@@ -1,0 +1,5 @@
+*.o
+dawn
+dawn-msg
+config.h
+patches.h
