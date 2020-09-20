@@ -295,9 +295,9 @@ struct Client {
 	float cfact;
 	#endif // CFACTS_PATCH
 	int x, y, w, h;
-	#if SAVEFLOATS_PATCH || EXRESIZE_PATCH
+	#if SAVEFLOATS_PATCH
 	int sfx, sfy, sfw, sfh; /* stored float geometry, used on mode revert */
-	#endif // SAVEFLOATS_PATCH / EXRESIZE_PATCH
+	#endif // SAVEFLOATS_PATCH
 	int oldx, oldy, oldw, oldh;
 	int basew, baseh, incw, inch, maxw, maxh, minw, minh;
 	int bw, oldbw;
@@ -2138,12 +2138,12 @@ manage(Window w, XWindowAttributes *wa)
 		c->y = c->mon->wy + (c->mon->wh - HEIGHT(c)) / 2;
 	}
 	#endif // CENTER_PATCH
-	#if SAVEFLOATS_PATCH || EXRESIZE_PATCH
+	#if SAVEFLOATS_PATCH
 	c->sfx = -9999;
 	c->sfy = -9999;
 	c->sfw = c->w;
 	c->sfh = c->h;
-	#endif // SAVEFLOATS_PATCH / EXRESIZE_PATCH
+	#endif // SAVEFLOATS_PATCH
 
 	XSelectInput(dpy, w, EnterWindowMask|FocusChangeMask|PropertyChangeMask|StructureNotifyMask);
 	grabbuttons(c, 0);
@@ -2293,14 +2293,14 @@ movemouse(const Arg *arg)
 			&& (abs(nx - c->x) > snap || abs(ny - c->y) > snap))
 				togglefloating(NULL);
 			if (!selmon->lt[selmon->sellt]->arrange || c->isfloating) {
-			#if SAVEFLOATS_PATCH || EXRESIZE_PATCH
+			#if SAVEFLOATS_PATCH
 				resize(c, nx, ny, c->w, c->h, 1);
 				/* save last known float coordinates */
 				c->sfx = nx;
 				c->sfy = ny;
 			#else
 				resize(c, nx, ny, c->w, c->h, 1);
-			#endif // SAVEFLOATS_PATCH / EXRESIZE_PATCH
+			#endif // SAVEFLOATS_PATCH
 			}
 			#if ROUNDED_CORNERS_PATCH
 			drawroundedcorners(c);
@@ -2477,9 +2477,6 @@ resizeclient(Client *c, int x, int y, int w, int h)
 	c->oldy = c->y; c->y = wc.y = y;
 	c->oldw = c->w; c->w = wc.width = w;
 	c->oldh = c->h; c->h = wc.height = h;
-	#if EXRESIZE_PATCH
-	c->expandmask = 0;
-	#endif // EXRESIZE_PATCH
 	wc.border_width = c->bw;
 	#if NOBORDER_PATCH
 	if (((nexttiled(c->mon->clients) == c && !nexttiled(c->next)))
@@ -2725,18 +2722,15 @@ scan(void)
 void
 sendmon(Client *c, Monitor *m)
 {
-	#if EXRESIZE_PATCH
-	Monitor *oldm = selmon;
-	#endif // EXRESIZE_PATCH
 	if (c->mon == m)
 		return;
-	#if SENDMON_KEEPFOCUS_PATCH && !EXRESIZE_PATCH
+	#if SENDMON_KEEPFOCUS_PATCH
 	int hadfocus = (c == selmon->sel);
 	#endif // SENDMON_KEEPFOCUS_PATCH
 	unfocus(c, 1, NULL);
 	detach(c);
 	detachstack(c);
-	#if SENDMON_KEEPFOCUS_PATCH && !EXRESIZE_PATCH
+	#if SENDMON_KEEPFOCUS_PATCH
 	arrange(c->mon);
 	#endif // SENDMON_KEEPFOCUS_PATCH
 	c->mon = m;
@@ -2754,13 +2748,7 @@ sendmon(Client *c, Monitor *m)
 	attach(c);
 	#endif
 	attachstack(c);
-	#if EXRESIZE_PATCH
-	if (oldm != m)
-		arrange(oldm);
-	arrange(m);
-	focus(c);
-	restack(m);
-	#elif SENDMON_KEEPFOCUS_PATCH
+	#if SENDMON_KEEPFOCUS_PATCH
 	arrange(m);
 	if (hadfocus) {
 		focus(c);
@@ -2770,7 +2758,7 @@ sendmon(Client *c, Monitor *m)
 	#else
 	focus(NULL);
 	arrange(NULL);
-	#endif // EXRESIZE_PATCH / SENDMON_KEEPFOCUS_PATCH
+	#endif // SENDMON_KEEPFOCUS_PATCH
 	#if SWITCHTAG_PATCH
 	if (c->switchtag)
 		c->switchtag = 0;
@@ -2933,17 +2921,6 @@ setlayout(const Arg *arg)
 		#else
 		selmon->sellt ^= 1;
 		#endif // PERTAG_PATCH
-		#if EXRESIZE_PATCH
-		if (!selmon->lt[selmon->sellt]->arrange) {
-			for (Client *c = selmon->clients ; c ; c = c->next) {
-				if (!c->isfloating) {
-					/*restore last known float dimensions*/
-					resize(c, selmon->mx + c->sfx, selmon->my + c->sfy,
-					       c->sfw, c->sfh, False);
-				}
-			}
-		}
-		#endif // EXRESIZE_PATCH
 	}
 	if (arg && arg->v)
 	#if PERTAG_PATCH
@@ -3206,14 +3183,14 @@ showhide(Client *c)
 		}
 		#endif // SCRATCHPADS_KEEP_POSITION_AND_SIZE_PATCH | SCRATCHPADS_PATCH
 		/* show clients top down */
-		#if SAVEFLOATS_PATCH || EXRESIZE_PATCH
+		#if SAVEFLOATS_PATCH
 		if (!c->mon->lt[c->mon->sellt]->arrange && c->sfx != -9999 && !c->isfullscreen) {
 			XMoveWindow(dpy, c->win, c->sfx, c->sfy);
 			resize(c, c->sfx, c->sfy, c->sfw, c->sfh, 0);
 			showhide(c->snext);
 			return;
 		}
-		#endif // SAVEFLOATS_PATCH / EXRESIZE_PATCH
+		#endif // SAVEFLOATS_PATCH
 		#if AUTORESIZE_PATCH
 		if (c->needresize) {
 			c->needresize = 0;
@@ -3426,23 +3403,23 @@ togglefloating(const Arg *arg)
 		XSetWindowBorder(dpy, c->win, scheme[SchemeSel][ColBorder].pixel);
 	#endif // BAR_FLEXWINTITLE_PATCH
 	if (c->isfloating) {
-		#if SAVEFLOATS_PATCH || EXRESIZE_PATCH
+		#if SAVEFLOATS_PATCH
 		if (c->sfx != -9999) {
 			/* restore last known float dimensions */
 			resize(c, c->sfx, c->sfy, c->sfw, c->sfh, 0);
 			arrange(c->mon);
 			return;
 		}
-		#endif // SAVEFLOATS_PATCH // EXRESIZE_PATCH
+		#endif // SAVEFLOATS_PATCH
 		resize(c, c->x, c->y, c->w, c->h, 0);
-	#if SAVEFLOATS_PATCH || EXRESIZE_PATCH
+	#if SAVEFLOATS_PATCH
 	} else {
 		/* save last known float dimensions */
 		c->sfx = c->x;
 		c->sfy = c->y;
 		c->sfw = c->w;
 		c->sfh = c->h;
-	#endif // SAVEFLOATS_PATCH / EXRESIZE_PATCH
+	#endif // SAVEFLOATS_PATCH
 	}
 	arrange(c->mon);
 }
