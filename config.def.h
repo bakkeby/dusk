@@ -388,19 +388,11 @@ static const Rule rules[] = {
 };
 
 #if MONITOR_RULES_PATCH
-#if PERTAG_PATCH
 static const MonitorRule monrules[] = {
 	/* monitor  tag   layout  mfact  nmaster  showbar  topbar */
 	{  1,       -1,   2,      -1,    -1,      -1,      -1     }, // use a different layout for the second monitor
 	{  -1,      -1,   0,      -1,    -1,      -1,      -1     }, // default
 };
-#else
-static const MonitorRule monrules[] = {
-	/* monitor  layout  mfact  nmaster  showbar  topbar */
-	{  1,       2,      -1,    -1,      -1,      -1     }, // use a different layout for the second monitor
-	{  -1,      0,      -1,    -1,      -1,      -1     }, // default
-};
-#endif // PERTAG_PATCH
 #endif // MONITOR_RULES_PATCH
 
 #if INSETS_PATCH
@@ -648,7 +640,7 @@ static Key keys[] = {
 	{ MODKEY,                       XK_j,          focusstack,             {.i = +1 } },
 	{ MODKEY,                       XK_k,          focusstack,             {.i = -1 } },
 	#endif // STACKER_PATCH
-	#if SWAPFOCUS_PATCH && PERTAG_PATCH
+	#if SWAPFOCUS_PATCH
 	{ MODKEY,                       XK_s,          swapfocus,              {.i = -1 } },
 	#endif // SWAPFOCUS_PATCH
 	#if SWITCHCOL_PATCH
@@ -1075,7 +1067,7 @@ static IPCCommand ipccommands[] = {
 	#if STICKY_PATCH
 	IPCCOMMAND( togglesticky, 1, {ARG_TYPE_NONE} ),
 	#endif // STICKY_PATCH
-	#if SWAPFOCUS_PATCH && PERTAG_PATCH
+	#if SWAPFOCUS_PATCH
 	IPCCOMMAND( swapfocus, 1, {ARG_TYPE_SINT} ),
 	#endif // SWAPFOCUS_PATCH
 	#if SWITCHCOL_PATCH

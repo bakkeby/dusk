@@ -584,12 +584,6 @@
  */
 #define ONLYQUITONEMPTY_PATCH 0
 
-/* The pertag patch adds nmaster, mfacts and layouts per tag rather than per
- * monitor (default).
- * https://dwm.suckless.org/patches/pertag/
- */
-#define PERTAG_PATCH 0
-
 /* This controls whether or not to also store bar position on a per
  * tag basis, or leave it as one bar per monitor.
  */

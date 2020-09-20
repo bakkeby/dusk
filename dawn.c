@@ -370,9 +370,7 @@ typedef struct {
 } Inset;
 #endif // INSETS_PATCH
 
-#if PERTAG_PATCH
 typedef struct Pertag Pertag;
-#endif // PERTAG_PATCH
 struct Monitor {
 	int index;
 	char ltsymbol[16];
@@ -407,9 +405,7 @@ struct Monitor {
 	#if BAR_ALTERNATIVE_TAGS_PATCH
 	unsigned int alttag;
 	#endif // BAR_ALTERNATIVE_TAGS_PATCH
-	#if PERTAG_PATCH
 	Pertag *pertag;
-	#endif // PERTAG_PATCH
 	#if INSETS_PATCH
 	Inset inset;
 	#endif // INSETS_PATCH
@@ -488,9 +484,7 @@ typedef struct {
 #if MONITOR_RULES_PATCH
 typedef struct {
 	int monitor;
-	#if PERTAG_PATCH
 	int tag;
-	#endif // PERTAG_PATCH
 	int layout;
 	float mfact;
 	int nmaster;
@@ -802,12 +796,8 @@ applyrules(Client *c)
 					if (r->switchtag == 3 || r->switchtag == 4)
 						c->switchtag = c->mon->tagset[c->mon->seltags];
 					if (r->switchtag == 1 || r->switchtag == 3) {
-						#if PERTAG_PATCH
 						pertagview(&((Arg) { .ui = newtagset }));
 						arrange(c->mon);
-						#else
-						view(&((Arg) { .ui = newtagset }));
-						#endif // PERTAG_PATCH
 					} else {
 						c->mon->tagset[c->mon->seltags] = newtagset;
 						arrange(c->mon);
@@ -1357,10 +1347,7 @@ createmon(void)
 	for (j = 0; j < LENGTH(monrules); j++) {
 		mr = &monrules[j];
 		if ((mr->monitor == -1 || mr->monitor == mi)
-		#if PERTAG_PATCH
-				&& (mr->tag <= 0 || (m->tagset[0] & (1 << (mr->tag - 1))))
-		#endif // PERTAG_PATCH
-		) {
+				&& (mr->tag <= 0 || (m->tagset[0] & (1 << (mr->tag - 1))))) {
 			layout = MAX(mr->layout, 0);
 			layout = MIN(layout, LENGTH(layouts) - 1);
 			m->lt[0] = &layouts[layout];
@@ -1417,7 +1404,6 @@ createmon(void)
 	m->ltaxis[STACK2] = m->lt[0]->preset.stack2axis;
 	#endif // FLEXTILE_DELUXE_LAYOUT
 
-	#if PERTAG_PATCH
 	if (!(m->pertag = (Pertag *)calloc(1, sizeof(Pertag))))
 		die("fatal: could not malloc() %u bytes\n", sizeof(Pertag));
 	m->pertag->curtag = m->pertag->prevtag = 1;
@@ -1483,7 +1469,6 @@ createmon(void)
 		m->pertag->enablegaps[i] = 1;
 		#endif // VANITYGAPS_PATCH
 	}
-	#endif // PERTAG_PATCH
 	#if INSETS_PATCH
 	m->inset = default_inset;
 	#endif // INSETS_PATCH
@@ -1972,11 +1957,7 @@ grabkeys(void)
 void
 incnmaster(const Arg *arg)
 {
-	#if PERTAG_PATCH
 	selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag] = MAX(selmon->nmaster + arg->i, 0);
-	#else
-	selmon->nmaster = MAX(selmon->nmaster + arg->i, 0);
-	#endif // PERTAG_PATCH
 	arrange(selmon);
 }
 
@@ -2033,7 +2014,7 @@ killclient(const Arg *arg)
 		XSetErrorHandler(xerror);
 		XUngrabServer(dpy);
 	}
-	#if SWAPFOCUS_PATCH && PERTAG_PATCH
+	#if SWAPFOCUS_PATCH
 	c->mon->pertag->prevclient[c->mon->pertag->curtag] = NULL;
 	#endif // SWAPFOCUS_PATCH
 }
@@ -2915,20 +2896,12 @@ void
 setlayout(const Arg *arg)
 {
 	if (!arg || !arg->v || arg->v != selmon->lt[selmon->sellt]) {
-		#if PERTAG_PATCH
 		selmon->pertag->sellts[selmon->pertag->curtag] ^= 1;
 		selmon->sellt = selmon->pertag->sellts[selmon->pertag->curtag];
-		#else
-		selmon->sellt ^= 1;
-		#endif // PERTAG_PATCH
 	}
 	if (arg && arg->v)
-	#if PERTAG_PATCH
 		selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt] = (Layout *)arg->v;
 	selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt];
-	#else
-		selmon->lt[selmon->sellt] = (Layout *)arg->v;
-	#endif // PERTAG_PATCH
 
 	#if FLEXTILE_DELUXE_LAYOUT
 	if (selmon->lt[selmon->sellt]->preset.nmaster && selmon->lt[selmon->sellt]->preset.nmaster != -1)
@@ -2941,12 +2914,10 @@ setlayout(const Arg *arg)
 	selmon->ltaxis[STACK]  = selmon->lt[selmon->sellt]->preset.stack1axis;
 	selmon->ltaxis[STACK2] = selmon->lt[selmon->sellt]->preset.stack2axis;
 
-	#if PERTAG_PATCH
 	selmon->pertag->ltaxis[selmon->pertag->curtag][LAYOUT] = selmon->ltaxis[LAYOUT];
 	selmon->pertag->ltaxis[selmon->pertag->curtag][MASTER] = selmon->ltaxis[MASTER];
 	selmon->pertag->ltaxis[selmon->pertag->curtag][STACK]  = selmon->ltaxis[STACK];
 	selmon->pertag->ltaxis[selmon->pertag->curtag][STACK2] = selmon->ltaxis[STACK2];
-	#endif // PERTAG_PATCH
 	#endif // FLEXTILE_DELUXE_LAYOUT
 	strncpy(selmon->ltsymbol, selmon->lt[selmon->sellt]->symbol, sizeof selmon->ltsymbol);
 	if (selmon->sel)
@@ -2966,11 +2937,8 @@ setmfact(const Arg *arg)
 	f = arg->f < 1.0 ? arg->f + selmon->mfact : arg->f - 1.0;
 	if (f < 0.05 || f > 0.95)
 		return;
-	#if PERTAG_PATCH
+
 	selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag] = f;
-	#else
-	selmon->mfact = f;
-	#endif // PERTAG_PATCH
 	arrange(selmon);
 }
 
@@ -3317,7 +3285,7 @@ spawn(const Arg *arg)
 void
 tag(const Arg *arg)
 {
-	#if SWAPFOCUS_PATCH && PERTAG_PATCH
+	#if SWAPFOCUS_PATCH
 	unsigned int tagmask, tagindex;
 	#endif // SWAPFOCUS_PATCH
 
@@ -3328,7 +3296,7 @@ tag(const Arg *arg)
 			selmon->sel->switchtag = 0;
 		#endif // SWITCHTAG_PATCH
 		focus(NULL);
-		#if SWAPFOCUS_PATCH && PERTAG_PATCH
+		#if SWAPFOCUS_PATCH
 		selmon->pertag->prevclient[selmon->pertag->curtag] = NULL;
 		for (tagmask = arg->ui & TAGMASK, tagindex = 1; tagmask!=0; tagmask >>= 1, tagindex++)
 			if (tagmask & 1)
@@ -3370,15 +3338,15 @@ void
 togglebar(const Arg *arg)
 {
 	Bar *bar;
-	#if BAR_HOLDBAR_PATCH && PERTAG_PATCH && PERTAGBAR_PATCH
+	#if BAR_HOLDBAR_PATCH && PERTAGBAR_PATCH
 	selmon->showbar = selmon->pertag->showbars[selmon->pertag->curtag] = (selmon->showbar == 2 ? 1 : !selmon->showbar);
 	#elif BAR_HOLDBAR_PATCH
 	selmon->showbar = (selmon->showbar == 2 ? 1 : !selmon->showbar);
-	#elif PERTAG_PATCH && PERTAGBAR_PATCH
+	#elif PERTAGBAR_PATCH
 	selmon->showbar = selmon->pertag->showbars[selmon->pertag->curtag] = !selmon->showbar;
 	#else
 	selmon->showbar = !selmon->showbar;
-	#endif // BAR_HOLDBAR_PATCH | PERTAG_PATCH
+	#endif // BAR_HOLDBAR_PATCH
 	updatebarpos(selmon);
 	for (bar = selmon->bar; bar; bar = bar->next)
 		XMoveResizeWindow(dpy, bar->win, bar->bx, bar->by, bar->bw, bar->bh);
@@ -3428,7 +3396,7 @@ void
 toggletag(const Arg *arg)
 {
 	unsigned int newtags;
-	#if SWAPFOCUS_PATCH && PERTAG_PATCH
+	#if SWAPFOCUS_PATCH
 	unsigned int tagmask, tagindex;
 	#endif // SWAPFOCUS_PATCH
 
@@ -3438,7 +3406,7 @@ toggletag(const Arg *arg)
 	if (newtags) {
 		selmon->sel->tags = newtags;
 		focus(NULL);
-		#if SWAPFOCUS_PATCH && PERTAG_PATCH
+		#if SWAPFOCUS_PATCH
 		for (tagmask = arg->ui & TAGMASK, tagindex = 1; tagmask!=0; tagmask >>= 1, tagindex++)
 			if (tagmask & 1)
 				selmon->pertag->prevclient[tagindex] = NULL;
@@ -3454,9 +3422,7 @@ void
 toggleview(const Arg *arg)
 {
 	unsigned int newtagset = selmon->tagset[selmon->seltags] ^ (arg->ui & TAGMASK);
-	#if PERTAG_PATCH
 	int i;
-	#endif // PERTAG_PATCH
 
 	#if TAGINTOSTACK_ALLMASTER_PATCH
 	Client *const selected = selmon->sel;
@@ -3496,7 +3462,6 @@ toggleview(const Arg *arg)
 	#endif // EMPTYVIEW_PATCH
 		selmon->tagset[selmon->seltags] = newtagset;
 
-		#if PERTAG_PATCH
 		if (newtagset == ~0) {
 			selmon->pertag->prevtag = selmon->pertag->curtag;
 			selmon->pertag->curtag = 0;
@@ -3518,7 +3483,6 @@ toggleview(const Arg *arg)
 		if (selmon->showbar != selmon->pertag->showbars[selmon->pertag->curtag])
 			togglebar(NULL);
 		#endif // PERTAGBAR_PATCH
-		#endif // PERTAG_PATCH
 		focus(NULL);
 		arrange(selmon);
 	#if !EMPTYVIEW_PATCH
@@ -3534,7 +3498,7 @@ unfocus(Client *c, int setfocus, Client *nextfocus)
 {
 	if (!c)
 		return;
-	#if SWAPFOCUS_PATCH && PERTAG_PATCH
+	#if SWAPFOCUS_PATCH
 	selmon->pertag->prevclient[selmon->pertag->curtag] = c;
 	#endif // SWAPFOCUS_PATCH
 	if (c->isfullscreen && ISVISIBLE(c) && c->mon == selmon && nextfocus && !nextfocus->isfloating)
@@ -3999,17 +3963,12 @@ view(const Arg *arg)
 		return;
     }
 	selmon->seltags ^= 1; /* toggle sel tagset */
-	#if PERTAG_PATCH
 	pertagview(arg);
 	#if SWAPFOCUS_PATCH
 	Client *unmodified = selmon->pertag->prevclient[selmon->pertag->curtag];
 	#endif // SWAPFOCUS_PATCH
-	#else
-	if (arg->ui & TAGMASK)
-		selmon->tagset[selmon->seltags] = arg->ui & TAGMASK;
-	#endif // PERTAG_PATCH
 	focus(NULL);
-	#if SWAPFOCUS_PATCH && PERTAG_PATCH
+	#if SWAPFOCUS_PATCH
 	selmon->pertag->prevclient[selmon->pertag->curtag] = unmodified;
 	#endif // SWAPFOCUS_PATCH
 	arrange(selmon);
@@ -4103,7 +4062,7 @@ zoom(const Arg *arg)
 		togglefloating(&((Arg) { .v = c }));
 	#endif // ZOOMFLOATING_PATCH
 
-	#if SWAPFOCUS_PATCH && PERTAG_PATCH
+	#if SWAPFOCUS_PATCH
 	c->mon->pertag->prevclient[c->mon->pertag->curtag] = nexttiled(c->mon->clients);
 	#endif // SWAPFOCUS_PATCH
 
@@ -4117,28 +4076,20 @@ zoom(const Arg *arg)
 
 	#if ZOOMSWAP_PATCH
 	if (c == nexttiled(c->mon->clients)) {
-		#if PERTAG_PATCH
 		p = c->mon->pertag->prevzooms[c->mon->pertag->curtag];
-		#else
-		p = prevzoom;
-		#endif // PERTAG_PATCH
 		at = findbefore(p);
 		if (at)
 			cprevious = nexttiled(at->next);
 		if (!cprevious || cprevious != p) {
-			#if PERTAG_PATCH
 			c->mon->pertag->prevzooms[c->mon->pertag->curtag] = NULL;
-			#else
-			prevzoom = NULL;
-			#endif // PERTAG_PATCH
-			#if SWAPFOCUS_PATCH && PERTAG_PATCH
+			#if SWAPFOCUS_PATCH
 			if (!c || !(c = c->mon->pertag->prevclient[c->mon->pertag->curtag] = nexttiled(c->next)))
 			#else
 			if (!c || !(c = nexttiled(c->next)))
 			#endif // SWAPFOCUS_PATCH
 				return;
 		} else
-			#if SWAPFOCUS_PATCH && PERTAG_PATCH
+			#if SWAPFOCUS_PATCH
 			c = c->mon->pertag->prevclient[c->mon->pertag->curtag] = cprevious;
 			#else
 			c = cprevious;
@@ -4152,11 +4103,7 @@ zoom(const Arg *arg)
 	attach(c);
 	/* swap windows instead of pushing the previous one down */
 	if (c != cold && at) {
-		#if PERTAG_PATCH
 		c->mon->pertag->prevzooms[c->mon->pertag->curtag] = cold;
-		#else
-		prevzoom = cold;
-		#endif // PERTAG_PATCH
 		if (cold && at != cold) {
 			detach(cold);
 			cold->next = at->next;
@@ -4167,7 +4114,7 @@ zoom(const Arg *arg)
 	arrange(c->mon);
 	#else
 	if (c == nexttiled(c->mon->clients))
-		#if SWAPFOCUS_PATCH && PERTAG_PATCH
+		#if SWAPFOCUS_PATCH
 		if (!c || !(c = c->mon->pertag->prevclient[c->mon->pertag->curtag] = nexttiled(c->next)))
 		#else
 		if (!c || !(c = nexttiled(c->next)))

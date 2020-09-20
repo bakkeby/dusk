@@ -80,9 +80,7 @@ setlayoutaxisex(const Arg *arg)
 		arr = 0;
 
 	selmon->ltaxis[axis] = arr;
-	#if PERTAG_PATCH
 	selmon->pertag->ltaxis[selmon->pertag->curtag][axis] = selmon->ltaxis[axis];
-	#endif // PERTAG_PATCH
 	arrange(selmon);
 }
 #endif // IPC_PATCH
@@ -709,9 +707,7 @@ mirrorlayout(const Arg *arg)
 	if (!selmon->lt[selmon->sellt]->arrange)
 		return;
 	selmon->ltaxis[LAYOUT] *= -1;
-	#if PERTAG_PATCH
 	selmon->pertag->ltaxis[selmon->pertag->curtag][0] = selmon->ltaxis[LAYOUT];
-	#endif // PERTAG_PATCH
 	arrange(selmon);
 }
 
@@ -745,9 +741,7 @@ rotatelayoutaxis(const Arg *arg)
 		else if (selmon->ltaxis[axis] < 0)
 			selmon->ltaxis[axis] = AXIS_LAST - 1;
 	}
-	#if PERTAG_PATCH
 	selmon->pertag->ltaxis[selmon->pertag->curtag][axis] = selmon->ltaxis[axis];
-	#endif // PERTAG_PATCH
 	arrange(selmon);
 	setflexsymbols(selmon, 0);
 }
@@ -755,10 +749,6 @@ rotatelayoutaxis(const Arg *arg)
 void
 incnstack(const Arg *arg)
 {
-	#if PERTAG_PATCH
 	selmon->nstack = selmon->pertag->nstacks[selmon->pertag->curtag] = MAX(selmon->nstack + arg->i, 0);
-	#else
-	selmon->nstack = MAX(selmon->nstack + arg->i, 0);
-	#endif // PERTAG_PATCH
 	arrange(selmon);
 }

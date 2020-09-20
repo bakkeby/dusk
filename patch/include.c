@@ -152,9 +152,9 @@
 #if NO_MOD_BUTTONS_PATCH
 #include "nomodbuttons.c"
 #endif
-#if PERTAG_PATCH
+
 #include "pertag.c"
-#endif
+
 #if PUSH_NO_MASTER_PATCH
 #include "push_no_master.c"
 #elif PUSH_PATCH
@@ -207,7 +207,7 @@
 #if SWALLOW_PATCH
 #include "swallow.c"
 #endif
-#if SWAPFOCUS_PATCH && PERTAG_PATCH
+#if SWAPFOCUS_PATCH
 #include "swapfocus.c"
 #endif
 #if SWAPTAGS_PATCH
