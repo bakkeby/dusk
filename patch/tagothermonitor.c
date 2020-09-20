@@ -1,4 +1,4 @@
-#if IPC_PATCH || DWMC_PATCH
+#if IPC_PATCH
 void
 tagnextmonex(const Arg *arg)
 {
@@ -10,7 +10,7 @@ tagprevmonex(const Arg *arg)
 {
 	tagprevmon(&((Arg) { .ui = 1 << arg->ui }));
 }
-#endif // IPC_PATCH | DWMC_PATCH
+#endif // IPC_PATCH
 
 void
 tagnextmon(const Arg *arg)

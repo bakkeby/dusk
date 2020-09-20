@@ -1050,16 +1050,6 @@ static Button buttons[] = {
 	{ ClkTagBar,            MODKEY,              Button3,        toggletag,      {0} },
 };
 
-#if FSIGNAL_PATCH
-/* signal definitions */
-/* signum must be greater than 0 */
-/* trigger signals using `xsetroot -name "fsignal:<signum>"` */
-static Signal signals[] = {
-	/* signum       function        argument  */
-	{ 1,            setlayout,      {.v = 0} },
-};
-#endif // DWMC_PATCH
-
 #if IPC_PATCH
 static const char *ipcsockpath = "/tmp/dwm.sock";
 static IPCCommand ipccommands[] = {

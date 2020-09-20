@@ -110,11 +110,6 @@
 #if DRAGCFACT_PATCH && CFACTS_PATCH
 #include "dragcfact.c"
 #endif
-#if DWMC_PATCH
-#include "dwmc.c"
-#elif FSIGNAL_PATCH
-#include "fsignal.c"
-#endif
 #if EXRESIZE_PATCH
 #include "exresize.c"
 #endif
