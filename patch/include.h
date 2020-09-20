@@ -107,9 +107,9 @@
 #if DRAGMFACT_PATCH
 #include "dragmfact.h"
 #endif
-#if FAKEFULLSCREEN_CLIENT_PATCH
+
 #include "fakefullscreenclient.h"
-#endif
+
 #if FLOATPOS_PATCH
 #include "floatpos.h"
 #endif
@@ -227,9 +227,9 @@
 #if TAGSWAPMON_PATCH
 #include "tagswapmon.h"
 #endif
-#if TOGGLEFULLSCREEN_PATCH
+
 #include "togglefullscreen.h"
-#endif
+
 #if TRANSFER_PATCH
 #include "transfer.h"
 #endif
@@ -255,6 +255,5 @@
 #include "xrdb.h"
 #endif
 /* Layouts */
-#if FLEXTILE_DELUXE_LAYOUT
+
 #include "layout_flextile-deluxe.h"
-#endif

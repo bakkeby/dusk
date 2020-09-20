@@ -60,10 +60,10 @@ static const int showsystray             = 1;   /* 0 means no systray */
 /* Indicators: see patch/bar_indicators.h for options */
 static int tagindicatortype              = INDICATOR_TOP_LEFT_SQUARE;
 static int floatindicatortype            = INDICATOR_TOP_LEFT_SQUARE;
-#if FAKEFULLSCREEN_CLIENT_PATCH
+
 static int fakefsindicatortype           = INDICATOR_PLUS;
 static int floatfakefsindicatortype      = INDICATOR_PLUS_AND_LARGER_SQUARE;
-#endif // FAKEFULLSCREEN_CLIENT_PATCH
+
 #if ONLYQUITONEMPTY_PATCH
 static const int quit_empty_window_count = 2;   /* only allow dwm to quit if no windows are open, value here represents number of deamons */
 #endif // ONLYQUITONEMPTY_PATCH
@@ -788,12 +788,10 @@ static Key keys[] = {
 	{ MODKEY|Mod4Mask,              XK_space,      unfloatvisible,         {0} },
 	{ MODKEY|ShiftMask,             XK_t,          unfloatvisible,         {.v = &layouts[0]} },
 	#endif // UNFLOATVISIBLE_PATCH
-	#if TOGGLEFULLSCREEN_PATCH
+
 	{ MODKEY,                       XK_y,          togglefullscreen,       {0} },
-	#endif // TOGGLEFULLSCREEN_PATCH
-	#if !FAKEFULLSCREEN_PATCH && FAKEFULLSCREEN_CLIENT_PATCH
 	{ MODKEY|ShiftMask,             XK_y,          togglefakefullscreen,   {0} },
-	#endif // FAKEFULLSCREEN_CLIENT_PATCH
+
 	#if STICKY_PATCH
 	{ MODKEY|ShiftMask,             XK_s,          togglesticky,           {0} },
 	#endif // STICKY_PATCH
@@ -1026,9 +1024,9 @@ static IPCCommand ipccommands[] = {
 	#if CYCLELAYOUTS_PATCH
 	IPCCOMMAND( cyclelayout, 1, {ARG_TYPE_SINT} ),
 	#endif // CYCLELAYOUTS_PATCH
-	#if !FAKEFULLSCREEN_PATCH && FAKEFULLSCREEN_CLIENT_PATCH
+
 	IPCCOMMAND( togglefakefullscreen, 1, {ARG_TYPE_NONE} ),
-	#endif // FAKEFULLSCREEN_CLIENT_PATCH
+
 	#if FLOATPOS_PATCH
 	IPCCOMMAND( floatpos, 1, {ARG_TYPE_STR} ),
 	#endif // FLOATPOS_PATCH
@@ -1108,9 +1106,9 @@ static IPCCommand ipccommands[] = {
 	#if TAGSWAPMON_PATCH
 	IPCCOMMAND( tagswapmon, 1, {ARG_TYPE_SINT} ),
 	#endif // TAGSWAPMON_PATCH
-	#if TOGGLEFULLSCREEN_PATCH
+
 	IPCCOMMAND( togglefullscreen, 1, {ARG_TYPE_NONE} ),
-	#endif // TOGGLEFULLSCREEN_PATCH
+
 	#if TRANSFER_PATCH
 	IPCCOMMAND( transfer, 1, {ARG_TYPE_NONE} ),
 	#endif // TRANSFER_PATCH

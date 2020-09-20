@@ -107,9 +107,9 @@
 #if DRAGCFACT_PATCH && CFACTS_PATCH
 #include "dragcfact.c"
 #endif
-#if FAKEFULLSCREEN_CLIENT_PATCH
+
 #include "fakefullscreenclient.c"
-#endif
+
 #if FLOATPOS_PATCH
 #include "floatpos.c"
 #endif
@@ -231,9 +231,9 @@
 #if TAGSWAPMON_PATCH
 #include "tagswapmon.c"
 #endif
-#if TOGGLEFULLSCREEN_PATCH
+
 #include "togglefullscreen.c"
-#endif
+
 #if TRANSFER_PATCH
 #include "transfer.c"
 #endif

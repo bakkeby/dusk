@@ -439,15 +439,6 @@
  */
 #define EMPTYVIEW_PATCH 0
 
-/* Similarly to the fakefullscreen patch this patch only allows clients to "fullscreen" into
- * the space currently given to them.
- * The "twist" with this patch is that fake fullscreen can be toggled on a per client basis
- * rather than applying to all clients globally.
- * Also see the selectivefakefullscreen option that adds a rule option to enabled this on client
- * startup.
- */
-#define FAKEFULLSCREEN_CLIENT_PATCH 0
-
 /* This patch adds a float rule allowing the size and position of floating windows to be specified
  * It also allows the size and position of floating windows to be controlled similar to the
  * exresize, moveresize, and moveplace patches.
@@ -530,15 +521,6 @@
  * https://dwm.suckless.org/patches/killunsel/
  */
 #define KILLUNSEL_PATCH 0
-
-/* By default in dwm it is possible to make an application fullscreen, then use
- * the focusstack keybindings to focus on other windows beneath the current window.
- * It is also possible to spawn new windows (e.g. a terminal) that end up getting
- * focus while the previous window remains in fullscreen. This patch ensures that
- * in such scenarios the previous window loses fullscreen.
- * https://github.com/bakkeby/patches/blob/master/dwm/dwm-losefullscreen-6.2.diff
- */
-#define LOSEFULLSCREEN_PATCH 0
 
 /* This patch adds helper functions for maximizing, horizontally and vertically, floating
  * windows using keybindings.
@@ -892,11 +874,6 @@
  * https://github.com/bakkeby/patches/blob/master/dwm/dwm-tagswapmon-6.2.diff
  */
 #define TAGSWAPMON_PATCH 0
-
-/* This patch allows you to toggle fullscreen on and off using a single shortcut key.
- * https://github.com/bakkeby/patches/blob/master/dwm/dwm-togglefullscreen-6.2.diff
- */
-#define TOGGLEFULLSCREEN_PATCH 0
 
 /* Lets you transfer the currently focused client between the master and stack area
  * while increasing or decreasing the master area (nmaster) accordingly.
