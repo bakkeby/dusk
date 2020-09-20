@@ -666,11 +666,10 @@ static Key keys[] = {
 	#endif // FLEXTILE_DELUXE_LAYOUT
 	{ MODKEY,                       XK_h,          setmfact,               {.f = -0.05} },
 	{ MODKEY,                       XK_l,          setmfact,               {.f = +0.05} },
-	#if CFACTS_PATCH
 	{ MODKEY|ShiftMask,             XK_h,          setcfact,               {.f = +0.25} },
 	{ MODKEY|ShiftMask,             XK_l,          setcfact,               {.f = -0.25} },
 	{ MODKEY|ShiftMask,             XK_o,          setcfact,               {0} },
-	#endif // CFACTS_PATCH
+
 	#if MOVESTACK_PATCH
 	{ MODKEY|ShiftMask,             XK_j,          movestack,              {.i = +1 } },
 	{ MODKEY|ShiftMask,             XK_k,          movestack,              {.i = -1 } },
@@ -963,12 +962,9 @@ static Button buttons[] = {
 	{ ClkClientWin,         MODKEY,              Button1,        movemouse,      {0} },
 	{ ClkClientWin,         MODKEY,              Button2,        togglefloating, {0} },
 	{ ClkClientWin,         MODKEY,              Button3,        resizemouse,    {0} },
-	#if DRAGCFACT_PATCH && CFACTS_PATCH
 	{ ClkClientWin,         MODKEY|ShiftMask,    Button3,        dragcfact,      {0} },
-	#endif // DRAGCFACT_PATCH
-	#if DRAGMFACT_PATCH
 	{ ClkClientWin,         MODKEY|ShiftMask,    Button1,        dragmfact,      {0} },
-	#endif // DRAGMFACT_PATCH
+	{ ClkRootWin,           MODKEY|ShiftMask,    Button1,        dragmfact,      {0} },
 	{ ClkTagBar,            0,                   Button1,        view,           {0} },
 	{ ClkTagBar,            0,                   Button3,        toggleview,     {0} },
 	{ ClkTagBar,            MODKEY,              Button1,        tag,            {0} },
@@ -1000,9 +996,9 @@ static IPCCommand ipccommands[] = {
 	#if BAR_TAGGRID_PATCH
 	IPCCOMMAND( switchtag, 1, {ARG_TYPE_UINT} ),
 	#endif // BAR_TAGGRID_PATCH
-	#if CFACTS_PATCH
+
 	IPCCOMMAND( setcfact, 1, {ARG_TYPE_FLOAT} ),
-	#endif // CFACTS_PATCH
+
 	#if CYCLELAYOUTS_PATCH
 	IPCCOMMAND( cyclelayout, 1, {ARG_TYPE_SINT} ),
 	#endif // CYCLELAYOUTS_PATCH

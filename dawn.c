@@ -291,9 +291,7 @@ typedef struct Client Client;
 struct Client {
 	char name[256];
 	float mina, maxa;
-	#if CFACTS_PATCH
 	float cfact;
-	#endif // CFACTS_PATCH
 	int x, y, w, h;
 	#if SAVEFLOATS_PATCH
 	int sfx, sfy, sfw, sfh; /* stored float geometry, used on mode revert */
@@ -2026,9 +2024,7 @@ manage(Window w, XWindowAttributes *wa)
 	c->w = c->oldw = wa->width;
 	c->h = c->oldh = wa->height;
 	c->oldbw = wa->border_width;
-	#if CFACTS_PATCH
 	c->cfact = 1.0;
-	#endif // CFACTS_PATCH
 
 	updatetitle(c);
 	if (XGetTransientForHint(dpy, w, &trans) && (t = wintoclient(trans))) {

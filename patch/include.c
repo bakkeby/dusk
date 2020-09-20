@@ -89,9 +89,9 @@
 #if ATTACHABOVE_PATCH || ATTACHASIDE_PATCH || ATTACHBELOW_PATCH || ATTACHBOTTOM_PATCH
 #include "attachx.c"
 #endif
-#if CFACTS_PATCH
+
 #include "cfacts.c"
-#endif
+
 #if CMDCUSTOMIZE_PATCH
 #include "cmdcustomize.c"
 #endif
@@ -104,9 +104,9 @@
 #if DECORATION_HINTS_PATCH
 #include "decorationhints.c"
 #endif
-#if DRAGCFACT_PATCH && CFACTS_PATCH
+
 #include "dragcfact.c"
-#endif
+#include "dragmfact.c"
 
 #include "fakefullscreenclient.c"
 
@@ -255,8 +255,6 @@
 #if XRDB_PATCH && !BAR_VTCOLORS_PATCH
 #include "xrdb.c"
 #endif
-
-#include "dragmfact.c"
 
 /* Layouts */
 #include "layout_flextile-deluxe.c"

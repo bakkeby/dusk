@@ -86,9 +86,9 @@
 #if ATTACHABOVE_PATCH || ATTACHASIDE_PATCH || ATTACHBELOW_PATCH || ATTACHBOTTOM_PATCH
 #include "attachx.h"
 #endif
-#if CFACTS_PATCH
+
 #include "cfacts.h"
-#endif
+
 #if CMDCUSTOMIZE_PATCH
 #include "cmdcustomize.h"
 #endif
@@ -101,12 +101,9 @@
 #if DECORATION_HINTS_PATCH
 #include "decorationhints.h"
 #endif
-#if DRAGCFACT_PATCH && CFACTS_PATCH
+
 #include "dragcfact.h"
-#endif
-#if DRAGMFACT_PATCH
 #include "dragmfact.h"
-#endif
 
 #include "fakefullscreenclient.h"
 
