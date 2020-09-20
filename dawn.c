@@ -185,9 +185,7 @@ enum {
 	WMDelete,
 	WMState,
 	WMTakeFocus,
-	#if WINDOWROLERULE_PATCH
 	WMWindowRole,
-	#endif // WINDOWROLERULE_PATCH
 	WMLast
 }; /* default atoms */
 
@@ -417,9 +415,7 @@ struct Monitor {
 
 typedef struct {
 	const char *class;
-	#if WINDOWROLERULE_PATCH
 	const char *role;
-	#endif // WINDOWROLERULE_PATCH
 	const char *instance;
 	const char *title;
 	const char *wintype;
@@ -695,9 +691,7 @@ applyrules(Client *c)
 {
 	const char *class, *instance;
 	Atom wintype;
-	#if WINDOWROLERULE_PATCH
 	char role[64];
-	#endif // WINDOWROLERULE_PATCH
 	unsigned int i;
 	#if SWITCHTAG_PATCH
 	unsigned int newtagset;
@@ -716,9 +710,7 @@ applyrules(Client *c)
 	class    = ch.res_class ? ch.res_class : broken;
 	instance = ch.res_name  ? ch.res_name  : broken;
 	wintype  = getatomprop(c, netatom[NetWMWindowType]);
-	#if WINDOWROLERULE_PATCH
 	gettextprop(c->win, wmatom[WMWindowRole], role, sizeof(role));
-	#endif // WINDOWROLERULE_PATCH
 	// long flags;
 
 	#if STEAM_PATCH
@@ -731,9 +723,7 @@ applyrules(Client *c)
 		r = &rules[i];
 		if ((!r->title || strstr(c->name, r->title))
 		&& (!r->class || strstr(class, r->class))
-		#if WINDOWROLERULE_PATCH
 		&& (!r->role || strstr(role, r->role))
-		#endif // WINDOWROLERULE_PATCH
 		&& (!r->instance || strstr(instance, r->instance))
 		&& (!r->wintype || wintype == XInternAtom(dpy, r->wintype, False)))
 		{
@@ -2970,9 +2960,7 @@ setup(void)
 	wmatom[WMDelete] = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
 	wmatom[WMState] = XInternAtom(dpy, "WM_STATE", False);
 	wmatom[WMTakeFocus] = XInternAtom(dpy, "WM_TAKE_FOCUS", False);
-	#if WINDOWROLERULE_PATCH
 	wmatom[WMWindowRole] = XInternAtom(dpy, "WM_WINDOW_ROLE", False);
-	#endif // WINDOWROLERULE_PATCH
 	netatom[NetActiveWindow] = XInternAtom(dpy, "_NET_ACTIVE_WINDOW", False);
 	netatom[NetSupported] = XInternAtom(dpy, "_NET_SUPPORTED", False);
 	#if BAR_SYSTRAY_PATCH
