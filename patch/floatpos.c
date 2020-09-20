@@ -9,10 +9,8 @@ floatpos(const Arg *arg)
 	setfloatpos(c, (char *)arg->v);
 	resizeclient(c, c->x, c->y, c->w, c->h);
 
-	#if !FOCUSONCLICK_PATCH
 	XRaiseWindow(dpy, c->win);
 	XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w/2, c->h/2);
-	#endif // FOCUSONCLICK_PATCH
 }
 
 void

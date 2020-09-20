@@ -462,11 +462,6 @@
  */
 #define FOCUSMASTER_PATCH 0
 
-/* Switch focus only by mouse click and not sloppy (focus follows mouse pointer).
- * https://dwm.suckless.org/patches/focusonclick/
- */
-#define FOCUSONCLICK_PATCH 0
-
 /* Selects the next window having the urgent flag regardless of the tag it is on.
  * The urgent flag can be artificially set with the following xdotool command on any window:
  *   xdotool selectwindow -- set_window --urgency 1

@@ -528,9 +528,7 @@ static Monitor *dirtomon(int dir);
 static void drawbar(Monitor *m);
 static void drawbars(void);
 static void drawbarwin(Bar *bar);
-#if !FOCUSONCLICK_PATCH
 static void enternotify(XEvent *e);
-#endif // FOCUSONCLICK_PATCH
 static void expose(XEvent *e);
 static void focus(Client *c);
 static void focusin(XEvent *e);
@@ -558,9 +556,7 @@ static void killclient(const Arg *arg);
 static void manage(Window w, XWindowAttributes *wa);
 static void mappingnotify(XEvent *e);
 static void maprequest(XEvent *e);
-#if !FOCUSONCLICK_PATCH
 static void motionnotify(XEvent *e);
-#endif // FOCUSONCLICK_PATCH
 static void movemouse(const Arg *arg);
 static Client *nexttiled(Client *c);
 #if !ZOOMSWAP_PATCH || TAGINTOSTACK_ALLMASTER_PATCH || TAGINTOSTACK_ONEMASTER_PATCH
@@ -666,9 +662,7 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 	[ConfigureRequest] = configurerequest,
 	[ConfigureNotify] = configurenotify,
 	[DestroyNotify] = destroynotify,
-	#if !FOCUSONCLICK_PATCH
 	[EnterNotify] = enternotify,
-	#endif // FOCUSONCLICK_PATCH
 	[Expose] = expose,
 	[FocusIn] = focusin,
 	[KeyPress] = keypress,
@@ -677,9 +671,7 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 	#endif // COMBO_PATCH / BAR_HOLDBAR_PATCH
 	[MappingNotify] = mappingnotify,
 	[MapRequest] = maprequest,
-	#if !FOCUSONCLICK_PATCH
 	[MotionNotify] = motionnotify,
-	#endif // FOCUSONCLICK_PATCH
 	[PropertyNotify] = propertynotify,
 	#if BAR_SYSTRAY_PATCH
 	[ResizeRequest] = resizerequest,
@@ -979,11 +971,7 @@ buttonpress(XEvent *e)
 	BarArg carg = { 0, 0, 0, 0 };
 	click = ClkRootWin;
 	/* focus monitor if necessary */
-	if ((m = wintomon(ev->window)) && m != selmon
-		#if FOCUSONCLICK_PATCH
-		&& (focusonwheel || (ev->button != Button4 && ev->button != Button5))
-		#endif // FOCUSONCLICK_PATCH
-	) {
+	if ((m = wintomon(ev->window)) && m != selmon) {
 		unfocus(selmon->sel, 1, NULL);
 		selmon = m;
 		focus(NULL);
@@ -1013,13 +1001,8 @@ buttonpress(XEvent *e)
 	}
 
 	if (click == ClkRootWin && (c = wintoclient(ev->window))) {
-		#if FOCUSONCLICK_PATCH
-		if (focusonwheel || (ev->button != Button4 && ev->button != Button5))
-			focus(c);
-		#else
 		focus(c);
 		restack(selmon);
-		#endif // FOCUSONCLICK_PATCH
 		XAllowEvents(dpy, ReplayPointer, CurrentTime);
 		click = ClkClientWin;
 	}
@@ -1723,7 +1706,6 @@ drawbarwin(Bar *bar)
 		drw_map(drw, bar->win, 0, 0, bar->bw, bar->bh);
 }
 
-#if !FOCUSONCLICK_PATCH
 void
 enternotify(XEvent *e)
 {
@@ -1743,7 +1725,6 @@ enternotify(XEvent *e)
 		return;
 	focus(c);
 }
-#endif // FOCUSONCLICK_PATCH
 
 void
 expose(XEvent *e)
@@ -2250,7 +2231,6 @@ maprequest(XEvent *e)
 		manage(ev->window, &wa);
 }
 
-#if !FOCUSONCLICK_PATCH
 void
 motionnotify(XEvent *e)
 {
@@ -2269,7 +2249,6 @@ motionnotify(XEvent *e)
 	}
 	mon = m;
 }
-#endif // FOCUSONCLICK_PATCH
 
 void
 movemouse(const Arg *arg)

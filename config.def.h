@@ -39,9 +39,6 @@ static const int bar_height              = 0;   /* 0 means derive from font, >= 
 static const int vertpad                 = 10;  /* vertical padding of bar */
 static const int sidepad                 = 10;  /* horizontal padding of bar */
 #endif // BAR_PADDING_PATCH
-#if FOCUSONCLICK_PATCH
-static const int focusonwheel            = 0;
-#endif // FOCUSONCLICK_PATCH
 #if FLOATPOS_PATCH
 static int floatposgrid_x                = 5;  /* float grid columns */
 static int floatposgrid_y                = 5;  /* float grid rows */
