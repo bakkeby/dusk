@@ -323,11 +323,6 @@
  * Other patches
  */
 
-/* This patch allows windows to be resized with its aspect ratio remaining constant.
- * https://dwm.suckless.org/patches/aspectresize/
- */
-#define ASPECTRESIZE_PATCH 0
-
 /* This patch prevents the focus to drift from the active fullscreen client when
  * using focusstack().
  * https://dwm.suckless.org/patches/alwaysfullscreen/

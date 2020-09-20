@@ -682,20 +682,6 @@ static Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_l,          setcfact,               {.f = -0.25} },
 	{ MODKEY|ShiftMask,             XK_o,          setcfact,               {0} },
 	#endif // CFACTS_PATCH
-	#if ASPECTRESIZE_PATCH
-	{ MODKEY|ControlMask|ShiftMask, XK_e,          aspectresize,           {.i = +24} },
-	{ MODKEY|ControlMask|ShiftMask, XK_r,          aspectresize,           {.i = -24} },
-	#endif // ASPECTRESIZE_PATCH
-	#if MOVERESIZE_PATCH
-	{ MODKEY|Mod4Mask,              XK_Down,       moveresize,             {.v = "0x 25y 0w 0h" } },
-	{ MODKEY|Mod4Mask,              XK_Up,         moveresize,             {.v = "0x -25y 0w 0h" } },
-	{ MODKEY|Mod4Mask,              XK_Right,      moveresize,             {.v = "25x 0y 0w 0h" } },
-	{ MODKEY|Mod4Mask,              XK_Left,       moveresize,             {.v = "-25x 0y 0w 0h" } },
-	{ MODKEY|Mod4Mask|ShiftMask,    XK_Down,       moveresize,             {.v = "0x 0y 0w 25h" } },
-	{ MODKEY|Mod4Mask|ShiftMask,    XK_Up,         moveresize,             {.v = "0x 0y 0w -25h" } },
-	{ MODKEY|Mod4Mask|ShiftMask,    XK_Right,      moveresize,             {.v = "0x 0y 25w 0h" } },
-	{ MODKEY|Mod4Mask|ShiftMask,    XK_Left,       moveresize,             {.v = "0x 0y -25w 0h" } },
-	#endif // MOVERESIZE_PATCH
 	#if MOVESTACK_PATCH
 	{ MODKEY|ShiftMask,             XK_j,          movestack,              {.i = +1 } },
 	{ MODKEY|ShiftMask,             XK_k,          movestack,              {.i = -1 } },
@@ -769,9 +755,7 @@ static Key keys[] = {
 	{ MODKEY,                       XK_t,          setlayout,              {.v = &layouts[0]} },
 	{ MODKEY,                       XK_f,          setlayout,              {.v = &layouts[1]} },
 	{ MODKEY,                       XK_m,          setlayout,              {.v = &layouts[2]} },
-	#if COLUMNS_LAYOUT
 	{ MODKEY,                       XK_c,          setlayout,              {.v = &layouts[3]} },
-	#endif // COLUMNS_LAYOUT
 	#if FLEXTILE_DELUXE_LAYOUT
 	{ MODKEY|ControlMask,           XK_t,          rotatelayoutaxis,       {.i = +1 } },   /* flextile, 1 = layout axis */
 	{ MODKEY|ControlMask,           XK_Tab,        rotatelayoutaxis,       {.i = +2 } },   /* flextile, 2 = master axis */
