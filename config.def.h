@@ -21,12 +21,6 @@ static const unsigned int gappoh         = 10;  /* horiz outer gap between windo
 static const unsigned int gappov         = 30;  /* vert outer gap between windows and screen edge */
 static const int smartgaps               = 0;   /* 1 means no outer gap when there is only one window */
 
-#if AUTOSTART_PATCH
-static const char autostartblocksh[]     = "autostart_blocking.sh";
-static const char autostartsh[]          = "autostart.sh";
-static const char dwmdir[]               = "dwm";
-static const char localshare[]           = ".local/share";
-#endif // AUTOSTART_PATCH
 #if BAR_ANYBAR_PATCH
 static const int usealtbar               = 1;        /* 1 means use non-dwm status bar */
 static const char *altbarclass           = "Polybar"; /* Alternate bar class name */

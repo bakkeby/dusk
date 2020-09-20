@@ -92,9 +92,6 @@
 #if ATTACHABOVE_PATCH || ATTACHASIDE_PATCH || ATTACHBELOW_PATCH || ATTACHBOTTOM_PATCH
 #include "attachx.c"
 #endif
-#if AUTOSTART_PATCH
-#include "autostart.c"
-#endif
 #if CFACTS_PATCH
 #include "cfacts.c"
 #endif

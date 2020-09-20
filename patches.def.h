@@ -358,14 +358,6 @@
  */
 #define ATTACHBOTTOM_PATCH 0
 
-/* This patch will make dwm run "~/.local/share/dwm/autostart_blocking.sh" and
- * "~/.local/share/dwm/autostart.sh &" before entering the handler loop. One or
- * both of these files can be ommited. Note the path inside .local/share rather
- * than the original ~/.dwm folder.
- * https://dwm.suckless.org/patches/autostart/
- */
-#define AUTOSTART_PATCH 0
-
 /* By default, windows that are not visible when requesting a resize/move will not
  * get resized/moved. With this patch, they will.
  * https://dwm.suckless.org/patches/autoresize/
