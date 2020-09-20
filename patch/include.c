@@ -107,7 +107,7 @@
 #if DRAGCFACT_PATCH && CFACTS_PATCH
 #include "dragcfact.c"
 #endif
-#if !FAKEFULLSCREEN_PATCH && FAKEFULLSCREEN_CLIENT_PATCH
+#if FAKEFULLSCREEN_CLIENT_PATCH
 #include "fakefullscreenclient.c"
 #endif
 #if FLOATPOS_PATCH

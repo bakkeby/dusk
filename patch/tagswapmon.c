@@ -38,12 +38,12 @@ tagswapmon(const Arg *arg)
 		attach(c);
 		attachstack(c);
 		if (c->isfullscreen) {
-			#if !FAKEFULLSCREEN_PATCH && FAKEFULLSCREEN_CLIENT_PATCH
+			#if FAKEFULLSCREEN_CLIENT_PATCH
 			if (c->fakefullscreen != 1) {
 				resizeclient(c, c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
 				XRaiseWindow(dpy, c->win);
 			}
-			#elif !FAKEFULLSCREEN_PATCH
+			#else
 			resizeclient(c, c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
 			XRaiseWindow(dpy, c->win);
 			#endif // FAKEFULLSCREEN_CLIENT_PATCH
@@ -57,12 +57,12 @@ tagswapmon(const Arg *arg)
 		attach(c);
 		attachstack(c);
 		if (c->isfullscreen) {
-			#if !FAKEFULLSCREEN_PATCH && FAKEFULLSCREEN_CLIENT_PATCH
+			#if FAKEFULLSCREEN_CLIENT_PATCH
 			if (c->fakefullscreen != 1) {
 				resizeclient(c, c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
 				XRaiseWindow(dpy, c->win);
 			}
-			#elif !FAKEFULLSCREEN_PATCH
+			#else
 			resizeclient(c, c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
 			XRaiseWindow(dpy, c->win);
 			#endif // FAKEFULLSCREEN_CLIENT_PATCH

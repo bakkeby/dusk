@@ -312,7 +312,7 @@ struct Client {
 	unsigned int switchtag;
 	#endif // SWITCHTAG_PATCH
 	int isfixed, isfloating, isurgent, neverfocus, oldstate, isfullscreen;
-	#if !FAKEFULLSCREEN_PATCH && FAKEFULLSCREEN_CLIENT_PATCH
+	#if FAKEFULLSCREEN_CLIENT_PATCH
 	int fakefullscreen;
 	#endif // FAKEFULLSCREEN_CLIENT_PATCH
 	#if EXRESIZE_PATCH
@@ -1194,9 +1194,7 @@ clientmessage(XEvent *e)
 			#endif // FAKEFULLSCREEN_CLIENT_PATCH
 			setfullscreen(c, (cme->data.l[0] == 1 /* _NET_WM_STATE_ADD    */
 				|| (cme->data.l[0] == 2 /* _NET_WM_STATE_TOGGLE */
-				#if !FAKEFULLSCREEN_PATCH
 				&& !c->isfullscreen
-				#endif // !FAKEFULLSCREEN_PATCH
 			)));
 		}
 	} else if (cme->message_type == netatom[NetActiveWindow]) {
@@ -1245,9 +1243,7 @@ configurenotify(XEvent *e)
 {
 	Monitor *m;
 	Bar *bar;
-	#if !FAKEFULLSCREEN_PATCH
 	Client *c;
-	#endif // !FAKEFULLSCREEN_PATCH
 	XConfigureEvent *ev = &e->xconfigure;
 	int dirty;
 	/* TODO: updategeom handling sucks, needs to be simplified */
@@ -1259,7 +1255,6 @@ configurenotify(XEvent *e)
 			drw_resize(drw, sw, bh);
 			updatebars();
 			for (m = mons; m; m = m->next) {
-				#if !FAKEFULLSCREEN_PATCH
 				for (c = m->clients; c; c = c->next)
 					#if FAKEFULLSCREEN_CLIENT_PATCH
 					if (c->isfullscreen && c->fakefullscreen != 1)
@@ -1267,7 +1262,6 @@ configurenotify(XEvent *e)
 					if (c->isfullscreen)
 					#endif // FAKEFULLSCREEN_CLIENT_PATCH
 						resizeclient(c, m->mx, m->my, m->mw, m->mh);
-				#endif // !FAKEFULLSCREEN_PATCH
 				for (bar = m->bar; bar; bar = bar->next)
 					XMoveResizeWindow(dpy, bar->win, bar->bx, bar->by, bar->bw, bar->bh);
 			}
@@ -2334,7 +2328,6 @@ movemouse(const Arg *arg)
 
 	if (!(c = selmon->sel))
 		return;
-	#if !FAKEFULLSCREEN_PATCH
 	#if FAKEFULLSCREEN_CLIENT_PATCH
 	if (c->isfullscreen && c->fakefullscreen != 1) /* no support moving fullscreen windows by mouse */
 		return;
@@ -2342,7 +2335,6 @@ movemouse(const Arg *arg)
 	if (c->isfullscreen) /* no support moving fullscreen windows by mouse */
 		return;
 	#endif // FAKEFULLSCREEN_CLIENT_PATCH
-	#endif // FAKEFULLSCREEN_PATCH
 	restack(selmon);
 	ocx = c->x;
 	ocy = c->y;
@@ -2615,7 +2607,6 @@ resizemouse(const Arg *arg)
 
 	if (!(c = selmon->sel))
 		return;
-	#if !FAKEFULLSCREEN_PATCH
 	#if FAKEFULLSCREEN_CLIENT_PATCH
 	if (c->isfullscreen && c->fakefullscreen != 1) /* no support resizing fullscreen windows by mouse */
 		return;
@@ -2623,7 +2614,6 @@ resizemouse(const Arg *arg)
 	if (c->isfullscreen) /* no support resizing fullscreen windows by mouse */
 		return;
 	#endif // FAKEFULLSCREEN_CLIENT_PATCH
-	#endif // !FAKEFULLSCREEN_PATCH
 	restack(selmon);
 	ocx = c->x;
 	ocy = c->y;
@@ -3009,7 +2999,7 @@ setfocus(Client *c)
 	#endif // BAR_SYSTRAY_PATCH
 }
 
-#if FAKEFULLSCREEN_CLIENT_PATCH && !FAKEFULLSCREEN_PATCH
+#if FAKEFULLSCREEN_CLIENT_PATCH
 void
 setfullscreen(Client *c, int fullscreen)
 {
@@ -3078,19 +3068,16 @@ setfullscreen(Client *c, int fullscreen)
 		XChangeProperty(dpy, c->win, netatom[NetWMState], XA_ATOM, 32,
 			PropModeReplace, (unsigned char*)&netatom[NetWMFullscreen], 1);
 		c->isfullscreen = 1;
-		#if !FAKEFULLSCREEN_PATCH
 		c->oldbw = c->bw;
 		c->oldstate = c->isfloating;
 		c->bw = 0;
 		c->isfloating = 1;
 		resizeclient(c, c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
 		XRaiseWindow(dpy, c->win);
-		#endif // !FAKEFULLSCREEN_PATCH
 	} else if (!fullscreen && c->isfullscreen){
 		XChangeProperty(dpy, c->win, netatom[NetWMState], XA_ATOM, 32,
 			PropModeReplace, (unsigned char*)0, 0);
 		c->isfullscreen = 0;
-		#if !FAKEFULLSCREEN_PATCH
 		c->bw = c->oldbw;
 		c->isfloating = c->oldstate;
 		c->x = c->oldx;
@@ -3099,7 +3086,6 @@ setfullscreen(Client *c, int fullscreen)
 		c->h = c->oldh;
 		resizeclient(c, c->x, c->y, c->w, c->h);
 		arrange(c->mon);
-		#endif // !FAKEFULLSCREEN_PATCH
 	}
 }
 #endif // FAKEFULLSCREEN_CLIENT_PATCH
@@ -3411,11 +3397,7 @@ showhide(Client *c)
 		#else
 		XMoveWindow(dpy, c->win, c->x, c->y);
 		#endif // AUTORESIZE_PATCH
-		if ((!c->mon->lt[c->mon->sellt]->arrange || c->isfloating)
-			#if !FAKEFULLSCREEN_PATCH
-			&& !c->isfullscreen
-			#endif // !FAKEFULLSCREEN_PATCH
-			)
+		if ((!c->mon->lt[c->mon->sellt]->arrange || c->isfloating) && !c->isfullscreen)
 			resize(c, c->x, c->y, c->w, c->h, 0);
 		showhide(c->snext);
 	} else {
@@ -3567,12 +3549,12 @@ tagmon(const Arg *arg)
 		c->isfullscreen = 0;
 		sendmon(c, dirtomon(arg->i));
 		c->isfullscreen = 1;
-		#if !FAKEFULLSCREEN_PATCH && FAKEFULLSCREEN_CLIENT_PATCH
+		#if FAKEFULLSCREEN_CLIENT_PATCH
 		if (c->fakefullscreen != 1) {
 			resizeclient(c, c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
 			XRaiseWindow(dpy, c->win);
 		}
-		#elif !FAKEFULLSCREEN_PATCH
+		#else
 		resizeclient(c, c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
 		XRaiseWindow(dpy, c->win);
 		#endif // FAKEFULLSCREEN_CLIENT_PATCH
@@ -3612,7 +3594,6 @@ togglefloating(const Arg *arg)
 		c = (Client*)arg->v;
 	if (!c)
 		return;
-	#if !FAKEFULLSCREEN_PATCH
 	#if FAKEFULLSCREEN_CLIENT_PATCH
 	if (c->isfullscreen && c->fakefullscreen != 1) /* no support for fullscreen windows */
 		return;
@@ -3620,7 +3601,6 @@ togglefloating(const Arg *arg)
 	if (c->isfullscreen) /* no support for fullscreen windows */
 		return;
 	#endif // FAKEFULLSCREEN_CLIENT_PATCH
-	#endif // !FAKEFULLSCREEN_PATCH
 	c->isfloating = !c->isfloating || c->isfixed;
 	#if !BAR_FLEXWINTITLE_PATCH
 	if (c->isfloating)

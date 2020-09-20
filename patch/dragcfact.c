@@ -13,7 +13,6 @@ dragcfact(const Arg *arg)
 		resizemouse(arg);
 		return;
 	}
-	#if !FAKEFULLSCREEN_PATCH
 	#if FAKEFULLSCREEN_CLIENT_PATCH
 	if (c->isfullscreen && !c->fakefullscreen) /* no support resizing fullscreen windows by mouse */
 		return;
@@ -21,7 +20,6 @@ dragcfact(const Arg *arg)
 	if (c->isfullscreen) /* no support resizing fullscreen windows by mouse */
 		return;
 	#endif // FAKEFULLSCREEN_CLIENT_PATCH
-	#endif // !FAKEFULLSCREEN_PATCH
 	restack(selmon);
 
 	if (XGrabPointer(dpy, root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
