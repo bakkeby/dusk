@@ -1,1 +1,0 @@
-static void col(Monitor *);

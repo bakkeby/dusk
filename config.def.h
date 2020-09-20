@@ -14,13 +14,13 @@ static const int swallowfloating         = 0;   /* 1 means swallow floating wind
 #if NO_MOD_BUTTONS_PATCH
 static int nomodbuttons                  = 1;   /* allow client mouse button bindings that have no modifier */
 #endif // NO_MOD_BUTTONS_PATCH
-#if VANITYGAPS_PATCH
+
 static const unsigned int gappih         = 20;  /* horiz inner gap between windows */
 static const unsigned int gappiv         = 10;  /* vert inner gap between windows */
 static const unsigned int gappoh         = 10;  /* horiz outer gap between windows and screen edge */
 static const unsigned int gappov         = 30;  /* vert outer gap between windows and screen edge */
 static const int smartgaps               = 0;   /* 1 means no outer gap when there is only one window */
-#endif // VANITYGAPS_PATCH
+
 #if AUTOSTART_PATCH
 static const char autostartblocksh[]     = "autostart_blocking.sh";
 static const char autostartsh[]          = "autostart.sh";
@@ -76,9 +76,7 @@ static const int quit_empty_window_count = 2;   /* only allow dwm to quit if no 
 #if BAR_EXTRASTATUS_PATCH
 static const char statussep              = ';'; /* separator between status bars */
 #endif // BAR_EXTRASTATUS_PATCH
-#if BAR_TABGROUPS_PATCH && MONOCLE_LAYOUT
-static void (*bartabmonfns[])(Monitor *) = { monocle /* , customlayoutfn */ };
-#else
+#if BAR_TABGROUPS_PATCH
 static void (*bartabmonfns[])(Monitor *) = { NULL /* , customlayoutfn */ };
 #endif // BAR_TABGROUPS_PATCH
 #if BAR_PANGO_PATCH
@@ -515,7 +513,6 @@ static const int decorhints  = 1;    /* 1 means respect decoration hints */
 #define FORCE_VSPLIT 1
 #endif
 
-#if FLEXTILE_DELUXE_LAYOUT
 static const Layout layouts[] = {
 	/* symbol     arrange function, { nmaster, nstack, layout, master axis, stack axis, secondary stack axis } */
 	{ "[]=",      flextile,         { -1, -1, SPLIT_VERTICAL, TOP_TO_BOTTOM, TOP_TO_BOTTOM, 0, NULL } }, // default tile layout
@@ -530,103 +527,8 @@ static const Layout layouts[] = {
 	{ ":::",      flextile,         { -1, -1, NO_SPLIT, GAPPLESSGRID, 0, 0, NULL } }, // gappless grid
 	{ "[\\]",     flextile,         { -1, -1, NO_SPLIT, DWINDLE, 0, 0, NULL } }, // fibonacci dwindle
 	{ "(@)",      flextile,         { -1, -1, NO_SPLIT, SPIRAL, 0, 0, NULL } }, // fibonacci spiral
-	#if TILE_LAYOUT
-	{ "[]=",      tile,             {0} },
-	#endif
-	#if MONOCLE_LAYOUT
-	{ "[M]",      monocle,          {0} },
-	#endif
-	#if BSTACK_LAYOUT
-	{ "TTT",      bstack,           {0} },
-	#endif
-	#if BSTACKHORIZ_LAYOUT
-	{ "===",      bstackhoriz,      {0} },
-	#endif
-	#if CENTEREDMASTER_LAYOUT
-	{ "|M|",      centeredmaster,   {0} },
-	#endif
-	#if CENTEREDFLOATINGMASTER_LAYOUT
-	{ ">M>",      centeredfloatingmaster, {0} },
-	#endif
-	#if COLUMNS_LAYOUT
-	{ "|||",      col,              {0} },
-	#endif
-	#if DECK_LAYOUT
-	{ "[D]",      deck,             {0} },
-	#endif
-	#if FIBONACCI_SPIRAL_LAYOUT
-	{ "(@)",      spiral,           {0} },
-	#endif
-	#if FIBONACCI_DWINDLE_LAYOUT
-	{ "[\\]",     dwindle,          {0} },
-	#endif
-	#if GRIDMODE_LAYOUT
-	{ "HHH",      grid,             {0} },
-	#endif
-	#if HORIZGRID_LAYOUT
-	{ "---",      horizgrid,        {0} },
-	#endif
-	#if GAPPLESSGRID_LAYOUT
-	{ ":::",      gaplessgrid,      {0} },
-	#endif
-	#if NROWGRID_LAYOUT
-	{ "###",      nrowgrid,         {0} },
-	#endif
-	#if CYCLELAYOUTS_PATCH
 	{ NULL,       NULL,             {0} },
-	#endif
 };
-#else
-static const Layout layouts[] = {
-	/* symbol     arrange function */
-	#if TILE_LAYOUT
-	{ "[]=",      tile },    /* first entry is default */
-	#endif
-	{ "><>",      NULL },    /* no layout function means floating behavior */
-	#if MONOCLE_LAYOUT
-	{ "[M]",      monocle },
-	#endif
-	#if BSTACK_LAYOUT
-	{ "TTT",      bstack },
-	#endif
-	#if BSTACKHORIZ_LAYOUT
-	{ "===",      bstackhoriz },
-	#endif
-	#if CENTEREDMASTER_LAYOUT
-	{ "|M|",      centeredmaster },
-	#endif
-	#if CENTEREDFLOATINGMASTER_LAYOUT
-	{ ">M>",      centeredfloatingmaster },
-	#endif
-	#if COLUMNS_LAYOUT
-	{ "|||",      col },
-	#endif
-	#if DECK_LAYOUT
-	{ "[D]",      deck },
-	#endif
-	#if FIBONACCI_SPIRAL_LAYOUT
-	{ "(@)",      spiral },
-	#endif
-	#if FIBONACCI_DWINDLE_LAYOUT
-	{ "[\\]",     dwindle },
-	#endif
-	#if GRIDMODE_LAYOUT
-	{ "HHH",      grid },
-	#endif
-	#if HORIZGRID_LAYOUT
-	{ "---",      horizgrid },
-	#endif
-	#if GAPPLESSGRID_LAYOUT
-	{ ":::",      gaplessgrid },
-	#endif
-	#if NROWGRID_LAYOUT
-	{ "###",      nrowgrid },
-	#endif
-	#if CYCLELAYOUTS_PATCH
-	{ NULL,       NULL },
-	#endif
-};
-#endif // FLEXTILE_DELUXE_LAYOUT
 
 /* key definitions */
 #define MODKEY Mod1Mask
@@ -914,9 +816,6 @@ static Key keys[] = {
 	#if !FAKEFULLSCREEN_PATCH && FAKEFULLSCREEN_CLIENT_PATCH
 	{ MODKEY|ShiftMask,             XK_y,          togglefakefullscreen,   {0} },
 	#endif // FAKEFULLSCREEN_CLIENT_PATCH
-	#if FULLSCREEN_PATCH
-	{ MODKEY|ShiftMask,             XK_f,          fullscreen,             {0} },
-	#endif // FULLSCREEN_PATCH
 	#if STICKY_PATCH
 	{ MODKEY|ShiftMask,             XK_s,          togglesticky,           {0} },
 	#endif // STICKY_PATCH
@@ -1157,169 +1056,7 @@ static Button buttons[] = {
 	{ ClkTagBar,            MODKEY,              Button3,        toggletag,      {0} },
 };
 
-#if DWMC_PATCH
-/* signal definitions */
-/* signum must be greater than 0 */
-/* trigger signals using `xsetroot -name "fsignal:<signame> [<type> <value>]"` */
-static Signal signals[] = {
-	/* signum                    function */
-	{ "focusstack",              focusstack },
-	{ "setmfact",                setmfact },
-	{ "togglebar",               togglebar },
-	{ "incnmaster",              incnmaster },
-	{ "togglefloating",          togglefloating },
-	{ "focusmon",                focusmon },
-	#if STACKER_PATCH
-	{ "pushstack",               pushstack },
-	#endif // STACKER_PATCH
-	#if FOCUSURGENT_PATCH
-	{ "focusurgent",             focusurgent },
-	#endif // FOCUSURGENT_PATCH
-	#if FOCUSADJACENTTAG_PATCH
-	{ "viewtoleft",              viewtoleft },
-	{ "viewtoright",             viewtoright },
-	{ "tagtoleft",               tagtoleft },
-	{ "tagtoright",              tagtoright},
-	{ "tagandviewtoleft",        tagandviewtoleft },
-	{ "tagandviewtoright",       tagandviewtoright },
-	#endif // FOCUSADJACENTTAG_PATCH
-	#if SWAPFOCUS_PATCH && PERTAG_PATCH
-	{ "swapfocus",               swapfocus },
-	#endif // SWAPFOCUS_PATCH
-	#if SWITCHCOL_PATCH
-	{ "switchcol",               switchcol },
-	#endif // SWITCHCOL_PATCH
-	#if ROTATESTACK_PATCH
-	{ "rotatestack",             rotatestack },
-	#endif // ROTATESTACK_PATCH
-	#if INPLACEROTATE_PATCH
-	{ "inplacerotate",           inplacerotate },
-	#endif // INPLACEROTATE_PATCH
-	#if PUSH_PATCH || PUSH_NO_MASTER_PATCH
-	{ "pushdown",                pushdown },
-	{ "pushup",                  pushup },
-	#endif // PUSH_PATCH / PUSH_NO_MASTER_PATCH
-	#if FLEXTILE_DELUXE_LAYOUT
-	{ "incnstack",               incnstack },
-	{ "rotatelayoutaxis",        rotatelayoutaxis },
-	{ "setlayoutaxisex",         setlayoutaxisex },
-	{ "mirrorlayout",            mirrorlayout },
-	#endif // FLEXTILE_DELUXE_LAYOUT
-	#if CFACTS_PATCH
-	{ "setcfact",                setcfact },
-	#endif // CFACTS_PATCH
-	#if MOVEPLACE_PATCH
-	{ "moveplace",               moveplace },
-	#endif // MOVEPLACE_PATCH
-	#if EXRESIZE_PATCH
-	{ "explace",                 explace },
-	{ "togglehorizontalexpand",  togglehorizontalexpand },
-	{ "toggleverticalexpand",    toggleverticalexpand },
-	{ "togglemaximize",          togglemaximize },
-	#endif // EXRESIZE_PATCH
-	#if KEYMODES_PATCH
-	{ "setkeymode",              setkeymode },
-	#endif // KEYMODES_PATCH
-	#if TRANSFER_PATCH
-	{ "transfer",                transfer },
-	#endif // TRANSFER_PATCH
-	#if TRANSFER_ALL_PATCH
-	{ "transferall",             transferall },
-	#endif // TRANSFER_ALL_PATCH
-	{ "tagmon",                  tagmon },
-	{ "zoom",                    zoom },
-	#if VANITYGAPS_PATCH
-	{ "incrgaps",                incrgaps },
-	{ "incrigaps",               incrigaps },
-	{ "incrogaps",               incrogaps },
-	{ "incrihgaps",              incrihgaps },
-	{ "incrivgaps",              incrivgaps },
-	{ "incrohgaps",              incrohgaps },
-	{ "incrovgaps",              incrovgaps },
-	{ "togglegaps",              togglegaps },
-	{ "defaultgaps",             defaultgaps },
-	{ "setgaps",                 setgapsex },
-	#endif // VANITYGAPS_PATCH
-	{ "view",                    view },
-	{ "viewall",                 viewallex },
-	{ "viewex",                  viewex },
-	{ "toggleview",              toggleview },
-	#if SHIFTVIEW_PATCH
-	{ "shiftview",               shiftview },
-	#endif // SHIFTVIEW_PATCH
-	#if SHIFTVIEW_CLIENTS_PATCH
-	{ "shiftviewclients",        shiftviewclients },
-	#endif // SHIFTVIEW_CLIENTS_PATCH
-	#if SELFRESTART_PATCH
-	{ "self_restart",            self_restart },
-	#endif // SELFRESTART_PATCH
-	#if BAR_TAGGRID_PATCH
-	{ "switchtag",               switchtag },
-	#endif // BAR_TAGGRID_PATCH
-	#if STICKY_PATCH
-	{ "togglesticky",            togglesticky },
-	#endif // STICKY_PATCH
-	#if SETBORDERPX_PATCH
-	{ "setborderpx",             setborderpx },
-	#endif // SETBORDERPX_PATCH
-	#if CYCLELAYOUTS_PATCH
-	{ "cyclelayout",             cyclelayout },
-	#endif // CYCLELAYOUTS_PATCH
-	#if MDPCONTROL_PATCH
-	{ "mpdchange",               mpdchange },
-	{ "mpdcontrol",              mpdcontrol },
-	#endif // MDPCONTROL_PATCH
-	{ "toggleviewex",            toggleviewex },
-	{ "tag",                     tag },
-	{ "tagall",                  tagallex },
-	{ "tagex",                   tagex },
-	{ "toggletag",               toggletag },
-	{ "toggletagex",             toggletagex },
-	#if TAGALLMON_PATCH
-	{ "tagallmon",               tagallmon },
-	#endif // TAGALLMON_PATCH
-	#if TAGSWAPMON_PATCH
-	{ "tagswapmon",              tagswapmon},
-	#endif // TAGSWAPMON_PATCH
-	#if BAR_ALTERNATIVE_TAGS_PATCH
-	{ "togglealttag",            togglealttag },
-	#endif // BAR_ALTERNATIVE_TAGS_PATCH
-	#if TOGGLEFULLSCREEN_PATCH
-	{ "togglefullscreen",        togglefullscreen },
-	#endif // TOGGLEFULLSCREEN_PATCH
-	#if !FAKEFULLSCREEN_PATCH && FAKEFULLSCREEN_CLIENT_PATCH
-	{ "togglefakefullscreen",    togglefakefullscreen },
-	#endif // FAKEFULLSCREEN_CLIENT_PATCH
-	#if FULLSCREEN_PATCH
-	{ "fullscreen",              fullscreen },
-	#endif // FULLSCREEN_PATCH
-	#if MAXIMIZE_PATCH
-	{ "togglehorizontalmax",     togglehorizontalmax },
-	{ "toggleverticalmax",       toggleverticalmax },
-	{ "togglemax",               togglemax },
-	#endif // MAXIMIZE_PATCH
-	#if SCRATCHPADS_PATCH
-	{ "togglescratch",           togglescratch },
-	#endif // SCRATCHPADS_PATCH
-	#if UNFLOATVISIBLE_PATCH
-	{ "unfloatvisible",          unfloatvisible },
-	#endif // UNFLOATVISIBLE_PATCH
-	{ "killclient",              killclient },
-	#if WINVIEW_PATCH
-	{ "winview",                 winview },
-	#endif // WINVIEW_PATCH
-	#if XRDB_PATCH && !BAR_VTCOLORS_PATCH
-	{ "xrdb",                    xrdb },
-	#endif // XRDB_PATCH
-	#if TAGOTHERMONITOR_PATCH
-	{ "tagnextmonex",            tagnextmonex },
-	{ "tagprevmonex",            tagprevmonex },
-	#endif // TAGOTHERMONITOR_PATCH
-	{ "quit",                    quit },
-	{ "setlayout",               setlayout },
-	{ "setlayoutex",             setlayoutex },
-};
-#elif FSIGNAL_PATCH
+#if FSIGNAL_PATCH
 /* signal definitions */
 /* signum must be greater than 0 */
 /* trigger signals using `xsetroot -name "fsignal:<signum>"` */
@@ -1372,9 +1109,6 @@ static IPCCommand ipccommands[] = {
 	#if FLOATPOS_PATCH
 	IPCCOMMAND( floatpos, 1, {ARG_TYPE_STR} ),
 	#endif // FLOATPOS_PATCH
-	#if FULLSCREEN_PATCH
-	IPCCOMMAND( fullscreen, 1, {ARG_TYPE_NONE} ),
-	#endif // FULLSCREEN_PATCH
 	#if FLEXTILE_DELUXE_LAYOUT
 	IPCCOMMAND( incnstack, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( rotatelayoutaxis, 1, {ARG_TYPE_SINT} ),

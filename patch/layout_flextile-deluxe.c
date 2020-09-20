@@ -621,13 +621,7 @@ flextile(Monitor *m)
 {
 	unsigned int n;
 	int oh = 0, ov = 0, ih = 0, iv = 0; // gaps outer/inner horizontal/vertical
-
-	#if VANITYGAPS_PATCH
 	getgaps(m, &oh, &ov, &ih, &iv, &n);
-	#else
-	Client *c;
-	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
-	#endif // VANITYGAPS_PATCH
 
 	if (m->lt[m->sellt]->preset.layout != m->ltaxis[LAYOUT] ||
 			m->lt[m->sellt]->preset.masteraxis != m->ltaxis[MASTER] ||
@@ -640,13 +634,13 @@ flextile(Monitor *m)
 	if (n == 0)
 		return;
 
-	#if VANITYGAPS_PATCH && !VANITYGAPS_MONOCLE_PATCH
+	#if !VANITYGAPS_MONOCLE_PATCH
 	/* No outer gap if full screen monocle */
 	if (abs(m->ltaxis[MASTER]) == MONOCLE && (abs(m->ltaxis[LAYOUT]) == NO_SPLIT || n <= m->nmaster)) {
 		oh = 0;
 		ov = 0;
 	}
-	#endif // VANITYGAPS_PATCH && !VANITYGAPS_MONOCLE_PATCH
+	#endif // !VANITYGAPS_MONOCLE_PATCH
 
 	(&flexlayouts[abs(m->ltaxis[LAYOUT])])->arrange(m, m->wx + ov, m->wy + oh, m->wh - 2*oh, m->ww - 2*ov, ih, iv, n);
 	return;

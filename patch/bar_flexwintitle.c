@@ -72,78 +72,8 @@ getschemefor(Monitor *m, int group, int activegroup)
 	case GRP_MASTER:
 	case GRP_STACK1:
 	case GRP_STACK2:
-		#if BSTACK_LAYOUT
-		if (m->lt[m->sellt]->arrange == &bstack)
-			return (activegroup ? SchemeFlexActLTR : SchemeFlexInaLTR);
-		#endif // BSTACK_LAYOUT
-		#if BSTACKHORIZ_LAYOUT
-		if (m->lt[m->sellt]->arrange == &bstackhoriz) {
-			if (group == GRP_MASTER)
-				return (activegroup ? SchemeFlexActLTR : SchemeFlexInaLTR);
-			else
-				return (activegroup ? SchemeFlexActTTB : SchemeFlexInaTTB);
-		}
-		#endif // BSTACKHORIZ_LAYOUT
-		#if CENTEREDMASTER_LAYOUT
-		if (m->lt[m->sellt]->arrange == &centeredmaster)
-			return (activegroup ? SchemeFlexActTTB : SchemeFlexInaTTB);
-		#endif // CENTEREDMASTER_LAYOUT
-		#if CENTEREDFLOATINGMASTER_LAYOUT
-		if (m->lt[m->sellt]->arrange == &centeredfloatingmaster)
-			return (activegroup ? SchemeFlexActLTR : SchemeFlexInaLTR);
-		#endif // CENTEREDFLOATINGMASTER_LAYOUT
-		#if COLUMNS_LAYOUT
-		if (m->lt[m->sellt]->arrange == &col) {
-			if (group == GRP_MASTER)
-				return (activegroup ? SchemeFlexActLTR : SchemeFlexInaLTR);
-			else
-				return (activegroup ? SchemeFlexActTTB : SchemeFlexInaTTB);
-		}
-		#endif // COLUMNS_LAYOUT
-		#if DECK_LAYOUT
-		if (m->lt[m->sellt]->arrange == &deck) {
-			if (group == GRP_MASTER)
-				return (activegroup ? SchemeFlexActTTB : SchemeFlexInaTTB);
-			else
-				return (activegroup ? SchemeFlexActMONO : SchemeFlexInaMONO);
-		}
-		#endif // DECK_LAYOUT
-		#if FIBONACCI_DWINDLE_LAYOUT
-		if (m->lt[m->sellt]->arrange == &dwindle)
-			return (activegroup ? SchemeFlexActDWDL : SchemeFlexInaDWDL);
-		#endif // FIBONACCI_DWINDLE_LAYOUT
-		#if FIBONACCI_SPIRAL_LAYOUT
-		if (m->lt[m->sellt]->arrange == &spiral)
-			return (activegroup ? SchemeFlexActSPRL : SchemeFlexInaSPRL);
-		#endif // FIBONACCI_SPIRAL_LAYOUT
-		#if FLEXTILE_DELUXE_LAYOUT
 		if (m->lt[m->sellt]->arrange == &flextile)
 			return (activegroup ? SchemeFlexActTTB + m->ltaxis[group] : SchemeFlexInaTTB + m->ltaxis[group]);
-		#endif // FLEXTILE_DELUXE_LAYOUT
-		#if GAPPLESSGRID_LAYOUT
-		if (m->lt[m->sellt]->arrange == &gaplessgrid)
-			return (activegroup ? SchemeFlexActGRID : SchemeFlexInaGRID);
-		#endif // GAPPLESSGRID_LAYOUT
-		#if GRIDMODE_LAYOUT
-		if (m->lt[m->sellt]->arrange == &grid)
-			return (activegroup ? SchemeFlexActGRDM : SchemeFlexInaGRDM);
-		#endif // GRIDMODE_LAYOUT
-		#if HORIZGRID_LAYOUT
-		if (m->lt[m->sellt]->arrange == &horizgrid)
-			return (activegroup ? SchemeFlexActHGRD : SchemeFlexInaHGRD);
-		#endif // HORIZGRID_LAYOUT
-		#if NROWGRID_LAYOUT
-		if (m->lt[m->sellt]->arrange == &nrowgrid)
-			return (activegroup ? SchemeFlexActGRD1 : SchemeFlexInaGRD1);
-		#endif // NROWGRID_LAYOUT
-		#if TILE_LAYOUT
-		if (m->lt[m->sellt]->arrange == &tile)
-			return (activegroup ? SchemeFlexActTTB : SchemeFlexInaTTB);
-		#endif // TILE_LAYOUT
-		#if MONOCLE_LAYOUT
-		if (m->lt[m->sellt]->arrange == &monocle)
-			return (activegroup ? SchemeFlexActMONO : SchemeFlexInaMONO);
-		#endif // MONOCLE_LAYOUT
 		return SchemeTitleNorm;
 	case GRP_HIDDEN:
 		return SchemeHid;
@@ -326,24 +256,7 @@ flextitlecalculate(
 	/* Certain layouts have no master / stack areas */
 	if (!m->lt[m->sellt]->arrange                            // floating layout
 		|| (!n || (!fixed && m->nmaster && n <= m->nmaster)) // no master
-		#if MONOCLE_LAYOUT
-		|| m->lt[m->sellt]->arrange == &monocle
-		#endif // MONOCLE_LAYOUT
-		#if GRIDMODE_LAYOUT
-		|| m->lt[m->sellt]->arrange == &grid
-		#endif // GRIDMODE_LAYOUT
-		#if HORIZGRID_LAYOUT
-		|| m->lt[m->sellt]->arrange == &horizgrid
-		#endif // HORIZGRID_LAYOUT
-		#if GAPPLESSGRID_LAYOUT
-		|| m->lt[m->sellt]->arrange == &gaplessgrid
-		#endif // GAPPLESSGRID_LAYOUT
-		#if NROWGRID_LAYOUT
-		|| m->lt[m->sellt]->arrange == &nrowgrid
-		#endif // NROWGRID_LAYOUT
-		#if FLEXTILE_DELUXE_LAYOUT
 		|| (m->lt[m->sellt]->arrange == &flextile && m->ltaxis[LAYOUT] == NO_SPLIT)
-		#endif // FLEXTILE_DELUXE_LAYOUT
 	)
 		fulllayout = 1;
 

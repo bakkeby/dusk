@@ -136,9 +136,6 @@
 #if FOCUSURGENT_PATCH
 #include "focusurgent.c"
 #endif
-#if FULLSCREEN_PATCH
-#include "fullscreen.c"
-#endif
 #if INPLACEROTATE_PATCH
 #include "inplacerotate.c"
 #endif
@@ -266,9 +263,9 @@
 #if UNFLOATVISIBLE_PATCH
 #include "unfloatvisible.c"
 #endif
-#if VANITYGAPS_PATCH
+
 #include "vanitygaps.c"
-#endif
+
 #if WARP_PATCH
 #include "warp.c"
 #endif
@@ -281,52 +278,8 @@
 #if XRDB_PATCH && !BAR_VTCOLORS_PATCH
 #include "xrdb.c"
 #endif
-#if DRAGMFACT_PATCH
+
 #include "dragmfact.c"
-#endif
+
 /* Layouts */
-#if BSTACK_LAYOUT || BSTACKHORIZ_LAYOUT || CENTEREDMASTER_LAYOUT || CENTEREDFLOATINGMASTER_LAYOUT || COLUMNS_LAYOUT || DECK_LAYOUT || TILE_LAYOUT
-#include "layout_facts.c"
-#endif
-#if BSTACK_LAYOUT
-#include "layout_bstack.c"
-#endif
-#if BSTACKHORIZ_LAYOUT
-#include "layout_bstackhoriz.c"
-#endif
-#if CENTEREDMASTER_LAYOUT
-#include "layout_centeredmaster.c"
-#endif
-#if CENTEREDFLOATINGMASTER_LAYOUT
-#include "layout_centeredfloatingmaster.c"
-#endif
-#if COLUMNS_LAYOUT
-#include "layout_columns.c"
-#endif
-#if DECK_LAYOUT
-#include "layout_deck.c"
-#endif
-#if FIBONACCI_DWINDLE_LAYOUT || FIBONACCI_SPIRAL_LAYOUT
-#include "layout_fibonacci.c"
-#endif
-#if FLEXTILE_DELUXE_LAYOUT
 #include "layout_flextile-deluxe.c"
-#endif
-#if GAPPLESSGRID_LAYOUT
-#include "layout_gapplessgrid.c"
-#endif
-#if GRIDMODE_LAYOUT
-#include "layout_grid.c"
-#endif
-#if HORIZGRID_LAYOUT
-#include "layout_horizgrid.c"
-#endif
-#if MONOCLE_LAYOUT
-#include "layout_monocle.c"
-#endif
-#if NROWGRID_LAYOUT
-#include "layout_nrowgrid.c"
-#endif
-#if TILE_LAYOUT
-#include "layout_tile.c"
-#endif

@@ -2082,11 +2082,7 @@ void
 killclient(const Arg *arg)
 {
 	Client *c = selmon->sel;
-	#if ISPERMANENT_PATCH
 	if (!c || ISPERMANENT(c))
-	#else
-	if (!c || ISPERMANENT(c))
-	#endif // ISPERMANENT_PATCH
 		return;
 	#if BAR_SYSTRAY_PATCH
 	if (!sendevent(c->win, wmatom[WMDelete], NoEventMask, wmatom[WMDelete], CurrentTime, 0, 0, 0)) {
@@ -2577,11 +2573,7 @@ resizeclient(Client *c, int x, int y, int w, int h)
 	#endif // EXRESIZE_PATCH
 	wc.border_width = c->bw;
 	#if NOBORDER_PATCH
-	if (((nexttiled(c->mon->clients) == c && !nexttiled(c->next))
-		#if MONOCLE_LAYOUT
-		|| &monocle == c->mon->lt[c->mon->sellt]->arrange
-		#endif // MONOCLE_LAYOUT
-		)
+	if (((nexttiled(c->mon->clients) == c && !nexttiled(c->next)))
 		#if FAKEFULLSCREEN_CLIENT_PATCH
 		&& (c->fakefullscreen == 1 || !c->isfullscreen)
 		#else
@@ -2778,19 +2770,10 @@ restack(Monitor *m)
 	}
 	XSync(dpy, False);
 	while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
-	#if WARP_PATCH && FLEXTILE_DELUXE_LAYOUT || WARP_PATCH && MONOCLE_LAYOUT
-	#if FLEXTILE_DELUXE_LAYOUT
+	#if WARP_PATCH
 	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
-	#endif // FLEXTILE_DELUXE_LAYOUT
 	if (m == selmon && (m->tagset[m->seltags] & m->sel->tags) && (
-		#if MONOCLE_LAYOUT && FLEXTILE_DELUXE_LAYOUT
-		(m->lt[m->sellt]->arrange != &monocle
-		&& !(m->ltaxis[MASTER] == MONOCLE && (abs(m->ltaxis[LAYOUT] == NO_SPLIT || !m->nmaster || n <= m->nmaster))))
-		#elif MONOCLE_LAYOUT
-		m->lt[m->sellt]->arrange == &monocle
-		#else
 		!(m->ltaxis[MASTER] == MONOCLE && (abs(m->ltaxis[LAYOUT] == NO_SPLIT || !m->nmaster || n <= m->nmaster)))
-		#endif // FLEXTILE_DELUXE_LAYOUT
 		|| m->sel->isfloating)
 	)
 		warp(m->sel);

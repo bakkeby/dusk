@@ -136,9 +136,6 @@
 #if FOCUSURGENT_PATCH
 #include "focusurgent.h"
 #endif
-#if FULLSCREEN_PATCH
-#include "fullscreen.h"
-#endif
 #if INPLACEROTATE_PATCH
 #include "inplacerotate.h"
 #endif
@@ -278,45 +275,6 @@
 #include "xrdb.h"
 #endif
 /* Layouts */
-#if BSTACK_LAYOUT
-#include "layout_bstack.h"
-#endif
-#if BSTACKHORIZ_LAYOUT
-#include "layout_bstackhoriz.h"
-#endif
-#if CENTEREDMASTER_LAYOUT
-#include "layout_centeredmaster.h"
-#endif
-#if CENTEREDFLOATINGMASTER_LAYOUT
-#include "layout_centeredfloatingmaster.h"
-#endif
-#if COLUMNS_LAYOUT
-#include "layout_columns.h"
-#endif
-#if DECK_LAYOUT
-#include "layout_deck.h"
-#endif
-#if FIBONACCI_DWINDLE_LAYOUT || FIBONACCI_SPIRAL_LAYOUT
-#include "layout_fibonacci.h"
-#endif
 #if FLEXTILE_DELUXE_LAYOUT
 #include "layout_flextile-deluxe.h"
-#endif
-#if GAPPLESSGRID_LAYOUT
-#include "layout_gapplessgrid.h"
-#endif
-#if GRIDMODE_LAYOUT
-#include "layout_grid.h"
-#endif
-#if HORIZGRID_LAYOUT
-#include "layout_horizgrid.h"
-#endif
-#if MONOCLE_LAYOUT
-#include "layout_monocle.h"
-#endif
-#if NROWGRID_LAYOUT
-#include "layout_nrowgrid.h"
-#endif
-#if TILE_LAYOUT
-#include "layout_tile.h"
 #endif
