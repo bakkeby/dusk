@@ -432,13 +432,6 @@
  */
 #define DRAGMFACT_PATCH 0
 
-/* This patch allows no tag at all to be selected. The result is that dwm will start with
- * no tag selected and when you start a client with no tag rule and no tag selected then
- * it will be opened on the first tag.
- * https://dwm.suckless.org/patches/emptyview/
- */
-#define EMPTYVIEW_PATCH 0
-
 /* This patch adds a float rule allowing the size and position of floating windows to be specified
  * It also allows the size and position of floating windows to be controlled similar to the
  * exresize, moveresize, and moveplace patches.

@@ -815,24 +815,14 @@ applyrules(Client *c)
 		XFree(ch.res_class);
 	if (ch.res_name)
 		XFree(ch.res_name);
-	#if EMPTYVIEW_PATCH
-	if (c->tags & TAGMASK)                    c->tags = c->tags & TAGMASK;
 	#if SCRATCHPADS_PATCH
-	else if (c->mon->tagset[c->mon->seltags]) c->tags = c->mon->tagset[c->mon->seltags] & ~SPTAGMASK;
-	#elif SCRATCHPAD_ALT_1_PATCH
-	else if (c->tags != SCRATCHPAD_MASK && c->mon->tagset[c->mon->seltags]) c->tags = c->mon->tagset[c->mon->seltags];
-	#else
-	else if (c->mon->tagset[c->mon->seltags]) c->tags = c->mon->tagset[c->mon->seltags];
-	#endif // SCRATCHPADS_PATCH
-	else                                      c->tags = 1;
-	#elif SCRATCHPADS_PATCH
 	c->tags = c->tags & TAGMASK ? c->tags & TAGMASK : (c->mon->tagset[c->mon->seltags] & ~SPTAGMASK);
 	#elif SCRATCHPAD_ALT_1_PATCH
 	if (c->tags != SCRATCHPAD_MASK)
 		c->tags = c->tags & TAGMASK ? c->tags & TAGMASK : c->mon->tagset[c->mon->seltags];
 	#else
 	c->tags = c->tags & TAGMASK ? c->tags & TAGMASK : c->mon->tagset[c->mon->seltags];
-	#endif // EMPTYVIEW_PATCH
+	#endif // SCRATCHPADS_PATCH
 }
 
 int
@@ -1321,11 +1311,7 @@ createmon(void)
 	#endif // MONITOR_RULES_PATCH
 
 	m = ecalloc(1, sizeof(Monitor));
-	#if EMPTYVIEW_PATCH
-	m->tagset[0] = m->tagset[1] = 0;
-	#else
 	m->tagset[0] = m->tagset[1] = 1;
-	#endif // EMPTYVIEW_PATCH
 	m->mfact = mfact;
 	m->nmaster = nmaster;
 	#if FLEXTILE_DELUXE_LAYOUT
@@ -2718,11 +2704,7 @@ sendmon(Client *c, Monitor *m)
 	#if SCRATCHPADS_PATCH
 	if (!(c->tags & SPTAGMASK))
 	#endif // SCRATCHPADS_PATCH
-	#if EMPTYVIEW_PATCH
-	c->tags = (m->tagset[m->seltags] ? m->tagset[m->seltags] : 1);
-	#else
 	c->tags = m->tagset[m->seltags]; /* assign tags of target monitor */
-	#endif // EMPTYVIEW_PATCH
 	#if ATTACHABOVE_PATCH || ATTACHASIDE_PATCH || ATTACHBELOW_PATCH || ATTACHBOTTOM_PATCH
 	attachx(c);
 	#else
@@ -3457,9 +3439,7 @@ toggleview(const Arg *arg)
 	}
 	#endif // TAGINTOSTACK_ALLMASTER_PATCH / TAGINTOSTACK_ONEMASTER_PATCH
 
-	#if !EMPTYVIEW_PATCH
 	if (newtagset) {
-	#endif // EMPTYVIEW_PATCH
 		selmon->tagset[selmon->seltags] = newtagset;
 
 		if (newtagset == ~0) {
@@ -3485,9 +3465,7 @@ toggleview(const Arg *arg)
 		#endif // PERTAGBAR_PATCH
 		focus(NULL);
 		arrange(selmon);
-	#if !EMPTYVIEW_PATCH
 	}
-	#endif // EMPTYVIEW_PATCH
 	#if BAR_EWMHTAGS_PATCH
 	updatecurrentdesktop();
 	#endif // BAR_EWMHTAGS_PATCH
@@ -3951,11 +3929,7 @@ updatewmhints(Client *c)
 void
 view(const Arg *arg)
 {
-	#if EMPTYVIEW_PATCH
 	if (arg->ui && (arg->ui & TAGMASK) == selmon->tagset[selmon->seltags])
-	#else
-	if ((arg->ui & TAGMASK) == selmon->tagset[selmon->seltags])
-	#endif // EMPTYVIEW_PATCH
 	{
 		#if VIEW_SAME_TAG_GIVES_PREVIOUS_TAG_PATCH
 		view(&((Arg) { .ui = 0 }));
