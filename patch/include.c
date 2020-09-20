@@ -110,9 +110,6 @@
 #if DRAGCFACT_PATCH && CFACTS_PATCH
 #include "dragcfact.c"
 #endif
-#if EXRESIZE_PATCH
-#include "exresize.c"
-#endif
 #if !FAKEFULLSCREEN_PATCH && FAKEFULLSCREEN_CLIENT_PATCH
 #include "fakefullscreenclient.c"
 #endif
@@ -154,12 +151,6 @@
 #endif
 #if MDPCONTROL_PATCH
 #include "mdpcontrol.c"
-#endif
-#if MOVEPLACE_PATCH
-#include "moveplace.c"
-#endif
-#if MOVERESIZE_PATCH
-#include "moveresize.c"
 #endif
 #if MOVESTACK_PATCH
 #include "movestack.c"

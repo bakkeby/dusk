@@ -444,13 +444,6 @@
  */
 #define EMPTYVIEW_PATCH 0
 
-/* This patch allows the user to change size and placement of floating windows using only the
- * keyboard. It also allows for temporary vertical and horizontal extension of windows similar
- * to other WMs fill command.
- * https://dwm.suckless.org/patches/exresize/
- */
-#define EXRESIZE_PATCH 0
-
 /* Only allow clients to "fullscreen" into the space currently given to them.
  * As an example, this will allow you to view a fullscreen video in your browser on
  * one half of the screen, while having the other half available for other tasks.
@@ -588,18 +581,6 @@
  * https://dwm.suckless.org/patches/monoclesymbol/
  */
 #define MONOCLESYMBOL_PATCH 0
-
-/* Makes a window floating and 1/3rd the height and 1/3rd the width of the screen and is
- * positioned in either the center or one of the 8 cardinal directions depending on which
- * key is pressed.
- * https://dwm.suckless.org/patches/moveplace/
- */
-#define MOVEPLACE_PATCH 0
-
-/* This patch allows you to move and resize dwm's clients using keyboard bindings.
- * https://dwm.suckless.org/patches/moveresize/
- */
-#define MOVERESIZE_PATCH 0
 
 /* This patch allows you to move clients around in the stack and swap them with the master.
  * https://dwm.suckless.org/patches/movestack/
