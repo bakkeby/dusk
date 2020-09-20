@@ -522,12 +522,6 @@
  */
 #define KILLUNSEL_PATCH 0
 
-/* This patch adds helper functions for maximizing, horizontally and vertically, floating
- * windows using keybindings.
- * https://dwm.suckless.org/patches/maximize/
- */
-#define MAXIMIZE_PATCH 0
-
 /* Control Music Player Daemon via keybinds.
  * You need to uncomment the corresponding line in config.mk to use the -lmpdclient library
  * when including this patch.

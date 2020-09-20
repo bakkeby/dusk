@@ -313,16 +313,6 @@ struct Client {
 	#endif // SWITCHTAG_PATCH
 	int isfixed, isfloating, isurgent, neverfocus, oldstate, isfullscreen;
 	int fakefullscreen;
-	#if EXRESIZE_PATCH
-	unsigned char expandmask;
-	int expandx1, expandy1, expandx2, expandy2;
-	#if !MAXIMIZE_PATCH
-	int wasfloating;
-	#endif // MAXIMIZE_PATCH
-	#endif // EXRESIZE_PATCH
-	#if MAXIMIZE_PATCH
-	int ismax, wasfloating;
-	#endif // MAXIMIZE_PATCH
 	#if AUTORESIZE_PATCH
 	int needresize;
 	#endif // AUTORESIZE_PATCH
@@ -2182,12 +2172,6 @@ manage(Window w, XWindowAttributes *wa)
 
 	XSelectInput(dpy, w, EnterWindowMask|FocusChangeMask|PropertyChangeMask|StructureNotifyMask);
 	grabbuttons(c, 0);
-	#if MAXIMIZE_PATCH
-	c->wasfloating = 0;
-	c->ismax = 0;
-	#elif EXRESIZE_PATCH
-	c->wasfloating = 0;
-	#endif // MAXIMIZE_PATCH / EXRESIZE_PATCH
 
 	if (!c->isfloating)
 		c->isfloating = c->oldstate = trans != None || c->isfixed;

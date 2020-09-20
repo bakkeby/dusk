@@ -769,13 +769,6 @@ static Key keys[] = {
 	#endif // FLEXTILE_DELUXE_LAYOUT
 	{ MODKEY,                       XK_space,      setlayout,              {0} },
 	{ MODKEY|ShiftMask,             XK_space,      togglefloating,         {0} },
-	#if MAXIMIZE_PATCH
-	{ MODKEY|ControlMask|ShiftMask, XK_h,          togglehorizontalmax,    {0} },
-	{ MODKEY|ControlMask|ShiftMask, XK_l,          togglehorizontalmax,    {0} },
-	{ MODKEY|ControlMask|ShiftMask, XK_j,          toggleverticalmax,      {0} },
-	{ MODKEY|ControlMask|ShiftMask, XK_k,          toggleverticalmax,      {0} },
-	{ MODKEY|ControlMask,           XK_m,          togglemax,              {0} },
-	#endif // MAXIMIZE_PATCH
 	#if NO_MOD_BUTTONS_PATCH
 	{ MODKEY|ShiftMask,             XK_Escape,     togglenomodbuttons,     {0} },
 	#endif // NO_MOD_BUTTONS_PATCH
@@ -1053,11 +1046,6 @@ static IPCCommand ipccommands[] = {
 	#if KEYMODES_PATCH
 	IPCCOMMAND( setkeymode, 1, {ARG_TYPE_UINT} ),
 	#endif // KEYMODES_PATCH
-	#if MAXIMIZE_PATCH
-	IPCCOMMAND( togglehorizontalmax, 1, {ARG_TYPE_NONE} ),
-	IPCCOMMAND( toggleverticalmax, 1, {ARG_TYPE_NONE} ),
-	IPCCOMMAND( togglemax, 1, {ARG_TYPE_NONE} ),
-	#endif // MAXIMIZE_PATCH
 	#if MDPCONTROL_PATCH
 	IPCCOMMAND( mpdchange, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( mpdcontrol, 1, {ARG_TYPE_NONE} ),

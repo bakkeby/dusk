@@ -143,9 +143,6 @@
 #if KILLUNSEL_PATCH
 #include "killunsel.c"
 #endif
-#if MAXIMIZE_PATCH
-#include "maximize.c"
-#endif
 #if MDPCONTROL_PATCH
 #include "mdpcontrol.c"
 #endif
