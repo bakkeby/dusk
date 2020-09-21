@@ -11,7 +11,7 @@
 #include <unistd.h>
 #include <yajl/yajl_gen.h>
 
-#define IPC_MAGIC "DWM-IPC"
+#define IPC_MAGIC "DAWN-IPC"
 // clang-format off
 #define IPC_MAGIC_ARR { 'D', 'W', 'M', '-', 'I', 'P', 'C' }
 // clang-format on
@@ -44,7 +44,7 @@
 
 typedef unsigned long Window;
 
-const char *DEFAULT_SOCKET_PATH = "/tmp/dwm.sock";
+const char *DEFAULT_SOCKET_PATH = "/tmp/dawn.sock";
 static int sock_fd = -1;
 static unsigned int ignore_reply = 0;
 

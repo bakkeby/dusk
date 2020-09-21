@@ -9,7 +9,7 @@ OBJ = ${SRC:.c=.o}
 # FreeBSD users, prefix all ifdef, else and endif statements with a . for this to work (e.g. .ifdef)
 
 ifdef YAJLLIBS
-all: options dawn dawn-msg
+all: options dawn dawnc
 else
 all: options dawn
 endif
@@ -35,13 +35,13 @@ dawn: ${OBJ}
 	${CC} -o $@ ${OBJ} ${LDFLAGS}
 
 ifdef YAJLLIBS
-dawn-msg:
-	${CC} -o $@ patch/ipc/dawn-msg.c ${LDFLAGS}
+dawnc:
+	${CC} -o $@ patch/ipc/dawnc.c ${LDFLAGS}
 endif
 
 clean:
 	rm -f dawn ${OBJ} dawn-${VERSION}.tar.gz
-	rm -f dawn-msg
+	rm -f dawnc
 
 dist: clean
 	mkdir -p dawn-${VERSION}
@@ -55,11 +55,11 @@ install: all
 	mkdir -p ${DESTDIR}${PREFIX}/bin
 	cp -f dawn ${DESTDIR}${PREFIX}/bin
 ifdef YAJLLIBS
-	cp -f dawn-msg ${DESTDIR}${PREFIX}/bin
+	cp -f dawnc ${DESTDIR}${PREFIX}/bin
 endif
 	chmod 755 ${DESTDIR}${PREFIX}/bin/dawn
 ifdef YAJLLIBS
-	chmod 755 ${DESTDIR}${PREFIX}/bin/dawn-msg
+	chmod 755 ${DESTDIR}${PREFIX}/bin/dawnc
 endif
 	mkdir -p ${DESTDIR}${MANPREFIX}/man1
 	sed "s/VERSION/${VERSION}/g" < dawn.1 > ${DESTDIR}${MANPREFIX}/man1/dawn.1

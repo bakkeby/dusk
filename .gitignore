@@ -1,5 +1,5 @@
 *.o
 dawn
-dawn-msg
+dawnc
 config.h
 patches.h
