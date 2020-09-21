@@ -31,15 +31,10 @@ tagallmon(const Arg *arg)
 		else
 			m->stack = slast = c;
 		if (c->isfullscreen) {
-			#if FAKEFULLSCREEN_CLIENT_PATCH
 			if (c->fakefullscreen != 1) {
 				resizeclient(c, c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
 				XRaiseWindow(dpy, c->win);
 			}
-			#else
-			resizeclient(c, c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
-			XRaiseWindow(dpy, c->win);
-			#endif // FAKEFULLSCREEN_CLIENT_PATCH
 		}
 	}
 
