@@ -39,10 +39,10 @@ static const int bar_height              = 0;   /* 0 means derive from font, >= 
 static const int vertpad                 = 10;  /* vertical padding of bar */
 static const int sidepad                 = 10;  /* horizontal padding of bar */
 #endif // BAR_PADDING_PATCH
-#if FLOATPOS_PATCH
+
 static int floatposgrid_x                = 5;  /* float grid columns */
 static int floatposgrid_y                = 5;  /* float grid rows */
-#endif // FLOATPOS_PATCH
+
 #if BAR_STATUSPADDING_PATCH
 static const int horizpadbar             = 2;   /* horizontal padding for statusbar */
 static const int vertpadbar              = 0;   /* vertical padding for statusbar */
@@ -822,7 +822,7 @@ static Key keys[] = {
 	{ MODKEY|Mod4Mask,              XK_Right,      switchtag,              { .ui = SWITCHTAG_RIGHT | SWITCHTAG_TAG | SWITCHTAG_VIEW } },
 	{ MODKEY|Mod4Mask,              XK_Left,       switchtag,              { .ui = SWITCHTAG_LEFT  | SWITCHTAG_TAG | SWITCHTAG_VIEW } },
 	#endif // BAR_TAGGRID_PATCH
-	#if FLOATPOS_PATCH
+
 	/* Note that due to key limitations the below example kybindings are defined with a Mod3Mask,
 	 * which is not always readily available. Refer to the patch wiki for more details. */
 	/* Client position is limited to monitor window area */
@@ -863,7 +863,7 @@ static Key keys[] = {
 	{ Mod3Mask|Mod1Mask,            XK_m,            floatpos,               {.v = "-1p  1p" } }, // ↙
 	{ Mod3Mask|Mod1Mask,            XK_comma,        floatpos,               {.v = " 0p  1p" } }, // ↓
 	{ Mod3Mask|Mod1Mask,            XK_period,       floatpos,               {.v = " 1p  1p" } }, // ↘
-	#endif // FLOATPOS_PATCH
+
 	#if SETBORDERPX_PATCH
 	{ MODKEY|ControlMask,           XK_minus,      setborderpx,            {.i = -1 } },
 	{ MODKEY|ControlMask,           XK_plus,       setborderpx,            {.i = +1 } },
@@ -989,10 +989,8 @@ static IPCCommand ipccommands[] = {
 	#endif // CYCLELAYOUTS_PATCH
 
 	IPCCOMMAND( togglefakefullscreen, 1, {ARG_TYPE_NONE} ),
-
-	#if FLOATPOS_PATCH
 	IPCCOMMAND( floatpos, 1, {ARG_TYPE_STR} ),
-	#endif // FLOATPOS_PATCH
+
 	#if FLEXTILE_DELUXE_LAYOUT
 	IPCCOMMAND( incnstack, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( rotatelayoutaxis, 1, {ARG_TYPE_SINT} ),

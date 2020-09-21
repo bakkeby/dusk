@@ -437,9 +437,7 @@ typedef struct {
 	int isterminal;
 	int noswallow;
 	#endif // SWALLOW_PATCH
-	#if FLOATPOS_PATCH
 	const char *floatpos;
-	#endif // FLOATPOS_PATCH
 	int monitor;
 } Rule;
 
@@ -758,10 +756,9 @@ applyrules(Client *c)
 			for (m = mons; m && m->num != r->monitor; m = m->next);
 			if (m)
 				c->mon = m;
-			#if FLOATPOS_PATCH
+
 			if (c->isfloating && r->floatpos)
 				setfloatpos(c, r->floatpos);
-			#endif // FLOATPOS_PATCH
 
 			#if SWITCHTAG_PATCH
 			#if SWALLOW_PATCH
@@ -2015,13 +2012,11 @@ manage(Window w, XWindowAttributes *wa)
 	if (XGetTransientForHint(dpy, w, &trans) && (t = wintoclient(trans))) {
 		c->mon = t->mon;
 		c->tags = t->tags;
-		#if FLOATPOS_PATCH
 		#if SETBORDERPX_PATCH
 		c->bw = c->mon->borderpx;
 		#else
 		c->bw = borderpx;
 		#endif // SETBORDERPX_PATCH
-		#endif // FLOATPOS_PATCH
 		#if CENTER_TRANSIENT_WINDOWS_BY_PARENT_PATCH
 		c->x = t->x + WIDTH(t) / 2 - WIDTH(c) / 2;
 		c->y = t->y + HEIGHT(t) / 2 - HEIGHT(c) / 2;
@@ -2031,13 +2026,11 @@ manage(Window w, XWindowAttributes *wa)
 		#endif // CENTER_TRANSIENT_WINDOWS_PATCH | CENTER_TRANSIENT_WINDOWS_BY_PARENT_PATCH
 	} else {
 		c->mon = selmon;
-		#if FLOATPOS_PATCH
 		#if SETBORDERPX_PATCH
 		c->bw = c->mon->borderpx;
 		#else
 		c->bw = borderpx;
 		#endif // SETBORDERPX_PATCH
-		#endif // FLOATPOS_PATCH
 		applyrules(c);
 		#if SWALLOW_PATCH
 		term = termforwin(c);
@@ -2054,13 +2047,6 @@ manage(Window w, XWindowAttributes *wa)
 	/* only fix client y-offset, if the client center might cover the bar */
 	c->y = MAX(c->y, ((c->mon->bar->by == c->mon->my) && (c->x + (c->w / 2) >= c->mon->wx)
 		&& (c->x + (c->w / 2) < c->mon->wx + c->mon->ww)) ? bh : c->mon->my);
-	#if !FLOATPOS_PATCH
-	#if SETBORDERPX_PATCH
-	c->bw = c->mon->borderpx;
-	#else
-	c->bw = borderpx;
-	#endif // SETBORDERPX_PATCH
-	#endif // FLOATPOS_PATCH
 
 	wc.border_width = c->bw;
 	XConfigureWindow(dpy, w, CWBorderWidth, &wc);
@@ -2071,9 +2057,9 @@ manage(Window w, XWindowAttributes *wa)
 		XSetWindowBorder(dpy, w, scheme[SchemeNorm][ColBorder].pixel);
 	#endif // BAR_FLEXWINTITLE_PATCH
 	configure(c); /* propagates border_width, if size doesn't change */
-	#if !FLOATPOS_PATCH
-	updatesizehints(c);
-	#endif // FLOATPOS_PATCH
+
+	//updatesizehints(c); // commented due to floatpos
+
 	if (getatomprop(c, netatom[NetWMState]) == netatom[NetWMFullscreen])
 		setfullscreen(c, 1);
 	updatewmhints(c);

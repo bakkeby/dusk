@@ -105,10 +105,8 @@
 #include "dragcfact.c"
 #include "dragmfact.c"
 #include "fakefullscreenclient.c"
-
-#if FLOATPOS_PATCH
 #include "floatpos.c"
-#endif
+
 #if FOCUSADJACENTTAG_PATCH
 #include "focusadjacenttag.c"
 #endif
