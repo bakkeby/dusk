@@ -541,9 +541,9 @@ static void maprequest(XEvent *e);
 static void motionnotify(XEvent *e);
 static void movemouse(const Arg *arg);
 static Client *nexttiled(Client *c);
-#if !ZOOMSWAP_PATCH || TAGINTOSTACK_ALLMASTER_PATCH || TAGINTOSTACK_ONEMASTER_PATCH
+#if TAGINTOSTACK_ALLMASTER_PATCH || TAGINTOSTACK_ONEMASTER_PATCH
 static void pop(Client *);
-#endif // !ZOOMSWAP_PATCH / TAGINTOSTACK_ALLMASTER_PATCH / TAGINTOSTACK_ONEMASTER_PATCH
+#endif // TAGINTOSTACK_ALLMASTER_PATCH / TAGINTOSTACK_ONEMASTER_PATCH
 static void propertynotify(XEvent *e);
 static void quit(const Arg *arg);
 static Monitor *recttomon(int x, int y, int w, int h);
@@ -1399,9 +1399,7 @@ createmon(void)
 		#endif // PERTAGBAR_PATCH
 		#endif // MONITOR_RULES_PATCH
 
-		#if ZOOMSWAP_PATCH
 		m->pertag->prevzooms[i] = NULL;
-		#endif // ZOOMSWAP_PATCH
 
 		/* init layouts */
 		#if MONITOR_RULES_PATCH
@@ -2287,7 +2285,7 @@ nexttiled(Client *c)
 	return c;
 }
 
-#if !ZOOMSWAP_PATCH || TAGINTOSTACK_ALLMASTER_PATCH || TAGINTOSTACK_ONEMASTER_PATCH
+#if TAGINTOSTACK_ALLMASTER_PATCH || TAGINTOSTACK_ONEMASTER_PATCH
 void
 pop(Client *c)
 {
@@ -2296,7 +2294,7 @@ pop(Client *c)
 	focus(c);
 	arrange(c->mon);
 }
-#endif // !ZOOMSWAP_PATCH / TAGINTOSTACK_ALLMASTER_PATCH / TAGINTOSTACK_ONEMASTER_PATCH
+#endif // TAGINTOSTACK_ALLMASTER_PATCH / TAGINTOSTACK_ONEMASTER_PATCH
 
 void
 propertynotify(XEvent *e)
@@ -3992,14 +3990,11 @@ xerrorstart(Display *dpy, XErrorEvent *ee)
 void
 zoom(const Arg *arg)
 {
-	Client *c = selmon->sel;
+	Client *c = selmon->sel, *at = NULL, *cold, *cprevious = NULL, *p;;
 	if (arg && arg->v)
 		c = (Client*)arg->v;
 	if (!c)
 		return;
-	#if ZOOMSWAP_PATCH
-	Client *at = NULL, *cold, *cprevious = NULL, *p;
-	#endif // ZOOMSWAP_PATCH
 
 	#if ZOOMFLOATING_PATCH
 	if (c && c->isfloating)
@@ -4010,15 +4005,9 @@ zoom(const Arg *arg)
 	c->mon->pertag->prevclient[c->mon->pertag->curtag] = nexttiled(c->mon->clients);
 	#endif // SWAPFOCUS_PATCH
 
-	if (!c->mon->lt[c->mon->sellt]->arrange
-	|| (c && c->isfloating)
-	#if ZOOMSWAP_PATCH
-	|| !c
-	#endif // ZOOMSWAP_PATCH
-	)
+	if (!c->mon->lt[c->mon->sellt]->arrange || (c && c->isfloating) || !c)
 		return;
 
-	#if ZOOMSWAP_PATCH
 	if (c == nexttiled(c->mon->clients)) {
 		p = c->mon->pertag->prevzooms[c->mon->pertag->curtag];
 		at = findbefore(p);
@@ -4056,16 +4045,6 @@ zoom(const Arg *arg)
 	}
 	focus(c);
 	arrange(c->mon);
-	#else
-	if (c == nexttiled(c->mon->clients))
-		#if SWAPFOCUS_PATCH
-		if (!c || !(c = c->mon->pertag->prevclient[c->mon->pertag->curtag] = nexttiled(c->next)))
-		#else
-		if (!c || !(c = nexttiled(c->next)))
-		#endif // SWAPFOCUS_PATCH
-			return;
-	pop(c);
-	#endif // ZOOMSWAP_PATCH
 }
 
 int

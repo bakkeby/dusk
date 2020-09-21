@@ -246,9 +246,9 @@
 #if WINVIEW_PATCH
 #include "winview.c"
 #endif
-#if ZOOMSWAP_PATCH
+
 #include "zoomswap.c"
-#endif
+
 #if XRDB_PATCH && !BAR_VTCOLORS_PATCH
 #include "xrdb.c"
 #endif
