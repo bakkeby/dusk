@@ -78,9 +78,6 @@
 #if BAR_SYSTRAY_PATCH
 #include "bar_systray.c"
 #endif
-#if BAR_VTCOLORS_PATCH
-#include "bar_vtcolors.c"
-#endif
 #if BAR_WINTITLEACTIONS_PATCH
 #include "bar_wintitleactions.c"
 #endif
@@ -107,7 +104,6 @@
 
 #include "dragcfact.c"
 #include "dragmfact.c"
-
 #include "fakefullscreenclient.c"
 
 #if FLOATPOS_PATCH
@@ -249,7 +245,7 @@
 
 #include "zoomswap.c"
 
-#if XRDB_PATCH && !BAR_VTCOLORS_PATCH
+#if XRDB_PATCH
 #include "xrdb.c"
 #endif
 

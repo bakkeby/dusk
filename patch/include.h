@@ -75,9 +75,6 @@
 #if BAR_SYSTRAY_PATCH
 #include "bar_systray.h"
 #endif
-#if BAR_VTCOLORS_PATCH
-#include "bar_vtcolors.h"
-#endif
 #if BAR_WINTITLEACTIONS_PATCH
 #include "bar_wintitleactions.h"
 #endif
@@ -242,7 +239,7 @@
 
 #include "zoomswap.h"
 
-#if XRDB_PATCH && !BAR_VTCOLORS_PATCH
+#if XRDB_PATCH
 #include "xrdb.h"
 #endif
 /* Layouts */

@@ -206,21 +206,6 @@ static const unsigned int alphas[][3] = {
 	#endif // BAR_FLEXWINTITLE_PATCH
 };
 #endif // BAR_ALPHA_PATCH
-#if BAR_VTCOLORS_PATCH
-static const char title_bg_dark[]   = "#303030";
-static const char title_bg_light[]  = "#fdfdfd";
-static const int color_ptrs[][ColCount] = {
-	/*                       fg      bg      border  float */
-	[SchemeNorm]         = { -1,     -1,     5,      12 },
-	[SchemeSel]          = { -1,     -1,     11,     13 },
-	[SchemeTitleNorm]    = { 6,      -1,     -1,     -1 },
-	[SchemeTitleSel]     = { 6,      -1,     -1,     -1 },
-	[SchemeTagsNorm]     = { 2,      0,      0,      -1 },
-	[SchemeTagsSel]      = { 6,      5,      5,      -1 },
-	[SchemeHid]          = { 5,      0,      0,      -1 },
-	[SchemeUrg]          = { 7,      9,      9,      15 },
-};
-#endif // BAR_VTCOLORS_PATCH
 
 static char *colors[][ColCount] = {
 	/*                       fg                bg                border                float */
@@ -737,7 +722,7 @@ static Key keys[] = {
 	#if WINVIEW_PATCH
 	{ MODKEY,                       XK_o,          winview,                {0} },
 	#endif // WINVIEW_PATCH
-	#if XRDB_PATCH && !BAR_VTCOLORS_PATCH
+	#if XRDB_PATCH
 	{ MODKEY|ShiftMask,             XK_F5,         xrdb,                   {.v = NULL } },
 	#endif // XRDB_PATCH
 	{ MODKEY,                       XK_t,          setlayout,              {.v = &layouts[0]} },
@@ -1106,7 +1091,7 @@ static IPCCommand ipccommands[] = {
 	#if WINVIEW_PATCH
 	IPCCOMMAND( winview, 1, {ARG_TYPE_NONE} ),
 	#endif // WINVIEW_PATCH
-	#if XRDB_PATCH && !BAR_VTCOLORS_PATCH
+	#if XRDB_PATCH
 	IPCCOMMAND( xrdb, 1, {ARG_TYPE_NONE} ),
 	#endif // XRDB_PATCH
 };

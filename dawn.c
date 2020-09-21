@@ -2985,16 +2985,6 @@ setup(void)
 	cursor[CurIronCross] = drw_cur_create(drw, XC_iron_cross);
 	cursor[CurMove] = drw_cur_create(drw, XC_fleur);
 	/* init appearance */
-	#if BAR_VTCOLORS_PATCH
-	get_vt_colors();
-	if (get_luminance(colors[SchemeTagsNorm][ColBg]) > 50) {
-		strcpy(colors[SchemeTitleNorm][ColBg], title_bg_light);
-		strcpy(colors[SchemeTitleSel][ColBg], title_bg_light);
-	} else {
-		strcpy(colors[SchemeTitleNorm][ColBg], title_bg_dark);
-		strcpy(colors[SchemeTitleSel][ColBg], title_bg_dark);
-	}
-	#endif // BAR_VTCOLORS_PATCH
 	#if BAR_STATUS2D_PATCH && !BAR_STATUSCOLORS_PATCH
 	scheme = ecalloc(LENGTH(colors) + 1, sizeof(Clr *));
 	#if BAR_ALPHA_PATCH
@@ -3996,10 +3986,8 @@ zoom(const Arg *arg)
 	if (!c)
 		return;
 
-	#if ZOOMFLOATING_PATCH
 	if (c && c->isfloating)
 		togglefloating(&((Arg) { .v = c }));
-	#endif // ZOOMFLOATING_PATCH
 
 	#if SWAPFOCUS_PATCH
 	c->mon->pertag->prevclient[c->mon->pertag->curtag] = nexttiled(c->mon->clients);
@@ -4062,7 +4050,6 @@ main(int argc, char *argv[])
 		#else
 			fonts[0] = argv[++i];
 		#endif // BAR_PANGO_PATCH
-		#if !BAR_VTCOLORS_PATCH
 		else if (!strcmp("-nb", argv[i])) /* normal background color */
 			colors[SchemeNorm][1] = argv[++i];
 		else if (!strcmp("-nf", argv[i])) /* normal foreground color */
@@ -4071,7 +4058,6 @@ main(int argc, char *argv[])
 			colors[SchemeSel][1] = argv[++i];
 		else if (!strcmp("-sf", argv[i])) /* selected foreground color */
 			colors[SchemeSel][0] = argv[++i];
-		#endif // !BAR_VTCOLORS_PATCH
 		#if NODMENU_PATCH
 		else if (!strcmp("-df", argv[i])) /* dmenu font */
 			dmenucmd[2] = argv[++i];
@@ -4111,10 +4097,10 @@ main(int argc, char *argv[])
 		die("dwm: cannot get xcb connection\n");
 	#endif // SWALLOW_PATCH
 	checkotherwm();
-	#if XRDB_PATCH && !BAR_VTCOLORS_PATCH
+	#if XRDB_PATCH
 	XrmInitialize();
 	loadxrdb();
-	#endif // XRDB_PATCH && !BAR_VTCOLORS_PATCH
+	#endif // XRDB_PATCH
 	#if COOL_AUTOSTART_PATCH
 	autostart_exec();
 	#endif // COOL_AUTOSTART_PATCH
