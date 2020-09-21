@@ -862,12 +862,6 @@
  */
 #define VIEW_SAME_TAG_GIVES_PREVIOUS_TAG_PATCH 0
 
-/* This patch warps the mouse cursor to the center of the currently focused window or screen
- * when the mouse cursor is (a) on a different screen or (b) on top of a different window.
- * https://dwm.suckless.org/patches/warp/
- */
-#define WARP_PATCH 0
-
 /* The winview patch allows switching the view to that of a given client from the all-window
  * view (Mod-0) using a keyboard shortcut.
  * http://dwm.suckless.org/patches/winview/

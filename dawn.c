@@ -1743,9 +1743,6 @@ focusmon(const Arg *arg)
 	selmon = m;
 	unfocus(sel, 0, NULL);
 	focus(NULL);
-	#if WARP_PATCH
-	warp(selmon->sel);
-	#endif // WARP_PATCH
 }
 
 #if !STACKER_PATCH
@@ -2548,9 +2545,6 @@ restack(Monitor *m)
 	Client *c;
 	XEvent ev;
 	XWindowChanges wc;
-	#if WARP_PATCH && FLEXTILE_DELUXE_LAYOUT
-	int n;
-	#endif // WARP_PATCH
 
 	drawbar(m);
 	if (!m->sel)
@@ -2568,14 +2562,6 @@ restack(Monitor *m)
 	}
 	XSync(dpy, False);
 	while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
-	#if WARP_PATCH
-	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
-	if (m == selmon && (m->tagset[m->seltags] & m->sel->tags) && (
-		!(m->ltaxis[MASTER] == MONOCLE && (abs(m->ltaxis[LAYOUT] == NO_SPLIT || !m->nmaster || n <= m->nmaster)))
-		|| m->sel->isfloating)
-	)
-		warp(m->sel);
-	#endif // WARP_PATCH
 }
 
 #if IPC_PATCH

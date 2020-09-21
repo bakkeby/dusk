@@ -243,9 +243,6 @@
 
 #include "vanitygaps.c"
 
-#if WARP_PATCH
-#include "warp.c"
-#endif
 #if WINVIEW_PATCH
 #include "winview.c"
 #endif

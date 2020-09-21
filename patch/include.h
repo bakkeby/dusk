@@ -236,9 +236,6 @@
 #if VANITYGAPS_PATCH
 #include "vanitygaps.h"
 #endif
-#if WARP_PATCH
-#include "warp.h"
-#endif
 #if WINVIEW_PATCH
 #include "winview.h"
 #endif
