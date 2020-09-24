@@ -782,15 +782,6 @@
  */
 #define TAGINTOSTACK_ONEMASTER_PATCH 0
 
-/* If you try to send a fullscreen window to an adjacent monitor using tagmon then
- * the window is moved behind the scenes, but it remains in fullscreen on the original
- * monitor until you exit fullscreen view (at which point it will appear on the adjacent
- * monitor). This patch allows a fullscreen window to be moved to an adjacent monitor
- * while remaining in fullscreen.
- * https://github.com/bakkeby/patches/blob/master/dwm/dwm-tagmonfixfs-6.2.diff
- */
-#define TAGMONFIXFS_PATCH 0
-
 /* Add functions and keybindings to tag a window to a desired tag on the next (right)
  * or previous (left) monitor from the currently selected monitor.
  * https://dwm.suckless.org/patches/tagothermonitor/

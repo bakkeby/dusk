@@ -45,12 +45,6 @@
 #include "drw.h"
 #include "util.h"
 
-#if BAR_FLEXWINTITLE_PATCH
-#ifndef FLEXTILE_DELUXE_LAYOUT
-#define FLEXTILE_DELUXE_LAYOUT 1
-#endif
-#endif
-
 #if BAR_PANGO_PATCH
 #include <pango/pango.h>
 #endif // BAR_PANGO_PATCH
@@ -3239,7 +3233,6 @@ tag(const Arg *arg)
 void
 tagmon(const Arg *arg)
 {
-	#if TAGMONFIXFS_PATCH
 	Client *c = selmon->sel;
 	if (!c || !mons->next)
 		return;
@@ -3253,11 +3246,6 @@ tagmon(const Arg *arg)
 		}
 	} else
 		sendmon(c, dirtomon(arg->i));
-	#else
-	if (!selmon->sel || !mons->next)
-		return;
-	sendmon(selmon->sel, dirtomon(arg->i));
-	#endif // TAGMONFIXFS_PATCH
 }
 
 void
