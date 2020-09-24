@@ -26,11 +26,7 @@ static const int usealtbar               = 1;        /* 1 means use non-dwm stat
 static const char *altbarclass           = "Polybar"; /* Alternate bar class name */
 static const char *altbarcmd             = "$HOME/bar.sh"; /* Alternate bar launch command */
 #endif // BAR_ANYBAR_PATCH
-#if BAR_HOLDBAR_PATCH
-static const int showbar                 = 0;   /* 0 means no bar */
-#else
 static const int showbar                 = 1;   /* 0 means no bar */
-#endif // BAR_HOLDBAR_PATCH
 static const int topbar                  = 1;   /* 0 means bottom bar */
 #if BAR_HEIGHT_PATCH
 static const int bar_height              = 0;   /* 0 means derive from font, >= 1 explicit height */
@@ -573,10 +569,6 @@ static const Layout layouts[] = {
 	{ MOD, XK_z,     ACTION##stack, {.i = -1 } },
 #endif // STACKER_PATCH
 
-#if BAR_HOLDBAR_PATCH
-#define HOLDKEY 0 // replace 0 with the keysym to activate holdbar
-#endif // BAR_HOLDBAR_PATCH
-
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 
@@ -716,9 +708,6 @@ static Key keys[] = {
 	#if FOCUSURGENT_PATCH
 	{ MODKEY,                       XK_u,          focusurgent,            {0} },
 	#endif // FOCUSURGENT_PATCH
-	#if BAR_HOLDBAR_PATCH
-	{ 0,                            HOLDKEY,       holdbar,                {0} },
-	#endif // BAR_HOLDBAR_PATCH
 	#if WINVIEW_PATCH
 	{ MODKEY,                       XK_o,          winview,                {0} },
 	#endif // WINVIEW_PATCH

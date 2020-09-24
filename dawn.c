@@ -629,9 +629,9 @@ static int (*xerrorxlib)(Display *, XErrorEvent *);
 static unsigned int numlockmask = 0;
 static void (*handler[LASTEvent]) (XEvent *) = {
 	[ButtonPress] = buttonpress,
-	#if COMBO_PATCH || BAR_HOLDBAR_PATCH
+	#if COMBO_PATCH
 	[ButtonRelease] = keyrelease,
-	#endif // COMBO_PATCH / BAR_HOLDBAR_PATCH
+	#endif // COMBO_PATCH
 	[ClientMessage] = clientmessage,
 	[ConfigureRequest] = configurerequest,
 	[ConfigureNotify] = configurenotify,
@@ -640,9 +640,9 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 	[Expose] = expose,
 	[FocusIn] = focusin,
 	[KeyPress] = keypress,
-	#if COMBO_PATCH || BAR_HOLDBAR_PATCH
+	#if COMBO_PATCH
 	[KeyRelease] = keyrelease,
-	#endif // COMBO_PATCH / BAR_HOLDBAR_PATCH
+	#endif // COMBO_PATCH
 	[MappingNotify] = mappingnotify,
 	[MapRequest] = maprequest,
 	[MotionNotify] = motionnotify,
@@ -3252,15 +3252,11 @@ void
 togglebar(const Arg *arg)
 {
 	Bar *bar;
-	#if BAR_HOLDBAR_PATCH && PERTAGBAR_PATCH
-	selmon->showbar = selmon->pertag->showbars[selmon->pertag->curtag] = (selmon->showbar == 2 ? 1 : !selmon->showbar);
-	#elif BAR_HOLDBAR_PATCH
-	selmon->showbar = (selmon->showbar == 2 ? 1 : !selmon->showbar);
-	#elif PERTAGBAR_PATCH
+	#if PERTAGBAR_PATCH
 	selmon->showbar = selmon->pertag->showbars[selmon->pertag->curtag] = !selmon->showbar;
 	#else
 	selmon->showbar = !selmon->showbar;
-	#endif // BAR_HOLDBAR_PATCH
+	#endif
 	updatebarpos(selmon);
 	for (bar = selmon->bar; bar; bar = bar->next)
 		XMoveResizeWindow(dpy, bar->win, bar->bx, bar->by, bar->bw, bar->bh);

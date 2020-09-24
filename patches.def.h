@@ -252,12 +252,6 @@
  */
 #define BAR_HIDEVACANTTAGS_PATCH 0
 
-/* With this patch dwm's built-in status bar is only shown when HOLDKEY is pressed
- * and the bar will now overlay the display.
- * http://dwm.suckless.org/patches/holdbar/
- */
-#define BAR_HOLDBAR_PATCH 0
-
 /* Sometimes dwm crashes when it cannot render some glyphs in window titles (usually emoji).
  * This patch is essentially a hack to ignore any errors when drawing text on the status bar.
  * https://groups.google.com/forum/m/#!topic/wmii/7bncCahYIww
