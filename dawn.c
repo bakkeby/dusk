@@ -73,13 +73,13 @@
                                * MAX(0, MIN((y)+(h),(m)->wy+(m)->wh) - MAX((y),(m)->wy)))
 #endif // BAR_ANYBAR_PATCH
 #if ATTACHASIDE_PATCH && STICKY_PATCH
-#define ISVISIBLEONTAG(C, T)    ((C->tags & T) || C->issticky)
+#define ISVISIBLEONTAG(C, T)    ((C->tags & T) || (C->flags & Sticky))
 #define ISVISIBLE(C)            ISVISIBLEONTAG(C, C->mon->tagset[C->mon->seltags])
 #elif ATTACHASIDE_PATCH
 #define ISVISIBLEONTAG(C, T)    ((C->tags & T))
 #define ISVISIBLE(C)            ISVISIBLEONTAG(C, C->mon->tagset[C->mon->seltags])
 #elif STICKY_PATCH
-#define ISVISIBLE(C)            ((C->tags & C->mon->tagset[C->mon->seltags]) || C->issticky)
+#define ISVISIBLE(C)            ((C->tags & C->mon->tagset[C->mon->seltags]) || (C->flags & Sticky))
 #else
 #define ISVISIBLE(C)            ((C->tags & C->mon->tagset[C->mon->seltags]))
 #endif // ATTACHASIDE_PATCH
@@ -88,14 +88,10 @@
 #define WIDTH(X)                ((X)->w + 2 * (X)->bw)
 #define HEIGHT(X)               ((X)->h + 2 * (X)->bw)
 #define WTYPE                   "_NET_WM_WINDOW_TYPE_"
-#if SCRATCHPADS_PATCH
 #define TOTALTAGS               (NUMTAGS + LENGTH(scratchpads))
 #define TAGMASK                 ((1 << TOTALTAGS) - 1)
 #define SPTAG(i)                ((1 << NUMTAGS) << (i))
 #define SPTAGMASK               (((1 << LENGTH(scratchpads))-1) << NUMTAGS)
-#else
-#define TAGMASK                 ((1 << NUMTAGS) - 1)
-#endif // SCRATCHPADS_PATCH
 #define TEXTWM(X)               (drw_fontset_getwidth(drw, (X), True) + lrpad)
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X), False) + lrpad)
 #define HIDDEN(C)               ((getstate(C->win) == IconicState))
@@ -210,6 +206,15 @@ enum {
 	BAR_ALIGN_LAST
 }; /* bar alignment */
 
+/* Named flextile constants */
+enum {
+	LAYOUT,       // controls overall layout arrangement / split
+	MASTER,       // indicates the tile arrangement for the master area
+	STACK,        // indicates the tile arrangement for the stack area
+	STACK2,       // indicates the tile arrangement for the secondary stack area
+	LTAXIS_LAST,
+};
+
 #if IPC_PATCH
 typedef struct TagState TagState;
 struct TagState {
@@ -293,23 +298,17 @@ struct Client {
 	int bw, oldbw;
 	unsigned int tags;
 	#if SWITCHTAG_PATCH
-	unsigned int switchtag;
+	unsigned int switchtag; /* holds the original tag info from when the client was opened */
 	#endif // SWITCHTAG_PATCH
 	int isfixed, isfloating, isurgent, neverfocus, oldstate, isfullscreen;
 	int fakefullscreen;
 	#if AUTORESIZE_PATCH
 	int needresize;
 	#endif // AUTORESIZE_PATCH
-	#if ISPERMANENT_PATCH
-	int ispermanent;
-	#endif // ISPERMANENT_PATCH
 	#if SWALLOW_PATCH
-	int isterminal, noswallow;
+	int noswallow;
 	pid_t pid;
 	#endif // SWALLOW_PATCH
-	#if STICKY_PATCH
-	int issticky;
-	#endif // STICKY_PATCH
 	Client *next;
 	Client *snext;
 	#if SWALLOW_PATCH
@@ -414,21 +413,12 @@ typedef struct {
 	const char *title;
 	const char *wintype;
 	unsigned int tags;
+	unsigned int flags;
 	#if SWITCHTAG_PATCH
 	int switchtag;
 	#endif // SWITCHTAG_PATCH
-	#if CENTER_PATCH
-	int iscentered;
-	#endif // CENTER_PATCH
 	int isfloating;
-	#if SELECTIVEFAKEFULLSCREEN_PATCH
-	int isfakefullscreen;
-	#endif // SELECTIVEFAKEFULLSCREEN_PATCH
-	#if ISPERMANENT_PATCH
-	int ispermanent;
-	#endif // ISPERMANENT_PATCH
 	#if SWALLOW_PATCH
-	int isterminal;
 	int noswallow;
 	#endif // SWALLOW_PATCH
 	const char *floatpos;
@@ -439,28 +429,7 @@ typedef struct {
 
 /* Cross patch compatibility rule macro helper macros */
 #define FLOATING , .isfloating = 1
-#if CENTER_PATCH
-#define CENTERED , .iscentered = 1
-#else
-#define CENTERED
-#endif // CENTER_PATCH
-#if ISPERMANENT_PATCH
-#define PERMANENT , .ispermanent = 1
-#else
-#define PERMANENT
-#endif // ISPERMANENT_PATCH
-#if SELECTIVEFAKEFULLSCREEN_PATCH
-#define FAKEFULLSCREEN , .isfakefullscreen = 1
-#else
-#define FAKEFULLSCREEN
-#endif // SELECTIVEFAKEFULLSCREEN_PATCH
-#if SWALLOW_PATCH
-#define NOSWALLOW , .noswallow = 1
-#define TERMINAL , .isterminal = 1
-#else
-#define NOSWALLOW
-#define TERMINAL
-#endif // SWALLOW_PATCH
+
 #if SWITCHTAG_PATCH
 #define SWITCHTAG , .switchtag = 1
 #else
@@ -671,11 +640,7 @@ static Window root, wmcheckwin;
 #include "patch/include.c"
 
 /* compile-time check if all tags fit into an unsigned int bit array. */
-#if SCRATCHPAD_ALT_1_PATCH
-struct NumTags { char limitexceeded[NUMTAGS > 30 ? -1 : 1]; };
-#else
 struct NumTags { char limitexceeded[NUMTAGS > 31 ? -1 : 1]; };
-#endif // SCRATCHPAD_ALT_1_PATCH
 
 /* function implementations */
 void
@@ -705,12 +670,6 @@ applyrules(Client *c)
 	gettextprop(c->win, wmatom[WMWindowRole], role, sizeof(role));
 	// long flags;
 
-	#if STEAM_PATCH
-	if (strstr(class, "Steam") || strstr(class, "steam_app_"))
-		// flags |= 1 << IsSteam;
-		addflag(c, IsSteam);
-	#endif // STEAM_PATCH
-
 	for (i = 0; i < LENGTH(rules); i++) {
 		r = &rules[i];
 		if ((!r->title || strstr(c->name, r->title))
@@ -719,34 +678,21 @@ applyrules(Client *c)
 		&& (!r->instance || strstr(instance, r->instance))
 		&& (!r->wintype || wintype == XInternAtom(dpy, r->wintype, False)))
 		{
-			// flags = flags
-			// 	| r->iscentered << IsCentered
-			// 	| r-ispermanent << IsPermanent
-			// 	| r->isfakefullscreen << IsFakeFullScreen;
-			#if CENTER_PATCH
-			if (r->iscentered)
-				addflag(c, IsCentered);
-			#endif // CENTER_PATCH
-			#if ISPERMANENT_PATCH
-			if (r->ispermanent)
-				addflag(c, IsPermanent);
-			// c->ispermanent = r->ispermanent;
-			#endif // ISPERMANENT_PATCH
-			#if SELECTIVEFAKEFULLSCREEN_PATCH
-			c->fakefullscreen = r->isfakefullscreen;
-			#endif // SELECTIVEFAKEFULLSCREEN_PATCH
+			c->flags = r->flags;
+			// #if SELECTIVEFAKEFULLSCREEN_PATCH
+			// c->fakefullscreen = r->isfakefullscreen;
+			// #endif // SELECTIVEFAKEFULLSCREEN_PATCH
 			#if SWALLOW_PATCH
-			c->isterminal = r->isterminal;
 			c->noswallow = r->noswallow;
 			#endif // SWALLOW_PATCH
 			c->isfloating = r->isfloating;
 			c->tags |= r->tags;
-			#if SCRATCHPADS_PATCH
+
 			if ((r->tags & SPTAGMASK) && r->isfloating) {
 				c->x = c->mon->wx + (c->mon->ww / 2 - WIDTH(c) / 2);
 				c->y = c->mon->wy + (c->mon->wh / 2 - HEIGHT(c) / 2);
 			}
-			#endif // SCRATCHPADS_PATCH
+
 			for (m = mons; m && m->num != r->monitor; m = m->next);
 			if (m)
 				c->mon = m;
@@ -755,14 +701,10 @@ applyrules(Client *c)
 				setfloatpos(c, r->floatpos);
 
 			#if SWITCHTAG_PATCH
-			#if SWALLOW_PATCH
 			if (r->switchtag && (
-				c->noswallow > 0 ||
+				NOSWALLOW(c) ||
 				!termforwin(c) ||
-				!(c->isfloating && swallowfloating && c->noswallow < 0)))
-			#else
-			if (r->switchtag)
-			#endif // SWALLOW_PATCH
+				!(c->isfloating && swallowfloating && c->noswallow < 0))) // TODO review this
 			{
 				selmon = c->mon;
 				if (r->switchtag == 2 || r->switchtag == 4)
@@ -789,19 +731,19 @@ applyrules(Client *c)
 			#endif // ONLY_ONE_RULE_MATCH_PATCH
 		}
 	}
+
+	// #if STEAM_PATCH
+	// if (strstr(class, "Steam") || strstr(class, "steam_app_"))
+	// 	addflag(c, Steam);
+	// #endif // STEAM_PATCH
+
 	// setflags(c, flags);
 	if (ch.res_class)
 		XFree(ch.res_class);
 	if (ch.res_name)
 		XFree(ch.res_name);
-	#if SCRATCHPADS_PATCH
+
 	c->tags = c->tags & TAGMASK ? c->tags & TAGMASK : (c->mon->tagset[c->mon->seltags] & ~SPTAGMASK);
-	#elif SCRATCHPAD_ALT_1_PATCH
-	if (c->tags != SCRATCHPAD_MASK)
-		c->tags = c->tags & TAGMASK ? c->tags & TAGMASK : c->mon->tagset[c->mon->seltags];
-	#else
-	c->tags = c->tags & TAGMASK ? c->tags & TAGMASK : c->mon->tagset[c->mon->seltags];
-	#endif // SCRATCHPADS_PATCH
 }
 
 int
@@ -2060,12 +2002,12 @@ manage(Window w, XWindowAttributes *wa)
 	#if DECORATION_HINTS_PATCH
 	updatemotifhints(c);
 	#endif // DECORATION_HINTS_PATCH
-	#if CENTER_PATCH
+
 	if (ISCENTERED(c)) {
 		c->x = c->mon->wx + (c->mon->ww - WIDTH(c)) / 2;
 		c->y = c->mon->wy + (c->mon->wh - HEIGHT(c)) / 2;
 	}
-	#endif // CENTER_PATCH
+
 	#if SAVEFLOATS_PATCH
 	c->sfx = -9999;
 	c->sfy = -9999;
@@ -2238,12 +2180,10 @@ movemouse(const Arg *arg)
 	} while (ev.type != ButtonRelease);
 	XUngrabPointer(dpy, CurrentTime);
 	if ((m = recttomon(c->x, c->y, c->w, c->h)) != selmon) {
-		#if SCRATCHPADS_PATCH
 		if (c->tags & SPTAGMASK) {
 			c->mon->tagset[c->mon->seltags] ^= (c->tags & SPTAGMASK);
 			m->tagset[m->seltags] |= (c->tags & SPTAGMASK);
 		}
-		#endif // SCRATCHPADS_PATCH
 		sendmon(c, m);
 		selmon = m;
 		focus(NULL);
@@ -2504,12 +2444,10 @@ resizemouse(const Arg *arg)
 	XUngrabPointer(dpy, CurrentTime);
 	while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
 	if ((m = recttomon(c->x, c->y, c->w, c->h)) != selmon) {
-		#if SCRATCHPADS_PATCH
 		if (c->tags & SPTAGMASK) {
 			c->mon->tagset[c->mon->seltags] ^= (c->tags & SPTAGMASK);
 			m->tagset[m->seltags] |= (c->tags & SPTAGMASK);
 		}
-		#endif // SCRATCHPADS_PATCH
 		sendmon(c, m);
 		selmon = m;
 		focus(NULL);
@@ -2651,10 +2589,9 @@ sendmon(Client *c, Monitor *m)
 	arrange(c->mon);
 	#endif // SENDMON_KEEPFOCUS_PATCH
 	c->mon = m;
-	#if SCRATCHPADS_PATCH
+
 	if (!(c->tags & SPTAGMASK))
-	#endif // SCRATCHPADS_PATCH
-	c->tags = m->tagset[m->seltags]; /* assign tags of target monitor */
+		c->tags = m->tagset[m->seltags]; /* assign tags of target monitor */
 	#if ATTACHABOVE_PATCH || ATTACHASIDE_PATCH || ATTACHBELOW_PATCH || ATTACHBOTTOM_PATCH
 	attachx(c);
 	#else
@@ -3050,7 +2987,6 @@ showhide(Client *c)
 	if (!c)
 		return;
 	if (ISVISIBLE(c)) {
-		#if SCRATCHPADS_PATCH && SCRATCHPADS_KEEP_POSITION_AND_SIZE_PATCH
 		if (
 			(c->tags & SPTAGMASK) &&
 			c->isfloating &&
@@ -3064,12 +3000,6 @@ showhide(Client *c)
 			c->x = c->mon->wx + (c->mon->ww / 2 - WIDTH(c) / 2);
 			c->y = c->mon->wy + (c->mon->wh / 2 - HEIGHT(c) / 2);
 		}
-		#elif SCRATCHPADS_PATCH
-		if ((c->tags & SPTAGMASK) && c->isfloating) {
-			c->x = c->mon->wx + (c->mon->ww / 2 - WIDTH(c) / 2);
-			c->y = c->mon->wy + (c->mon->wh / 2 - HEIGHT(c) / 2);
-		}
-		#endif // SCRATCHPADS_KEEP_POSITION_AND_SIZE_PATCH | SCRATCHPADS_PATCH
 		/* show clients top down */
 		#if SAVEFLOATS_PATCH
 		if (!c->mon->lt[c->mon->sellt]->arrange && c->sfx != -9999 && !c->isfullscreen) {
@@ -3218,7 +3148,7 @@ tag(const Arg *arg)
 		focus(NULL);
 		#if SWAPFOCUS_PATCH
 		selmon->pertag->prevclient[selmon->pertag->curtag] = NULL;
-		for (tagmask = arg->ui & TAGMASK, tagindex = 1; tagmask!=0; tagmask >>= 1, tagindex++)
+		for (tagmask = arg->ui & TAGMASK, tagindex = 1; tagmask != 0; tagmask >>= 1, tagindex++)
 			if (tagmask & 1)
 				selmon->pertag->prevclient[tagindex] = NULL;
 		#endif // SWAPFOCUS_PATCH

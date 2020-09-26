@@ -271,7 +271,7 @@ static const char *const autostart[] = {
 };
 #endif // COOL_AUTOSTART_PATCH
 
-#if SCRATCHPADS_PATCH
+
 const char *spcmd1[] = {"st", "-n", "spterm", "-g", "120x34", NULL };
 const char *spcmd2[] = {"st", "-n", "spfm", "-g", "144x41", "-e", "ranger", NULL };
 const char *spcmd3[] = {"keepassxc", NULL };
@@ -281,7 +281,6 @@ static Sp scratchpads[] = {
    {"spranger",    spcmd2},
    {"keepassxc",   spcmd3},
 };
-#endif // SCRATCHPADS_PATCH
 
 /* Tags
  * In a traditional dwm the number of tags in use can be changed simply by changing the number
@@ -361,11 +360,9 @@ static const Rule rules[] = {
 	RULE(.wintype = WTYPE "SPLASH", .isfloating = 1)
 	RULE(.class = "Gimp", .tags = 1 << 4)
 	RULE(.class = "Firefox", .tags = 1 << 7)
-	#if SCRATCHPADS_PATCH
 	RULE(.instance = "spterm", .tags = SPTAG(0), .isfloating = 1)
 	RULE(.instance = "spfm", .tags = SPTAG(1), .isfloating = 1)
 	RULE(.instance = "keepassxc", .tags = SPTAG(2))
-	#endif // SCRATCHPADS_PATCH
 };
 
 #if MONITOR_RULES_PATCH
@@ -465,17 +462,11 @@ static const BarRule barrules[] = {
 /* layout(s) */
 static const float mfact     = 0.55; /* factor of master area size [0.05..0.95] */
 static const int nmaster     = 1;    /* number of clients in master area */
-#if FLEXTILE_DELUXE_LAYOUT
 static const int nstack      = 0;    /* number of clients in primary stack area */
-#endif // FLEXTILE_DELUXE_LAYOUT
 static const int resizehints = 0;    /* 1 means respect size hints in tiled resizals */
 #if DECORATION_HINTS_PATCH
 static const int decorhints  = 1;    /* 1 means respect decoration hints */
 #endif // DECORATION_HINTS_PATCH
-
-#if NROWGRID_LAYOUT
-#define FORCE_VSPLIT 1
-#endif
 
 static const Layout layouts[] = {
 	/* symbol     arrange function, { nmaster, nstack, layout, master axis, stack axis, secondary stack axis } */
@@ -734,11 +725,11 @@ static Key keys[] = {
 	#if NO_MOD_BUTTONS_PATCH
 	{ MODKEY|ShiftMask,             XK_Escape,     togglenomodbuttons,     {0} },
 	#endif // NO_MOD_BUTTONS_PATCH
-	#if SCRATCHPADS_PATCH
+
 	{ MODKEY,                       XK_grave,      togglescratch,          {.ui = 0 } },
 	{ MODKEY|ControlMask,           XK_grave,      togglescratch,          {.ui = 1 } },
 	{ MODKEY|ShiftMask,             XK_grave,      togglescratch,          {.ui = 2 } },
-	#endif // SCRATCHPADS_PATCH
+
 	#if UNFLOATVISIBLE_PATCH
 	{ MODKEY|Mod4Mask,              XK_space,      unfloatvisible,         {0} },
 	{ MODKEY|ShiftMask,             XK_t,          unfloatvisible,         {.v = &layouts[0]} },
@@ -750,14 +741,8 @@ static Key keys[] = {
 	#if STICKY_PATCH
 	{ MODKEY|ShiftMask,             XK_s,          togglesticky,           {0} },
 	#endif // STICKY_PATCH
-	#if SCRATCHPAD_ALT_1_PATCH
-	{ MODKEY,                       XK_minus,      scratchpad_show,        {0} },
-	{ MODKEY|ShiftMask,             XK_minus,      scratchpad_hide,        {0} },
-	{ MODKEY,                       XK_equal,      scratchpad_remove,      {0} },
-	#else
 	{ MODKEY,                       XK_0,          view,                   {.ui = ~0 } },
 	{ MODKEY|ShiftMask,             XK_0,          tag,                    {.ui = ~0 } },
-	#endif // SCRATCHPAD_ALT_1_PATCH
 	{ MODKEY,                       XK_comma,      focusmon,               {.i = -1 } },
 	{ MODKEY,                       XK_period,     focusmon,               {.i = +1 } },
 	{ MODKEY|ShiftMask,             XK_comma,      tagmon,                 {.i = -1 } },
@@ -946,7 +931,7 @@ static Button buttons[] = {
 };
 
 #if IPC_PATCH
-static const char *ipcsockpath = "/tmp/dwm.sock";
+static const char *ipcsockpath = "/tmp/dawn.sock";
 static IPCCommand ipccommands[] = {
 	IPCCOMMAND( focusmon, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( focusstack, 1, {ARG_TYPE_SINT} ),
@@ -1014,9 +999,9 @@ static IPCCommand ipccommands[] = {
 	#if ROTATESTACK_PATCH
 	IPCCOMMAND( rotatestack, 1, {ARG_TYPE_SINT} ),
 	#endif // ROTATESTACK_PATCH
-	#if SCRATCHPADS_PATCH
+
 	IPCCOMMAND( togglescratch, 1, {ARG_TYPE_UINT} ),
-	#endif // SCRATCHPADS_PATCH
+
 	#if SELFRESTART_PATCH
 	IPCCOMMAND( self_restart, 1, {ARG_TYPE_NONE} ),
 	#endif // SELFRESTART_PATCH

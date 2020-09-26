@@ -163,12 +163,9 @@
 #if ROUNDED_CORNERS_PATCH
 #include "roundedcorners.c"
 #endif
-#if SCRATCHPADS_PATCH
+
 #include "scratchpad.c"
-#endif
-#if SCRATCHPAD_ALT_1_PATCH
-#include "scratchpad_alt_1.c"
-#endif
+
 #if SELFRESTART_PATCH
 #include "selfrestart.c"
 #endif

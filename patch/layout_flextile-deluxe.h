@@ -41,14 +41,6 @@ static void arrange_horizgrid(Monitor *m, int ax, int ay, int ah, int aw, int ih
 static void arrange_dwindle(Monitor *m, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
 static void arrange_spiral(Monitor *m, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
 
-/* Named flextile constants */
-enum {
-	LAYOUT,       // controls overall layout arrangement / split
-	MASTER,       // indicates the tile arrangement for the master area
-	STACK,        // indicates the tile arrangement for the stack area
-	STACK2,       // indicates the tile arrangement for the secondary stack area
-	LTAXIS_LAST,
-};
 
 /* Layout arrangements */
 enum {

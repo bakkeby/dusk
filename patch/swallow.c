@@ -13,9 +13,9 @@ swallow(Client *p, Client *c)
 {
 	Client *s;
 
-	if (c->noswallow > 0 || c->isterminal)
+	if (c->noswallow > 0 || ISTERMINAL(c))
 		return 0;
-	if (c->noswallow < 0 && !swallowfloating && c->isfloating)
+	if (c->noswallow < 0 && !swallowfloating && ISFLOATING(c))
 		return 0;
 
 	detach(c);
@@ -163,16 +163,16 @@ termforwin(const Client *w)
 	Client *c;
 	Monitor *m;
 
-	if (!w->pid || w->isterminal)
+	if (!w->pid || ISTERMINAL(w))
 		return NULL;
 
 	c = selmon->sel;
-	if (c && c->isterminal && !c->swallowing && c->pid && isdescprocess(c->pid, w->pid))
+	if (c && ISTERMINAL(c) && !c->swallowing && c->pid && isdescprocess(c->pid, w->pid))
 		return c;
 
 	for (m = mons; m; m = m->next) {
 		for (c = m->clients; c; c = c->next) {
-			if (c->isterminal && !c->swallowing && c->pid && isdescprocess(c->pid, w->pid))
+			if (ISTERMINAL(c) && !c->swallowing && c->pid && isdescprocess(c->pid, w->pid))
 				return c;
 		}
 	}
