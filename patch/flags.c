@@ -51,18 +51,18 @@
 // 	return c->flags & flag;
 // }
 
-// void
-// addflag(Client *c, const unsigned int flag)
-// {
-// 	c->prevflags = (c->prevflags ^ flag) | (c->flags & flag);
-// 	c->flags |= flag;
-// }
+void
+addflag(Client *c, const unsigned int flag)
+{
+	c->prevflags = (c->prevflags ^ flag) | (c->flags & flag);
+	c->flags |= flag;
+}
 
-// void
-// setflag(Client *c, const unsigned int flag, const int value)
-// {
-// 	value ? addflag(c, flag) : removeflag(c, flag);
-// }
+void
+setflag(Client *c, const unsigned int flag, const int value)
+{
+	value ? addflag(c, flag) : removeflag(c, flag);
+}
 
 // void
 // setflags(Client *c, const unsigned int flags)
@@ -71,9 +71,9 @@
 // 	c->flags = flags;
 // }
 
-// void
-// removeflag(Client *c, const unsigned int flag)
-// {
-// 	c->prevflags = (c->prevflags ^ flag) | (c->flags & flag);
-// 	c->flags ^= flag;
-// }
+void
+removeflag(Client *c, const unsigned int flag)
+{
+	c->prevflags = (c->prevflags ^ flag) | (c->flags & flag);
+	c->flags ^= flag;
+}

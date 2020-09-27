@@ -4,7 +4,7 @@ prevt(Client *c)
 	Client *p, *r;
 
 	for (p = selmon->clients, r = NULL; p && p != c; p = p->next)
-		if (!p->isfloating && ISVISIBLE(p))
+		if (!ISFLOATING(p) && ISVISIBLE(p))
 			r = p;
 	return r;
 }
@@ -14,7 +14,7 @@ pushup(const Arg *arg)
 {
 	Client *sel = selmon->sel, *c;
 
-	if (!sel || sel->isfloating)
+	if (!sel || ISFLOATING(sel))
 		return;
 	if ((c = prevt(sel)) && c != nexttiled(selmon->clients)) {
 		detach(sel);
@@ -31,7 +31,7 @@ pushdown(const Arg *arg)
 {
 	Client *sel = selmon->sel, *c;
 
-	if (!sel || sel->isfloating || sel == nexttiled(selmon->clients))
+	if (!sel || ISFLOATING(sel) || sel == nexttiled(selmon->clients))
 		return;
 	if ((c = nexttiled(sel->next))) {
 		detach(sel);

@@ -14,7 +14,7 @@ prevc(Client *c, float f)
 	Client *p, *r;
 
 	for (p = selmon->clients, r = NULL; c && p && p != c; p = p->next)
-		if ((f || !p->isfloating) && ISVISIBLE(p))
+		if ((f || !ISFLOATING(p)) && ISVISIBLE(p))
 			r = p;
 	return r;
 }
@@ -25,7 +25,7 @@ pushup(const Arg *arg)
 	Client *sel = selmon->sel;
 	Client *c;
 
-	if (!sel || (sel->isfloating && !arg->f))
+	if (!sel || (ISFLOATING(sel) && !arg->f))
 		return;
 	if ((c = prevc(sel, arg->f))) {
 		/* attach before c */
@@ -54,7 +54,7 @@ pushdown(const Arg *arg)
 	Client *sel = selmon->sel;
 	Client *c;
 
-	if (!sel || (sel->isfloating && !arg->f))
+	if (!sel || (ISFLOATING(sel) && !arg->f))
 		return;
 	if ((c = nextc(sel->next, arg->f))) {
 		/* attach after c */

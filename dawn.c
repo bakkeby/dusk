@@ -300,7 +300,7 @@ struct Client {
 	#if SWITCHTAG_PATCH
 	unsigned int switchtag; /* holds the original tag info from when the client was opened */
 	#endif // SWITCHTAG_PATCH
-	int isfixed, isfloating, isurgent, neverfocus, oldstate, isfullscreen;
+	int isfixed, isurgent, neverfocus, oldstate, isfullscreen;
 	int fakefullscreen;
 	#if AUTORESIZE_PATCH
 	int needresize;
@@ -417,7 +417,6 @@ typedef struct {
 	#if SWITCHTAG_PATCH
 	int switchtag;
 	#endif // SWITCHTAG_PATCH
-	int isfloating;
 	#if SWALLOW_PATCH
 	int noswallow;
 	#endif // SWALLOW_PATCH
@@ -428,8 +427,6 @@ typedef struct {
 #define RULE(...) { .monitor = -1, ##__VA_ARGS__ },
 
 /* Cross patch compatibility rule macro helper macros */
-#define FLOATING , .isfloating = 1
-
 #if SWITCHTAG_PATCH
 #define SWITCHTAG , .switchtag = 1
 #else
@@ -661,7 +658,6 @@ applyrules(Client *c)
 	#if SWALLOW_PATCH
 	c->noswallow = -1;
 	#endif // SWALLOW_PATCH
-	c->isfloating = 0;
 	c->tags = 0;
 	XGetClassHint(dpy, c->win, &ch);
 	class    = ch.res_class ? ch.res_class : broken;
@@ -685,10 +681,9 @@ applyrules(Client *c)
 			#if SWALLOW_PATCH
 			c->noswallow = r->noswallow;
 			#endif // SWALLOW_PATCH
-			c->isfloating = r->isfloating;
 			c->tags |= r->tags;
 
-			if ((r->tags & SPTAGMASK) && r->isfloating) {
+			if ((r->tags & SPTAGMASK) && ISFLOATING(c)) {
 				c->x = c->mon->wx + (c->mon->ww / 2 - WIDTH(c) / 2);
 				c->y = c->mon->wy + (c->mon->wh / 2 - HEIGHT(c) / 2);
 			}
@@ -697,14 +692,14 @@ applyrules(Client *c)
 			if (m)
 				c->mon = m;
 
-			if (c->isfloating && r->floatpos)
+			if (ISFLOATING(c) && r->floatpos)
 				setfloatpos(c, r->floatpos);
 
 			#if SWITCHTAG_PATCH
 			if (r->switchtag && (
 				NOSWALLOW(c) ||
 				!termforwin(c) ||
-				!(c->isfloating && swallowfloating && c->noswallow < 0))) // TODO review this
+				!(ISFLOATING(c) && swallowfloating && c->noswallow < 0))) // TODO review this
 			{
 				selmon = c->mon;
 				if (r->switchtag == 2 || r->switchtag == 4)
@@ -778,7 +773,7 @@ applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact)
 		*h = bh;
 	if (*w < bh)
 		*w = bh;
-	if (resizehints || c->isfloating || !c->mon->lt[c->mon->sellt]->arrange) {
+	if (resizehints || ISFLOATING(c) || !c->mon->lt[c->mon->sellt]->arrange) {
 		/* see last two sentences in ICCCM 4.1.2.3 */
 		baseismin = c->basew == c->minw && c->baseh == c->minh;
 		if (!baseismin) { /* temporarily remove base dimensions */
@@ -1028,7 +1023,7 @@ clientmessage(XEvent *e)
 			c->h = c->oldh = wa.height;
 			c->oldbw = wa.border_width;
 			c->bw = 0;
-			c->isfloating = True;
+			SETFLOATING(c);
 			/* reuse tags field as mapped status */
 			c->tags = 1;
 			updatesizehints(c);
@@ -1148,7 +1143,7 @@ configurerequest(XEvent *e)
 	if ((c = wintoclient(ev->window))) {
 		if (ev->value_mask & CWBorderWidth)
 			c->bw = ev->border_width;
-		else if (c->isfloating || !selmon->lt[selmon->sellt]->arrange) {
+		else if (ISFLOATING(c) || !selmon->lt[selmon->sellt]->arrange) {
 			m = c->mon;
 			#if STEAM_PATCH
 			if (!ISSTEAM(c)) {
@@ -1179,9 +1174,9 @@ configurerequest(XEvent *e)
 				c->oldh = c->h;
 				c->h = ev->height;
 			}
-			if ((c->x + c->w) > m->mx + m->mw && c->isfloating)
+			if ((c->x + c->w) > m->mx + m->mw && ISFLOATING(c))
 				c->x = m->mx + (m->mw / 2 - WIDTH(c) / 2);  /* center in x direction */
-			if ((c->y + c->h) > m->my + m->mh && c->isfloating)
+			if ((c->y + c->h) > m->my + m->mh && ISFLOATING(c))
 				c->y = m->my + (m->mh / 2 - HEIGHT(c) / 2); /* center in y direction */
 			if ((ev->value_mask & (CWX|CWY)) && !(ev->value_mask & (CWWidth|CWHeight)))
 				configure(c);
@@ -1636,7 +1631,7 @@ focus(Client *c)
 		attachstack(c);
 		grabbuttons(c, 1);
 		#if !BAR_FLEXWINTITLE_PATCH
-		if (c->isfloating)
+		if (ISFLOATING(c))
 			XSetWindowBorder(dpy, c->win, scheme[SchemeSel][ColFloat].pixel);
 		else
 			XSetWindowBorder(dpy, c->win, scheme[SchemeSel][ColBorder].pixel);
@@ -1987,7 +1982,7 @@ manage(Window w, XWindowAttributes *wa)
 	wc.border_width = c->bw;
 	XConfigureWindow(dpy, w, CWBorderWidth, &wc);
 	#if !BAR_FLEXWINTITLE_PATCH
-	if (c->isfloating)
+	if (ISFLOATING(c))
 		XSetWindowBorder(dpy, w, scheme[SchemeNorm][ColFloat].pixel);
 	else
 		XSetWindowBorder(dpy, w, scheme[SchemeNorm][ColBorder].pixel);
@@ -2018,9 +2013,10 @@ manage(Window w, XWindowAttributes *wa)
 	XSelectInput(dpy, w, EnterWindowMask|FocusChangeMask|PropertyChangeMask|StructureNotifyMask);
 	grabbuttons(c, 0);
 
-	if (!c->isfloating)
-		c->isfloating = c->oldstate = trans != None || c->isfixed;
-	if (c->isfloating) {
+	if (!ISFLOATING(c) && (ISFIXED(c) || (c->oldstate = trans != None)))
+		SETFLOATING(c);
+
+	if (ISFLOATING(c)) {
 		XRaiseWindow(dpy, c->win);
 		XSetWindowBorder(dpy, w, scheme[SchemeNorm][ColFloat].pixel);
 	}
@@ -2159,10 +2155,10 @@ movemouse(const Arg *arg)
 				ny = selmon->wy;
 			else if (abs((selmon->wy + selmon->wh) - (ny + HEIGHT(c))) < snap)
 				ny = selmon->wy + selmon->wh - HEIGHT(c);
-			if (!c->isfloating && selmon->lt[selmon->sellt]->arrange
+			if (!ISFLOATING(c) && selmon->lt[selmon->sellt]->arrange
 			&& (abs(nx - c->x) > snap || abs(ny - c->y) > snap))
 				togglefloating(NULL);
-			if (!selmon->lt[selmon->sellt]->arrange || c->isfloating) {
+			if (!selmon->lt[selmon->sellt]->arrange || ISFLOATING(c)) {
 			#if SAVEFLOATS_PATCH
 				resize(c, nx, ny, c->w, c->h, 1);
 				/* save last known float coordinates */
@@ -2198,9 +2194,9 @@ Client *
 nexttiled(Client *c)
 {
 	#if BAR_WINTITLEACTIONS_PATCH
-	for (; c && (c->isfloating || !ISVISIBLE(c) || HIDDEN(c)); c = c->next);
+	for (; c && (ISFLOATING(c) || !ISVISIBLE(c) || HIDDEN(c)); c = c->next);
 	#else
-	for (; c && (c->isfloating || !ISVISIBLE(c)); c = c->next);
+	for (; c && (ISFLOATING(c) || !ISVISIBLE(c)); c = c->next);
 	#endif // BAR_WINTITLEACTIONS_PATCH
 	return c;
 }
@@ -2243,8 +2239,8 @@ propertynotify(XEvent *e)
 		switch(ev->atom) {
 		default: break;
 		case XA_WM_TRANSIENT_FOR:
-			if (!c->isfloating && (XGetTransientForHint(dpy, c->win, &trans)) &&
-				(c->isfloating = (wintoclient(trans)) != NULL))
+			setflag(c, Floating, (wintoclient(trans)) != NULL);
+			if (!ISFLOATING(c) && (XGetTransientForHint(dpy, c->win, &trans)) && ISFLOATING(c))
 				arrange(c->mon);
 			break;
 		case XA_WM_NORMAL_HINTS:
@@ -2349,7 +2345,7 @@ resizeclient(Client *c, int x, int y, int w, int h)
 	#if NOBORDER_PATCH
 	if (((nexttiled(c->mon->clients) == c && !nexttiled(c->next)))
 		&& (c->fakefullscreen == 1 || !c->isfullscreen)
-		&& !c->isfloating
+		&& !ISFLOATING(c)
 		&& c->mon->lt[c->mon->sellt]->arrange) {
 		c->w = wc.width += c->bw * 2;
 		c->h = wc.height += c->bw * 2;
@@ -2420,11 +2416,11 @@ resizemouse(const Arg *arg)
 			if (c->mon->wx + nw >= selmon->wx && c->mon->wx + nw <= selmon->wx + selmon->ww
 			&& c->mon->wy + nh >= selmon->wy && c->mon->wy + nh <= selmon->wy + selmon->wh)
 			{
-				if (!c->isfloating && selmon->lt[selmon->sellt]->arrange
+				if (!ISFLOATING(c) && selmon->lt[selmon->sellt]->arrange
 				&& (abs(nw - c->w) > snap || abs(nh - c->h) > snap))
 					togglefloating(NULL);
 			}
-			if (!selmon->lt[selmon->sellt]->arrange || c->isfloating) {
+			if (!selmon->lt[selmon->sellt]->arrange || ISFLOATING(c)) {
 				resizeclient(c, nx, ny, nw, nh);
 				#if SAVEFLOATS_PATCH
 				/* save last known float dimensions */
@@ -2465,13 +2461,13 @@ restack(Monitor *m)
 	drawbar(m);
 	if (!m->sel)
 		return;
-	if (m->sel->isfloating || !m->lt[m->sellt]->arrange)
+	if (ISFLOATING(m->sel) || !m->lt[m->sellt]->arrange)
 		XRaiseWindow(dpy, m->sel->win);
 	if (m->lt[m->sellt]->arrange) {
 		wc.stack_mode = Below;
 		wc.sibling = m->bar->win;
 		for (c = m->stack; c; c = c->snext)
-			if (!c->isfloating && ISVISIBLE(c)) {
+			if (!ISFLOATING(c) && ISVISIBLE(c)) {
 				XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
 				wc.sibling = c->win;
 			}
@@ -2744,14 +2740,16 @@ setfullscreen(Client *c, int fullscreen)
 	 * settings can only be stored and restored in that precise order. */
 	if (savestate && !(c->oldstate & (1 << 1))) {
 		c->oldbw = c->bw;
-		c->oldstate = c->isfloating | (1 << 1);
+		c->oldstate = ISFLOATING(c) | (1 << 1);
 		c->bw = 0;
-		c->isfloating = 1;
+		SETFLOATING(c);
 		resizeclient(c, c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
 		XRaiseWindow(dpy, c->win);
 	} else if (restorestate && (c->oldstate & (1 << 1))) {
 		c->bw = c->oldbw;
-		c->isfloating = c->oldstate = c->oldstate & 1;
+		c->oldstate = c->oldstate & 1;
+		if (c->oldstate)
+			SETFLOATING(c);
 		c->x = c->oldx;
 		c->y = c->oldy;
 		c->w = c->oldw;
@@ -2989,7 +2987,7 @@ showhide(Client *c)
 	if (ISVISIBLE(c)) {
 		if (
 			(c->tags & SPTAGMASK) &&
-			c->isfloating &&
+			ISFLOATING(c) &&
 			(
 				c->x < c->mon->mx ||
 				c->x > c->mon->mx + c->mon->mw ||
@@ -3019,7 +3017,7 @@ showhide(Client *c)
 		#else
 		XMoveWindow(dpy, c->win, c->x, c->y);
 		#endif // AUTORESIZE_PATCH
-		if ((!c->mon->lt[c->mon->sellt]->arrange || c->isfloating) && !c->isfullscreen)
+		if ((!c->mon->lt[c->mon->sellt]->arrange || ISFLOATING(c)) && !c->isfullscreen)
 			resize(c, c->x, c->y, c->w, c->h, 0);
 		showhide(c->snext);
 	} else {
@@ -3203,14 +3201,14 @@ togglefloating(const Arg *arg)
 		return;
 	if (c->isfullscreen && c->fakefullscreen != 1) /* no support for fullscreen windows */
 		return;
-	c->isfloating = !c->isfloating || c->isfixed;
+	setflag(c, Floating, !ISFLOATING(c) || c->isfixed);
 	#if !BAR_FLEXWINTITLE_PATCH
-	if (c->isfloating)
+	if (ISFLOATING(c))
 		XSetWindowBorder(dpy, c->win, scheme[SchemeSel][ColFloat].pixel);
 	else
 		XSetWindowBorder(dpy, c->win, scheme[SchemeSel][ColBorder].pixel);
 	#endif // BAR_FLEXWINTITLE_PATCH
-	if (c->isfloating) {
+	if (ISFLOATING(c)) {
 		#if SAVEFLOATS_PATCH
 		if (c->sfx != -9999) {
 			/* restore last known float dimensions */
@@ -3337,12 +3335,12 @@ unfocus(Client *c, int setfocus, Client *nextfocus)
 	#if SWAPFOCUS_PATCH
 	selmon->pertag->prevclient[selmon->pertag->curtag] = c;
 	#endif // SWAPFOCUS_PATCH
-	if (c->isfullscreen && ISVISIBLE(c) && c->mon == selmon && nextfocus && !nextfocus->isfloating)
+	if (c->isfullscreen && ISVISIBLE(c) && c->mon == selmon && nextfocus && !ISFLOATING(nextfocus))
 		if (c->fakefullscreen != 1)
 			setfullscreen(c, 0);
 	grabbuttons(c, 0);
 	#if !BAR_FLEXWINTITLE_PATCH
-	if (c->isfloating)
+	if (ISFLOATING(c))
 		XSetWindowBorder(dpy, c->win, scheme[SchemeNorm][ColFloat].pixel);
 	else
 		XSetWindowBorder(dpy, c->win, scheme[SchemeNorm][ColBorder].pixel);
@@ -3689,7 +3687,7 @@ updatesizehints(Client *c)
 	if (size.flags & PSize) {
 		c->basew = size.base_width;
 		c->baseh = size.base_height;
-		c->isfloating = 1;
+		SETFLOATING(c);
 	}
 	#if SIZEHINTS_RULED_PATCH
 	checkfloatingrules(c);
@@ -3771,7 +3769,7 @@ updatewmhints(Client *c)
 		} else
 			c->isurgent = (wmh->flags & XUrgencyHint) ? 1 : 0;
 		if (c->isurgent) {
-			if (c->isfloating)
+			if (ISFLOATING(c))
 				XSetWindowBorder(dpy, c->win, scheme[SchemeUrg][ColFloat].pixel);
 			else
 				XSetWindowBorder(dpy, c->win, scheme[SchemeUrg][ColBorder].pixel);
@@ -3886,14 +3884,14 @@ zoom(const Arg *arg)
 	if (!c)
 		return;
 
-	if (c && c->isfloating)
+	if (c && ISFLOATING(c))
 		togglefloating(&((Arg) { .v = c }));
 
 	#if SWAPFOCUS_PATCH
 	c->mon->pertag->prevclient[c->mon->pertag->curtag] = nexttiled(c->mon->clients);
 	#endif // SWAPFOCUS_PATCH
 
-	if (!c->mon->lt[c->mon->sellt]->arrange || (c && c->isfloating) || !c)
+	if (!c->mon->lt[c->mon->sellt]->arrange || (c && ISFLOATING(c)) || !c)
 		return;
 
 	if (c == nexttiled(c->mon->clients)) {

@@ -51,8 +51,8 @@ flextitledrawarea(Monitor *m, Client *c, int x, int r, int w, int max_clients, i
 		if (
 			ISVISIBLE(c) &&
 			(
-				(draw_tiled && !c->isfloating && !HIDDEN(c)) ||
-				(draw_floating && c->isfloating && !HIDDEN(c)) ||
+				(draw_tiled && !ISFLOATING(c) && !HIDDEN(c)) ||
+				(draw_floating && ISFLOATING(c) && !HIDDEN(c)) ||
 				(draw_hidden && HIDDEN(c))
 			)
 		) {
@@ -178,7 +178,7 @@ flextitlecalculate(
 			continue;
 		}
 
-		if (c->isfloating) {
+		if (ISFLOATING(c)) {
 			if (FLEXWINTITLE_FLOATWEIGHT)
 				clientsnfloating++;
 			continue;
@@ -208,7 +208,7 @@ flextitlecalculate(
 		groupactive = GRP_NOSELECTION;
 	else if (HIDDEN(m->sel))
 		groupactive = GRP_HIDDEN;
-	else if (m->sel->isfloating)
+	else if (ISFLOATING(m->sel))
 		groupactive = GRP_FLOAT;
 	else if (selidx < clientsnmaster)
 		groupactive = GRP_MASTER;

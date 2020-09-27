@@ -11,7 +11,7 @@ tagall(const Arg *arg)
 	if (tag >= 0 && tag < NUMTAGS)
 		for (c = selmon->clients; c; c = c->next)
 		{
-			if (!floating_only || c->isfloating)
+			if (!floating_only || ISFLOATING(c))
 				for (j = 0; j < NUMTAGS; j++)
 				{
 					if (c->tags & 1 << j && selmon->tagset[selmon->seltags] & 1 << j)

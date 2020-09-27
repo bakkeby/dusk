@@ -3,7 +3,7 @@ attachx(Client *c)
 {
 	#if ATTACHABOVE_PATCH
 	Client *at;
-	if (!(c->mon->sel == NULL || c->mon->sel == c->mon->clients || c->mon->sel->isfloating)) {
+	if (!(c->mon->sel == NULL || c->mon->sel == c->mon->clients || ISFLOATING(c->mon->sel))) {
 		for (at = c->mon->clients; at->next != c->mon->sel; at = at->next);
 		c->next = at->next;
 		at->next = c;
@@ -14,7 +14,7 @@ attachx(Client *c)
 	unsigned int n;
 
 	for (at = c->mon->clients, n = 0; at; at = at->next)
-		if (!at->isfloating && ISVISIBLEONTAG(at, c->tags))
+		if (!ISFLOATING(at) && ISVISIBLEONTAG(at, c->tags))
 			if (++n >= c->mon->nmaster)
 				break;
 
@@ -24,7 +24,7 @@ attachx(Client *c)
 		return;
 	}
 	#elif ATTACHBELOW_PATCH
-	if (!(c->mon->sel == NULL || c->mon->sel == c || c->mon->sel->isfloating)) {
+	if (!(c->mon->sel == NULL || c->mon->sel == c || ISFLOATING(c->mon->sel))) {
 		c->next = c->mon->sel->next;
 		c->mon->sel->next = c;
 		return;

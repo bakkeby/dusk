@@ -6,7 +6,7 @@ transferall(const Arg *arg)
 	while (n) {
 		c = n;
 		n = c->next;
-		if (!ISVISIBLE(c) || c->isfloating) continue;
+		if (!ISVISIBLE(c) || ISFLOATING(c)) continue;
 		if (i >= selmon->nmaster) {
 			detach(c);
 			if (!attachfrom) {

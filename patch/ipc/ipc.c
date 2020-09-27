@@ -1128,7 +1128,7 @@ ipc_send_events(Monitor *mons, Monitor **lastselmon, Monitor *selmon)
     ClientState *o = &m->sel->prevstate;
     ClientState n = {.oldstate = sel->oldstate,
                      .isfixed = sel->isfixed,
-                     .isfloating = sel->isfloating,
+                     .isfloating = ISFLOATING(sel), // temporary for now until all client states are captured in flags
                      .isfullscreen = sel->isfullscreen,
                      .isurgent = sel->isurgent,
                      .neverfocus = sel->neverfocus};

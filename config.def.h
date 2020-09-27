@@ -334,9 +334,9 @@ static const int tagrows = 2;
  *  - using the RULE macro
  *
  * A traditional struct table looks like this:
- *    // class      instance  title  wintype  tags mask  isfloating  monitor
- *    { "Gimp",     NULL,     NULL,  NULL,    1 << 4,    0,          -1 },
- *    { "Firefox",  NULL,     NULL,  NULL,    1 << 7,    0,          -1 },
+ *    // class      instance  title  wintype  tags mask  monitor
+ *    { "Gimp",     NULL,     NULL,  NULL,    1 << 4,    -1 },
+ *    { "Firefox",  NULL,     NULL,  NULL,    1 << 7,    -1 },
  *
  * The RULE macro has the default values set for each field allowing you to only
  * specify the values that are relevant for your rule, e.g.
@@ -354,14 +354,14 @@ static const Rule rules[] = {
 	 *	WM_WINDOW_ROLE(STRING) = role
 	 *	_NET_WM_WINDOW_TYPE(ATOM) = wintype
 	 */
-	RULE(.wintype = WTYPE "DIALOG", .isfloating = 1)
-	RULE(.wintype = WTYPE "UTILITY", .isfloating = 1)
-	RULE(.wintype = WTYPE "TOOLBAR", .isfloating = 1)
-	RULE(.wintype = WTYPE "SPLASH", .isfloating = 1)
+	RULE(.wintype = WTYPE "DIALOG", .flags = Floating)
+	RULE(.wintype = WTYPE "UTILITY", .flags = Floating)
+	RULE(.wintype = WTYPE "TOOLBAR", .flags = Floating)
+	RULE(.wintype = WTYPE "SPLASH", .flags = Floating)
 	RULE(.class = "Gimp", .tags = 1 << 4)
 	RULE(.class = "Firefox", .tags = 1 << 7)
-	RULE(.instance = "spterm", .tags = SPTAG(0), .isfloating = 1)
-	RULE(.instance = "spfm", .tags = SPTAG(1), .isfloating = 1)
+	RULE(.instance = "spterm", .tags = SPTAG(0), .flags = Floating)
+	RULE(.instance = "spfm", .tags = SPTAG(1), .flags = Floating)
 	RULE(.instance = "keepassxc", .tags = SPTAG(2))
 };
 

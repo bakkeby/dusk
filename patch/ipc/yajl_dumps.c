@@ -83,7 +83,7 @@ dump_client(yajl_gen gen, Client *c)
 
     YSTR("states"); YMAP(
       YSTR("is_fixed"); YBOOL(c->isfixed);
-      YSTR("is_floating"); YBOOL(c->isfloating);
+      YSTR("is_floating"); YBOOL(ISFLOATING(c));
       YSTR("is_urgent"); YBOOL(c->isurgent);
       YSTR("never_focus"); YBOOL(c->neverfocus);
       YSTR("old_state"); YBOOL(c->oldstate);

@@ -9,7 +9,7 @@ dragcfact(const Arg *arg)
 
 	if (!(c = selmon->sel))
 		return;
-	if (c->isfloating) {
+	if (ISFLOATING(c)) {
 		resizemouse(arg);
 		return;
 	}

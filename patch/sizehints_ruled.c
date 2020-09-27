@@ -15,7 +15,7 @@ checkfloatingrules(Client *c)
 		if ((!r->title || strstr(c->name, r->title))
 		&& (!r->class || strstr(class, r->class))
 		&& (!r->instance || strstr(instance, r->instance)))
-			c->isfloating = r->isfloating;
+			setflag(c, Floating, r->flags & Floating);
 	}
 	if (ch.res_class)
 		XFree(ch.res_class);

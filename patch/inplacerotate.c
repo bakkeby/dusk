@@ -20,14 +20,14 @@ insertclient(Client *item, Client *insertItem, int after)
 void
 inplacerotate(const Arg *arg)
 {
-	if (!selmon->sel || (selmon->sel->isfloating && !arg->f)) return;
+	if (!selmon->sel || (ISFLOATING(selmon->sel) && !arg->f)) return;
 
 	unsigned int selidx = 0, i = 0;
 	Client *c = NULL, *stail = NULL, *mhead = NULL, *mtail = NULL, *shead = NULL;
 
 	// Shift client
 	for (c = selmon->clients; c; c = c->next) {
-		if (ISVISIBLE(c) && !(c->isfloating)) {
+		if (ISVISIBLE(c) && !(ISFLOATING(c))) {
 			if (selmon->sel == c) { selidx = i; }
 			if (i == selmon->nmaster - 1) { mtail = c; }
 			if (i == selmon->nmaster) { shead = c; }
@@ -44,7 +44,7 @@ inplacerotate(const Arg *arg)
 	// Restore focus position
 	i = 0;
 	for (c = selmon->clients; c; c = c->next) {
-		if (!ISVISIBLE(c) || (c->isfloating)) continue;
+		if (!ISVISIBLE(c) || (ISFLOATING(c))) continue;
 		if (i == selidx) { focus(c); break; }
 		i++;
 	}

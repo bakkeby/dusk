@@ -3,6 +3,6 @@ togglesticky(const Arg *arg)
 {
 	if (!selmon->sel)
 		return;
-	selmon->sel->issticky = !selmon->sel->issticky;
+	setflag(selmon->sel, Sticky, !ISSTICKY(selmon->sel));
 	arrange(selmon);
 }

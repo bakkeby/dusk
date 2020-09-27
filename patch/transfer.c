@@ -5,13 +5,13 @@ transfer(const Arg *arg)
 	int transfertostack = 0, i, nmasterclients;
 
 	for (i = 0, c = selmon->clients; c; c = c->next) {
-		if (!ISVISIBLE(c) || c->isfloating) continue;
+		if (!ISVISIBLE(c) || ISFLOATING(c)) continue;
 		if (selmon->sel == c) { transfertostack = i < selmon->nmaster && selmon->nmaster != 0; }
 		if (i < selmon->nmaster) { nmasterclients++; mtail = c; }
 		stail = c;
 		i++;
 	}
-	if (selmon->sel->isfloating || i == 0) {
+	if (ISFLOATING(selmon->sel) || i == 0) {
 		return;
 	} else if (transfertostack) {
 		selmon->nmaster = MIN(i, selmon->nmaster) - 1;

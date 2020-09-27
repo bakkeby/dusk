@@ -115,7 +115,7 @@ bartabcalculate(
 			clientsnhidden++;
 			continue;
 		}
-		if (c->isfloating) {
+		if (ISFLOATING(c)) {
 			clientsnfloating++;
 			continue;
 		}
@@ -151,7 +151,7 @@ bartabcalculate(
 		r = num % den;
 		w = num / den;
 		for (c = m->clients, i = 0; c; c = c->next) {
-			if (!ISVISIBLE(c) || (c->isfloating && !HIDDEN(c)))
+			if (!ISVISIBLE(c) || (ISFLOATING(c) && !HIDDEN(c)))
 				continue;
 			tabfn(m, c, passx, x, w + (i < r ? 1 : 0), tgactive, arg, barg);
 			x += w + (i < r ? 1 : 0);
@@ -170,7 +170,7 @@ bartabcalculate(
 			r = num % den;
 			w = num / den;
 			for (; c && i < m->nmaster; c = c->next) { // tiled master
-				if (!ISVISIBLE(c) || c->isfloating || HIDDEN(c))
+				if (!ISVISIBLE(c) || ISFLOATING(c) || HIDDEN(c))
 					continue;
 				tabfn(m, c, passx, x, w + (i < r ? 1 : 0), tgactive, arg, barg);
 				x += w + (i < r ? 1 : 0);
@@ -188,7 +188,7 @@ bartabcalculate(
 		w = num / den;
 		#if BARTAB_STACKWEIGHT
 		for (; c; c = c->next) { // tiled stack
-			if (!ISVISIBLE(c) || HIDDEN(c) || c->isfloating)
+			if (!ISVISIBLE(c) || HIDDEN(c) || ISFLOATING(c))
 				continue;
 			tabfn(m, c, passx, x, w * BARTAB_STACKWEIGHT + (i - m->nmaster < r ? 1 : 0), tgactive, arg, barg);
 			x += w * BARTAB_STACKWEIGHT + (i - m->nmaster < r ? 1 : 0);
@@ -208,7 +208,7 @@ bartabcalculate(
 
 		#if BARTAB_FLOATWEIGHT
 		for (c = m->clients; c; c = c->next) { // floating windows
-			if (!ISVISIBLE(c) || HIDDEN(c) || !c->isfloating)
+			if (!ISVISIBLE(c) || HIDDEN(c) || !ISFLOATING(c))
 				continue;
 			tabfn(m, c, passx, x, w * BARTAB_FLOATWEIGHT + (i - m->nmaster < r ? 1 : 0), tgactive, arg, barg);
 			x += w * BARTAB_FLOATWEIGHT + (i - m->nmaster < r ? 1 : 0);

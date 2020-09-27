@@ -96,10 +96,10 @@ drawindicator(Monitor *m, Client *c, unsigned int occ, int x, int y, int w, int 
 void
 drawstateindicator(Monitor *m, Client *c, unsigned int occ, int x, int y, int w, int h, unsigned int tag, int filled, int invert)
 {
-	if (c->fakefullscreen && c->isfloating)
+	if (c->fakefullscreen && ISFLOATING(c))
 		drawindicator(m, c, occ, x, y, w, h, tag, filled, invert, floatfakefsindicatortype);
 	else if (c->fakefullscreen)
 		drawindicator(m, c, occ, x, y, w, h, tag, filled, invert, fakefsindicatortype);
-	else if (c->isfloating)
+	else if (ISFLOATING(c))
 		drawindicator(m, c, occ, x, y, w, h, tag, filled, invert, floatindicatortype);
 }

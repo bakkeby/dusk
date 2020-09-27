@@ -31,7 +31,7 @@ calc_wintitle_floating(
 	for (c = m->clients; c; c = c->next) {
 		if (!ISVISIBLE(c) || HIDDEN(c))
 			continue;
-		if (c->isfloating)
+		if (ISFLOATING(c))
 			clientsnfloating++;
 	}
 

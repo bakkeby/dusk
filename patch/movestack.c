@@ -6,18 +6,18 @@ movestack(const Arg *arg)
 		if (!selmon->sel)
 			return;
 		/* find the client after selmon->sel */
-		for (c = selmon->sel->next; c && (!ISVISIBLE(c) || c->isfloating); c = c->next);
+		for (c = selmon->sel->next; c && (!ISVISIBLE(c) || ISFLOATING(c)); c = c->next);
 		if (!c)
-			for (c = selmon->clients; c && (!ISVISIBLE(c) || c->isfloating); c = c->next);
+			for (c = selmon->clients; c && (!ISVISIBLE(c) || ISFLOATING(c)); c = c->next);
 	}
 	else {
 		/* find the client before selmon->sel */
 		for (i = selmon->clients; i != selmon->sel; i = i->next)
-			if(ISVISIBLE(i) && !i->isfloating)
+			if(ISVISIBLE(i) && !ISFLOATING(i))
 				c = i;
 		if (!c)
 			for (; i; i = i->next)
-				if (ISVISIBLE(i) && !i->isfloating)
+				if (ISVISIBLE(i) && !ISFLOATING(i))
 					c = i;
 	}
 
