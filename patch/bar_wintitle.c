@@ -38,7 +38,7 @@ draw_wintitle(Bar *bar, BarArg *a)
 	XSync(dpy, False);
 	XSetErrorHandler(xerror);
 	#endif // BAR_IGNORE_XFT_ERRORS_WHEN_DRAWING_TEXT_PATCH
-	drawstateindicator(m, m->sel, 1, x, a->y, w, a->h, 0, 0, m->sel->isfixed);
+	drawstateindicator(m, m->sel, 1, x, a->y, w, a->h, 0, 0, ISFIXED(m->sel));
 	return 1;
 }
 

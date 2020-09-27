@@ -300,7 +300,7 @@ struct Client {
 	#if SWITCHTAG_PATCH
 	unsigned int switchtag; /* holds the original tag info from when the client was opened */
 	#endif // SWITCHTAG_PATCH
-	int isfixed, isurgent, neverfocus, oldstate, isfullscreen;
+	int isurgent, neverfocus, oldstate, isfullscreen;
 	int fakefullscreen;
 	#if AUTORESIZE_PATCH
 	int needresize;
@@ -3201,7 +3201,7 @@ togglefloating(const Arg *arg)
 		return;
 	if (c->isfullscreen && c->fakefullscreen != 1) /* no support for fullscreen windows */
 		return;
-	setflag(c, Floating, !ISFLOATING(c) || c->isfixed);
+	setflag(c, Floating, !ISFLOATING(c) || ISFIXED(c));
 	#if !BAR_FLEXWINTITLE_PATCH
 	if (ISFLOATING(c))
 		XSetWindowBorder(dpy, c->win, scheme[SchemeSel][ColFloat].pixel);
@@ -3693,7 +3693,7 @@ updatesizehints(Client *c)
 	checkfloatingrules(c);
 	#endif // SIZEHINTS_RULED_PATCH
 	#endif // SIZEHINTS_PATCH
-	c->isfixed = (c->maxw && c->maxh && c->maxw == c->minw && c->maxh == c->minh);
+	setflag(c, Fixed, (c->maxw && c->maxh && c->maxw == c->minw && c->maxh == c->minh));
 }
 
 void
