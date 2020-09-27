@@ -54,8 +54,10 @@
 void
 addflag(Client *c, const unsigned int flag)
 {
-	c->prevflags = (c->prevflags ^ flag) | (c->flags & flag);
+	c->prevflags = (c->prevflags & ~flag) | (c->flags & flag);
 	c->flags |= flag;
+
+
 }
 
 void
@@ -74,6 +76,6 @@ setflag(Client *c, const unsigned int flag, const int value)
 void
 removeflag(Client *c, const unsigned int flag)
 {
-	c->prevflags = (c->prevflags ^ flag) | (c->flags & flag);
-	c->flags ^= flag;
+	c->prevflags = (c->prevflags & ~flag) | (c->flags & flag);
+	c->flags &= ~flag;
 }

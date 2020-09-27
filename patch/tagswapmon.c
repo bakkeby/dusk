@@ -37,7 +37,7 @@ tagswapmon(const Arg *arg)
 		c->tags = m->tagset[m->seltags]; /* assign tags of target monitor */
 		attach(c);
 		attachstack(c);
-		if (c->isfullscreen) {
+		if (ISFULLSCREEN(c)) {
 			if (c->fakefullscreen != 1) {
 				resizeclient(c, c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
 				XRaiseWindow(dpy, c->win);
@@ -51,7 +51,7 @@ tagswapmon(const Arg *arg)
 		c->tags = selmon->tagset[selmon->seltags]; /* assign tags of target monitor */
 		attach(c);
 		attachstack(c);
-		if (c->isfullscreen) {
+		if (ISFULLSCREEN(c)) {
 			if (c->fakefullscreen != 1) {
 				resizeclient(c, c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
 				XRaiseWindow(dpy, c->win);

@@ -35,7 +35,7 @@ draw_tags(Bar *bar, BarArg *a)
 		#else
 		occ |= c->tags;
 		#endif // BAR_HIDEVACANTTAGS_PATCH
-		if (c->isurgent)
+		if (ISURGENT(c))
 			urg |= c->tags;
 	}
 	for (i = 0; i < NUMTAGS; i++) {

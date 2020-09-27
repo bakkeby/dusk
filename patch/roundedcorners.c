@@ -2,7 +2,7 @@
 
 void drawroundedcorners(Client *c)
 {
-    if (corner_radius <= 0 || !c || c->isfullscreen)
+    if (corner_radius <= 0 || !c || ISFULLSCREEN(c))
     	return;
 
     Window win;

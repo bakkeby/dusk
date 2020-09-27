@@ -37,7 +37,7 @@ draw_pwrl_tags(Bar *bar, BarArg *a)
 		#else
 		occ |= c->tags;
 		#endif // BAR_HIDEVACANTTAGS_PATCH
-		if (c->isurgent)
+		if (ISURGENT(C))
 			urg |= c->tags;
 	}
 	x = a->x;

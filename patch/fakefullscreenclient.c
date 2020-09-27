@@ -5,7 +5,7 @@ togglefakefullscreen(const Arg *arg)
 	if (!c)
 		return;
 
-	if (c->fakefullscreen != 1 && c->isfullscreen) { // exit fullscreen --> fake fullscreen
+	if (c->fakefullscreen != 1 && ISFULLSCREEN(c)) { // exit fullscreen --> fake fullscreen
 		c->fakefullscreen = 2;
 		setfullscreen(c, 0);
 	} else if (c->fakefullscreen == 1) {

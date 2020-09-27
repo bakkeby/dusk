@@ -30,7 +30,7 @@ tagallmon(const Arg *arg)
 			slast = slast->snext = c;
 		else
 			m->stack = slast = c;
-		if (c->isfullscreen) {
+		if (ISFULLSCREEN(c)) {
 			if (c->fakefullscreen != 1) {
 				resizeclient(c, c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
 				XRaiseWindow(dpy, c->win);

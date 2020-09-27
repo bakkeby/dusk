@@ -9,5 +9,5 @@ togglefullscreen(const Arg *arg)
 		c->fakefullscreen = 2;
 		setfullscreen(c, 1);
 	} else
-		setfullscreen(c, !c->isfullscreen);
+		setfullscreen(c, !ISFULLSCREEN(c));
 }

@@ -7,11 +7,6 @@ focusstack(const Arg *arg)
 	if (i < 0)
  		return;
 
-	#if ALWAYSFULLSCREEN_PATCH
-	if (!selmon->sel || selmon->sel->isfullscreen)
-		return;
-	#endif // ALWAYSFULLSCREEN_PATCH
-
 	for (p = NULL, c = selmon->clients; c && (i || !ISVISIBLE(c));
 	    i -= ISVISIBLE(c) ? 1 : 0, p = c, c = c->next);
 	focus(c ? c : p);

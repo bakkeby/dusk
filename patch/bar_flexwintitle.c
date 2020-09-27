@@ -106,7 +106,7 @@ flextitledraw(Monitor *m, Client *c, int unused, int x, int w, int tabscheme, Ar
 		? getselschemefor(tabscheme)
 		: HIDDEN(c)
 		? SchemeHid
-		: c->isurgent
+		: ISURGENT(c)
 		? SchemeUrg
 		: tabscheme
 	);

@@ -84,10 +84,10 @@ dump_client(yajl_gen gen, Client *c)
     YSTR("states"); YMAP(
       YSTR("is_fixed"); YBOOL(ISFIXED(c));
       YSTR("is_floating"); YBOOL(ISFLOATING(c));
-      YSTR("is_urgent"); YBOOL(c->isurgent);
-      YSTR("never_focus"); YBOOL(c->neverfocus);
-      YSTR("old_state"); YBOOL(c->oldstate);
-      YSTR("is_fullscreen"); YBOOL(c->isfullscreen);
+      YSTR("is_urgent"); YBOOL(ISURGENT(c));
+      YSTR("never_focus"); YBOOL(NEVERFOCUS(c));
+      YSTR("old_state"); YBOOL(WASFLOATING(c));
+      YSTR("is_fullscreen"); YBOOL(ISFULLSCREEN(c));
     )
   )
   // clang-format on
