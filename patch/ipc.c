@@ -65,7 +65,7 @@ setstatus(const Arg *arg)
 	Monitor *m;
 	#if BAR_EXTRASTATUS_PATCH
 	if (arg->v == NULL) {
-		strcpy(stext, "dwm-"VERSION);
+		strcpy(stext, "dawn-"VERSION);
 		estext[0] = '\0';
 	} else {
 		strcpy(rawstext, arg->v);
@@ -89,12 +89,12 @@ setstatus(const Arg *arg)
 	}
 	#elif BAR_STATUSCMD_PATCH
 	if (!gettextprop(root, XA_WM_NAME, rawstext, sizeof(rawstext)))
-		strcpy(stext, "dwm-"VERSION);
+		strcpy(stext, "dawn-"VERSION);
 	else
 		copyvalidchars(stext, rawstext);
 	#else
 	if (!gettextprop(root, XA_WM_NAME, stext, sizeof(stext)))
-		strcpy(stext, "dwm-"VERSION);
+		strcpy(stext, "dawn-"VERSION);
 	#endif // BAR_EXTRASTATUS_PATCH | BAR_STATUSCMD_PATCH
 	for (m = mons; m; m = m->next)
 		drawbar(m);

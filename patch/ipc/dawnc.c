@@ -13,9 +13,9 @@
 
 #define IPC_MAGIC "DAWN-IPC"
 // clang-format off
-#define IPC_MAGIC_ARR { 'D', 'W', 'M', '-', 'I', 'P', 'C' }
+#define IPC_MAGIC_ARR { 'D', 'A', 'W', 'N', '-', 'I', 'P', 'C' }
 // clang-format on
-#define IPC_MAGIC_LEN 7  // Not including null char
+#define IPC_MAGIC_LEN 8  // Not including null char
 
 #define IPC_EVENT_TAG_CHANGE "tag_change_event"
 #define IPC_EVENT_CLIENT_FOCUS_CHANGE "client_focus_change_event"
