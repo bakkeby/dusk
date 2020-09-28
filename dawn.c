@@ -1,12 +1,12 @@
 /* See LICENSE file for copyright and license details.
  *
- * dynamic window manager is designed like any other X client as well. It is
- * driven through handling X events. In contrast to other X clients, a window
- * manager selects for SubstructureRedirectMask on the root window, to receive
- * events about window (dis-)appearance. Only one X connection at a time is
- * allowed to select for this event mask.
+ * The dawn dynamic window manager is designed like any other X client as well.
+ * It is driven through handling X events. In contrast to other X clients, a
+ * window manager selects for SubstructureRedirectMask on the root window, to
+ * receive events about window (dis-)appearance. Only one X connection at a
+ * time is allowed to select for this event mask.
  *
- * The event handlers of dwm are organized in an array which is accessed
+ * The event handlers of dawn are organized in an array which is accessed
  * whenever a new event has been fetched. This allows event dispatching
  * in O(1) time.
  *
@@ -1029,7 +1029,7 @@ clientmessage(XEvent *e)
 			updatesystrayicongeom(c, wa.width, wa.height);
 			XAddToSaveSet(dpy, c->win);
 			XSelectInput(dpy, c->win, StructureNotifyMask | PropertyChangeMask | ResizeRedirectMask);
-			XClassHint ch = {"dwmsystray", "dwmsystray"};
+			XClassHint ch = {"dawnsystray", "dawnsystray"};
 			XSetClassHint(dpy, c->win, &ch);
 			XReparentWindow(dpy, c->win, systray->win, 0, 0);
 			/* use parents background color */
@@ -2053,6 +2053,10 @@ manage(Window w, XWindowAttributes *wa)
 	arrange(c->mon);
 	#endif // SWALLOW_PATCH
 	focus(NULL);
+
+	Atom target = XInternAtom(dpy, "_IS_FLOATING", 0);
+	unsigned int floating[1] = {ISFLOATING(c) ? 1 : 0};
+	XChangeProperty(dpy, c->win, target, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)floating, 1);
 }
 
 void
@@ -2290,7 +2294,7 @@ quit(const Arg *arg)
 		running = 0;
 	}
 	else
-		printf("[dwm] not exiting (n=%d)\n", n);
+		printf("[dawn] not exiting (n=%d)\n", n);
 
 	free(junk);
 	#else
@@ -3229,6 +3233,10 @@ togglefloating(const Arg *arg)
 	#endif // SAVEFLOATS_PATCH
 	}
 	arrange(c->mon);
+
+	Atom target = XInternAtom(dpy, "_IS_FLOATING", 0);
+	unsigned int floating[1] = {ISFLOATING(c) ? 1 : 0};
+	XChangeProperty(dpy, selmon->sel->win, target, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)floating, 1);
 }
 
 void
@@ -3457,7 +3465,7 @@ updatebars(void)
 		#endif // BAR_ALPHA_PATCH
 		.event_mask = ButtonPressMask|ExposureMask
 	};
-	XClassHint ch = {"dwm", "dwm"};
+	XClassHint ch = {"dawn", "dawn"};
 	for (m = mons; m; m = m->next) {
 		for (bar = m->bar; bar; bar = bar->next) {
 			if (bar->external)
@@ -3703,7 +3711,7 @@ updatestatus(void)
 	Monitor *m;
 	#if BAR_EXTRASTATUS_PATCH
 	if (!gettextprop(root, XA_WM_NAME, rawstext, sizeof(rawstext))) {
-		strcpy(stext, "dwm-"VERSION);
+		strcpy(stext, "dawn-"VERSION);
 		estext[0] = '\0';
 	} else {
 		char *e = strchr(rawstext, statussep);
@@ -3726,12 +3734,12 @@ updatestatus(void)
 	}
 	#elif BAR_STATUSCMD_PATCH
 	if (!gettextprop(root, XA_WM_NAME, rawstext, sizeof(rawstext)))
-		strcpy(stext, "dwm-"VERSION);
+		strcpy(stext, "dawn-"VERSION);
 	else
 		copyvalidchars(stext, rawstext);
 	#else
 	if (!gettextprop(root, XA_WM_NAME, stext, sizeof(stext)))
-		strcpy(stext, "dwm-"VERSION);
+		strcpy(stext, "dawn-"VERSION);
 	#endif // BAR_EXTRASTATUS_PATCH | BAR_STATUSCMD_PATCH
 	for (m = mons; m; m = m->next)
 		drawbar(m);
@@ -3854,7 +3862,7 @@ xerror(Display *dpy, XErrorEvent *ee)
 	|| (ee->request_code == X_GrabKey && ee->error_code == BadAccess)
 	|| (ee->request_code == X_CopyArea && ee->error_code == BadDrawable))
 		return 0;
-	fprintf(stderr, "dwm: fatal error: request code=%d, error code=%d\n",
+	fprintf(stderr, "dawn: fatal error: request code=%d, error code=%d\n",
 		ee->request_code, ee->error_code);
 	return xerrorxlib(dpy, ee); /* may call exit */
 }
@@ -3870,7 +3878,7 @@ xerrordummy(Display *dpy, XErrorEvent *ee)
 int
 xerrorstart(Display *dpy, XErrorEvent *ee)
 {
-	die("dwm: another window manager is already running");
+	die("dawn: another window manager is already running");
 	return -1;
 }
 
@@ -3938,7 +3946,7 @@ main(int argc, char *argv[])
 	#if CMDCUSTOMIZE_PATCH
 	for (int i=1;i<argc;i+=1)
 		if (!strcmp("-v", argv[i]))
-			die("dwm-"VERSION);
+			die("dawn-"VERSION);
 		else if (!strcmp("-h", argv[i]) || !strcmp("--help", argv[i]))
 			die(help());
 		else if (!strcmp("-fn", argv[i])) /* font set */
@@ -3981,17 +3989,17 @@ main(int argc, char *argv[])
 		else die(help());
 	#else
 	if (argc == 2 && !strcmp("-v", argv[1]))
-		die("dwm-"VERSION);
+		die("dawn-"VERSION);
 	else if (argc != 1)
-		die("usage: dwm [-v]");
+		die("usage: dawn [-v]");
 	#endif // CMDCUSTOMIZE_PATCH
 	if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
 		fputs("warning: no locale support\n", stderr);
 	if (!(dpy = XOpenDisplay(NULL)))
-		die("dwm: cannot open display");
+		die("dawn: cannot open display");
 	#if SWALLOW_PATCH
 	if (!(xcon = XGetXCBConnection(dpy)))
-		die("dwm: cannot get xcb connection\n");
+		die("dawn: cannot get xcb connection\n");
 	#endif // SWALLOW_PATCH
 	checkotherwm();
 	#if XRDB_PATCH
