@@ -757,7 +757,7 @@ applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact)
 		if (*x + *w + 2 * c->bw < 0)
 			*x = 0;
 		if (*y + *h + 2 * c->bw < 0)
-			*y = 0;f
+			*y = 0;
 	} else {
 		if (*x >= m->wx + m->ww)
 			*x = m->wx + m->ww - WIDTH(c);
@@ -1813,7 +1813,7 @@ grabbuttons(Client *c, int focused)
 		for (i = 0; i < LENGTH(buttons); i++)
 			if (buttons[i].click == ClkClientWin
 			#if NO_MOD_BUTTONS_PATCH
-				&& (nomodbuttons || buttons[i].mask != 0)
+				&& ((nomodbuttons && !ONLYMODBUTTONS(c)) || buttons[i].mask != 0)
 			#endif // NO_MOD_BUTTONS_PATCH
 			)
 				for (j = 0; j < LENGTH(modifiers); j++)
@@ -1936,10 +1936,10 @@ manage(Window w, XWindowAttributes *wa)
 
 	updatetitle(c);
 	if (XGetTransientForHint(dpy, w, &trans) && (t = wintoclient(trans))) {
-		addflag(c, Transient)
+		addflag(c, Transient);
+		addflag(c, Centered);
 		c->mon = t->mon;
 		c->tags = t->tags;
-		c->iscentered = 1;
 	} else {
 		c->mon = selmon;
 	}
@@ -1951,10 +1951,10 @@ manage(Window w, XWindowAttributes *wa)
 	#endif // SETBORDERPX_PATCH
 	#if CENTER_PATCH
 	if (c->x == c->mon->wx && c->y == c->mon->wy)
-		c->iscentered = 1;
+		addflag(c, Centered);
 	#endif // CENTER_PATCH
 
-	if (!ISTRANSIENT(c))
+	if (!ISTRANSIENT(c)) {
 		applyrules(c);
 		#if SWALLOW_PATCH
 		term = termforwin(c);

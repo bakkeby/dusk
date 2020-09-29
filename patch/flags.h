@@ -20,6 +20,7 @@ enum {
 	NoSwallow = 1 << 11,
 	Locked = 1 << 12, // used by setfullscreen, prevents state change
 	Transient = 1 << 13, // whether the client has the transient or hint
+	OnlyModButtons = 1 << 14, // if enabled, allows buttons without modifiers to be used
 } flags; /* flags */
 // 100000001110
 //          \\\- floating
@@ -39,6 +40,7 @@ enum {
 #define ISURGENT(C) (C->flags & Urgent)
 #define NEVERFOCUS(C) (C->flags & NeverFocus)
 #define NOSWALLOW(C) (C->flags & NoSwallow)
+#define ONLYMODBUTTONS(C) (C->flags & OnlyModButtons)
 
 #define WASFLOATING(C) (C->prevflags & Floating)
 
