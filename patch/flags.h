@@ -19,6 +19,7 @@ enum {
 	Terminal = 1 << 10,
 	NoSwallow = 1 << 11,
 	Locked = 1 << 12, // used by setfullscreen, prevents state change
+	Transient = 1 << 13, // whether the client has the transient or hint
 } flags; /* flags */
 // 100000001110
 //          \\\- floating
@@ -34,6 +35,7 @@ enum {
 #define ISFULLSCREEN(C) (C->flags & FullScreen)
 #define ISPERMANENT(C) (C->flags & Permanent)
 #define ISTERMINAL(C) (C->flags & Terminal)
+#define ISTRANSIENT(C) (C->flags & Transient)
 #define ISURGENT(C) (C->flags & Urgent)
 #define NEVERFOCUS(C) (C->flags & NeverFocus)
 #define NOSWALLOW(C) (C->flags & NoSwallow)

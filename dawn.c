@@ -757,7 +757,7 @@ applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact)
 		if (*x + *w + 2 * c->bw < 0)
 			*x = 0;
 		if (*y + *h + 2 * c->bw < 0)
-			*y = 0;
+			*y = 0;f
 	} else {
 		if (*x >= m->wx + m->ww)
 			*x = m->wx + m->ww - WIDTH(c);
@@ -1936,27 +1936,25 @@ manage(Window w, XWindowAttributes *wa)
 
 	updatetitle(c);
 	if (XGetTransientForHint(dpy, w, &trans) && (t = wintoclient(trans))) {
+		addflag(c, Transient)
 		c->mon = t->mon;
 		c->tags = t->tags;
-		#if SETBORDERPX_PATCH
-		c->bw = c->mon->borderpx;
-		#else
-		c->bw = borderpx;
-		#endif // SETBORDERPX_PATCH
-		#if CENTER_TRANSIENT_WINDOWS_BY_PARENT_PATCH
-		c->x = t->x + WIDTH(t) / 2 - WIDTH(c) / 2;
-		c->y = t->y + HEIGHT(t) / 2 - HEIGHT(c) / 2;
-		#elif CENTER_TRANSIENT_WINDOWS_PATCH
-		c->x = c->mon->wx + (c->mon->ww - WIDTH(c)) / 2;
-		c->y = c->mon->wy + (c->mon->wh - HEIGHT(c)) / 2;
-		#endif // CENTER_TRANSIENT_WINDOWS_PATCH | CENTER_TRANSIENT_WINDOWS_BY_PARENT_PATCH
+		c->iscentered = 1;
 	} else {
 		c->mon = selmon;
-		#if SETBORDERPX_PATCH
-		c->bw = c->mon->borderpx;
-		#else
-		c->bw = borderpx;
-		#endif // SETBORDERPX_PATCH
+	}
+
+	#if SETBORDERPX_PATCH
+	c->bw = c->mon->borderpx;
+	#else
+	c->bw = borderpx;
+	#endif // SETBORDERPX_PATCH
+	#if CENTER_PATCH
+	if (c->x == c->mon->wx && c->y == c->mon->wy)
+		c->iscentered = 1;
+	#endif // CENTER_PATCH
+
+	if (!ISTRANSIENT(c))
 		applyrules(c);
 		#if SWALLOW_PATCH
 		term = termforwin(c);
@@ -1984,7 +1982,8 @@ manage(Window w, XWindowAttributes *wa)
 	#endif // BAR_FLEXWINTITLE_PATCH
 	configure(c); /* propagates border_width, if size doesn't change */
 
-	//updatesizehints(c); // commented due to floatpos
+	//updatesizehints(c); // commented due to floatpos, TODO figure out a way to keep this
+	// does it HAVE to be after configure?
 
 	/* If the client indicates that it is in fullscreen, or if the FullScreen flag has been
 	 * explictly set via client rules, then enable fullscreen now. */
@@ -1998,8 +1997,14 @@ manage(Window w, XWindowAttributes *wa)
 	#endif // DECORATION_HINTS_PATCH
 
 	if (ISCENTERED(c)) {
-		c->x = c->mon->wx + (c->mon->ww - WIDTH(c)) / 2;
-		c->y = c->mon->wy + (c->mon->wh - HEIGHT(c)) / 2;
+		if (ISTRANSIENT(c)) {
+			/* Transient windows are centered within the geometry of the parent window */
+			c->x = t->x + WIDTH(t) / 2 - WIDTH(c) / 2;
+			c->y = t->y + HEIGHT(t) / 2 - HEIGHT(c) / 2;
+		} else {
+			c->x = c->mon->wx + (c->mon->ww - WIDTH(c)) / 2;
+			c->y = c->mon->wy + (c->mon->wh - HEIGHT(c)) / 2;
+		}
 	}
 
 	#if SAVEFLOATS_PATCH
