@@ -48,15 +48,6 @@
 #if BAR_TAGS_PATCH
 #include "bar_tags.h"
 #endif
-#if BAR_TAGGRID_PATCH
-#include "bar_taggrid.h"
-#endif
-#if BAR_WINTITLE_PATCH
-#include "bar_wintitle.h"
-#endif
-#if BAR_FANCYBAR_PATCH
-#include "bar_fancybar.h"
-#endif
 #if BAR_FLEXWINTITLE_PATCH
 #include "bar_flexwintitle.h"
 #if BAR_WINTITLE_FLOATING_PATCH
@@ -66,9 +57,6 @@
 #include "bar_wintitle_hidden.h"
 #endif
 #endif // BAR_FLEXWINTITLE_PATCH
-#if BAR_AWESOMEBAR_PATCH
-#include "bar_awesomebar.h"
-#endif
 #if BAR_SYSTRAY_PATCH
 #include "bar_systray.h"
 #endif

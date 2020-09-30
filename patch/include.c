@@ -45,20 +45,11 @@
 #if BAR_STATUSCOLORS_PATCH
 #include "bar_statuscolors.c"
 #endif
-#if BAR_TABGROUPS_PATCH
-#include "bar_tabgroups.c"
-#endif
 #if BAR_TAGS_PATCH
 #include "bar_tags.c"
 #endif
 #if BAR_TAGGRID_PATCH
 #include "bar_taggrid.c"
-#endif
-#if BAR_WINTITLE_PATCH
-#include "bar_wintitle.c"
-#endif
-#if BAR_FANCYBAR_PATCH
-#include "bar_fancybar.c"
 #endif
 #if BAR_FLEXWINTITLE_PATCH
 #include "bar_flexwintitle.c"
@@ -69,9 +60,6 @@
 #include "bar_wintitle_hidden.c"
 #endif
 #endif // BAR_FLEXWINTITLE_PATCH
-#if BAR_AWESOMEBAR_PATCH
-#include "bar_awesomebar.c"
-#endif
 #if BAR_SYSTRAY_PATCH
 #include "bar_systray.c"
 #endif
