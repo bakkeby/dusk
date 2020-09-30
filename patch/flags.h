@@ -12,15 +12,16 @@ enum {
 	NeverFocus = 1 << 3,
 	FullScreen = 1 << 4,
 	FakeFullScreen = 1 << 5,
-	Centered = 1 << 6,
-	Permanent = 1 << 7, // client can't be killed
-	Sticky = 1 << 8, // client shows on all tags
-	Steam = 1 << 9,
-	Terminal = 1 << 10,
-	NoSwallow = 1 << 11,
-	Locked = 1 << 12, // used by setfullscreen, prevents state change
-	Transient = 1 << 13, // whether the client has the transient or hint
-	OnlyModButtons = 1 << 14, // if enabled, allows buttons without modifiers to be used
+	RestoreFakeFullScreen = 1 << 6,
+	Centered = 1 << 7,
+	Permanent = 1 << 8, // client can't be killed
+	Sticky = 1 << 9, // client shows on all tags
+	Steam = 1 << 10,
+	Terminal = 1 << 11,
+	NoSwallow = 1 << 12,
+	Locked = 1 << 13, // used by setfullscreen, prevents state change
+	Transient = 1 << 14, // whether the client has the transient or hint
+	OnlyModButtons = 1 << 15, // if enabled, allows buttons without modifiers to be used
 } flags; /* flags */
 // 100000001110
 //          \\\- floating
@@ -34,6 +35,7 @@ enum {
 #define ISSTICKY(C) (C->flags & Sticky)
 #define ISCENTERED(C) (C->flags & Centered)
 #define ISFULLSCREEN(C) (C->flags & FullScreen)
+#define ISFAKEFULLSCREEN(C) (C->flags & FakeFullScreen)
 #define ISPERMANENT(C) (C->flags & Permanent)
 #define ISTERMINAL(C) (C->flags & Terminal)
 #define ISTRANSIENT(C) (C->flags & Transient)
@@ -41,8 +43,10 @@ enum {
 #define NEVERFOCUS(C) (C->flags & NeverFocus)
 #define NOSWALLOW(C) (C->flags & NoSwallow)
 #define ONLYMODBUTTONS(C) (C->flags & OnlyModButtons)
+#define RESTOREFAKEFULLSCREEN(C) (C->flags & RestoreFakeFullScreen)
 
 #define WASFLOATING(C) (C->prevflags & Floating)
+#define WASFAKEFULLSCREEN(C) (C->prevflags & FakeFullScreen)
 
 #define SETFLOATING(C) (addflag(C, Floating))
 #define SETFULLSCREEN(C) (addflag(C, FullScreen))
@@ -54,4 +58,8 @@ enum {
 // hmm, switchtag _rules_ has multiple values 1, 2, 3, 4, c->switchtag holds the original tag info
 // and noswallow can be negative to indicate that flag was not explicitly set? review this
 // fakefullscreen can be 0, 1, 2, 3 where 2 is the same as wasfullscreen, 3 being a special case
+// for when the client is in fullscreen, it was in fakefullscreen, and we get a fullscreen notification
+// via clientmessage (essentially, 1) enable fake fullscreen for the client, 2) go actual fullscreen,
+// 3) press F11 to have the client leave fullscreen --> expected outcome is that client is not in
+// fullscreen anymore, but fakefullscreen is still enabled
 

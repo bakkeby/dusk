@@ -55,7 +55,7 @@ unswallow(Client *c)
 	XDeleteProperty(dpy, c->win, netatom[NetClientList]);
 
 	/* unfullscreen the client */
-	setfullscreen(c, 0);
+	setfullscreen(c, 0, 0);
 	updatetitle(c);
 	arrange(c->mon);
 	XMapWindow(dpy, c->win);

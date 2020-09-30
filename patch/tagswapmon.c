@@ -38,7 +38,7 @@ tagswapmon(const Arg *arg)
 		attach(c);
 		attachstack(c);
 		if (ISFULLSCREEN(c)) {
-			if (c->fakefullscreen != 1) {
+			if (!ISFAKEFULLSCREEN(c)) {
 				resizeclient(c, c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
 				XRaiseWindow(dpy, c->win);
 			}
@@ -52,7 +52,7 @@ tagswapmon(const Arg *arg)
 		attach(c);
 		attachstack(c);
 		if (ISFULLSCREEN(c)) {
-			if (c->fakefullscreen != 1) {
+			if (!ISFAKEFULLSCREEN(c)) {
 				resizeclient(c, c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
 				XRaiseWindow(dpy, c->win);
 			}

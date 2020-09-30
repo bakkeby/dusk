@@ -54,6 +54,8 @@
 void
 addflag(Client *c, const unsigned int flag)
 {
+	// if (ISLOCKED(c))
+	// 	return;
 	c->prevflags = (c->prevflags & ~flag) | (c->flags & flag);
 	c->flags |= flag;
 
@@ -76,6 +78,9 @@ setflag(Client *c, const unsigned int flag, const int value)
 void
 removeflag(Client *c, const unsigned int flag)
 {
+	// if (ISLOCKED(c) && flag != Locked)
+	// 	return;
+
 	c->prevflags = (c->prevflags & ~flag) | (c->flags & flag);
 	c->flags &= ~flag;
 }
