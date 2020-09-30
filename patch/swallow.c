@@ -13,9 +13,9 @@ swallow(Client *p, Client *c)
 {
 	Client *s;
 
-	if (c->noswallow > 0 || ISTERMINAL(c))
+	if (NOSWALLOW(c) || ISTERMINAL(c))
 		return 0;
-	if (c->noswallow < 0 && !swallowfloating && ISFLOATING(c))
+	if (!RULED(c) && !swallowfloating && ISFLOATING(c))
 		return 0;
 
 	detach(c);

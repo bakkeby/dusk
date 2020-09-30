@@ -300,11 +300,7 @@ struct Client {
 	#if SWITCHTAG_PATCH
 	unsigned int switchtag; /* holds the original tag info from when the client was opened */
 	#endif // SWITCHTAG_PATCH
-	#if AUTORESIZE_PATCH
-	int needresize;
-	#endif // AUTORESIZE_PATCH
 	#if SWALLOW_PATCH
-	int noswallow;
 	pid_t pid;
 	#endif // SWALLOW_PATCH
 	Client *next;
@@ -415,9 +411,6 @@ typedef struct {
 	#if SWITCHTAG_PATCH
 	int switchtag;
 	#endif // SWITCHTAG_PATCH
-	#if SWALLOW_PATCH
-	int noswallow;
-	#endif // SWALLOW_PATCH
 	const char *floatpos;
 	int monitor;
 } Rule;
@@ -653,16 +646,12 @@ applyrules(Client *c)
 	XClassHint ch = { NULL, NULL };
 
 	/* rule matching */
-	#if SWALLOW_PATCH
-	c->noswallow = -1;
-	#endif // SWALLOW_PATCH
 	c->tags = 0;
 	XGetClassHint(dpy, c->win, &ch);
 	class    = ch.res_class ? ch.res_class : broken;
 	instance = ch.res_name  ? ch.res_name  : broken;
 	wintype  = getatomprop(c, netatom[NetWMWindowType]);
 	gettextprop(c->win, wmatom[WMWindowRole], role, sizeof(role));
-	// long flags;
 
 	for (i = 0; i < LENGTH(rules); i++) {
 		r = &rules[i];
@@ -672,10 +661,7 @@ applyrules(Client *c)
 		&& (!r->instance || strstr(instance, r->instance))
 		&& (!r->wintype || wintype == XInternAtom(dpy, r->wintype, False)))
 		{
-			c->flags = r->flags;
-			#if SWALLOW_PATCH
-			c->noswallow = r->noswallow;
-			#endif // SWALLOW_PATCH
+			c->flags = Ruled & r->flags;
 			c->tags |= r->tags;
 
 			if ((r->tags & SPTAGMASK) && ISFLOATING(c)) {
@@ -691,11 +677,7 @@ applyrules(Client *c)
 				setfloatpos(c, r->floatpos);
 
 			#if SWITCHTAG_PATCH
-			if (r->switchtag && (
-				NOSWALLOW(c) ||
-				!termforwin(c) ||
-				!(ISFLOATING(c) && swallowfloating && c->noswallow < 0))) // TODO review this
-			{
+			if (r->switchtag && (NOSWALLOW(c) || !termforwin(c))) {
 				selmon = c->mon;
 				if (r->switchtag == 2 || r->switchtag == 4)
 					newtagset = c->mon->tagset[c->mon->seltags] ^ c->tags;
@@ -708,26 +690,17 @@ applyrules(Client *c)
 						c->switchtag = c->mon->tagset[c->mon->seltags];
 					if (r->switchtag == 1 || r->switchtag == 3) {
 						pertagview(&((Arg) { .ui = newtagset }));
-						arrange(c->mon);
 					} else {
 						c->mon->tagset[c->mon->seltags] = newtagset;
-						arrange(c->mon);
 					}
 				}
 			}
 			#endif // SWITCHTAG_PATCH
-			#if ONLY_ONE_RULE_MATCH_PATCH
-			break;
-			#endif // ONLY_ONE_RULE_MATCH_PATCH
+
+			break; // only allow one rule match
 		}
 	}
 
-	// #if STEAM_PATCH
-	// if (strstr(class, "Steam") || strstr(class, "steam_app_"))
-	// 	addflag(c, Steam);
-	// #endif // STEAM_PATCH
-
-	// setflags(c, flags);
 	if (ch.res_class)
 		XFree(ch.res_class);
 	if (ch.res_name)
@@ -1178,10 +1151,8 @@ configurerequest(XEvent *e)
 				configure(c);
 			if (ISVISIBLE(c))
 				XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
-			#if AUTORESIZE_PATCH
 			else
-				c->needresize = 1;
-			#endif // AUTORESIZE_PATCH
+				addflag(c, NeedResize);
 		} else
 			configure(c);
 	} else {
@@ -3024,16 +2995,12 @@ showhide(Client *c)
 			return;
 		}
 		#endif // SAVEFLOATS_PATCH
-		#if AUTORESIZE_PATCH
-		if (c->needresize) {
-			c->needresize = 0;
+		if (NEEDRESIZE(c)) {
+			removeflag(c, NeedResize);
 			XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
 		} else {
 			XMoveWindow(dpy, c->win, c->x, c->y);
 		}
-		#else
-		XMoveWindow(dpy, c->win, c->x, c->y);
-		#endif // AUTORESIZE_PATCH
 		if ((!c->mon->lt[c->mon->sellt]->arrange || ISFLOATING(c)) && !ISFULLSCREEN(c))
 			resize(c, c->x, c->y, c->w, c->h, 0);
 		showhide(c->snext);
