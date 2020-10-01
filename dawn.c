@@ -288,9 +288,7 @@ struct Client {
 	int basew, baseh, incw, inch, maxw, maxh, minw, minh;
 	int bw, oldbw;
 	unsigned int tags;
-	#if SWITCHTAG_PATCH
-	unsigned int switchtag; /* holds the original tag info from when the client was opened */
-	#endif // SWITCHTAG_PATCH
+	unsigned int reverttags; /* holds the original tag info from when the client was opened */
 	#if SWALLOW_PATCH
 	pid_t pid;
 	#endif // SWALLOW_PATCH
@@ -399,21 +397,11 @@ typedef struct {
 	const char *wintype;
 	unsigned int tags;
 	unsigned int flags;
-	#if SWITCHTAG_PATCH
-	int switchtag;
-	#endif // SWITCHTAG_PATCH
 	const char *floatpos;
 	int monitor;
 } Rule;
 
 #define RULE(...) { .monitor = -1, ##__VA_ARGS__ },
-
-/* Cross patch compatibility rule macro helper macros */
-#if SWITCHTAG_PATCH
-#define SWITCHTAG , .switchtag = 1
-#else
-#define SWITCHTAG
-#endif // SWITCHTAG_PATCH
 
 #if MONITOR_RULES_PATCH
 typedef struct {
@@ -629,9 +617,7 @@ applyrules(Client *c)
 	Atom wintype;
 	char role[64];
 	unsigned int i;
-	#if SWITCHTAG_PATCH
 	unsigned int newtagset;
-	#endif // SWITCHTAG_PATCH
 	const Rule *r;
 	Monitor *m;
 	XClassHint ch = { NULL, NULL };
@@ -667,26 +653,21 @@ applyrules(Client *c)
 			if (ISFLOATING(c) && r->floatpos)
 				setfloatpos(c, r->floatpos);
 
-			#if SWITCHTAG_PATCH
-			if (r->switchtag && (NOSWALLOW(c) || !termforwin(c))) {
+			if ((SWITCHTAG(c) || ENABLETAG(c)) && (NOSWALLOW(c) || !termforwin(c))) {
 				selmon = c->mon;
-				if (r->switchtag == 2 || r->switchtag == 4)
-					newtagset = c->mon->tagset[c->mon->seltags] ^ c->tags;
-				else
-					newtagset = c->tags;
+				newtagset = SWITCHTAG(c) ? c->tags : c->mon->tagset[c->mon->seltags] | c->tags;
 
 				/* Switch to the client's tag, but only if that tag is not already shown */
 				if (newtagset && !(c->tags & c->mon->tagset[c->mon->seltags])) {
-					if (r->switchtag == 3 || r->switchtag == 4)
-						c->switchtag = c->mon->tagset[c->mon->seltags];
-					if (r->switchtag == 1 || r->switchtag == 3) {
+					if (REVERTTAG(c))
+						c->reverttags = c->mon->tagset[c->mon->seltags];
+					if (SWITCHTAG(c)) {
 						pertagview(&((Arg) { .ui = newtagset }));
 					} else {
 						c->mon->tagset[c->mon->seltags] = newtagset;
 					}
 				}
 			}
-			#endif // SWITCHTAG_PATCH
 
 			break; // only allow one rule match
 		}
@@ -2566,10 +2547,8 @@ sendmon(Client *c, Monitor *m)
 	focus(NULL);
 	arrange(NULL);
 	#endif // SENDMON_KEEPFOCUS_PATCH
-	#if SWITCHTAG_PATCH
-	if (c->switchtag)
-		c->switchtag = 0;
-	#endif // SWITCHTAG_PATCH
+	if (c->reverttags)
+		c->reverttags = 0;
 }
 
 void
@@ -3106,10 +3085,10 @@ tag(const Arg *arg)
 
 	if (selmon->sel && arg->ui & TAGMASK) {
 		selmon->sel->tags = arg->ui & TAGMASK;
-		#if SWITCHTAG_PATCH
-		if (selmon->sel->switchtag)
-			selmon->sel->switchtag = 0;
-		#endif // SWITCHTAG_PATCH
+
+		if (selmon->sel->reverttags)
+			selmon->sel->reverttags = 0;
+
 		focus(NULL);
 		#if SWAPFOCUS_PATCH
 		selmon->pertag->prevclient[selmon->pertag->curtag] = NULL;
@@ -3326,9 +3305,7 @@ void
 unmanage(Client *c, int destroyed)
 {
 	Monitor *m = c->mon;
-	#if SWITCHTAG_PATCH
-	unsigned int switchtag = c->switchtag;
-	#endif // SWITCHTAG_PATCH
+	unsigned int reverttags = c->reverttags;
 	XWindowChanges wc;
 
 	#if SWALLOW_PATCH
@@ -3368,10 +3345,9 @@ unmanage(Client *c, int destroyed)
 	focus(NULL);
 	updateclientlist();
 	arrange(m);
-	#if SWITCHTAG_PATCH
-	if (switchtag && ((switchtag & TAGMASK) != selmon->tagset[selmon->seltags]))
-		view(&((Arg) { .ui = switchtag }));
-	#endif // SWITCHTAG_PATCH
+
+	if (reverttags && ((reverttags & TAGMASK) != selmon->tagset[selmon->seltags]))
+		view(&((Arg) { .ui = reverttags }));
 }
 
 void

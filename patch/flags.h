@@ -29,6 +29,9 @@ enum {
 	AttachAside = 1 << 20,
 	AttachBelow = 1 << 21,
 	AttachBottom = 1 << 22,
+	SwitchTag = 1 << 23, // automatically moves you to the tag of the newly opened application
+	EnableTag = 1 << 24, // enables the tag of the newly opened application in addition to your existing enabled tags
+	RevertTag = 1 << 25, // if SwitchTag or EnableTag, closing that window reverts the view back to what it was previously
 } flags; /* flags */
 
 #define ISFLOATING(C) (C->flags & Floating)
@@ -49,6 +52,9 @@ enum {
 #define ONLYMODBUTTONS(C) (C->flags & OnlyModButtons)
 #define RESTOREFAKEFULLSCREEN(C) (C->flags & RestoreFakeFullScreen)
 #define RULED(C) (C->flags & Ruled)
+#define SWITCHTAG(C) (C->flags & SwitchTag)
+#define ENABLETAG(C) (C->flags & EnableTag)
+#define REVERTTAG(C) (C->flags & RevertTag)
 
 #define WASFLOATING(C) (C->prevflags & Floating)
 #define WASFAKEFULLSCREEN(C) (C->prevflags & FakeFullScreen)
