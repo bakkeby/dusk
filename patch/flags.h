@@ -24,6 +24,11 @@ enum {
 	Transient = 1 << 15, // whether the client has the transient or hint
 	OnlyModButtons = 1 << 16, // if enabled, allows buttons without modifiers to be used
 	NeedResize = 1 << 17,
+	AttachMaster = 1 << 18,
+	AttachAbove = 1 << 19,
+	AttachAside = 1 << 20,
+	AttachBelow = 1 << 21,
+	AttachBottom = 1 << 22,
 } flags; /* flags */
 
 #define ISFLOATING(C) (C->flags & Floating)

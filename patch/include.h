@@ -48,6 +48,9 @@
 #if BAR_TAGS_PATCH
 #include "bar_tags.h"
 #endif
+#if BAR_TAGGRID_PATCH
+#include "bar_taggrid.h"
+#endif
 #if BAR_FLEXWINTITLE_PATCH
 #include "bar_flexwintitle.h"
 #if BAR_WINTITLE_FLOATING_PATCH
@@ -65,10 +68,7 @@
 #endif
 
 /* Other patches */
-#if ATTACHABOVE_PATCH || ATTACHASIDE_PATCH || ATTACHBELOW_PATCH || ATTACHBOTTOM_PATCH
 #include "attachx.h"
-#endif
-
 #include "cfacts.h"
 
 #if CMDCUSTOMIZE_PATCH

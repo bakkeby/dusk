@@ -72,17 +72,8 @@
 #define INTERSECT(x,y,w,h,m)    (MAX(0, MIN((x)+(w),(m)->wx+(m)->ww) - MAX((x),(m)->wx)) \
                                * MAX(0, MIN((y)+(h),(m)->wy+(m)->wh) - MAX((y),(m)->wy)))
 #endif // BAR_ANYBAR_PATCH
-#if ATTACHASIDE_PATCH && STICKY_PATCH
 #define ISVISIBLEONTAG(C, T)    ((C->tags & T) || (C->flags & Sticky))
 #define ISVISIBLE(C)            ISVISIBLEONTAG(C, C->mon->tagset[C->mon->seltags])
-#elif ATTACHASIDE_PATCH
-#define ISVISIBLEONTAG(C, T)    ((C->tags & T))
-#define ISVISIBLE(C)            ISVISIBLEONTAG(C, C->mon->tagset[C->mon->seltags])
-#elif STICKY_PATCH
-#define ISVISIBLE(C)            ((C->tags & C->mon->tagset[C->mon->seltags]) || (C->flags & Sticky))
-#else
-#define ISVISIBLE(C)            ((C->tags & C->mon->tagset[C->mon->seltags]))
-#endif // ATTACHASIDE_PATCH
 #define LENGTH(X)               (sizeof X / sizeof X[0])
 #define MOUSEMASK               (BUTTONMASK|PointerMotionMask)
 #define WIDTH(X)                ((X)->w + 2 * (X)->bw)
@@ -661,7 +652,7 @@ applyrules(Client *c)
 		&& (!r->instance || strstr(instance, r->instance))
 		&& (!r->wintype || wintype == XInternAtom(dpy, r->wintype, False)))
 		{
-			c->flags = Ruled & r->flags;
+			c->flags = Ruled | r->flags;
 			c->tags |= r->tags;
 
 			if ((r->tags & SPTAGMASK) && ISFLOATING(c)) {
@@ -1994,11 +1985,7 @@ manage(Window w, XWindowAttributes *wa)
 		XRaiseWindow(dpy, c->win);
 		XSetWindowBorder(dpy, w, scheme[SchemeNorm][ColFloat].pixel);
 	}
-	#if ATTACHABOVE_PATCH || ATTACHASIDE_PATCH || ATTACHBELOW_PATCH || ATTACHBOTTOM_PATCH
 	attachx(c);
-	#else
-	attach(c);
-	#endif
 	attachstack(c);
 	XChangeProperty(dpy, root, netatom[NetClientList], XA_WINDOW, 32, PropModeAppend,
 		(unsigned char *) &(c->win), 1);
@@ -2566,11 +2553,7 @@ sendmon(Client *c, Monitor *m)
 
 	if (!(c->tags & SPTAGMASK))
 		c->tags = m->tagset[m->seltags]; /* assign tags of target monitor */
-	#if ATTACHABOVE_PATCH || ATTACHASIDE_PATCH || ATTACHBELOW_PATCH || ATTACHBOTTOM_PATCH
 	attachx(c);
-	#else
-	attach(c);
-	#endif
 	attachstack(c);
 	#if SENDMON_KEEPFOCUS_PATCH
 	arrange(m);

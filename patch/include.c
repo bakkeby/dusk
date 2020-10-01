@@ -68,10 +68,7 @@
 #endif
 
 /* Other patches */
-#if ATTACHABOVE_PATCH || ATTACHASIDE_PATCH || ATTACHBELOW_PATCH || ATTACHBOTTOM_PATCH
 #include "attachx.c"
-#endif
-
 #include "cfacts.c"
 
 #if CMDCUSTOMIZE_PATCH
