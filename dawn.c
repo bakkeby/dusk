@@ -284,14 +284,10 @@ struct Client {
 	int bw, oldbw;
 	unsigned int tags;
 	unsigned int reverttags; /* holds the original tag info from when the client was opened */
-	#if SWALLOW_PATCH
 	pid_t pid;
-	#endif // SWALLOW_PATCH
 	Client *next;
 	Client *snext;
-	#if SWALLOW_PATCH
 	Client *swallowing;
-	#endif // SWALLOW_PATCH
 	Monitor *mon;
 	Window win;
 	#if IPC_PATCH
@@ -1322,10 +1318,8 @@ destroynotify(XEvent *e)
 
 	if ((c = wintoclient(ev->window)))
 		unmanage(c, 1);
-	#if SWALLOW_PATCH
 	else if ((c = swallowingclient(ev->window)))
 		unmanage(c->swallowing, 1);
-	#endif // SWALLOW_PATCH
 	#if BAR_SYSTRAY_PATCH
 	else if (enabled(Systray) && (c = wintosystrayicon(ev->window))) {
 		removesystrayicon(c);
@@ -1851,17 +1845,14 @@ void
 manage(Window w, XWindowAttributes *wa)
 {
 	Client *c, *t = NULL;
-	#if SWALLOW_PATCH
 	Client *term = NULL;
-	#endif // SWALLOW_PATCH
 	Window trans = None;
 	XWindowChanges wc;
 
 	c = ecalloc(1, sizeof(Client));
 	c->win = w;
-	#if SWALLOW_PATCH
 	c->pid = winpid(w);
-	#endif // SWALLOW_PATCH
+
 	/* geometry */
 	c->x = c->oldx = wa->x;
 	c->y = c->oldy = wa->y;
@@ -1892,11 +1883,9 @@ manage(Window w, XWindowAttributes *wa)
 
 	if (!ISTRANSIENT(c)) {
 		applyrules(c);
-		#if SWALLOW_PATCH
 		term = termforwin(c);
 		if (term)
 			c->mon = term->mon;
-		#endif // SWALLOW_PATCH
 	}
 
 	if (c->x + WIDTH(c) > c->mon->mx + c->mon->mw)
@@ -1983,12 +1972,8 @@ manage(Window w, XWindowAttributes *wa)
 	#else
 	XMapWindow(dpy, c->win);
 	#endif // BAR_WINTITLEACTIONS_PATCH
-	#if SWALLOW_PATCH
 	if (!(term && swallow(term, c)))
 		arrange(c->mon);
-	#else
-	arrange(c->mon);
-	#endif // SWALLOW_PATCH
 	focus(NULL);
 
 	Atom target = XInternAtom(dpy, "_IS_FLOATING", 0);
@@ -2473,10 +2458,8 @@ run(void)
 void
 scan(void)
 {
-	#if SWALLOW_PATCH
 	scanner = 1;
 	char swin[256];
-	#endif // SWALLOW_PATCH
 	unsigned int i, num;
 	Window d1, d2, *wins = NULL;
 	XWindowAttributes wa;
@@ -2493,10 +2476,8 @@ scan(void)
 			#endif // BAR_ANYBAR_PATCH
 			if (wa.map_state == IsViewable || getstate(wins[i]) == IconicState)
 				manage(wins[i], &wa);
-			#if SWALLOW_PATCH
 			else if (gettextprop(wins[i], netatom[NetClientList], swin, sizeof swin))
 				manage(wins[i], &wa);
-			#endif // SWALLOW_PATCH
 		}
 		for (i = 0; i < num; i++) { /* now the transients */
 			if (!XGetWindowAttributes(dpy, wins[i], &wa))
@@ -2507,9 +2488,7 @@ scan(void)
 		}
 		XFree(wins);
 	}
-	#if SWALLOW_PATCH
 	scanner = 0;
-	#endif // SWALLOW_PATCH
 }
 
 void
@@ -3304,7 +3283,6 @@ unmanage(Client *c, int destroyed)
 	unsigned int reverttags = c->reverttags;
 	XWindowChanges wc;
 
-	#if SWALLOW_PATCH
 	if (c->swallowing) {
 		unswallow(c);
 		return;
@@ -3318,7 +3296,6 @@ unmanage(Client *c, int destroyed)
 		focus(NULL);
 		return;
 	}
-	#endif // SWALLOW_PATCH
 
 	detach(c);
 	detachstack(c);
@@ -3334,10 +3311,10 @@ unmanage(Client *c, int destroyed)
 		XUngrabServer(dpy);
 	}
 	free(c);
-	#if SWALLOW_PATCH
+
 	if (s)
 		return;
-	#endif // SWALLOW_PATCH
+
 	focus(NULL);
 	updateclientlist();
 	arrange(m);
@@ -3931,10 +3908,10 @@ main(int argc, char *argv[])
 		fputs("warning: no locale support\n", stderr);
 	if (!(dpy = XOpenDisplay(NULL)))
 		die("dawn: cannot open display");
-	#if SWALLOW_PATCH
+
 	if (!(xcon = XGetXCBConnection(dpy)))
 		die("dawn: cannot get xcb connection\n");
-	#endif // SWALLOW_PATCH
+
 	checkotherwm();
 	#if XRDB_PATCH
 	XrmInitialize();
@@ -3945,11 +3922,7 @@ main(int argc, char *argv[])
 	#endif // COOL_AUTOSTART_PATCH
 	setup();
 #ifdef __OpenBSD__
-	#if SWALLOW_PATCH
 	if (pledge("stdio rpath proc exec ps", NULL) == -1)
-	#else
-	if (pledge("stdio rpath proc exec", NULL) == -1)
-	#endif // SWALLOW_PATCH
 		die("pledge");
 #endif /* __OpenBSD__ */
 	scan();

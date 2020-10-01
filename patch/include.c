@@ -175,9 +175,9 @@
 #if STICKY_PATCH
 #include "sticky.c"
 #endif
-#if SWALLOW_PATCH
+
 #include "swallow.c"
-#endif
+
 #if SWAPFOCUS_PATCH
 #include "swapfocus.c"
 #endif

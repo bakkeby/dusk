@@ -5,8 +5,9 @@ static int disabled(const long functionality);
 static void reload();
 
 enum {
-	SmartGaps = 1 << 0,
-	Systray = 1 << 1,
+	SmartGaps = 1 << 0, // enables no gaps if there is only one visible window
+	Systray = 1 << 1, // enables systray
+	SwallowFloating = 1 << 2, // means swallow floating windows by default
 
 
 } func_options;

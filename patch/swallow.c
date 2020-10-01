@@ -15,7 +15,7 @@ swallow(Client *p, Client *c)
 
 	if (NOSWALLOW(c) || ISTERMINAL(c))
 		return 0;
-	if (!RULED(c) && !swallowfloating && ISFLOATING(c))
+	if (!RULED(c) && disabled(SwallowFloating) && ISFLOATING(c))
 		return 0;
 
 	detach(c);
