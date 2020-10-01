@@ -2,6 +2,7 @@
 #include "bar_indicators.h"
 #include "bar_tagicons.h"
 #include "flags.h"
+#include "func.h"
 
 #if BAR_ALPHA_PATCH
 #include "bar_alpha.h"
@@ -41,9 +42,6 @@
 #endif
 #if BAR_STATUSCMD_PATCH
 #include "bar_statuscmd.h"
-#endif
-#if BAR_TABGROUPS_PATCH
-#include "bar_tabgroups.h"
 #endif
 #if BAR_TAGS_PATCH
 #include "bar_tags.h"

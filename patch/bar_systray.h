@@ -18,8 +18,8 @@
 /* enums */
 enum { Manager, Xembed, XembedInfo, XLast }; /* Xembed atoms */
 
-typedef struct Systray Systray;
-struct Systray {
+typedef struct SystrayWin SystrayWin;
+struct SystrayWin {
 	Window win;
 	Client *icons;
 	Bar *bar;

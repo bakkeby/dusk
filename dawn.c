@@ -221,13 +221,8 @@ struct ClientState {
 #endif // IPC_PATCH
 
 typedef union {
-	#if IPC_PATCH
 	long i;
 	unsigned long ui;
-	#else
-	int i;
-	unsigned int ui;
-	#endif // IPC_PATCH
 	float f;
 	const void *v;
 } Arg;
@@ -556,6 +551,7 @@ static int screen;
 static int sw, sh;           /* X display screen geometry width, height */
 static int bh;               /* bar geometry */
 static int lrpad;            /* sum of left and right padding for text */
+
 /* Some clients (e.g. alacritty) helpfully send configure requests with a new size or position
  * when they detect that they have been moved to another monitor. This can cause visual glitches
  * when moving (or resizing) client windows from one monitor to another. This variable is used
@@ -876,7 +872,7 @@ cleanup(void)
 	while (mons)
 		cleanupmon(mons);
 	#if BAR_SYSTRAY_PATCH
-	if (showsystray && systray) {
+	if (enabled(Systray) && systray) {
 		if (systray->win) {
 			XUnmapWindow(dpy, systray->win);
 			XDestroyWindow(dpy, systray->win);
@@ -945,7 +941,7 @@ clientmessage(XEvent *e)
 	int setfakefullscreen = 0;
 
 	#if BAR_SYSTRAY_PATCH
-	if (showsystray && systray && cme->window == systray->win && cme->message_type == netatom[NetSystemTrayOP]) {
+	if (enabled(Systray) && systray && cme->window == systray->win && cme->message_type == netatom[NetSystemTrayOP]) {
 		/* add systray icons */
 		if (cme->data.l[1] == SYSTEM_TRAY_REQUEST_DOCK) {
 			if (!(c = (Client *)calloc(1, sizeof(Client))))
@@ -1331,7 +1327,7 @@ destroynotify(XEvent *e)
 		unmanage(c->swallowing, 1);
 	#endif // SWALLOW_PATCH
 	#if BAR_SYSTRAY_PATCH
-	else if (showsystray && (c = wintosystrayicon(ev->window))) {
+	else if (enabled(Systray) && (c = wintosystrayicon(ev->window))) {
 		removesystrayicon(c);
 		drawbarwin(systray->bar);
 	}
@@ -2018,7 +2014,7 @@ maprequest(XEvent *e)
 
 	#if BAR_SYSTRAY_PATCH
 	Client *i;
-	if (showsystray && systray && (i = wintosystrayicon(ev->window))) {
+	if (enabled(Systray) && systray && (i = wintosystrayicon(ev->window))) {
 		sendevent(i->win, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_WINDOW_ACTIVATE, 0, systray->win, XEMBED_EMBEDDED_VERSION);
 		drawbarwin(systray->bar);
 	}
@@ -2166,7 +2162,7 @@ propertynotify(XEvent *e)
 	XPropertyEvent *ev = &e->xproperty;
 
 	#if BAR_SYSTRAY_PATCH
-	if (showsystray && (c = wintosystrayicon(ev->window))) {
+	if (enabled(Systray) && (c = wintosystrayicon(ev->window))) {
 		if (ev->atom == XA_WM_NORMAL_HINTS) {
 			updatesizehints(c);
 			updatesystrayicongeom(c, c->w, c->h);
@@ -3366,7 +3362,7 @@ unmapnotify(XEvent *e)
 		else
 			unmanage(c, 0);
 	#if BAR_SYSTRAY_PATCH
-	} else if (showsystray && (c = wintosystrayicon(ev->window))) {
+	} else if (enabled(Systray) && (c = wintosystrayicon(ev->window))) {
 		/* KLUDGE! sometimes icons occasionally unmap their windows, but do
 		 * _not_ destroy them. We map those windows back */
 		XMapRaised(dpy, c->win);

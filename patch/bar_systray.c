@@ -1,4 +1,4 @@
-static Systray *systray = NULL;
+static SystrayWin *systray = NULL;
 static unsigned long systrayorientation = _NET_SYSTEM_TRAY_ORIENTATION_HORZ;
 
 int
@@ -8,7 +8,7 @@ width_systray(Bar *bar, BarArg *a)
 	Client *i;
 	if (!systray)
 		return 1;
-	if (showsystray)
+	if (enabled(Systray))
 		for (i = systray->icons; i; w += i->w + systrayspacing, i = i->next);
 	return w ? w + lrpad - systrayspacing : 0;
 }
@@ -16,7 +16,7 @@ width_systray(Bar *bar, BarArg *a)
 int
 draw_systray(Bar *bar, BarArg *a)
 {
-	if (!showsystray)
+	if (disabled(Systray))
 		return 0;
 
 	XSetWindowAttributes wa;
@@ -25,8 +25,8 @@ draw_systray(Bar *bar, BarArg *a)
 
 	if (!systray) {
 		/* init systray */
-		if (!(systray = (Systray *)calloc(1, sizeof(Systray))))
-			die("fatal: could not malloc() %u bytes\n", sizeof(Systray));
+		if (!(systray = (SystrayWin *)calloc(1, sizeof(SystrayWin))))
+			die("fatal: could not malloc() %u bytes\n", sizeof(SystrayWin));
 
 		wa.override_redirect = True;
 		wa.event_mask = ButtonPressMask|ExposureMask;
@@ -100,7 +100,7 @@ removesystrayicon(Client *i)
 {
 	Client **ii;
 
-	if (!showsystray || !i)
+	if (disabled(Systray) || !i)
 		return;
 	for (ii = &systray->icons; *ii && *ii != i; ii = &(*ii)->next);
 	if (ii)
@@ -156,7 +156,7 @@ updatesystrayiconstate(Client *i, XPropertyEvent *ev)
 	long flags;
 	int code = 0;
 
-	if (!showsystray || !systray || !i || ev->atom != xatom[XembedInfo] ||
+	if (disabled(Systray) || !systray || !i || ev->atom != xatom[XembedInfo] ||
 			!(flags = getatomprop(i, xatom[XembedInfo])))
 		return;
 
@@ -184,7 +184,7 @@ wintosystrayicon(Window w)
 	if (!systray)
 		return NULL;
 	Client *i = NULL;
-	if (!showsystray || !w)
+	if (disabled(Systray) || !w)
 		return i;
 	for (i = systray->icons; i && i->win != w; i = i->next);
 	return i;
