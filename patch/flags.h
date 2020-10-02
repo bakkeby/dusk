@@ -17,7 +17,7 @@ enum {
 	Centered = 1 << 8,
 	Permanent = 1 << 9, // client can't be killed
 	Sticky = 1 << 10, // client shows on all tags
-	Steam = 1 << 11,
+	// Steam = 1 << 11,
 	Terminal = 1 << 12,
 	NoSwallow = 1 << 13,
 	Locked = 1 << 14, // used by setfullscreen, prevents state change
@@ -32,12 +32,20 @@ enum {
 	SwitchTag = 1 << 23, // automatically moves you to the tag of the newly opened application
 	EnableTag = 1 << 24, // enables the tag of the newly opened application in addition to your existing enabled tags
 	RevertTag = 1 << 25, // if SwitchTag or EnableTag, closing that window reverts the view back to what it was previously
+	IgnoreCfgReq = 1 << 26, // ignore all configure requests coming from the client
+	IgnoreCfgReqPos = 1 << 27, // ignore the x,y position details of configure requests coming from the client
+	IgnoreCfgReqSize = 1 << 28, // ignore the size details of configure requests coming from the client
+	/* Some clients (e.g. alacritty) helpfully send configure requests with a new size or position
+	 * when they detect that they have been moved to another monitor. This can cause visual glitches
+	 * when moving (or resizing) client windows from one monitor to another. This variable is used
+	 * internally to ignore such configure requests while movemouse or resizemouse are being used. */
+	MoveResize = 1 << 29, // used internally to indicate that the client is being moved or resized
 } flags; /* flags */
 
 #define ISFLOATING(C) (C->flags & Floating)
 #define ISFIXED(C) (C->flags & Fixed)
 #define ISLOCKED(C) (C->flags & Locked)
-#define ISSTEAM(C) (C->flags & Steam)
+// #define ISSTEAM(C) (C->flags & Steam)
 #define ISSTICKY(C) (C->flags & Sticky)
 #define ISCENTERED(C) (C->flags & Centered)
 #define ISFULLSCREEN(C) (C->flags & FullScreen)
@@ -46,6 +54,9 @@ enum {
 #define ISTERMINAL(C) (C->flags & Terminal)
 #define ISTRANSIENT(C) (C->flags & Transient)
 #define ISURGENT(C) (C->flags & Urgent)
+#define IGNORECFGREQ(C) (C->flags & IgnoreCfgReq)
+#define IGNORECFGREQPOS(C) (C->flags & IgnoreCfgReqPos)
+#define IGNORECFGREQSIZE(C) (C->flags & IgnoreCfgReqSize)
 #define NEEDRESIZE(C) (C->flags & NeedResize)
 #define NEVERFOCUS(C) (C->flags & NeverFocus)
 #define NOSWALLOW(C) (C->flags & NoSwallow)
@@ -55,6 +66,7 @@ enum {
 #define SWITCHTAG(C) (C->flags & SwitchTag)
 #define ENABLETAG(C) (C->flags & EnableTag)
 #define REVERTTAG(C) (C->flags & RevertTag)
+#define MOVERESIZE(C) (C->flags & MoveResize)
 
 #define WASFLOATING(C) (C->prevflags & Floating)
 #define WASFAKEFULLSCREEN(C) (C->prevflags & FakeFullScreen)

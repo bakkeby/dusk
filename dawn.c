@@ -548,11 +548,6 @@ static int sw, sh;           /* X display screen geometry width, height */
 static int bh;               /* bar geometry */
 static int lrpad;            /* sum of left and right padding for text */
 
-/* Some clients (e.g. alacritty) helpfully send configure requests with a new size or position
- * when they detect that they have been moved to another monitor. This can cause visual glitches
- * when moving (or resizing) client windows from one monitor to another. This variable is used
- * internally to ignore such configure requests while movemouse or resizemouse are being used. */
-static int ignoreconfigurerequests = 0;
 static int (*xerrorxlib)(Display *, XErrorEvent *);
 static unsigned int numlockmask = 0;
 static void (*handler[LASTEvent]) (XEvent *) = {
@@ -1070,16 +1065,17 @@ configurerequest(XEvent *e)
 	XConfigureRequestEvent *ev = &e->xconfigurerequest;
 	XWindowChanges wc;
 
-	if (ignoreconfigurerequests)
-		return;
-
 	if ((c = wintoclient(ev->window))) {
+		if (IGNORECFGREQ(c) || MOVERESIZE(c))
+			return;
 		if (ev->value_mask & CWBorderWidth)
 			c->bw = ev->border_width;
 		else if (ISFLOATING(c) || !selmon->lt[selmon->sellt]->arrange) {
+			if (IGNORECFGREQPOS(c) && IGNORECFGREQSIZE(c))
+				return;
+
 			m = c->mon;
-			#if STEAM_PATCH
-			if (!ISSTEAM(c)) {
+			if (!IGNORECFGREQPOS(c)) {
 				if (ev->value_mask & CWX) {
 					c->oldx = c->x;
 					c->x = m->mx + ev->x;
@@ -1089,23 +1085,16 @@ configurerequest(XEvent *e)
 					c->y = m->my + ev->y;
 				}
 			}
-			#else
-			if (ev->value_mask & CWX) {
-				c->oldx = c->x;
-				c->x = m->mx + ev->x;
-			}
-			if (ev->value_mask & CWY) {
-				c->oldy = c->y;
-				c->y = m->my + ev->y;
-			}
-			#endif // STEAM_PATCH
-			if (ev->value_mask & CWWidth) {
-				c->oldw = c->w;
-				c->w = ev->width;
-			}
-			if (ev->value_mask & CWHeight) {
-				c->oldh = c->h;
-				c->h = ev->height;
+
+			if (!IGNORECFGREQSIZE(c)) {
+				if (ev->value_mask & CWWidth) {
+					c->oldw = c->w;
+					c->w = ev->width;
+				}
+				if (ev->value_mask & CWHeight) {
+					c->oldh = c->h;
+					c->h = ev->height;
+				}
 			}
 			if ((c->x + c->w) > m->mx + m->mw && ISFLOATING(c))
 				c->x = m->mx + (m->mw / 2 - WIDTH(c) / 2);  /* center in x direction */
@@ -2058,7 +2047,7 @@ movemouse(const Arg *arg)
 		return;
 	if (!getrootptr(&x, &y))
 		return;
-	ignoreconfigurerequests = 1;
+	addflag(c, MoveResize);
 	do {
 		XMaskEvent(dpy, MOUSEMASK|ExposureMask|SubstructureRedirectMask, &ev);
 		switch(ev.type) {
@@ -2114,7 +2103,7 @@ movemouse(const Arg *arg)
 	#if ROUNDED_CORNERS_PATCH
 	drawroundedcorners(c);
 	#endif // ROUNDED_CORNERS_PATCH
-	ignoreconfigurerequests = 0;
+	removeflag(c, MoveResize);
 }
 
 Client *
@@ -2321,7 +2310,7 @@ resizemouse(const Arg *arg)
 	if (XGrabPointer(dpy, root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
 		None, cursor[horizcorner | (vertcorner << 1)]->cursor, CurrentTime) != GrabSuccess)
 		return;
-	ignoreconfigurerequests = 1;
+	addflag(c, MoveResize);
 	do {
 		XMaskEvent(dpy, MOUSEMASK|ExposureMask|SubstructureRedirectMask, &ev);
 		switch(ev.type) {
@@ -2375,7 +2364,7 @@ resizemouse(const Arg *arg)
 		selmon = m;
 		focus(NULL);
 	}
-	ignoreconfigurerequests = 0;
+	removeflag(c, MoveResize);
 }
 
 void
