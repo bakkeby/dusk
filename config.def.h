@@ -428,13 +428,8 @@ static const BarRule barrules[] = {
 	#endif // BAR_STATUS2D_PATCH | BAR_STATUSCMD_PATCH
 	#endif // BAR_EXTRASTATUS_PATCH
 
-	#if BAR_WINTITLE_HIDDEN_PATCH
-	{ -1,       1,  BAR_ALIGN_RIGHT_RIGHT, width_wintitle_hidden, draw_wintitle_hidden,   click_wintitle_hidden,   "wintitle_hidden" },
-	#endif
-	#if BAR_WINTITLE_FLOATING_PATCH
+	{ -1,       1,     BAR_ALIGN_RIGHT_RIGHT, width_wintitle_hidden, draw_wintitle_hidden,   click_wintitle_hidden,   "wintitle_hidden" },
 	{ -1,       1,     BAR_ALIGN_LEFT,   width_wintitle_floating, draw_wintitle_floating, click_wintitle_floating, "wintitle_floating" },
-	#endif // BAR_WINTITLE_FLOATING_PATCH
-
 };
 
 /* layout(s) */

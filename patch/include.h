@@ -49,13 +49,11 @@
 #if BAR_TAGGRID_PATCH
 #include "bar_taggrid.h"
 #endif
+
 #include "bar_flexwintitle.h"
-#if BAR_WINTITLE_FLOATING_PATCH
 #include "bar_wintitle_floating.h"
-#endif
-#if BAR_WINTITLE_HIDDEN_PATCH
 #include "bar_wintitle_hidden.h"
-#endif
+
 #if BAR_SYSTRAY_PATCH
 #include "bar_systray.h"
 #endif
