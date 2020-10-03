@@ -25,11 +25,7 @@ int
 width_status2d(Bar *bar, BarArg *a)
 {
 	int width;
-	#if BAR_EXTRASTATUS_PATCH || BAR_STATUSCMD_PATCH
 	width = status2dtextlength(rawstext);
-	#else
-	width = status2dtextlength(stext);
-	#endif // #if BAR_EXTRASTATUS_PATCH | BAR_STATUSCMD_PATCH
 	return width ? width + lrpad : 0;
 }
 
@@ -38,11 +34,7 @@ int
 width_status2d_es(Bar *bar, BarArg *a)
 {
 	int width;
-	#if BAR_STATUSCMD_PATCH
 	width = status2dtextlength(rawestext);
-	#else
-	width = status2dtextlength(estext);
-	#endif // BAR_STATUSCMD_PATCH
 	return width ? width + lrpad : 0;
 }
 #endif // BAR_EXTRASTATUS_PATCH
@@ -50,32 +42,16 @@ width_status2d_es(Bar *bar, BarArg *a)
 int
 draw_status2d(Bar *bar, BarArg *a)
 {
-	#if BAR_EXTRASTATUS_PATCH || BAR_STATUSCMD_PATCH
 	return drawstatusbar(a, rawstext);
-	#else
-	return drawstatusbar(a, stext);
-	#endif // #if BAR_EXTRASTATUS_PATCH | BAR_STATUSCMD_PATCH
 }
 
 #if BAR_EXTRASTATUS_PATCH
 int
 draw_status2d_es(Bar *bar, BarArg *a)
 {
-	#if BAR_STATUSCMD_PATCH
 	return drawstatusbar(a, rawestext);
-	#else
-	return drawstatusbar(a, estext);
-	#endif // BAR_STATUSCMD_PATCH
 }
 #endif // BAR_EXTRASTATUS_PATCH
-
-#if !BAR_STATUSCMD_PATCH
-int
-click_status2d(Bar *bar, Arg *arg, BarArg *a)
-{
-	return ClkStatusText;
-}
-#endif // BAR_STATUSCMD_PATCH
 
 int
 drawstatusbar(BarArg *a, char* stext)
@@ -91,11 +67,8 @@ drawstatusbar(BarArg *a, char* stext)
 	if (!(text = (char*) malloc(sizeof(char)*len)))
 		die("malloc");
 	p = text;
-	#if BAR_STATUSCMD_PATCH
+
 	copyvalidchars(text, stext);
-	#else
-	memcpy(text, stext, len);
-	#endif // BAR_STATUSCMD_PATCH
 
 	x += lrpad / 2;
 	drw_setscheme(drw, scheme[LENGTH(colors)]);
@@ -124,10 +97,8 @@ drawstatusbar(BarArg *a, char* stext)
 					}
 					memcpy(buf, (char*)text+i+1, 7);
 					buf[7] = '\0';
-					#if BAR_ALPHA_PATCH && BAR_STATUS2D_NO_ALPHA_PATCH
-					drw_clr_create(drw, &drw->scheme[ColFg], buf, 0xff);
-					#elif BAR_ALPHA_PATCH
-					drw_clr_create(drw, &drw->scheme[ColFg], buf, alphas[SchemeNorm][ColFg]);
+					#if BAR_ALPHA_PATCH
+					drw_clr_create(drw, &drw->scheme[ColFg], buf, enabled(Status2DNoAlpha) ? 0xff : alphas[SchemeNorm][ColFg]);
 					#else
 					drw_clr_create(drw, &drw->scheme[ColFg], buf);
 					#endif // BAR_ALPHA_PATCH
@@ -140,10 +111,8 @@ drawstatusbar(BarArg *a, char* stext)
 					}
 					memcpy(buf, (char*)text+i+1, 7);
 					buf[7] = '\0';
-					#if BAR_ALPHA_PATCH && BAR_STATUS2D_NO_ALPHA_PATCH
-					drw_clr_create(drw, &drw->scheme[ColBg], buf, 0xff);
-					#elif BAR_ALPHA_PATCH
-					drw_clr_create(drw, &drw->scheme[ColBg], buf, alphas[SchemeNorm][ColBg]);
+					#if BAR_ALPHA_PATCH
+					drw_clr_create(drw, &drw->scheme[ColBg], buf, enabled(Status2DNoAlpha) ? 0xff : alphas[SchemeNorm][ColFg]);
 					#else
 					drw_clr_create(drw, &drw->scheme[ColBg], buf);
 					#endif // BAR_ALPHA_PATCH
@@ -151,19 +120,15 @@ drawstatusbar(BarArg *a, char* stext)
 				#if BAR_STATUS2D_XRDB_TERMCOLORS_PATCH
 				} else if (text[i] == 'C') {
 					int c = atoi(text + ++i) % 16;
-					#if BAR_ALPHA_PATCH && BAR_STATUS2D_NO_ALPHA_PATCH
-					drw_clr_create(drw, &drw->scheme[ColFg], termcolor[c], 0xff);
-					#elif BAR_ALPHA_PATCH
-					drw_clr_create(drw, &drw->scheme[ColFg], termcolor[c], alphas[SchemeNorm][ColBg]);
+					#if BAR_ALPHA_PATCH
+					drw_clr_create(drw, &drw->scheme[ColFg], termcolor[c], enabled(Status2DNoAlpha) ? 0xff : alphas[SchemeNorm][ColFg]);
 					#else
 					drw_clr_create(drw, &drw->scheme[ColFg], termcolor[c]);
 					#endif // BAR_ALPHA_PATCH
 				} else if (text[i] == 'B') {
 					int c = atoi(text + ++i) % 16;
-					#if BAR_ALPHA_PATCH && BAR_STATUS2D_NO_ALPHA_PATCH
-					drw_clr_create(drw, &drw->scheme[ColBg], termcolor[c], 0xff);
-					#elif BAR_ALPHA_PATCH
-					drw_clr_create(drw, &drw->scheme[ColBg], termcolor[c], alphas[SchemeNorm][ColBg]);
+					#if BAR_ALPHA_PATCH
+					drw_clr_create(drw, &drw->scheme[ColBg], termcolor[c], enabled(Status2DNoAlpha) ? 0xff : alphas[SchemeNorm][ColFg]);
 					#else
 					drw_clr_create(drw, &drw->scheme[ColBg], termcolor[c]);
 					#endif // BAR_ALPHA_PATCH
@@ -230,11 +195,8 @@ status2dtextlength(char* stext)
 	if (!(text = (char*) malloc(sizeof(char)*len)))
 		die("malloc");
 	p = text;
-	#if BAR_STATUSCMD_PATCH
+
 	copyvalidchars(text, stext);
-	#else
-	memcpy(text, stext, len);
-	#endif // BAR_STATUSCMD_PATCH
 
 	/* compute width of the status text */
 	w = 0;

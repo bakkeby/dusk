@@ -10,9 +10,7 @@
 #if BAR_ALTERNATIVE_TAGS_PATCH
 #include "bar_alternativetags.h"
 #endif
-#if BAR_DWMBLOCKS_PATCH && BAR_STATUSCMD_PATCH
 #include "bar_dwmblocks.h"
-#endif
 #if BAR_EWMHTAGS_PATCH
 #include "bar_ewmhtags.h"
 #endif
@@ -22,24 +20,16 @@
 #if BAR_LTSYMBOL_PATCH
 #include "bar_ltsymbol.h"
 #endif
-#if BAR_POWERLINE_STATUS_PATCH
-#include "bar_powerline_status.h"
-#endif
-#if BAR_POWERLINE_TAGS_PATCH
-#include "bar_powerline_tags.h"
-#endif
-#if BAR_STATUS_PATCH
-#include "bar_status.h"
-#endif
-#if BAR_STATUS2D_PATCH
+
+
 #include "bar_status2d.h"
-#endif
+
 #if BAR_STATUSBUTTON_PATCH
 #include "bar_statusbutton.h"
 #endif
-#if BAR_STATUSCMD_PATCH
+
 #include "bar_statuscmd.h"
-#endif
+
 #if BAR_TAGS_PATCH
 #include "bar_tags.h"
 #endif

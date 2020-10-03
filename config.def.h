@@ -231,20 +231,6 @@ static char *colors[][ColCount] = {
 	[SchemeFlexSelFloat] = { titleselfgcolor,  selfloatbgcolor,  selfloatbgcolor,      c000000 },
 };
 
-#if BAR_POWERLINE_STATUS_PATCH
-static char *statuscolors[][ColCount] = {
-	/*                       fg                bg                border                float */
-	[SchemeNorm]         = { normfgcolor,      normbgcolor,      normbordercolor,      normfloatcolor },
-	[SchemeSel]          = { selfgcolor,       selbgcolor,       selbordercolor,       selfloatcolor },
-	[SchemeTitleNorm]    = { titlenormfgcolor, titlenormbgcolor, titlenormbordercolor, titlenormfloatcolor },
-	[SchemeTitleSel]     = { titleselfgcolor,  titleselbgcolor,  titleselbordercolor,  titleselfloatcolor },
-	[SchemeTagsNorm]     = { tagsnormfgcolor,  tagsnormbgcolor,  tagsnormbordercolor,  tagsnormfloatcolor },
-	[SchemeTagsSel]      = { tagsselfgcolor,   tagsselbgcolor,   tagsselbordercolor,   tagsselfloatcolor },
-	[SchemeHid]          = { hidfgcolor,       hidbgcolor,       hidbordercolor,       hidfloatcolor },
-	[SchemeUrg]          = { urgfgcolor,       urgbgcolor,       urgbordercolor,       urgfloatcolor },
-};
-#endif // BAR_POWERLINE_STATUS_PATCH
-
 #if COOL_AUTOSTART_PATCH
 static const char *const autostart[] = {
 	"st", NULL,
@@ -380,9 +366,6 @@ static const BarRule barrules[] = {
 	#if BAR_STATUSBUTTON_PATCH
 	{ -1,       0,     BAR_ALIGN_LEFT,   width_stbutton,          draw_stbutton,          click_stbutton,          "statusbutton" },
 	#endif // BAR_STATUSBUTTON_PATCH
-	#if BAR_POWERLINE_TAGS_PATCH
-	{  0,       0,     BAR_ALIGN_LEFT,   width_pwrl_tags,         draw_pwrl_tags,         click_pwrl_tags,         "powerline_tags" },
-	#endif // BAR_POWERLINE_TAGS_PATCH
 	#if BAR_TAGS_PATCH
 	{ -1,       0,     BAR_ALIGN_LEFT,   width_tags,              draw_tags,              click_tags,              "tags" },
 	#endif // BAR_TAGS_PATCH
@@ -395,33 +378,10 @@ static const BarRule barrules[] = {
 	#if BAR_LTSYMBOL_PATCH
 	{ -1,       0,     BAR_ALIGN_LEFT,   width_ltsymbol,          draw_ltsymbol,          click_ltsymbol,          "layout" },
 	#endif // BAR_LTSYMBOL_PATCH
-	#if BAR_STATUS2D_PATCH && BAR_STATUSCMD_PATCH
+
 	{ 'A',      0,     BAR_ALIGN_RIGHT,  width_status2d,          draw_status2d,          click_statuscmd,         "status2d" },
-	#elif BAR_STATUS2D_PATCH
-	{ 'A',      0,     BAR_ALIGN_RIGHT,  width_status2d,          draw_status2d,          click_status2d,          "status2d" },
-	#elif BAR_POWERLINE_STATUS_PATCH
-	{  0,       0,     BAR_ALIGN_RIGHT,  width_pwrl_status,       draw_pwrl_status,       click_pwrl_status,       "powerline_status" },
-	#elif BAR_STATUS_PATCH && BAR_STATUSCMD_PATCH
-	{  0,       0,     BAR_ALIGN_RIGHT,  width_status,            draw_status,            click_statuscmd,         "status" },
-	#elif BAR_STATUS_PATCH
-	{ 'A',      0,     BAR_ALIGN_RIGHT,  width_status,            draw_status,            click_status,            "status" },
-	#endif // BAR_STATUS2D_PATCH | BAR_STATUSCMD_PATCH
-
 	{ -1,       0,     BAR_ALIGN_NONE,   width_flexwintitle,      draw_flexwintitle,      click_flexwintitle,      "flexwintitle" },
-
-	#if BAR_EXTRASTATUS_PATCH
-	#if BAR_STATUS2D_PATCH && BAR_STATUSCMD_PATCH
 	{ 'A',      1,     BAR_ALIGN_CENTER, width_status2d_es,       draw_status2d_es,       click_statuscmd_es,      "status2d_es" },
-	#elif BAR_STATUS2D_PATCH
-	{ 'A',      1,     BAR_ALIGN_CENTER, width_status2d_es,       draw_status2d_es,       click_status2d,          "status2d_es" },
-	#elif BAR_POWERLINE_STATUS_PATCH
-	{  0,       1,     BAR_ALIGN_RIGHT,  width_pwrl_status_es,    draw_pwrl_status_es,    click_pwrl_status,       "powerline_status" },
-	#elif BAR_STATUSCMD_PATCH && BAR_STATUS_PATCH
-	{ 'A',      1,     BAR_ALIGN_CENTER, width_status_es,         draw_status_es,         click_statuscmd_es,      "status_es" },
-	#elif BAR_STATUS_PATCH
-	{ 'A',      1,     BAR_ALIGN_CENTER, width_status_es,         draw_status_es,         click_status,            "status_es" },
-	#endif // BAR_STATUS2D_PATCH | BAR_STATUSCMD_PATCH
-	#endif // BAR_EXTRASTATUS_PATCH
 
 	{ -1,       1,     BAR_ALIGN_RIGHT_RIGHT, width_wintitle_hidden, draw_wintitle_hidden,   click_wintitle_hidden,   "wintitle_hidden" },
 	{ -1,       1,     BAR_ALIGN_LEFT,   width_wintitle_floating, draw_wintitle_floating, click_wintitle_floating, "wintitle_floating" },
@@ -500,12 +460,6 @@ static const char *dmenucmd[] = {
 	NULL
 };
 static const char *termcmd[]  = { "st", NULL };
-
-#if BAR_STATUSCMD_PATCH && !BAR_DWMBLOCKS_PATCH
-/* commands spawned when clicking statusbar, the mouse button pressed is exported as BUTTON */
-static const char *statuscmds[] = { "notify-send Mouse$BUTTON" };
-static char *statuscmd[] = { "/bin/sh", "-c", NULL, NULL };
-#endif // BAR_STATUSCMD_PATCH | DWMBLOCKS_PATCH
 
 static Key keys[] = {
 	/* modifier                     key            function                argument */
@@ -820,17 +774,9 @@ static Button buttons[] = {
 	{ ClkWinTitle,          0,                   Button1,        togglewin,      {0} },
 	{ ClkWinTitle,          0,                   Button3,        showhideclient, {0} },
 	{ ClkWinTitle,          0,                   Button2,        zoom,           {0} },
-	#if BAR_STATUSCMD_PATCH && BAR_DWMBLOCKS_PATCH
 	{ ClkStatusText,        0,                   Button1,        sigdwmblocks,   {.i = 1 } },
 	{ ClkStatusText,        0,                   Button2,        sigdwmblocks,   {.i = 2 } },
 	{ ClkStatusText,        0,                   Button3,        sigdwmblocks,   {.i = 3 } },
-	#elif BAR_STATUSCMD_PATCH
-	{ ClkStatusText,        0,                   Button1,        spawn,          {.v = statuscmd } },
-	{ ClkStatusText,        0,                   Button2,        spawn,          {.v = statuscmd } },
-	{ ClkStatusText,        0,                   Button3,        spawn,          {.v = statuscmd } },
-	#else
-	{ ClkStatusText,        0,                   Button2,        spawn,          {.v = termcmd } },
-	#endif // BAR_STATUSCMD_PATCH
 	{ ClkClientWin,         MODKEY,              Button1,        movemouse,      {0} },
 	{ ClkClientWin,         MODKEY,              Button2,        togglefloating, {0} },
 	{ ClkClientWin,         MODKEY,              Button3,        resizemouse,    {0} },

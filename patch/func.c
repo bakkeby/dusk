@@ -1,27 +1,25 @@
 void
 enable(const Arg *arg)
 {
-	settings |= arg->ui;
+	// settings |= arg->ui;
+	enablefunc(arg->ui);
 	reload();
-}
-
-int
-enabled(const long functionality)
-{
-	return settings & functionality;
 }
 
 void
 disable(const Arg *arg)
 {
-	settings &= ~arg->ui;
+	disablefunc(arg->ui);
 	reload();
 }
 
-int
-disabled(const long functionality)
+void
+toggle(const Arg *arg)
 {
-	return !(settings & functionality);
+	if (disabled(arg->ui))
+		enable(arg);
+	else
+		disable(arg);
 }
 
 void

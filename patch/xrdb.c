@@ -81,7 +81,7 @@ loadxrdb()
 				XRDB_LOAD_COLOR("dwm.selDWDLbgcolor", selDWDLbgcolor);
 				XRDB_LOAD_COLOR("dwm.selSPRLbgcolor", selSPRLbgcolor);
 				XRDB_LOAD_COLOR("dwm.selfloatbgcolor", selfloatbgcolor);
-				#if BAR_STATUS2D_XRDB_TERMCOLORS_PATCH && BAR_STATUS2D_PATCH
+				#if BAR_STATUS2D_XRDB_TERMCOLORS_PATCH
 				XRDB_LOAD_COLOR("color0", termcol0);
 				XRDB_LOAD_COLOR("color1", termcol1);
 				XRDB_LOAD_COLOR("color2", termcol2);

@@ -6,6 +6,9 @@
 
 #include "util.h"
 
+// long settings = 0;
+unsigned long settings = 0;
+
 void *
 ecalloc(size_t nmemb, size_t size)
 {
@@ -32,4 +35,28 @@ die(const char *fmt, ...) {
 	}
 
 	exit(1);
+}
+
+int
+enabled(const long functionality)
+{
+	return settings & functionality;
+}
+
+int
+disabled(const long functionality)
+{
+	return !(settings & functionality);
+}
+
+void
+enablefunc(const long functionality)
+{
+	settings |= functionality;
+}
+
+void
+disablefunc(const long functionality)
+{
+	settings &= ~functionality;
 }

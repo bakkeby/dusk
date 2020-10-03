@@ -356,9 +356,7 @@ struct Monitor {
 	Monitor *next;
 	Bar *bar;
 	const Layout *lt[2];
-	#if BAR_ALTERNATIVE_TAGS_PATCH
 	unsigned int alttag;
-	#endif // BAR_ALTERNATIVE_TAGS_PATCH
 	Pertag *pertag;
 	#if INSETS_PATCH
 	Inset inset;
@@ -511,28 +509,10 @@ static void zoom(const Arg *arg);
 
 /* variables */
 static const char broken[] = "broken";
-#if BAR_PANGO_PATCH || BAR_STATUS2D_PATCH && !BAR_STATUSCOLORS_PATCH
 static char stext[1024];
-#else
-static char stext[512];
-#endif // BAR_PANGO_PATCH | BAR_STATUS2D_PATCH
-#if BAR_EXTRASTATUS_PATCH || BAR_STATUSCMD_PATCH
-#if BAR_STATUS2D_PATCH
 static char rawstext[1024];
-#else
-static char rawstext[512];
-#endif // BAR_STATUS2D_PATCH
-#endif // BAR_EXTRASTATUS_PATCH | BAR_STATUSCMD_PATCH
-#if BAR_EXTRASTATUS_PATCH
-#if BAR_STATUS2D_PATCH && !BAR_STATUSCOLORS_PATCH
 static char estext[1024];
-#else
-static char estext[512];
-#endif // BAR_STATUS2D_PATCH
-#if BAR_STATUSCMD_PATCH
 static char rawestext[1024];
-#endif // BAR_STATUS2D_PATCH | BAR_STATUSCMD_PATCH
-#endif // BAR_EXTRASTATUS_PATCH
 
 static int screen;
 static int sw, sh;           /* X display screen geometry width, height */
@@ -581,6 +561,7 @@ static Window root, wmcheckwin;
 
 /* configuration, allows nested code to access above variables */
 #include "config.h"
+
 
 #include "patch/include.c"
 
@@ -860,11 +841,7 @@ cleanup(void)
 	#endif // BAR_SYSTRAY_PATCH
 	for (i = 0; i < CurLast; i++)
 		drw_cur_free(drw, cursor[i]);
-	#if BAR_STATUS2D_PATCH && !BAR_STATUSCOLORS_PATCH
 	for (i = 0; i < LENGTH(colors) + 1; i++)
-	#else
-	for (i = 0; i < LENGTH(colors); i++)
-	#endif // BAR_STATUS2D_PATCH
 		free(scheme[i]);
 	free(scheme);
 	XDestroyWindow(dpy, wmcheckwin);
@@ -2727,31 +2704,20 @@ setup(void)
 	cursor[CurIronCross] = drw_cur_create(drw, XC_iron_cross);
 	cursor[CurMove] = drw_cur_create(drw, XC_fleur);
 	/* init appearance */
-	#if BAR_STATUS2D_PATCH && !BAR_STATUSCOLORS_PATCH
+
 	scheme = ecalloc(LENGTH(colors) + 1, sizeof(Clr *));
 	#if BAR_ALPHA_PATCH
 	scheme[LENGTH(colors)] = drw_scm_create(drw, colors[0], alphas[0], ColCount);
 	#else
 	scheme[LENGTH(colors)] = drw_scm_create(drw, colors[0], ColCount);
 	#endif // BAR_ALPHA_PATCH
-	#else
-	scheme = ecalloc(LENGTH(colors), sizeof(Clr *));
-	#endif // BAR_STATUS2D_PATCH
+
 	for (i = 0; i < LENGTH(colors); i++)
 		#if BAR_ALPHA_PATCH
 		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], ColCount);
 		#else
 		scheme[i] = drw_scm_create(drw, colors[i], ColCount);
 		#endif // BAR_ALPHA_PATCH
-	#if BAR_POWERLINE_STATUS_PATCH
-	statusscheme = ecalloc(LENGTH(statuscolors), sizeof(Clr *));
-	for (i = 0; i < LENGTH(statuscolors); i++)
-		#if BAR_ALPHA_PATCH
-		statusscheme[i] = drw_scm_create(drw, statuscolors[i], alphas[0], ColCount);
-		#else
-		statusscheme[i] = drw_scm_create(drw, statuscolors[i], ColCount);
-		#endif // BAR_ALPHA_PATCH
-	#endif // BAR_POWERLINE_STATUS_PATCH
 
 	updatebars();
 	updatestatus();
@@ -2786,6 +2752,8 @@ setup(void)
 	#if IPC_PATCH
 	setupepoll();
 	#endif // IPC_PATCH
+
+	enablefunc(functionality);
 }
 
 
@@ -2877,29 +2845,10 @@ sigchld(int unused)
 void
 spawn(const Arg *arg)
 {
-	#if BAR_STATUSCMD_PATCH && !BAR_DWMBLOCKS_PATCH
-	char *cmd = NULL;
-	#endif // BAR_STATUSCMD_PATCH | BAR_DWMBLOCKS_PATCH
 	#if !NODMENU_PATCH
 	if (arg->v == dmenucmd)
 		dmenumon[0] = '0' + selmon->num;
 	#endif // NODMENU_PATCH
-	#if BAR_STATUSCMD_PATCH && !BAR_DWMBLOCKS_PATCH
-	#if !NODMENU_PATCH
-	else if (arg->v == statuscmd)
-	#else
-	if (arg->v == statuscmd)
-	#endif // NODMENU_PATCH
-	{
-		int len = strlen(statuscmds[statuscmdn]) + 1;
-		if (!(cmd = malloc(sizeof(char)*len + sizeof(statusexport))))
-			die("malloc:");
-		strcpy(cmd, statusexport);
-		strcat(cmd, statuscmds[statuscmdn]);
-		cmd[LENGTH(statusexport)-3] = '0' + lastbutton;
-		statuscmd[2] = cmd;
-	}
-	#endif // BAR_STATUSCMD_PATCH | BAR_DWMBLOCKS_PATCH
 
 	if (fork() == 0) {
 		if (dpy)
@@ -2942,9 +2891,6 @@ spawn(const Arg *arg)
 		perror(" failed");
 		exit(EXIT_SUCCESS);
 	}
-	#if BAR_STATUSCMD_PATCH && !BAR_DWMBLOCKS_PATCH
-	free(cmd);
-	#endif // BAR_STATUSCMD_PATCH | BAR_DWMBLOCKS_PATCH
 }
 
 void
@@ -3436,6 +3382,7 @@ updatesizehints(Client *c)
 
 	if (!XGetWMNormalHints(dpy, c->win, &size, &msize))
 		/* size is uninitialized, ensure that size.flags aren't used */
+		size.flags = PSize;
 	if (size.flags & PBaseSize) {
 		c->basew = size.base_width;
 		c->baseh = size.base_height;
@@ -3474,7 +3421,6 @@ void
 updatestatus(void)
 {
 	Monitor *m;
-	#if BAR_EXTRASTATUS_PATCH
 	if (!gettextprop(root, XA_WM_NAME, rawstext, sizeof(rawstext))) {
 		strcpy(stext, "dawn-"VERSION);
 		estext[0] = '\0';
@@ -3482,30 +3428,13 @@ updatestatus(void)
 		char *e = strchr(rawstext, statussep);
 		if (e) {
 			*e = '\0'; e++;
-			#if BAR_STATUSCMD_PATCH
 			strncpy(rawestext, e, sizeof(estext) - 1);
 			copyvalidchars(estext, rawestext);
-			#else
-			strncpy(estext, e, sizeof(estext) - 1);
-			#endif // BAR_STATUSCMD_PATCH
 		} else {
 			estext[0] = '\0';
 		}
-		#if BAR_STATUSCMD_PATCH
 		copyvalidchars(stext, rawstext);
-		#else
-		strncpy(stext, rawstext, sizeof(stext) - 1);
-		#endif // BAR_STATUSCMD_PATCH
 	}
-	#elif BAR_STATUSCMD_PATCH
-	if (!gettextprop(root, XA_WM_NAME, rawstext, sizeof(rawstext)))
-		strcpy(stext, "dawn-"VERSION);
-	else
-		copyvalidchars(stext, rawstext);
-	#else
-	if (!gettextprop(root, XA_WM_NAME, stext, sizeof(stext)))
-		strcpy(stext, "dawn-"VERSION);
-	#endif // BAR_EXTRASTATUS_PATCH | BAR_STATUSCMD_PATCH
 	for (m = mons; m; m = m->next)
 		drawbar(m);
 }
