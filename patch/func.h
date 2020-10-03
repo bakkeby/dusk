@@ -8,7 +8,8 @@ enum {
 	SmartGaps = 1 << 0, // enables no gaps if there is only one visible window
 	Systray = 1 << 1, // enables systray
 	SwallowFloating = 1 << 2, // means swallow floating windows by default
-
+	CenteredWindowName = 1 << 3,
+	BarActiveGroupBorderColor = 1 << 4, // use border color of active group, otherwise color for master group is used
 
 } func_options;
 

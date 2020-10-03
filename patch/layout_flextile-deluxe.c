@@ -75,6 +75,12 @@ setlayoutaxisex(const Arg *arg)
 	selmon->pertag->ltaxis[selmon->pertag->curtag][axis] = selmon->ltaxis[axis];
 	arrange(selmon);
 }
+
+static void
+setlayoutex(const Arg *arg)
+{
+	setlayout(&((Arg) { .v = &layouts[arg->i] }));
+}
 #endif // IPC_PATCH
 
 static void

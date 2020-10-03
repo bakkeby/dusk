@@ -32,13 +32,13 @@ int
 draw_flexwintitle(Bar *bar, BarArg *a)
 {
 	drw_rect(drw, a->x, a->y, a->w, a->h, 1, 1);
-	return flextitlecalculate(bar->mon, a->x, a->w, -1, flextitledraw, NULL, a);
+	return flextitlecalculate(bar, a->x, a->w, -1, flextitledraw, NULL, a);
 }
 
 int
 click_flexwintitle(Bar *bar, Arg *arg, BarArg *a)
 {
-	flextitlecalculate(bar->mon, 0, a->w, a->x, flextitleclick, arg, a);
+	flextitlecalculate(bar, 0, a->w, a->x, flextitleclick, arg, a);
 	return ClkWinTitle;
 }
 
@@ -69,6 +69,7 @@ getschemefor(Monitor *m, int group, int activegroup)
 {
 	switch (group) {
 	case GRP_NOSELECTION:
+		return SchemeTitleNorm;
 	case GRP_MASTER:
 	case GRP_STACK1:
 	case GRP_STACK2:
@@ -81,6 +82,133 @@ getschemefor(Monitor *m, int group, int activegroup)
 		return (activegroup ? SchemeFlexActFloat : SchemeFlexInaFloat);
 	}
 	return SchemeTitleNorm;
+}
+
+void
+getclientcounts(Monitor *m, int *groupactive, int *n, int *clientsnmaster, int *clientsnstack, int *clientsnstack2, int *clientsnfloating, int *clientsnhidden)
+{
+		Client *c;
+		int i, selidx = 0, cm = 0, cs1 = 0, cs2 = 0, cf = 0, ch = 0, center, dualstack;
+
+		for (i = 0, c = m->clients; c; c = c->next) {
+			if (!ISVISIBLE(c))
+				continue;
+			if (HIDDEN(c)) {
+				if (FLEXWINTITLE_HIDDENWEIGHT)
+					ch++;
+				continue;
+			}
+
+			if (ISFLOATING(c)) {
+				if (FLEXWINTITLE_FLOATWEIGHT)
+					cf++;
+				continue;
+			}
+
+			if (m->sel == c)
+				selidx = i;
+
+			if (!m->nmaster || i < m->nmaster || m->ltaxis[LAYOUT] == NO_SPLIT)
+				cm++;
+			else if (m->nstack) {
+				if (cs1 < m->nstack)
+					cs1++;
+				else
+					cs2++;
+			}
+			else if (i % 2)
+				cs1++;
+			else
+				cs2++;
+			i++;
+		}
+
+		*n = cm + cs1 + cs2 + cf + ch;
+		center = iscenteredlayout(m, *n);
+		dualstack = isdualstacklayout(m);
+
+		if ((!center && !dualstack) || (center && *n <= m->nmaster + (m->nstack ? m->nstack : 1))) {
+			cs1 += cs2;
+			cs2 = 0;
+		}
+
+		if (!m->sel)
+			*groupactive = GRP_NOSELECTION;
+		else if (HIDDEN(m->sel))
+			*groupactive = GRP_HIDDEN;
+		else if (ISFLOATING(m->sel))
+			*groupactive = GRP_FLOAT;
+		else if (selidx < cm)
+			*groupactive = GRP_MASTER;
+		else if (selidx < cm + cs1)
+			*groupactive = GRP_STACK1;
+		else if (selidx < cm + cs1 + cs2)
+			*groupactive = GRP_STACK2;
+
+		*clientsnmaster = cm;
+		*clientsnstack = cs1;
+		*clientsnstack2 = cs2;
+		*clientsnfloating = cf;
+		*clientsnhidden = ch;
+}
+
+int
+isdualstacklayout(Monitor *m)
+{
+	if (m->lt[m->sellt]->arrange != &flextile)
+		return 0;
+
+	int layout = m->ltaxis[LAYOUT];
+	if (layout < 0)
+		layout *= -1;
+
+	return (
+		layout == SPLIT_HORIZONTAL_DUAL_STACK ||
+		layout == SPLIT_HORIZONTAL_DUAL_STACK_FIXED ||
+		layout == SPLIT_VERTICAL_DUAL_STACK ||
+		layout == SPLIT_VERTICAL_DUAL_STACK_FIXED
+	);
+}
+
+int
+iscenteredlayout(Monitor *m, int n)
+{
+	if (m->lt[m->sellt]->arrange != &flextile)
+		return 0;
+
+	int layout = m->ltaxis[LAYOUT];
+	if (layout < 0)
+		layout *= -1;
+
+	return (
+			(layout == SPLIT_CENTERED_VERTICAL && (n - m->nmaster > 1)) ||
+			layout == SPLIT_CENTERED_VERTICAL_FIXED ||
+			(layout == SPLIT_CENTERED_HORIZONTAL && (n - m->nmaster > 1)) ||
+			layout == SPLIT_CENTERED_HORIZONTAL_FIXED ||
+			layout == FLOATING_MASTER
+	);
+}
+
+int
+isfixedlayout(Monitor *m)
+{
+	if (m->lt[m->sellt]->arrange != &flextile)
+		return 0;
+
+	int layout = m->ltaxis[LAYOUT];
+	if (layout < 0)
+		layout *= -1;
+
+	return layout > FLOATING_MASTER;
+}
+
+int
+ismirroredlayout(Monitor *m)
+{
+	if (m->lt[m->sellt]->arrange != &flextile)
+		return 0;
+
+	return m->ltaxis[LAYOUT] < 0;
 }
 
 int
@@ -114,10 +242,8 @@ flextitledraw(Monitor *m, Client *c, int unused, int x, int w, int tabscheme, Ar
 	XSetWindowBorder(dpy, c->win, scheme[clientscheme][ColBorder].pixel);
 	if (w <= TEXTW("A") - lrpad + pad) // reduce text padding if wintitle is too small
 		pad = (w - TEXTW("A") + lrpad < 0 ? 0 : (w - TEXTW("A") + lrpad) / 2);
-	#if BAR_CENTEREDWINDOWNAME_PATCH
-	else if (TEXTW(c->name) < w)
+	else if (enabled(CenteredWindowName) && TEXTW(c->name) < w)
 		pad = (w - TEXTW(c->name) + lrpad) / 2;
-	#endif // BAR_CENTEREDWINDOWNAME_PATCH
 
 	drw_text(drw, x, barg->y, w, barg->h, pad, c->name, 0, False);
 	drawstateindicator(m, c, 1, x + 2, barg->y, w, barg->h, 0, 0, 0);
@@ -152,106 +278,29 @@ flextitleclick(Monitor *m, Client *c, int passx, int x, int w, int unused, Arg *
 
 int
 flextitlecalculate(
-	Monitor *m, int offx, int tabw, int passx,
+	Bar *bar, int offx, int tabw, int passx,
 	void(*tabfn)(Monitor *, Client *, int, int, int, int, Arg *arg, BarArg *barg),
 	Arg *arg, BarArg *barg
 ) {
 	Client *c;
+	Monitor *m = bar->mon;
 	int n, center = 0, mirror = 0, fixed = 0; // layout configuration
-	int clientsnmaster = 0, clientsnstack = 0, clientsnfloating = 0, clientsnhidden = 0;
-	int i, w, r, num = 0, den, fulllayout = 0;
-	int clientsnstack2 = 0;
-	int groupactive = 0;
-	int selidx = 0;
-	int dualstack = 0;
+	int groupactive = 0, clientsnmaster = 0, clientsnstack = 0, clientsnstack2 = 0, clientsnfloating = 0, clientsnhidden = 0;
+	int w, r, num = 0, den, fulllayout = 0;
 	int rw, rr;
 
 	int mas_x = offx, st1_x = offx, st2_x = offx, hid_x = offx, flt_x = offx;
 	int mas_w, st1_w, st2_w, hid_w;
 
-	for (i = 0, c = m->clients; c; c = c->next) {
-		if (!ISVISIBLE(c))
-			continue;
-		if (HIDDEN(c)) {
-			if (FLEXWINTITLE_HIDDENWEIGHT)
-				clientsnhidden++;
-			continue;
-		}
+	getclientcounts(m, &groupactive, &n, &clientsnmaster, &clientsnstack, &clientsnstack2, &clientsnfloating, &clientsnhidden);
 
-		if (ISFLOATING(c)) {
-			if (FLEXWINTITLE_FLOATWEIGHT)
-				clientsnfloating++;
-			continue;
-		}
-
-		if (m->sel == c)
-			selidx = i;
-
-		if (i < m->nmaster)
-			clientsnmaster++;
-		#if FLEXTILE_DELUXE_LAYOUT
-		else if (m->nstack) {
-			if (clientsnstack < m->nstack)
-				clientsnstack++;
-			else
-				clientsnstack2++;
-		}
-		#endif // FLEXTILE_DELUXE_LAYOUT
-		else if (i % 2)
-			clientsnstack++;
-		else
-			clientsnstack2++;
-		i++;
-	}
-
-	if (!m->sel)
-		groupactive = GRP_NOSELECTION;
-	else if (HIDDEN(m->sel))
-		groupactive = GRP_HIDDEN;
-	else if (ISFLOATING(m->sel))
-		groupactive = GRP_FLOAT;
-	else if (selidx < clientsnmaster)
-		groupactive = GRP_MASTER;
-	else if (selidx < clientsnmaster + clientsnstack)
-		groupactive = GRP_STACK1;
-	else if (selidx < clientsnmaster + clientsnstack + clientsnstack2)
-		groupactive = GRP_STACK2;
-
-	n = clientsnmaster + clientsnstack + clientsnstack2 + clientsnfloating + clientsnhidden;
 	if (n == 0)
 	 	return 0;
-	#if FLEXTILE_DELUXE_LAYOUT
 	else if (m->lt[m->sellt]->arrange == &flextile) {
-		int layout = m->ltaxis[LAYOUT];
-		if (layout < 0) {
-			mirror = 1;
-			layout *= -1;
-		}
-		if (layout > FLOATING_MASTER) {
-			layout -= FLOATING_MASTER;
-			fixed = 1;
-		}
-
-		if (layout == SPLIT_HORIZONTAL_DUAL_STACK || layout == SPLIT_HORIZONTAL_DUAL_STACK_FIXED)
-			dualstack = 1;
-		else if (layout == SPLIT_CENTERED_VERTICAL && (fixed || n - m->nmaster > 1))
-			center = 1;
-		else if (layout == FLOATING_MASTER)
-			center = 1;
-		else if (layout == SPLIT_CENTERED_HORIZONTAL) {
-			if (fixed || n - m->nmaster > 1)
-				center = 1;
-		}
+		mirror = ismirroredlayout(m);
+		fixed = isfixedlayout(m);
+		center = iscenteredlayout(m, n);
 	}
-	#endif // FLEXTILE_DELUXE_LAYOUT
-	#if CENTEREDMASTER_LAYOUT
-	else if (m->lt[m->sellt]->arrange == &centeredmaster && (fixed || n - m->nmaster > 1))
-		center = 1;
-	#endif // CENTEREDMASTER_LAYOUT
-	#if CENTEREDFLOATINGMASTER_LAYOUT
-	else if (m->lt[m->sellt]->arrange == &centeredfloatingmaster)
-		center = 1;
-	#endif // CENTEREDFLOATINGMASTER_LAYOUT
 
 	/* Certain layouts have no master / stack areas */
 	if (!m->lt[m->sellt]->arrange                            // floating layout
@@ -282,17 +331,6 @@ flextitlecalculate(
 		r = num % den; // weight rest width
 		rw = r / n; // rest incr per client
 		rr = r % n; // rest rest
-		#if FLEXTILE_DELUXE_LAYOUT
-		if ((!center && !dualstack) || (center && n <= m->nmaster + (m->nstack ? m->nstack : 1)))
-		#else
-		if ((!center && !dualstack) || (center && n <= m->nmaster + 1))
-		#endif // FLEXTILE_DELUXE_LAYOUT
-		{
-			clientsnstack += clientsnstack2;
-			clientsnstack2 = 0;
-			if (groupactive == GRP_STACK2)
-				groupactive = GRP_STACK1;
-		}
 
 		mas_w = clientsnmaster * rw + w * clientsnmaster * FLEXWINTITLE_MASTERWEIGHT + (rr > 0 ? MIN(rr, clientsnmaster) : 0);
 		rr -= clientsnmaster;

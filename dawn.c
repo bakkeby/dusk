@@ -238,7 +238,7 @@ struct Bar {
 	int topbar;
 	int external;
 	int borderpx;
-	int borderscheme;
+	int groupactive;
 	int bx, by, bw, bh; /* bar geometry */
 	int w[BARRULES]; // width, array length == barrules, then use r index for lookup purposes
 	int x[BARRULES]; // x position, array length == ^
@@ -1216,7 +1216,6 @@ createmon(void)
 		bar->borderpx = 0;
 		#endif // BAR_BORDER_PATCH
 		bar->bh = bh + bar->borderpx * 2;
-		bar->borderscheme = SchemeNorm;
 	}
 
 	#if FLEXTILE_DELUXE_LAYOUT
@@ -1387,12 +1386,16 @@ drawbarwin(Bar *bar)
 {
 	if (!bar->win || bar->external)
 		return;
-	int r, w, total_drawn = 0;
+	int r, w, total_drawn = 0, groupactive, ignored;
 	int rx, lx, rw, lw; // bar size, split between left and right if a center module is added
 	const BarRule *br;
 
 	if (bar->borderpx) {
-		XSetForeground(drw->dpy, drw->gc, scheme[bar->borderscheme][ColBorder].pixel);
+		if (enabled(BarActiveGroupBorderColor))
+			getclientcounts(bar->mon, &groupactive, &ignored, &ignored, &ignored, &ignored, &ignored, &ignored);
+		else
+			groupactive = GRP_MASTER;
+		XSetForeground(drw->dpy, drw->gc, scheme[getschemefor(bar->mon, groupactive, bar->mon == selmon)][ColBorder].pixel);
 		XFillRectangle(drw->dpy, drw->drawable, drw->gc, 0, 0, bar->bw, bar->bh);
 	}
 

@@ -4,6 +4,7 @@ static void mirrorlayout(const Arg *arg);
 static void rotatelayoutaxis(const Arg *arg);
 #if IPC_PATCH
 static void setlayoutaxisex(const Arg *arg);
+static void setlayoutex(const Arg *arg);
 #endif // IPC_PATCH
 static void incnstack(const Arg *arg);
 
