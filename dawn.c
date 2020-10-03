@@ -827,11 +827,7 @@ buttonpress(XEvent *e)
 	for (i = 0; i < LENGTH(buttons); i++) {
 		if (click == buttons[i].click && buttons[i].func && buttons[i].button == ev->button
 				&& CLEANMASK(buttons[i].mask) == CLEANMASK(ev->state)) {
-			#if BAR_WINTITLEACTIONS_PATCH
 			buttons[i].func((click == ClkTagBar || click == ClkWinTitle) && buttons[i].arg.i == 0 ? &arg : &buttons[i].arg);
-			#else
-			buttons[i].func(click == ClkTagBar && buttons[i].arg.i == 0 ? &arg : &buttons[i].arg);
-			#endif // BAR_WINTITLEACTIONS_PATCH
 		}
 	}
 }
@@ -1600,7 +1596,6 @@ focusstack(const Arg *arg)
 
 	if (!selmon->sel)
 		return;
-	#if BAR_WINTITLEACTIONS_PATCH
 	if (arg->i > 0) {
 		for (c = selmon->sel->next; c && (!ISVISIBLE(c) || (arg->i == 1 && HIDDEN(c))); c = c->next);
 		if (!c)
@@ -1614,21 +1609,6 @@ focusstack(const Arg *arg)
 				if (ISVISIBLE(i) && !(arg->i == -1 && HIDDEN(i)))
 					c = i;
 	}
-	#else
-	if (arg->i > 0) {
-		for (c = selmon->sel->next; c && !ISVISIBLE(c); c = c->next);
-		if (!c)
-			for (c = selmon->clients; c && !ISVISIBLE(c); c = c->next);
-	} else {
-		for (i = selmon->clients; i != selmon->sel; i = i->next)
-			if (ISVISIBLE(i))
-				c = i;
-		if (!c)
-			for (; i; i = i->next)
-				if (ISVISIBLE(i))
-					c = i;
-	}
-	#endif // BAR_WINTITLEACTIONS_PATCH
 	if (c) {
 		focus(c);
 		restack(selmon);
@@ -1949,21 +1929,13 @@ manage(Window w, XWindowAttributes *wa)
 		(unsigned char *) &(c->win), 1);
 	XMoveResizeWindow(dpy, c->win, c->x + 2 * sw, c->y, c->w, c->h); /* some windows require this */
 
-	#if BAR_WINTITLEACTIONS_PATCH
 	if (!HIDDEN(c))
 		setclientstate(c, NormalState);
-	#else
-	setclientstate(c, NormalState);
-	#endif // BAR_WINTITLEACTIONS_PATCH
 	if (c->mon == selmon)
 		unfocus(selmon->sel, 0, c);
 	c->mon->sel = c;
-	#if BAR_WINTITLEACTIONS_PATCH
 	if (!HIDDEN(c))
 		XMapWindow(dpy, c->win);
-	#else
-	XMapWindow(dpy, c->win);
-	#endif // BAR_WINTITLEACTIONS_PATCH
 	if (!(term && swallow(term, c)))
 		arrange(c->mon);
 	focus(NULL);
@@ -2112,11 +2084,7 @@ movemouse(const Arg *arg)
 Client *
 nexttiled(Client *c)
 {
-	#if BAR_WINTITLEACTIONS_PATCH
 	for (; c && (ISFLOATING(c) || !ISVISIBLE(c) || HIDDEN(c)); c = c->next);
-	#else
-	for (; c && (ISFLOATING(c) || !ISVISIBLE(c)); c = c->next);
-	#endif // BAR_WINTITLEACTIONS_PATCH
 	return c;
 }
 

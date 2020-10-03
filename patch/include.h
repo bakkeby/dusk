@@ -61,9 +61,9 @@
 #if BAR_SYSTRAY_PATCH
 #include "bar_systray.h"
 #endif
-#if BAR_WINTITLEACTIONS_PATCH
+
 #include "bar_wintitleactions.h"
-#endif
+
 
 /* Other patches */
 #include "attachx.h"

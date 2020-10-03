@@ -619,9 +619,7 @@ static Key keys[] = {
 	{ MODKEY|Mod4Mask,              XK_Tab,        shiftviewclients,       { .i = -1 } },
 	{ MODKEY|Mod4Mask,              XK_backslash,  shiftviewclients,       { .i = +1 } },
   	#endif // SHIFTVIEW_CLIENTS_PATCH
-	#if BAR_WINTITLEACTIONS_PATCH
 	{ MODKEY|ControlMask,           XK_z,          showhideclient,         {0} },
-	#endif // BAR_WINTITLEACTIONS_PATCH
 	{ MODKEY|ShiftMask,             XK_c,          killclient,             {0} },
 	#if KILLUNSEL_PATCH
 	{ MODKEY|ShiftMask,             XK_x,          killunsel,              {0} },
@@ -839,10 +837,8 @@ static Button buttons[] = {
 	#endif // BAR_STATUSBUTTON_PATCH
 	{ ClkLtSymbol,          0,                   Button1,        setlayout,      {0} },
 	{ ClkLtSymbol,          0,                   Button3,        setlayout,      {.v = &layouts[2]} },
-	#if BAR_WINTITLEACTIONS_PATCH
 	{ ClkWinTitle,          0,                   Button1,        togglewin,      {0} },
 	{ ClkWinTitle,          0,                   Button3,        showhideclient, {0} },
-	#endif // BAR_WINTITLEACTIONS_PATCH
 	{ ClkWinTitle,          0,                   Button2,        zoom,           {0} },
 	#if BAR_STATUSCMD_PATCH && BAR_DWMBLOCKS_PATCH
 	{ ClkStatusText,        0,                   Button1,        sigdwmblocks,   {.i = 1 } },

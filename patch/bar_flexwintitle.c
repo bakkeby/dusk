@@ -265,10 +265,6 @@ flextitledraw(Monitor *m, Client *c, int unused, int x, int w, int tabscheme, Ar
 		drawindicator(m, c, 1, x, barg->y, w, barg->h, 0, 0, 0, INDICATOR_RIGHT_TAGS);
 }
 
-#ifndef HIDDEN
-#define HIDDEN(C) 0
-#endif
-
 void
 flextitleclick(Monitor *m, Client *c, int passx, int x, int w, int unused, Arg *arg, BarArg *barg)
 {
