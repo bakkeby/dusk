@@ -59,9 +59,6 @@ static const int quit_empty_window_count = 2;   /* only allow dwm to quit if no 
 #if BAR_EXTRASTATUS_PATCH
 static const char statussep              = ';'; /* separator between status bars */
 #endif // BAR_EXTRASTATUS_PATCH
-#if BAR_TABGROUPS_PATCH
-static void (*bartabmonfns[])(Monitor *) = { NULL /* , customlayoutfn */ };
-#endif // BAR_TABGROUPS_PATCH
 #if BAR_PANGO_PATCH
 static const char font[]                 = "monospace 10";
 #else
@@ -69,9 +66,8 @@ static const char *fonts[]               = { "monospace:size=10" };
 #endif // BAR_PANGO_PATCH
 static const char dmenufont[]            = "monospace:size=10";
 
-#if BAR_FLEXWINTITLE_PATCH
 static char c000000[]                    = "#000000"; // placeholder value
-#endif // BAR_FLEXWINTITLE_PATCH
+
 static char normfgcolor[]                = "#bbbbbb";
 static char normbgcolor[]                = "#222222";
 static char normbordercolor[]            = "#444444";
@@ -112,7 +108,6 @@ static char urgbgcolor[]                 = "#222222";
 static char urgbordercolor[]             = "#ff0000";
 static char urgfloatcolor[]              = "#db8fd9";
 
-#if BAR_FLEXWINTITLE_PATCH
 static char normTTBbgcolor[]             = "#330000";
 static char normLTRbgcolor[]             = "#330033";
 static char normMONObgcolor[]            = "#000033";
@@ -146,7 +141,6 @@ static char selHGRDbgcolor[]             = "#b98822";
 static char selDWDLbgcolor[]             = "#005555";
 static char selSPRLbgcolor[]             = "#555500";
 static char selfloatbgcolor[]            = "#117799";
-#endif // BAR_FLEXWINTITLE_PATCH
 
 #if BAR_ALPHA_PATCH
 static const unsigned int baralpha = 0xd0;
@@ -161,7 +155,6 @@ static const unsigned int alphas[][3] = {
 	[SchemeTagsSel]      = { OPAQUE, baralpha, borderalpha },
 	[SchemeHid]          = { OPAQUE, baralpha, borderalpha },
 	[SchemeUrg]          = { OPAQUE, baralpha, borderalpha },
-	#if BAR_FLEXWINTITLE_PATCH
 	[SchemeFlexActTTB]   = { OPAQUE, baralpha, borderalpha },
 	[SchemeFlexActLTR]   = { OPAQUE, baralpha, borderalpha },
 	[SchemeFlexActMONO]  = { OPAQUE, baralpha, borderalpha },
@@ -195,7 +188,6 @@ static const unsigned int alphas[][3] = {
 	[SchemeFlexSelDWDL]  = { OPAQUE, baralpha, borderalpha },
 	[SchemeFlexSelSPRL]  = { OPAQUE, baralpha, borderalpha },
 	[SchemeFlexSelFloat] = { OPAQUE, baralpha, borderalpha },
-	#endif // BAR_FLEXWINTITLE_PATCH
 };
 #endif // BAR_ALPHA_PATCH
 
@@ -209,7 +201,6 @@ static char *colors[][ColCount] = {
 	[SchemeTagsSel]      = { tagsselfgcolor,   tagsselbgcolor,   tagsselbordercolor,   tagsselfloatcolor },
 	[SchemeHid]          = { hidfgcolor,       hidbgcolor,       hidbordercolor,       hidfloatcolor },
 	[SchemeUrg]          = { urgfgcolor,       urgbgcolor,       urgbordercolor,       urgfloatcolor },
-	#if BAR_FLEXWINTITLE_PATCH
 	[SchemeFlexActTTB]   = { titleselfgcolor,  actTTBbgcolor,    actTTBbgcolor,        c000000 },
 	[SchemeFlexActLTR]   = { titleselfgcolor,  actLTRbgcolor,    actLTRbgcolor,        c000000 },
 	[SchemeFlexActMONO]  = { titleselfgcolor,  actMONObgcolor,   actMONObgcolor,       c000000 },
@@ -243,7 +234,6 @@ static char *colors[][ColCount] = {
 	[SchemeFlexSelDWDL]  = { titleselfgcolor,  selDWDLbgcolor,   selDWDLbgcolor,       c000000 },
 	[SchemeFlexSelSPRL]  = { titleselfgcolor,  selSPRLbgcolor,   selSPRLbgcolor,       c000000 },
 	[SchemeFlexSelFloat] = { titleselfgcolor,  selfloatbgcolor,  selfloatbgcolor,      c000000 },
-	#endif // BAR_FLEXWINTITLE_PATCH
 };
 
 #if BAR_POWERLINE_STATUS_PATCH
@@ -437,14 +427,14 @@ static const BarRule barrules[] = {
 	{ 'A',      1,     BAR_ALIGN_CENTER, width_status_es,         draw_status_es,         click_status,            "status_es" },
 	#endif // BAR_STATUS2D_PATCH | BAR_STATUSCMD_PATCH
 	#endif // BAR_EXTRASTATUS_PATCH
-	#if BAR_FLEXWINTITLE_PATCH
+
 	#if BAR_WINTITLE_HIDDEN_PATCH
 	{ -1,       1,  BAR_ALIGN_RIGHT_RIGHT, width_wintitle_hidden, draw_wintitle_hidden,   click_wintitle_hidden,   "wintitle_hidden" },
 	#endif
 	#if BAR_WINTITLE_FLOATING_PATCH
 	{ -1,       1,     BAR_ALIGN_LEFT,   width_wintitle_floating, draw_wintitle_floating, click_wintitle_floating, "wintitle_floating" },
 	#endif // BAR_WINTITLE_FLOATING_PATCH
-	#endif // BAR_FLEXWINTITLE_PATCH
+
 };
 
 /* layout(s) */

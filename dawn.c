@@ -111,7 +111,6 @@ enum {
 	SchemeTagsSel,
 	SchemeHid,
 	SchemeUrg,
-	#if BAR_FLEXWINTITLE_PATCH
 	SchemeFlexActTTB,
 	SchemeFlexActLTR,
 	SchemeFlexActMONO,
@@ -145,7 +144,6 @@ enum {
 	SchemeFlexActFloat,
 	SchemeFlexInaFloat,
 	SchemeFlexSelFloat,
-	#endif // BAR_FLEXWINTITLE_PATCH
 }; /* color schemes */
 
 enum {
@@ -1547,12 +1545,6 @@ focus(Client *c)
 		detachstack(c);
 		attachstack(c);
 		grabbuttons(c, 1);
-		#if !BAR_FLEXWINTITLE_PATCH
-		if (ISFLOATING(c))
-			XSetWindowBorder(dpy, c->win, scheme[SchemeSel][ColFloat].pixel);
-		else
-			XSetWindowBorder(dpy, c->win, scheme[SchemeSel][ColBorder].pixel);
-		#endif // BAR_FLEXWINTITLE_PATCH
 		setfocus(c);
 	} else {
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
@@ -1871,12 +1863,6 @@ manage(Window w, XWindowAttributes *wa)
 
 	wc.border_width = c->bw;
 	XConfigureWindow(dpy, w, CWBorderWidth, &wc);
-	#if !BAR_FLEXWINTITLE_PATCH
-	if (ISFLOATING(c))
-		XSetWindowBorder(dpy, w, scheme[SchemeNorm][ColFloat].pixel);
-	else
-		XSetWindowBorder(dpy, w, scheme[SchemeNorm][ColBorder].pixel);
-	#endif // BAR_FLEXWINTITLE_PATCH
 	configure(c); /* propagates border_width, if size doesn't change */
 
 	//updatesizehints(c); // commented due to floatpos, TODO figure out a way to keep this
@@ -3083,12 +3069,6 @@ togglefloating(const Arg *arg)
 	if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c)) /* no support for fullscreen windows */
 		return;
 	setflag(c, Floating, !ISFLOATING(c) || ISFIXED(c));
-	#if !BAR_FLEXWINTITLE_PATCH
-	if (ISFLOATING(c))
-		XSetWindowBorder(dpy, c->win, scheme[SchemeSel][ColFloat].pixel);
-	else
-		XSetWindowBorder(dpy, c->win, scheme[SchemeSel][ColBorder].pixel);
-	#endif // BAR_FLEXWINTITLE_PATCH
 	if (ISFLOATING(c)) {
 		#if SAVEFLOATS_PATCH
 		if (c->sfx != -9999) {
@@ -3224,12 +3204,6 @@ unfocus(Client *c, int setfocus, Client *nextfocus)
 		if (!ISFAKEFULLSCREEN(c))
 			setfullscreen(c, 0, 0);
 	grabbuttons(c, 0);
-	#if !BAR_FLEXWINTITLE_PATCH
-	if (ISFLOATING(c))
-		XSetWindowBorder(dpy, c->win, scheme[SchemeNorm][ColFloat].pixel);
-	else
-		XSetWindowBorder(dpy, c->win, scheme[SchemeNorm][ColBorder].pixel);
-	#endif // BAR_FLEXWINTITLE_PATCH
 	if (setfocus) {
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
 		XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
