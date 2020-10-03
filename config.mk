@@ -21,7 +21,7 @@ FREETYPEINC = /usr/include/freetype2
 #FREETYPEINC = ${X11INC}/freetype2
 #KVMLIB = -lkvm
 
-# Uncomment this for the alpha patch / BAR_ALPHA_PATCH
+# Needed for the alpha patch
 XRENDER = -lXrender
 
 # Uncomment this for the mdpcontrol patch / MDPCONTROL_PATCH

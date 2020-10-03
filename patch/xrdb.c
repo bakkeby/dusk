@@ -112,12 +112,7 @@ xrdb(const Arg *arg)
 	loadxrdb();
 	int i;
 	for (i = 0; i < LENGTH(colors); i++)
-		scheme[i] = drw_scm_create(drw, colors[i],
-		#if BAR_ALPHA_PATCH
-		alphas[i],
-		#endif // BAR_ALPHA_PATCH
-		ColCount
-		);
+		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], ColCount);
 	focus(NULL);
 	arrange(NULL);
 }

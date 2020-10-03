@@ -97,11 +97,7 @@ drawstatusbar(BarArg *a, char* stext)
 					}
 					memcpy(buf, (char*)text+i+1, 7);
 					buf[7] = '\0';
-					#if BAR_ALPHA_PATCH
 					drw_clr_create(drw, &drw->scheme[ColFg], buf, enabled(Status2DNoAlpha) ? 0xff : alphas[SchemeNorm][ColFg]);
-					#else
-					drw_clr_create(drw, &drw->scheme[ColFg], buf);
-					#endif // BAR_ALPHA_PATCH
 					i += 7;
 				} else if (text[i] == 'b') {
 					char buf[8];
@@ -111,27 +107,15 @@ drawstatusbar(BarArg *a, char* stext)
 					}
 					memcpy(buf, (char*)text+i+1, 7);
 					buf[7] = '\0';
-					#if BAR_ALPHA_PATCH
 					drw_clr_create(drw, &drw->scheme[ColBg], buf, enabled(Status2DNoAlpha) ? 0xff : alphas[SchemeNorm][ColFg]);
-					#else
-					drw_clr_create(drw, &drw->scheme[ColBg], buf);
-					#endif // BAR_ALPHA_PATCH
 					i += 7;
 				#if BAR_STATUS2D_XRDB_TERMCOLORS_PATCH
 				} else if (text[i] == 'C') {
 					int c = atoi(text + ++i) % 16;
-					#if BAR_ALPHA_PATCH
 					drw_clr_create(drw, &drw->scheme[ColFg], termcolor[c], enabled(Status2DNoAlpha) ? 0xff : alphas[SchemeNorm][ColFg]);
-					#else
-					drw_clr_create(drw, &drw->scheme[ColFg], termcolor[c]);
-					#endif // BAR_ALPHA_PATCH
 				} else if (text[i] == 'B') {
 					int c = atoi(text + ++i) % 16;
-					#if BAR_ALPHA_PATCH
 					drw_clr_create(drw, &drw->scheme[ColBg], termcolor[c], enabled(Status2DNoAlpha) ? 0xff : alphas[SchemeNorm][ColFg]);
-					#else
-					drw_clr_create(drw, &drw->scheme[ColBg], termcolor[c]);
-					#endif // BAR_ALPHA_PATCH
 				#endif // BAR_STATUS2D_XRDB_TERMCOLORS_PATCH
 				} else if (text[i] == 'd') {
 					drw->scheme[ColFg] = scheme[SchemeNorm][ColFg];

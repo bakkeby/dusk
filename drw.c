@@ -66,11 +66,7 @@ utf8decode(const char *c, long *u, size_t clen)
 #endif // BAR_PANGO_PATCH
 
 Drw *
-#if BAR_ALPHA_PATCH
 drw_create(Display *dpy, int screen, Window root, unsigned int w, unsigned int h, Visual *visual, unsigned int depth, Colormap cmap)
-#else
-drw_create(Display *dpy, int screen, Window root, unsigned int w, unsigned int h)
-#endif // BAR_ALPHA_PATCH
 {
 	Drw *drw = ecalloc(1, sizeof(Drw));
 
@@ -80,16 +76,11 @@ drw_create(Display *dpy, int screen, Window root, unsigned int w, unsigned int h
 	drw->w = w;
 	drw->h = h;
 
-	#if BAR_ALPHA_PATCH
 	drw->visual = visual;
 	drw->depth = depth;
 	drw->cmap = cmap;
 	drw->drawable = XCreatePixmap(dpy, root, w, h, depth);
 	drw->gc = XCreateGC(dpy, drw->drawable, 0, NULL);
-	#else
-	drw->drawable = XCreatePixmap(dpy, root, w, h, DefaultDepth(dpy, screen));
-	drw->gc = XCreateGC(dpy, root, 0, NULL);
-	#endif // BAR_ALPHA_PATCH
 	XSetLineAttributes(dpy, drw->gc, 1, LineSolid, CapButt, JoinMiter);
 
 	return drw;
@@ -105,11 +96,7 @@ drw_resize(Drw *drw, unsigned int w, unsigned int h)
 	drw->h = h;
 	if (drw->drawable)
 		XFreePixmap(drw->dpy, drw->drawable);
-	#if BAR_ALPHA_PATCH
 	drw->drawable = XCreatePixmap(drw->dpy, drw->root, w, h, drw->depth);
-	#else
-	drw->drawable = XCreatePixmap(drw->dpy, drw->root, w, h, DefaultDepth(drw->dpy, drw->screen));
-	#endif // BAR_ALPHA_PATCH
 }
 
 void
@@ -279,30 +266,17 @@ void
 drw_clr_create(
 	Drw *drw,
 	Clr *dest,
-	const char *clrname
-	#if BAR_ALPHA_PATCH
-	, unsigned int alpha
-	#endif // BAR_ALPHA_PATCH
+	const char *clrname,
+	unsigned int alpha
 ) {
 	if (!drw || !dest || !clrname)
 		return;
 
-	#if BAR_ALPHA_PATCH
 	if (!XftColorAllocName(drw->dpy, drw->visual, drw->cmap,
 	                       clrname, dest))
 		die("error, cannot allocate color '%s'", clrname);
 
 	dest->pixel = (dest->pixel & 0x00ffffffU) | (alpha << 24);
-	#else
-	if (!XftColorAllocName(drw->dpy, DefaultVisual(drw->dpy, drw->screen),
-	                       DefaultColormap(drw->dpy, drw->screen),
-	                       clrname, dest))
-		die("error, cannot allocate color '%s'", clrname);
-
-	#if NO_TRANSPARENT_BORDERS_PATCH
-	dest->pixel |= 0xff << 24;
-	#endif // NO_TRANSPARENT_BORDERS_PATCH
-	#endif // BAR_ALPHA_PATCH
 }
 
 /* Wrapper to create color schemes. The caller has to call free(3) on the
@@ -311,9 +285,7 @@ Clr *
 drw_scm_create(
 	Drw *drw,
 	char *clrnames[],
-	#if BAR_ALPHA_PATCH
 	const unsigned int alphas[],
-	#endif // BAR_ALPHA_PATCH
 	size_t clrcount
 ) {
 	size_t i;
@@ -324,11 +296,7 @@ drw_scm_create(
 		return NULL;
 
 	for (i = 0; i < clrcount; i++)
-		#if BAR_ALPHA_PATCH
 		drw_clr_create(drw, &ret[i], clrnames[i], alphas[i]);
-		#else
-		drw_clr_create(drw, &ret[i], clrnames[i]);
-		#endif // BAR_ALPHA_PATCH
 	return ret;
 }
 
@@ -379,13 +347,7 @@ drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lp
 	} else {
 		XSetForeground(drw->dpy, drw->gc, drw->scheme[invert ? ColFg : ColBg].pixel);
 		XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, y, w, h);
-		#if BAR_ALPHA_PATCH
 		d = XftDrawCreate(drw->dpy, drw->drawable, drw->visual, drw->cmap);
-		#else
-		d = XftDrawCreate(drw->dpy, drw->drawable,
-		                  DefaultVisual(drw->dpy, drw->screen),
-		                  DefaultColormap(drw->dpy, drw->screen));
-		#endif // BAR_ALPHA_PATCH
 		x += lpad;
 		w -= lpad;
 	}
@@ -452,13 +414,7 @@ drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lp
 	} else {
 		XSetForeground(drw->dpy, drw->gc, drw->scheme[invert ? ColFg : ColBg].pixel);
 		XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, y, w, h);
-		#if BAR_ALPHA_PATCH
 		d = XftDrawCreate(drw->dpy, drw->drawable, drw->visual, drw->cmap);
-		#else
-		d = XftDrawCreate(drw->dpy, drw->drawable,
-		                  DefaultVisual(drw->dpy, drw->screen),
-		                  DefaultColormap(drw->dpy, drw->screen));
-		#endif // BAR_ALPHA_PATCH
 		x += lpad;
 		w -= lpad;
 	}

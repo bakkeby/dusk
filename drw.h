@@ -29,11 +29,9 @@ typedef struct {
 	Display *dpy;
 	int screen;
 	Window root;
-	#if BAR_ALPHA_PATCH
 	Visual *visual;
 	unsigned int depth;
 	Colormap cmap;
-	#endif // BAR_ALPHA_PATCH
 	Drawable drawable;
 	GC gc;
 	Clr *scheme;
@@ -41,11 +39,7 @@ typedef struct {
 } Drw;
 
 /* Drawable abstraction */
-#if BAR_ALPHA_PATCH
 Drw *drw_create(Display *dpy, int screen, Window win, unsigned int w, unsigned int h, Visual *visual, unsigned int depth, Colormap cmap);
-#else
-Drw *drw_create(Display *dpy, int screen, Window win, unsigned int w, unsigned int h);
-#endif // BAR_ALPHA_PATCH
 void drw_resize(Drw *drw, unsigned int w, unsigned int h);
 void drw_free(Drw *drw);
 
@@ -64,17 +58,13 @@ unsigned int drw_fontset_getwidth(Drw *drw, const char *text, Bool markup);
 void drw_clr_create(
 	Drw *drw,
 	Clr *dest,
-	const char *clrname
-	#if BAR_ALPHA_PATCH
-	, unsigned int alpha
-	#endif // BAR_ALPHA_PATCH
+	const char *clrname,
+	unsigned int alpha
 );
 Clr *drw_scm_create(
 	Drw *drw,
 	char *clrnames[],
-	#if BAR_ALPHA_PATCH
 	const unsigned int alphas[],
-	#endif // BAR_ALPHA_PATCH
 	size_t clrcount
 );
 

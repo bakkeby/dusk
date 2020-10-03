@@ -135,7 +135,6 @@ static char selDWDLbgcolor[]             = "#005555";
 static char selSPRLbgcolor[]             = "#555500";
 static char selfloatbgcolor[]            = "#117799";
 
-#if BAR_ALPHA_PATCH
 static const unsigned int baralpha = 0xd0;
 static const unsigned int borderalpha = OPAQUE;
 static const unsigned int alphas[][3] = {
@@ -182,7 +181,6 @@ static const unsigned int alphas[][3] = {
 	[SchemeFlexSelSPRL]  = { OPAQUE, baralpha, borderalpha },
 	[SchemeFlexSelFloat] = { OPAQUE, baralpha, borderalpha },
 };
-#endif // BAR_ALPHA_PATCH
 
 static char *colors[][ColCount] = {
 	/*                       fg                bg                border                float */

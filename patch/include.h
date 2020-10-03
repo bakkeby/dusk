@@ -4,9 +4,7 @@
 #include "flags.h"
 #include "func.h"
 
-#if BAR_ALPHA_PATCH
 #include "bar_alpha.h"
-#endif
 #if BAR_ALTERNATIVE_TAGS_PATCH
 #include "bar_alternativetags.h"
 #endif
