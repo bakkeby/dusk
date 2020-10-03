@@ -17,35 +17,18 @@
 #if COMBO_PATCH
 #include "combo.c"
 #endif
-#if BAR_LTSYMBOL_PATCH
+
 #include "bar_ltsymbol.c"
-#endif
-
 #include "bar_status2d.c"
-
-#if BAR_STATUSBUTTON_PATCH
 #include "bar_statusbutton.c"
-#endif
-
 #include "bar_statuscmd.c"
-
-#if BAR_TAGS_PATCH
 #include "bar_tags.c"
-#endif
-#if BAR_TAGGRID_PATCH
 #include "bar_taggrid.c"
-#endif
-
 #include "bar_flexwintitle.c"
 #include "bar_wintitle_floating.c"
 #include "bar_wintitle_hidden.c"
-
-#if BAR_SYSTRAY_PATCH
 #include "bar_systray.c"
-#endif
-
 #include "bar_wintitleactions.c"
-
 
 /* Other patches */
 #include "attachx.c"

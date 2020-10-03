@@ -142,10 +142,8 @@ enum {
 enum {
 	NetSupported, NetWMName, NetWMState, NetWMCheck,
 	NetWMFullscreen, NetActiveWindow, NetWMWindowType,
-	#if BAR_SYSTRAY_PATCH
 	NetSystemTray, NetSystemTrayOP, NetSystemTrayOrientation,
 	NetSystemTrayVisual, NetWMWindowTypeDock, NetSystemTrayOrientationHorz,
-	#endif // BAR_SYSTRAY_PATCH
 	#if BAR_EWMHTAGS_PATCH
 	NetDesktopNames, NetDesktopViewport, NetNumberOfDesktops, NetCurrentDesktop,
 	#endif // BAR_EWMHTAGS_PATCH
@@ -162,9 +160,7 @@ enum {
 }; /* default atoms */
 
 enum {
-	#if BAR_STATUSBUTTON_PATCH
 	ClkButton,
-	#endif // BAR_STATUSBUTTON_PATCH
 	ClkTagBar,
 	ClkLtSymbol,
 	ClkStatusText,
@@ -461,11 +457,7 @@ static void resizemouse(const Arg *arg);
 static void restack(Monitor *m);
 static void run(void);
 static void scan(void);
-#if BAR_SYSTRAY_PATCH
 static int sendevent(Window w, Atom proto, int m, long d0, long d1, long d2, long d3, long d4);
-#else
-static int sendevent(Client *c, Atom proto);
-#endif // BAR_SYSTRAY_PATCH
 static void sendmon(Client *c, Monitor *m);
 static void setclientstate(Client *c, long state);
 static void setfocus(Client *c);
@@ -541,16 +533,10 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 	[MapRequest] = maprequest,
 	[MotionNotify] = motionnotify,
 	[PropertyNotify] = propertynotify,
-	#if BAR_SYSTRAY_PATCH
 	[ResizeRequest] = resizerequest,
-	#endif // BAR_SYSTRAY_PATCH
 	[UnmapNotify] = unmapnotify
 };
-#if BAR_SYSTRAY_PATCH
 static Atom wmatom[WMLast], netatom[NetLast], xatom[XLast];
-#else
-static Atom wmatom[WMLast], netatom[NetLast];
-#endif // BAR_SYSTRAY_PATCH
 static int running = 1;
 static Cur *cursor[CurLast];
 static Clr **scheme;
@@ -830,7 +816,6 @@ cleanup(void)
 	XUngrabKey(dpy, AnyKey, AnyModifier, root);
 	while (mons)
 		cleanupmon(mons);
-	#if BAR_SYSTRAY_PATCH
 	if (enabled(Systray) && systray) {
 		if (systray->win) {
 			XUnmapWindow(dpy, systray->win);
@@ -838,7 +823,6 @@ cleanup(void)
 		}
 		free(systray);
 	}
-	#endif // BAR_SYSTRAY_PATCH
 	for (i = 0; i < CurLast; i++)
 		drw_cur_free(drw, cursor[i]);
 	for (i = 0; i < LENGTH(colors) + 1; i++)
@@ -884,10 +868,8 @@ cleanupmon(Monitor *mon)
 void
 clientmessage(XEvent *e)
 {
-	#if BAR_SYSTRAY_PATCH
 	XWindowAttributes wa;
 	XSetWindowAttributes swa;
-	#endif // BAR_SYSTRAY_PATCH
 	XClientMessageEvent *cme = &e->xclient;
 	Client *c = wintoclient(cme->window);
 	#if FOCUSONNETACTIVE_PATCH
@@ -895,7 +877,6 @@ clientmessage(XEvent *e)
 	#endif // FOCUSONNETACTIVE_PATCH
 	int setfakefullscreen = 0;
 
-	#if BAR_SYSTRAY_PATCH
 	if (enabled(Systray) && systray && cme->window == systray->win && cme->message_type == netatom[NetSystemTrayOP]) {
 		/* add systray icons */
 		if (cme->data.l[1] == SYSTEM_TRAY_REQUEST_DOCK) {
@@ -934,7 +915,6 @@ clientmessage(XEvent *e)
 		}
 		return;
 	}
-	#endif // BAR_SYSTRAY_PATCH
 
 	if (!c)
 		return;
@@ -1256,12 +1236,10 @@ destroynotify(XEvent *e)
 		unmanage(c, 1);
 	else if ((c = swallowingclient(ev->window)))
 		unmanage(c->swallowing, 1);
-	#if BAR_SYSTRAY_PATCH
 	else if (enabled(Systray) && (c = wintosystrayicon(ev->window))) {
 		removesystrayicon(c);
 		drawbarwin(systray->bar);
 	}
-	#endif // BAR_SYSTRAY_PATCH
 }
 
 void
@@ -1559,7 +1537,6 @@ getatomprop(Client *c, Atom prop)
 	unsigned char *p = NULL;
 	Atom da, atom = None;
 
-	#if BAR_SYSTRAY_PATCH
 	/* FIXME getatomprop should return the number of items and a pointer to
 	 * the stored data instead of this workaround */
 	Atom req = XA_ATOM;
@@ -1573,13 +1550,6 @@ getatomprop(Client *c, Atom prop)
 			atom = ((Atom *)p)[1];
 		XFree(p);
 	}
-	#else
-	if (XGetWindowProperty(dpy, c->win, prop, 0L, sizeof atom, False, XA_ATOM,
-		&da, &di, &dl, &dl, &p) == Success && p) {
-		atom = *(Atom *)p;
-		XFree(p);
-	}
-	#endif // BAR_SYSTRAY_PATCH
 	return atom;
 }
 
@@ -1730,11 +1700,7 @@ killclient(const Arg *arg)
 	Client *c = selmon->sel;
 	if (!c || ISPERMANENT(c))
 		return;
-	#if BAR_SYSTRAY_PATCH
 	if (!sendevent(c->win, wmatom[WMDelete], NoEventMask, wmatom[WMDelete], CurrentTime, 0, 0, 0)) {
-	#else
-	if (!sendevent(c, wmatom[WMDelete])) {
-	#endif // BAR_SYSTRAY_PATCH
 		XGrabServer(dpy);
 		XSetErrorHandler(xerrordummy);
 		XSetCloseDownMode(dpy, DestroyAll);
@@ -1890,13 +1856,11 @@ maprequest(XEvent *e)
 	static XWindowAttributes wa;
 	XMapRequestEvent *ev = &e->xmaprequest;
 
-	#if BAR_SYSTRAY_PATCH
 	Client *i;
 	if (enabled(Systray) && systray && (i = wintosystrayicon(ev->window))) {
 		sendevent(i->win, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_WINDOW_ACTIVATE, 0, systray->win, XEMBED_EMBEDDED_VERSION);
 		drawbarwin(systray->bar);
 	}
-	#endif // BAR_SYSTRAY_PATCH
 
 	if (!XGetWindowAttributes(dpy, ev->window, &wa))
 		return;
@@ -2030,7 +1994,6 @@ propertynotify(XEvent *e)
 	Window trans;
 	XPropertyEvent *ev = &e->xproperty;
 
-	#if BAR_SYSTRAY_PATCH
 	if (enabled(Systray) && (c = wintosystrayicon(ev->window))) {
 		if (ev->atom == XA_WM_NORMAL_HINTS) {
 			updatesizehints(c);
@@ -2040,7 +2003,6 @@ propertynotify(XEvent *e)
 			updatesystrayiconstate(c, ev);
 		drawbarwin(systray->bar);
 	}
-	#endif // BAR_SYSTRAY_PATCH
 
 	if ((ev->window == root) && (ev->atom == XA_WM_NAME)) {
 		updatestatus();
@@ -2415,21 +2377,14 @@ setclientstate(Client *c, long state)
 }
 
 int
-#if BAR_SYSTRAY_PATCH
 sendevent(Window w, Atom proto, int mask, long d0, long d1, long d2, long d3, long d4)
-#else
-sendevent(Client *c, Atom proto)
-#endif // BAR_SYSTRAY_PATCH
 {
 	int n;
 	Atom *protocols;
-	#if BAR_SYSTRAY_PATCH
 	Atom mt;
-	#endif // BAR_SYSTRAY_PATCH
 	int exists = 0;
 	XEvent ev;
 
-	#if BAR_SYSTRAY_PATCH
 	if (proto == wmatom[WMTakeFocus] || proto == wmatom[WMDelete]) {
 		mt = wmatom[WMProtocols];
 		if (XGetWMProtocols(dpy, w, &protocols, &n)) {
@@ -2441,16 +2396,8 @@ sendevent(Client *c, Atom proto)
 		exists = True;
 		mt = proto;
 	}
-	#else
-	if (XGetWMProtocols(dpy, c->win, &protocols, &n)) {
-		while (!exists && n--)
-			exists = protocols[n] == proto;
-		XFree(protocols);
-	}
-	#endif // BAR_SYSTRAY_PATCH
 
 	if (exists) {
-		#if BAR_SYSTRAY_PATCH
 		ev.type = ClientMessage;
 		ev.xclient.window = w;
 		ev.xclient.message_type = mt;
@@ -2461,15 +2408,6 @@ sendevent(Client *c, Atom proto)
 		ev.xclient.data.l[3] = d3;
 		ev.xclient.data.l[4] = d4;
 		XSendEvent(dpy, w, False, mask, &ev);
-		#else
-		ev.type = ClientMessage;
-		ev.xclient.window = c->win;
-		ev.xclient.message_type = wmatom[WMProtocols];
-		ev.xclient.format = 32;
-		ev.xclient.data.l[0] = proto;
-		ev.xclient.data.l[1] = CurrentTime;
-		XSendEvent(dpy, c->win, False, NoEventMask, &ev);
-		#endif // BAR_SYSTRAY_PATCH
 	}
 	return exists;
 }
@@ -2483,11 +2421,7 @@ setfocus(Client *c)
 			XA_WINDOW, 32, PropModeReplace,
 			(unsigned char *) &(c->win), 1);
 	}
-	#if BAR_SYSTRAY_PATCH
 	sendevent(c->win, wmatom[WMTakeFocus], NoEventMask, wmatom[WMTakeFocus], CurrentTime, 0, 0, 0);
-	#else
-	sendevent(c, wmatom[WMTakeFocus]);
-	#endif // BAR_SYSTRAY_PATCH
 }
 
 void
@@ -2666,7 +2600,6 @@ setup(void)
 	wmatom[WMWindowRole] = XInternAtom(dpy, "WM_WINDOW_ROLE", False);
 	netatom[NetActiveWindow] = XInternAtom(dpy, "_NET_ACTIVE_WINDOW", False);
 	netatom[NetSupported] = XInternAtom(dpy, "_NET_SUPPORTED", False);
-	#if BAR_SYSTRAY_PATCH
 	netatom[NetSystemTray] = XInternAtom(dpy, "_NET_SYSTEM_TRAY_S0", False);
 	netatom[NetSystemTrayOP] = XInternAtom(dpy, "_NET_SYSTEM_TRAY_OPCODE", False);
 	netatom[NetSystemTrayOrientation] = XInternAtom(dpy, "_NET_SYSTEM_TRAY_ORIENTATION", False);
@@ -2676,7 +2609,6 @@ setup(void)
 	xatom[Manager] = XInternAtom(dpy, "MANAGER", False);
 	xatom[Xembed] = XInternAtom(dpy, "_XEMBED", False);
 	xatom[XembedInfo] = XInternAtom(dpy, "_XEMBED_INFO", False);
-	#endif // BAR_SYSTRAY_PATCH
 	#if BAR_EWMHTAGS_PATCH
 	netatom[NetDesktopViewport] = XInternAtom(dpy, "_NET_DESKTOP_VIEWPORT", False);
 	netatom[NetNumberOfDesktops] = XInternAtom(dpy, "_NET_NUMBER_OF_DESKTOPS", False);
@@ -3164,14 +3096,12 @@ unmapnotify(XEvent *e)
 			setclientstate(c, WithdrawnState);
 		else
 			unmanage(c, 0);
-	#if BAR_SYSTRAY_PATCH
 	} else if (enabled(Systray) && (c = wintosystrayicon(ev->window))) {
 		/* KLUDGE! sometimes icons occasionally unmap their windows, but do
 		 * _not_ destroy them. We map those windows back */
 		XMapRaised(dpy, c->win);
 		removesystrayicon(c);
 		drawbarwin(systray->bar);
-	#endif // BAR_SYSTRAY_PATCH
 	}
 }
 

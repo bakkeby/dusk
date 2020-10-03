@@ -35,12 +35,10 @@ static int floatposgrid_y                = 5;  /* float grid rows */
 static const int horizpadbar             = 2;   /* horizontal padding for statusbar */
 static const int vertpadbar              = 0;   /* vertical padding for statusbar */
 #endif // BAR_STATUSPADDING_PATCH
-#if BAR_STATUSBUTTON_PATCH
+
 static const char buttonbar[]            = "<O>";
-#endif // BAR_STATUSBUTTON_PATCH
-#if BAR_SYSTRAY_PATCH
 static const unsigned int systrayspacing = 2;   /* systray spacing */
-#endif // BAR_SYSTRAY_PATCH
+
 /* Indicators: see patch/bar_indicators.h for options */
 static int tagindicatortype              = INDICATOR_TOP_LEFT_SQUARE;
 static int floatindicatortype            = INDICATOR_TOP_LEFT_SQUARE;
@@ -282,7 +280,6 @@ static char *tagicons[][NUMTAGS] = {
 	[ALT_TAGS_DECORATION] = { "<1>", "<2>", "<3>", "<4>", "<5>", "<6>", "<7>", "<8>", "<9>" },
 };
 
-#if BAR_TAGGRID_PATCH
 /* grid of tags */
 #define SWITCHTAG_UP                1 << 0
 #define SWITCHTAG_DOWN              1 << 1
@@ -294,7 +291,6 @@ static char *tagicons[][NUMTAGS] = {
 #define SWITCHTAG_TOGGLEVIEW        1 << 7
 
 static const int tagrows = 2;
-#endif // BAR_TAGGRID_PATCH
 
 /* There are two options when it comes to per-client rules:
  *  - a typical struct table or
@@ -363,22 +359,11 @@ static const Inset default_inset = {
  */
 static const BarRule barrules[] = {
 	/* monitor  bar    alignment         widthfunc                drawfunc                clickfunc                name */
-	#if BAR_STATUSBUTTON_PATCH
 	{ -1,       0,     BAR_ALIGN_LEFT,   width_stbutton,          draw_stbutton,          click_stbutton,          "statusbutton" },
-	#endif // BAR_STATUSBUTTON_PATCH
-	#if BAR_TAGS_PATCH
 	{ -1,       0,     BAR_ALIGN_LEFT,   width_tags,              draw_tags,              click_tags,              "tags" },
-	#endif // BAR_TAGS_PATCH
-	#if BAR_TAGGRID_PATCH
 	{ -1,       0,     BAR_ALIGN_LEFT,   width_taggrid,           draw_taggrid,           click_taggrid,           "taggrid" },
-	#endif // BAR_TAGGRID_PATCH
-	#if BAR_SYSTRAY_PATCH
 	{  0,       0,     BAR_ALIGN_RIGHT,  width_systray,           draw_systray,           click_systray,           "systray" },
-	#endif // BAR_SYSTRAY_PATCH
-	#if BAR_LTSYMBOL_PATCH
 	{ -1,       0,     BAR_ALIGN_LEFT,   width_ltsymbol,          draw_ltsymbol,          click_ltsymbol,          "layout" },
-	#endif // BAR_LTSYMBOL_PATCH
-
 	{ 'A',      0,     BAR_ALIGN_RIGHT,  width_status2d,          draw_status2d,          click_statuscmd,         "status2d" },
 	{ -1,       0,     BAR_ALIGN_NONE,   width_flexwintitle,      draw_flexwintitle,      click_flexwintitle,      "flexwintitle" },
 	{ 'A',      1,     BAR_ALIGN_CENTER, width_status2d_es,       draw_status2d_es,       click_statuscmd_es,      "status2d_es" },
@@ -655,7 +640,7 @@ static Key keys[] = {
 	#if BAR_ALTERNATIVE_TAGS_PATCH
 	{ MODKEY,                       XK_n,          togglealttag,           {0} },
 	#endif // BAR_ALTERNATIVE_TAGS_PATCH
-	#if BAR_TAGGRID_PATCH
+
 	{ MODKEY|ControlMask,           XK_Up,         switchtag,              { .ui = SWITCHTAG_UP    | SWITCHTAG_VIEW } },
 	{ MODKEY|ControlMask,           XK_Down,       switchtag,              { .ui = SWITCHTAG_DOWN  | SWITCHTAG_VIEW } },
 	{ MODKEY|ControlMask,           XK_Right,      switchtag,              { .ui = SWITCHTAG_RIGHT | SWITCHTAG_VIEW } },
@@ -664,7 +649,6 @@ static Key keys[] = {
 	{ MODKEY|Mod4Mask,              XK_Down,       switchtag,              { .ui = SWITCHTAG_DOWN  | SWITCHTAG_TAG | SWITCHTAG_VIEW } },
 	{ MODKEY|Mod4Mask,              XK_Right,      switchtag,              { .ui = SWITCHTAG_RIGHT | SWITCHTAG_TAG | SWITCHTAG_VIEW } },
 	{ MODKEY|Mod4Mask,              XK_Left,       switchtag,              { .ui = SWITCHTAG_LEFT  | SWITCHTAG_TAG | SWITCHTAG_VIEW } },
-	#endif // BAR_TAGGRID_PATCH
 
 	/* Note that due to key limitations the below example kybindings are defined with a Mod3Mask,
 	 * which is not always readily available. Refer to the patch wiki for more details. */
@@ -766,9 +750,7 @@ static Command commands[] = {
 #endif //
 static Button buttons[] = {
 	/* click                event mask           button          function        argument */
-	#if BAR_STATUSBUTTON_PATCH
 	{ ClkButton,            0,                   Button1,        spawn,          {.v = dmenucmd } },
-	#endif // BAR_STATUSBUTTON_PATCH
 	{ ClkLtSymbol,          0,                   Button1,        setlayout,      {0} },
 	{ ClkLtSymbol,          0,                   Button3,        setlayout,      {.v = &layouts[2]} },
 	{ ClkWinTitle,          0,                   Button1,        togglewin,      {0} },
@@ -811,10 +793,8 @@ static IPCCommand ipccommands[] = {
 	#if BAR_ALTERNATIVE_TAGS_PATCH
 	IPCCOMMAND( togglealttag, 1, {ARG_TYPE_NONE} ),
 	#endif // BAR_ALTERNATIVE_TAGS_PATCH
-	#if BAR_TAGGRID_PATCH
-	IPCCOMMAND( switchtag, 1, {ARG_TYPE_UINT} ),
-	#endif // BAR_TAGGRID_PATCH
 
+	IPCCOMMAND( switchtag, 1, {ARG_TYPE_UINT} ),
 	IPCCOMMAND( setcfact, 1, {ARG_TYPE_FLOAT} ),
 
 	#if CYCLELAYOUTS_PATCH
