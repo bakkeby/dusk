@@ -49,12 +49,10 @@
 #include <pango/pango.h>
 #endif // BAR_PANGO_PATCH
 
-#if SPAWNCMD_PATCH
 #include <assert.h>
 #include <libgen.h>
 #include <sys/stat.h>
 #define SPAWN_CWD_DELIM " []{}()<>\"':"
-#endif // SPAWNCMD_PATCH
 
 /* macros */
 #define Button6                 6
@@ -2906,8 +2904,7 @@ spawn(const Arg *arg)
 	if (fork() == 0) {
 		if (dpy)
 			close(ConnectionNumber(dpy));
-		#if SPAWNCMD_PATCH
-		if (selmon->sel) {
+		if (enabled(SpawnCwd) && selmon->sel) {
 			const char* const home = getenv("HOME");
 			assert(home && strchr(home, '/'));
 			const size_t homelen = strlen(home);
@@ -2939,7 +2936,6 @@ spawn(const Arg *arg)
 
 			free(pathbuf);
 		}
-		#endif // SPAWNCMD_PATCH
 		setsid();
 		execvp(((char **)arg->v)[0], (char **)arg->v);
 		fprintf(stderr, "dawn: execvp %s", ((char **)arg->v)[0]);
