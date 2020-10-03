@@ -3436,11 +3436,6 @@ updatesizehints(Client *c)
 
 	if (!XGetWMNormalHints(dpy, c->win, &size, &msize))
 		/* size is uninitialized, ensure that size.flags aren't used */
-		#if SIZEHINTS_PATCH || SIZEHINTS_RULED_PATCH
-		size.flags = 0;
-		#else
-		size.flags = PSize;
-		#endif // SIZEHINTS_PATCH | SIZEHINTS_RULED_PATCH
 	if (size.flags & PBaseSize) {
 		c->basew = size.base_width;
 		c->baseh = size.base_height;
@@ -3472,16 +3467,6 @@ updatesizehints(Client *c)
 		c->maxa = (float)size.max_aspect.x / size.max_aspect.y;
 	} else
 		c->maxa = c->mina = 0.0;
-	#if SIZEHINTS_PATCH || SIZEHINTS_RULED_PATCH
-	if (size.flags & PSize) {
-		c->basew = size.base_width;
-		c->baseh = size.base_height;
-		SETFLOATING(c);
-	}
-	#if SIZEHINTS_RULED_PATCH
-	checkfloatingrules(c);
-	#endif // SIZEHINTS_RULED_PATCH
-	#endif // SIZEHINTS_PATCH
 	setflag(c, Fixed, (c->maxw && c->maxh && c->maxw == c->minw && c->maxh == c->minh));
 }
 
