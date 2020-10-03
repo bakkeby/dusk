@@ -49,14 +49,8 @@ static int floatfakefsindicatortype      = INDICATOR_PLUS_AND_LARGER_SQUARE;
 #if ONLYQUITONEMPTY_PATCH
 static const int quit_empty_window_count = 2;   /* only allow dwm to quit if no windows are open, value here represents number of deamons */
 #endif // ONLYQUITONEMPTY_PATCH
-#if BAR_EXTRASTATUS_PATCH
 static const char statussep              = ';'; /* separator between status bars */
-#endif // BAR_EXTRASTATUS_PATCH
-#if BAR_PANGO_PATCH
-static const char font[]                 = "monospace 10";
-#else
 static const char *fonts[]               = { "monospace:size=10" };
-#endif // BAR_PANGO_PATCH
 static const char dmenufont[]            = "monospace:size=10";
 
 static char c000000[]                    = "#000000"; // placeholder value

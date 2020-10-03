@@ -45,10 +45,6 @@
 #include "drw.h"
 #include "util.h"
 
-#if BAR_PANGO_PATCH
-#include <pango/pango.h>
-#endif // BAR_PANGO_PATCH
-
 #include <assert.h>
 #include <libgen.h>
 #include <sys/stat.h>
@@ -2569,11 +2565,7 @@ setup(void)
 	root = RootWindow(dpy, screen);
 	xinitvisual();
 	drw = drw_create(dpy, screen, root, sw, sh, visual, depth, cmap);
-	#if BAR_PANGO_PATCH
-	if (!drw_font_create(drw, font))
-	#else
 	if (!drw_fontset_create(drw, fonts, LENGTH(fonts)))
-	#endif // BAR_PANGO_PATCH
 		die("no fonts could be loaded.");
 	#if BAR_STATUSPADDING_PATCH
 	lrpad = drw->fonts->h + horizpadbar;
@@ -3552,11 +3544,7 @@ main(int argc, char *argv[])
 		else if (!strcmp("-h", argv[i]) || !strcmp("--help", argv[i]))
 			die(help());
 		else if (!strcmp("-fn", argv[i])) /* font set */
-		#if BAR_PANGO_PATCH
-			strcpy(font, argv[++i]);
-		#else
 			fonts[0] = argv[++i];
-		#endif // BAR_PANGO_PATCH
 		else if (!strcmp("-nb", argv[i])) /* normal background color */
 			colors[SchemeNorm][1] = argv[++i];
 		else if (!strcmp("-nf", argv[i])) /* normal foreground color */
