@@ -503,7 +503,7 @@ static Key keys[] = {
 	{ MODKEY|ShiftMask|ControlMask, XK_a,          updateinset,            {.v = &default_inset } },
 	#endif // INSETS_PATCH
 	{ MODKEY,                       XK_Return,     zoom,                   {0} },
-	#if VANITYGAPS_PATCH
+
 	{ MODKEY|Mod4Mask,              XK_u,          incrgaps,               {.i = +1 } },
 	{ MODKEY|Mod4Mask|ShiftMask,    XK_u,          incrgaps,               {.i = -1 } },
 	{ MODKEY|Mod4Mask,              XK_i,          incrigaps,              {.i = +1 } },
@@ -520,7 +520,7 @@ static Key keys[] = {
 	{ MODKEY|Mod4Mask|ShiftMask,    XK_9,          incrovgaps,             {.i = -1 } },
 	{ MODKEY|Mod4Mask,              XK_0,          togglegaps,             {0} },
 	{ MODKEY|Mod4Mask|ShiftMask,    XK_0,          defaultgaps,            {0} },
-	#endif // VANITYGAPS_PATCH
+
 	{ MODKEY,                       XK_Tab,        view,                   {0} },
 	#if SHIFTVIEW_PATCH
 	{ MODKEY|ShiftMask,             XK_Tab,        shiftview,              { .i = -1 } },
@@ -879,7 +879,7 @@ static IPCCommand ipccommands[] = {
 	#if UNFLOATVISIBLE_PATCH
 	IPCCOMMAND( unfloatvisible, 1, {ARG_TYPE_NONE} ),
 	#endif // UNFLOATVISIBLE_PATCH
-	#if VANITYGAPS_PATCH
+
 	IPCCOMMAND( incrgaps, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( incrigaps, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( incrogaps, 1, {ARG_TYPE_SINT} ),
@@ -890,7 +890,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( togglegaps, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( defaultgaps, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( setgapsex, 1, {ARG_TYPE_SINT} ),
-	#endif // VANITYGAPS_PATCH
+
 	#if WINVIEW_PATCH
 	IPCCOMMAND( winview, 1, {ARG_TYPE_NONE} ),
 	#endif // WINVIEW_PATCH

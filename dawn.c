@@ -329,12 +329,10 @@ struct Monitor {
 	int num;
 	int mx, my, mw, mh;   /* screen size */
 	int wx, wy, ww, wh;   /* window area  */
-	#if VANITYGAPS_PATCH
 	int gappih;           /* horizontal gap between windows */
 	int gappiv;           /* vertical gap between windows */
 	int gappoh;           /* horizontal outer gaps */
 	int gappov;           /* vertical outer gaps */
-	#endif // VANITYGAPS_PATCH
 	#if SETBORDERPX_PATCH
 	unsigned int borderpx;
 	#endif // SETBORDERPX_PATCH
@@ -1085,12 +1083,10 @@ createmon(void)
 	#if SETBORDERPX_PATCH
 	m->borderpx = borderpx;
 	#endif // SETBORDERPX_PATCH
-	#if VANITYGAPS_PATCH
 	m->gappih = gappih;
 	m->gappiv = gappiv;
 	m->gappoh = gappoh;
 	m->gappov = gappov;
-	#endif // VANITYGAPS_PATCH
 	for (mi = 0, mon = mons; mon; mon = mon->next, mi++); // monitor index
 	m->index = mi;
 	#if MONITOR_RULES_PATCH
@@ -1212,9 +1208,7 @@ createmon(void)
 		#endif // MONITOR_RULES_PATCH
 		m->pertag->sellts[i] = m->sellt;
 
-		#if VANITYGAPS_PATCH
 		m->pertag->enablegaps[i] = 1;
-		#endif // VANITYGAPS_PATCH
 	}
 	#if INSETS_PATCH
 	m->inset = default_inset;

@@ -17,9 +17,7 @@ struct Pertag {
 	Client *prevclient[NUMTAGS + 1];
 	#endif // SWAPFOCUS_PATCH
 	Client *prevzooms[NUMTAGS + 1]; /* store zoom information */
-	#if VANITYGAPS_PATCH
 	int enablegaps[NUMTAGS + 1];
-	#endif // VANITYGAPS_PATCH
 };
 
 void

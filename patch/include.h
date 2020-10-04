@@ -167,9 +167,9 @@
 #if UNFLOATVISIBLE_PATCH
 #include "unfloatvisible.h"
 #endif
-#if VANITYGAPS_PATCH
+
 #include "vanitygaps.h"
-#endif
+
 #if WINVIEW_PATCH
 #include "winview.h"
 #endif
