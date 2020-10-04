@@ -680,11 +680,6 @@ static Key keys[] = {
 	{ MODKEY|ControlMask,           XK_comma,      cyclelayout,            {.i = -1 } },
 	{ MODKEY|ControlMask,           XK_period,     cyclelayout,            {.i = +1 } },
 
-	#if MDPCONTROL_PATCH
-	{ MODKEY,                       XK_F1,         mpdchange,              {.i = -1} },
-	{ MODKEY,                       XK_F2,         mpdchange,              {.i = +1} },
-	{ MODKEY,                       XK_Escape,     mpdcontrol,             {0} },
-	#endif // MDPCONTROL_PATCH
 	TAGKEYS(                        XK_1,                                  0)
 	TAGKEYS(                        XK_2,                                  1)
 	TAGKEYS(                        XK_3,                                  2)
@@ -801,10 +796,6 @@ static IPCCommand ipccommands[] = {
 	#if KEYMODES_PATCH
 	IPCCOMMAND( setkeymode, 1, {ARG_TYPE_UINT} ),
 	#endif // KEYMODES_PATCH
-	#if MDPCONTROL_PATCH
-	IPCCOMMAND( mpdchange, 1, {ARG_TYPE_SINT} ),
-	IPCCOMMAND( mpdcontrol, 1, {ARG_TYPE_NONE} ),
-	#endif // MDPCONTROL_PATCH
 	#if PUSH_PATCH || PUSH_NO_MASTER_PATCH
 	IPCCOMMAND( pushdown, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( pushup, 1, {ARG_TYPE_NONE} ),
