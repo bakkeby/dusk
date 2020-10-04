@@ -2556,11 +2556,7 @@ setup(void)
 	bh = drw->fonts->h + vertpadbar;
 	#else
 	lrpad = drw->fonts->h;
-	#if BAR_HEIGHT_PATCH
 	bh = bar_height ? bar_height : drw->fonts->h + 2;
-	#else
-	bh = drw->fonts->h + 2;
-	#endif // BAR_HEIGHT_PATCH
 	#endif // BAR_STATUSPADDING_PATCH
 	updategeom();
 	/* init atoms */
