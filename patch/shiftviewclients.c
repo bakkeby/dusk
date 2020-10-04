@@ -9,7 +9,7 @@ shiftviewclients(const Arg *arg)
 		if (!(c->tags & SPTAGMASK))
 			tagmask = tagmask | c->tags;
 
-	shifted.ui = selmon->tagset[selmon->seltags];
+	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
 	if (arg->i > 0) // left circular shift
 		do {
 			shifted.ui = (shifted.ui << arg->i)
@@ -17,8 +17,8 @@ shiftviewclients(const Arg *arg)
 		} while (tagmask && !(shifted.ui & tagmask));
 	else // right circular shift
 		do {
-			shifted.ui = (shifted.ui >> (- arg->i)
-			   | shifted.ui << (NUMTAGS + arg->i));
+			shifted.ui = (shifted.ui >> -arg->i)
+			   | (shifted.ui << (NUMTAGS + arg->i));
 		} while (tagmask && !(shifted.ui & tagmask));
 
 	view(&shifted);
