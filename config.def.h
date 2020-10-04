@@ -527,9 +527,7 @@ static Key keys[] = {
 	#if KILLUNSEL_PATCH
 	{ MODKEY|ShiftMask,             XK_x,          killunsel,              {0} },
 	#endif // KILLUNSEL_PATCH
-	#if SELFRESTART_PATCH
-	{ MODKEY|ShiftMask,             XK_r,          self_restart,           {0} },
-	#endif // SELFRESTART_PATCH
+
 	{ MODKEY|ShiftMask,             XK_q,          quit,                   {0} },
 	#if RESTARTSIG_PATCH
 	{ MODKEY|ControlMask|ShiftMask, XK_q,          quit,                   {1} },
@@ -819,9 +817,6 @@ static IPCCommand ipccommands[] = {
 
 	IPCCOMMAND( togglescratch, 1, {ARG_TYPE_UINT} ),
 
-	#if SELFRESTART_PATCH
-	IPCCOMMAND( self_restart, 1, {ARG_TYPE_NONE} ),
-	#endif // SELFRESTART_PATCH
 	#if SETBORDERPX_PATCH
 	IPCCOMMAND( setborderpx, 1, {ARG_TYPE_SINT} ),
 	#endif // SETBORDERPX_PATCH

@@ -105,9 +105,6 @@
 
 #include "scratchpad.h"
 
-#if SELFRESTART_PATCH
-#include "selfrestart.h"
-#endif
 #if SETBORDERPX_PATCH
 #include "setborderpx.h"
 #endif
