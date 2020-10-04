@@ -1132,11 +1132,7 @@ createmon(void)
 		istopbar = !istopbar;
 		bar->showbar = 1;
 		bar->external = 0;
-		#if BAR_BORDER_PATCH
-		bar->borderpx = borderpx;
-		#else
-		bar->borderpx = 0;
-		#endif // BAR_BORDER_PATCH
+		bar->borderpx = enabled(BarBorder) ? borderpx : 0;
 		bar->bh = bh + bar->borderpx * 2;
 	}
 

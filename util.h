@@ -25,6 +25,7 @@ enum {
 	ColorEmoji = 1 << 7,
 	Status2DNoAlpha = 1 << 8, // option to not use alpha when drawing status2d status
 	HideVacantTags = 1 << 9, // hides vacant tags
+	BarBorder = 1 << 10,
 };
 
 void die(const char *fmt, ...);
