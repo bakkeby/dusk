@@ -680,10 +680,10 @@ static Key keys[] = {
 	{ MODKEY|ControlMask,           XK_plus,       setborderpx,            {.i = +1 } },
 	{ MODKEY|ControlMask,           XK_numbersign, setborderpx,            {.i = 0 } },
 	#endif // SETBORDERPX_PATCH
-	#if CYCLELAYOUTS_PATCH
+
 	{ MODKEY|ControlMask,           XK_comma,      cyclelayout,            {.i = -1 } },
 	{ MODKEY|ControlMask,           XK_period,     cyclelayout,            {.i = +1 } },
-	#endif // CYCLELAYOUTS_PATCH
+
 	#if MDPCONTROL_PATCH
 	{ MODKEY,                       XK_F1,         mpdchange,              {.i = -1} },
 	{ MODKEY,                       XK_F2,         mpdchange,              {.i = +1} },
@@ -780,11 +780,7 @@ static IPCCommand ipccommands[] = {
 
 	IPCCOMMAND( switchtag, 1, {ARG_TYPE_UINT} ),
 	IPCCOMMAND( setcfact, 1, {ARG_TYPE_FLOAT} ),
-
-	#if CYCLELAYOUTS_PATCH
 	IPCCOMMAND( cyclelayout, 1, {ARG_TYPE_SINT} ),
-	#endif // CYCLELAYOUTS_PATCH
-
 	IPCCOMMAND( togglefakefullscreen, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( floatpos, 1, {ARG_TYPE_STR} ),
 	IPCCOMMAND( incnstack, 1, {ARG_TYPE_SINT} ),

@@ -35,9 +35,9 @@
 #if COOL_AUTOSTART_PATCH
 #include "cool_autostart.h"
 #endif
-#if CYCLELAYOUTS_PATCH
+
 #include "cyclelayouts.h"
-#endif
+
 #if DECORATION_HINTS_PATCH
 #include "decorationhints.h"
 #endif
