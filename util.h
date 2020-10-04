@@ -16,7 +16,7 @@
 
 enum {
 	SmartGaps = 1 << 0, // enables no gaps if there is only one visible window
-	SmartGapsMonocle = 1 << 0, // enforces no gaps in monocle layout
+	SmartGapsMonocle = 1 << 0, // enforces no (outer) gaps in monocle layout
 	Systray = 1 << 2, // enables systray
 	SwallowFloating = 1 << 3, // means swallow floating windows by default
 	CenteredWindowName = 1 << 4,
@@ -24,6 +24,7 @@ enum {
 	SpawnCwd = 1 << 6, // spawn applications in the currently selected client's working directory
 	ColorEmoji = 1 << 7,
 	Status2DNoAlpha = 1 << 8, // option to not use alpha when drawing status2d status
+	HideVacantTags = 1 << 9, // hides vacant tags
 };
 
 void die(const char *fmt, ...);
