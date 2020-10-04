@@ -70,9 +70,9 @@
 #if KEYMODES_PATCH
 #include "keymodes.h"
 #endif
-#if KILLUNSEL_PATCH
+
 #include "killunsel.h"
-#endif
+
 #if MOVESTACK_PATCH
 #include "movestack.h"
 #endif

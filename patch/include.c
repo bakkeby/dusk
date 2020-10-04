@@ -74,9 +74,9 @@
 #if KEYMODES_PATCH
 #include "keymodes.c"
 #endif
-#if KILLUNSEL_PATCH
+
 #include "killunsel.c"
-#endif
+
 #if MOVESTACK_PATCH
 #include "movestack.c"
 #endif

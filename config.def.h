@@ -524,9 +524,6 @@ static Key keys[] = {
 
 	{ MODKEY|ControlMask,           XK_z,          showhideclient,         {0} },
 	{ MODKEY|ShiftMask,             XK_c,          killclient,             {0} },
-	#if KILLUNSEL_PATCH
-	{ MODKEY|ShiftMask,             XK_x,          killunsel,              {0} },
-	#endif // KILLUNSEL_PATCH
 
 	{ MODKEY|ShiftMask,             XK_q,          quit,                   {0} },
 	#if RESTARTSIG_PATCH
