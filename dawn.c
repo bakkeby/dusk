@@ -2509,6 +2509,8 @@ setup(void)
 	signal(SIGTERM, sigterm);
 	#endif // RESTARTSIG_PATCH
 
+	enablefunc(functionality);
+
 	/* init screen */
 	screen = DefaultScreen(dpy);
 	sw = DisplayWidth(dpy, screen);
@@ -2611,8 +2613,6 @@ setup(void)
 	#if IPC_PATCH
 	setupepoll();
 	#endif // IPC_PATCH
-
-	enablefunc(functionality);
 }
 
 

@@ -115,12 +115,10 @@
 #if SETBORDERPX_PATCH
 #include "setborderpx.c"
 #endif
-#if SHIFTVIEW_PATCH
+
 #include "shiftview.c"
-#endif
-#if SHIFTVIEW_CLIENTS_PATCH
 #include "shiftviewclients.c"
-#endif
+
 #if SORTSCREENS_PATCH
 #ifdef XINERAMA
 #include "sortscreens.c"

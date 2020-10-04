@@ -520,14 +520,10 @@ static Key keys[] = {
 	{ MODKEY|Mod4Mask|ShiftMask,    XK_0,          defaultgaps,            {0} },
 
 	{ MODKEY,                       XK_Tab,        view,                   {0} },
-	#if SHIFTVIEW_PATCH
-	{ MODKEY|ShiftMask,             XK_Tab,        shiftview,              { .i = -1 } },
-	{ MODKEY|ShiftMask,             XK_backslash,  shiftview,              { .i = +1 } },
-  	#endif // SHIFTVIEW_PATCH
-  	#if SHIFTVIEW_CLIENTS_PATCH
+
 	{ MODKEY|Mod4Mask,              XK_Tab,        shiftviewclients,       { .i = -1 } },
 	{ MODKEY|Mod4Mask,              XK_backslash,  shiftviewclients,       { .i = +1 } },
-  	#endif // SHIFTVIEW_CLIENTS_PATCH
+
 	{ MODKEY|ControlMask,           XK_z,          showhideclient,         {0} },
 	{ MODKEY|ShiftMask,             XK_c,          killclient,             {0} },
 	#if KILLUNSEL_PATCH
@@ -835,12 +831,10 @@ static IPCCommand ipccommands[] = {
 	#if SETBORDERPX_PATCH
 	IPCCOMMAND( setborderpx, 1, {ARG_TYPE_SINT} ),
 	#endif // SETBORDERPX_PATCH
-	#if SHIFTVIEW_PATCH
+
 	IPCCOMMAND( shiftview, 1, {ARG_TYPE_SINT} ),
-	#endif // SHIFTVIEW_PATCH
-	#if SHIFTVIEW_CLIENTS_PATCH
 	IPCCOMMAND( shiftviewclients, 1, {ARG_TYPE_SINT} ),
-	#endif // SHIFTVIEW_CLIENTS_PATCH
+
 	#if STACKER_PATCH
 	IPCCOMMAND( pushstack, 1, {ARG_TYPE_SINT} ),
 	#endif // STACKER_PATCH

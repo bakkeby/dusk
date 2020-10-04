@@ -25,7 +25,7 @@ enum {
 	ColorEmoji = 1 << 7,
 	Status2DNoAlpha = 1 << 8, // option to not use alpha when drawing status2d status
 	HideVacantTags = 1 << 9, // hides vacant tags
-	BarBorder = 1 << 10,
+	BarBorder = 1 << 10, // draw a border around the bar
 	NoBorder = 1 << 11, // as per the noborder patch, show no border when only one client in tiled mode
 };
 
