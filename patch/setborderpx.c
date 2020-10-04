@@ -2,6 +2,7 @@ void
 setborderpx(const Arg *arg)
 {
 	Client *c;
+	Bar *bar;
 	int prev_borderpx = selmon->borderpx;
 
 	if (arg->i == 0)
@@ -28,5 +29,9 @@ setborderpx(const Arg *arg)
 				resize(c, c->x, c->y, c->w - 2*(borderpx - prev_borderpx), c->h - 2*(borderpx - prev_borderpx), 0);
 		}
 	}
+
+	for (bar = selmon->bar; bar; bar = bar->next)
+		bar->borderpx = selmon->borderpx;
+
 	arrange(selmon);
 }

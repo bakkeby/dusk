@@ -325,9 +325,7 @@ struct Monitor {
 	int gappiv;           /* vertical gap between windows */
 	int gappoh;           /* horizontal outer gaps */
 	int gappov;           /* vertical outer gaps */
-	#if SETBORDERPX_PATCH
 	unsigned int borderpx;
-	#endif // SETBORDERPX_PATCH
 	unsigned int seltags;
 	unsigned int sellt;
 	unsigned int tagset[2];
@@ -1070,9 +1068,7 @@ createmon(void)
 	m->nmaster = nmaster;
 	m->nstack = nstack;
 	m->showbar = showbar;
-	#if SETBORDERPX_PATCH
 	m->borderpx = borderpx;
-	#endif // SETBORDERPX_PATCH
 	m->gappih = gappih;
 	m->gappiv = gappiv;
 	m->gappoh = gappoh;
@@ -1702,15 +1698,10 @@ manage(Window w, XWindowAttributes *wa)
 		c->mon = selmon;
 	}
 
-	#if SETBORDERPX_PATCH
 	c->bw = c->mon->borderpx;
-	#else
-	c->bw = borderpx;
-	#endif // SETBORDERPX_PATCH
-	#if CENTER_PATCH
+
 	if (c->x == c->mon->wx && c->y == c->mon->wy)
 		addflag(c, Centered);
-	#endif // CENTER_PATCH
 
 	if (!ISTRANSIENT(c)) {
 		applyrules(c);

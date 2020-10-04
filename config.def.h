@@ -673,11 +673,9 @@ static Key keys[] = {
 	{ Mod3Mask|Mod1Mask,            XK_comma,        floatpos,               {.v = " 0p  1p" } }, // ↓
 	{ Mod3Mask|Mod1Mask,            XK_period,       floatpos,               {.v = " 1p  1p" } }, // ↘
 
-	#if SETBORDERPX_PATCH
 	{ MODKEY|ControlMask,           XK_minus,      setborderpx,            {.i = -1 } },
 	{ MODKEY|ControlMask,           XK_plus,       setborderpx,            {.i = +1 } },
 	{ MODKEY|ControlMask,           XK_numbersign, setborderpx,            {.i = 0 } },
-	#endif // SETBORDERPX_PATCH
 
 	{ MODKEY|ControlMask,           XK_comma,      cyclelayout,            {.i = -1 } },
 	{ MODKEY|ControlMask,           XK_period,     cyclelayout,            {.i = +1 } },
@@ -816,11 +814,7 @@ static IPCCommand ipccommands[] = {
 	#endif // ROTATESTACK_PATCH
 
 	IPCCOMMAND( togglescratch, 1, {ARG_TYPE_UINT} ),
-
-	#if SETBORDERPX_PATCH
 	IPCCOMMAND( setborderpx, 1, {ARG_TYPE_SINT} ),
-	#endif // SETBORDERPX_PATCH
-
 	IPCCOMMAND( shiftview, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( shiftviewclients, 1, {ARG_TYPE_SINT} ),
 

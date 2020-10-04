@@ -108,11 +108,7 @@
 #endif
 
 #include "scratchpad.c"
-
-#if SETBORDERPX_PATCH
 #include "setborderpx.c"
-#endif
-
 #include "shiftview.c"
 #include "shiftviewclients.c"
 
