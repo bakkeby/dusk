@@ -32,9 +32,6 @@
 #include "attachx.c"
 #include "cfacts.c"
 
-#if CMDCUSTOMIZE_PATCH
-#include "cmdcustomize.c"
-#endif
 #if COOL_AUTOSTART_PATCH
 #include "cool_autostart.c"
 #endif
