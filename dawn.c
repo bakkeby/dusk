@@ -259,9 +259,7 @@ struct Client {
 	float mina, maxa;
 	float cfact;
 	int x, y, w, h;
-	#if SAVEFLOATS_PATCH
 	int sfx, sfy, sfw, sfh; /* stored float geometry, used on mode revert */
-	#endif // SAVEFLOATS_PATCH
 	int oldx, oldy, oldw, oldh;
 	int basew, baseh, incw, inch, maxw, maxh, minw, minh;
 	int bw, oldbw;
@@ -1789,12 +1787,10 @@ manage(Window w, XWindowAttributes *wa)
 		}
 	}
 
-	#if SAVEFLOATS_PATCH
 	c->sfx = -9999;
 	c->sfy = -9999;
 	c->sfw = c->w;
 	c->sfh = c->h;
-	#endif // SAVEFLOATS_PATCH
 
 	XSelectInput(dpy, w, EnterWindowMask|FocusChangeMask|PropertyChangeMask|StructureNotifyMask);
 	grabbuttons(c, 0);
@@ -1928,14 +1924,10 @@ movemouse(const Arg *arg)
 			&& (abs(nx - c->x) > snap || abs(ny - c->y) > snap))
 				togglefloating(NULL);
 			if (!selmon->lt[selmon->sellt]->arrange || ISFLOATING(c)) {
-			#if SAVEFLOATS_PATCH
 				resize(c, nx, ny, c->w, c->h, 1);
 				/* save last known float coordinates */
 				c->sfx = nx;
 				c->sfy = ny;
-			#else
-				resize(c, nx, ny, c->w, c->h, 1);
-			#endif // SAVEFLOATS_PATCH
 			}
 			#if ROUNDED_CORNERS_PATCH
 			drawroundedcorners(c);
@@ -2185,13 +2177,11 @@ resizemouse(const Arg *arg)
 			}
 			if (!selmon->lt[selmon->sellt]->arrange || ISFLOATING(c)) {
 				resizeclient(c, nx, ny, nw, nh);
-				#if SAVEFLOATS_PATCH
 				/* save last known float dimensions */
 				c->sfx = nx;
 				c->sfy = ny;
 				c->sfw = nw;
 				c->sfh = nh;
-				#endif // SAVEFLOATS_PATCH
 				#if ROUNDED_CORNERS_PATCH
 				drawroundedcorners(c);
 				#endif // ROUNDED_CORNERS_PATCH
@@ -2696,14 +2686,12 @@ showhide(Client *c)
 			c->y = c->mon->wy + (c->mon->wh / 2 - HEIGHT(c) / 2);
 		}
 		/* show clients top down */
-		#if SAVEFLOATS_PATCH
 		if (!c->mon->lt[c->mon->sellt]->arrange && c->sfx != -9999 && !ISFULLSCREEN(c)) {
 			XMoveWindow(dpy, c->win, c->sfx, c->sfy);
 			resize(c, c->sfx, c->sfy, c->sfw, c->sfh, 0);
 			showhide(c->snext);
 			return;
 		}
-		#endif // SAVEFLOATS_PATCH
 		if (NEEDRESIZE(c)) {
 			removeflag(c, NeedResize);
 			XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
@@ -2872,23 +2860,19 @@ togglefloating(const Arg *arg)
 		return;
 	setflag(c, Floating, !ISFLOATING(c) || ISFIXED(c));
 	if (ISFLOATING(c)) {
-		#if SAVEFLOATS_PATCH
 		if (c->sfx != -9999) {
 			/* restore last known float dimensions */
 			resize(c, c->sfx, c->sfy, c->sfw, c->sfh, 0);
 			arrange(c->mon);
 			return;
 		}
-		#endif // SAVEFLOATS_PATCH
 		resize(c, c->x, c->y, c->w, c->h, 0);
-	#if SAVEFLOATS_PATCH
 	} else {
 		/* save last known float dimensions */
 		c->sfx = c->x;
 		c->sfy = c->y;
 		c->sfw = c->w;
 		c->sfh = c->h;
-	#endif // SAVEFLOATS_PATCH
 	}
 	arrange(c->mon);
 
