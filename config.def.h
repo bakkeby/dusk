@@ -476,10 +476,8 @@ static Key keys[] = {
 	#endif // PUSH_PATCH / PUSH_NO_MASTER_PATCH
 	{ MODKEY,                       XK_i,          incnmaster,             {.i = +1 } },
 	{ MODKEY,                       XK_d,          incnmaster,             {.i = -1 } },
-	#if FLEXTILE_DELUXE_LAYOUT
 	{ MODKEY|ControlMask,           XK_i,          incnstack,              {.i = +1 } },
 	{ MODKEY|ControlMask,           XK_u,          incnstack,              {.i = -1 } },
-	#endif // FLEXTILE_DELUXE_LAYOUT
 	{ MODKEY,                       XK_h,          setmfact,               {.f = -0.05} },
 	{ MODKEY,                       XK_l,          setmfact,               {.f = +0.05} },
 	{ MODKEY|ShiftMask,             XK_h,          setcfact,               {.f = +0.25} },
@@ -555,7 +553,7 @@ static Key keys[] = {
 	{ MODKEY,                       XK_f,          setlayout,              {.v = &layouts[1]} },
 	{ MODKEY,                       XK_m,          setlayout,              {.v = &layouts[2]} },
 	{ MODKEY,                       XK_c,          setlayout,              {.v = &layouts[3]} },
-	#if FLEXTILE_DELUXE_LAYOUT
+
 	{ MODKEY|ControlMask,           XK_t,          rotatelayoutaxis,       {.i = +1 } },   /* flextile, 1 = layout axis */
 	{ MODKEY|ControlMask,           XK_Tab,        rotatelayoutaxis,       {.i = +2 } },   /* flextile, 2 = master axis */
 	{ MODKEY|ControlMask|ShiftMask, XK_Tab,        rotatelayoutaxis,       {.i = +3 } },   /* flextile, 3 = stack axis */
@@ -565,7 +563,7 @@ static Key keys[] = {
 	{ MODKEY|Mod5Mask|ShiftMask,    XK_Tab,        rotatelayoutaxis,       {.i = -3 } },   /* flextile, 3 = stack axis */
 	{ MODKEY|Mod5Mask|Mod1Mask,     XK_Tab,        rotatelayoutaxis,       {.i = -4 } },   /* flextile, 4 = secondary stack axis */
 	{ MODKEY|ControlMask,           XK_Return,     mirrorlayout,           {0} },          /* flextile, flip master and stack areas */
-	#endif // FLEXTILE_DELUXE_LAYOUT
+
 	{ MODKEY,                       XK_space,      setlayout,              {0} },
 	{ MODKEY|ShiftMask,             XK_space,      togglefloating,         {0} },
 	#if NO_MOD_BUTTONS_PATCH
@@ -795,13 +793,11 @@ static IPCCommand ipccommands[] = {
 
 	IPCCOMMAND( togglefakefullscreen, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( floatpos, 1, {ARG_TYPE_STR} ),
-
-	#if FLEXTILE_DELUXE_LAYOUT
 	IPCCOMMAND( incnstack, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( rotatelayoutaxis, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( setlayoutaxisex, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( mirrorlayout, 1, {ARG_TYPE_NONE} ),
-	#endif // FLEXTILE_DELUXE_LAYOUT
+
 	#if FOCUSURGENT_PATCH
 	IPCCOMMAND( focusurgent, 1, {ARG_TYPE_NONE} ),
 	#endif // FOCUSURGENT_PATCH

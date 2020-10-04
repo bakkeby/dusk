@@ -285,7 +285,6 @@ typedef struct {
 	const Arg arg;
 } Key;
 
-#if FLEXTILE_DELUXE_LAYOUT
 typedef struct {
 	int nmaster;
 	int nstack;
@@ -295,14 +294,11 @@ typedef struct {
 	int stack2axis; // secondary stack area, e.g. centered master
 	void (*symbolfunc)(Monitor *, unsigned int);
 } LayoutPreset;
-#endif // FLEXTILE_DELUXE_LAYOUT
 
 typedef struct {
 	const char *symbol;
 	void (*arrange)(Monitor *);
-	#if FLEXTILE_DELUXE_LAYOUT
 	LayoutPreset preset;
-	#endif // FLEXTILE_DELUXE_LAYOUT
 } Layout;
 
 #if INSETS_PATCH
@@ -319,10 +315,8 @@ struct Monitor {
 	int index;
 	char ltsymbol[16];
 	float mfact;
-	#if FLEXTILE_DELUXE_LAYOUT
 	int ltaxis[4];
 	int nstack;
-	#endif // FLEXTILE_DELUXE_LAYOUT
 	int nmaster;
 	int num;
 	int mx, my, mw, mh;   /* screen size */
@@ -1074,9 +1068,7 @@ createmon(void)
 	m->tagset[0] = m->tagset[1] = 1;
 	m->mfact = mfact;
 	m->nmaster = nmaster;
-	#if FLEXTILE_DELUXE_LAYOUT
 	m->nstack = nstack;
-	#endif // FLEXTILE_DELUXE_LAYOUT
 	m->showbar = showbar;
 	#if SETBORDERPX_PATCH
 	m->borderpx = borderpx;
@@ -1136,20 +1128,16 @@ createmon(void)
 		bar->bh = bh + bar->borderpx * 2;
 	}
 
-	#if FLEXTILE_DELUXE_LAYOUT
 	m->ltaxis[LAYOUT] = m->lt[0]->preset.layout;
 	m->ltaxis[MASTER] = m->lt[0]->preset.masteraxis;
 	m->ltaxis[STACK]  = m->lt[0]->preset.stack1axis;
 	m->ltaxis[STACK2] = m->lt[0]->preset.stack2axis;
-	#endif // FLEXTILE_DELUXE_LAYOUT
 
 	if (!(m->pertag = (Pertag *)calloc(1, sizeof(Pertag))))
 		die("fatal: could not malloc() %u bytes\n", sizeof(Pertag));
 	m->pertag->curtag = m->pertag->prevtag = 1;
 	for (i = 0; i <= NUMTAGS; i++) {
-		#if FLEXTILE_DELUXE_LAYOUT
 		m->pertag->nstacks[i] = m->nstack;
-		#endif // FLEXTILE_DELUXE_LAYOUT
 
 		#if !MONITOR_RULES_PATCH
 		/* init nmaster */
@@ -1167,7 +1155,6 @@ createmon(void)
 		m->pertag->prevzooms[i] = NULL;
 
 		/* init layouts */
-		#if MONITOR_RULES_PATCH
 		for (j = 0; j < LENGTH(monrules); j++) {
 			mr = &monrules[j];
 			if ((mr->monitor == -1 || mr->monitor == mi) && (mr->tag == -1 || mr->tag == i)) {
@@ -1180,26 +1167,13 @@ createmon(void)
 				#if PERTAGBAR_PATCH
 				m->pertag->showbars[i] = (mr->showbar > -1 ? mr->showbar : m->showbar);
 				#endif // PERTAGBAR_PATCH
-				#if FLEXTILE_DELUXE_LAYOUT
 				m->pertag->ltaxis[i][LAYOUT] = m->pertag->ltidxs[i][0]->preset.layout;
 				m->pertag->ltaxis[i][MASTER] = m->pertag->ltidxs[i][0]->preset.masteraxis;
 				m->pertag->ltaxis[i][STACK]  = m->pertag->ltidxs[i][0]->preset.stack1axis;
 				m->pertag->ltaxis[i][STACK2] = m->pertag->ltidxs[i][0]->preset.stack2axis;
-				#endif // FLEXTILE_DELUXE_LAYOUT
 				break;
 			}
 		}
-		#else
-		m->pertag->ltidxs[i][0] = m->lt[0];
-		m->pertag->ltidxs[i][1] = m->lt[1];
-		#if FLEXTILE_DELUXE_LAYOUT
-		/* init flextile axes */
-		m->pertag->ltaxis[i][LAYOUT] = m->ltaxis[LAYOUT];
-		m->pertag->ltaxis[i][MASTER] = m->ltaxis[MASTER];
-		m->pertag->ltaxis[i][STACK]  = m->ltaxis[STACK];
-		m->pertag->ltaxis[i][STACK2] = m->ltaxis[STACK2];
-		#endif // FLEXTILE_DELUXE_LAYOUT
-		#endif // MONITOR_RULES_PATCH
 		m->pertag->sellts[i] = m->sellt;
 
 		m->pertag->enablegaps[i] = 1;
@@ -2482,7 +2456,6 @@ setlayout(const Arg *arg)
 		selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt] = (Layout *)arg->v;
 	selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt];
 
-	#if FLEXTILE_DELUXE_LAYOUT
 	if (selmon->lt[selmon->sellt]->preset.nmaster && selmon->lt[selmon->sellt]->preset.nmaster != -1)
 		selmon->nmaster = selmon->lt[selmon->sellt]->preset.nmaster;
 	if (selmon->lt[selmon->sellt]->preset.nstack && selmon->lt[selmon->sellt]->preset.nstack != -1)
@@ -2497,7 +2470,7 @@ setlayout(const Arg *arg)
 	selmon->pertag->ltaxis[selmon->pertag->curtag][MASTER] = selmon->ltaxis[MASTER];
 	selmon->pertag->ltaxis[selmon->pertag->curtag][STACK]  = selmon->ltaxis[STACK];
 	selmon->pertag->ltaxis[selmon->pertag->curtag][STACK2] = selmon->ltaxis[STACK2];
-	#endif // FLEXTILE_DELUXE_LAYOUT
+
 	strncpy(selmon->ltsymbol, selmon->lt[selmon->sellt]->symbol, sizeof selmon->ltsymbol);
 	if (selmon->sel)
 		arrange(selmon);
