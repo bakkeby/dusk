@@ -537,9 +537,9 @@ static Key keys[] = {
 	#if FOCUSURGENT_PATCH
 	{ MODKEY,                       XK_u,          focusurgent,            {0} },
 	#endif // FOCUSURGENT_PATCH
-	#if WINVIEW_PATCH
+
 	{ MODKEY,                       XK_o,          winview,                {0} },
-	#endif // WINVIEW_PATCH
+
 	#if XRDB_PATCH
 	{ MODKEY|ShiftMask,             XK_F5,         xrdb,                   {.v = NULL } },
 	#endif // XRDB_PATCH
@@ -878,10 +878,8 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( togglegaps, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( defaultgaps, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( setgapsex, 1, {ARG_TYPE_SINT} ),
-
-	#if WINVIEW_PATCH
 	IPCCOMMAND( winview, 1, {ARG_TYPE_NONE} ),
-	#endif // WINVIEW_PATCH
+
 	#if XRDB_PATCH
 	IPCCOMMAND( xrdb, 1, {ARG_TYPE_NONE} ),
 	#endif // XRDB_PATCH

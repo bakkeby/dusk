@@ -168,11 +168,7 @@
 #endif
 
 #include "vanitygaps.c"
-
-#if WINVIEW_PATCH
 #include "winview.c"
-#endif
-
 #include "zoomswap.c"
 
 #if XRDB_PATCH
