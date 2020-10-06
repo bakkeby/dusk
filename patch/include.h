@@ -3,6 +3,7 @@
 #include "bar_tagicons.h"
 #include "flags.h"
 #include "func.h"
+#include "warp.h"
 
 #include "bar_alpha.h"
 #if BAR_ALTERNATIVE_TAGS_PATCH
@@ -131,24 +132,18 @@
 #if TAGALL_PATCH
 #include "tagall.h"
 #endif
-#if TAGALLMON_PATCH
+
 #include "tagallmon.h"
-#endif
+
 #if TAGOTHERMONITOR_PATCH
 #include "tagothermonitor.h"
 #endif
-#if TAGSWAPMON_PATCH
+
 #include "tagswapmon.h"
-#endif
-
 #include "togglefullscreen.h"
-
-#if TRANSFER_PATCH
 #include "transfer.h"
-#endif
-#if TRANSFER_ALL_PATCH
 #include "transferall.h"
-#endif
+
 #if UNFLOATVISIBLE_PATCH
 #include "unfloatvisible.h"
 #endif

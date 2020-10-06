@@ -486,12 +486,7 @@ static Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_j,          movestack,              {.i = +1 } },
 	{ MODKEY|ShiftMask,             XK_k,          movestack,              {.i = -1 } },
 	#endif // MOVESTACK_PATCH
-	#if TRANSFER_PATCH
-	{ MODKEY,                       XK_x,          transfer,               {0} },
-	#endif // TRANSFER_PATCH
-	#if TRANSFER_ALL_PATCH
-	{ MODKEY|ControlMask,           XK_x,          transferall,            {0} },
-	#endif // TRANSFER_ALL_PATCH
+
 	#if REORGANIZETAGS_PATCH
 	{ MODKEY|ControlMask,           XK_r,          reorganizetags,         {0} },
 	#endif // REORGANIZETAGS_PATCH
@@ -608,14 +603,7 @@ static Key keys[] = {
 	{ MODKEY|ControlMask,           XK_F8,         tagall,                 {.v = "8"} },
 	{ MODKEY|ControlMask,           XK_F9,         tagall,                 {.v = "9"} },
 	#endif // TAGALL_PATCH
-	#if TAGALLMON_PATCH
-	{ MODKEY|Mod4Mask|ShiftMask,    XK_comma,      tagallmon,              {.i = +1 } },
-	{ MODKEY|Mod4Mask|ShiftMask,    XK_period,     tagallmon,              {.i = -1 } },
-	#endif // TAGALLMON_PATCH
-	#if TAGSWAPMON_PATCH
-	{ MODKEY|Mod4Mask|ControlMask,  XK_comma,      tagswapmon,             {.i = +1 } },
-	{ MODKEY|Mod4Mask|ControlMask,  XK_period,     tagswapmon,             {.i = -1 } },
-	#endif // TAGSWAPMON_PATCH
+
 	#if BAR_ALTERNATIVE_TAGS_PATCH
 	{ MODKEY,                       XK_n,          togglealttag,           {0} },
 	#endif // BAR_ALTERNATIVE_TAGS_PATCH
@@ -818,25 +806,19 @@ static IPCCommand ipccommands[] = {
 	#if SWITCHCOL_PATCH
 	IPCCOMMAND( switchcol, 1, {ARG_TYPE_NONE} ),
 	#endif // SWITCHCOL_PATCH
-	#if TAGALLMON_PATCH
+
 	IPCCOMMAND( tagallmon, 1, {ARG_TYPE_SINT} ),
-	#endif // TAGALLMON_PATCH
+
 	#if TAGOTHERMONITOR_PATCH
 	IPCCOMMAND( tagnextmonex, 1, {ARG_TYPE_UINT} ),
 	IPCCOMMAND( tagprevmonex, 1, {ARG_TYPE_UINT} ),
 	#endif // TAGOTHERMONITOR_PATCH
-	#if TAGSWAPMON_PATCH
+
 	IPCCOMMAND( tagswapmon, 1, {ARG_TYPE_SINT} ),
-	#endif // TAGSWAPMON_PATCH
-
 	IPCCOMMAND( togglefullscreen, 1, {ARG_TYPE_NONE} ),
-
-	#if TRANSFER_PATCH
 	IPCCOMMAND( transfer, 1, {ARG_TYPE_NONE} ),
-	#endif // TRANSFER_PATCH
-	#if TRANSFER_ALL_PATCH
 	IPCCOMMAND( transferall, 1, {ARG_TYPE_NONE} ),
-	#endif // TRANSFER_ALL_PATCH
+
 	#if UNFLOATVISIBLE_PATCH
 	IPCCOMMAND( unfloatvisible, 1, {ARG_TYPE_NONE} ),
 	#endif // UNFLOATVISIBLE_PATCH

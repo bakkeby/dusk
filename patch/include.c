@@ -3,6 +3,8 @@
 #include "bar_tagicons.c"
 #include "flags.c"
 #include "func.c"
+#include "warp.c"
+
 
 #include "bar_alpha.c"
 #if BAR_ALTERNATIVE_TAGS_PATCH
@@ -135,24 +137,18 @@
 #if TAGALL_PATCH
 #include "tagall.c"
 #endif
-#if TAGALLMON_PATCH
+
 #include "tagallmon.c"
-#endif
+
 #if TAGOTHERMONITOR_PATCH
 #include "tagothermonitor.c"
 #endif
-#if TAGSWAPMON_PATCH
+
 #include "tagswapmon.c"
-#endif
-
 #include "togglefullscreen.c"
-
-#if TRANSFER_PATCH
 #include "transfer.c"
-#endif
-#if TRANSFER_ALL_PATCH
 #include "transferall.c"
-#endif
+
 #if UNFLOATVISIBLE_PATCH
 #include "unfloatvisible.c"
 #endif

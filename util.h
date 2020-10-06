@@ -27,6 +27,7 @@ enum {
 	HideVacantTags = 1 << 9, // hides vacant tags
 	BarBorder = 1 << 10, // draw a border around the bar
 	NoBorder = 1 << 11, // as per the noborder patch, show no border when only one client in tiled mode
+	Warp = 1 << 12, // warp patch
 };
 
 void die(const char *fmt, ...);

@@ -494,6 +494,8 @@ static int screen;
 static int sw, sh;           /* X display screen geometry width, height */
 static int bh;               /* bar geometry */
 static int lrpad;            /* sum of left and right padding for text */
+static int force_warp = 0;   /* force warp in some situations, e.g. killclient */
+static int ignore_warp = 0;  /* force skip warp in some situations, e.g. dragmfact, dragcfact */
 
 static int (*xerrorxlib)(Display *, XErrorEvent *);
 static unsigned int numlockmask = 0;
@@ -1453,6 +1455,8 @@ focusmon(const Arg *arg)
 	selmon = m;
 	unfocus(sel, 0, NULL);
 	focus(NULL);
+	if (enabled(Warp))
+		warp(selmon->sel);
 }
 
 #if !STACKER_PATCH
@@ -1662,6 +1666,7 @@ killclient(const Arg *arg)
 		XSync(dpy, False);
 		XSetErrorHandler(xerror);
 		XUngrabServer(dpy);
+		force_warp = 1;
 	}
 	#if SWAPFOCUS_PATCH
 	c->mon->pertag->prevclient[c->mon->pertag->curtag] = NULL;
@@ -2169,6 +2174,7 @@ restack(Monitor *m)
 	Client *c;
 	XEvent ev;
 	XWindowChanges wc;
+	int n;
 
 	drawbar(m);
 	if (!m->sel)
@@ -2186,6 +2192,15 @@ restack(Monitor *m)
 	}
 	XSync(dpy, False);
 	while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
+
+	if (enabled(Warp)) {
+		for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
+		if (m == selmon && (m->tagset[m->seltags] & m->sel->tags) && (
+			!(m->ltaxis[MASTER] == MONOCLE && (abs(m->ltaxis[LAYOUT] == NO_SPLIT || !m->nmaster || n <= m->nmaster)))
+			|| m->sel->isfloating)
+		)
+			warp(m->sel);
+	}
 }
 
 #if IPC_PATCH
@@ -2364,29 +2379,29 @@ setfocus(Client *c)
 }
 
 void
-setfullscreen(Client *c, int fullscreen, int setfakefullscreen)
+setfullscreen(Client *c, int fullscreen, int restorefakefullscreen)
 {
 	int savestate = 0, restorestate = 0;
 
 
-	fprintf(stderr, "before: %s ISFULLSCREEN = %d, ISFAKEFULLSCREEN = %d, WASFAKEFULLSCREEN = %d, RESTOREFAKEFULLSCREEN = %d, LOCKED = %d, fs = %d, setff = %d\n", c->name, ISFULLSCREEN(c), ISFAKEFULLSCREEN(c), WASFAKEFULLSCREEN(c), RESTOREFAKEFULLSCREEN(c), ISLOCKED(c), fullscreen, setfakefullscreen);
+	fprintf(stderr, "before: %s ISFULLSCREEN = %d, ISFAKEFULLSCREEN = %d, WASFAKEFULLSCREEN = %d, RESTOREFAKEFULLSCREEN = %d, LOCKED = %d, fs = %d, setff = %d\n", c->name, ISFULLSCREEN(c), ISFAKEFULLSCREEN(c), WASFAKEFULLSCREEN(c), RESTOREFAKEFULLSCREEN(c), ISLOCKED(c), fullscreen, restorefakefullscreen);
 
 	if ((!ISFAKEFULLSCREEN(c) && fullscreen && !ISFULLSCREEN(c)) // normal fullscreen
 			|| (RESTOREFAKEFULLSCREEN(c) && fullscreen)) // fake fullscreen --> actual fullscreen
 		savestate = 1; // go actual fullscreen
 	else if ((!ISFAKEFULLSCREEN(c) && !fullscreen && ISFULLSCREEN(c)) // normal fullscreen exit
-			|| ((RESTOREFAKEFULLSCREEN(c) || setfakefullscreen) && !fullscreen)) // fullscreen exit --> fake fullscreen
+			|| ((RESTOREFAKEFULLSCREEN(c) || restorefakefullscreen) && !fullscreen)) // fullscreen exit --> fake fullscreen
 		restorestate = 1; // go back into tiled
 
 	fprintf(stderr, "%s savestate = %d, restorestate = %d\n", c->name, savestate, restorestate);
 
 	/* If leaving fullscreen and the window was previously fake fullscreen, then restore that while
 	 * staying in fullscreen. The exception to this is if we are in said state, but the client
-	 * itself disables fullscreen (setfakefullscreen) then we let the client go out of while
+	 * itself disables fullscreen (restorefakefullscreen) then we let the client go out of while
 	 * keeping fake fullscreen enabled (as otherwise there will be a mismatch between the client
 	 * and the window manager's perception of the client's fullscreen state). */
 	if (RESTOREFAKEFULLSCREEN(c) && !fullscreen && ISFULLSCREEN(c)) {
-		setfakefullscreen = 1;
+		restorefakefullscreen = 1;
 		fullscreen = 1;
 	}
 
@@ -2426,14 +2441,13 @@ setfullscreen(Client *c, int fullscreen, int setfakefullscreen)
 		c->h = c->oldh;
 		resizeclient(c, c->x, c->y, c->w, c->h);
 		restack(c->mon);
+		if (restorefakefullscreen) {
+			addflag(c, FakeFullScreen);
+			removeflag(c, RestoreFakeFullScreen);
+		}
 	}
 
-	if (!ISLOCKED(c) && setfakefullscreen) {
-		addflag(c, FakeFullScreen);
-		removeflag(c, RestoreFakeFullScreen);
-	}
-
-	fprintf(stderr, "after: %s ISFULLSCREEN = %d, ISFAKEFULLSCREEN = %d, WASFAKEFULLSCREEN = %d, RESTOREFAKEFULLSCREEN = %d, LOCKED = %d, fs = %d, setff = %d\n", c->name, ISFULLSCREEN(c), ISFAKEFULLSCREEN(c), WASFAKEFULLSCREEN(c), RESTOREFAKEFULLSCREEN(c), ISLOCKED(c), fullscreen, setfakefullscreen);
+	fprintf(stderr, "after: %s ISFULLSCREEN = %d, ISFAKEFULLSCREEN = %d, WASFAKEFULLSCREEN = %d, RESTOREFAKEFULLSCREEN = %d, LOCKED = %d, fs = %d, setff = %d\n", c->name, ISFULLSCREEN(c), ISFAKEFULLSCREEN(c), WASFAKEFULLSCREEN(c), RESTOREFAKEFULLSCREEN(c), ISLOCKED(c), fullscreen, restorefakefullscreen);
 }
 
 void

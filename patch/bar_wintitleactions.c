@@ -46,19 +46,13 @@ show(Client *c)
 }
 
 void
-togglewin(const Arg *arg)
+focuswin(const Arg *arg)
 {
 	Client *c = (Client*)arg->v;
 	if (!c)
 		return;
-	if (c == selmon->sel)
-		hide(c);
-	else {
-		if (HIDDEN(c))
-			show(c);
-		focus(c);
-		restack(c->mon);
-	}
+
+	focus(c);
 }
 
 Client *
@@ -80,6 +74,7 @@ showhideclient(const Arg *arg)
 	if (!c)
 		return;
 
+	force_warp = 1;
 	if (HIDDEN(c)) {
 		show(c);
 		focus(c);
