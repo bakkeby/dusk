@@ -2404,17 +2404,12 @@ setfullscreen(Client *c, int fullscreen, int restorefakefullscreen)
 {
 	int savestate = 0, restorestate = 0;
 
-
-	fprintf(stderr, "before: %s ISFULLSCREEN = %d, ISFAKEFULLSCREEN = %d, WASFAKEFULLSCREEN = %d, RESTOREFAKEFULLSCREEN = %d, LOCKED = %d, fs = %d, setff = %d\n", c->name, ISFULLSCREEN(c), ISFAKEFULLSCREEN(c), WASFAKEFULLSCREEN(c), RESTOREFAKEFULLSCREEN(c), ISLOCKED(c), fullscreen, restorefakefullscreen);
-
 	if ((!ISFAKEFULLSCREEN(c) && fullscreen && !ISFULLSCREEN(c)) // normal fullscreen
 			|| (RESTOREFAKEFULLSCREEN(c) && fullscreen)) // fake fullscreen --> actual fullscreen
 		savestate = 1; // go actual fullscreen
 	else if ((!ISFAKEFULLSCREEN(c) && !fullscreen && ISFULLSCREEN(c)) // normal fullscreen exit
 			|| ((RESTOREFAKEFULLSCREEN(c) || restorefakefullscreen) && !fullscreen)) // fullscreen exit --> fake fullscreen
 		restorestate = 1; // go back into tiled
-
-	fprintf(stderr, "%s savestate = %d, restorestate = %d\n", c->name, savestate, restorestate);
 
 	/* If leaving fullscreen and the window was previously fake fullscreen, then restore that while
 	 * staying in fullscreen. The exception to this is if we are in said state, but the client
@@ -2467,8 +2462,6 @@ setfullscreen(Client *c, int fullscreen, int restorefakefullscreen)
 			removeflag(c, RestoreFakeFullScreen);
 		}
 	}
-
-	fprintf(stderr, "after: %s ISFULLSCREEN = %d, ISFAKEFULLSCREEN = %d, WASFAKEFULLSCREEN = %d, RESTOREFAKEFULLSCREEN = %d, LOCKED = %d, fs = %d, setff = %d\n", c->name, ISFULLSCREEN(c), ISFAKEFULLSCREEN(c), WASFAKEFULLSCREEN(c), RESTOREFAKEFULLSCREEN(c), ISLOCKED(c), fullscreen, restorefakefullscreen);
 }
 
 void
