@@ -40,8 +40,10 @@ enum {
 	 * when moving (or resizing) client windows from one monitor to another. This variable is used
 	 * internally to ignore such configure requests while movemouse or resizemouse are being used. */
 	MoveResize = 1 << 29, // used internally to indicate that the client is being moved or resized
+	AlwaysOnTop = 1 << 30,
 } flags; /* flags */
 
+#define ALWAYSONTOP(C) (C->flags & AlwaysOnTop)
 #define ISFLOATING(C) (C->flags & Floating)
 #define ISFIXED(C) (C->flags & Fixed)
 #define ISLOCKED(C) (C->flags & Locked)

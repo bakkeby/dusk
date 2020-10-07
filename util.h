@@ -28,6 +28,7 @@ enum {
 	BarBorder = 1 << 10, // draw a border around the bar
 	NoBorder = 1 << 11, // as per the noborder patch, show no border when only one client in tiled mode
 	Warp = 1 << 12, // warp patch
+	FocusedOnTop = 1 << 13,
 };
 
 void die(const char *fmt, ...);

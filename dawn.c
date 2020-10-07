@@ -569,7 +569,7 @@ applyrules(Client *c)
 		&& (!r->instance || strstr(instance, r->instance))
 		&& (!r->wintype || wintype == XInternAtom(dpy, r->wintype, False)))
 		{
-			c->flags = Ruled | r->flags;
+			c->flags |= Ruled | r->flags;
 			c->tags |= r->tags;
 
 			if ((r->tags & SPTAGMASK) && ISFLOATING(c)) {
@@ -1410,6 +1410,7 @@ expose(XEvent *e)
 void
 focus(Client *c)
 {
+	Client *f;
 	if (!c || !ISVISIBLE(c))
 		for (c = selmon->stack; c && !ISVISIBLE(c); c = c->snext);
 	if (selmon->sel && selmon->sel != c)
@@ -1423,6 +1424,17 @@ focus(Client *c)
 		attachstack(c);
 		grabbuttons(c, 1);
 		setfocus(c);
+		if (enabled(FocusedOnTop)) {
+			for (f = c->mon->stack; f; f = f->snext)
+				if (f != c && ISVISIBLE(f) && ISFLOATING(f) && !(ALWAYSONTOP(f) || ISTRANSIENT(f)))
+					XRaiseWindow(dpy, f->win);
+			if (!(ALWAYSONTOP(c) || ISTRANSIENT(c)))
+				XRaiseWindow(dpy, c->win);
+			for (f = c->mon->stack; f; f = f->snext)
+				if (f != c && ISVISIBLE(f) && f->tags && (ALWAYSONTOP(f) || ISTRANSIENT(f)))
+					XRaiseWindow(dpy, f->win);
+			XSync(dpy, True);
+		}
 	} else {
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
 		XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
@@ -1464,6 +1476,7 @@ void
 focusstack(const Arg *arg)
 {
 	Client *c = NULL, *i;
+	int n;
 
 	if (!selmon->sel)
 		return;
@@ -1482,7 +1495,15 @@ focusstack(const Arg *arg)
 	}
 	if (c) {
 		focus(c);
-		restack(selmon);
+		if (enabled(FocusedOnTop)) {
+			if (enabled(Warp)) {
+				force_warp = 1;
+				for (n = 0, i = nexttiled(c->mon->clients); i; i = nexttiled(i->next), n++);
+				if (ISFLOATING(c) || !(c->mon->ltaxis[MASTER] == MONOCLE && (abs(c->mon->ltaxis[LAYOUT] == NO_SPLIT || !c->mon->nmaster || n <= c->mon->nmaster))))
+					warp(c);
+			}
+		} else
+			restack(selmon);
 	}
 }
 #endif // STACKER_PATCH
@@ -2197,7 +2218,7 @@ restack(Monitor *m)
 		for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
 		if (m == selmon && (m->tagset[m->seltags] & m->sel->tags) && (
 			!(m->ltaxis[MASTER] == MONOCLE && (abs(m->ltaxis[LAYOUT] == NO_SPLIT || !m->nmaster || n <= m->nmaster)))
-			|| m->sel->isfloating)
+			|| ISFLOATING(m->sel))
 		)
 			warp(m->sel);
 	}
