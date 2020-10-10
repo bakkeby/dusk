@@ -136,7 +136,7 @@ enum {
 }; /* color schemes */
 
 enum {
-	NetSupported, NetWMName, NetWMState, NetWMCheck,
+	NetSupported, NetWMName, NetWMState, NetWMStateAbove, NetWMCheck, // TODO _NET_WM_STATE_ABOVE
 	NetWMFullscreen, NetActiveWindow, NetWMWindowType,
 	NetSystemTray, NetSystemTrayOP, NetSystemTrayOrientation,
 	NetSystemTrayVisual, NetWMWindowTypeDock, NetSystemTrayOrientationHorz,
@@ -1802,10 +1802,11 @@ manage(Window w, XWindowAttributes *wa)
 	if (c->mon == selmon)
 		unfocus(selmon->sel, 0, c);
 	c->mon->sel = c;
-	if (!HIDDEN(c))
-		XMapWindow(dpy, c->win);
-	if (!(term && swallow(term, c)))
+	if (!(term && swallow(term, c))) {
 		arrange(c->mon);
+		if (!HIDDEN(c))
+			XMapWindow(dpy, c->win);
+	}
 	focus(NULL);
 
 	Atom target = XInternAtom(dpy, "_IS_FLOATING", 0);

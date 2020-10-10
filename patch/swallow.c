@@ -18,6 +18,8 @@ swallow(Client *p, Client *c)
 	if (!RULED(c) && disabled(SwallowFloating) && ISFLOATING(c))
 		return 0;
 
+	XMapWindow(dpy, c->win);
+
 	detach(c);
 	detachstack(c);
 
