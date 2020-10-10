@@ -1909,8 +1909,10 @@ movemouse(const Arg *arg)
 			else if (abs((selmon->wy + selmon->wh) - (ny + HEIGHT(c))) < snap)
 				ny = selmon->wy + selmon->wh - HEIGHT(c);
 			if (!ISFLOATING(c) && selmon->lt[selmon->sellt]->arrange
-			&& (abs(nx - c->x) > snap || abs(ny - c->y) > snap))
+			&& (abs(nx - c->x) > snap || abs(ny - c->y) > snap)) {
+				c->sfx = -9999; // disable savefloats when using movemouse
 				togglefloating(NULL);
+			}
 			if (!selmon->lt[selmon->sellt]->arrange || ISFLOATING(c)) {
 				resize(c, nx, ny, c->w, c->h, 1);
 				/* save last known float coordinates */
@@ -2158,8 +2160,10 @@ resizemouse(const Arg *arg)
 			&& c->mon->wy + nh >= selmon->wy && c->mon->wy + nh <= selmon->wy + selmon->wh)
 			{
 				if (!ISFLOATING(c) && selmon->lt[selmon->sellt]->arrange
-				&& (abs(nw - c->w) > snap || abs(nh - c->h) > snap))
+				&& (abs(nw - c->w) > snap || abs(nh - c->h) > snap)) {
+					c->sfx = -9999; // disable savefloats when using resizemouse
 					togglefloating(NULL);
+				}
 			}
 			if (!selmon->lt[selmon->sellt]->arrange || ISFLOATING(c)) {
 				resizeclient(c, nx, ny, nw, nh);
