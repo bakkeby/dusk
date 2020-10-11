@@ -2859,19 +2859,17 @@ togglefloating(const Arg *arg)
 	if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c)) /* no support for fullscreen windows */
 		return;
 	setflag(c, Floating, !ISFLOATING(c) || ISFIXED(c));
-	if (ISFLOATING(c)) {
-		if (c->sfx != -9999)
-			/* restore last known float dimensions */
-			resize(c, c->sfx, c->sfy, c->sfw, c->sfh, 0);
-		else
-			resize(c, c->x, c->y, c->w, c->h, 0);
-	} else {
+	if (!ISFLOATING(c)) {
 		/* save last known float dimensions */
 		c->sfx = c->x;
 		c->sfy = c->y;
 		c->sfw = c->w;
 		c->sfh = c->h;
-	}
+	} else if (c->sfx != -9999)
+		/* restore last known float dimensions */
+		resize(c, c->sfx, c->sfy, c->sfw, c->sfh, 0);
+	else
+		resize(c, c->x, c->y, c->w, c->h, 0);
 	arrange(c->mon);
 	setfloatinghint(c);
 }
