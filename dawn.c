@@ -1411,6 +1411,7 @@ void
 focus(Client *c)
 {
 	Client *f;
+	XWindowChanges wc;
 	if (!c || !ISVISIBLE(c))
 		for (c = selmon->stack; c && !ISVISIBLE(c); c = c->snext);
 	if (selmon->sel && selmon->sel != c)
@@ -1425,14 +1426,29 @@ focus(Client *c)
 		grabbuttons(c, 1);
 		setfocus(c);
 		if (enabled(FocusedOnTop)) {
+			/* Move all visible tiled clients that are not marked as on top below the bar window */
+			wc.stack_mode = Below;
+			wc.sibling = c->mon->bar->win;
 			for (f = c->mon->stack; f; f = f->snext)
-				if (f != c && ISVISIBLE(f) && ISFLOATING(f) && !(ALWAYSONTOP(f) || ISTRANSIENT(f)))
-					XRaiseWindow(dpy, f->win);
-			if (!(ALWAYSONTOP(c) || ISTRANSIENT(c)))
-				XRaiseWindow(dpy, c->win);
+				if (f != c && !ISFLOATING(f) && ISVISIBLE(f) && !(ALWAYSONTOP(f) || ISTRANSIENT(f))) {
+					XConfigureWindow(dpy, f->win, CWSibling|CWStackMode, &wc);
+					wc.sibling = f->win;
+				}
+
+			/* Move the currently focused client above the bar window */
+			wc.stack_mode = Above;
+			wc.sibling = c->mon->bar->win;
+			XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
+
+			/* Move all visible floating windows that are not marked as on top below the current window */
+			wc.stack_mode = Below;
+			wc.sibling = c->win;
 			for (f = c->mon->stack; f; f = f->snext)
-				if (f != c && ISVISIBLE(f) && f->tags && (ALWAYSONTOP(f) || ISTRANSIENT(f)))
-					XRaiseWindow(dpy, f->win);
+				if (f != c && ISFLOATING(f) && ISVISIBLE(f) && !(ALWAYSONTOP(f) || ISTRANSIENT(f))) {
+					XConfigureWindow(dpy, f->win, CWSibling|CWStackMode, &wc);
+					wc.sibling = f->win;
+				}
+
 			XSync(dpy, True);
 		}
 	} else {
@@ -1808,10 +1824,7 @@ manage(Window w, XWindowAttributes *wa)
 			XMapWindow(dpy, c->win);
 	}
 	focus(NULL);
-
-	Atom target = XInternAtom(dpy, "_IS_FLOATING", 0);
-	unsigned int floating[1] = {ISFLOATING(c) ? 1 : 0};
-	XChangeProperty(dpy, c->win, target, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)floating, 1);
+	setfloatinghint(c);
 }
 
 void
@@ -2847,13 +2860,11 @@ togglefloating(const Arg *arg)
 		return;
 	setflag(c, Floating, !ISFLOATING(c) || ISFIXED(c));
 	if (ISFLOATING(c)) {
-		if (c->sfx != -9999) {
+		if (c->sfx != -9999)
 			/* restore last known float dimensions */
 			resize(c, c->sfx, c->sfy, c->sfw, c->sfh, 0);
-			arrange(c->mon);
-			return;
-		}
-		resize(c, c->x, c->y, c->w, c->h, 0);
+		else
+			resize(c, c->x, c->y, c->w, c->h, 0);
 	} else {
 		/* save last known float dimensions */
 		c->sfx = c->x;
@@ -2862,10 +2873,7 @@ togglefloating(const Arg *arg)
 		c->sfh = c->h;
 	}
 	arrange(c->mon);
-
-	Atom target = XInternAtom(dpy, "_IS_FLOATING", 0);
-	unsigned int floating[1] = {ISFLOATING(c) ? 1 : 0};
-	XChangeProperty(dpy, selmon->sel->win, target, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)floating, 1);
+	setfloatinghint(c);
 }
 
 void
