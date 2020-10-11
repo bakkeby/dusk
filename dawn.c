@@ -274,8 +274,8 @@ struct Client {
 	#if IPC_PATCH
 	ClientState prevstate;
 	#endif // IPC_PATCH
-	unsigned int flags;
-	unsigned int prevflags;
+	unsigned long flags;
+	unsigned long prevflags;
 };
 
 typedef struct {
@@ -356,7 +356,7 @@ typedef struct {
 	const char *title;
 	const char *wintype;
 	unsigned int tags;
-	unsigned int flags;
+	unsigned long flags;
 	const char *floatpos;
 	int monitor;
 } Rule;

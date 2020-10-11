@@ -52,7 +52,7 @@
 // }
 
 void
-addflag(Client *c, const unsigned int flag)
+addflag(Client *c, const unsigned long flag)
 {
 	// if (ISLOCKED(c))
 	// 	return;
@@ -63,7 +63,7 @@ addflag(Client *c, const unsigned int flag)
 }
 
 void
-setflag(Client *c, const unsigned int flag, const int value)
+setflag(Client *c, const unsigned long flag, const int value)
 {
 	value ? addflag(c, flag) : removeflag(c, flag);
 }
@@ -76,7 +76,7 @@ setflag(Client *c, const unsigned int flag, const int value)
 // }
 
 void
-removeflag(Client *c, const unsigned int flag)
+removeflag(Client *c, const unsigned long flag)
 {
 	// if (ISLOCKED(c) && flag != Locked)
 	// 	return;

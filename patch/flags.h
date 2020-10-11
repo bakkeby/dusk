@@ -1,9 +1,9 @@
 // static int hadflag(Client *c, const unsigned int flag);
 // static int hasflag(Client *c, const unsigned int flag);
-static void addflag(Client *c, const unsigned int flag);
-static void setflag(Client *c, const unsigned int flag, const int value);
+static void addflag(Client *c, const unsigned long flag);
+static void setflag(Client *c, const unsigned long flag, const int value);
 // static void setflags(Client *c, const unsigned int flags);
-static void removeflag(Client *c, const unsigned int flag);
+static void removeflag(Client *c, const unsigned long flag);
 
 enum {
 	Ruled = 1 << 0, // indicates whether client was subject to client rules (used internally to determine default behaviour)
