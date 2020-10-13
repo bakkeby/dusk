@@ -695,11 +695,6 @@ arrangemon(Monitor *m)
 	strncpy(m->ltsymbol, m->lt[m->sellt]->symbol, sizeof m->ltsymbol);
 	if (m->lt[m->sellt]->arrange)
 		m->lt[m->sellt]->arrange(m);
-	#if ROUNDED_CORNERS_PATCH
-	Client *c;
-	for (c = nexttiled(m->clients); c; c = nexttiled(c->next))
-		drawroundedcorners(c);
-	#endif // ROUNDED_CORNERS_PATCH
 }
 
 void
@@ -1927,9 +1922,6 @@ movemouse(const Arg *arg)
 				c->sfx = nx;
 				c->sfy = ny;
 			}
-			#if ROUNDED_CORNERS_PATCH
-			drawroundedcorners(c);
-			#endif // ROUNDED_CORNERS_PATCH
 			break;
 		}
 	} while (ev.type != ButtonRelease);
@@ -1943,9 +1935,6 @@ movemouse(const Arg *arg)
 		selmon = m;
 		focus(NULL);
 	}
-	#if ROUNDED_CORNERS_PATCH
-	drawroundedcorners(c);
-	#endif // ROUNDED_CORNERS_PATCH
 	removeflag(c, MoveResize);
 }
 
@@ -2177,9 +2166,6 @@ resizemouse(const Arg *arg)
 				c->sfy = ny;
 				c->sfw = nw;
 				c->sfh = nh;
-				#if ROUNDED_CORNERS_PATCH
-				drawroundedcorners(c);
-				#endif // ROUNDED_CORNERS_PATCH
 			}
 			break;
 		}

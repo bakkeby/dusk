@@ -28,15 +28,12 @@ XRENDER = -lXrender
 YAJLLIBS = -lyajl
 YAJLINC = -I/usr/include/yajl
 
-# Uncomment this for the rounded corners patch / ROUNDED_CORNERS_PATCH
-#XEXTLIB = -lXext
-
 # This is needed for the swallow patch
 XCBLIBS = -lX11-xcb -lxcb -lxcb-res
 
 # includes and libs
 INCS = -I${X11INC} -I${FREETYPEINC} ${YAJLINC}
-LIBS = -L${X11LIB} -lX11 ${XINERAMALIBS} ${FREETYPELIBS}  ${XRENDER} ${XEXTLIB} ${XCBLIBS} ${KVMLIB} ${YAJLLIBS}
+LIBS = -L${X11LIB} -lX11 ${XINERAMALIBS} ${FREETYPELIBS}  ${XRENDER} ${XCBLIBS} ${KVMLIB} ${YAJLLIBS}
 
 # flags
 CPPFLAGS = -D_DEFAULT_SOURCE -D_BSD_SOURCE -D_POSIX_C_SOURCE=200809L -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS}

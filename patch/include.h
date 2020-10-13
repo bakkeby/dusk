@@ -42,10 +42,8 @@
 
 #include "focusmaster.h"
 #include "focusurgent.h"
-
-#if INPLACEROTATE_PATCH
 #include "inplacerotate.h"
-#endif
+
 #if IPC_PATCH
 #include "ipc.h"
 #include "ipc/ipc.h"
@@ -80,13 +78,8 @@
 #if RESTARTSIG_PATCH
 #include "restartsig.h"
 #endif
-#if ROTATESTACK_PATCH
-#include "rotatestack.h"
-#endif
-#if ROUNDED_CORNERS_PATCH
-#include "roundedcorners.h"
-#endif
 
+#include "rotatestack.h"
 #include "scratchpad.h"
 #include "setborderpx.h"
 #include "shiftview.h"
