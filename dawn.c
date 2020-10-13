@@ -2467,18 +2467,24 @@ setfullscreen(Client *c, int fullscreen, int restorefakefullscreen)
 	} else if (restorestate && ISLOCKED(c)) {
 		UNLOCK(c);
 		c->bw = c->oldbw;
-		if (WASFLOATING(c))
-			SETFLOATING(c);
-		c->x = c->oldx;
-		c->y = c->oldy;
-		c->w = c->oldw;
-		c->h = c->oldh;
-		resizeclient(c, c->x, c->y, c->w, c->h);
-		restack(c->mon);
+		setflag(c, Floating, WASFLOATING(c));
 		if (restorefakefullscreen) {
 			addflag(c, FakeFullScreen);
 			removeflag(c, RestoreFakeFullScreen);
 		}
+		/* The client may have been moved to another monitor whilst in fullscreen which if tiled
+		 * we address by doing a full arrange of tiled clients. If the client is floating then the
+		 * height and width may be larger than the monitor's window area, so we cap that by
+		 * ensuring max / min values. */
+		if (ISFLOATING(c)) {
+			c->x = MAX(c->mon->wx, c->oldx);
+			c->y = MAX(c->mon->wy, c->oldy);
+			c->w = MIN(c->mon->ww - c->x + c->mon->wx - 2*c->bw, c->oldw);
+			c->h = MIN(c->mon->wh - c->y + c->mon->wy - 2*c->bw, c->oldh);
+			resizeclient(c, c->x, c->y, c->w, c->h);
+			restack(c->mon);
+		} else
+			arrange(c->mon);
 	}
 }
 
