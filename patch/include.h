@@ -33,11 +33,7 @@
 #include "cfacts.h"
 #include "cool_autostart.h"
 #include "cyclelayouts.h"
-
-#if DECORATION_HINTS_PATCH
 #include "decorationhints.h"
-#endif
-
 #include "dragcfact.h"
 #include "dragmfact.h"
 #include "fakefullscreenclient.h"

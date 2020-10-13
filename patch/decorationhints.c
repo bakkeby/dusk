@@ -10,7 +10,7 @@ updatemotifhints(Client *c)
 	unsigned long *motif;
 	int width, height;
 
-	if (!decorhints)
+	if (disabled(DecorationHints))
 		return;
 
 	if (XGetWindowProperty(dpy, c->win, motifatom, 0L, 5L, False, motifatom,

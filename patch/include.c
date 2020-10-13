@@ -34,11 +34,7 @@
 #include "cfacts.c"
 #include "cool_autostart.c"
 #include "cyclelayouts.c"
-
-#if DECORATION_HINTS_PATCH
 #include "decorationhints.c"
-#endif
-
 #include "dragcfact.c"
 #include "dragmfact.c"
 #include "fakefullscreenclient.c"
