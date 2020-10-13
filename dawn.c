@@ -2330,32 +2330,23 @@ sendmon(Client *c, Monitor *m)
 {
 	if (c->mon == m)
 		return;
-	#if SENDMON_KEEPFOCUS_PATCH
 	int hadfocus = (c == selmon->sel);
-	#endif // SENDMON_KEEPFOCUS_PATCH
 	unfocus(c, 1, NULL);
 	detach(c);
 	detachstack(c);
-	#if SENDMON_KEEPFOCUS_PATCH
 	arrange(c->mon);
-	#endif // SENDMON_KEEPFOCUS_PATCH
 	c->mon = m;
 
 	if (!(c->tags & SPTAGMASK))
 		c->tags = m->tagset[m->seltags]; /* assign tags of target monitor */
 	attachx(c);
 	attachstack(c);
-	#if SENDMON_KEEPFOCUS_PATCH
 	arrange(m);
 	if (hadfocus) {
 		focus(c);
 		restack(m);
 	} else
 		focus(NULL);
-	#else
-	focus(NULL);
-	arrange(NULL);
-	#endif // SENDMON_KEEPFOCUS_PATCH
 	if (c->reverttags)
 		c->reverttags = 0;
 }
