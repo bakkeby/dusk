@@ -10,10 +10,7 @@
 #include "bar_alternativetags.h"
 #endif
 #include "bar_dwmblocks.h"
-#if BAR_EWMHTAGS_PATCH
 #include "bar_ewmhtags.h"
-#endif
-
 #include "combo.h"
 
 #include "bar_ltsymbol.h"

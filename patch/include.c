@@ -11,10 +11,8 @@
 #include "bar_alternativetags.c"
 #endif
 #include "bar_dwmblocks.c"
-#if BAR_EWMHTAGS_PATCH
-#include "bar_ewmhtags.c"
-#endif
 
+#include "bar_ewmhtags.c"
 #include "combo.c"
 
 #include "bar_ltsymbol.c"

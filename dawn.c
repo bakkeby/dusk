@@ -140,9 +140,7 @@ enum {
 	NetWMFullscreen, NetActiveWindow, NetWMWindowType,
 	NetSystemTray, NetSystemTrayOP, NetSystemTrayOrientation,
 	NetSystemTrayVisual, NetWMWindowTypeDock, NetSystemTrayOrientationHorz,
-	#if BAR_EWMHTAGS_PATCH
 	NetDesktopNames, NetDesktopViewport, NetNumberOfDesktops, NetCurrentDesktop,
-	#endif // BAR_EWMHTAGS_PATCH
 	NetClientList, NetLast
 }; /* EWMH atoms */
 
@@ -2575,12 +2573,10 @@ setup(void)
 	xatom[Manager] = XInternAtom(dpy, "MANAGER", False);
 	xatom[Xembed] = XInternAtom(dpy, "_XEMBED", False);
 	xatom[XembedInfo] = XInternAtom(dpy, "_XEMBED_INFO", False);
-	#if BAR_EWMHTAGS_PATCH
 	netatom[NetDesktopViewport] = XInternAtom(dpy, "_NET_DESKTOP_VIEWPORT", False);
 	netatom[NetNumberOfDesktops] = XInternAtom(dpy, "_NET_NUMBER_OF_DESKTOPS", False);
 	netatom[NetCurrentDesktop] = XInternAtom(dpy, "_NET_CURRENT_DESKTOP", False);
 	netatom[NetDesktopNames] = XInternAtom(dpy, "_NET_DESKTOP_NAMES", False);
-	#endif // BAR_EWMHTAGS_PATCH
 	netatom[NetWMName] = XInternAtom(dpy, "_NET_WM_NAME", False);
 	netatom[NetWMState] = XInternAtom(dpy, "_NET_WM_STATE", False);
 	netatom[NetWMCheck] = XInternAtom(dpy, "_NET_SUPPORTING_WM_CHECK", False);
@@ -2621,12 +2617,10 @@ setup(void)
 	/* EWMH support per view */
 	XChangeProperty(dpy, root, netatom[NetSupported], XA_ATOM, 32,
 		PropModeReplace, (unsigned char *) netatom, NetLast);
-	#if BAR_EWMHTAGS_PATCH
 	setnumdesktops();
 	setcurrentdesktop();
 	setdesktopnames();
 	setviewport();
-	#endif // BAR_EWMHTAGS_PATCH
 	XDeleteProperty(dpy, root, netatom[NetClientList]);
 	/* select events */
 	wa.cursor = cursor[CurNormal]->cursor;
@@ -2941,9 +2935,7 @@ toggletag(const Arg *arg)
 		#endif // SWAPFOCUS_PATCH
 		arrange(selmon);
 	}
-	#if BAR_EWMHTAGS_PATCH
 	updatecurrentdesktop();
-	#endif // BAR_EWMHTAGS_PATCH
 }
 
 void
@@ -3012,9 +3004,7 @@ toggleview(const Arg *arg)
 		focus(NULL);
 		arrange(selmon);
 	}
-	#if BAR_EWMHTAGS_PATCH
 	updatecurrentdesktop();
-	#endif // BAR_EWMHTAGS_PATCH
 }
 
 void
@@ -3420,9 +3410,7 @@ view(const Arg *arg)
 	selmon->pertag->prevclient[selmon->pertag->curtag] = unmodified;
 	#endif // SWAPFOCUS_PATCH
 	arrange(selmon);
-	#if BAR_EWMHTAGS_PATCH
 	updatecurrentdesktop();
-	#endif // BAR_EWMHTAGS_PATCH
 }
 
 Client *
