@@ -31,11 +31,7 @@
 /* Other patches */
 #include "attachx.h"
 #include "cfacts.h"
-
-#if COOL_AUTOSTART_PATCH
 #include "cool_autostart.h"
-#endif
-
 #include "cyclelayouts.h"
 
 #if DECORATION_HINTS_PATCH

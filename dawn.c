@@ -2024,20 +2024,14 @@ propertynotify(XEvent *e)
 void
 quit(const Arg *arg)
 {
-	#if COOL_AUTOSTART_PATCH
 	size_t i;
-	#endif // COOL_AUTOSTART_PATCH
 	#if ONLYQUITONEMPTY_PATCH
 	unsigned int n;
 	Window *junk = malloc(1);
 
 	XQueryTree(dpy, root, junk, junk, &junk, &n);
 
-	#if COOL_AUTOSTART_PATCH
 	if (n - autostart_len <= quit_empty_window_count)
-	#else
-	if (n <= quit_empty_window_count)
-	#endif // COOL_AUTOSTART_PATCH
 	{
 		#if RESTARTSIG_PATCH
 		if (arg->i)
@@ -2057,7 +2051,6 @@ quit(const Arg *arg)
 	running = 0;
 	#endif // ONLYQUITONEMPTY_PATCH
 
-	#if COOL_AUTOSTART_PATCH
 	/* kill child processes */
 	for (i = 0; i < autostart_len; i++) {
 		if (0 < autostart_pids[i]) {
@@ -2065,7 +2058,6 @@ quit(const Arg *arg)
 			waitpid(autostart_pids[i], NULL, 0);
 		}
 	}
-	#endif // COOL_AUTOSTART_PATCH
 }
 
 Monitor *
@@ -2456,12 +2448,12 @@ setfullscreen(Client *c, int fullscreen, int restorefakefullscreen)
 	 * when they are not supposed to we add an additional bit-lock so that settings can
 	 * only be stored and restored in that precise order. */
 	if (savestate && !ISLOCKED(c)) {
-		LOCK(c);
 		c->oldbw = c->bw;
 		c->bw = 0;
 		SETFLOATING(c);
 		resizeclient(c, c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
 		XRaiseWindow(dpy, c->win);
+		LOCK(c);
 	} else if (restorestate && ISLOCKED(c)) {
 		UNLOCK(c);
 		c->bw = c->oldbw;
@@ -2715,12 +2707,9 @@ showhide(Client *c)
 void
 sigchld(int unused)
 {
-	#if COOL_AUTOSTART_PATCH
 	pid_t pid;
-	#endif // COOL_AUTOSTART_PATCH
 	if (signal(SIGCHLD, sigchld) == SIG_ERR)
 		die("can't install SIGCHLD handler:");
-	#if COOL_AUTOSTART_PATCH
 	while (0 < (pid = waitpid(-1, NULL, WNOHANG))) {
 		pid_t *p, *lim;
 
@@ -2735,9 +2724,6 @@ sigchld(int unused)
 			}
 		}
 	}
-	#else
-	while (0 < waitpid(-1, NULL, WNOHANG));
-	#endif // COOL_AUTOSTART_PATCH
 }
 
 void
@@ -3591,9 +3577,7 @@ main(int argc, char *argv[])
 	XrmInitialize();
 	loadxrdb();
 	#endif // XRDB_PATCH
-	#if COOL_AUTOSTART_PATCH
 	autostart_exec();
-	#endif // COOL_AUTOSTART_PATCH
 	setup();
 #ifdef __OpenBSD__
 	if (pledge("stdio rpath proc exec ps", NULL) == -1)

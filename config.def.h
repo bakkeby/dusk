@@ -221,12 +221,10 @@ static char *colors[][ColCount] = {
 	[SchemeFlexSelFloat] = { titleselfgcolor,  selfloatbgcolor,  selfloatbgcolor,      c000000 },
 };
 
-#if COOL_AUTOSTART_PATCH
 static const char *const autostart[] = {
 	"st", NULL,
 	NULL /* terminate */
 };
-#endif // COOL_AUTOSTART_PATCH
 
 
 const char *spcmd1[] = {"st", "-n", "spterm", "-g", "120x34", NULL };

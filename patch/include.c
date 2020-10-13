@@ -32,11 +32,7 @@
 /* Other patches */
 #include "attachx.c"
 #include "cfacts.c"
-
-#if COOL_AUTOSTART_PATCH
 #include "cool_autostart.c"
-#endif
-
 #include "cyclelayouts.c"
 
 #if DECORATION_HINTS_PATCH
