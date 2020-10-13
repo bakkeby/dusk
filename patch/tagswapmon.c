@@ -1,13 +1,13 @@
 void
 tagswapmon(const Arg *arg)
 {
-	Monitor *m;
+	Monitor *n;
 	Client *c, *sc = NULL, *mc = NULL, *next;
 
 	if (!mons->next)
 		return;
 
-	m = dirtomon(arg->i);
+	n = dirtomon(arg->i);
 
 	for (c = selmon->clients; c; c = next) {
 		next = c->next;
@@ -20,7 +20,7 @@ tagswapmon(const Arg *arg)
 		sc = c;
 	}
 
-	for (c = m->clients; c; c = next) {
+	for (c = n->clients; c; c = next) {
 		next = c->next;
 		if (!ISVISIBLE(c))
 			continue;
@@ -32,9 +32,10 @@ tagswapmon(const Arg *arg)
 	}
 
 	for (c = sc; c; c = next) {
+		tagmonresize(c, selmon, n);
 		next = c->next;
-		c->mon = m;
-		c->tags = m->tagset[m->seltags]; /* assign tags of target monitor */
+		c->mon = n;
+		c->tags = n->tagset[n->seltags]; /* assign tags of target monitor */
 		attach(c);
 		attachstack(c);
 		if (ISFULLSCREEN(c)) {
@@ -46,6 +47,7 @@ tagswapmon(const Arg *arg)
 	}
 
 	for (c = mc; c; c = next) {
+		tagmonresize(c, n, selmon);
 		next = c->next;
 		c->mon = selmon;
 		c->tags = selmon->tagset[selmon->seltags]; /* assign tags of target monitor */

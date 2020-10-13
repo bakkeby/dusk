@@ -454,7 +454,10 @@ static void showhide(Client *c);
 static void sigchld(int unused);
 static void spawn(const Arg *arg);
 static void tag(const Arg *arg);
+static void tagfittomon(Client *c, Monitor *m, int *cx, int *cy, int *cw, int *ch);
 static void tagmon(const Arg *arg);
+static void tagmonresize(Client *c, Monitor *old, Monitor *m);
+static void tagrelposmon(Client *c, Monitor *o, Monitor *n, int *cx, int *cy, int *cw, int *ch);
 static void togglebar(const Arg *arg);
 static void togglefloating(const Arg *arg);
 static void toggletag(const Arg *arg);
@@ -2095,15 +2098,22 @@ resizeclient(Client *c, int x, int y, int w, int h)
 {
 	XWindowChanges wc;
 
-	c->oldx = c->x; c->x = wc.x = x;
-	c->oldy = c->y; c->y = wc.y = y;
-	c->oldw = c->w; c->w = wc.width = w;
-	c->oldh = c->h; c->h = wc.height = h;
+	if (!ISLOCKED(c)) {
+		c->oldx = c->x;
+		c->oldy = c->y;
+		c->oldw = c->w;
+		c->oldh = c->h;
+	}
+	c->x = wc.x = x;
+	c->y = wc.y = y;
+	c->w = wc.width = w;
+	c->h = wc.height = h;
 	wc.border_width = c->bw;
 	if (enabled(NoBorder) && ((nexttiled(c->mon->clients) == c && !nexttiled(c->next)))
 		&& (ISFAKEFULLSCREEN(c) || !ISFULLSCREEN(c))
 		&& !ISFLOATING(c)
-		&& c->mon->lt[c->mon->sellt]->arrange) {
+		&& c->mon->lt[c->mon->sellt]->arrange)
+	{
 		c->w = wc.width += c->bw * 2;
 		c->h = wc.height += c->bw * 2;
 		wc.border_width = 0;
@@ -2342,6 +2352,7 @@ sendmon(Client *c, Monitor *m)
 	attachx(c);
 	attachstack(c);
 	arrange(m);
+
 	if (hadfocus) {
 		focus(c);
 		restack(m);
@@ -2813,21 +2824,83 @@ tag(const Arg *arg)
 }
 
 void
+tagfittomon(Client *c, Monitor *m, int *cx, int *cy, int *cw, int *ch)
+{
+	if (*cx < m->wx)
+		*cx = m->wx + m->gappov;
+	if (*cy < m->wy)
+		*cy = m->wy + m->gappoh;
+	if (*cx + *cw > m->wx + m->ww)
+		*cx = m->wx + m->ww - *cw - m->gappov;
+	if (*cy + *ch > m->wy + m->wh)
+		*cy = m->my + m->wh - *ch - m->gappoh;
+}
+
+void
 tagmon(const Arg *arg)
 {
 	Client *c = selmon->sel;
 	if (!c || !mons->next)
 		return;
+	Monitor *n = dirtomon(arg->i);
+	tagmonresize(c, c->mon, n);
 	if (ISFULLSCREEN(c)) {
 		setflag(c, FullScreen, 0);
-		sendmon(c, dirtomon(arg->i));
+		sendmon(c, n);
 		setflag(c, FullScreen, 1);
 		if (!ISFAKEFULLSCREEN(c)) {
 			resizeclient(c, c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
 			XRaiseWindow(dpy, c->win);
 		}
-	} else
+	} else {
 		sendmon(c, dirtomon(arg->i));
+		if (ISFLOATING(c))
+			resizeclient(c, c->x, c->y, c->w, c->h);
+	}
+}
+
+
+void
+tagmonresize(Client *c, Monitor *o, Monitor *n)
+{
+	if (ISFLOATING(c) && (!ISFULLSCREEN(c) || ISFAKEFULLSCREEN(c)))
+		tagrelposmon(c, o, n, &c->x, &c->y, &c->w, &c->h);
+	else
+		tagrelposmon(c, o, n, &c->oldx, &c->oldy, &c->oldw, &c->oldh);
+
+	if (c->sfx != -9999)
+		tagrelposmon(c, o, n, &c->sfx, &c->sfy, &c->sfw, &c->sfh);
+}
+
+/* Works out a client's (c) position on a new monitor (n) relative to that of the position on
+ * another (o) monitor.
+ *
+ * Formula:
+ *                (n->ww - c->w)
+ *    x = n->wx + -------------- * (c->x - o->wx)
+ *                (o->ww - c->w)
+ */
+void
+tagrelposmon(Client *c, Monitor *o, Monitor *n, int *cx, int *cy, int *cw, int *ch)
+{
+	int ncw = MIN(*cw, MIN(o->ww, n->ww) - 2 * c->bw - 2 * n->gappov);
+	int nch = MIN(*ch, MIN(o->wh, n->wh) - 2 * c->bw - 2 * n->gappoh);
+
+	tagfittomon(c, o, cx, cy, cw, ch);
+
+	if (*cw != ncw || (o->ww - *cw <= 0)) {
+		*cw = ncw;
+		*cx = n->wx + n->gappov;
+	} else
+		*cx = n->wx + (n->ww - *cw) * (*cx - o->wx) / (o->ww - *cw);
+
+	if (*ch != nch || (o->wh - *ch <= 0)) {
+		*ch = nch;
+		*cy = n->wy + n->gappoh;
+	} else
+		*cy = n->wy + (n->wh - *ch) * (*cy - o->wy) / (o->wh - *ch);
+
+	tagfittomon(c, n, cx, cy, cw, ch);
 }
 
 void
