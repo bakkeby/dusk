@@ -13,9 +13,8 @@
 #if BAR_EWMHTAGS_PATCH
 #include "bar_ewmhtags.h"
 #endif
-#if COMBO_PATCH
+
 #include "combo.h"
-#endif
 
 #include "bar_ltsymbol.h"
 #include "bar_status2d.h"
@@ -114,18 +113,15 @@
 #if STACKER_PATCH
 #include "stacker.h"
 #endif
-#if STICKY_PATCH
-#include "sticky.h"
-#endif
 
+#include "sticky.h"
 #include "swallow.h"
 
 #if SWAPFOCUS_PATCH
 #include "swapfocus.h"
 #endif
-#if SWAPTAGS_PATCH
 #include "swaptags.h"
-#endif
+
 #if SWITCHCOL_PATCH
 #include "switchcol.h"
 #endif
