@@ -41,10 +41,8 @@
 #endif
 
 #include "focusmaster.h"
-
-#if FOCUSURGENT_PATCH
 #include "focusurgent.h"
-#endif
+
 #if INPLACEROTATE_PATCH
 #include "inplacerotate.h"
 #endif
