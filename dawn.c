@@ -355,7 +355,6 @@ typedef struct {
 
 #define RULE(...) { .monitor = -1, ##__VA_ARGS__ },
 
-#if MONITOR_RULES_PATCH
 typedef struct {
 	int monitor;
 	int tag;
@@ -365,7 +364,6 @@ typedef struct {
 	int showbar;
 	int topbar;
 } MonitorRule;
-#endif // MONITOR_RULES_PATCH
 
 /* function declarations */
 static void applyrules(Client *c);
@@ -1037,16 +1035,12 @@ createmon(void)
 {
 	Monitor *m, *mon;
 	int i, n, mi, max_bars = 2, istopbar = topbar;
-	#if MONITOR_RULES_PATCH
 	int layout;
-	#endif // MONITOR_RULES_PATCH
 
 	const BarRule *br;
 	Bar *bar;
-	#if MONITOR_RULES_PATCH
 	int j;
 	const MonitorRule *mr;
-	#endif // MONITOR_RULES_PATCH
 
 	m = ecalloc(1, sizeof(Monitor));
 	m->tagset[0] = m->tagset[1] = 1;
@@ -1061,7 +1055,6 @@ createmon(void)
 	m->gappov = gappov;
 	for (mi = 0, mon = mons; mon; mon = mon->next, mi++); // monitor index
 	m->index = mi;
-	#if MONITOR_RULES_PATCH
 	for (j = 0; j < LENGTH(monrules); j++) {
 		mr = &monrules[j];
 		if ((mr->monitor == -1 || mr->monitor == mi)
@@ -1083,11 +1076,6 @@ createmon(void)
 			break;
 		}
 	}
-	#else
-	m->lt[0] = &layouts[0];
-	m->lt[1] = &layouts[1 % LENGTH(layouts)];
-	strncpy(m->ltsymbol, layouts[0].symbol, sizeof m->ltsymbol);
-	#endif // MONITOR_RULES_PATCH
 
 	/* Derive the number of bars for this monitor based on bar rules */
 	for (n = -1, i = 0; i < LENGTH(barrules); i++) {
@@ -1120,20 +1108,6 @@ createmon(void)
 	m->pertag->curtag = m->pertag->prevtag = 1;
 	for (i = 0; i <= NUMTAGS; i++) {
 		m->pertag->nstacks[i] = m->nstack;
-
-		#if !MONITOR_RULES_PATCH
-		/* init nmaster */
-		m->pertag->nmasters[i] = m->nmaster;
-
-		/* init mfacts */
-		m->pertag->mfacts[i] = m->mfact;
-
-		#if PERTAGBAR_PATCH
-		/* init showbar */
-		m->pertag->showbars[i] = m->showbar;
-		#endif // PERTAGBAR_PATCH
-		#endif // MONITOR_RULES_PATCH
-
 		m->pertag->prevzooms[i] = NULL;
 
 		/* init layouts */
