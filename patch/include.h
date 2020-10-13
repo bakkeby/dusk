@@ -75,10 +75,8 @@
 #if REORGANIZETAGS_PATCH
 #include "reorganizetags.h"
 #endif
-#if RESTARTSIG_PATCH
-#include "restartsig.h"
-#endif
 
+#include "restartsig.h"
 #include "rotatestack.h"
 #include "scratchpad.h"
 #include "setborderpx.h"

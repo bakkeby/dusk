@@ -81,10 +81,7 @@
 #if REORGANIZETAGS_PATCH
 #include "reorganizetags.c"
 #endif
-#if RESTARTSIG_PATCH
 #include "restartsig.c"
-#endif
-
 #include "rotatestack.c"
 #include "scratchpad.c"
 #include "setborderpx.c"

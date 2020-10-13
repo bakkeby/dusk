@@ -2016,10 +2016,8 @@ quit(const Arg *arg)
 
 	if (n - autostart_len <= quit_empty_window_count)
 	{
-		#if RESTARTSIG_PATCH
 		if (arg->i)
 			restart = 1;
-		#endif // RESTARTSIG_PATCH
 		running = 0;
 	}
 	else
@@ -2027,10 +2025,8 @@ quit(const Arg *arg)
 
 	free(junk);
 	#else
-	#if RESTARTSIG_PATCH
 	if (arg->i)
 		restart = 1;
-	#endif // RESTARTSIG_PATCH
 	running = 0;
 	#endif // ONLYQUITONEMPTY_PATCH
 
@@ -2516,11 +2512,8 @@ setup(void)
 
 	/* clean up any zombies immediately */
 	sigchld(0);
-
-	#if RESTARTSIG_PATCH
 	signal(SIGHUP, sighup);
 	signal(SIGTERM, sigterm);
-	#endif // RESTARTSIG_PATCH
 
 	enablefunc(functionality);
 
@@ -3556,10 +3549,8 @@ main(int argc, char *argv[])
 	runautostart();
 	#endif
 	run();
-	#if RESTARTSIG_PATCH
 	if (restart)
 		execvp(argv[0], argv);
-	#endif // RESTARTSIG_PATCH
 	cleanup();
 	XCloseDisplay(dpy);
 	return EXIT_SUCCESS;

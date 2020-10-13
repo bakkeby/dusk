@@ -502,9 +502,7 @@ static Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_c,          killclient,             {0} },
 
 	{ MODKEY|ShiftMask,             XK_q,          quit,                   {0} },
-	#if RESTARTSIG_PATCH
 	{ MODKEY|ControlMask|ShiftMask, XK_q,          quit,                   {1} },
-	#endif // RESTARTSIG_PATCH
 
 	{ MODKEY,                       XK_o,          winview,                {0} },
 
