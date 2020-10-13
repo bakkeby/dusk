@@ -426,9 +426,7 @@ static const char *dmenucmd[] = {
 	"-nf", normfgcolor,
 	"-sb", selbgcolor,
 	"-sf", selfgcolor,
-	#if BAR_DMENUMATCHTOP_PATCH
 	topbar ? NULL : "-b",
-	#endif // BAR_DMENUMATCHTOP_PATCH
 	NULL
 };
 static const char *termcmd[]  = { "st", NULL };
