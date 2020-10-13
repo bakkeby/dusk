@@ -10,7 +10,6 @@
 #include "bar_alternativetags.h"
 #endif
 #include "bar_dwmblocks.h"
-#include "bar_ewmhtags.h"
 #include "combo.h"
 
 #include "bar_ltsymbol.h"
@@ -33,6 +32,7 @@
 #include "decorationhints.h"
 #include "dragcfact.h"
 #include "dragmfact.h"
+#include "ewmhtags.h"
 #include "fakefullscreenclient.h"
 #include "floatpos.h"
 

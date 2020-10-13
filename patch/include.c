@@ -12,7 +12,6 @@
 #endif
 #include "bar_dwmblocks.c"
 
-#include "bar_ewmhtags.c"
 #include "combo.c"
 
 #include "bar_ltsymbol.c"
@@ -35,6 +34,7 @@
 #include "decorationhints.c"
 #include "dragcfact.c"
 #include "dragmfact.c"
+#include "ewmhtags.c"
 #include "fakefullscreenclient.c"
 #include "floatpos.c"
 
