@@ -13,7 +13,6 @@ setgaps(int oh, int ov, int ih, int iv)
 	arrange(selmon);
 }
 
-#if IPC_PATCH
 /* External function that takes one integer and splits it
  * into four gap values:
  *    - outer horizontal (oh)
@@ -60,7 +59,6 @@ setgapsex(const Arg *arg)
 
 	setgaps(oh, ov, ih, iv);
 }
-#endif // IPC_PATCH
 
 static void
 togglegaps(const Arg *arg)

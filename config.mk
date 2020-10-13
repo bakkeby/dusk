@@ -24,7 +24,7 @@ FREETYPEINC = /usr/include/freetype2
 # Needed for the alpha patch
 XRENDER = -lXrender
 
-# Uncomment for the ipc patch / IPC_PATCH
+# Needed for the ipc patch
 YAJLLIBS = -lyajl
 YAJLINC = -I/usr/include/yajl
 

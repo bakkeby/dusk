@@ -187,7 +187,6 @@ enum {
 	LTAXIS_LAST,
 };
 
-#if IPC_PATCH
 typedef struct TagState TagState;
 struct TagState {
        int selected;
@@ -199,7 +198,6 @@ typedef struct ClientState ClientState;
 struct ClientState {
        int isfixed, isfloating, isurgent, neverfocus, oldstate, isfullscreen;
 };
-#endif // IPC_PATCH
 
 typedef union {
 	long i;
@@ -269,9 +267,7 @@ struct Client {
 	Client *swallowing;
 	Monitor *mon;
 	Window win;
-	#if IPC_PATCH
 	ClientState prevstate;
-	#endif // IPC_PATCH
 	unsigned long flags;
 	unsigned long prevflags;
 };
@@ -339,12 +335,10 @@ struct Monitor {
 	#if INSETS_PATCH
 	Inset inset;
 	#endif // INSETS_PATCH
-	#if IPC_PATCH
 	char lastltsymbol[16];
 	TagState tagstate;
 	Client *lastsel;
 	const Layout *lastlt;
-	#endif // IPC_PATCH
 };
 
 typedef struct {
@@ -812,12 +806,10 @@ cleanup(void)
 	XSetInputFocus(dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
 	XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
 
-	#if IPC_PATCH
 	ipc_cleanup();
 
 	if (close(epoll_fd) < 0)
 		fprintf(stderr, "Failed to close epoll file descriptor\n");
-	#endif // IPC_PATCH
 }
 
 void
@@ -2216,7 +2208,6 @@ restack(Monitor *m)
 	}
 }
 
-#if IPC_PATCH
 void
 run(void)
 {
@@ -2255,18 +2246,6 @@ run(void)
 		}
 	}
 }
-#else
-void
-run(void)
-{
-	XEvent ev;
-	/* main event loop */
-	XSync(dpy, False);
-	while (running && !XNextEvent(dpy, &ev))
-		if (handler[ev.type])
-			handler[ev.type](&ev); /* call handler */
-}
-#endif // IPC_PATCH
 
 void
 scan(void)
@@ -2610,9 +2589,7 @@ setup(void)
 	XSelectInput(dpy, root, wa.event_mask);
 	grabkeys();
 	focus(NULL);
-	#if IPC_PATCH
 	setupepoll();
-	#endif // IPC_PATCH
 }
 
 
@@ -3328,22 +3305,18 @@ updatestatus(void)
 void
 updatetitle(Client *c)
 {
-	#if IPC_PATCH
 	char oldname[sizeof(c->name)];
 	strcpy(oldname, c->name);
-	#endif // IPC_PATCH
 
 	if (!gettextprop(c->win, netatom[NetWMName], c->name, sizeof c->name))
 		gettextprop(c->win, XA_WM_NAME, c->name, sizeof c->name);
 	if (c->name[0] == '\0') /* hack to mark broken clients */
 		strcpy(c->name, broken);
 
-	#if IPC_PATCH
 	for (Monitor *m = mons; m; m = m->next) {
 		if (m->sel == c && strcmp(oldname, c->name) != 0)
 			ipc_focused_title_change_event(m->num, c->win, oldname, c->name);
 	}
-	#endif // IPC_PATCH
 }
 
 void

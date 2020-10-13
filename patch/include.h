@@ -43,12 +43,10 @@
 #include "focusmaster.h"
 #include "focusurgent.h"
 #include "inplacerotate.h"
-
-#if IPC_PATCH
 #include "ipc.h"
 #include "ipc/ipc.h"
 #include "ipc/util.h"
-#endif
+
 #if INSETS_PATCH
 #include "insets.h"
 #endif

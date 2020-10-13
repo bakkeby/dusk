@@ -8,11 +8,7 @@ OBJ = ${SRC:.c=.o}
 
 # FreeBSD users, prefix all ifdef, else and endif statements with a . for this to work (e.g. .ifdef)
 
-ifdef YAJLLIBS
 all: options dawn dawnc
-else
-all: options dawn
-endif
 
 options:
 	@echo dawn build options:
@@ -34,10 +30,8 @@ patches.h:
 dawn: ${OBJ}
 	${CC} -o $@ ${OBJ} ${LDFLAGS}
 
-ifdef YAJLLIBS
 dawnc:
 	${CC} -o $@ patch/ipc/dawnc.c ${LDFLAGS}
-endif
 
 clean:
 	rm -f dawn ${OBJ} dawn-${VERSION}.tar.gz
@@ -54,13 +48,9 @@ dist: clean
 install: all
 	mkdir -p ${DESTDIR}${PREFIX}/bin
 	cp -f dawn ${DESTDIR}${PREFIX}/bin
-ifdef YAJLLIBS
 	cp -f dawnc ${DESTDIR}${PREFIX}/bin
-endif
 	chmod 755 ${DESTDIR}${PREFIX}/bin/dawn
-ifdef YAJLLIBS
 	chmod 755 ${DESTDIR}${PREFIX}/bin/dawnc
-endif
 	mkdir -p ${DESTDIR}${MANPREFIX}/man1
 	sed "s/VERSION/${VERSION}/g" < dawn.1 > ${DESTDIR}${MANPREFIX}/man1/dawn.1
 	chmod 644 ${DESTDIR}${MANPREFIX}/man1/dawn.1

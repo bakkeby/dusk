@@ -704,6 +704,4 @@ static Button buttons[] = {
 	{ ClkTagBar,            MODKEY,              Button3,        toggletag,      {0} },
 };
 
-#if IPC_PATCH
 static const char *ipcsockpath = "/tmp/dawn.sock";
-#endif // IPC_PATCH

@@ -46,7 +46,6 @@
 #include "focusurgent.c"
 #include "inplacerotate.c"
 
-#if IPC_PATCH
 #include "ipc.c"
 #ifdef VERSION
 #include "ipc/IPCClient.c"
@@ -54,7 +53,6 @@
 #include "ipc/ipc.c"
 #include "ipc/util.c"
 #endif
-#endif // IPC_PATCH
 #if INSETS_PATCH
 #include "insets.c"
 #endif
