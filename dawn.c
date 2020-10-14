@@ -295,15 +295,6 @@ typedef struct {
 	LayoutPreset preset;
 } Layout;
 
-#if INSETS_PATCH
-typedef struct {
-	int x;
-	int y;
-	int w;
-	int h;
-} Inset;
-#endif // INSETS_PATCH
-
 typedef struct Pertag Pertag;
 struct Monitor {
 	int index;
@@ -332,9 +323,6 @@ struct Monitor {
 	const Layout *lt[2];
 	unsigned int alttag;
 	Pertag *pertag;
-	#if INSETS_PATCH
-	Inset inset;
-	#endif // INSETS_PATCH
 	char lastltsymbol[16];
 	TagState tagstate;
 	Client *lastsel;
@@ -1127,9 +1115,6 @@ createmon(void)
 
 		m->pertag->enablegaps[i] = 1;
 	}
-	#if INSETS_PATCH
-	m->inset = default_inset;
-	#endif // INSETS_PATCH
 	return m;
 }
 
@@ -2997,15 +2982,6 @@ updatebarpos(Monitor *m)
 	Bar *bar;
 	int y_pad = vertpad;
 	int x_pad = sidepad;
-
-	#if INSETS_PATCH
-	// Custom insets
-	Inset inset = m->inset;
-	m->wx += inset.x;
-	m->wy += inset.y;
-	m->ww -= inset.w + inset.x;
-	m->wh -= inset.h + inset.y;
-	#endif // INSETS_PATCH
 
 	for (bar = m->bar; bar; bar = bar->next) {
 		bar->bx = m->wx + x_pad;

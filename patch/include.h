@@ -44,10 +44,6 @@
 #include "ipc.h"
 #include "ipc/ipc.h"
 #include "ipc/util.h"
-
-#if INSETS_PATCH
-#include "insets.h"
-#endif
 #if KEYMODES_PATCH
 #include "keymodes.h"
 #endif

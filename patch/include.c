@@ -51,9 +51,6 @@
 #include "ipc/ipc.c"
 #include "ipc/util.c"
 #endif
-#if INSETS_PATCH
-#include "insets.c"
-#endif
 #if KEYMODES_PATCH
 #include "keymodes.c"
 #endif
