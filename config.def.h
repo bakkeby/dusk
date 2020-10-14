@@ -18,10 +18,8 @@ static const int sidepad                 = 10;  /* horizontal padding of bar */
 static int floatposgrid_x                = 5;  /* float grid columns */
 static int floatposgrid_y                = 5;  /* float grid rows */
 
-#if BAR_STATUSPADDING_PATCH
-static const int horizpadbar             = 2;   /* horizontal padding for statusbar */
-static const int vertpadbar              = 0;   /* vertical padding for statusbar */
-#endif // BAR_STATUSPADDING_PATCH
+static const int horizpadbar             = 2;   /* horizontal (inner) padding for statusbar (increases lrpad) */
+static const int vertpadbar              = 0;   /* vertical (inner) padding for statusbar (increases bh, overridden by bar_height) */
 
 static const char buttonbar[]            = "<O>";
 static const unsigned int systrayspacing = 2;   /* systray spacing */
