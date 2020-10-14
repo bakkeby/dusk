@@ -1959,27 +1959,9 @@ void
 quit(const Arg *arg)
 {
 	size_t i;
-	#if ONLYQUITONEMPTY_PATCH
-	unsigned int n;
-	Window *junk = malloc(1);
-
-	XQueryTree(dpy, root, junk, junk, &junk, &n);
-
-	if (n - autostart_len <= quit_empty_window_count)
-	{
-		if (arg->i)
-			restart = 1;
-		running = 0;
-	}
-	else
-		printf("[dawn] not exiting (n=%d)\n", n);
-
-	free(junk);
-	#else
 	if (arg->i)
 		restart = 1;
 	running = 0;
-	#endif // ONLYQUITONEMPTY_PATCH
 
 	/* kill child processes */
 	for (i = 0; i < autostart_len; i++) {
