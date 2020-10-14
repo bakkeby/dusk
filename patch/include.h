@@ -69,11 +69,10 @@
 #include "shiftview.h"
 #include "shiftviewclients.h"
 
-#if SORTSCREENS_PATCH
 #ifdef XINERAMA
 #include "sortscreens.h"
 #endif // XINERAMA
-#endif
+
 #if STACKER_PATCH
 #include "stacker.h"
 #endif
