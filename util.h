@@ -30,6 +30,7 @@ enum {
 	Warp = 1 << 12, // warp patch
 	FocusedOnTop = 1 << 13,
 	DecorationHints = 1 << 14,
+	FocusOnNetActive = 1 << 15,
 };
 
 void die(const char *fmt, ...);

@@ -840,9 +840,7 @@ clientmessage(XEvent *e)
 	XSetWindowAttributes swa;
 	XClientMessageEvent *cme = &e->xclient;
 	Client *c = wintoclient(cme->window);
-	#if FOCUSONNETACTIVE_PATCH
 	unsigned int i;
-	#endif // FOCUSONNETACTIVE_PATCH
 	int setfakefullscreen = 0;
 
 	if (enabled(Systray) && systray && cme->window == systray->win && cme->message_type == netatom[NetSystemTrayOP]) {
@@ -897,24 +895,22 @@ clientmessage(XEvent *e)
 			)), setfakefullscreen);
 		}
 	} else if (cme->message_type == netatom[NetActiveWindow]) {
-		#if FOCUSONNETACTIVE_PATCH
-		if (c->tags & c->mon->tagset[c->mon->seltags]) {
-			selmon = c->mon;
-			focus(c);
-		} else {
-			for (i = 0; i < NUMTAGS && !((1 << i) & c->tags); i++);
-			if (i < NUMTAGS) {
+		if (enabled(FocusOnNetActive)) {
+			if (c->tags & c->mon->tagset[c->mon->seltags]) {
 				selmon = c->mon;
-				if (((1 << i) & TAGMASK) != selmon->tagset[selmon->seltags])
-					view(&((Arg) { .ui = 1 << i }));
 				focus(c);
-				restack(selmon);
+			} else {
+				for (i = 0; i < NUMTAGS && !((1 << i) & c->tags); i++);
+				if (i < NUMTAGS) {
+					selmon = c->mon;
+					if (((1 << i) & TAGMASK) != selmon->tagset[selmon->seltags])
+						view(&((Arg) { .ui = 1 << i }));
+					focus(c);
+					restack(selmon);
+				}
 			}
-		}
-		#else
-		if (c != selmon->sel && !ISURGENT(c))
+		} else if (c != selmon->sel && !ISURGENT(c))
 			seturgent(c, 1);
-		#endif // FOCUSONNETACTIVE_PATCH
 	}
 }
 
@@ -2047,8 +2043,8 @@ resizeclient(Client *c, int x, int y, int w, int h)
 		&& !ISFLOATING(c)
 		&& c->mon->lt[c->mon->sellt]->arrange)
 	{
-		c->w = wc.width += c->bw * 2;
-		c->h = wc.height += c->bw * 2;
+		wc.width += c->bw * 2;
+		wc.height += c->bw * 2;
 		wc.border_width = 0;
 	}
 	XConfigureWindow(dpy, c->win, CWX|CWY|CWWidth|CWHeight|CWBorderWidth, &wc);
