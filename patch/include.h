@@ -64,10 +64,6 @@
 #elif PUSH_PATCH
 #include "push.h"
 #endif
-#if REORGANIZETAGS_PATCH
-#include "reorganizetags.h"
-#endif
-
 #include "restartsig.h"
 #include "rotatestack.h"
 #include "scratchpad.h"

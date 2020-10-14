@@ -441,9 +441,6 @@ static Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_j,          movestack,              {.i = +1 } },
 	{ MODKEY|ShiftMask,             XK_k,          movestack,              {.i = -1 } },
 
-	#if REORGANIZETAGS_PATCH
-	{ MODKEY|ControlMask,           XK_r,          reorganizetags,         {0} },
-	#endif // REORGANIZETAGS_PATCH
 	#if INSETS_PATCH
 	{ MODKEY|ShiftMask|ControlMask, XK_a,          updateinset,            {.v = &default_inset } },
 	#endif // INSETS_PATCH
