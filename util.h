@@ -34,7 +34,7 @@ enum {
 	AllowNoModifierButtons = 1 << 16,
 	TagIntoStack = 1 << 17,
 	PerTagBar = 1 << 18,
-	SortScreens = 1 << 19,
+	SortScreens = 1 << 19, // only applies on startup
 };
 
 void die(const char *fmt, ...);
