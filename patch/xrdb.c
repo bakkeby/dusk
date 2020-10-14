@@ -84,7 +84,6 @@ loadxrdb()
 				XRDB_LOAD_COLOR("dwm.selDWDLbgcolor", selDWDLbgcolor);
 				XRDB_LOAD_COLOR("dwm.selSPRLbgcolor", selSPRLbgcolor);
 				XRDB_LOAD_COLOR("dwm.selfloatbgcolor", selfloatbgcolor);
-				#if BAR_STATUS2D_XRDB_TERMCOLORS_PATCH
 				XRDB_LOAD_COLOR("color0", termcol0);
 				XRDB_LOAD_COLOR("color1", termcol1);
 				XRDB_LOAD_COLOR("color2", termcol2);
@@ -101,7 +100,6 @@ loadxrdb()
 				XRDB_LOAD_COLOR("color13", termcol13);
 				XRDB_LOAD_COLOR("color14", termcol14);
 				XRDB_LOAD_COLOR("color15", termcol15);
-				#endif // BAR_STATUS2D_XRDB_TERMCOLORS_PATCH
 			}
 		}
 	}
