@@ -55,12 +55,7 @@
 #include "killunsel.h"
 #include "nomodbuttons.h"
 #include "pertag.h"
-
-#if PUSH_NO_MASTER_PATCH
-#include "push_no_master.h"
-#elif PUSH_PATCH
 #include "push.h"
-#endif
 #include "restartsig.h"
 #include "rotatestack.h"
 #include "scratchpad.h"

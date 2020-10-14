@@ -419,6 +419,7 @@ static void maprequest(XEvent *e);
 static void motionnotify(XEvent *e);
 static void movemouse(const Arg *arg);
 static Client *nexttiled(Client *c);
+static Client *prevtiled(Client *c);
 static void pop(Client *);
 static void propertynotify(XEvent *e);
 static void quit(const Arg *arg);
@@ -1896,6 +1897,14 @@ nexttiled(Client *c)
 {
 	for (; c && (ISFLOATING(c) || !ISVISIBLE(c) || HIDDEN(c)); c = c->next);
 	return c;
+}
+
+Client *
+prevtiled(Client *c)
+{
+	Client *p, *r;
+	for (p = nexttiled(c->mon->clients), r = NULL; p && p != c && (r = p); p = nexttiled(p->next));
+	return r;
 }
 
 void

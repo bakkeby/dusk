@@ -28,7 +28,7 @@ hide(Client *c) {
 	} else {
 		n = nexttiled(c);
 		if (!n)
-			n = prevtiled(c);
+			n = prevvisible(c);
 	}
 	focus(n);
 	arrange(c->mon);
@@ -56,7 +56,7 @@ focuswin(const Arg *arg)
 }
 
 Client *
-prevtiled(Client *c)
+prevvisible(Client *c)
 {
 	Client *p, *i;
 	for (p = NULL, i = c->mon->clients; c && i != c; i = i->next)

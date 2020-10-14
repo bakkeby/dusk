@@ -61,12 +61,7 @@
 #include "killunsel.c"
 #include "nomodbuttons.c"
 #include "pertag.c"
-
-#if PUSH_NO_MASTER_PATCH
-#include "push_no_master.c"
-#elif PUSH_PATCH
 #include "push.c"
-#endif
 #include "restartsig.c"
 #include "rotatestack.c"
 #include "scratchpad.c"
