@@ -453,9 +453,6 @@ static Key keys[] = {
 
 	{ MODKEY,                       XK_o,          winview,                {0} },
 
-	#if XRDB_PATCH
-	{ MODKEY|ShiftMask,             XK_F5,         xrdb,                   {.v = NULL } },
-	#endif // XRDB_PATCH
 	{ MODKEY,                       XK_t,          setlayout,              {.v = &layouts[0]} },
 	{ MODKEY,                       XK_f,          setlayout,              {.v = &layouts[1]} },
 	{ MODKEY,                       XK_m,          setlayout,              {.v = &layouts[2]} },

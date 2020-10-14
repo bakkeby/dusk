@@ -4,14 +4,11 @@
 #include "flags.c"
 #include "func.c"
 #include "warp.c"
-
+#include "combo.c"
 
 #include "bar_alpha.c"
 #include "bar_alternativetags.c"
 #include "bar_dwmblocks.c"
-
-#include "combo.c"
-
 #include "bar_ltsymbol.c"
 #include "bar_status2d.c"
 #include "bar_statusbutton.c"
@@ -43,7 +40,6 @@
 #include "focusmaster.c"
 #include "focusurgent.c"
 #include "inplacerotate.c"
-
 #include "ipc.c"
 #ifdef VERSION
 #include "ipc/IPCClient.c"
@@ -61,7 +57,6 @@
 #include "setborderpx.c"
 #include "shiftview.c"
 #include "shiftviewclients.c"
-
 #ifdef XINERAMA
 #include "sortscreens.c"
 #endif // XINERAMA
@@ -85,10 +80,7 @@
 #include "vanitygaps.c"
 #include "winview.c"
 #include "zoomswap.c"
-
-#if XRDB_PATCH
 #include "xrdb.c"
-#endif
 
 /* Layouts */
 #include "layout_flextile-deluxe.c"

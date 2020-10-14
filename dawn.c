@@ -3349,10 +3349,10 @@ main(int argc, char *argv[])
 		die("dawn: cannot get xcb connection\n");
 
 	checkotherwm();
-	#if XRDB_PATCH
-	XrmInitialize();
-	loadxrdb();
-	#endif // XRDB_PATCH
+	XrmInitialize(); // needed for xrdb / Xresources
+	if (enabled(Xresources)) {
+		loadxrdb();
+	}
 	autostart_exec();
 	setup();
 #ifdef __OpenBSD__

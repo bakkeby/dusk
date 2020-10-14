@@ -4,12 +4,11 @@
 #include "flags.h"
 #include "func.h"
 #include "warp.h"
+#include "combo.h"
 
 #include "bar_alpha.h"
 #include "bar_alternativetags.h"
 #include "bar_dwmblocks.h"
-#include "combo.h"
-
 #include "bar_ltsymbol.h"
 #include "bar_status2d.h"
 #include "bar_statusbutton.h"
@@ -54,7 +53,6 @@
 #include "setborderpx.h"
 #include "shiftview.h"
 #include "shiftviewclients.h"
-
 #ifdef XINERAMA
 #include "sortscreens.h"
 #endif // XINERAMA
@@ -78,10 +76,7 @@
 #include "vanitygaps.h"
 #include "winview.h"
 #include "zoomswap.h"
-
-#if XRDB_PATCH
 #include "xrdb.h"
-#endif
-/* Layouts */
 
+/* Layouts */
 #include "layout_flextile-deluxe.h"

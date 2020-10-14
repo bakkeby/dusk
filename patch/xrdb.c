@@ -7,6 +7,9 @@ loadxrdb()
 	char *type;
 	XrmValue value;
 
+	if (disabled(Xresources))
+		return;
+
 	display = XOpenDisplay(NULL);
 
 	if (display != NULL) {
