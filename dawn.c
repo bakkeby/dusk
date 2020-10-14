@@ -419,9 +419,7 @@ static void maprequest(XEvent *e);
 static void motionnotify(XEvent *e);
 static void movemouse(const Arg *arg);
 static Client *nexttiled(Client *c);
-#if TAGINTOSTACK_ALLMASTER_PATCH || TAGINTOSTACK_ONEMASTER_PATCH
 static void pop(Client *);
-#endif // TAGINTOSTACK_ALLMASTER_PATCH / TAGINTOSTACK_ONEMASTER_PATCH
 static void propertynotify(XEvent *e);
 static void quit(const Arg *arg);
 static Monitor *recttomon(int x, int y, int w, int h);
@@ -1905,7 +1903,6 @@ nexttiled(Client *c)
 	return c;
 }
 
-#if TAGINTOSTACK_ALLMASTER_PATCH || TAGINTOSTACK_ONEMASTER_PATCH
 void
 pop(Client *c)
 {
@@ -1914,7 +1911,6 @@ pop(Client *c)
 	focus(c);
 	arrange(c->mon);
 }
-#endif // TAGINTOSTACK_ALLMASTER_PATCH / TAGINTOSTACK_ONEMASTER_PATCH
 
 void
 propertynotify(XEvent *e)
@@ -2863,7 +2859,6 @@ toggleview(const Arg *arg)
 	unsigned int newtagset = selmon->tagset[selmon->seltags] ^ (arg->ui & TAGMASK);
 	int i;
 
-	#if TAGINTOSTACK_ALLMASTER_PATCH
 	Client *const selected = selmon->sel;
 
 	// clients in the master area should be the same after we add a new tag
@@ -2885,16 +2880,6 @@ toggleview(const Arg *arg)
 
 	// we also want to be sure not to mutate the focus
 	focus(selected);
-	#elif TAGINTOSTACK_ONEMASTER_PATCH
-	// the first visible client should be the same after we add a new tag
-	// we also want to be sure not to mutate the focus
-	Client *const c = nexttiled(selmon->clients);
-	if (c) {
-		Client * const selected = selmon->sel;
-		pop(c);
-		focus(selected);
-	}
-	#endif // TAGINTOSTACK_ALLMASTER_PATCH / TAGINTOSTACK_ONEMASTER_PATCH
 
 	if (newtagset) {
 		selmon->tagset[selmon->seltags] = newtagset;
