@@ -16,10 +16,8 @@ disable(const Arg *arg)
 void
 toggle(const Arg *arg)
 {
-	if (disabled(arg->ui))
-		enable(arg);
-	else
-		disable(arg);
+	togglefunc(arg->ui);
+	reload();
 }
 
 void

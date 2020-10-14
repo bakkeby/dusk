@@ -1,7 +1,7 @@
 void
 togglenomodbuttons(const Arg *arg)
 {
-	nomodbuttons = !nomodbuttons;
+	togglefunc(AllowNoModifierButtons);
 	if (selmon->sel)
 		grabbuttons(selmon->sel, 1);
 }

@@ -31,6 +31,8 @@ enum {
 	FocusedOnTop = 1 << 13,
 	DecorationHints = 1 << 14,
 	FocusOnNetActive = 1 << 15,
+	AllowNoModifierButtons = 1 << 16,
+	TagIntoStack = 1 << 17,
 };
 
 void die(const char *fmt, ...);
@@ -39,3 +41,4 @@ int enabled(const long functionality);
 int disabled(const long functionality);
 void enablefunc(const long functionality);
 void disablefunc(const long functionality);
+void togglefunc(const long functionality);

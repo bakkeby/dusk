@@ -60,3 +60,9 @@ disablefunc(const long functionality)
 {
 	settings &= ~functionality;
 }
+
+void
+togglefunc(const long functionality)
+{
+	settings ^= functionality;
+}
