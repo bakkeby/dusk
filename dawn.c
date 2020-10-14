@@ -2643,10 +2643,8 @@ tag(const Arg *arg)
 
 		focus(NULL);
 		arrange(selmon);
-		#if VIEWONTAG_PATCH
-		if ((arg->ui & TAGMASK) != selmon->tagset[selmon->seltags])
+		if (enabled(ViewOnTag) && (arg->ui & TAGMASK) != selmon->tagset[selmon->seltags])
 			view(arg);
-		#endif // VIEWONTAG_PATCH
 	}
 }
 

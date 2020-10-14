@@ -35,6 +35,7 @@ enum {
 	TagIntoStack = 1 << 17,
 	PerTagBar = 1 << 18,
 	SortScreens = 1 << 19, // only applies on startup
+	ViewOnTag = 1 << 20, // follow a window to the tag it is being moved to
 };
 
 void die(const char *fmt, ...);
