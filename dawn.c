@@ -3005,13 +3005,8 @@ updatebarpos(Monitor *m)
 	m->ww = m->mw;
 	m->wh = m->mh;
 	Bar *bar;
-	#if BAR_PADDING_PATCH
 	int y_pad = vertpad;
 	int x_pad = sidepad;
-	#else
-	int y_pad = 0;
-	int x_pad = 0;
-	#endif // BAR_PADDING_PATCH
 
 	#if INSETS_PATCH
 	// Custom insets

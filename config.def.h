@@ -13,12 +13,8 @@ static const int showbar                 = 1;   /* 0 means no bar */
 static const int topbar                  = 1;   /* 0 means bottom bar */
 
 static const int bar_height              = 0;   /* 0 means derive from font, >= 1 explicit height */
-
-#if BAR_PADDING_PATCH
 static const int vertpad                 = 10;  /* vertical padding of bar */
 static const int sidepad                 = 10;  /* horizontal padding of bar */
-#endif // BAR_PADDING_PATCH
-
 static int floatposgrid_x                = 5;  /* float grid columns */
 static int floatposgrid_y                = 5;  /* float grid rows */
 
