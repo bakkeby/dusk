@@ -44,10 +44,6 @@
 #include "ipc.h"
 #include "ipc/ipc.h"
 #include "ipc/util.h"
-#if KEYMODES_PATCH
-#include "keymodes.h"
-#endif
-
 #include "killunsel.h"
 #include "nomodbuttons.h"
 #include "pertag.h"

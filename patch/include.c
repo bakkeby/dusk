@@ -51,10 +51,6 @@
 #include "ipc/ipc.c"
 #include "ipc/util.c"
 #endif
-#if KEYMODES_PATCH
-#include "keymodes.c"
-#endif
-
 #include "killunsel.c"
 #include "nomodbuttons.c"
 #include "pertag.c"
