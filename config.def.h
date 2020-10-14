@@ -369,16 +369,14 @@ static const Layout layouts[] = {
 	{ MODKEY|Mod4Mask|ControlMask,  KEY,      tagprevmon,     {.ui = 1 << TAG} },
 
 
-#if STACKER_PATCH
 #define STACKKEYS(MOD,ACTION) \
-	{ MOD, XK_j,     ACTION##stack, {.i = INC(+1) } }, \
-	{ MOD, XK_k,     ACTION##stack, {.i = INC(-1) } }, \
-	{ MOD, XK_s,     ACTION##stack, {.i = PREVSEL } }, \
-	{ MOD, XK_w,     ACTION##stack, {.i = 0 } }, \
-	{ MOD, XK_e,     ACTION##stack, {.i = 1 } }, \
-	{ MOD, XK_a,     ACTION##stack, {.i = 2 } }, \
-	{ MOD, XK_z,     ACTION##stack, {.i = -1 } },
-#endif // STACKER_PATCH
+	{ MOD, XK_j, ACTION, {.i = INC(+1) } }, \
+	{ MOD, XK_k, ACTION, {.i = INC(-1) } }, \
+	{ MOD, XK_s, ACTION, {.i = PREVSEL } }, \
+	{ MOD, XK_w, ACTION, {.i = 0 } }, \
+	{ MOD, XK_e, ACTION, {.i = 1 } }, \
+	{ MOD, XK_a, ACTION, {.i = 2 } }, \
+	{ MOD, XK_z, ACTION, {.i = -1 } },
 
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
@@ -402,13 +400,12 @@ static Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_Return,     spawn,                  {.v = termcmd } },
 	{ MODKEY,                       XK_b,          togglebar,              {0} },
 
-	#if STACKER_PATCH
-	STACKKEYS(MODKEY,                              focus)
-	STACKKEYS(MODKEY|ShiftMask,                    push)
-	#else
+	STACKKEYS(MODKEY,                              stackerfocus)
+	STACKKEYS(MODKEY|ShiftMask,                    stackerpush)
+
 	{ MODKEY,                       XK_j,          focusstack,             {.i = +1 } },
 	{ MODKEY,                       XK_k,          focusstack,             {.i = -1 } },
-	#endif // STACKER_PATCH
+
 
 	{ MODKEY|ControlMask,           XK_j,          pushdown,               {0} },
 	{ MODKEY|ControlMask,           XK_k,          pushup,                 {0} },

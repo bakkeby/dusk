@@ -1,5 +1,5 @@
 void
-focusstack(const Arg *arg)
+stackfocus(const Arg *arg)
 {
 	int i = stackpos(arg);
 	Client *c, *p;
@@ -14,7 +14,7 @@ focusstack(const Arg *arg)
 }
 
 void
-pushstack(const Arg *arg)
+stackpush(const Arg *arg)
 {
 	int i = stackpos(arg);
 	Client *sel = selmon->sel, *c, *p;

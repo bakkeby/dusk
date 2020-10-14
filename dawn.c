@@ -41,7 +41,6 @@
 #endif /* XINERAMA */
 #include <X11/Xft/Xft.h>
 
-#include "patches.h"
 #include "drw.h"
 #include "util.h"
 
@@ -381,9 +380,7 @@ static void expose(XEvent *e);
 static void focus(Client *c);
 static void focusin(XEvent *e);
 static void focusmon(const Arg *arg);
-#if !STACKER_PATCH
 static void focusstack(const Arg *arg);
-#endif // STACKER_PATCH
 static Atom getatomprop(Client *c, Atom prop);
 static int getrootptr(int *x, int *y);
 static long getstate(Window w);
@@ -1415,7 +1412,6 @@ focusmon(const Arg *arg)
 		warp(selmon->sel);
 }
 
-#if !STACKER_PATCH
 void
 focusstack(const Arg *arg)
 {
@@ -1450,7 +1446,6 @@ focusstack(const Arg *arg)
 			restack(selmon);
 	}
 }
-#endif // STACKER_PATCH
 
 Atom
 getatomprop(Client *c, Atom prop)

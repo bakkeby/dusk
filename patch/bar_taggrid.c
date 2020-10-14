@@ -72,7 +72,7 @@ click_taggrid(Bar *bar, Arg *arg, BarArg *a)
 }
 
 void
-switchtag(const Arg *arg)
+taggridmovetag(const Arg *arg)
 {
 	unsigned int columns;
 	unsigned int new_tagset = 0;

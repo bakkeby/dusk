@@ -52,11 +52,7 @@
 #ifdef XINERAMA
 #include "sortscreens.h"
 #endif // XINERAMA
-
-#if STACKER_PATCH
 #include "stacker.h"
-#endif
-
 #include "sticky.h"
 #include "swallow.h"
 #include "swaptags.h"
