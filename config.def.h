@@ -430,9 +430,6 @@ static Key keys[] = {
 	{ MODKEY,                       XK_j,          focusstack,             {.i = +1 } },
 	{ MODKEY,                       XK_k,          focusstack,             {.i = -1 } },
 	#endif // STACKER_PATCH
-	#if SWAPFOCUS_PATCH
-	{ MODKEY,                       XK_s,          swapfocus,              {.i = -1 } },
-	#endif // SWAPFOCUS_PATCH
 	#if SWITCHCOL_PATCH
 	{ MODKEY,                       XK_v,          switchcol,              {0} },
 	#endif // SWITCHCOL_PATCH

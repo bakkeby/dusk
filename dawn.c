@@ -1655,9 +1655,6 @@ killclient(const Arg *arg)
 		XUngrabServer(dpy);
 		force_warp = 1;
 	}
-	#if SWAPFOCUS_PATCH
-	c->mon->pertag->prevclient[c->mon->pertag->curtag] = NULL;
-	#endif // SWAPFOCUS_PATCH
 }
 
 void
@@ -2683,10 +2680,6 @@ spawn(const Arg *arg)
 void
 tag(const Arg *arg)
 {
-	#if SWAPFOCUS_PATCH
-	unsigned int tagmask, tagindex;
-	#endif // SWAPFOCUS_PATCH
-
 	if (selmon->sel && arg->ui & TAGMASK) {
 		selmon->sel->tags = arg->ui & TAGMASK;
 
@@ -2694,12 +2687,6 @@ tag(const Arg *arg)
 			selmon->sel->reverttags = 0;
 
 		focus(NULL);
-		#if SWAPFOCUS_PATCH
-		selmon->pertag->prevclient[selmon->pertag->curtag] = NULL;
-		for (tagmask = arg->ui & TAGMASK, tagindex = 1; tagmask != 0; tagmask >>= 1, tagindex++)
-			if (tagmask & 1)
-				selmon->pertag->prevclient[tagindex] = NULL;
-		#endif // SWAPFOCUS_PATCH
 		arrange(selmon);
 		#if VIEWONTAG_PATCH
 		if ((arg->ui & TAGMASK) != selmon->tagset[selmon->seltags])
@@ -2833,9 +2820,6 @@ void
 toggletag(const Arg *arg)
 {
 	unsigned int newtags;
-	#if SWAPFOCUS_PATCH
-	unsigned int tagmask, tagindex;
-	#endif // SWAPFOCUS_PATCH
 
 	if (!selmon->sel)
 		return;
@@ -2843,11 +2827,6 @@ toggletag(const Arg *arg)
 	if (newtags) {
 		selmon->sel->tags = newtags;
 		focus(NULL);
-		#if SWAPFOCUS_PATCH
-		for (tagmask = arg->ui & TAGMASK, tagindex = 1; tagmask!=0; tagmask >>= 1, tagindex++)
-			if (tagmask & 1)
-				selmon->pertag->prevclient[tagindex] = NULL;
-		#endif // SWAPFOCUS_PATCH
 		arrange(selmon);
 	}
 	updatecurrentdesktop();
@@ -2918,9 +2897,6 @@ unfocus(Client *c, int setfocus, Client *nextfocus)
 {
 	if (!c)
 		return;
-	#if SWAPFOCUS_PATCH
-	selmon->pertag->prevclient[selmon->pertag->curtag] = c;
-	#endif // SWAPFOCUS_PATCH
 	if (ISFULLSCREEN(c) && ISVISIBLE(c) && c->mon == selmon && nextfocus && !ISFLOATING(nextfocus))
 		if (!ISFAKEFULLSCREEN(c))
 			setfullscreen(c, 0, 0);
@@ -3297,20 +3273,12 @@ view(const Arg *arg)
 {
 	if (arg->ui && (arg->ui & TAGMASK) == selmon->tagset[selmon->seltags])
 	{
-		#if VIEW_SAME_TAG_GIVES_PREVIOUS_TAG_PATCH
 		view(&((Arg) { .ui = 0 }));
-		#endif // VIEW_SAME_TAG_GIVES_PREVIOUS_TAG_PATCH
 		return;
     }
 	selmon->seltags ^= 1; /* toggle sel tagset */
 	pertagview(arg);
-	#if SWAPFOCUS_PATCH
-	Client *unmodified = selmon->pertag->prevclient[selmon->pertag->curtag];
-	#endif // SWAPFOCUS_PATCH
 	focus(NULL);
-	#if SWAPFOCUS_PATCH
-	selmon->pertag->prevclient[selmon->pertag->curtag] = unmodified;
-	#endif // SWAPFOCUS_PATCH
 	arrange(selmon);
 	updatecurrentdesktop();
 }
@@ -3395,10 +3363,6 @@ zoom(const Arg *arg)
 	if (c && ISFLOATING(c))
 		togglefloating(&((Arg) { .v = c }));
 
-	#if SWAPFOCUS_PATCH
-	c->mon->pertag->prevclient[c->mon->pertag->curtag] = nexttiled(c->mon->clients);
-	#endif // SWAPFOCUS_PATCH
-
 	if (!c->mon->lt[c->mon->sellt]->arrange || (c && ISFLOATING(c)) || !c)
 		return;
 
@@ -3409,18 +3373,10 @@ zoom(const Arg *arg)
 			cprevious = nexttiled(at->next);
 		if (!cprevious || cprevious != p) {
 			c->mon->pertag->prevzooms[c->mon->pertag->curtag] = NULL;
-			#if SWAPFOCUS_PATCH
-			if (!c || !(c = c->mon->pertag->prevclient[c->mon->pertag->curtag] = nexttiled(c->next)))
-			#else
 			if (!c || !(c = nexttiled(c->next)))
-			#endif // SWAPFOCUS_PATCH
 				return;
 		} else
-			#if SWAPFOCUS_PATCH
-			c = c->mon->pertag->prevclient[c->mon->pertag->curtag] = cprevious;
-			#else
 			c = cprevious;
-			#endif // SWAPFOCUS_PATCH
 	}
 
 	cold = nexttiled(c->mon->clients);

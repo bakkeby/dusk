@@ -9,9 +9,6 @@ struct Pertag {
 	#if PERTAGBAR_PATCH
 	int showbars[NUMTAGS + 1]; /* display bar for the current tag */
 	#endif // PERTAGBAR_PATCH
-	#if SWAPFOCUS_PATCH
-	Client *prevclient[NUMTAGS + 1];
-	#endif // SWAPFOCUS_PATCH
 	Client *prevzooms[NUMTAGS + 1]; /* store zoom information */
 	int enablegaps[NUMTAGS + 1];
 };

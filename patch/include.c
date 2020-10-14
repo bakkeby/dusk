@@ -91,11 +91,6 @@
 
 #include "sticky.c"
 #include "swallow.c"
-
-#if SWAPFOCUS_PATCH
-#include "swapfocus.c"
-#endif
-
 #include "swaptags.c"
 
 #if SWITCHCOL_PATCH
