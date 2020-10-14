@@ -61,10 +61,8 @@
 #endif
 
 #include "killunsel.c"
-
-#if MOVESTACK_PATCH
 #include "movestack.c"
-#endif
+
 #if NO_MOD_BUTTONS_PATCH
 #include "nomodbuttons.c"
 #endif

@@ -55,10 +55,8 @@
 #endif
 
 #include "killunsel.h"
-
-#if MOVESTACK_PATCH
 #include "movestack.h"
-#endif
+
 #if NO_MOD_BUTTONS_PATCH
 #include "nomodbuttons.h"
 #endif
