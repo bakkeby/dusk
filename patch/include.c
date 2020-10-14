@@ -32,11 +32,7 @@
 #include "ewmhtags.c"
 #include "fakefullscreenclient.c"
 #include "floatpos.c"
-
-#if FOCUSADJACENTTAG_PATCH
 #include "focusadjacenttag.c"
-#endif
-
 #include "focusmaster.c"
 #include "focusurgent.c"
 #include "inplacerotate.c"
