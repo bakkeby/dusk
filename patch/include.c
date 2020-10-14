@@ -89,11 +89,7 @@
 #include "switchcol.c"
 #include "tagall.c"
 #include "tagallmon.c"
-
-#if TAGOTHERMONITOR_PATCH
 #include "tagothermonitor.c"
-#endif
-
 #include "tagswapmon.c"
 #include "togglefullscreen.c"
 #include "transfer.c"
