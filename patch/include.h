@@ -109,11 +109,7 @@
 #include "togglefullscreen.h"
 #include "transfer.h"
 #include "transferall.h"
-
-#if UNFLOATVISIBLE_PATCH
 #include "unfloatvisible.h"
-#endif
-
 #include "vanitygaps.h"
 #include "winview.h"
 #include "zoomswap.h"

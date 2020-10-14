@@ -115,11 +115,7 @@
 #include "togglefullscreen.c"
 #include "transfer.c"
 #include "transferall.c"
-
-#if UNFLOATVISIBLE_PATCH
 #include "unfloatvisible.c"
-#endif
-
 #include "vanitygaps.c"
 #include "winview.c"
 #include "zoomswap.c"

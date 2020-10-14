@@ -517,11 +517,6 @@ static Key keys[] = {
 	{ MODKEY|ControlMask,           XK_grave,      togglescratch,          {.ui = 1 } },
 	{ MODKEY|ShiftMask,             XK_grave,      togglescratch,          {.ui = 2 } },
 
-	#if UNFLOATVISIBLE_PATCH
-	{ MODKEY|Mod4Mask,              XK_space,      unfloatvisible,         {0} },
-	{ MODKEY|ShiftMask,             XK_t,          unfloatvisible,         {.v = &layouts[0]} },
-	#endif // UNFLOATVISIBLE_PATCH
-
 	{ MODKEY,                       XK_y,          togglefullscreen,       {0} },
 	{ MODKEY|ShiftMask,             XK_y,          togglefakefullscreen,   {0} },
 

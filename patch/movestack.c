@@ -13,7 +13,7 @@ movestack(const Arg *arg)
 	else {
 		/* find the client before selmon->sel */
 		for (i = selmon->clients; i != selmon->sel; i = i->next)
-			if(ISVISIBLE(i) && !ISFLOATING(i))
+			if (ISVISIBLE(i) && !ISFLOATING(i))
 				c = i;
 		if (!c)
 			for (; i; i = i->next)
