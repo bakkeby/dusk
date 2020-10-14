@@ -6,9 +6,7 @@ struct Pertag {
 	const Layout *ltidxs[NUMTAGS + 1][3]; /* matrix of tags and layouts indexes  */
 	float mfacts[NUMTAGS + 1]; /* mfacts per tag */
 	unsigned int sellts[NUMTAGS + 1]; /* selected layouts */
-	#if PERTAGBAR_PATCH
 	int showbars[NUMTAGS + 1]; /* display bar for the current tag */
-	#endif // PERTAGBAR_PATCH
 	Client *prevzooms[NUMTAGS + 1]; /* store zoom information */
 	int enablegaps[NUMTAGS + 1];
 };
@@ -43,8 +41,6 @@ pertagview(const Arg *arg)
 	selmon->ltaxis[MASTER] = selmon->pertag->ltaxis[selmon->pertag->curtag][MASTER];
 	selmon->ltaxis[STACK]  = selmon->pertag->ltaxis[selmon->pertag->curtag][STACK];
 	selmon->ltaxis[STACK2] = selmon->pertag->ltaxis[selmon->pertag->curtag][STACK2];
-	#if PERTAGBAR_PATCH
-	if (selmon->showbar != selmon->pertag->showbars[selmon->pertag->curtag])
+	if (enabled(PerTagBar) && selmon->showbar != selmon->pertag->showbars[selmon->pertag->curtag])
 		togglebar(NULL);
-	#endif // PERTAGBAR_PATCH
 }

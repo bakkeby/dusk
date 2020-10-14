@@ -33,6 +33,7 @@ enum {
 	FocusOnNetActive = 1 << 15,
 	AllowNoModifierButtons = 1 << 16,
 	TagIntoStack = 1 << 17,
+	PerTagBar = 1 << 18,
 };
 
 void die(const char *fmt, ...);

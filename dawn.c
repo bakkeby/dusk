@@ -1114,9 +1114,7 @@ createmon(void)
 				m->pertag->ltidxs[i][1] = m->lt[0];
 				m->pertag->nmasters[i] = (mr->nmaster > -1 ? mr->nmaster : m->nmaster);
 				m->pertag->mfacts[i] = (mr->mfact > -1 ? mr->mfact : m->mfact);
-				#if PERTAGBAR_PATCH
 				m->pertag->showbars[i] = (mr->showbar > -1 ? mr->showbar : m->showbar);
-				#endif // PERTAGBAR_PATCH
 				m->pertag->ltaxis[i][LAYOUT] = m->pertag->ltidxs[i][0]->preset.layout;
 				m->pertag->ltaxis[i][MASTER] = m->pertag->ltidxs[i][0]->preset.masteraxis;
 				m->pertag->ltaxis[i][STACK]  = m->pertag->ltidxs[i][0]->preset.stack1axis;
@@ -2779,11 +2777,9 @@ void
 togglebar(const Arg *arg)
 {
 	Bar *bar;
-	#if PERTAGBAR_PATCH
-	selmon->showbar = selmon->pertag->showbars[selmon->pertag->curtag] = !selmon->showbar;
-	#else
 	selmon->showbar = !selmon->showbar;
-	#endif
+	if (enabled(PerTagBar))
+		selmon->pertag->showbars[selmon->pertag->curtag] = selmon->showbar;
 	updatebarpos(selmon);
 	for (bar = selmon->bar; bar; bar = bar->next)
 		XMoveResizeWindow(dpy, bar->win, bar->bx, bar->by, bar->bw, bar->bh);
@@ -2882,10 +2878,8 @@ toggleview(const Arg *arg)
 		selmon->sellt = selmon->pertag->sellts[selmon->pertag->curtag];
 		selmon->lt[selmon->sellt] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt];
 		selmon->lt[selmon->sellt^1] = selmon->pertag->ltidxs[selmon->pertag->curtag][selmon->sellt^1];
-		#if PERTAGBAR_PATCH
-		if (selmon->showbar != selmon->pertag->showbars[selmon->pertag->curtag])
+		if (enabled(PerTagBar) && selmon->showbar != selmon->pertag->showbars[selmon->pertag->curtag])
 			togglebar(NULL);
-		#endif // PERTAGBAR_PATCH
 		focus(NULL);
 		arrange(selmon);
 	}
