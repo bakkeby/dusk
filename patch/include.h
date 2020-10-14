@@ -53,7 +53,6 @@
 #endif
 
 #include "killunsel.h"
-#include "movestack.h"
 #include "nomodbuttons.h"
 #include "pertag.h"
 

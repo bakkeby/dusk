@@ -2785,8 +2785,10 @@ togglefloating(const Arg *arg)
 	} else if (c->sfx != -9999)
 		/* restore last known float dimensions */
 		resize(c, c->sfx, c->sfy, c->sfw, c->sfh, 0);
-	else
-		resize(c, c->x, c->y, c->w, c->h, 0);
+	else if (!MOVERESIZE(c)) {
+		setfloatpos(c, "50% 50% 80% 80%");
+		resizeclient(c, c->x, c->y, c->w, c->h);
+	}
 	arrange(c->mon);
 	setfloatinghint(c);
 }
