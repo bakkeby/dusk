@@ -7,9 +7,7 @@
 
 
 #include "bar_alpha.c"
-#if BAR_ALTERNATIVE_TAGS_PATCH
 #include "bar_alternativetags.c"
-#endif
 #include "bar_dwmblocks.c"
 
 #include "combo.c"
@@ -89,14 +87,8 @@
 #include "sticky.c"
 #include "swallow.c"
 #include "swaptags.c"
-
-#if SWITCHCOL_PATCH
 #include "switchcol.c"
-#endif
-#if TAGALL_PATCH
 #include "tagall.c"
-#endif
-
 #include "tagallmon.c"
 
 #if TAGOTHERMONITOR_PATCH

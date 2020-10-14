@@ -6,9 +6,7 @@
 #include "warp.h"
 
 #include "bar_alpha.h"
-#if BAR_ALTERNATIVE_TAGS_PATCH
 #include "bar_alternativetags.h"
-#endif
 #include "bar_dwmblocks.h"
 #include "combo.h"
 
@@ -83,14 +81,8 @@
 #include "sticky.h"
 #include "swallow.h"
 #include "swaptags.h"
-
-#if SWITCHCOL_PATCH
 #include "switchcol.h"
-#endif
-#if TAGALL_PATCH
 #include "tagall.h"
-#endif
-
 #include "tagallmon.h"
 
 #if TAGOTHERMONITOR_PATCH
