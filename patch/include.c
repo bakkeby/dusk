@@ -62,11 +62,7 @@
 
 #include "killunsel.c"
 #include "movestack.c"
-
-#if NO_MOD_BUTTONS_PATCH
 #include "nomodbuttons.c"
-#endif
-
 #include "pertag.c"
 
 #if PUSH_NO_MASTER_PATCH

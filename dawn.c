@@ -1568,9 +1568,7 @@ grabbuttons(Client *c, int focused)
 				BUTTONMASK, GrabModeSync, GrabModeSync, None, None);
 		for (i = 0; i < LENGTH(buttons); i++)
 			if (buttons[i].click == ClkClientWin
-			#if NO_MOD_BUTTONS_PATCH
-				&& ((nomodbuttons && !ONLYMODBUTTONS(c)) || buttons[i].mask != 0)
-			#endif // NO_MOD_BUTTONS_PATCH
+				&& ((enabled(AllowNoModifierButtons) && !ONLYMODBUTTONS(c)) || buttons[i].mask != 0)
 			)
 				for (j = 0; j < LENGTH(modifiers); j++)
 					XGrabButton(dpy, buttons[i].button,

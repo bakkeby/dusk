@@ -56,11 +56,7 @@
 
 #include "killunsel.h"
 #include "movestack.h"
-
-#if NO_MOD_BUTTONS_PATCH
 #include "nomodbuttons.h"
-#endif
-
 #include "pertag.h"
 
 #if PUSH_NO_MASTER_PATCH

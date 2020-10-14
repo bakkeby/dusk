@@ -4,10 +4,6 @@
 static const unsigned int borderpx       = 1;   /* border pixel of windows */
 static const unsigned int snap           = 32;  /* snap pixel */
 
-#if NO_MOD_BUTTONS_PATCH
-static int nomodbuttons                  = 1;   /* allow client mouse button bindings that have no modifier */
-#endif // NO_MOD_BUTTONS_PATCH
-
 static const unsigned int gappih         = 20;  /* horiz inner gap between windows */
 static const unsigned int gappiv         = 10;  /* vert inner gap between windows */
 static const unsigned int gappoh         = 10;  /* horiz outer gap between windows and screen edge */
@@ -515,9 +511,7 @@ static Key keys[] = {
 
 	{ MODKEY,                       XK_space,      setlayout,              {0} },
 	{ MODKEY|ShiftMask,             XK_space,      togglefloating,         {0} },
-	#if NO_MOD_BUTTONS_PATCH
 	{ MODKEY|ShiftMask,             XK_Escape,     togglenomodbuttons,     {0} },
-	#endif // NO_MOD_BUTTONS_PATCH
 
 	{ MODKEY,                       XK_grave,      togglescratch,          {.ui = 0 } },
 	{ MODKEY|ControlMask,           XK_grave,      togglescratch,          {.ui = 1 } },
