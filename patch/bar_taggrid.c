@@ -1,7 +1,7 @@
 int
 width_taggrid(Bar *bar, BarArg *a)
 {
-	return (a->h / 2) * (NUMTAGS / tagrows + ((NUMTAGS % tagrows > 0) ? 1 : 0)) + lrpad;
+	return (a->h / 2) * (NUMTAGS / taggridrows + ((NUMTAGS % taggridrows > 0) ? 1 : 0)) + lrpad;
 }
 
 int
@@ -15,16 +15,16 @@ draw_taggrid(Bar *bar, BarArg *a)
 		occ |= c->tags;
 
 	max_x = x = a->x + lrpad / 2;
-	h = a->h / tagrows - 1;
+	h = a->h / taggridrows - 1;
 	y = a->y;
-	columns = NUMTAGS / tagrows + ((NUMTAGS % tagrows > 0) ? 1 : 0);
+	columns = NUMTAGS / taggridrows + ((NUMTAGS % taggridrows > 0) ? 1 : 0);
 
 	/* Firstly we will fill the borders of squares */
 	XSetForeground(drw->dpy, drw->gc, scheme[SchemeTagsNorm][ColBg].pixel);
 	XFillRectangle(dpy, drw->drawable, drw->gc, x, y, h*columns + 1, a->h);
 
 	/* We will draw NUMTAGS squares in tagraws raws. */
-	for (j = 0, i = 0; j < tagrows; j++) {
+	for (j = 0, i = 0; j < taggridrows; j++) {
 		x = a->x + lrpad / 2;
 		for (k = 0; k < columns; k++, i++) {
 			if (i < NUMTAGS) {
@@ -61,8 +61,8 @@ click_taggrid(Bar *bar, Arg *arg, BarArg *a)
 {
 	unsigned int i, h, columns;
 
-	h = a->h / tagrows - 1;
-	columns = NUMTAGS / tagrows + ((NUMTAGS % tagrows > 0) ? 1 : 0);
+	h = a->h / taggridrows - 1;
+	columns = NUMTAGS / taggridrows + ((NUMTAGS % taggridrows > 0) ? 1 : 0);
 	i = (a->x - lrpad / 2) / h + columns * (a->y / h);
 	if (i >= NUMTAGS) {
 		i = NUMTAGS - 1;
@@ -80,7 +80,7 @@ taggridmovetag(const Arg *arg)
 	int col, row;
 	Arg new_arg;
 
-	columns = NUMTAGS / tagrows + ((NUMTAGS % tagrows > 0) ? 1 : 0);
+	columns = NUMTAGS / taggridrows + ((NUMTAGS % taggridrows > 0) ? 1 : 0);
 
 	for (i = 0; i < NUMTAGS; ++i) {
 		if (!(selmon->tagset[selmon->seltags] & 1 << i)) {
@@ -89,19 +89,19 @@ taggridmovetag(const Arg *arg)
 		pos = i;
 		row = pos / columns;
 		col = pos % columns;
-		if (arg->ui & SWITCHTAG_UP) {     /* UP */
+		if (arg->ui & TAGGRID_UP) {     /* UP */
 			row --;
 			if (row < 0) {
-				row = tagrows - 1;
+				row = taggridrows - 1;
 			}
 			do {
 				pos = row * columns + col;
 				row --;
 			} while (pos >= NUMTAGS);
 		}
-		if (arg->ui & SWITCHTAG_DOWN) {     /* DOWN */
+		if (arg->ui & TAGGRID_DOWN) {     /* DOWN */
 			row ++;
-			if (row >= tagrows) {
+			if (row >= taggridrows) {
 				row = 0;
 			}
 			pos = row * columns + col;
@@ -110,7 +110,7 @@ taggridmovetag(const Arg *arg)
 			}
 			pos = row * columns + col;
 		}
-		if (arg->ui & SWITCHTAG_LEFT) {     /* LEFT */
+		if (arg->ui & TAGGRID_LEFT) {     /* LEFT */
 			col --;
 			if (col < 0) {
 				col = columns - 1;
@@ -120,7 +120,7 @@ taggridmovetag(const Arg *arg)
 				col --;
 			} while (pos >= NUMTAGS);
 		}
-		if (arg->ui & SWITCHTAG_RIGHT) {     /* RIGHT */
+		if (arg->ui & TAGGRID_RIGHT) {     /* RIGHT */
 			col ++;
 			if (col >= columns) {
 				col = 0;
@@ -134,16 +134,16 @@ taggridmovetag(const Arg *arg)
 		new_tagset |= 1 << pos;
 	}
 	new_arg.ui = new_tagset;
-	if (arg->ui & SWITCHTAG_TOGGLETAG) {
+	if (arg->ui & TAGGRID_TOGGLETAG) {
 		toggletag(&new_arg);
 	}
-	if (arg->ui & SWITCHTAG_TAG) {
+	if (arg->ui & TAGGRID_TAG) {
 		tag(&new_arg);
 	}
-	if (arg->ui & SWITCHTAG_VIEW) {
+	if (arg->ui & TAGGRID_VIEW) {
 		view (&new_arg);
 	}
-	if (arg->ui & SWITCHTAG_TOGGLEVIEW) {
+	if (arg->ui & TAGGRID_TOGGLEVIEW) {
 		toggleview (&new_arg);
 	}
 }
