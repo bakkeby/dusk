@@ -1830,15 +1830,12 @@ movemouse(const Arg *arg)
 			else if (abs((selmon->wy + selmon->wh) - (ny + HEIGHT(c))) < snap)
 				ny = selmon->wy + selmon->wh - HEIGHT(c);
 			if (!ISFLOATING(c) && selmon->lt[selmon->sellt]->arrange
-			&& (abs(nx - c->x) > snap || abs(ny - c->y) > snap)) {
-				c->sfx = -9999; // disable savefloats when using movemouse
+					&& (abs(nx - c->x) > snap || abs(ny - c->y) > snap))
 				togglefloating(NULL);
-			}
 			if (!selmon->lt[selmon->sellt]->arrange || ISFLOATING(c)) {
 				resize(c, nx, ny, c->w, c->h, 1);
-				/* save last known float coordinates */
-				c->sfx = nx;
-				c->sfy = ny;
+				if (enabled(AutoSaveFloats))
+					savefloats(NULL);
 			}
 			break;
 		}
@@ -2056,18 +2053,13 @@ resizemouse(const Arg *arg)
 			&& c->mon->wy + nh >= selmon->wy && c->mon->wy + nh <= selmon->wy + selmon->wh)
 			{
 				if (!ISFLOATING(c) && selmon->lt[selmon->sellt]->arrange
-				&& (abs(nw - c->w) > snap || abs(nh - c->h) > snap)) {
-					c->sfx = -9999; // disable savefloats when using resizemouse
+				&& (abs(nw - c->w) > snap || abs(nh - c->h) > snap))
 					togglefloating(NULL);
-				}
 			}
 			if (!selmon->lt[selmon->sellt]->arrange || ISFLOATING(c)) {
 				resizeclient(c, nx, ny, nw, nh);
-				/* save last known float dimensions */
-				c->sfx = nx;
-				c->sfy = ny;
-				c->sfw = nw;
-				c->sfh = nh;
+				if (enabled(AutoSaveFloats))
+					savefloats(NULL);
 			}
 			break;
 		}
@@ -2747,18 +2739,14 @@ togglefloating(const Arg *arg)
 	if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c)) /* no support for fullscreen windows */
 		return;
 	setflag(c, Floating, !ISFLOATING(c) || ISFIXED(c));
-	if (!ISFLOATING(c)) {
-		/* save last known float dimensions */
-		c->sfx = c->x;
-		c->sfy = c->y;
-		c->sfw = c->w;
-		c->sfh = c->h;
-	} else if (c->sfx != -9999)
-		/* restore last known float dimensions */
-		resize(c, c->sfx, c->sfy, c->sfw, c->sfh, 0);
-	else if (!MOVERESIZE(c)) {
-		setfloatpos(c, "50% 50% 80% 80%");
-		resizeclient(c, c->x, c->y, c->w, c->h);
+	if (ISFLOATING(c) && !MOVERESIZE(c)) {
+		if (c->sfx != -9999)
+			/* restore last known float dimensions */
+			resize(c, c->sfx, c->sfy, c->sfw, c->sfh, 0);
+		else {
+			setfloatpos(c, toggle_float_pos);
+			resizeclient(c, c->x, c->y, c->w, c->h);
+		}
 	}
 	arrange(c->mon);
 	setfloatinghint(c);

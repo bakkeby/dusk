@@ -1,0 +1,1 @@
+static void savefloats(const Arg *arg);

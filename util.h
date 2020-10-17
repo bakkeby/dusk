@@ -37,6 +37,7 @@ enum {
 	SortScreens = 1 << 19, // only applies on startup
 	ViewOnTag = 1 << 20, // follow a window to the tag it is being moved to
 	Xresources = 1 << 21, // xrdb patch
+	AutoSaveFloats = 1 << 22, // auto save float posistion when using movemouse or resizemouse
 };
 
 void die(const char *fmt, ...);

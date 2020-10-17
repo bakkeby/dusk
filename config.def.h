@@ -27,6 +27,7 @@ static const int vertpadbar              = 0;   /* vertical (inner) padding for 
 
 static const char buttonbar[]            = "⛶";
 static const unsigned int systrayspacing = 2;   /* systray spacing */
+static char *toggle_float_pos            = "50% 50% 80% 80%"; // default floating position when triggering togglefloatpos
 
 /* Indicators: see patch/bar_indicators.h for options */
 static int tagindicatortype              = INDICATOR_BOTTOM_BAR_SLIM;
@@ -485,6 +486,7 @@ static Key keys[] = {
 	{ MODKEY|Ctrl,                  XK_bracketleft,  rotatelayoutaxis,       {.i = -4 } },   /* flextile, 4 = secondary stack axis */
 	{ MODKEY|Ctrl,                  XK_m,            mirrorlayout,           {0} },          /* flextile, flip master and stack areas */
 	{ MODKEY,                       XK_space,        setlayout,              {0} }, // toggles previous layout
+	{ MODKEY|Shift,                 XK_s,            savefloats,             {0} }, // saves float posistion
 	{ MODKEY|ShiftMask,             XK_space,        togglefloating,         {0} },
 	{ Ctrl|Alt,                     XK_Tab,          togglenomodbuttons,     {0} },
 	{ MODKEY,                       XK_w,            togglescratch,          {.ui = 0 } },

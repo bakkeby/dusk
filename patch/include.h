@@ -45,6 +45,7 @@
 #include "push.h"
 #include "restartsig.h"
 #include "rotatestack.h"
+#include "savefloats.h"
 #include "scratchpad.h"
 #include "setborderpx.h"
 #include "shiftview.h"

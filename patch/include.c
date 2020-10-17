@@ -49,6 +49,7 @@
 #include "push.c"
 #include "restartsig.c"
 #include "rotatestack.c"
+#include "savefloats.c"
 #include "scratchpad.c"
 #include "setborderpx.c"
 #include "shiftview.c"
