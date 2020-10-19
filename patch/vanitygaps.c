@@ -159,7 +159,7 @@ getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc)
 
 	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
 	if (enabled(SmartGaps) && n == 1) {
-		oe = 0; // outer gaps disabled when only one client
+		oe = smartgaps_fact; // outer gaps disabled or multiplied when only one client
 	}
 
 	*oh = m->gappoh*oe; // outer horizontal gap
