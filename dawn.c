@@ -499,7 +499,6 @@ static Window root, wmcheckwin;
 /* configuration, allows nested code to access above variables */
 #include "config.h"
 
-
 #include "patch/include.c"
 
 /* compile-time check if all tags fit into an unsigned int bit array. */

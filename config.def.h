@@ -512,6 +512,10 @@ static Key keys[] = {
 	{ MODKEY|Alt|Ctrl,              XK_comma,        tagswapmon,             {.i = +1 } },
 	{ MODKEY|Alt|Ctrl,              XK_period,       tagswapmon,             {.i = -1 } },
 	{ MODKEY,                       XK_n,            togglealttag,           {0} },
+	{ MODKEY,                       XK_Left,         focusdir,               {.i = 0 } }, // left
+	{ MODKEY,                       XK_Right,        focusdir,               {.i = 1 } }, // right
+	{ MODKEY,                       XK_Up,           focusdir,               {.i = 2 } }, // up
+	{ MODKEY,                       XK_Down,         focusdir,               {.i = 3 } }, // down
 
 	/* Unassigned key bidnings (available externally via the dawnc command) */
 //	{ MODKEY,                       XK_,             incrgaps,               {.i = +1 } },
