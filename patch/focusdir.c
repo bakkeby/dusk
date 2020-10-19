@@ -59,6 +59,8 @@ focusdir(const Arg *arg)
 		}
 	}
 
-	if (f != s)
+	if (f != s) {
 		focus(f);
+		restack(f->mon);
+	}
 }
