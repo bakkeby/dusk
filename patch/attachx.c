@@ -16,16 +16,14 @@ attachx(Client *c)
 		? AttachBottom
 		: attachdefault;
 
-	switch (attachmode) {
-	case AttachAbove:
+	if (attachmode == AttachAbove) {
 		if (!(c->mon->sel == NULL || c->mon->sel == c->mon->clients || ISFLOATING(c->mon->sel))) {
 			for (at = c->mon->clients; at->next != c->mon->sel; at = at->next);
 			c->next = at->next;
 			at->next = c;
 			return;
 		}
-		break;
-	case AttachAside:
+	} else if (attachmode == AttachAside) {
 		for (at = c->mon->clients, n = 0; at; at = at->next)
 			if (!ISFLOATING(at) && ISVISIBLEONTAG(at, c->tags))
 				if (++n >= c->mon->nmaster)
@@ -36,22 +34,19 @@ attachx(Client *c)
 			at->next = c;
 			return;
 		}
-		break;
-	case AttachBelow:
+	} else if (attachmode == AttachBelow) {
 		if (!(c->mon->sel == NULL || c->mon->sel == c || ISFLOATING(c->mon->sel))) {
 			c->next = c->mon->sel->next;
 			c->mon->sel->next = c;
 			return;
 		}
-		break;
-	case AttachBottom:
+	} else if (attachmode == AttachBottom) {
 		for (at = c->mon->clients; at && at->next; at = at->next);
 		if (at) {
 			at->next = c;
 			c->next = NULL;
 			return;
 		}
-		break;
 	}
 	attach(c); // master (default)
 }
