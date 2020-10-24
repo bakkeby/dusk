@@ -362,7 +362,7 @@ ipc_parse_run_command(char *msg, IPCParsedCommand *parsed_command)
 		*args = (Arg *)malloc(sizeof(Arg));
 		*arg_types = (ArgType *)malloc(sizeof(ArgType));
 		(*arg_types)[0] = ARG_TYPE_NONE;
-		(*args)[0].f = 0;
+		(*args)[0].i = 0;
 		(*argc)++;
 	} else if (*argc > 0) {
 		*args = (Arg *)calloc(*argc, sizeof(Arg));
