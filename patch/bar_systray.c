@@ -33,7 +33,8 @@ draw_systray(Bar *bar, BarArg *a)
 		wa.border_pixel = 0;
 		wa.background_pixel = 0;
 		wa.colormap = cmap;
-		systray->win = XCreateWindow(dpy, root, bar->bx + a->x + lrpad / 2, bar->by + a->y, MAX(a->w + 40, 1), a->h, 0, depth,
+		systray->h = MIN(a->h, drw->fonts->h);
+		systray->win = XCreateWindow(dpy, root, bar->bx + a->x + lrpad / 2, bar->by + a->y + (a->h - systray->h) / 2, MAX(a->w + 40, 1), systray->h, 0, depth,
 						InputOutput, visual,
 						CWOverrideRedirect|CWBorderPixel|CWBackPixel|CWColormap|CWEventMask, &wa); // CWBackPixmap
 
@@ -73,7 +74,7 @@ draw_systray(Bar *bar, BarArg *a)
 			i->mon = bar->mon;
 	}
 
-	XMoveResizeWindow(dpy, systray->win, bar->bx + a->x + lrpad / 2, (w ? bar->by + a->y : -bar->by - a->y), MAX(w, 1), a->h);
+	XMoveResizeWindow(dpy, systray->win, bar->bx + a->x + lrpad / 2, (w ? bar->by + a->y + (a->h - systray->h) / 2 : -bar->by - a->y), MAX(w, 1), systray->h);
 	return w;
 }
 
@@ -115,7 +116,7 @@ updatesystrayicongeom(Client *i, int w, int h)
 	if (!systray)
 		return;
 
-	int bar_height = systray->bar->bh - 2 * systray->bar->borderpx;
+	int bar_height = systray->h;
 	if (i) {
 		i->h = bar_height;
 		if (w == h)
