@@ -140,6 +140,8 @@ enum {
 	NetSystemTray, NetSystemTrayOP, NetSystemTrayOrientation,
 	NetSystemTrayVisual, NetWMWindowTypeDock, NetSystemTrayOrientationHorz,
 	NetDesktopNames, NetDesktopViewport, NetNumberOfDesktops, NetCurrentDesktop,
+	NetWMActionClose,
+	NetWMMaximizedVert, NetWMMaximizedHorz, NetWMMoveResize,
 	NetClientList, NetLast
 }; /* EWMH atoms */
 
@@ -149,8 +151,11 @@ enum {
 	WMState,
 	WMTakeFocus,
 	WMWindowRole,
+	WMChangeState,
 	WMLast
 }; /* default atoms */
+
+// https://specifications.freedesktop.org/wm-spec/latest/ar01s05.html
 
 enum {
 	ClkButton,
@@ -472,8 +477,8 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 	[ButtonPress] = buttonpress,
 	[ButtonRelease] = keyrelease,
 	[ClientMessage] = clientmessage,
-	[ConfigureRequest] = configurerequest,
 	[ConfigureNotify] = configurenotify,
+	[ConfigureRequest] = configurerequest,
 	[DestroyNotify] = destroynotify,
 	[EnterNotify] = enternotify,
 	[Expose] = expose,
@@ -524,6 +529,8 @@ applyrules(Client *c)
 	instance = ch.res_name  ? ch.res_name  : broken;
 	wintype  = getatomprop(c, netatom[NetWMWindowType]);
 	gettextprop(c->win, wmatom[WMWindowRole], role, sizeof(role));
+
+	fprintf(stderr, "new client class = '%s', instance = '%s', role = '%s', wintype = '%ld'\n", class, instance, role, wintype);
 
 	for (i = 0; i < LENGTH(rules); i++) {
 		r = &rules[i];
@@ -859,9 +866,15 @@ clientmessage(XEvent *e)
 
 	if (!c)
 		return;
+
+	fprintf(stderr, "clientmessage: received message type of %ld for client %s\n", cme->message_type, c->name);
+	fprintf(stderr, "    - data 0 = %ld\n", cme->data.l[0]);
+	fprintf(stderr, "    - data 1 = %ld\n", cme->data.l[1]);
+	fprintf(stderr, "    - data 2 = %ld\n", cme->data.l[2]);
+
 	if (cme->message_type == netatom[NetWMState]) {
 		if (cme->data.l[1] == netatom[NetWMFullscreen]
-		|| cme->data.l[2] == netatom[NetWMFullscreen]) {
+		 || cme->data.l[2] == netatom[NetWMFullscreen]) {
 			if (RESTOREFAKEFULLSCREEN(c) && ISFULLSCREEN(c))
 				setfakefullscreen = 1;
 			setfullscreen(c, (cme->data.l[0] == 1 /* _NET_WM_STATE_ADD    */
@@ -869,6 +882,16 @@ clientmessage(XEvent *e)
 				&& !ISFULLSCREEN(c)
 			)), setfakefullscreen);
 		}
+		if (cme->data.l[1] == netatom[NetWMMaximizedVert]
+		 || cme->data.l[2] == netatom[NetWMMaximizedVert]) {
+			if (cme->data.l[1] == netatom[NetWMMaximizedHorz]
+			 || cme->data.l[2] == netatom[NetWMMaximizedHorz])
+				resize(c, c->mon->wx, c->mon->wy, c->mon->ww, c->mon->wh, 0);
+			else
+				resize(c, c->x, c->mon->wy, c->w, c->mon->wh, 0);
+		} else if (cme->data.l[1] == netatom[NetWMMaximizedHorz]
+				|| cme->data.l[2] == netatom[NetWMMaximizedHorz])
+			resize(c, c->mon->wx, c->y, c->mon->ww, c->h, 0);
 	} else if (cme->message_type == netatom[NetActiveWindow]) {
 		if (enabled(FocusOnNetActive)) {
 			if (c->tags & c->mon->tagset[c->mon->seltags]) {
@@ -886,7 +909,36 @@ clientmessage(XEvent *e)
 			}
 		} else if (c != selmon->sel && !ISURGENT(c))
 			seturgent(c, 1);
+	} else if (cme->message_type == wmatom[WMChangeState]) {
+		if (cme->data.l[0] == IconicState && !HIDDEN(c))
+			hide(c);
+		else if (cme->data.l[0] == NormalState && HIDDEN(c))
+			show(c);
+	} else if (cme->message_type == netatom[NetWMActionClose]) {
+		selmon->sel = c;
+		killclient(NULL);
+	} else if (cme->message_type == netatom[NetWMMoveResize]) {
+		resizemouse(&((Arg) { .v = c }));
 	}
+
+
+// To change the state of a mapped window, a Client MUST send a _NET_WM_STATE client message to the root window:
+
+// window  = the respective client window
+// message_type = _NET_WM_STATE
+// format = 32
+// data.l[0] = the action, as listed below
+// data.l[1] = first property to alter
+// data.l[2] = second property to alter
+// data.l[3] = source indication
+// other data.l[] elements = 0
+
+// _NET_WM_STATE_REMOVE        0    /* remove/unset property */
+// _NET_WM_STATE_ADD           1    /* add/set property */
+// _NET_WM_STATE_TOGGLE        2    /* toggle property  */
+
+// clientmessage: received message type of 331 --> []  -- _NET_WM_STATE
+//	https://specifications.freedesktop.org/wm-spec/wm-spec-1.3.html#idm45805407959456
 }
 
 void
@@ -918,6 +970,10 @@ configurenotify(XEvent *e)
 	int dirty;
 	/* TODO: updategeom handling sucks, needs to be simplified */
 	if (ev->window == root) {
+
+		fprintf(stderr, "configurenotify: received event for root window\n");
+		fprintf(stderr, "    - x = %d, y = %d, w = %d, h = %d\n", ev->x, ev->y, ev->width, ev->height);
+
 		dirty = (sw != ev->width || sh != ev->height);
 		sw = ev->width;
 		sh = ev->height;
@@ -946,6 +1002,10 @@ configurerequest(XEvent *e)
 	XWindowChanges wc;
 
 	if ((c = wintoclient(ev->window))) {
+
+		fprintf(stderr, "configurerequest: received event %ld for client %s\n", ev->value_mask, c->name);
+		fprintf(stderr, "    - x = %d, y = %d, w = %d, h = %d\n", ev->x, ev->y, ev->width, ev->height);
+
 		if (IGNORECFGREQ(c) || MOVERESIZE(c))
 			return;
 		if (ev->value_mask & CWBorderWidth)
@@ -1112,8 +1172,10 @@ destroynotify(XEvent *e)
 	Client *c;
 	XDestroyWindowEvent *ev = &e->xdestroywindow;
 
-	if ((c = wintoclient(ev->window)))
+	if ((c = wintoclient(ev->window))) {
+		fprintf(stderr, "destroynotify: received event for client %s\n", c->name);
 		unmanage(c, 1);
+	}
 	else if ((c = swallowingclient(ev->window)))
 		unmanage(c->swallowing, 1);
 	else if (enabled(Systray) && (c = wintosystrayicon(ev->window))) {
@@ -1372,8 +1434,6 @@ focus(Client *c)
 					XConfigureWindow(dpy, f->win, CWSibling|CWStackMode, &wc);
 					wc.sibling = f->win;
 				}
-
-			XSync(dpy, True);
 		}
 	} else {
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
@@ -1720,6 +1780,8 @@ manage(Window w, XWindowAttributes *wa)
 		(unsigned char *) &(c->win), 1);
 	XMoveResizeWindow(dpy, c->win, c->x + 2 * sw, c->y, c->w, c->h); /* some windows require this */
 
+	if ((c->flags & Hidden) && !HIDDEN(c))
+		hide(c);
 	if (!HIDDEN(c))
 		setclientstate(c, NormalState);
 	if (c->mon == selmon)
@@ -1771,6 +1833,17 @@ motionnotify(XEvent *e)
 	Monitor *m;
 	Client *sel;
 	XMotionEvent *ev = &e->xmotion;
+
+	// temporary code
+	// sel = wintoclient(ev->window);
+	// if (sel) {
+	// 	fprintf(stderr, "motionnotify: received event x = %d, y = %d for client %s\n", ev->x_root, ev->y_root, sel->name);
+	// } else if (ev->window == root) {
+	// 	fprintf(stderr, "motionnotify: received event x = %d, y = %d for root window\n", ev->x_root, ev->y_root);
+	// } else {
+	// 	fprintf(stderr, "motionnotify: received event x = %d, y = %d for no window?\n", ev->x_root, ev->y_root);
+	// }
+	// temporary code
 
 	if (ev->window != root)
 		return;
@@ -1896,8 +1969,17 @@ propertynotify(XEvent *e)
 	if ((ev->window == root) && (ev->atom == XA_WM_NAME)) {
 		updatestatus();
 	} else if (ev->state == PropertyDelete) {
+		if ((c = wintoclient(ev->window))) {
+			fprintf(stderr, "propertynotify: ignored property delete event (%ld) for client %s\n", ev->atom, c->name);
+		} else {
+			fprintf(stderr, "propertynotify: ignored property delete event for unknown client\n");
+		}
 		return; /* ignore */
 	} else if ((c = wintoclient(ev->window))) {
+
+		fprintf(stderr, "propertynotify: received message type of %ld for client %s\n", ev->atom, c->name);
+
+
 		switch(ev->atom) {
 		default: break;
 		case XA_WM_TRANSIENT_FOR:
@@ -1989,14 +2071,15 @@ resizeclient(Client *c, int x, int y, int w, int h)
 	}
 	XConfigureWindow(dpy, c->win, CWX|CWY|CWWidth|CWHeight|CWBorderWidth, &wc);
 	configure(c);
-	if (ISFAKEFULLSCREEN(c))
+	if (ISFAKEFULLSCREEN(c) && WASFULLSCREEN(c)) {
 		/* Exception: if the client was in actual fullscreen and we exit out to fake fullscreen
 		 * mode, then the focus would drift to whichever window is under the mouse cursor at the
 		 * time. To avoid this we pass True to XSync which will make the X server disregard any
 		 * other events in the queue thus cancelling the EnterNotify event that would otherwise
 		 * have changed focus. */
+		fprintf(stderr, "XSync true for client %s\n", c->name);
 		XSync(dpy, True);
-	else
+	} else
 		XSync(dpy, False);
 }
 
@@ -2422,6 +2505,7 @@ setup(void)
 	wmatom[WMState] = XInternAtom(dpy, "WM_STATE", False);
 	wmatom[WMTakeFocus] = XInternAtom(dpy, "WM_TAKE_FOCUS", False);
 	wmatom[WMWindowRole] = XInternAtom(dpy, "WM_WINDOW_ROLE", False);
+	wmatom[WMChangeState] = XInternAtom(dpy, "WM_CHANGE_STATE", False);
 	netatom[NetActiveWindow] = XInternAtom(dpy, "_NET_ACTIVE_WINDOW", False);
 	netatom[NetSupported] = XInternAtom(dpy, "_NET_SUPPORTED", False);
 	netatom[NetSystemTray] = XInternAtom(dpy, "_NET_SYSTEM_TRAY_S0", False);
@@ -2437,10 +2521,14 @@ setup(void)
 	netatom[NetNumberOfDesktops] = XInternAtom(dpy, "_NET_NUMBER_OF_DESKTOPS", False);
 	netatom[NetCurrentDesktop] = XInternAtom(dpy, "_NET_CURRENT_DESKTOP", False);
 	netatom[NetDesktopNames] = XInternAtom(dpy, "_NET_DESKTOP_NAMES", False);
+	netatom[NetWMActionClose] = XInternAtom(dpy, "_NET_WM_ACTION_CLOSE", False);
 	netatom[NetWMName] = XInternAtom(dpy, "_NET_WM_NAME", False);
 	netatom[NetWMState] = XInternAtom(dpy, "_NET_WM_STATE", False);
+	netatom[NetWMMoveResize] = XInternAtom(dpy, "_NET_WM_MOVERESIZE", False);
 	netatom[NetWMCheck] = XInternAtom(dpy, "_NET_SUPPORTING_WM_CHECK", False);
 	netatom[NetWMFullscreen] = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
+	netatom[NetWMMaximizedVert] = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False);
+	netatom[NetWMMaximizedHorz] = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
 	netatom[NetWMWindowType] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False);
 	netatom[NetClientList] = XInternAtom(dpy, "_NET_CLIENT_LIST", False);
 	motifatom = XInternAtom(dpy, "_MOTIF_WM_HINTS", False);
@@ -2902,7 +2990,7 @@ unmapnotify(XEvent *e)
 		/* KLUDGE! sometimes icons occasionally unmap their windows, but do
 		 * _not_ destroy them. We map those windows back */
 		XMapRaised(dpy, c->win);
-		removesystrayicon(c);
+		//removesystrayicon(c); // I don't remember why this was added, hmm, tracked back to original patch applied to vanitygaps
 		drawbarwin(systray->bar);
 	}
 }
@@ -3300,8 +3388,10 @@ zoom(const Arg *arg)
 	cold = nexttiled(c->mon->clients);
 	if (c != cold && !at)
 		at = findbefore(c);
+
 	detach(c);
 	attach(c);
+
 	/* swap windows instead of pushing the previous one down */
 	if (c != cold && at) {
 		c->mon->pertag->prevzooms[c->mon->pertag->curtag] = cold;
@@ -3311,7 +3401,7 @@ zoom(const Arg *arg)
 			at->next = cold;
 		}
 	}
-	focus(c);
+
 	arrange(c->mon);
 }
 
