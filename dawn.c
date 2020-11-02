@@ -548,7 +548,8 @@ applyrules(Client *c)
 	wintype  = getatomprop(c, netatom[NetWMWindowType]);
 	gettextprop(c->win, wmatom[WMWindowRole], role, sizeof(role));
 
-	fprintf(stderr, "new client class = '%s', instance = '%s', role = '%s', wintype = '%ld'\n", class, instance, role, wintype);
+	if (enabled(Debug))
+		fprintf(stderr, "applyrules: new client class = '%s', instance = '%s', role = '%s', wintype = '%ld'\n", class, instance, role, wintype);
 
 	for (i = 0; i < LENGTH(rules); i++) {
 		r = &rules[i];
@@ -885,10 +886,12 @@ clientmessage(XEvent *e)
 	if (!c)
 		return;
 
-	fprintf(stderr, "clientmessage: received message type of %ld for client %s\n", cme->message_type, c->name);
-	fprintf(stderr, "    - data 0 = %ld\n", cme->data.l[0]);
-	fprintf(stderr, "    - data 1 = %ld\n", cme->data.l[1]);
-	fprintf(stderr, "    - data 2 = %ld\n", cme->data.l[2]);
+	if (enabled(Debug)) {
+		fprintf(stderr, "clientmessage: received message type of %ld for client %s\n", cme->message_type, c->name);
+		fprintf(stderr, "    - data 0 = %ld\n", cme->data.l[0]);
+		fprintf(stderr, "    - data 1 = %ld\n", cme->data.l[1]);
+		fprintf(stderr, "    - data 2 = %ld\n", cme->data.l[2]);
+	}
 
 	if (cme->message_type == netatom[NetWMState]) {
 		if (cme->data.l[1] == netatom[NetWMFullscreen]
@@ -989,8 +992,10 @@ configurenotify(XEvent *e)
 	/* TODO: updategeom handling sucks, needs to be simplified */
 	if (ev->window == root) {
 
-		fprintf(stderr, "configurenotify: received event for root window\n");
-		fprintf(stderr, "    - x = %d, y = %d, w = %d, h = %d\n", ev->x, ev->y, ev->width, ev->height);
+		if (enabled(Debug)) {
+			fprintf(stderr, "configurenotify: received event for root window\n");
+			fprintf(stderr, "    - x = %d, y = %d, w = %d, h = %d\n", ev->x, ev->y, ev->width, ev->height);
+		}
 
 		dirty = (sw != ev->width || sh != ev->height);
 		sw = ev->width;
@@ -1021,8 +1026,10 @@ configurerequest(XEvent *e)
 
 	if ((c = wintoclient(ev->window))) {
 
-		fprintf(stderr, "configurerequest: received event %ld for client %s\n", ev->value_mask, c->name);
-		fprintf(stderr, "    - x = %d, y = %d, w = %d, h = %d\n", ev->x, ev->y, ev->width, ev->height);
+		if (enabled(Debug)) {
+			fprintf(stderr, "configurerequest: received event %ld for client %s\n", ev->value_mask, c->name);
+			fprintf(stderr, "    - x = %d, y = %d, w = %d, h = %d\n", ev->x, ev->y, ev->width, ev->height);
+		}
 
 		if (IGNORECFGREQ(c) || MOVERESIZE(c))
 			return;
@@ -1191,7 +1198,8 @@ destroynotify(XEvent *e)
 	XDestroyWindowEvent *ev = &e->xdestroywindow;
 
 	if ((c = wintoclient(ev->window))) {
-		fprintf(stderr, "destroynotify: received event for client %s\n", c->name);
+		if (enabled(Debug))
+			fprintf(stderr, "destroynotify: received event for client %s\n", c->name);
 		unmanage(c, 1);
 	}
 	else if ((c = swallowingclient(ev->window)))
@@ -1855,6 +1863,7 @@ motionnotify(XEvent *e)
 	XMotionEvent *ev = &e->xmotion;
 
 	// temporary code
+	// if (enabled(Debug)) {
 	// sel = wintoclient(ev->window);
 	// if (sel) {
 	// 	fprintf(stderr, "motionnotify: received event x = %d, y = %d for client %s\n", ev->x_root, ev->y_root, sel->name);
@@ -1862,6 +1871,7 @@ motionnotify(XEvent *e)
 	// 	fprintf(stderr, "motionnotify: received event x = %d, y = %d for root window\n", ev->x_root, ev->y_root);
 	// } else {
 	// 	fprintf(stderr, "motionnotify: received event x = %d, y = %d for no window?\n", ev->x_root, ev->y_root);
+	// }
 	// }
 	// temporary code
 
@@ -1989,16 +1999,18 @@ propertynotify(XEvent *e)
 	if ((ev->window == root) && (ev->atom == XA_WM_NAME)) {
 		updatestatus();
 	} else if (ev->state == PropertyDelete) {
-		if ((c = wintoclient(ev->window))) {
-			fprintf(stderr, "propertynotify: ignored property delete event (%ld) for client %s\n", ev->atom, c->name);
-		} else {
-			fprintf(stderr, "propertynotify: ignored property delete event for unknown client\n");
+		if (enabled(Debug)) {
+			if ((c = wintoclient(ev->window))) {
+				fprintf(stderr, "propertynotify: ignored property delete event (%ld) for client %s\n", ev->atom, c->name);
+			} else {
+				fprintf(stderr, "propertynotify: ignored property delete event for unknown client\n");
+			}
 		}
 		return; /* ignore */
 	} else if ((c = wintoclient(ev->window))) {
 
-		fprintf(stderr, "propertynotify: received message type of %ld for client %s\n", ev->atom, c->name);
-
+		if (enabled(Debug))
+			fprintf(stderr, "propertynotify: received message type of %ld for client %s\n", ev->atom, c->name);
 
 		switch(ev->atom) {
 		default: break;
@@ -2097,7 +2109,6 @@ resizeclient(Client *c, int x, int y, int w, int h)
 		 * time. To avoid this we pass True to XSync which will make the X server disregard any
 		 * other events in the queue thus cancelling the EnterNotify event that would otherwise
 		 * have changed focus. */
-		fprintf(stderr, "XSync true for client %s\n", c->name);
 		XSync(dpy, True);
 	} else
 		XSync(dpy, False);
@@ -3018,10 +3029,12 @@ unmapnotify(XEvent *e)
 	Client *c;
 	XUnmapEvent *ev = &e->xunmap;
 
-	fprintf(stderr, "unmapnotify: received event type %d, serial %ld, window %ld, event %ld, ev->send_event = %d, ev->from_configure = %d\n", ev->type, ev->serial, ev->window, ev->event, ev->send_event, ev->from_configure);
+	if (enabled(Debug))
+		fprintf(stderr, "unmapnotify: received event type %d, serial %ld, window %ld, event %ld, ev->send_event = %d, ev->from_configure = %d\n", ev->type, ev->serial, ev->window, ev->event, ev->send_event, ev->from_configure);
 
 	if ((c = wintoclient(ev->window))) {
-		fprintf(stderr, "unmapnotify: window %ld --> client %s\n", ev->window, c->name);
+		if (enabled(Debug))
+			fprintf(stderr, "unmapnotify: window %ld --> client %s\n", ev->window, c->name);
 		if (ev->send_event)
 			setclientstate(c, WithdrawnState);
 		else

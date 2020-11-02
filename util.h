@@ -38,7 +38,7 @@ static const unsigned long
 	ViewOnTag = 0x100000, // follow a window to the tag it is being moved to
 	Xresources = 0x200000, // xrdb patch
 	AutoSaveFloats = 0x400000, // auto save float posistion when using movemouse or resizemouse
-	FuncPlaceholder0x800000 = 0x800000,
+	Debug = 0x800000,
 	FuncPlaceholder0x1000000 = 0x1000000,
 	FuncPlaceholder0x2000000 = 0x2000000,
 	FuncPlaceholder0x4000000 = 0x4000000,
