@@ -58,6 +58,7 @@ setfloatpos(Client *c, const char *floatpos)
 	wy = c->mon->wy + oh;
 	ww = c->mon->ww - 2*ov;
 	wh = c->mon->wh - 2*oh;
+	addflag(c, IgnoreSizeHints);
 
 	getfloatpos(x, xCh, w, wCh, wx, ww, c->x, c->w, c->bw, floatposgrid_x, &c->x, &c->w);
 	getfloatpos(y, yCh, h, hCh, wy, wh, c->y, c->h, c->bw, floatposgrid_y, &c->y, &c->h);

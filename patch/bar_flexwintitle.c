@@ -1,6 +1,6 @@
 /* Flexwintitle properties, you can override these in your config.h if you want. */
 #ifndef FLEXWINTITLE_BORDERS
-#define FLEXWINTITLE_BORDERS 1       // 0 = off, 1 = on
+#define FLEXWINTITLE_BORDERS 2       // 0 = off, otherwise width of border / client separator
 #endif
 #ifndef FLEXWINTITLE_SHOWFLOATING
 #define FLEXWINTITLE_SHOWFLOATING 0  // whether to show titles for floating windows, hidden clients are always shown
@@ -250,8 +250,8 @@ flextitledraw(Monitor *m, Client *c, int unused, int x, int w, int tabscheme, Ar
 
 	if (FLEXWINTITLE_BORDERS) {
 		XSetForeground(drw->dpy, drw->gc, scheme[SchemeSel][ColBorder].pixel);
-		XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, barg->y, 1, barg->h);
-		XFillRectangle(drw->dpy, drw->drawable, drw->gc, x + w - (x + w >= barg->w ? 1 : 0), barg->y, 1, barg->h);
+		XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, barg->y, FLEXWINTITLE_BORDERS, barg->h);
+		XFillRectangle(drw->dpy, drw->drawable, drw->gc, x + w - (x + w >= barg->w ? 1 : 0), barg->y, FLEXWINTITLE_BORDERS, barg->h);
 	}
 	/* Optional tags icons */
 	for (i = 0; i < NUMTAGS; i++) {

@@ -20,9 +20,8 @@ setdesktopnames(void)
 void
 setfloatinghint(Client *c)
 {
-    Atom target = XInternAtom(dpy, "_IS_FLOATING", 0);
     unsigned int floating[1] = {ISFLOATING(c) ? 1 : 0};
-    XChangeProperty(dpy, c->win, target, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)floating, 1);
+    XChangeProperty(dpy, c->win, xatom[IsFloating], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)floating, 1);
 }
 
 void

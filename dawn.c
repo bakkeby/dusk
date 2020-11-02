@@ -135,27 +135,45 @@ enum {
 }; /* color schemes */
 
 enum {
-	NetSupported, NetWMName, NetWMState, NetWMStateAbove, NetWMCheck, // TODO _NET_WM_STATE_ABOVE
-	NetWMFullscreen, NetActiveWindow, NetWMWindowType,
-	NetSystemTray, NetSystemTrayOP, NetSystemTrayOrientation,
-	NetSystemTrayVisual, NetWMWindowTypeDock, NetSystemTrayOrientationHorz,
-	NetDesktopNames, NetDesktopViewport, NetNumberOfDesktops, NetCurrentDesktop,
+	NetActiveWindow,
+	NetClientList,
+	NetClientListStacking,
+	NetCurrentDesktop,
+	NetDesktopNames,
+	NetDesktopViewport,
+	NetNumberOfDesktops,
+	NetSupported,
+	NetSystemTray,
+	NetSystemTrayOP,
+	NetSystemTrayOrientation,
+	NetSystemTrayOrientationHorz,
+	NetSystemTrayVisual,
 	NetWMActionClose,
-	NetWMMaximizedVert, NetWMMaximizedHorz, NetWMMoveResize,
-	NetClientList, NetClientListStacking, NetLast
+	NetWMCheck,
+	NetWMFullPlacement,
+	NetWMFullscreen,
+	NetWMName,
+	NetWMState,
+	NetWMStateAbove, // TODO _NET_WM_STATE_ABOVE
+	NetWMWindowType,
+	NetWMWindowTypeDock,
+	NetWMMaximizedVert,
+	NetWMMaximizedHorz,
+	NetWMMoveResize,
+	NetLast
 }; /* EWMH atoms */
 
 enum {
-	WMProtocols,
+	WMChangeState,
 	WMDelete,
+	WMProtocols,
 	WMState,
 	WMTakeFocus,
 	WMWindowRole,
-	WMChangeState,
 	WMLast
 }; /* default atoms */
 
-// https://specifications.freedesktop.org/wm-spec/latest/ar01s05.html
+/* https://specifications.freedesktop.org/wm-spec/latest/ar01s05.html - Application Window Properties */
 
 enum {
 	ClkButton,
@@ -615,7 +633,7 @@ applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact)
 		*h = bh;
 	if (*w < bh)
 		*w = bh;
-	if (resizehints || ISFLOATING(c) || !c->mon->lt[c->mon->sellt]->arrange) {
+	if (!IGNORESIZEHINTS(c) && (resizehints || ISFLOATING(c) || !c->mon->lt[c->mon->sellt]->arrange)) {
 		/* see last two sentences in ICCCM 4.1.2.3 */
 		baseismin = c->basew == c->minw && c->baseh == c->minh;
 		if (!baseismin) { /* temporarily remove base dimensions */
@@ -1519,6 +1537,8 @@ getatomprop(Client *c, Atom prop)
 	Atom req = XA_ATOM;
 	if (prop == xatom[XembedInfo])
 		req = xatom[XembedInfo];
+	if (prop == xatom[IsFloating])
+		req = AnyPropertyType;
 
 	if (XGetWindowProperty(dpy, c->win, prop, 0L, sizeof atom, False, req,
 		&da, &di, &dl, &dl, &p) == Success && p) {
@@ -1733,12 +1753,7 @@ manage(Window w, XWindowAttributes *wa)
 	wc.border_width = c->bw;
 	XConfigureWindow(dpy, w, CWBorderWidth, &wc);
 	configure(c); /* propagates border_width, if size doesn't change */
-
-	//updatesizehints(c); // commented due to floatpos, TODO figure out a way to keep this
-	// does it HAVE to be after configure?
-
-
-
+	updatesizehints(c);
 
 	/* If the client indicates that it is in fullscreen, or if the FullScreen flag has been
 	 * explictly set via client rules, then enable fullscreen now. */
@@ -1770,7 +1785,7 @@ manage(Window w, XWindowAttributes *wa)
 
 	if (trans != None)
 		c->prevflags |= Floating;
-	if (!ISFLOATING(c) && (ISFIXED(c) || WASFLOATING(c)))
+	if (!ISFLOATING(c) && (ISFIXED(c) || WASFLOATING(c) || getatomprop(c, xatom[IsFloating])))
 		SETFLOATING(c);
 
 	if (ISFLOATING(c)) {
@@ -2528,6 +2543,7 @@ setup(void)
 	netatom[NetCurrentDesktop] = XInternAtom(dpy, "_NET_CURRENT_DESKTOP", False);
 	netatom[NetDesktopNames] = XInternAtom(dpy, "_NET_DESKTOP_NAMES", False);
 	netatom[NetWMActionClose] = XInternAtom(dpy, "_NET_WM_ACTION_CLOSE", False);
+	netatom[NetWMFullPlacement] = XInternAtom(dpy, "_NET_WM_FULL_PLACEMENT", False); /* https://specifications.freedesktop.org/wm-spec/latest/ar01s07.html */
 	netatom[NetWMName] = XInternAtom(dpy, "_NET_WM_NAME", False);
 	netatom[NetWMState] = XInternAtom(dpy, "_NET_WM_STATE", False);
 	netatom[NetWMMoveResize] = XInternAtom(dpy, "_NET_WM_MOVERESIZE", False);
@@ -2986,10 +3002,26 @@ unmanage(Client *c, int destroyed)
 void
 unmapnotify(XEvent *e)
 {
+	/* https://tronche.com/gui/x/xlib/events/window-state-change/unmap.html
+	typedef struct {
+	    int type;             // UnmapNotify
+	    unsigned long serial; // # of last request processed by server
+	    Bool send_event;      // true if this came from a SendEvent request
+	    Display *display;     // the display the event was read from
+	    Window event;         // the window the notification originates from
+	    Window window;        // the window the notification is for
+	    Bool from_configure;  // true if the event was generated as a result of a resizing of the
+	                          // window's parent when the window itself had a win_gravity of
+	                          // UnmapGravity
+	} XUnmapEvent; */
+
 	Client *c;
 	XUnmapEvent *ev = &e->xunmap;
 
+	fprintf(stderr, "unmapnotify: received event type %d, serial %ld, window %ld, event %ld, ev->send_event = %d, ev->from_configure = %d\n", ev->type, ev->serial, ev->window, ev->event, ev->send_event, ev->from_configure);
+
 	if ((c = wintoclient(ev->window))) {
+		fprintf(stderr, "unmapnotify: window %ld --> client %s\n", ev->window, c->name);
 		if (ev->send_event)
 			setclientstate(c, WithdrawnState);
 		else
@@ -2998,10 +3030,13 @@ unmapnotify(XEvent *e)
 		/* KLUDGE! sometimes icons occasionally unmap their windows, but do
 		 * _not_ destroy them. We map those windows back */
 		XMapRaised(dpy, c->win);
-		//removesystrayicon(c); // I don't remember why this was added, hmm, tracked back to original patch applied to vanitygaps
 		drawbarwin(systray->bar);
 	}
 }
+
+
+
+
 
 void
 updatebars(void)

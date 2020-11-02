@@ -16,7 +16,7 @@
 #define XEMBED_EMBEDDED_VERSION (VERSION_MAJOR << 16) | VERSION_MINOR
 
 /* enums */
-enum { Manager, Xembed, XembedInfo, XLast }; /* Xembed atoms */
+enum { Manager, Xembed, XembedInfo, IsFloating, XLast }; /* Xembed atoms */
 
 typedef struct SystrayWin SystrayWin;
 struct SystrayWin {
