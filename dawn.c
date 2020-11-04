@@ -173,6 +173,13 @@ enum {
 	WMLast
 }; /* default atoms */
 
+enum {
+	IsFloating,
+	DawnClientFlags,
+	DawnMonitorTags,
+	ClientLast
+}; /* dawn client atoms */
+
 /* https://specifications.freedesktop.org/wm-spec/latest/ar01s05.html - Application Window Properties */
 
 enum {
@@ -510,7 +517,7 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 	[ResizeRequest] = resizerequest,
 	[UnmapNotify] = unmapnotify
 };
-static Atom wmatom[WMLast], netatom[NetLast], xatom[XLast];
+static Atom wmatom[WMLast], netatom[NetLast], xatom[XLast], clientatom[ClientLast];
 static int running = 1;
 static Cur *cursor[CurLast];
 static Clr **scheme;
@@ -1545,7 +1552,7 @@ getatomprop(Client *c, Atom prop)
 	Atom req = XA_ATOM;
 	if (prop == xatom[XembedInfo])
 		req = xatom[XembedInfo];
-	if (prop == xatom[IsFloating])
+	if (prop == clientatom[IsFloating] || prop == clientatom[DawnClientFlags] || prop == clientatom[DawnMonitorTags])
 		req = AnyPropertyType;
 
 	if (XGetWindowProperty(dpy, c->win, prop, 0L, sizeof atom, False, req,
@@ -1726,27 +1733,35 @@ manage(Window w, XWindowAttributes *wa)
 	c->h = c->oldh = wa->height;
 	c->oldbw = wa->border_width;
 	c->cfact = 1.0;
+	c->mon = NULL;
 
 	updatetitle(c);
-	if (XGetTransientForHint(dpy, w, &trans) && (t = wintoclient(trans))) {
-		addflag(c, Transient);
-		addflag(c, Centered);
-		c->mon = t->mon;
-		c->tags = t->tags;
-	} else {
-		c->mon = selmon;
+	getdawnclientflags(c);
+	getdawnmonitortags(c);
+
+	if (!c->mon) {
+		if (XGetTransientForHint(dpy, w, &trans) && (t = wintoclient(trans))) {
+			addflag(c, Transient);
+			addflag(c, Centered);
+			c->mon = t->mon;
+			c->tags = t->tags;
+		} else {
+			c->mon = selmon;
+		}
 	}
 
 	c->bw = c->mon->borderpx;
 
-	if (c->x == c->mon->wx && c->y == c->mon->wy)
-		addflag(c, Centered);
+	if (!RULED(c)) {
+		if (c->x == c->mon->wx && c->y == c->mon->wy)
+			addflag(c, Centered);
 
-	if (!ISTRANSIENT(c)) {
-		applyrules(c);
-		term = termforwin(c);
-		if (term)
-			c->mon = term->mon;
+		if (!ISTRANSIENT(c)) {
+			applyrules(c);
+			term = termforwin(c);
+			if (term)
+				c->mon = term->mon;
+		}
 	}
 
 	if (c->x + WIDTH(c) > c->mon->mx + c->mon->mw)
@@ -1793,7 +1808,7 @@ manage(Window w, XWindowAttributes *wa)
 
 	if (trans != None)
 		c->prevflags |= Floating;
-	if (!ISFLOATING(c) && (ISFIXED(c) || WASFLOATING(c) || getatomprop(c, xatom[IsFloating])))
+	if (!ISFLOATING(c) && (ISFIXED(c) || WASFLOATING(c) || getatomprop(c, clientatom[IsFloating])))
 		SETFLOATING(c);
 
 	if (ISFLOATING(c)) {
@@ -2041,6 +2056,8 @@ propertynotify(XEvent *e)
 void
 quit(const Arg *arg)
 {
+	Monitor *m;
+	Client *c;
 	size_t i;
 	if (arg->i)
 		restart = 1;
@@ -2053,6 +2070,14 @@ quit(const Arg *arg)
 			waitpid(autostart_pids[i], NULL, 0);
 		}
 	}
+
+	/* set dawn client atoms */
+	for (m = mons; m; m = m->next)
+		for (c = m->clients; c; c = c->next) {
+			setdawnclientflags(c);
+			setdawnmonitortags(c);
+		}
+	XSync(dpy, False);
 }
 
 Monitor *
@@ -2548,7 +2573,9 @@ setup(void)
 	xatom[Manager] = XInternAtom(dpy, "MANAGER", False);
 	xatom[Xembed] = XInternAtom(dpy, "_XEMBED", False);
 	xatom[XembedInfo] = XInternAtom(dpy, "_XEMBED_INFO", False);
-	xatom[IsFloating] = XInternAtom(dpy, "_IS_FLOATING", False);
+	clientatom[IsFloating] = XInternAtom(dpy, "_IS_FLOATING", False);
+	clientatom[DawnClientFlags] = XInternAtom(dpy, "_DAWN_CLIENT_FLAGS", False);
+	clientatom[DawnMonitorTags] = XInternAtom(dpy, "_DAWN_MONITOR_TAGS", False);
 	netatom[NetDesktopViewport] = XInternAtom(dpy, "_NET_DESKTOP_VIEWPORT", False);
 	netatom[NetNumberOfDesktops] = XInternAtom(dpy, "_NET_NUMBER_OF_DESKTOPS", False);
 	netatom[NetCurrentDesktop] = XInternAtom(dpy, "_NET_CURRENT_DESKTOP", False);

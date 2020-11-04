@@ -20,8 +20,45 @@ setdesktopnames(void)
 void
 setfloatinghint(Client *c)
 {
-    unsigned int floating[1] = {ISFLOATING(c) ? 1 : 0};
-    XChangeProperty(dpy, c->win, xatom[IsFloating], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)floating, 1);
+	unsigned int floating[1] = {ISFLOATING(c) ? 1 : 0};
+	XChangeProperty(dpy, c->win, clientatom[IsFloating], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)floating, 1);
+}
+
+void
+setdawnclientflags(Client *c)
+{
+	unsigned long data[] = { c->flags };
+	XChangeProperty(dpy, c->win, clientatom[DawnClientFlags], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
+}
+
+void
+setdawnmonitortags(Client *c)
+{
+	unsigned long data[] = { c->mon->index | (c->tags << 4)};
+	XChangeProperty(dpy, c->win, clientatom[DawnMonitorTags], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
+}
+
+void
+getdawnclientflags(Client *c)
+{
+	Atom flags = getatomprop(c, clientatom[DawnClientFlags]);
+	if (flags)
+		c->flags |= flags;
+}
+
+void
+getdawnmonitortags(Client *c)
+{
+	Monitor *m;
+	Atom monitortags = getatomprop(c, clientatom[DawnMonitorTags]);
+	if (monitortags) {
+		c->tags = (monitortags >> 4);
+		for (m = mons; m; m = m->next)
+			if (m->index == (monitortags & 0xF)) {
+				c->mon = m;
+				break;
+			}
+	}
 }
 
 void

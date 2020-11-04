@@ -1,6 +1,10 @@
+static void getdawnclientflags(Client *c);
+static void getdawnmonitortags(Client *c);
 static void setcurrentdesktop(void);
 static void setdesktopnames(void);
 static void setfloatinghint(Client *c);
+static void setdawnclientflags(Client *c);
+static void setdawnmonitortags(Client *c);
 static void setnumdesktops(void);
 static void setviewport(void);
 static void updatecurrentdesktop(void);
