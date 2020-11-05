@@ -102,4 +102,6 @@ drawstateindicator(Monitor *m, Client *c, unsigned int occ, int x, int y, int w,
 		drawindicator(m, c, occ, x, y, w, h, tag, filled, invert, fakefsindicatortype);
 	else if (ISFLOATING(c))
 		drawindicator(m, c, occ, x, y, w, h, tag, filled, invert, floatindicatortype);
+	else
+		drawindicator(m, c, occ, x, y, w, h, tag, filled, invert, tiledindicatortype);
 }

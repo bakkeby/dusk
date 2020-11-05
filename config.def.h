@@ -32,10 +32,10 @@ static char *toggle_float_pos            = "50% 50% 80% 80%"; // default floatin
 
 /* Indicators: see patch/bar_indicators.h for options */
 static int tagindicatortype              = INDICATOR_BOTTOM_BAR_SLIM;
-static int floatindicatortype            = INDICATOR_TOP_LEFT_LARGER_SQUARE;
-
 static int fakefsindicatortype           = INDICATOR_PLUS;
 static int floatfakefsindicatortype      = INDICATOR_PLUS_AND_LARGER_SQUARE;
+static int floatindicatortype            = INDICATOR_TOP_LEFT_LARGER_SQUARE;
+static int tiledindicatortype            = INDICATOR_NONE;
 
 /* See util.h for options */
 static unsigned long functionality = 0
