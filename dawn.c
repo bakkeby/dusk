@@ -836,6 +836,8 @@ cleanupmon(Monitor *mon)
 			XDestroyWindow(dpy, bar->win);
 		}
 		mon->bar = bar->next;
+		if (systray && bar == systray->bar)
+			systray->bar = NULL;
 		free(bar);
 	}
 	free(mon);
@@ -1212,6 +1214,8 @@ destroynotify(XEvent *e)
 	else if ((c = swallowingclient(ev->window)))
 		unmanage(c->swallowing, 1);
 	else if (enabled(Systray) && (c = wintosystrayicon(ev->window))) {
+		if (enabled(Debug))
+			fprintf(stderr, "destroynotify: removing systray icon for client %s\n", c->name);
 		removesystrayicon(c);
 		drawbarwin(systray->bar);
 	}
@@ -1274,12 +1278,12 @@ drawbars(void)
 void
 drawbarwin(Bar *bar)
 {
-	if (!bar->win || bar->external)
+	if (!bar || !bar->win || bar->external)
 		return;
+
 	int r, w, total_drawn = 0, groupactive, ignored;
 	int rx, lx, rw, lw; // bar size, split between left and right if a center module is added
 	const BarRule *br;
-
 	if (bar->borderpx) {
 		if (enabled(BarActiveGroupBorderColor))
 			getclientcounts(bar->mon, &groupactive, &ignored, &ignored, &ignored, &ignored, &ignored, &ignored);
@@ -1421,7 +1425,6 @@ expose(XEvent *e)
 {
 	Monitor *m;
 	XExposeEvent *ev = &e->xexpose;
-
 	if (ev->count == 0 && (m = wintomon(ev->window)))
 		drawbar(m);
 }
@@ -1481,7 +1484,6 @@ void
 focusin(XEvent *e)
 {
 	XFocusChangeEvent *ev = &e->xfocus;
-
 	if (selmon->sel && ev->window != selmon->sel->win)
 		setfocus(selmon->sel);
 }
@@ -3055,7 +3057,6 @@ unmapnotify(XEvent *e)
 
 	Client *c;
 	XUnmapEvent *ev = &e->xunmap;
-
 	if (enabled(Debug))
 		fprintf(stderr, "unmapnotify: received event type %d, serial %ld, window %ld, event %ld, ev->send_event = %d, ev->from_configure = %d\n", ev->type, ev->serial, ev->window, ev->event, ev->send_event, ev->from_configure);
 
@@ -3164,7 +3165,6 @@ int
 updategeom(void)
 {
 	int dirty = 0;
-
 #ifdef XINERAMA
 	if (XineramaIsActive(dpy)) {
 		int i, j, n, nn;
