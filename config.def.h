@@ -44,11 +44,12 @@ static unsigned long functionality = 0
 	|CenteredWindowName
 	|SpawnCwd
 	|BarBorder
-	|Warp
+//	|Warp
 	|FocusOnNetActive
 	|AllowNoModifierButtons
 	|TagIntoStack
-	|ColorEmoji
+//	|ColorEmoji
+//	|Debug
 //	|FocusedOnTop
 //	|BarActiveGroupBorderColor
 //	|DecorationHints
@@ -56,7 +57,8 @@ static unsigned long functionality = 0
 //	|PerTagBar
 //	|SortScreens
 //	|ViewOnTag
-//  |Xresources
+//	|Xresources
+//	|AutoSaveFloats
 ;
 
 static const char statussep              = ';'; /* separator between status bars */
@@ -321,7 +323,7 @@ static const BarRule barrules[] = {
 	{ -1,       0,     BAR_ALIGN_LEFT,         width_stbutton,           draw_stbutton,           click_stbutton,           "statusbutton" },
 	{ -1,       0,     BAR_ALIGN_LEFT,         width_tags,               draw_tags,               click_tags,               "tags" },
 	{ -1,       0,     BAR_ALIGN_LEFT,         width_taggrid,            draw_taggrid,            click_taggrid,            "taggrid" },
-	{  0,       0,     BAR_ALIGN_RIGHT,        width_systray,            draw_systray,            click_systray,            "systray" },
+	{ 'A',      0,     BAR_ALIGN_RIGHT,        width_systray,            draw_systray,            click_systray,            "systray" },
 	{ -1,       0,     BAR_ALIGN_LEFT,         width_ltsymbol,           draw_ltsymbol,           click_ltsymbol,           "layout" },
 	{ 'A',      0,     BAR_ALIGN_RIGHT,        width_status2d,           draw_status2d,           click_statuscmd,          "status2d" },
 	{ -1,       0,     BAR_ALIGN_NONE,         width_flexwintitle,       draw_flexwintitle,       click_flexwintitle,       "flexwintitle" },
@@ -368,8 +370,6 @@ static char *tagicons[][NUMTAGS*2] = {
 	[ALTERNATIVE_TAGS]    = { "A₁", "B₂", "C₃", "D₄", "E₅", "F₆", "G₇", "H₈", "I₉", "1₁", "2₂", "3₃", "4₄", "5₅", "6₆", "7₇", "8₈", "9₉" },
 	[ALT_TAGS_DECORATION] = { "◉₁", "☢₂", "❖₃", "⚉₄", "♻₅", "⌬₆", "♹₇", "✇₈", "☉₉", "☋₁", "ℓ₂", "҂₃", "∆₄", "√₅", "∏₆", "Ξ₇", "Ω₈", "ƒ₉" },
 };
-
-
 
 /* layout(s) */
 static const float mfact     = 0.50; /* factor of master area size [0.05..0.95] */
@@ -448,8 +448,8 @@ static Key keys[] = {
 	{ MODKEY,                       XK_Return,       spawn,                  {.v = termcmd } },
 	{ MODKEY,                       XK_b,            togglebar,              {0} },
 
-	STACKKEYS(MODKEY,                                stackfocus)
-	STACKKEYS(MODKEY|Shift,                          stackpush)
+	STACKKEYS(AltGr|Ctrl,                            stackfocus)
+	STACKKEYS(AltGr|Ctrl|Shift,                      stackpush)
 
 	{ MODKEY,                       XK_j,            focusstack,             {.i = +1 } },
 	{ MODKEY,                       XK_k,            focusstack,             {.i = -1 } },
@@ -487,8 +487,8 @@ static Key keys[] = {
 	{ MODKEY|Ctrl,                  XK_bracketleft,  rotatelayoutaxis,       {.i = -4 } },   /* flextile, 4 = secondary stack axis */
 	{ MODKEY|Ctrl,                  XK_m,            mirrorlayout,           {0} },          /* flextile, flip master and stack areas */
 	{ MODKEY,                       XK_space,        setlayout,              {0} }, // toggles previous layout
-	{ MODKEY|Shift,                 XK_s,            savefloats,             {0} }, // saves float posistion
-	{ MODKEY|ShiftMask,             XK_space,        togglefloating,         {0} },
+	{ MODKEY|Shift,                 XK_g,            savefloats,             {0} }, // pins a client's floating position and size
+	{ MODKEY,                       XK_g,            togglefloating,         {0} },
 	{ Ctrl|Alt,                     XK_Tab,          togglenomodbuttons,     {0} },
 	{ MODKEY,                       XK_w,            togglescratch,          {.ui = 0 } },
 	{ MODKEY,                       XK_e,            togglescratch,          {.ui = 1 } },
