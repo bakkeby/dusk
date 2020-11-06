@@ -288,6 +288,7 @@ struct Client {
 	int oldx, oldy, oldw, oldh;
 	int basew, baseh, incw, inch, maxw, maxh, minw, minh;
 	int bw, oldbw;
+	unsigned int id;
 	unsigned int tags;
 	unsigned int reverttags; /* holds the original tag info from when the client was opened */
 	pid_t pid;
@@ -2080,7 +2081,8 @@ quit(const Arg *arg)
 
 	/* set dawn client atoms */
 	for (m = mons; m; m = m->next)
-		for (c = m->clients; c; c = c->next) {
+		for (i = 1, c = m->clients; c; c = c->next, ++i) {
+			c->id = i;
 			setdawnclientflags(c);
 			setdawnmonitortags(c);
 		}
@@ -2340,6 +2342,7 @@ sendmon(Client *c, Monitor *m)
 	detachstack(c);
 	arrange(c->mon);
 	c->mon = m;
+	c->id = 0;
 
 	if (!(c->tags & SPTAGMASK))
 		c->tags = m->tagset[m->seltags]; /* assign tags of target monitor */

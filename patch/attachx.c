@@ -3,7 +3,7 @@ attachx(Client *c)
 {
 	Client *at;
 	unsigned int n;
-	unsigned int attachmode
+	unsigned long attachmode
 		= c->flags & AttachMaster
 		? AttachMaster
 		: c->flags & AttachAbove
@@ -15,6 +15,19 @@ attachx(Client *c)
 		: c->flags & AttachBottom
 		? AttachBottom
 		: attachdefault;
+
+	if (c->id > 0) { /* then the client has a designated position in the client list */
+		for (at = c->mon->clients; at; at = at->next)
+			if (c->id < at->id) {
+				c->next = at;
+				c->mon->clients = c;
+				return;
+			} else if (at->id < c->id && (!at->next || c->id < at->next->id)) {
+				c->next = at->next;
+				at->next = c;
+				return;
+			}
+	}
 
 	if (attachmode == AttachAbove) {
 		if (!(c->mon->sel == NULL || c->mon->sel == c->mon->clients || ISFLOATING(c->mon->sel))) {

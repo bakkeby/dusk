@@ -34,7 +34,7 @@ setdawnclientflags(Client *c)
 void
 setdawnmonitortags(Client *c)
 {
-	unsigned long data[] = { c->mon->index | (c->tags << 4)};
+	unsigned long data[] = { c->mon->index | (c->id << 4) | (c->tags << 12)};
 	XChangeProperty(dpy, c->win, clientatom[DawnMonitorTags], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
 }
 
@@ -52,7 +52,8 @@ getdawnmonitortags(Client *c)
 	Monitor *m;
 	Atom monitortags = getatomprop(c, clientatom[DawnMonitorTags]);
 	if (monitortags) {
-		c->tags = (monitortags >> 4);
+		c->tags = (monitortags >> 12);
+		c->id = (monitortags & 0xFF0) >> 4;
 		for (m = mons; m; m = m->next)
 			if (m->index == (monitortags & 0xF)) {
 				c->mon = m;
