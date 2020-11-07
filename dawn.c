@@ -558,7 +558,7 @@ applyrules(Client *c)
 	gettextprop(c->win, wmatom[WMWindowRole], role, sizeof(role));
 
 	if (enabled(Debug))
-		fprintf(stderr, "applyrules: new client class = '%s', instance = '%s', role = '%s', wintype = '%ld'\n", class, instance, role, wintype);
+		fprintf(stderr, "applyrules: new client %s, class = '%s', instance = '%s', role = '%s', wintype = '%ld'\n", c->name, class, instance, role, wintype);
 
 	for (i = 0; i < LENGTH(rules); i++) {
 		r = &rules[i];
@@ -599,6 +599,18 @@ applyrules(Client *c)
 				}
 			}
 
+			if (enabled(Debug))
+				fprintf(stderr, "applyrules: client rule %d matched:\n    class: %s\n    role: %s\n    instance: %s\n    title: %s\n    wintype: %s\n    tags: %d\n    flags: %ld\n    floatpos: %s\n    monitor: %d\n",
+					i,
+					r->class ? r->class : "NULL",
+					r->role ? r->role : "NULL",
+					r->instance ? r->instance : "NULL",
+					r->title ? r->title : "NULL",
+					r->wintype ? r->wintype : "NULL",
+					r->tags,
+					r->flags,
+					r->floatpos ? r->floatpos : "NULL",
+					r->monitor);
 			break; // only allow one rule match
 		}
 	}
@@ -898,7 +910,7 @@ clientmessage(XEvent *e)
 		return;
 
 	if (enabled(Debug)) {
-		fprintf(stderr, "clientmessage: received message type of %ld for client %s\n", cme->message_type, c->name);
+		fprintf(stderr, "clientmessage: received message type of %s (%ld) for client %s\n", XGetAtomName(dpy, cme->message_type), cme->message_type, c->name);
 		fprintf(stderr, "    - data 0 = %ld\n", cme->data.l[0]);
 		fprintf(stderr, "    - data 1 = %ld\n", cme->data.l[1]);
 		fprintf(stderr, "    - data 2 = %ld\n", cme->data.l[2]);
@@ -2020,16 +2032,16 @@ propertynotify(XEvent *e)
 	} else if (ev->state == PropertyDelete) {
 		if (enabled(Debug)) {
 			if ((c = wintoclient(ev->window))) {
-				fprintf(stderr, "propertynotify: ignored property delete event (%ld) for client %s\n", ev->atom, c->name);
+				fprintf(stderr, "propertynotify: ignored property delete event %s (%ld) for client %s\n", XGetAtomName(dpy, ev->atom), ev->atom, c->name);
 			} else {
-				fprintf(stderr, "propertynotify: ignored property delete event for unknown client\n");
+				fprintf(stderr, "propertynotify: ignored property delete event %s (%ld) for unknown client\n", XGetAtomName(dpy, ev->atom), ev->atom);
 			}
 		}
 		return; /* ignore */
 	} else if ((c = wintoclient(ev->window))) {
 
 		if (enabled(Debug))
-			fprintf(stderr, "propertynotify: received message type of %ld for client %s\n", ev->atom, c->name);
+			fprintf(stderr, "propertynotify: received message type of %s (%ld) for client %s\n", XGetAtomName(dpy, ev->atom), ev->atom, c->name);
 
 		switch(ev->atom) {
 		default: break;
@@ -3100,7 +3112,7 @@ unmapnotify(XEvent *e)
 	Client *c;
 	XUnmapEvent *ev = &e->xunmap;
 	if (enabled(Debug))
-		fprintf(stderr, "unmapnotify: received event type %d, serial %ld, window %ld, event %ld, ev->send_event = %d, ev->from_configure = %d\n", ev->type, ev->serial, ev->window, ev->event, ev->send_event, ev->from_configure);
+		fprintf(stderr, "unmapnotify: received event type %s (%d), serial %ld, window %ld, event %ld, ev->send_event = %d, ev->from_configure = %d\n", XGetAtomName(dpy, ev->type), ev->type, ev->serial, ev->window, ev->event, ev->send_event, ev->from_configure);
 
 	if ((c = wintoclient(ev->window))) {
 		if (enabled(Debug))
