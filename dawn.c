@@ -457,6 +457,7 @@ static void tagmonresize(Client *c, Monitor *old, Monitor *m);
 static void tagrelposmon(Client *c, Monitor *o, Monitor *n, int *cx, int *cy, int *cw, int *ch);
 static void togglebar(const Arg *arg);
 static void togglefloating(const Arg *arg);
+static void togglemaximize(Client *c, int maximize_vert, int maximize_horz);
 static void toggletag(const Arg *arg);
 static void toggleview(const Arg *arg);
 static void unfocus(Client *c, int setfocus, Client *nextfocus);
@@ -851,7 +852,7 @@ clientmessage(XEvent *e)
 	XSetWindowAttributes swa;
 	XClientMessageEvent *cme = &e->xclient;
 	Client *c = wintoclient(cme->window);
-	unsigned int i;
+	unsigned int i, maximize_vert, maximize_horz;
 	int setfakefullscreen = 0;
 
 	if (enabled(Systray) && systray && cme->window == systray->win && cme->message_type == netatom[NetSystemTrayOP]) {
@@ -913,16 +914,11 @@ clientmessage(XEvent *e)
 				&& !ISFULLSCREEN(c)
 			)), setfakefullscreen);
 		}
-		if (cme->data.l[1] == netatom[NetWMMaximizedVert]
-		 || cme->data.l[2] == netatom[NetWMMaximizedVert]) {
-			if (cme->data.l[1] == netatom[NetWMMaximizedHorz]
-			 || cme->data.l[2] == netatom[NetWMMaximizedHorz])
-				resize(c, c->mon->wx, c->mon->wy, c->mon->ww, c->mon->wh, 0);
-			else
-				resize(c, c->x, c->mon->wy, c->w, c->mon->wh, 0);
-		} else if (cme->data.l[1] == netatom[NetWMMaximizedHorz]
-				|| cme->data.l[2] == netatom[NetWMMaximizedHorz])
-			resize(c, c->mon->wx, c->y, c->mon->ww, c->h, 0);
+
+		maximize_vert = (cme->data.l[1] == netatom[NetWMMaximizedVert] || cme->data.l[2] == netatom[NetWMMaximizedVert]);
+		maximize_horz = (cme->data.l[1] == netatom[NetWMMaximizedHorz] || cme->data.l[2] == netatom[NetWMMaximizedHorz]);
+		if (maximize_vert || maximize_horz)
+			togglemaximize(c, maximize_vert, maximize_horz);
 	} else if (cme->message_type == netatom[NetActiveWindow]) {
 		if (enabled(FocusOnNetActive)) {
 			if (c->tags & c->mon->tagset[c->mon->seltags]) {
@@ -2912,6 +2908,44 @@ togglefloating(const Arg *arg)
 }
 
 void
+togglemaximize(Client *c, int maximize_vert, int maximize_horz)
+{
+	if (!maximize_vert && !maximize_horz)
+		return;
+
+	if (ISFLOATING(c)) {
+		if (maximize_vert && maximize_horz) {
+			if (abs(c->x - c->mon->wx) <= c->mon->gappov && abs(c->y - c->mon->wy) <= c->mon->gappoh) {
+				if (!WASFLOATING(c))
+					togglefloating(&((Arg) { .v = c }));
+				else
+					resizeclient(c, c->sfx, c->sfy, c->sfw, c->sfh);
+				return;
+			}
+		} else if (maximize_vert && abs(c->y - c->mon->wy) <= c->mon->gappoh) {
+			resizeclient(c, c->x, c->sfy, c->w, c->sfh);
+			return;
+		} else if (maximize_horz && abs(c->x - c->mon->wx) <= c->mon->gappov) {
+			resizeclient(c, c->sfx, c->y, c->sfw, c->h);
+			return;
+		}
+		savefloats(&((Arg) { .v = c }));
+	}
+
+ 	SETFLOATING(c);
+ 	XRaiseWindow(dpy, c->win);
+
+	if (maximize_vert && maximize_horz)
+		setfloatpos(c, "0% 0% 100% 100%");
+	else if (maximize_vert)
+		setfloatpos(c, "-1x 0% -1w 100%");
+	else
+		setfloatpos(c, "0% -1y 100% -1h");
+
+	resizeclient(c, c->x, c->y, c->w, c->h);
+}
+
+void
 toggletag(const Arg *arg)
 {
 	unsigned int newtags;
@@ -3082,10 +3116,6 @@ unmapnotify(XEvent *e)
 		drawbarwin(systray->bar);
 	}
 }
-
-
-
-
 
 void
 updatebars(void)
