@@ -911,11 +911,29 @@ clientmessage(XEvent *e)
 
 	if (enabled(Debug)) {
 		fprintf(stderr, "clientmessage: received message type of %s (%ld) for client %s\n", XGetAtomName(dpy, cme->message_type), cme->message_type, c->name);
-		fprintf(stderr, "    - data 0 = %ld\n", cme->data.l[0]);
-		fprintf(stderr, "    - data 1 = %ld\n", cme->data.l[1]);
-		fprintf(stderr, "    - data 2 = %ld\n", cme->data.l[2]);
+		fprintf(stderr, "    - data 0 = %s (%ld)\n", (cme->data.l[0] == 0 ? "_NET_WM_STATE_REMOVE" : cme->data.l[0] == 1 ? "_NET_WM_STATE_ADD" : cme->data.l[0] == 2 ? "_NET_WM_STATE_TOGGLE" : "?"), cme->data.l[0]);
+		fprintf(stderr, "    - data 1 = %s (%ld)\n", XGetAtomName(dpy, cme->data.l[1]), cme->data.l[1]);
+		fprintf(stderr, "    - data 2 = %s (%ld)\n", XGetAtomName(dpy, cme->data.l[2]), cme->data.l[2]);
 	}
 
+	/* To change the state of a mapped window, a client MUST send a _NET_WM_STATE client message
+	 * to the root window.
+	 *
+	 *   window  = the respective client window
+	 *   message_type = _NET_WM_STATE
+	 *   format = 32
+	 *   data.l[0] = the action, as listed below
+	 *   data.l[1] = first property to alter
+	 *   data.l[2] = second property to alter
+	 *   data.l[3] = source indication
+	 *   other data.l[] elements = 0
+	 *
+	 * _NET_WM_STATE_REMOVE        0    // remove/unset property
+	 * _NET_WM_STATE_ADD           1    // add/set property
+	 * _NET_WM_STATE_TOGGLE        2    // toggle property
+	 *
+	 * https://specifications.freedesktop.org/wm-spec/wm-spec-1.3.html#idm45805407959456
+	 */
 	if (cme->message_type == netatom[NetWMState]) {
 		if (cme->data.l[1] == netatom[NetWMFullscreen]
 		 || cme->data.l[2] == netatom[NetWMFullscreen]) {
@@ -959,25 +977,6 @@ clientmessage(XEvent *e)
 	} else if (cme->message_type == netatom[NetWMMoveResize]) {
 		resizemouse(&((Arg) { .v = c }));
 	}
-
-
-// To change the state of a mapped window, a Client MUST send a _NET_WM_STATE client message to the root window:
-
-// window  = the respective client window
-// message_type = _NET_WM_STATE
-// format = 32
-// data.l[0] = the action, as listed below
-// data.l[1] = first property to alter
-// data.l[2] = second property to alter
-// data.l[3] = source indication
-// other data.l[] elements = 0
-
-// _NET_WM_STATE_REMOVE        0    /* remove/unset property */
-// _NET_WM_STATE_ADD           1    /* add/set property */
-// _NET_WM_STATE_TOGGLE        2    /* toggle property  */
-
-// clientmessage: received message type of 331 --> []  -- _NET_WM_STATE
-//	https://specifications.freedesktop.org/wm-spec/wm-spec-1.3.html#idm45805407959456
 }
 
 void
@@ -3468,6 +3467,7 @@ int
 xerror(Display *dpy, XErrorEvent *ee)
 {
 	if (ee->error_code == BadWindow
+	|| (ee->request_code == X_GetAtomName && ee->error_code == BadAtom)
 	|| (ee->request_code == X_SetInputFocus && ee->error_code == BadMatch)
 	|| (ee->request_code == X_PolyText8 && ee->error_code == BadDrawable)
 	|| (ee->request_code == X_PolyFillRectangle && ee->error_code == BadDrawable)
