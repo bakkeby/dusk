@@ -116,10 +116,10 @@ getclientcounts(Monitor *m, int *groupactive, int *n, int *clientsnmaster, int *
 				else
 					cs2++;
 			}
-			else if (i % 2)
-				cs1++;
-			else
+			else if ((i - m->nmaster) % 2)
 				cs2++;
+			else
+				cs1++;
 			i++;
 		}
 
