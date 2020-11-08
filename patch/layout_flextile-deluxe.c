@@ -350,7 +350,7 @@ arrange_left_to_right(Monitor *m, int x, int y, int h, int w, int ih, int iv, in
 	for (i = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++) {
 		if (i >= ai && i < (ai + an)) {
 			fact = c->cfact;
-			resize(c, x, y, w * (fact / facts) + ((i - ai) < rest ? 1 : 0) - (2*c->bw), h - (2*c->bw), 0);
+			resize(c, x, y, w * (fact / facts) + ((i - ai) < rest ? 1 : 0) - (2 * c->bw), h - (2 * c->bw), 0);
 			x += WIDTH(c) + iv;
 		}
 	}
@@ -371,7 +371,7 @@ arrange_top_to_bottom(Monitor *m, int x, int y, int h, int w, int ih, int iv, in
 	for (i = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++) {
 		if (i >= ai && i < (ai + an)) {
 			fact = c->cfact;
-			resize(c, x, y, w - (2*c->bw), h * (fact / facts) + ((i - ai) < rest ? 1 : 0) - (2*c->bw), 0);
+			resize(c, x, y, w - (2 * c->bw), h * (fact / facts) + ((i - ai) < rest ? 1 : 0) - (2 * c->bw), 0);
 			y += HEIGHT(c) + ih;
 		}
 	}
@@ -380,12 +380,23 @@ arrange_top_to_bottom(Monitor *m, int x, int y, int h, int w, int ih, int iv, in
 static void
 arrange_monocle(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n, int an, int ai)
 {
-	int i;
-	Client *c;
+	int i, stackno, minstackno = n + 1;
+	Client *c, *s, *f = NULL;
 
 	for (i = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++)
-		if (i >= ai && i < (ai + an))
-			resize(c, x, y, w - (2*c->bw), h - (2*c->bw), 0);
+		if (i >= ai && i < (ai + an)) {
+			for (stackno = 0, s = m->stack; s && s != c; s = s->snext, ++stackno);
+			if (stackno < minstackno) {
+				f = s;
+				minstackno = stackno;
+			}
+			XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
+		}
+
+	if (f != NULL) {
+		XMoveWindow(dpy, f->win, x, y);
+		resize(f, x, y, w - (2 * f->bw), h - (2 * f->bw), 0);
+	}
 }
 
 static void
@@ -411,7 +422,7 @@ arrange_gridmode(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n, 
 			cr = ((i - ai) % rows); // client row number
 			cx = x + cc * (cw + iv) + MIN(cc, cwrest);
 			cy = y + cr * (ch + ih) + MIN(cr, chrest);
-			resize(c, cx, cy, cw + (cc < cwrest ? 1 : 0) - 2*c->bw, ch + (cr < chrest ? 1 : 0) - 2*c->bw, False);
+			resize(c, cx, cy, cw + (cc < cwrest ? 1 : 0) - 2 * c->bw, ch + (cr < chrest ? 1 : 0) - 2 * c->bw, False);
 		}
 	}
 }
@@ -465,8 +476,8 @@ arrange_gapplessgrid(Monitor *m, int x, int y, int h, int w, int ih, int iv, int
 			resize(c,
 				x,
 				y + rn*(ch + ih) + MIN(rn, rrest),
-				cw + (cn < crest ? 1 : 0) - 2*c->bw,
-				ch + (rn < rrest ? 1 : 0) - 2*c->bw,
+				cw + (cn < crest ? 1 : 0) - 2 * c->bw,
+				ch + (rn < rrest ? 1 : 0) - 2 * c->bw,
 				0);
 			rn++;
 			cc++;
@@ -528,7 +539,7 @@ arrange_fibonacci(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n,
 	for (i = 0, j = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), j++) {
 		if (j >= ai && j < (ai + an)) {
 			if (r) {
-				if ((i % 2 && ((nh - ih) / 2) <= (bh + 2*c->bw)) || (!(i % 2) && ((nw - iv) / 2) <= (bh + 2*c->bw))) {
+				if ((i % 2 && ((nh - ih) / 2) <= (bh + 2 * c->bw)) || (!(i % 2) && ((nw - iv) / 2) <= (bh + 2 * c->bw))) {
 					r = 0;
 				}
 				if (r && i < an - 1) {
@@ -589,7 +600,7 @@ arrange_fibonacci(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n,
 				i++;
 			}
 
-			resize(c, nx, ny, nw - 2 * c->bw, nh - 2*c->bw, False);
+			resize(c, nx, ny, nw - 2 * c->bw, nh - 2 * c->bw, False);
 		}
 	}
 }
@@ -625,10 +636,10 @@ flextile(Monitor *m)
 		return;
 
 	if (enabled(SmartGapsMonocle)) {
-		/* No outer gap if full screen monocle */
+		/* Apply outer gap factor if full screen monocle */
 		if (abs(m->ltaxis[MASTER]) == MONOCLE && (abs(m->ltaxis[LAYOUT]) == NO_SPLIT || n <= m->nmaster)) {
-			oh = 0;
-			ov = 0;
+			oh = m->gappoh * smartgaps_fact;
+			ov = m->gappov * smartgaps_fact;
 		}
 	}
 

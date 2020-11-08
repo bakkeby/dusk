@@ -709,6 +709,8 @@ arrangemon(Monitor *m)
 	strncpy(m->ltsymbol, m->lt[m->sellt]->symbol, sizeof m->ltsymbol);
 	if (m->lt[m->sellt]->arrange)
 		m->lt[m->sellt]->arrange(m);
+	// else
+	// 	showhide(m->stack);
 }
 
 void
@@ -1489,6 +1491,11 @@ focus(Client *c)
 		XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
 	}
 	selmon->sel = c;
+	if (selmon->lt[selmon->sellt]->arrange == flextile && (
+			selmon->ltaxis[MASTER] == MONOCLE ||
+			selmon->ltaxis[STACK] == MONOCLE ||
+			selmon->ltaxis[STACK2] == MONOCLE))
+		arrangemon(selmon);
 	drawbars();
 }
 

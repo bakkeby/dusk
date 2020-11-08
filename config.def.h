@@ -395,7 +395,7 @@ static const Layout layouts[] = {
 	{ "[\\]",     flextile,         { -1, -1, NO_SPLIT, DWINDLE, 0, 0, NULL } }, // fibonacci dwindle
 	{ "(@)",      flextile,         { -1, -1, NO_SPLIT, SPIRAL, 0, 0, NULL } }, // fibonacci spiral
  	{ "><>",      NULL,             {0} },    /* no layout function means floating behavior */
-	{ NULL,       NULL,             {0} },
+	{ NULL,       NULL,             {0} },    /* end of layouts marker for cyclelayouts */
 };
 
 #define Shift ShiftMask
