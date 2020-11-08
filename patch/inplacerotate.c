@@ -82,6 +82,6 @@ inplacerotate(const Arg *arg)
 		}
 		i++;
 	}
-	arrange(selmon);
+	arrangemon(selmon);
 	focus(c);
 }

@@ -390,13 +390,16 @@ arrange_monocle(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n, i
 				f = s;
 				minstackno = stackno;
 			}
-			XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
 		}
 
-	if (f != NULL) {
-		XMoveWindow(dpy, f->win, x, y);
-		resize(f, x, y, w - (2 * f->bw), h - (2 * f->bw), 0);
-	}
+	for (i = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++)
+		if (i >= ai && i < (ai + an)) {
+			if (c == f) {
+				XMoveWindow(dpy, c->win, x, y);
+				resize(c, x, y, w - (2 * c->bw), h - (2 * c->bw), 0);
+			} else
+				XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
+		}
 }
 
 static void
