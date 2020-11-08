@@ -7,5 +7,5 @@ unfloatvisible(const Arg *arg)
 		if (ISVISIBLE(c) && ISFLOATING(c))
 			setflag(c, Floating, ISFIXED(c));
 
-	arrange(selmon);
+	arrangemon(selmon);
 }

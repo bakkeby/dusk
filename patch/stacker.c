@@ -34,7 +34,7 @@ stackpush(const Arg *arg)
 		sel->next = c->next;
 		c->next = sel;
 	}
-	arrange(selmon);
+	arrangemon(selmon);
 }
 
 int

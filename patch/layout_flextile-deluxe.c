@@ -72,7 +72,7 @@ setlayoutaxisex(const Arg *arg)
 
 	selmon->ltaxis[axis] = arr;
 	selmon->pertag->ltaxis[selmon->pertag->curtag][axis] = selmon->ltaxis[axis];
-	arrange(selmon);
+	arrangemon(selmon);
 }
 
 static void
@@ -714,7 +714,7 @@ mirrorlayout(const Arg *arg)
 		return;
 	selmon->ltaxis[LAYOUT] *= -1;
 	selmon->pertag->ltaxis[selmon->pertag->curtag][0] = selmon->ltaxis[LAYOUT];
-	arrange(selmon);
+	arrangemon(selmon);
 }
 
 /* Rotate layout axis for flextile */
@@ -748,7 +748,7 @@ rotatelayoutaxis(const Arg *arg)
 			selmon->ltaxis[axis] = AXIS_LAST - 1;
 	}
 	selmon->pertag->ltaxis[selmon->pertag->curtag][axis] = selmon->ltaxis[axis];
-	arrange(selmon);
+	arrangemon(selmon);
 	setflexsymbols(selmon, 0);
 }
 
@@ -756,5 +756,5 @@ void
 incnstack(const Arg *arg)
 {
 	selmon->nstack = selmon->pertag->nstacks[selmon->pertag->curtag] = MAX(selmon->nstack + arg->i, 0);
-	arrange(selmon);
+	arrangemon(selmon);
 }

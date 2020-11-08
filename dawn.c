@@ -709,8 +709,6 @@ arrangemon(Monitor *m)
 	strncpy(m->ltsymbol, m->lt[m->sellt]->symbol, sizeof m->ltsymbol);
 	if (m->lt[m->sellt]->arrange)
 		m->lt[m->sellt]->arrange(m);
-	// else
-	// 	showhide(m->stack);
 }
 
 void
@@ -1403,14 +1401,14 @@ drawbarwin(Bar *bar)
 		bar->showbar = 0;
 		updatebarpos(bar->mon);
 		XMoveResizeWindow(dpy, bar->win, bar->bx, bar->by, bar->bw, bar->bh);
-		arrange(bar->mon);
+		arrangemon(bar->mon);
 	}
 	else if (total_drawn > 0 && !bar->showbar) {
 		bar->showbar = 1;
 		updatebarpos(bar->mon);
 		XMoveResizeWindow(dpy, bar->win, bar->bx, bar->by, bar->bw, bar->bh);
 		drw_map(drw, bar->win, 0, 0, bar->bw, bar->bh);
-		arrange(bar->mon);
+		arrangemon(bar->mon);
 	} else
 		drw_map(drw, bar->win, 0, 0, bar->bw, bar->bh);
 }
@@ -1685,7 +1683,7 @@ void
 incnmaster(const Arg *arg)
 {
 	selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag] = MAX(selmon->nmaster + arg->i, 0);
-	arrange(selmon);
+	arrangemon(selmon);
 }
 
 #ifdef XINERAMA
@@ -2013,7 +2011,7 @@ pop(Client *c)
 	detach(c);
 	attach(c);
 	focus(c);
-	arrange(c->mon);
+	arrangemon(c->mon);
 }
 
 void
@@ -2054,7 +2052,7 @@ propertynotify(XEvent *e)
 		case XA_WM_TRANSIENT_FOR:
 			setflag(c, Floating, (wintoclient(trans)) != NULL);
 			if (!ISFLOATING(c) && (XGetTransientForHint(dpy, c->win, &trans)) && ISFLOATING(c))
-				arrange(c->mon);
+				arrangemon(c->mon);
 			break;
 		case XA_WM_NORMAL_HINTS:
 			updatesizehints(c);
@@ -2497,7 +2495,7 @@ setfullscreen(Client *c, int fullscreen, int restorefakefullscreen)
 			resizeclient(c, c->x, c->y, c->w, c->h);
 			restack(c->mon);
 		} else
-			arrange(c->mon);
+			arrangemon(c->mon);
 	}
 }
 
@@ -2529,7 +2527,7 @@ setlayout(const Arg *arg)
 
 	strncpy(selmon->ltsymbol, selmon->lt[selmon->sellt]->symbol, sizeof selmon->ltsymbol);
 	if (selmon->sel)
-		arrange(selmon);
+		arrangemon(selmon);
 	else
 		drawbar(selmon);
 }
@@ -2547,7 +2545,7 @@ setmfact(const Arg *arg)
 		return;
 
 	selmon->mfact = selmon->pertag->mfacts[selmon->pertag->curtag] = f;
-	arrange(selmon);
+	arrangemon(selmon);
 }
 
 void
@@ -2898,7 +2896,7 @@ togglebar(const Arg *arg)
 	updatebarpos(selmon);
 	for (bar = selmon->bar; bar; bar = bar->next)
 		XMoveResizeWindow(dpy, bar->win, bar->bx, bar->by, bar->bw, bar->bh);
-	arrange(selmon);
+	arrangemon(selmon);
 }
 
 void
@@ -2921,7 +2919,7 @@ togglefloating(const Arg *arg)
 			resizeclient(c, c->x, c->y, c->w, c->h);
 		}
 	}
-	arrange(c->mon);
+	arrangemon(c->mon);
 	setfloatinghint(c);
 }
 
@@ -3549,7 +3547,7 @@ zoom(const Arg *arg)
 		}
 	}
 
-	arrange(c->mon);
+	arrangemon(c->mon);
 }
 
 int

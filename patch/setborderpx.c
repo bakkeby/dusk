@@ -41,5 +41,5 @@ setborderpx(const Arg *arg)
 				resize(c, c->x, c->y, c->w - 2*(borderpx - prev_borderpx), c->h - 2*(borderpx - prev_borderpx), 0);
 		}
 	}
-	arrange(selmon);
+	arrangemon(selmon);
 }

@@ -10,7 +10,7 @@ setgaps(int oh, int ov, int ih, int iv)
 	selmon->gappov = ov;
 	selmon->gappih = ih;
 	selmon->gappiv = iv;
-	arrange(selmon);
+	arrangemon(selmon);
 }
 
 /* External function that takes one integer and splits it
