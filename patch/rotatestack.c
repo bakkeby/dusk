@@ -45,7 +45,7 @@ rotatestack(const Arg *arg)
 		}
 	}
 	if (c){
-		arrange(selmon);
+		arrangemon(selmon);
 		focus(f);
 		restack(selmon);
 	}
