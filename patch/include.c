@@ -24,6 +24,7 @@
 /* Other patches */
 #include "attachx.c"
 #include "cfacts.c"
+#include "clientopacity.c"
 #include "cool_autostart.c"
 #include "cyclelayouts.c"
 #include "decorationhints.c"

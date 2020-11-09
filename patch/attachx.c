@@ -22,7 +22,7 @@ attachx(Client *c)
 				c->next = at;
 				c->mon->clients = c;
 				return;
-			} else if (at->id < c->id && (!at->next || c->id < at->next->id)) {
+			} else if (at->id <= c->id && (!at->next || c->id <= at->next->id)) {
 				c->next = at->next;
 				at->next = c;
 				return;

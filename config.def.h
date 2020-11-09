@@ -18,10 +18,10 @@ static const int bar_height              = 0;   /* 0 means derive from font, >= 
 static const int vertpad                 = borderpx;  /* vertical (outer) padding of bar */
 static const int sidepad                 = borderpx;  /* horizontal (outer) padding of bar */
 
-static const int taggridrows             = 2; /* number of rows to render the tag grid */
+static const int taggridrows             = 2;   /* number of rows to render the tag grid */
 
-static int floatposgrid_x                = 5;  /* float grid columns */
-static int floatposgrid_y                = 5;  /* float grid rows */
+static int floatposgrid_x                = 5;   /* float grid columns */
+static int floatposgrid_y                = 5;   /* float grid rows */
 
 static const int horizpadbar             = 2;   /* horizontal (inner) padding for statusbar (increases lrpad) */
 static const int vertpadbar              = 0;   /* vertical (inner) padding for statusbar (increases bh, overridden by bar_height) */
@@ -29,6 +29,7 @@ static const int vertpadbar              = 0;   /* vertical (inner) padding for 
 static const char buttonbar[]            = "⛶";
 static const unsigned int systrayspacing = 2;   /* systray spacing */
 static char *toggle_float_pos            = "50% 50% 80% 80%"; // default floating position when triggering togglefloatpos
+static const double defaultopacity       = 0;   /* client default opacity, e.g. 0.75. 0 means don't apply opacity. */
 
 /* Indicators: see patch/bar_indicators.h for options */
 static int tagindicatortype              = INDICATOR_BOTTOM_BAR_SLIM;
@@ -503,6 +504,8 @@ static Key keys[] = {
 	{ MODKEY|Shift,                 XK_f,            togglefakefullscreen,   {0} },
 	{ MODKEY,                       XK_0,            view,                   {.ui = ~SPTAGMASK } },
 	{ MODKEY|Shift,                 XK_0,            tag,                    {.ui = ~SPTAGMASK } },
+	{ MODKEY|ShiftMask,             XK_plus,         changeopacity,          {.f = +0.05 } },
+	{ MODKEY|ShiftMask,             XK_minus,        changeopacity,          {.f = -0.05 } },
 	{ MODKEY|Shift,                 XK_comma,        focusmon,               {.i = -1 } },
 	{ MODKEY|Shift,                 XK_period,       focusmon,               {.i = +1 } },
 	{ MODKEY|Alt,                   XK_comma,        tagmon,                 {.i = -1 } },

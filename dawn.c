@@ -154,7 +154,8 @@ enum {
 	NetWMFullscreen,
 	NetWMName,
 	NetWMState,
-	NetWMStateAbove, // TODO _NET_WM_STATE_ABOVE
+	NetWMStateAbove,
+	NetWMWindowOpacity,
 	NetWMWindowType,
 	NetWMWindowTypeDock,
 	NetWMMaximizedVert,
@@ -291,6 +292,7 @@ struct Client {
 	unsigned int id;
 	unsigned int tags;
 	unsigned int reverttags; /* holds the original tag info from when the client was opened */
+	double opacity;
 	pid_t pid;
 	Client *next;
 	Client *snext;
@@ -365,6 +367,7 @@ typedef struct {
 	const char *instance;
 	const char *title;
 	const char *wintype;
+	double opacity;
 	unsigned int tags;
 	unsigned long flags;
 	const char *floatpos;
@@ -551,6 +554,8 @@ applyrules(Client *c)
 
 	/* rule matching */
 	c->tags = 0;
+	if (!c->opacity)
+		c->opacity = defaultopacity;
 	XGetClassHint(dpy, c->win, &ch);
 	class    = ch.res_class ? ch.res_class : broken;
 	instance = ch.res_name  ? ch.res_name  : broken;
@@ -575,6 +580,9 @@ applyrules(Client *c)
 				c->x = c->mon->wx + (c->mon->ww / 2 - WIDTH(c) / 2);
 				c->y = c->mon->wy + (c->mon->wh / 2 - HEIGHT(c) / 2);
 			}
+
+			if (r->opacity)
+				c->opacity = r->opacity;
 
 			for (m = mons; m && m->num != r->monitor; m = m->next);
 			if (m)
@@ -1574,6 +1582,8 @@ getatomprop(Client *c, Atom prop)
 		req = xatom[XembedInfo];
 	if (prop == clientatom[IsFloating] || prop == clientatom[DawnClientFlags] || prop == clientatom[DawnMonitorTags])
 		req = AnyPropertyType;
+	if (prop == netatom[NetWMWindowOpacity])
+		req = AnyPropertyType;
 
 	if (XGetWindowProperty(dpy, c->win, prop, 0L, sizeof atom, False, req,
 		&da, &di, &dl, &dl, &p) == Success && p) {
@@ -1758,6 +1768,7 @@ manage(Window w, XWindowAttributes *wa)
 	updatetitle(c);
 	getdawnclientflags(c);
 	getdawnmonitortags(c);
+	getclientopacity(c);
 
 	if (!c->mon) {
 		if (XGetTransientForHint(dpy, w, &trans) && (t = wintoclient(trans))) {
@@ -1783,6 +1794,9 @@ manage(Window w, XWindowAttributes *wa)
 				c->mon = term->mon;
 		}
 	}
+
+	if (c->opacity)
+		opacity(c, c->opacity);
 
 	if (c->x + WIDTH(c) > c->mon->mx + c->mon->mw)
 		c->x = c->mon->mx + c->mon->mw - WIDTH(c);
@@ -2012,6 +2026,7 @@ pop(Client *c)
 	attach(c);
 	focus(c);
 	arrangemon(c->mon);
+	restack(c->mon);
 }
 
 void
@@ -2050,9 +2065,10 @@ propertynotify(XEvent *e)
 		switch(ev->atom) {
 		default: break;
 		case XA_WM_TRANSIENT_FOR:
+			XGetTransientForHint(dpy, c->win, &trans);
 			setflag(c, Floating, (wintoclient(trans)) != NULL);
-			if (!ISFLOATING(c) && (XGetTransientForHint(dpy, c->win, &trans)) && ISFLOATING(c))
-				arrangemon(c->mon);
+			if (WASFLOATING(c) && ISFLOATING(c))
+				arrange(c->mon);
 			break;
 		case XA_WM_NORMAL_HINTS:
 			updatesizehints(c);
@@ -2494,8 +2510,10 @@ setfullscreen(Client *c, int fullscreen, int restorefakefullscreen)
 			c->h = MIN(c->mon->wh - c->y + c->mon->wy - 2*c->bw, c->oldh);
 			resizeclient(c, c->x, c->y, c->w, c->h);
 			restack(c->mon);
-		} else
+		} else {
 			arrangemon(c->mon);
+			restack(c->mon);
+		}
 	}
 }
 
@@ -2611,6 +2629,7 @@ setup(void)
 	netatom[NetWMFullscreen] = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
 	netatom[NetWMMaximizedVert] = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False);
 	netatom[NetWMMaximizedHorz] = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+	netatom[NetWMWindowOpacity] = XInternAtom(dpy, "_NET_WM_WINDOW_OPACITY", False);
 	netatom[NetWMWindowType] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False);
 	netatom[NetClientList] = XInternAtom(dpy, "_NET_CLIENT_LIST", False);
 	netatom[NetClientListStacking] = XInternAtom(dpy, "_NET_CLIENT_LIST_STACKING", False);
@@ -2920,6 +2939,7 @@ togglefloating(const Arg *arg)
 		}
 	}
 	arrangemon(c->mon);
+	restack(c->mon);
 	setfloatinghint(c);
 }
 
