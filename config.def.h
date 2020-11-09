@@ -642,6 +642,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( focusmon, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( focusstack, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( focusurgent, 1, {ARG_TYPE_NONE} ),
+	IPCCOMMAND( grabkeys, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( incrgaps, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( incrigaps, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( incrogaps, 1, {ARG_TYPE_SINT} ),
