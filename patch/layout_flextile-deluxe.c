@@ -380,7 +380,7 @@ arrange_top_to_bottom(Monitor *m, int x, int y, int h, int w, int ih, int iv, in
 static void
 arrange_monocle(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n, int an, int ai)
 {
-	int i, stackno, minstackno = n + 1;
+	int i, stackno, minstackno = 0xFFFFFF;
 	Client *c, *s, *f = NULL;
 
 	for (i = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++)
@@ -397,8 +397,9 @@ arrange_monocle(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n, i
 			if (c == f) {
 				XMoveWindow(dpy, c->win, x, y);
 				resize(c, x, y, w - (2 * c->bw), h - (2 * c->bw), 0);
-			} else
+			} else {
 				XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
+			}
 		}
 }
 

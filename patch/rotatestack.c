@@ -30,22 +30,22 @@ rotatestack(const Arg *arg)
 	f = selmon->sel;
 	if (arg->i > 0) {
 		for (c = nexttiled(selmon->clients); c && nexttiled(c->next); c = nexttiled(c->next));
-		if (c){
+		if (c) {
 			detach(c);
 			attach(c);
 			detachstack(c);
 			attachstack(c);
 		}
 	} else {
-		if ((c = nexttiled(selmon->clients))){
+		if ((c = nexttiled(selmon->clients))) {
 			detach(c);
 			enqueue(c);
 			detachstack(c);
 			enqueuestack(c);
 		}
 	}
-	if (c){
-		arrangemon(selmon);
+	if (c) {
+		arrange(selmon);
 		focus(f);
 		restack(selmon);
 	}
