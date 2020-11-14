@@ -177,7 +177,7 @@ enum {
 enum {
 	IsFloating,
 	DawnClientFlags,
-	DawnMonitorTags,
+	DawnClientTags,
 	ClientLast
 }; /* dawn client atoms */
 
@@ -1213,6 +1213,7 @@ createmon(void)
 
 		m->pertag->enablegaps[i] = 1;
 	}
+	getmonitorstate(m);
 	return m;
 }
 
@@ -1580,7 +1581,7 @@ getatomprop(Client *c, Atom prop)
 	Atom req = XA_ATOM;
 	if (prop == xatom[XembedInfo])
 		req = xatom[XembedInfo];
-	if (prop == clientatom[IsFloating] || prop == clientatom[DawnClientFlags] || prop == clientatom[DawnMonitorTags])
+	if (prop == clientatom[IsFloating] || prop == clientatom[DawnClientFlags] || prop == clientatom[DawnClientTags])
 		req = AnyPropertyType;
 	if (prop == netatom[NetWMWindowOpacity])
 		req = AnyPropertyType;
@@ -1766,8 +1767,8 @@ manage(Window w, XWindowAttributes *wa)
 	c->mon = NULL;
 
 	updatetitle(c);
-	getdawnclientflags(c);
-	getdawnmonitortags(c);
+	getclientflags(c);
+	getclienttags(c);
 	getclientopacity(c);
 
 	if (!c->mon) {
@@ -2093,7 +2094,6 @@ void
 quit(const Arg *arg)
 {
 	Monitor *m;
-	Client *c;
 	size_t i;
 	if (arg->i)
 		restart = 1;
@@ -2107,14 +2107,8 @@ quit(const Arg *arg)
 		}
 	}
 
-	/* set dawn client atoms */
 	for (m = mons; m; m = m->next)
-		for (i = 1, c = m->clients; c; c = c->next, ++i) {
-			c->id = i;
-			setdawnclientflags(c);
-			setdawnmonitortags(c);
-		}
-	XSync(dpy, False);
+		persistmonitorstate(m);
 }
 
 Monitor *
@@ -2615,7 +2609,7 @@ setup(void)
 	xatom[XembedInfo] = XInternAtom(dpy, "_XEMBED_INFO", False);
 	clientatom[IsFloating] = XInternAtom(dpy, "_IS_FLOATING", False);
 	clientatom[DawnClientFlags] = XInternAtom(dpy, "_DAWN_CLIENT_FLAGS", False);
-	clientatom[DawnMonitorTags] = XInternAtom(dpy, "_DAWN_MONITOR_TAGS", False);
+	clientatom[DawnClientTags] = XInternAtom(dpy, "_DAWN_CLIENT_TAGS", False);
 	netatom[NetDesktopViewport] = XInternAtom(dpy, "_NET_DESKTOP_VIEWPORT", False);
 	netatom[NetNumberOfDesktops] = XInternAtom(dpy, "_NET_NUMBER_OF_DESKTOPS", False);
 	netatom[NetCurrentDesktop] = XInternAtom(dpy, "_NET_CURRENT_DESKTOP", False);
