@@ -1327,7 +1327,7 @@ drawbarwin(Bar *bar)
 		if (br->bar != bar->idx || !br->widthfunc || (br->monitor == 'A' && bar->mon != selmon))
 			continue;
 		if (br->monitor != 'A' && br->monitor != -1 && br->monitor != bar->mon->index &&
-				(br->drawfunc != draw_systray || (lastmon->index >= br->monitor && bar->mon->index == 0))) // hack: draw systray on first monitor if the designated one is not available
+				!(br->drawfunc == draw_systray && br->monitor > lastmon->index && bar->mon->index == 0)) // hack: draw systray on first monitor if the designated one is not available
 			continue;
 		drw_setscheme(drw, scheme[SchemeNorm]);
 		warg.w = (br->alignment < BAR_ALIGN_RIGHT_LEFT ? lw : rw);
