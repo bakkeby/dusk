@@ -63,7 +63,7 @@ setclienttags(Client *c)
 void
 getclientflags(Client *c)
 {
-	Atom flags = getatomprop(c, clientatom[DawnClientFlags]);
+	Atom flags = getatomprop(c, clientatom[DawnClientFlags], AnyPropertyType);
 	if (flags)
 		c->flags |= flags;
 }
@@ -72,7 +72,7 @@ void
 getclienttags(Client *c)
 {
 	Monitor *m;
-	Atom clienttags = getatomprop(c, clientatom[DawnClientTags]);
+	Atom clienttags = getatomprop(c, clientatom[DawnClientTags], AnyPropertyType);
 	if (clienttags) {
 		c->tags = (clienttags >> 12);
 		c->id = (clienttags & 0xFF0) >> 4;

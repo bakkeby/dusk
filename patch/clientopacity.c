@@ -30,7 +30,7 @@ opacity(Client *c, double opacity)
 void
 getclientopacity(Client *c)
 {
-	signed long atom = getatomprop(c, netatom[NetWMWindowOpacity]);
+	signed long atom = getatomprop(c, netatom[NetWMWindowOpacity], AnyPropertyType);
 	if (atom < 0)
 		atom = atom + 0xffffffff;
 

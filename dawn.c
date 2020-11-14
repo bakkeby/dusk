@@ -415,7 +415,7 @@ static void focus(Client *c);
 static void focusin(XEvent *e);
 static void focusmon(const Arg *arg);
 static void focusstack(const Arg *arg);
-static Atom getatomprop(Client *c, Atom prop);
+static Atom getatomprop(Client *c, Atom prop, Atom req);
 static int getrootptr(int *x, int *y);
 static long getstate(Window w);
 static int gettextprop(Window w, Atom atom, char *text, unsigned int size);
@@ -559,7 +559,7 @@ applyrules(Client *c)
 	XGetClassHint(dpy, c->win, &ch);
 	class    = ch.res_class ? ch.res_class : broken;
 	instance = ch.res_name  ? ch.res_name  : broken;
-	wintype  = getatomprop(c, netatom[NetWMWindowType]);
+	wintype  = getatomprop(c, netatom[NetWMWindowType], XA_ATOM);
 	gettextprop(c->win, wmatom[WMWindowRole], role, sizeof(role));
 
 	if (enabled(Debug))
@@ -1569,7 +1569,7 @@ focusstack(const Arg *arg)
 }
 
 Atom
-getatomprop(Client *c, Atom prop)
+getatomprop(Client *c, Atom prop, Atom req)
 {
 	int di;
 	unsigned long dl;
@@ -1578,14 +1578,6 @@ getatomprop(Client *c, Atom prop)
 
 	/* FIXME getatomprop should return the number of items and a pointer to
 	 * the stored data instead of this workaround */
-	Atom req = XA_ATOM;
-	if (prop == xatom[XembedInfo])
-		req = xatom[XembedInfo];
-	if (prop == clientatom[IsFloating] || prop == clientatom[DawnClientFlags] || prop == clientatom[DawnClientTags])
-		req = AnyPropertyType;
-	if (prop == netatom[NetWMWindowOpacity])
-		req = AnyPropertyType;
-
 	if (XGetWindowProperty(dpy, c->win, prop, 0L, sizeof atom, False, req,
 		&da, &di, &dl, &dl, &p) == Success && p) {
 		atom = *(Atom *)p;
@@ -1815,7 +1807,7 @@ manage(Window w, XWindowAttributes *wa)
 
 	/* If the client indicates that it is in fullscreen, or if the FullScreen flag has been
 	 * explictly set via client rules, then enable fullscreen now. */
-	if (getatomprop(c, netatom[NetWMState]) == netatom[NetWMFullscreen] || ISFULLSCREEN(c)) {
+	if (getatomprop(c, netatom[NetWMState], XA_ATOM) == netatom[NetWMFullscreen] || ISFULLSCREEN(c)) {
 		setflag(c, FullScreen, 0);
 		setfullscreen(c, 1, 0);
 	}
@@ -1843,7 +1835,7 @@ manage(Window w, XWindowAttributes *wa)
 
 	if (trans != None)
 		c->prevflags |= Floating;
-	if (!ISFLOATING(c) && (ISFIXED(c) || WASFLOATING(c) || getatomprop(c, clientatom[IsFloating])))
+	if (!ISFLOATING(c) && (ISFIXED(c) || WASFLOATING(c) || getatomprop(c, clientatom[IsFloating], AnyPropertyType)))
 		SETFLOATING(c);
 
 	if (ISFLOATING(c)) {
