@@ -1,6 +1,6 @@
 typedef struct {
-       const char *name;
-       const void *cmd;
+	const char *name;
+	const void *cmd;
 } Sp;
 
 static void removescratch(const Arg *arg);

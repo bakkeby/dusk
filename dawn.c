@@ -219,14 +219,14 @@ enum {
 
 typedef struct TagState TagState;
 struct TagState {
-       int selected;
-       int occupied;
-       int urgent;
+	int selected;
+	int occupied;
+	int urgent;
 };
 
 typedef struct ClientState ClientState;
 struct ClientState {
-       int isfixed, isfloating, isurgent, neverfocus, oldstate, isfullscreen;
+	int isfixed, isfloating, isurgent, neverfocus, oldstate, isfullscreen;
 };
 
 typedef union {
@@ -1904,18 +1904,16 @@ motionnotify(XEvent *e)
 	Client *sel;
 	XMotionEvent *ev = &e->xmotion;
 
-	// temporary code
 	// if (enabled(Debug)) {
-	// sel = wintoclient(ev->window);
-	// if (sel) {
-	// 	fprintf(stderr, "motionnotify: received event x = %d, y = %d for client %s\n", ev->x_root, ev->y_root, sel->name);
-	// } else if (ev->window == root) {
-	// 	fprintf(stderr, "motionnotify: received event x = %d, y = %d for root window\n", ev->x_root, ev->y_root);
-	// } else {
-	// 	fprintf(stderr, "motionnotify: received event x = %d, y = %d for no window?\n", ev->x_root, ev->y_root);
+	// 	sel = wintoclient(ev->window);
+	// 	if (sel) {
+	// 		fprintf(stderr, "motionnotify: received event x = %d, y = %d for client %s\n", ev->x_root, ev->y_root, sel->name);
+	// 	} else if (ev->window == root) {
+	// 		fprintf(stderr, "motionnotify: received event x = %d, y = %d for root window\n", ev->x_root, ev->y_root);
+	// 	} else {
+	// 		fprintf(stderr, "motionnotify: received event x = %d, y = %d for no window?\n", ev->x_root, ev->y_root);
+	// 	}
 	// }
-	// }
-	// temporary code
 
 	if (ev->window != root)
 		return;
