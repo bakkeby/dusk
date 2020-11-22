@@ -1135,6 +1135,7 @@ createmon(void)
 	m->gappov = gappov;
 	for (mi = 0, mon = mons; mon; mon = mon->next, mi++); // monitor index
 	m->index = mi;
+	getmonitorstate(m);
 	for (j = 0; j < LENGTH(monrules); j++) {
 		mr = &monrules[j];
 		if ((mr->monitor == -1 || mr->monitor == mi)
@@ -1212,7 +1213,6 @@ createmon(void)
 
 		m->pertag->enablegaps[i] = 1;
 	}
-	getmonitorstate(m);
 	return m;
 }
 
