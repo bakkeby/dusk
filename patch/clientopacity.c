@@ -34,5 +34,8 @@ getclientopacity(Client *c)
 	if (atom < 0)
 		atom = atom + 0xffffffff;
 
-	c->opacity = (double)(atom) / 0xffffffff;
+	if (atom == 0)
+		c->opacity = defaultopacity;
+	else
+		c->opacity = (double)(atom) / 0xffffffff;
 }

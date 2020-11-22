@@ -554,8 +554,6 @@ applyrules(Client *c)
 
 	/* rule matching */
 	c->tags = 0;
-	if (!c->opacity)
-		c->opacity = defaultopacity;
 	XGetClassHint(dpy, c->win, &ch);
 	class    = ch.res_class ? ch.res_class : broken;
 	instance = ch.res_name  ? ch.res_name  : broken;
