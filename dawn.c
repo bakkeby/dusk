@@ -957,12 +957,13 @@ clientmessage(XEvent *e)
 			togglemaximize(c, maximize_vert, maximize_horz);
 	} else if (cme->message_type == netatom[NetActiveWindow]) {
 		if (enabled(FocusOnNetActive)) {
-			if (c->tags & c->mon->tagset[c->mon->seltags]) {
-				selmon = c->mon;
+			if (c->tags & c->mon->tagset[c->mon->seltags])
 				focus(c);
-			} else {
+			else {
 				for (i = 0; i < NUMTAGS && !((1 << i) & c->tags); i++);
 				if (i < NUMTAGS) {
+					if (c != selmon->sel)
+						unfocus(selmon->sel, 0, NULL);
 					selmon = c->mon;
 					if (((1 << i) & TAGMASK) != selmon->tagset[selmon->seltags])
 						view(&((Arg) { .ui = 1 << i }));
