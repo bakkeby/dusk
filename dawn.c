@@ -329,13 +329,12 @@ typedef struct {
 
 typedef struct Pertag Pertag;
 struct Monitor {
-	int index;
 	char ltsymbol[16];
 	float mfact;
 	int ltaxis[4];
 	int nstack;
 	int nmaster;
-	int num;
+	int num;              /* monitor index */
 	int mx, my, mw, mh;   /* screen size */
 	int wx, wy, ww, wh;   /* window area  */
 	int gappih;           /* horizontal gap between windows */
@@ -401,7 +400,7 @@ static void clientmessage(XEvent *e);
 static void configure(Client *c);
 static void configurenotify(XEvent *e);
 static void configurerequest(XEvent *e);
-static Monitor *createmon(void);
+static Monitor *createmon(int num);
 static void destroynotify(XEvent *e);
 static void detach(Client *c);
 static void detachstack(Client *c);
@@ -756,7 +755,7 @@ buttonpress(XEvent *e)
 				br = &barrules[r];
 				if (br->bar != bar->idx || (br->monitor == 'A' && m != selmon) || br->clickfunc == NULL)
 					continue;
-				if (br->monitor != 'A' && br->monitor != -1 && br->monitor != bar->mon->index)
+				if (br->monitor != 'A' && br->monitor != -1 && br->monitor != bar->mon->num)
 					continue;
 				if (bar->x[r] <= ev->x && ev->x <= bar->x[r] + bar->w[r]) {
 					carg.x = ev->x - bar->x[r];
@@ -1111,10 +1110,10 @@ configurerequest(XEvent *e)
 }
 
 Monitor *
-createmon(void)
+createmon(int num)
 {
-	Monitor *m, *mon;
-	int i, n, mi, max_bars = 2, istopbar = topbar;
+	Monitor *m;
+	int i, n, max_bars = 2, istopbar = topbar;
 	int layout;
 
 	const BarRule *br;
@@ -1133,12 +1132,11 @@ createmon(void)
 	m->gappiv = gappiv;
 	m->gappoh = gappoh;
 	m->gappov = gappov;
-	for (mi = 0, mon = mons; mon; mon = mon->next, mi++); // monitor index
-	m->index = mi;
+	m->num = num;
 	getmonitorstate(m);
 	for (j = 0; j < LENGTH(monrules); j++) {
 		mr = &monrules[j];
-		if ((mr->monitor == -1 || mr->monitor == mi)
+		if ((mr->monitor == -1 || mr->monitor == m->num)
 				&& (mr->tag <= 0 || (m->tagset[0] & (1 << (mr->tag - 1))))) {
 			layout = MAX(mr->layout, 0);
 			layout = MIN(layout, LENGTH(layouts) - 1);
@@ -1161,7 +1159,7 @@ createmon(void)
 	/* Derive the number of bars for this monitor based on bar rules */
 	for (n = -1, i = 0; i < LENGTH(barrules); i++) {
 		br = &barrules[i];
-		if (br->monitor == 'A' || br->monitor == -1 || br->monitor == mi)
+		if (br->monitor == 'A' || br->monitor == -1 || br->monitor == m->num)
 			n = MAX(br->bar, n);
 	}
 
@@ -1194,7 +1192,7 @@ createmon(void)
 		/* init layouts */
 		for (j = 0; j < LENGTH(monrules); j++) {
 			mr = &monrules[j];
-			if ((mr->monitor == -1 || mr->monitor == mi) && (mr->tag == -1 || mr->tag == i)) {
+			if ((mr->monitor == -1 || mr->monitor == m->num) && (mr->tag == -1 || mr->tag == i)) {
 				layout = MAX(mr->layout, 0);
 				layout = MIN(layout, LENGTH(layouts) - 1);
 				m->pertag->ltidxs[i][0] = &layouts[layout];
@@ -1326,8 +1324,8 @@ drawbarwin(Bar *bar)
 		br = &barrules[r];
 		if (br->bar != bar->idx || !br->widthfunc || (br->monitor == 'A' && bar->mon != selmon))
 			continue;
-		if (br->monitor != 'A' && br->monitor != -1 && br->monitor != bar->mon->index &&
-				!(br->drawfunc == draw_systray && br->monitor > lastmon->index && bar->mon->index == 0)) // hack: draw systray on first monitor if the designated one is not available
+		if (br->monitor != 'A' && br->monitor != -1 && br->monitor != bar->mon->num &&
+				!(br->drawfunc == draw_systray && br->monitor > lastmon->num && bar->mon->num == 0)) // hack: draw systray on first monitor if the designated one is not available
 			continue;
 		drw_setscheme(drw, scheme[SchemeNorm]);
 		warg.w = (br->alignment < BAR_ALIGN_RIGHT_LEFT ? lw : rw);
@@ -3241,24 +3239,23 @@ updategeom(void)
 		if (enabled(SortScreens))
 			sortscreens(unique, nn);
 		if (n <= nn) { /* new monitors available */
-			for (i = 0; i < (nn - n); i++) {
+			for (i = n; i < nn; i++) {
 				for (m = mons; m && m->next; m = m->next);
 				if (m)
-					m->next = createmon();
+					m->next = createmon(i);
 				else
-					mons = createmon();
+					mons = createmon(i);
 			}
-			for (i = 0, m = mons; i < nn && m; m = m->next, i++) {
-				if (i >= n
-				|| unique[i].x_org != m->mx || unique[i].y_org != m->my
-				|| unique[i].width != m->mw || unique[i].height != m->mh)
+			for (m = mons; m && m->num < nn; m = m->next) {
+				if (m->num >= n
+				|| unique[m->num].x_org != m->mx || unique[m->num].y_org != m->my
+				|| unique[m->num].width != m->mw || unique[m->num].height != m->mh)
 				{
 					dirty = 1;
-					m->num = i;
-					m->mx = m->wx = unique[i].x_org;
-					m->my = m->wy = unique[i].y_org;
-					m->mw = m->ww = unique[i].width;
-					m->mh = m->wh = unique[i].height;
+					m->mx = m->wx = unique[m->num].x_org;
+					m->my = m->wy = unique[m->num].y_org;
+					m->mw = m->ww = unique[m->num].width;
+					m->mh = m->wh = unique[m->num].height;
 					updatebarpos(m);
 				}
 			}
@@ -3278,14 +3275,12 @@ updategeom(void)
 				cleanupmon(m);
 			}
 		}
-		for (i = 0, m = mons; m; m = m->next, i++)
-			m->index = i;
 		free(unique);
 	} else
 #endif /* XINERAMA */
 	{ /* default monitor setup */
 		if (!mons)
-			mons = createmon();
+			mons = createmon(0);
 		if (mons->mw != sw || mons->mh != sh) {
 			dirty = 1;
 			mons->mw = mons->ww = sw;

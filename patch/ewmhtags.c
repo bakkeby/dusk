@@ -5,7 +5,7 @@ persistmonitorstate(Monitor *m)
 	unsigned int i;
 	char atom[22];
 
-	sprintf(atom, "_DAWN_MONITOR_TAGS_%u", m->index);
+	sprintf(atom, "_DAWN_MONITOR_TAGS_%u", m->num);
 
 	unsigned long data[] = { m->tagset[m->seltags] };
 	XChangeProperty(dpy, root, XInternAtom(dpy, atom, False), XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
@@ -56,7 +56,7 @@ setclientflags(Client *c)
 void
 setclienttags(Client *c)
 {
-	unsigned long data[] = { c->mon->index | (c->id << 4) | (c->tags << 12)};
+	unsigned long data[] = { c->mon->num | (c->id << 4) | (c->tags << 12)};
 	XChangeProperty(dpy, c->win, clientatom[DawnClientTags], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
 }
 
@@ -77,7 +77,7 @@ getclienttags(Client *c)
 		c->tags = (clienttags >> 12);
 		c->id = (clienttags & 0xFF0) >> 4;
 		for (m = mons; m; m = m->next)
-			if (m->index == (clienttags & 0xF)) {
+			if (m->num == (clienttags & 0xF)) {
 				c->mon = m;
 				break;
 			}
@@ -93,7 +93,7 @@ getmonitorstate(Monitor *m)
 	unsigned char *p = NULL;
 	Atom da, tags = None;
 
-	sprintf(atom, "_DAWN_MONITOR_TAGS_%u", m->index);
+	sprintf(atom, "_DAWN_MONITOR_TAGS_%u", m->num);
 
 	Atom monitortags = XInternAtom(dpy, atom, True);
 	if (!monitortags)
