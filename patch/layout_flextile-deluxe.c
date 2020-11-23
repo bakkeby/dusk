@@ -84,7 +84,7 @@ setlayoutex(const Arg *arg)
 static void
 layout_no_split(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n)
 {
-	(&flextiles[m->ltaxis[MASTER]])->arrange(m, x, y, h, w, ih, iv, n, n, 0);
+	(&flextiles[m->ltaxis[m->nmaster >= n ? MASTER : STACK]])->arrange(m, x, y, h, w, ih, iv, n, n, 0);
 }
 
 static void
@@ -751,11 +751,4 @@ rotatelayoutaxis(const Arg *arg)
 	selmon->pertag->ltaxis[selmon->pertag->curtag][axis] = selmon->ltaxis[axis];
 	arrangemon(selmon);
 	setflexsymbols(selmon, 0);
-}
-
-void
-incnstack(const Arg *arg)
-{
-	selmon->nstack = selmon->pertag->nstacks[selmon->pertag->curtag] = MAX(selmon->nstack + arg->i, 0);
-	arrangemon(selmon);
 }

@@ -4,7 +4,6 @@ static void mirrorlayout(const Arg *arg);
 static void rotatelayoutaxis(const Arg *arg);
 static void setlayoutaxisex(const Arg *arg);
 static void setlayoutex(const Arg *arg);
-static void incnstack(const Arg *arg);
 
 /* Symbol handlers */
 static void setflexsymbols(Monitor *m, unsigned int n);
@@ -39,7 +38,6 @@ static void arrange_gridmode(Monitor *m, int ax, int ay, int ah, int aw, int ih,
 static void arrange_horizgrid(Monitor *m, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
 static void arrange_dwindle(Monitor *m, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
 static void arrange_spiral(Monitor *m, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
-
 
 /* Layout arrangements */
 enum {

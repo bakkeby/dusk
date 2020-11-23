@@ -11,6 +11,7 @@ stackfocus(const Arg *arg)
 	    i -= ISVISIBLE(c) ? 1 : 0, p = c, c = c->next);
 	focus(c ? c : p);
 	restack(selmon);
+	arrangemon(selmon);
 }
 
 void

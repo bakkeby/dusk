@@ -421,6 +421,7 @@ static int gettextprop(Window w, Atom atom, char *text, unsigned int size);
 static void grabbuttons(Client *c, int focused);
 static void grabkeys(const Arg *arg);
 static void incnmaster(const Arg *arg);
+static void incnstack(const Arg *arg);
 static void keypress(XEvent *e);
 static void killclient(const Arg *arg);
 static void manage(Window w, XWindowAttributes *wa);
@@ -714,6 +715,7 @@ arrangemon(Monitor *m)
 	strncpy(m->ltsymbol, m->lt[m->sellt]->symbol, sizeof m->ltsymbol);
 	if (m->lt[m->sellt]->arrange)
 		m->lt[m->sellt]->arrange(m);
+	drawbar(m);
 }
 
 void
@@ -1458,8 +1460,10 @@ focus(Client *c)
 	if (selmon->sel && selmon->sel != c)
 		unfocus(selmon->sel, 0, c);
 	if (c) {
-		if (c->mon != selmon)
+		if (c->mon != selmon) {
+			drawbar(selmon);
 			selmon = c->mon;
+		}
 		if (ISURGENT(c))
 			seturgent(c, 0);
 		detachstack(c);
@@ -1500,7 +1504,8 @@ focus(Client *c)
 			selmon->ltaxis[STACK] == MONOCLE ||
 			selmon->ltaxis[STACK2] == MONOCLE))
 		arrangemon(selmon);
-	drawbars();
+	else
+		drawbar(selmon);
 }
 
 /* there are some broken focus acquiring clients needing extra handling */
@@ -1683,8 +1688,28 @@ void
 incnmaster(const Arg *arg)
 {
 	selmon->nmaster = selmon->pertag->nmasters[selmon->pertag->curtag] = MAX(selmon->nmaster + arg->i, 0);
-	arrangemon(selmon);
+	if (selmon->lt[selmon->sellt]->arrange == flextile && (
+			selmon->ltaxis[MASTER] == MONOCLE ||
+			selmon->ltaxis[STACK] == MONOCLE ||
+			selmon->ltaxis[STACK2] == MONOCLE))
+		arrange(selmon);
+	else
+		arrangemon(selmon);
 }
+
+void
+incnstack(const Arg *arg)
+{
+	selmon->nstack = selmon->pertag->nstacks[selmon->pertag->curtag] = MAX(selmon->nstack + arg->i, 0);
+	if (selmon->lt[selmon->sellt]->arrange == flextile && (
+			selmon->ltaxis[MASTER] == MONOCLE ||
+			selmon->ltaxis[STACK] == MONOCLE ||
+			selmon->ltaxis[STACK2] == MONOCLE))
+		arrange(selmon);
+	else
+		arrangemon(selmon);
+}
+
 
 #ifdef XINERAMA
 static int
@@ -2243,7 +2268,6 @@ restack(Monitor *m)
 	XWindowChanges wc;
 	int n;
 
-	drawbar(m);
 	if (!m->sel)
 		return;
 	if (ISFLOATING(m->sel) || !m->lt[m->sellt]->arrange)
