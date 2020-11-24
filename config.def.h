@@ -32,7 +32,7 @@ static char *toggle_float_pos            = "50% 50% 80% 80%"; // default floatin
 static const double defaultopacity       = 0;   /* client default opacity, e.g. 0.75. 0 means don't apply opacity. */
 
 /* Indicators: see patch/bar_indicators.h for options */
-static int tagindicatortype              = INDICATOR_BOTTOM_BAR_SLIM;
+static int tagindicatortype              = INDICATOR_NONE;
 static int fakefsindicatortype           = INDICATOR_PLUS;
 static int floatfakefsindicatortype      = INDICATOR_PLUS_AND_LARGER_SQUARE;
 static int floatindicatortype            = INDICATOR_TOP_LEFT_LARGER_SQUARE;
@@ -365,6 +365,10 @@ static const MonitorRule monrules[] = {
  * index. If the icon index is is greater than the number of tag icons then it will wrap around
  * until it an icon matches. Similarly if there are two tag icons then it would alternate between
  * them. This works seamlessly with alternative tags and alttagsdecoration patches.
+ *
+ * If a tag icon is an empty string then that tag will be hidden unless it is occupied by clients.
+ * In practice this would allow for selective hiding of unoccupied tags, e.g. always show "web"
+ * or "email" tags, but hide the rest unless they have clients.
  */
 static char *tagicons[][NUMTAGS*2] = {
 	[DEFAULT_TAGS]        = { " ₁", " ₂", " ₃", " ₄", " ₅", " ₆", " ₇", " ₈", " ₉", " ₁", " ₂", " ₃", " ₄", " ₅", " ₆", " ₇", " ₈", " ₉" },

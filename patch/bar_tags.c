@@ -2,15 +2,7 @@ int
 width_tags(Bar *bar, BarArg *a)
 {
 	int w, i, tw;
-	Client *c;
-	unsigned int occ = 0;
-	if (enabled(HideVacantTags))
-		for (c = bar->mon->clients; c; c = c->next)
-			occ |= c->tags == 255 ? 0 : c->tags;
-
 	for (w = 0, i = 0; i < NUMTAGS; i++) {
-		if (enabled(HideVacantTags) && !(occ & 1 << i || bar->mon->tagset[bar->mon->seltags] & 1 << i))
-			continue;
 		tw = TEXTW(tagicon(bar->mon, i));
 		if (tw <= lrpad)
 			continue;
@@ -35,10 +27,6 @@ draw_tags(Bar *bar, BarArg *a)
 			urg |= c->tags;
 	}
 	for (i = 0; i < NUMTAGS; i++) {
-		/* do not draw vacant tags */
-		if (enabled(HideVacantTags) && !(occ & 1 << i || m->tagset[m->seltags] & 1 << i))
-			continue;
-
 		icon = tagicon(bar->mon, i);
 		invert = 0;
 		w = TEXTW(icon);
@@ -64,22 +52,13 @@ int
 click_tags(Bar *bar, Arg *arg, BarArg *a)
 {
 	int i = 0, tw, x = lrpad / 2;
-	Client *c;
-	unsigned int occ = 0;
-	if (enabled(HideVacantTags))
-		for (c = bar->mon->clients; c; c = c->next)
-			occ |= c->tags == 255 ? 0 : c->tags;
-
 	do {
-		if (enabled(HideVacantTags) && !(occ & 1 << i || bar->mon->tagset[bar->mon->seltags] & 1 << i))
-			continue;
 		tw = TEXTW(tagicon(bar->mon, i));
 		if (tw <= lrpad)
 			continue;
 		x += tw;
 	} while (a->x >= x && ++i < NUMTAGS);
-	if (i < NUMTAGS) {
+	if (i < NUMTAGS)
 		arg->ui = 1 << i;
-	}
 	return ClkTagBar;
 }

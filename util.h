@@ -24,7 +24,7 @@ static const unsigned long
 	SpawnCwd = 0x40, // spawn applications in the currently selected client's working directory
 	ColorEmoji = 0x80,
 	Status2DNoAlpha = 0x100, // option to not use alpha when drawing status2d status
-	HideVacantTags = 0x200, // hides vacant tags
+	FuncPlaceholder0x200 = 0x200,
 	BarBorder = 0x400, // draw a border around the bar
 	NoBorder = 0x800, // as per the noborder patch, show no border when only one client in tiled mode
 	Warp = 0x1000, // warp patch
