@@ -1,7 +1,7 @@
 int
 width_tags(Bar *bar, BarArg *a)
 {
-	int w, i;
+	int w, i, tw;
 	Client *c;
 	unsigned int occ = 0;
 	if (enabled(HideVacantTags))
@@ -11,7 +11,10 @@ width_tags(Bar *bar, BarArg *a)
 	for (w = 0, i = 0; i < NUMTAGS; i++) {
 		if (enabled(HideVacantTags) && !(occ & 1 << i || bar->mon->tagset[bar->mon->seltags] & 1 << i))
 			continue;
-		w += TEXTW(tagicon(bar->mon, i));
+		tw = TEXTW(tagicon(bar->mon, i));
+		if (tw <= lrpad)
+			continue;
+		w += tw;
 	}
 	return w;
 }
@@ -39,6 +42,9 @@ draw_tags(Bar *bar, BarArg *a)
 		icon = tagicon(bar->mon, i);
 		invert = 0;
 		w = TEXTW(icon);
+		if (w <= lrpad)
+			continue;
+
 		drw_setscheme(drw, scheme[
 			m->tagset[m->seltags] & 1 << i
 			? SchemeTagsSel
@@ -57,7 +63,7 @@ draw_tags(Bar *bar, BarArg *a)
 int
 click_tags(Bar *bar, Arg *arg, BarArg *a)
 {
-	int i = 0, x = lrpad / 2;
+	int i = 0, tw, x = lrpad / 2;
 	Client *c;
 	unsigned int occ = 0;
 	if (enabled(HideVacantTags))
@@ -67,7 +73,10 @@ click_tags(Bar *bar, Arg *arg, BarArg *a)
 	do {
 		if (enabled(HideVacantTags) && !(occ & 1 << i || bar->mon->tagset[bar->mon->seltags] & 1 << i))
 			continue;
-		x += TEXTW(tagicon(bar->mon, i));
+		tw = TEXTW(tagicon(bar->mon, i));
+		if (tw <= lrpad)
+			continue;
+		x += tw;
 	} while (a->x >= x && ++i < NUMTAGS);
 	if (i < NUMTAGS) {
 		arg->ui = 1 << i;
