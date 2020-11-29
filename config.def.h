@@ -347,11 +347,11 @@ static const MonitorRule monrules[] = {
  * Examples:
  *
  *  1) static char *tagicons[][NUMTAGS*2] = {
- *         [DEFAULT_TAGS] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F", "G", "H", "I" },
+ *         [IconsDefault] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F", "G", "H", "I" },
  *     }
  *
  *  2) static char *tagicons[][1] = {
- *         [DEFAULT_TAGS] = { "•" },
+ *         [IconsDefault] = { "•" },
  *     }
  *
  * The first example would result in the tags on the first monitor to be 1 through 9, while the
@@ -364,16 +364,16 @@ static const MonitorRule monrules[] = {
  * same from a technical standpoint - the icon index is derived from the tag index and the monitor
  * index. If the icon index is is greater than the number of tag icons then it will wrap around
  * until it an icon matches. Similarly if there are two tag icons then it would alternate between
- * them. This works seamlessly with alternative tags and alttagsdecoration patches.
+ * them.
  *
  * If a tag icon is an empty string then that tag will be hidden unless it is occupied by clients.
  * In practice this would allow for selective hiding of unoccupied tags, e.g. always show "web"
  * or "email" tags, but hide the rest unless they have clients.
  */
 static char *tagicons[][NUMTAGS*2] = {
-	[DEFAULT_TAGS]        = { " ₁", " ₂", " ₃", " ₄", " ₅", " ₆", " ₇", " ₈", " ₉", " ₁", " ₂", " ₃", " ₄", " ₅", " ₆", " ₇", " ₈", " ₉" },
-	[ALTERNATIVE_TAGS]    = { "",   "",   "",   "",   "",   "",   "",   "",   "",   "",   "",   "",   "",   "",   "",   "",   "",   "" },
-	[OCCUPIED_TAGS]       = { "◉₁", "☢₂", "❖₃", "⚉₄", "♻₅", "⌬₆", "♹₇", "✇₈", "☉₉", "☋₁", "ℓ₂", "҂₃", "∆₄", "√₅", "∏₆", "Ξ₇", "Ω₈", "ƒ₉" },
+	[IconsDefault]        = { " ₁", " ₂", " ₃", " ₄", " ₅", " ₆", " ₇", " ₈", " ₉", " ₁", " ₂", " ₃", " ₄", " ₅", " ₆", " ₇", " ₈", " ₉" },
+	[IconsVacant]         = { " ₁", " ₂", " ₃", " ₄", " ₅", " ₆", " ₇", " ₈", " ₉", " ₁", " ₂", " ₃", " ₄", " ₅", " ₆", " ₇", " ₈", " ₉" },
+	[IconsOccupied]       = { "◉₁", "☢₂", "❖₃", "⚉₄", "♻₅", "⌬₆", "♹₇", "✇₈", "☉₉", "☋₁", "ℓ₂", "҂₃", "∆₄", "√₅", "∏₆", "Ξ₇", "Ω₈", "ƒ₉" },
 };
 
 /* layout(s) */
@@ -518,7 +518,6 @@ static Key keys[] = {
 	{ MODKEY|Alt|Shift,             XK_period,       tagallmon,              {.i = -1 } },
 	{ MODKEY|Alt|Ctrl,              XK_comma,        tagswapmon,             {.i = +1 } },
 	{ MODKEY|Alt|Ctrl,              XK_period,       tagswapmon,             {.i = -1 } },
-	{ MODKEY,                       XK_n,            togglealttag,           {0} },
 	{ MODKEY,                       XK_Left,         focusdir,               {.i = 0 } }, // left
 	{ MODKEY,                       XK_Right,        focusdir,               {.i = 1 } }, // right
 	{ MODKEY,                       XK_Up,           focusdir,               {.i = 2 } }, // up
@@ -631,12 +630,15 @@ static Button buttons[] = {
 	{ ClkClientWin,              MODKEY|Alt,              Button5,        cyclelayout,    {.i = +1 } },
 	{ ClkTagBar,                 0,                       Button1,        view,           {0} },
 	{ ClkTagBar,                 0,                       Button3,        toggleview,     {0} },
+	{ ClkTagBar,                 0,                       Button4,        cycleiconset,   {.i = +1 } },
+	{ ClkTagBar,                 0,                       Button5,        cycleiconset,   {.i = -1 } },
 	{ ClkTagBar,                 MODKEY,                  Button1,        tag,            {0} },
 	{ ClkTagBar,                 MODKEY,                  Button3,        toggletag,      {0} },
 };
 
 static const char *ipcsockpath = "/tmp/dawn.sock";
 static IPCCommand ipccommands[] = {
+	IPCCOMMAND( cycleiconset, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( cyclelayout, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( defaultgaps, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( enable, 1, {ARG_TYPE_UINT} ),
@@ -666,6 +668,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( pushup, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( quit, 1, {ARG_TYPE_SINT} ), // 0 = quit, 1 = restart
 	IPCCOMMAND( setborderpx, 1, {ARG_TYPE_SINT} ),
+	IPCCOMMAND( seticonset, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( setlayoutaxisex, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( setlayoutex, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( setlayoutsafe, 1, {ARG_TYPE_PTR} ),
@@ -691,7 +694,6 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( tagandviewtoleft, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( tagandviewtoright, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( toggle, 1, {ARG_TYPE_UINT} ), // toggle functionality on and off
-	IPCCOMMAND( togglealttag, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( togglebar, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( togglefakefullscreen, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( togglefloating, 1, {ARG_TYPE_NONE} ),

@@ -352,7 +352,7 @@ struct Monitor {
 	Monitor *next;
 	Bar *bar;
 	const Layout *lt[2];
-	unsigned int alttag;
+	int iconset;
 	Pertag *pertag;
 	char lastltsymbol[16];
 	TagState tagstate;
@@ -1985,10 +1985,12 @@ movemouse(const Arg *arg)
 
 			nx = ocx + (ev.xmotion.x - x);
 			ny = ocy + (ev.xmotion.y - y);
-			if (abs(selmon->wx - nx) < snap)
+			if (abs(selmon->wx - nx) < snap) {
+				fprintf(stderr, "movemouse: snapping << nx (%d) to %d, selmon->wx = %d, ww = %d, num = %d, mx = %d, WIDTH(c) = %d, snap = %d, ev.xmotion.x = %d, x = %d\n", nx, selmon->wx + selmon->ww - WIDTH(c), selmon->wx, selmon->ww, selmon->num, selmon->mx, WIDTH(c), snap, ev.xmotion.x, x);
 				nx = selmon->wx;
+			}
 			else if (abs((selmon->wx + selmon->ww) - (nx + WIDTH(c))) < snap) {
-				fprintf(stderr, "movemouse: snapping nx (%d) to %d, selmon->wx = %d, ww = %d, num = %d, mx = %d, WIDTH(c) = %d, snap = %d, ev.xmotion.x = %d, x = %d\n", nx, selmon->wx + selmon->ww - WIDTH(c), selmon->wx, selmon->ww, selmon->num, selmon->mx, WIDTH(c), snap, ev.xmotion.x, x);
+				fprintf(stderr, "movemouse: snapping >> nx (%d) to %d, selmon->wx = %d, ww = %d, num = %d, mx = %d, WIDTH(c) = %d, snap = %d, ev.xmotion.x = %d, x = %d\n", nx, selmon->wx + selmon->ww - WIDTH(c), selmon->wx, selmon->ww, selmon->num, selmon->mx, WIDTH(c), snap, ev.xmotion.x, x);
 				nx = selmon->wx + selmon->ww - WIDTH(c);
 			}
 			if (abs(selmon->wy - ny) < snap)

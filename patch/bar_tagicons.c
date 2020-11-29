@@ -3,14 +3,55 @@ tagicon(Monitor *m, int tag)
 {
 	Client *c;
 	char *icon;
-	int tagindex = tag + NUMTAGS * m->num;
-	if (tagindex >= LENGTH(tagicons[DEFAULT_TAGS]))
-		tagindex = tagindex % LENGTH(tagicons[DEFAULT_TAGS]);
-	icon = tagicons[m->alttag ? ALTERNATIVE_TAGS : DEFAULT_TAGS][tagindex];
 	for (c = m->clients; c && (!(c->tags & 1 << tag) || HIDDEN(c)); c = c->next);
-	if (c)
-		icon = tagicons[OCCUPIED_TAGS][tagindex];
-	else if (TEXTW(icon) <= lrpad && m->tagset[m->seltags] & 1 << tag)
-		icon = tagicons[VACANT_TAGS][tagindex];
+	if (c && tagicons[IconsOccupied][0] != NULL)
+		icon = geticon(m, tag, IconsOccupied);
+	else {
+		icon = geticon(m, tag, m->iconset);
+		if (TEXTW(icon) <= lrpad && m->tagset[m->seltags] & 1 << tag)
+			icon = geticon(m, tag, IconsVacant);
+	}
+
 	return icon;
+}
+
+char *
+geticon(Monitor *m, int tag, int iconset)
+{
+	int i;
+	int tagindex = tag + NUMTAGS * m->num;
+	for (i = 0; i < LENGTH(tagicons[iconset]) && tagicons[iconset][i] != NULL; ++i);
+	if (i == 0)
+		tagindex = 0;
+	else if (tagindex >= i)
+		tagindex = tagindex % i;
+
+	return tagicons[iconset][tagindex];
+}
+
+void
+cycleiconset(const Arg *arg)
+{
+	Monitor *m = selmon;
+	if (arg->i == 0)
+		return;
+	if (arg->i > 0) {
+		++m->iconset;
+		if (m->iconset >= IconsLast)
+			m->iconset = 0;
+	} else if (arg->i < 0) {
+		--m->iconset;
+		if (m->iconset < 0)
+			m->iconset = IconsLast - 1;
+	}
+	drawbar(m);
+}
+
+void
+seticonset(const Arg *arg)
+{
+	if (arg->i >= 0 && arg->i < IconsLast) {
+		selmon->iconset = arg->i;
+		drawbar(selmon);
+	}
 }
