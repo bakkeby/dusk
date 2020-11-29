@@ -1987,8 +1987,10 @@ movemouse(const Arg *arg)
 			ny = ocy + (ev.xmotion.y - y);
 			if (abs(selmon->wx - nx) < snap)
 				nx = selmon->wx;
-			else if (abs((selmon->wx + selmon->ww) - (nx + WIDTH(c))) < snap)
+			else if (abs((selmon->wx + selmon->ww) - (nx + WIDTH(c))) < snap) {
+				fprintf(stderr, "movemouse: snapping nx (%d) to %d, selmon->wx = %d, ww = %d, num = %d, mx = %d, WIDTH(c) = %d, snap = %d, ev.xmotion.x = %d, x = %d\n", nx, selmon->wx + selmon->ww - WIDTH(c), selmon->wx, selmon->ww, selmon->num, selmon->mx, WIDTH(c), snap, ev.xmotion.x, x);
 				nx = selmon->wx + selmon->ww - WIDTH(c);
+			}
 			if (abs(selmon->wy - ny) < snap)
 				ny = selmon->wy;
 			else if (abs((selmon->wy + selmon->wh) - (ny + HEIGHT(c))) < snap)
