@@ -32,7 +32,7 @@ static char *toggle_float_pos            = "50% 50% 80% 80%"; // default floatin
 static const double defaultopacity       = 0;   /* client default opacity, e.g. 0.75. 0 means don't apply opacity. */
 
 /* Indicators: see patch/bar_indicators.h for options */
-static int tagindicatortype              = INDICATOR_NONE;
+static int tagindicatortype              = INDICATOR_BOTTOM_BAR_SLIM;
 static int fakefsindicatortype           = INDICATOR_PLUS;
 static int floatfakefsindicatortype      = INDICATOR_PLUS_AND_LARGER_SQUARE;
 static int floatindicatortype            = INDICATOR_TOP_LEFT_LARGER_SQUARE;
@@ -373,7 +373,7 @@ static const MonitorRule monrules[] = {
 static char *tagicons[][NUMTAGS*2] = {
 	[DEFAULT_TAGS]        = { " ₁", " ₂", " ₃", " ₄", " ₅", " ₆", " ₇", " ₈", " ₉", " ₁", " ₂", " ₃", " ₄", " ₅", " ₆", " ₇", " ₈", " ₉" },
 	[ALTERNATIVE_TAGS]    = { "",   "",   "",   "",   "",   "",   "",   "",   "",   "",   "",   "",   "",   "",   "",   "",   "",   "" },
-	[ALT_TAGS_DECORATION] = { "◉₁", "☢₂", "❖₃", "⚉₄", "♻₅", "⌬₆", "♹₇", "✇₈", "☉₉", "☋₁", "ℓ₂", "҂₃", "∆₄", "√₅", "∏₆", "Ξ₇", "Ω₈", "ƒ₉" },
+	[OCCUPIED_TAGS]       = { "◉₁", "☢₂", "❖₃", "⚉₄", "♻₅", "⌬₆", "♹₇", "✇₈", "☉₉", "☋₁", "ℓ₂", "҂₃", "∆₄", "√₅", "∏₆", "Ξ₇", "Ω₈", "ƒ₉" },
 };
 
 /* layout(s) */

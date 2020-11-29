@@ -6,9 +6,11 @@ tagicon(Monitor *m, int tag)
 	int tagindex = tag + NUMTAGS * m->num;
 	if (tagindex >= LENGTH(tagicons[DEFAULT_TAGS]))
 		tagindex = tagindex % LENGTH(tagicons[DEFAULT_TAGS]);
-	for (c = m->clients; c && (!(c->tags & 1 << tag) || HIDDEN(c)); c = c->next);
 	icon = tagicons[m->alttag ? ALTERNATIVE_TAGS : DEFAULT_TAGS][tagindex];
-	if (c || (TEXTW(icon) <= lrpad && m->tagset[m->seltags] & 1 << tag))
-		icon = tagicons[ALT_TAGS_DECORATION][tagindex];
+	for (c = m->clients; c && (!(c->tags & 1 << tag) || HIDDEN(c)); c = c->next);
+	if (c)
+		icon = tagicons[OCCUPIED_TAGS][tagindex];
+	else if (TEXTW(icon) <= lrpad && m->tagset[m->seltags] & 1 << tag)
+		icon = tagicons[VACANT_TAGS][tagindex];
 	return icon;
 }
