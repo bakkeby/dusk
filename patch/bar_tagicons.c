@@ -36,13 +36,13 @@ cycleiconset(const Arg *arg)
 	if (arg->i == 0)
 		return;
 	if (arg->i > 0) {
-		++m->iconset;
+		for (++m->iconset; m->iconset < IconsLast && tagicons[m->iconset][0] == NULL; ++m->iconset);
 		if (m->iconset >= IconsLast)
 			m->iconset = 0;
 	} else if (arg->i < 0) {
-		--m->iconset;
+		for (--m->iconset; m->iconset > 0 && tagicons[m->iconset][0] == NULL; --m->iconset);
 		if (m->iconset < 0)
-			m->iconset = IconsLast - 1;
+			for (m->iconset = IconsLast - 1; m->iconset > 0 && tagicons[m->iconset][0] == NULL; --m->iconset);
 	}
 	drawbar(m);
 }
