@@ -2082,6 +2082,8 @@ propertynotify(XEvent *e)
 		switch(ev->atom) {
 		default: break;
 		case XA_WM_TRANSIENT_FOR:
+			if (IGNOREPROPTRANSIENTFOR(c))
+				break;
 			XGetTransientForHint(dpy, c->win, &trans);
 			setflag(c, Floating, (wintoclient(trans)) != NULL);
 			if (WASFLOATING(c) && ISFLOATING(c))

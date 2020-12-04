@@ -35,14 +35,14 @@ static const unsigned long
 	IgnoreCfgReq = 0x4000000, // ignore all configure requests coming from the client
 	IgnoreCfgReqPos = 0x8000000, // ignore the x,y position details of configure requests coming from the client
 	IgnoreCfgReqSize = 0x10000000, // ignore the size details of configure requests coming from the client
+	IgnorePropTransientFor = 0x20000000, // ignore WM_TRANSIENT_FOR property notifications for buggy client windows (e.g. WebStorm)
+	IgnoreSizeHints = 0x40000000, // ignore size hints for clients (floating and tiled), see floatpos
+	AlwaysOnTop = 0x80000000,
 	/* Some clients (e.g. alacritty) helpfully send configure requests with a new size or position
 	 * when they detect that they have been moved to another monitor. This can cause visual glitches
 	 * when moving (or resizing) client windows from one monitor to another. This variable is used
 	 * internally to ignore such configure requests while movemouse or resizemouse are being used. */
-	MoveResize = 0x20000000, // used internally to indicate that the client is being moved or resized
-	AlwaysOnTop = 0x40000000,
-	IgnoreSizeHints = 0x80000000, // ignore size hints for clients (floating and tiled), see floatpos
-	FlagPlaceholder4294967296 = 0x100000000,
+	MoveResize = 0x100000000, // used internally to indicate that the client is being moved or resized
 	FlagPlaceholder8589934592 = 0x200000000,
 	FlagPlaceholder17179869184 = 0x400000000,
 	FlagPlaceholder34359738368 = 0x800000000,
@@ -90,6 +90,7 @@ static const unsigned long
 #define IGNORECFGREQ(C) (C->flags & IgnoreCfgReq)
 #define IGNORECFGREQPOS(C) (C->flags & IgnoreCfgReqPos)
 #define IGNORECFGREQSIZE(C) (C->flags & IgnoreCfgReqSize)
+#define IGNOREPROPTRANSIENTFOR(C) (C->flags & IgnorePropTransientFor)
 #define IGNORESIZEHINTS(C) (C->flags & IgnoreSizeHints)
 #define NEEDRESIZE(C) (C->flags & NeedResize)
 #define NEVERFOCUS(C) (C->flags & NeverFocus)
