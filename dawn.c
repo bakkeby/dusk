@@ -148,7 +148,7 @@ enum {
 	NetSystemTrayOrientation,
 	NetSystemTrayOrientationHorz,
 	NetSystemTrayVisual,
-	NetWMActionClose,
+	NetWMAllowedActions,
 	NetWMCheck,
 	NetWMDemandsAttention,
 	NetWMFullPlacement,
@@ -164,6 +164,22 @@ enum {
 	NetWMMoveResize,
 	NetLast
 }; /* EWMH atoms */
+
+enum {
+	NetWMActionMove,
+	NetWMActionResize,
+	NetWMActionMinimize,
+	NetWMActionShade,
+	NetWMActionStick,
+	NetWMActionMaximizeHorz,
+	NetWMActionMaximizeVert,
+	NetWMActionFullscreen,
+	NetWMActionChangeDesktop,
+	NetWMActionClose,
+	NetWMActionAbove,
+	NetWMActionBelow,
+	NetWMActionLast
+}; /* _NET_WM_ALLOWED_ACTIONS */
 
 enum {
 	WMChangeState,
@@ -524,7 +540,7 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 	[ResizeRequest] = resizerequest,
 	[UnmapNotify] = unmapnotify
 };
-static Atom wmatom[WMLast], netatom[NetLast], xatom[XLast], clientatom[ClientLast];
+static Atom wmatom[WMLast], netatom[NetLast], allowed[NetWMActionLast], xatom[XLast], clientatom[ClientLast];
 static int running = 1;
 static Cur *cursor[CurLast];
 static Clr **scheme;
@@ -991,9 +1007,6 @@ clientmessage(XEvent *e)
 			hide(c);
 		else if (cme->data.l[0] == NormalState && HIDDEN(c))
 			show(c);
-	} else if (cme->message_type == netatom[NetWMActionClose]) {
-		selmon->sel = c;
-		killclient(NULL);
 	} else if (cme->message_type == netatom[NetWMMoveResize]) {
 		resizemouse(&((Arg) { .v = c }));
 	}
@@ -1878,6 +1891,10 @@ manage(Window w, XWindowAttributes *wa)
 		XRaiseWindow(dpy, c->win);
 		XSetWindowBorder(dpy, w, scheme[SchemeNorm][ColFloat].pixel);
 	}
+
+	XChangeProperty(dpy, c->win, netatom[NetWMAllowedActions], XA_ATOM, 32,
+		PropModeReplace, (unsigned char *) allowed, NetWMActionLast);
+
 	attachx(c);
 	attachstack(c);
 	XChangeProperty(dpy, root, netatom[NetClientList], XA_WINDOW, 32, PropModeAppend,
@@ -2644,7 +2661,7 @@ setup(void)
 	netatom[NetSystemTrayOrientation] = XInternAtom(dpy, "_NET_SYSTEM_TRAY_ORIENTATION", False);
 	netatom[NetSystemTrayOrientationHorz] = XInternAtom(dpy, "_NET_SYSTEM_TRAY_ORIENTATION_HORZ", False);
 	netatom[NetSystemTrayVisual] = XInternAtom(dpy, "_NET_SYSTEM_TRAY_VISUAL", False);
-	netatom[NetWMActionClose] = XInternAtom(dpy, "_NET_WM_ACTION_CLOSE", False);
+	netatom[NetWMAllowedActions] = XInternAtom(dpy, "_NET_WM_ALLOWED_ACTIONS", False);
 	netatom[NetWMCheck] = XInternAtom(dpy, "_NET_SUPPORTING_WM_CHECK", False);
 	netatom[NetWMDemandsAttention] = XInternAtom(dpy, "_NET_WM_DEMANDS_ATTENTION", False);
 	netatom[NetWMFullPlacement] = XInternAtom(dpy, "_NET_WM_FULL_PLACEMENT", False); /* https://specifications.freedesktop.org/wm-spec/latest/ar01s07.html */
@@ -2657,6 +2674,18 @@ setup(void)
 	netatom[NetWMWindowOpacity] = XInternAtom(dpy, "_NET_WM_WINDOW_OPACITY", False);
 	netatom[NetWMWindowType] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False);
 	netatom[NetWMWindowTypeDock] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DOCK", False);
+	allowed[NetWMActionMove] = XInternAtom(dpy, "_NET_WM_ACTION_MOVE", False);
+	allowed[NetWMActionResize] = XInternAtom(dpy, "_NET_WM_ACTION_RESIZE", False);
+	allowed[NetWMActionMinimize] = XInternAtom(dpy, "_NET_WM_ACTION_MINIMIZE", False);
+	allowed[NetWMActionShade] = XInternAtom(dpy, "_NET_WM_ACTION_SHADE", False);
+	allowed[NetWMActionStick] = XInternAtom(dpy, "_NET_WM_ACTION_STICK", False);
+	allowed[NetWMActionMaximizeHorz] = XInternAtom(dpy, "_NET_WM_ACTION_MAXIMIZE_HORZ", False);
+	allowed[NetWMActionMaximizeVert] = XInternAtom(dpy, "_NET_WM_ACTION_MAXIMIZE_VERT", False);
+	allowed[NetWMActionFullscreen] = XInternAtom(dpy, "_NET_WM_ACTION_FULLSCREEN", False);
+	allowed[NetWMActionChangeDesktop] = XInternAtom(dpy, "_NET_WM_ACTION_CHANGE_DESKTOP", False);
+	allowed[NetWMActionClose] = XInternAtom(dpy, "_NET_WM_ACTION_CLOSE", False);
+	allowed[NetWMActionAbove] = XInternAtom(dpy, "_NET_WM_ACTION_ABOVE", False);
+	allowed[NetWMActionBelow] = XInternAtom(dpy, "_NET_WM_ACTION_BELOW", False);
 	motifatom = XInternAtom(dpy, "_MOTIF_WM_HINTS", False);
 	xatom[Manager] = XInternAtom(dpy, "MANAGER", False);
 	xatom[Xembed] = XInternAtom(dpy, "_XEMBED", False);
