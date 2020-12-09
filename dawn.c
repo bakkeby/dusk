@@ -555,7 +555,6 @@ applyrules(Client *c)
 	XClassHint ch = { NULL, NULL };
 
 	/* rule matching */
-	c->tags = 0;
 	XGetClassHint(dpy, c->win, &ch);
 	class    = ch.res_class ? ch.res_class : broken;
 	instance = ch.res_name  ? ch.res_name  : broken;
@@ -635,7 +634,6 @@ applyrules(Client *c)
 	if (ch.res_name)
 		XFree(ch.res_name);
 
-	c->tags = c->tags & TAGMASK ? c->tags & TAGMASK : (c->mon->tagset[c->mon->seltags] & ~SPTAGMASK);
 }
 
 int
@@ -1809,8 +1807,8 @@ manage(Window w, XWindowAttributes *wa)
 			c->mon = selmon;
 		}
 	}
-
-	c->bw = c->mon->borderpx;
+	if (!c->tags)
+		c->tags = (c->mon->tagset[c->mon->seltags] & ~SPTAGMASK);
 
 	if (!RULED(c)) {
 		if (c->x == c->mon->wx && c->y == c->mon->wy)
@@ -1823,6 +1821,8 @@ manage(Window w, XWindowAttributes *wa)
 				c->mon = term->mon;
 		}
 	}
+	
+	c->bw = (NOBORDER(c) ? 0 : c->mon->borderpx);
 
 	if (c->opacity)
 		opacity(c, c->opacity);
