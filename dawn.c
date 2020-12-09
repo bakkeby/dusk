@@ -1791,6 +1791,7 @@ manage(Window w, XWindowAttributes *wa)
 	Client *term = NULL;
 	Window trans = None;
 	XWindowChanges wc;
+	int focusclient = 1;
 
 	c = ecalloc(1, sizeof(Client));
 	c->win = w;
@@ -1834,7 +1835,7 @@ manage(Window w, XWindowAttributes *wa)
 				c->mon = term->mon;
 		}
 	}
-	
+
 	c->bw = (NOBORDER(c) ? 0 : c->mon->borderpx);
 
 	if (c->opacity)
@@ -1896,7 +1897,12 @@ manage(Window w, XWindowAttributes *wa)
 		PropModeReplace, (unsigned char *) allowed, NetWMActionLast);
 
 	attachx(c);
-	attachstack(c);
+	if (focusclient)
+		attachstack(c);
+	else {
+		c->snext = c->mon->sel->snext;
+		c->mon->sel->snext = c;
+	}
 	XChangeProperty(dpy, root, netatom[NetClientList], XA_WINDOW, 32, PropModeAppend,
 		(unsigned char *) &(c->win), 1);
 	XChangeProperty(dpy, root, netatom[NetClientListStacking], XA_WINDOW, 32, PropModePrepend,
@@ -1909,13 +1915,15 @@ manage(Window w, XWindowAttributes *wa)
 		setclientstate(c, NormalState);
 	if (c->mon == selmon)
 		unfocus(selmon->sel, 0, c);
-	c->mon->sel = c;
+	if (focusclient)
+		c->mon->sel = c;
 	if (!(term && swallow(term, c))) {
 		arrange(c->mon);
 		if (!HIDDEN(c))
 			XMapWindow(dpy, c->win);
 	}
-	focus(NULL);
+	if (focusclient)
+		focus(NULL);
 	setfloatinghint(c);
 }
 
