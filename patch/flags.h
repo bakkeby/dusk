@@ -43,7 +43,7 @@ static const unsigned long
 	 * when moving (or resizing) client windows from one monitor to another. This variable is used
 	 * internally to ignore such configure requests while movemouse or resizemouse are being used. */
 	MoveResize = 0x100000000, // used internally to indicate that the client is being moved or resized
-	FlagPlaceholder8589934592 = 0x200000000,
+	NoBorder = 0x200000000,
 	FlagPlaceholder17179869184 = 0x400000000,
 	FlagPlaceholder34359738368 = 0x800000000,
 	FlagPlaceholder68719476736 = 0x1000000000,
@@ -94,6 +94,7 @@ static const unsigned long
 #define IGNORESIZEHINTS(C) (C->flags & IgnoreSizeHints)
 #define NEEDRESIZE(C) (C->flags & NeedResize)
 #define NEVERFOCUS(C) (C->flags & NeverFocus)
+#define NOBORDER(C) (C->flags & NoBorder)
 #define NOSWALLOW(C) (C->flags & NoSwallow)
 #define ONLYMODBUTTONS(C) (C->flags & OnlyModButtons)
 #define RESTOREFAKEFULLSCREEN(C) (C->flags & RestoreFakeFullScreen)

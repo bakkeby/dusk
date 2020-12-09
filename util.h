@@ -26,7 +26,7 @@ static const unsigned long
 	Status2DNoAlpha = 0x100, // option to not use alpha when drawing status2d status
 	FuncPlaceholder0x200 = 0x200,
 	BarBorder = 0x400, // draw a border around the bar
-	NoBorder = 0x800, // as per the noborder patch, show no border when only one client in tiled mode
+	NoBorders = 0x800, // as per the noborder patch, show no border when only one client in tiled mode
 	Warp = 0x1000, // warp patch
 	FocusedOnTop = 0x2000,
 	DecorationHints = 0x4000, // used by setfullscreen, prevents state change

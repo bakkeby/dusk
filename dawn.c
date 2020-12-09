@@ -150,16 +150,17 @@ enum {
 	NetSystemTrayVisual,
 	NetWMActionClose,
 	NetWMCheck,
+	NetWMDemandsAttention,
 	NetWMFullPlacement,
 	NetWMFullscreen,
 	NetWMName,
 	NetWMState,
 	NetWMStateAbove,
+	NetWMMaximizedVert,
+	NetWMMaximizedHorz,
 	NetWMWindowOpacity,
 	NetWMWindowType,
 	NetWMWindowTypeDock,
-	NetWMMaximizedVert,
-	NetWMMaximizedHorz,
 	NetWMMoveResize,
 	NetLast
 }; /* EWMH atoms */
@@ -178,6 +179,7 @@ enum {
 	IsFloating,
 	DawnClientFlags,
 	DawnClientTags,
+	SteamGame,
 	ClientLast
 }; /* dawn client atoms */
 
@@ -488,7 +490,7 @@ static void zoom(const Arg *arg);
 #include "patch/include.h"
 
 /* variables */
-static const char broken[] = "broken";
+static const char broken[] = "fubar";
 static char stext[1024];
 static char rawstext[1024];
 static char estext[1024];
@@ -544,7 +546,7 @@ void
 applyrules(Client *c)
 {
 	const char *class, *instance;
-	Atom wintype;
+	Atom wintype, game_id;
 	char role[64];
 	unsigned int i;
 	unsigned int newtagset;
@@ -559,6 +561,12 @@ applyrules(Client *c)
 	instance = ch.res_name  ? ch.res_name  : broken;
 	wintype  = getatomprop(c, netatom[NetWMWindowType], XA_ATOM);
 	gettextprop(c->win, wmatom[WMWindowRole], role, sizeof(role));
+	game_id = getatomprop(c, clientatom[SteamGame], AnyPropertyType);
+
+	/* Steam games may come through with custom class, instance and name making it hard to create
+	 * generic rules for them. Overriding the class with "steam_app_" to make this easier. */
+	if (game_id && !strstr(class, "steam_app_"))
+		class = "steam_app_";
 
 	if (enabled(Debug))
 		fprintf(stderr, "applyrules: new client %s, class = '%s', instance = '%s', role = '%s', wintype = '%ld'\n", c->name, class, instance, role, wintype);
@@ -572,7 +580,8 @@ applyrules(Client *c)
 		&& (!r->wintype || wintype == XInternAtom(dpy, r->wintype, False)))
 		{
 			c->flags |= Ruled | r->flags;
-			c->tags |= r->tags;
+			if (r->tags & TAGMASK)
+				c->tags = r->tags;
 
 			if ((r->tags & SPTAGMASK) && ISFLOATING(c)) {
 				c->x = c->mon->wx + (c->mon->ww / 2 - WIDTH(c) / 2);
@@ -950,6 +959,11 @@ clientmessage(XEvent *e)
 				|| (cme->data.l[0] == 2 /* _NET_WM_STATE_TOGGLE */
 				&& !ISFULLSCREEN(c)
 			)), setfakefullscreen);
+		} else if (cme->data.l[1] == netatom[NetWMDemandsAttention]) {
+			if (cme->data.l[0] == 1 || (cme->data.l[0] == 2 && !ISURGENT(c))) {
+				setflag(c, Urgent, 1);
+				drawbar(c->mon);
+			}
 		}
 
 		maximize_vert = (cme->data.l[1] == netatom[NetWMMaximizedVert] || cme->data.l[2] == netatom[NetWMMaximizedVert]);
@@ -2166,7 +2180,7 @@ resizeclient(Client *c, int x, int y, int w, int h)
 	c->w = wc.width = w;
 	c->h = wc.height = h;
 	wc.border_width = c->bw;
-	if (enabled(NoBorder) && ((nexttiled(c->mon->clients) == c && !nexttiled(c->next)))
+	if (enabled(NoBorders) && ((nexttiled(c->mon->clients) == c && !nexttiled(c->next)))
 		&& (ISFAKEFULLSCREEN(c) || !ISFULLSCREEN(c))
 		&& !ISFLOATING(c)
 		&& c->mon->lt[c->mon->sellt]->arrange)
@@ -2613,38 +2627,40 @@ setup(void)
 	wmatom[WMTakeFocus] = XInternAtom(dpy, "WM_TAKE_FOCUS", False);
 	wmatom[WMWindowRole] = XInternAtom(dpy, "WM_WINDOW_ROLE", False);
 	wmatom[WMChangeState] = XInternAtom(dpy, "WM_CHANGE_STATE", False);
+	clientatom[IsFloating] = XInternAtom(dpy, "_IS_FLOATING", False);
+	clientatom[DawnClientFlags] = XInternAtom(dpy, "_DAWN_CLIENT_FLAGS", False);
+	clientatom[DawnClientTags] = XInternAtom(dpy, "_DAWN_CLIENT_TAGS", False);
+	clientatom[SteamGame] = XInternAtom(dpy, "STEAM_GAME", False);
 	netatom[NetActiveWindow] = XInternAtom(dpy, "_NET_ACTIVE_WINDOW", False);
+	netatom[NetClientList] = XInternAtom(dpy, "_NET_CLIENT_LIST", False);
+	netatom[NetClientListStacking] = XInternAtom(dpy, "_NET_CLIENT_LIST_STACKING", False);
+	netatom[NetCurrentDesktop] = XInternAtom(dpy, "_NET_CURRENT_DESKTOP", False);
+	netatom[NetDesktopNames] = XInternAtom(dpy, "_NET_DESKTOP_NAMES", False);
+	netatom[NetDesktopViewport] = XInternAtom(dpy, "_NET_DESKTOP_VIEWPORT", False);
+	netatom[NetNumberOfDesktops] = XInternAtom(dpy, "_NET_NUMBER_OF_DESKTOPS", False);
 	netatom[NetSupported] = XInternAtom(dpy, "_NET_SUPPORTED", False);
 	netatom[NetSystemTray] = XInternAtom(dpy, "_NET_SYSTEM_TRAY_S0", False);
 	netatom[NetSystemTrayOP] = XInternAtom(dpy, "_NET_SYSTEM_TRAY_OPCODE", False);
 	netatom[NetSystemTrayOrientation] = XInternAtom(dpy, "_NET_SYSTEM_TRAY_ORIENTATION", False);
 	netatom[NetSystemTrayOrientationHorz] = XInternAtom(dpy, "_NET_SYSTEM_TRAY_ORIENTATION_HORZ", False);
 	netatom[NetSystemTrayVisual] = XInternAtom(dpy, "_NET_SYSTEM_TRAY_VISUAL", False);
-	netatom[NetWMWindowTypeDock] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DOCK", False);
-	xatom[Manager] = XInternAtom(dpy, "MANAGER", False);
-	xatom[Xembed] = XInternAtom(dpy, "_XEMBED", False);
-	xatom[XembedInfo] = XInternAtom(dpy, "_XEMBED_INFO", False);
-	clientatom[IsFloating] = XInternAtom(dpy, "_IS_FLOATING", False);
-	clientatom[DawnClientFlags] = XInternAtom(dpy, "_DAWN_CLIENT_FLAGS", False);
-	clientatom[DawnClientTags] = XInternAtom(dpy, "_DAWN_CLIENT_TAGS", False);
-	netatom[NetDesktopViewport] = XInternAtom(dpy, "_NET_DESKTOP_VIEWPORT", False);
-	netatom[NetNumberOfDesktops] = XInternAtom(dpy, "_NET_NUMBER_OF_DESKTOPS", False);
-	netatom[NetCurrentDesktop] = XInternAtom(dpy, "_NET_CURRENT_DESKTOP", False);
-	netatom[NetDesktopNames] = XInternAtom(dpy, "_NET_DESKTOP_NAMES", False);
 	netatom[NetWMActionClose] = XInternAtom(dpy, "_NET_WM_ACTION_CLOSE", False);
-	netatom[NetWMFullPlacement] = XInternAtom(dpy, "_NET_WM_FULL_PLACEMENT", False); /* https://specifications.freedesktop.org/wm-spec/latest/ar01s07.html */
-	netatom[NetWMName] = XInternAtom(dpy, "_NET_WM_NAME", False);
-	netatom[NetWMState] = XInternAtom(dpy, "_NET_WM_STATE", False);
-	netatom[NetWMMoveResize] = XInternAtom(dpy, "_NET_WM_MOVERESIZE", False);
 	netatom[NetWMCheck] = XInternAtom(dpy, "_NET_SUPPORTING_WM_CHECK", False);
+	netatom[NetWMDemandsAttention] = XInternAtom(dpy, "_NET_WM_DEMANDS_ATTENTION", False);
+	netatom[NetWMFullPlacement] = XInternAtom(dpy, "_NET_WM_FULL_PLACEMENT", False); /* https://specifications.freedesktop.org/wm-spec/latest/ar01s07.html */
 	netatom[NetWMFullscreen] = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
 	netatom[NetWMMaximizedVert] = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False);
 	netatom[NetWMMaximizedHorz] = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+	netatom[NetWMMoveResize] = XInternAtom(dpy, "_NET_WM_MOVERESIZE", False);
+	netatom[NetWMName] = XInternAtom(dpy, "_NET_WM_NAME", False);
+	netatom[NetWMState] = XInternAtom(dpy, "_NET_WM_STATE", False);
 	netatom[NetWMWindowOpacity] = XInternAtom(dpy, "_NET_WM_WINDOW_OPACITY", False);
 	netatom[NetWMWindowType] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False);
-	netatom[NetClientList] = XInternAtom(dpy, "_NET_CLIENT_LIST", False);
-	netatom[NetClientListStacking] = XInternAtom(dpy, "_NET_CLIENT_LIST_STACKING", False);
+	netatom[NetWMWindowTypeDock] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DOCK", False);
 	motifatom = XInternAtom(dpy, "_MOTIF_WM_HINTS", False);
+	xatom[Manager] = XInternAtom(dpy, "MANAGER", False);
+	xatom[Xembed] = XInternAtom(dpy, "_XEMBED", False);
+	xatom[XembedInfo] = XInternAtom(dpy, "_XEMBED_INFO", False);
 	/* init cursors */
 	cursor[CurNormal] = drw_cur_create(drw, XC_left_ptr);
 	cursor[CurResize] = drw_cur_create(drw, XC_sizing);

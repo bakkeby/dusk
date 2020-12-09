@@ -74,7 +74,7 @@ getclienttags(Client *c)
 	Monitor *m;
 	Atom clienttags = getatomprop(c, clientatom[DawnClientTags], AnyPropertyType);
 	if (clienttags) {
-		c->tags = (clienttags >> 12);
+		c->tags = (clienttags >> 12) & TAGMASK;
 		c->id = (clienttags & 0xFF0) >> 4;
 		for (m = mons; m; m = m->next)
 			if (m->num == (clienttags & 0xF)) {
