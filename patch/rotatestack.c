@@ -2,7 +2,7 @@ void
 enqueue(Client *c)
 {
 	Client *l;
-	for (l = c->mon->clients; l && l->next; l = l->next);
+	for (l = c->ws->clients; l && l->next; l = l->next);
 	if (l) {
 		l->next = c;
 		c->next = NULL;
@@ -13,7 +13,7 @@ void
 enqueuestack(Client *c)
 {
 	Client *l;
-	for (l = c->mon->stack; l && l->snext; l = l->snext);
+	for (l = c->ws->stack; l && l->snext; l = l->snext);
 	if (l) {
 		l->snext = c;
 		c->snext = NULL;
@@ -25,11 +25,11 @@ rotatestack(const Arg *arg)
 {
 	Client *c = NULL, *f;
 
-	if (!selmon->sel)
+	if (!selws->sel)
 		return;
-	f = selmon->sel;
+	f = selws->sel;
 	if (arg->i > 0) {
-		for (c = nexttiled(selmon->clients); c && nexttiled(c->next); c = nexttiled(c->next));
+		for (c = nexttiled(selws->clients); c && nexttiled(c->next); c = nexttiled(c->next));
 		if (c) {
 			detach(c);
 			attach(c);
@@ -37,7 +37,7 @@ rotatestack(const Arg *arg)
 			attachstack(c);
 		}
 	} else {
-		if ((c = nexttiled(selmon->clients))) {
+		if ((c = nexttiled(selws->clients))) {
 			detach(c);
 			enqueue(c);
 			detachstack(c);
@@ -45,8 +45,8 @@ rotatestack(const Arg *arg)
 		}
 	}
 	if (c) {
-		arrange(selmon);
+		arrange(selws);
 		focus(f);
-		restack(selmon);
+		restack(selws);
 	}
 }

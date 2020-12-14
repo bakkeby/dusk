@@ -29,7 +29,7 @@ warp(const Client *c)
 
 	if (disabled(FocusedOnTop)) {
 		/* Avoid warping the cursor if our client's midpoint is covered by a floating window */
-		for (f = c->mon->stack; f; f = f->snext)
+		for (f = c->ws->stack; f; f = f->snext)
 			if (f != c && ISVISIBLE(f) &&
 				f->x < c->x + c->w / 2 &&
 				f->x + f->w > c->x + c->w / 2 &&

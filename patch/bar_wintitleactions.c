@@ -21,17 +21,17 @@ hide(Client *c) {
 	XSelectInput(dpy, w, ca.your_event_mask);
 	XUngrabServer(dpy);
 
-	if (ISFLOATING(c) || !c->mon->lt[c->mon->sellt]->arrange) {
+	if (ISFLOATING(c) || !c->ws->lt[c->ws->sellt]->arrange) {
 		for (n = c->snext; n && (!ISVISIBLE(n) || HIDDEN(n)); n = n->snext);
 		if (!n)
-			for (n = c->mon->stack; n && (!ISVISIBLE(n) || HIDDEN(n)); n = n->snext);
+			for (n = c->ws->stack; n && (!ISVISIBLE(n) || HIDDEN(n)); n = n->snext);
 	} else {
 		n = nexttiled(c);
 		if (!n)
 			n = prevvisible(c);
 	}
 	focus(n);
-	arrange(c->mon);
+	arrange(c->ws);
 }
 
 void
@@ -42,7 +42,7 @@ show(Client *c)
 
 	XMapWindow(dpy, c->win);
 	setclientstate(c, NormalState);
-	arrange(c->mon);
+	arrange(c->ws);
 }
 
 void
@@ -59,7 +59,7 @@ Client *
 prevvisible(Client *c)
 {
 	Client *p, *i;
-	for (p = NULL, i = c->mon->clients; c && i != c; i = i->next)
+	for (p = NULL, i = c->ws->clients; c && i != c; i = i->next)
 		if (ISVISIBLE(i) && !HIDDEN(i))
 			p = i;
 	return p;
@@ -70,7 +70,7 @@ showhideclient(const Arg *arg)
 {
 	Client *c = (Client*)arg->v;
 	if (!c)
-		c = selmon->sel;
+		c = selws->sel;
 	if (!c)
 		return;
 
@@ -78,7 +78,7 @@ showhideclient(const Arg *arg)
 	if (HIDDEN(c)) {
 		show(c);
 		focus(c);
-		restack(c->mon);
+		restack(c->ws);
 	} else {
 		hide(c);
 	}

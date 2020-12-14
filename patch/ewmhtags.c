@@ -56,8 +56,9 @@ setclientflags(Client *c)
 void
 setclienttags(Client *c)
 {
-	unsigned long data[] = { c->mon->num | (c->id << 4) | (c->tags << 12)};
-	XChangeProperty(dpy, c->win, clientatom[DawnClientTags], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
+	// TODO each workspace has an index (or num), then used to remember tags through restart
+	// unsigned long data[] = { c->ws->num | (c->id << 4) | (c->tags << 12)};
+	// XChangeProperty(dpy, c->win, clientatom[DawnClientTags], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
 }
 
 void
@@ -71,17 +72,18 @@ getclientflags(Client *c)
 void
 getclienttags(Client *c)
 {
-	Monitor *m;
-	Atom clienttags = getatomprop(c, clientatom[DawnClientTags], AnyPropertyType);
-	if (clienttags) {
-		c->tags = (clienttags >> 12) & TAGMASK;
-		c->id = (clienttags & 0xFF0) >> 4;
-		for (m = mons; m; m = m->next)
-			if (m->num == (clienttags & 0xF)) {
-				c->mon = m;
-				break;
-			}
-	}
+	// TODO each workspace has an index (or num), then used to remember tags through restart
+	// Monitor *m;
+	// Atom clienttags = getatomprop(c, clientatom[DawnClientTags], AnyPropertyType);
+	// if (clienttags) {
+	// 	c->tags = (clienttags >> 12) & TAGMASK;
+	// 	c->id = (clienttags & 0xFF0) >> 4;
+	// 	for (m = mons; m; m = m->next)
+	// 		if (m->num == (clienttags & 0xF)) {
+	// 			c->ws = m;
+	// 			break;
+	// 		}
+	// }
 }
 
 void
@@ -126,7 +128,7 @@ setviewport(void)
 void
 updatecurrentdesktop(void)
 {
-	long rawdata[] = { selmon->tagset[selmon->seltags] };
+	long rawdata[] = { selmon->tagset[selws->seltags] };
 	int i = 0;
 	while (*rawdata >> (i + 1)) {
 		i++;

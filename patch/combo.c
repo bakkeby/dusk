@@ -9,17 +9,17 @@ keyrelease(XEvent *e)
 void
 combotag(const Arg *arg)
 {
-	if (selmon->sel && arg->ui & TAGMASK) {
-		if (selmon->sel->reverttags)
-			selmon->sel->reverttags = 0;
+	if (selws->sel && arg->ui & TAGMASK) {
+		if (selws->sel->reverttags)
+			selws->sel->reverttags = 0;
 		if (combo) {
-			selmon->sel->tags |= arg->ui & TAGMASK;
+			selws->sel->tags |= arg->ui & TAGMASK;
 		} else {
 			combo = 1;
-			selmon->sel->tags = arg->ui & TAGMASK;
+			selws->sel->tags = arg->ui & TAGMASK;
 		}
 		focus(NULL);
-		arrange(selmon);
+		arrange(selws);
 	}
 }
 
@@ -28,13 +28,13 @@ comboview(const Arg *arg)
 {
 	unsigned newtags = arg->ui & TAGMASK;
 	if (combo) {
-		selmon->tagset[selmon->seltags] |= newtags;
+		selws->tagset[selws->seltags] |= newtags;
 	} else {
-		selmon->seltags ^= 1;	/*toggle tagset*/
+		selws->seltags ^= 1;	/*toggle tagset*/
 		combo = 1;
 		if (newtags)
-			pertagview(&((Arg) { .ui = newtags }));
+			view(&((Arg) { .ui = newtags }));
 	}
 	focus(NULL);
-	arrange(selmon);
+	arrange(selws);
 }

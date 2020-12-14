@@ -3,11 +3,11 @@ focusurgent(const Arg *arg)
 {
 	Client *c;
 	int i;
-	for (c = selmon->clients; c && !ISURGENT(c); c = c->next);
+	for (c = selws->clients; c && !ISURGENT(c); c = c->next);
 	if (c) {
 		for (i = 0; i < NUMTAGS && !((1 << i) & c->tags); i++);
 		if (i < NUMTAGS) {
-			if (((1 << i) & TAGMASK) != selmon->tagset[selmon->seltags])
+			if (((1 << i) & TAGMASK) != selmon->tagset[selws->seltags])
 				view(&((Arg) { .ui = 1 << i }));
 			focus(c);
 		}

@@ -1,7 +1,7 @@
 void
 pushup(const Arg *arg)
 {
-	Client *sel = selmon->sel;
+	Client *sel = selws->sel;
 	Client *c;
 
 	if (!sel || (ISFLOATING(sel) && !arg->f))
@@ -10,10 +10,10 @@ pushup(const Arg *arg)
 		/* attach before c */
 		detach(sel);
 		sel->next = c;
-		if (selmon->clients == c)
-			selmon->clients = sel;
+		if (selws->clients == c)
+			selws->clients = sel;
 		else {
-			for (c = selmon->clients; c->next != sel->next; c = c->next);
+			for (c = selws->clients; c->next != sel->next; c = c->next);
 			c->next = sel;
 		}
 	} else {
@@ -30,7 +30,7 @@ pushup(const Arg *arg)
 void
 pushdown(const Arg *arg)
 {
-	Client *sel = selmon->sel;
+	Client *sel = selws->sel;
 	Client *c;
 
 	if (!sel || (ISFLOATING(sel) && !arg->f))

@@ -54,8 +54,8 @@ setgapsex(const Arg *arg)
 		iv = (arg->i & 0x7f);
 
 	/* Auto enable gaps if disabled */
-	if (!selmon->pertag->enablegaps[selmon->pertag->curtag])
-		selmon->pertag->enablegaps[selmon->pertag->curtag] = 1;
+	if (!selws->enablegaps)
+		selws->enablegaps = 1;
 
 	setgaps(oh, ov, ih, iv);
 }
@@ -63,7 +63,7 @@ setgapsex(const Arg *arg)
 static void
 togglegaps(const Arg *arg)
 {
-	selmon->pertag->enablegaps[selmon->pertag->curtag] = !selmon->pertag->enablegaps[selmon->pertag->curtag];
+	selws->enablegaps = !selws->enablegaps;
 	arrange(NULL);
 }
 
@@ -154,7 +154,7 @@ static void
 getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc)
 {
 	unsigned int n, oe, ie;
-	oe = ie = selmon->pertag->enablegaps[selmon->pertag->curtag];
+	oe = ie = selws->enablegaps;
 	Client *c;
 
 	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);

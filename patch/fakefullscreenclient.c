@@ -1,7 +1,7 @@
 void
 togglefakefullscreen(const Arg *arg)
 {
-	Client *c = selmon->sel;
+	Client *c = selws->sel;
 	if (!c)
 		return;
 

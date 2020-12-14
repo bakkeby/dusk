@@ -1,17 +1,17 @@
 void
 transfer(const Arg *arg)
 {
-	Client *c, *mtail = selmon->clients, *stail = NULL, *insertafter;
+	Client *c, *mtail = selws->clients, *stail = NULL, *insertafter;
 	int transfertostack = 0, i, nmasterclients;
 
-	for (i = 0, c = selmon->clients; c; c = c->next) {
+	for (i = 0, c = selws->clients; c; c = c->next) {
 		if (!ISVISIBLE(c) || ISFLOATING(c)) continue;
-		if (selmon->sel == c) { transfertostack = i < selmon->nmaster && selmon->nmaster != 0; }
+		if (selws->sel == c) { transfertostack = i < selmon->nmaster && selmon->nmaster != 0; }
 		if (i < selmon->nmaster) { nmasterclients++; mtail = c; }
 		stail = c;
 		i++;
 	}
-	if (ISFLOATING(selmon->sel) || i == 0) {
+	if (ISFLOATING(selws->sel) || i == 0) {
 		return;
 	} else if (transfertostack) {
 		selmon->nmaster = MIN(i, selmon->nmaster) - 1;
@@ -20,14 +20,14 @@ transfer(const Arg *arg)
 		selmon->nmaster = selmon->nmaster + 1;
 		insertafter = mtail;
 	}
-	if (insertafter != selmon->sel) {
-		detach(selmon->sel);
+	if (insertafter != selws->sel) {
+		detach(selws->sel);
 		if (selmon->nmaster == 1 && !transfertostack) {
-		 attach(selmon->sel); // Head prepend case
+		 attach(selws->sel); // Head prepend case
 		} else {
-			selmon->sel->next = insertafter->next;
-			insertafter->next = selmon->sel;
+			selws->sel->next = insertafter->next;
+			insertafter->next = selws->sel;
 		}
 	}
-	arrange(selmon);
+	arrange(selws);
 }

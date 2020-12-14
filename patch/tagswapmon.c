@@ -9,7 +9,7 @@ tagswapmon(const Arg *arg)
 
 	n = dirtomon(arg->i);
 
-	for (c = selmon->clients; c; c = next) {
+	for (c = selws->clients; c; c = next) {
 		next = c->next;
 		if (!ISVISIBLE(c))
 			continue;
@@ -20,7 +20,7 @@ tagswapmon(const Arg *arg)
 		sc = c;
 	}
 
-	for (c = n->clients; c; c = next) {
+	for (c = n->ws->clients; c; c = next) {
 		next = c->next;
 		if (!ISVISIBLE(c))
 			continue;
@@ -34,13 +34,13 @@ tagswapmon(const Arg *arg)
 	for (c = sc; c; c = next) {
 		tagmonresize(c, selmon, n);
 		next = c->next;
-		c->mon = n;
-		c->tags = n->tagset[n->seltags]; /* assign tags of target monitor */
+		c->ws = n->ws;
+		c->tags = n->ws->tagset[n->ws->seltags]; /* assign tags of target monitor */
 		attach(c);
 		attachstack(c);
 		if (ISFULLSCREEN(c)) {
 			if (!ISFAKEFULLSCREEN(c)) {
-				resizeclient(c, c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
+				resizeclient(c, c->ws->mon->mx, c->ws->mon->my, c->ws->mon->mw, c->ws->mon->mh);
 				XRaiseWindow(dpy, c->win);
 			}
 		}
@@ -49,13 +49,13 @@ tagswapmon(const Arg *arg)
 	for (c = mc; c; c = next) {
 		tagmonresize(c, n, selmon);
 		next = c->next;
-		c->mon = selmon;
-		c->tags = selmon->tagset[selmon->seltags]; /* assign tags of target monitor */
+		c->ws = selws;
+		c->tags = selws->tagset[selws->seltags]; /* assign tags of target monitor */
 		attach(c);
 		attachstack(c);
 		if (ISFULLSCREEN(c)) {
 			if (!ISFAKEFULLSCREEN(c)) {
-				resizeclient(c, c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
+				resizeclient(c, c->ws->mon->mx, c->ws->mon->my, c->ws->mon->mw, c->ws->mon->mh);
 				XRaiseWindow(dpy, c->win);
 			}
 		}

@@ -711,7 +711,7 @@ decksymbols(Monitor *m, unsigned int n)
 void
 mirrorlayout(const Arg *arg)
 {
-	if (!selmon->lt[selmon->sellt]->arrange)
+	if (!selmon->lt[selws->sellt]->arrange)
 		return;
 	selmon->ltaxis[LAYOUT] *= -1;
 	selmon->pertag->ltaxis[selmon->pertag->curtag][0] = selmon->ltaxis[LAYOUT];
@@ -725,7 +725,7 @@ rotatelayoutaxis(const Arg *arg)
 	int incr = (arg->i > 0 ? 1 : -1);
 	int axis = abs(arg->i) - 1;
 
-	if (!selmon->lt[selmon->sellt]->arrange)
+	if (!selmon->lt[selws->sellt]->arrange)
 		return;
 	if (axis == LAYOUT) {
 		if (selmon->ltaxis[LAYOUT] >= 0) {

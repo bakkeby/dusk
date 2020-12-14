@@ -7,7 +7,7 @@ dragcfact(const Arg *arg)
 	XEvent ev;
 	Time lasttime = 0;
 
-	if (!(c = selmon->sel))
+	if (!(c = selws->sel))
 		return;
 	if (ISFLOATING(c)) {
 		resizemouse(arg);
@@ -16,7 +16,7 @@ dragcfact(const Arg *arg)
 
 	if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c)) /* no support resizing fullscreen windows by mouse */
 		return;
-	restack(selmon);
+	restack(selws);
 
 	if (XGrabPointer(dpy, root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
 		None, cursor[CurIronCross]->cursor, CurrentTime) != GrabSuccess)
@@ -47,9 +47,9 @@ dragcfact(const Arg *arg)
 			dist_y = ev.xmotion.y - prev_y;
 
 			if (abs(dist_x) > abs(dist_y)) {
-				fact = (float) 4.0 * dist_x / c->mon->ww;
+				fact = (float) 4.0 * dist_x / c->ws->mon->ww;
 			} else {
-				fact = (float) -4.0 * dist_y / c->mon->wh;
+				fact = (float) -4.0 * dist_y / c->ws->mon->wh;
 			}
 
 			if (fact)

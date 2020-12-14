@@ -74,7 +74,7 @@ getschemefor(Monitor *m, int group, int activegroup)
 	case GRP_STACK1:
 	case GRP_STACK2:
 		if (m->lt[m->sellt]->arrange == &flextile)
-			return (activegroup ? SchemeFlexActTTB + m->ltaxis[group] : SchemeFlexInaTTB + m->ltaxis[group]);
+			return (activegroup ? SchemeFlexActTTB + m->ws->ltaxis[group] : SchemeFlexInaTTB + m->ws->ltaxis[group]);
 		return SchemeTitleNorm;
 	case GRP_HIDDEN:
 		return SchemeHid;
@@ -108,7 +108,7 @@ getclientcounts(Monitor *m, int *groupactive, int *n, int *clientsnmaster, int *
 			if (m->sel == c)
 				selidx = i;
 
-			if (!m->nmaster || i < m->nmaster || m->ltaxis[LAYOUT] == NO_SPLIT)
+			if (!m->nmaster || i < m->nmaster || m->ws->ltaxis[LAYOUT] == NO_SPLIT)
 				cm++;
 			else if (m->nstack) {
 				if (cs1 < m->nstack)
@@ -155,7 +155,7 @@ getclientcounts(Monitor *m, int *groupactive, int *n, int *clientsnmaster, int *
 int
 isdualstacklayout(Monitor *m)
 {
-	if (m->lt[m->sellt]->arrange != &flextile)
+	if (m->ws->lt[m->ws->sellt]->arrange != &flextile)
 		return 0;
 
 	int layout = m->ltaxis[LAYOUT];
@@ -173,7 +173,7 @@ isdualstacklayout(Monitor *m)
 int
 iscenteredlayout(Monitor *m, int n)
 {
-	if (m->lt[m->sellt]->arrange != &flextile)
+	if (m->ws->lt[m->ws->sellt]->arrange != &flextile)
 		return 0;
 
 	int layout = m->ltaxis[LAYOUT];
@@ -192,7 +192,7 @@ iscenteredlayout(Monitor *m, int n)
 int
 isfixedlayout(Monitor *m)
 {
-	if (m->lt[m->sellt]->arrange != &flextile)
+	if (m->ws->lt[m->ws->sellt]->arrange != &flextile)
 		return 0;
 
 	int layout = m->ltaxis[LAYOUT];
@@ -205,10 +205,10 @@ isfixedlayout(Monitor *m)
 int
 ismirroredlayout(Monitor *m)
 {
-	if (m->lt[m->sellt]->arrange != &flextile)
+	if (m->ws->lt[m->ws->sellt]->arrange != &flextile)
 		return 0;
 
-	return m->ltaxis[LAYOUT] < 0;
+	return m->ws->ltaxis[LAYOUT] < 0;
 }
 
 int
@@ -230,7 +230,7 @@ flextitledraw(Monitor *m, Client *c, int unused, int x, int w, int tabscheme, Ar
 		return;
 	int i, nclienttags = 0, nviewtags = 0, pad = lrpad / 2;
 	int clientscheme = (
-		c == selmon->sel
+		c == selws->sel
 		? getselschemefor(tabscheme)
 		: HIDDEN(c)
 		? SchemeHid
@@ -292,16 +292,16 @@ flextitlecalculate(
 
 	if (n == 0)
 	 	return 0;
-	else if (m->lt[m->sellt]->arrange == &flextile) {
+	else if (m->ws->lt[m->ws->sellt]->arrange == &flextile) {
 		mirror = ismirroredlayout(m);
 		fixed = isfixedlayout(m);
 		center = iscenteredlayout(m, n);
 	}
 
 	/* Certain layouts have no master / stack areas */
-	if (!m->lt[m->sellt]->arrange                            // floating layout
+	if (!m->ws->lt[m->ws->sellt]->arrange                            // floating layout
 		|| (!n || (!fixed && m->nmaster && n <= m->nmaster)) // no master
-		|| (m->lt[m->sellt]->arrange == &flextile && m->ltaxis[LAYOUT] == NO_SPLIT)
+		|| (m->ws->lt[m->ws->sellt]->arrange == &flextile && m->ws->ltaxis[LAYOUT] == NO_SPLIT)
 	)
 		fulllayout = 1;
 
@@ -309,11 +309,11 @@ flextitlecalculate(
 	c = m->clients;
 
 	/* floating mode */
-	if ((fulllayout && FLEXWINTITLE_FLOATWEIGHT > 0) || clientsnmaster + clientsnstack == 0 || !m->lt[m->sellt]->arrange) {
+	if ((fulllayout && FLEXWINTITLE_FLOATWEIGHT > 0) || clientsnmaster + clientsnstack == 0 || !m->ws->lt[m->ws->sellt]->arrange) {
 		den = clientsnmaster + clientsnstack + clientsnstack2 + clientsnfloating + clientsnhidden;
 		w = num / den;
 		r = num % den; // rest
-		c = flextitledrawarea(m, c, mas_x, r, w, den, !m->lt[m->sellt]->arrange ? SchemeFlexActFloat : SCHEMEFOR(GRP_MASTER), 1, FLEXWINTITLE_HIDDENWEIGHT, FLEXWINTITLE_FLOATWEIGHT, passx, tabfn, arg, barg); // floating
+		c = flextitledrawarea(m, c, mas_x, r, w, den, !m->ws->lt[m->ws->sellt]->arrange ? SchemeFlexActFloat : SCHEMEFOR(GRP_MASTER), 1, FLEXWINTITLE_HIDDENWEIGHT, FLEXWINTITLE_FLOATWEIGHT, passx, tabfn, arg, barg); // floating
 	/* no master and stack mode, e.g. monocole, grid layouts, fibonacci */
 	} else if (fulllayout) {
 		den = clientsnmaster + clientsnstack + clientsnstack2 + clientsnhidden;

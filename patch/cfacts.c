@@ -4,9 +4,9 @@ setcfact(const Arg *arg)
 	float f;
 	Client *c;
 
-	c = selmon->sel;
+	c = selws->sel;
 
-	if (!arg || !c || !selmon->lt[selmon->sellt]->arrange)
+	if (!arg || !c || !selmon->lt[selws->sellt]->arrange)
 		return;
 	if (!arg->f)
 		f = 1.0;

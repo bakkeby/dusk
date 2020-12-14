@@ -28,14 +28,14 @@ tagothermon(const Arg *arg, int dir)
 	Client *sel;
 	Monitor *newmon;
 
-	if (!selmon->sel || !mons->next)
+	if (!selws->sel || !mons->next)
 		return;
-	sel = selmon->sel;
+	sel = selws->sel;
 	newmon = dirtomon(dir);
 	sendmon(sel, newmon);
 	if (arg->ui & TAGMASK) {
 		sel->tags = arg->ui & TAGMASK;
 		focus(NULL);
-		arrange(newmon);
+		arrange(newmon->ws);
 	}
 }

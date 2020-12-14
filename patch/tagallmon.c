@@ -11,15 +11,15 @@ tagallmon(const Arg *arg)
 	for (last = n->clients; last && last->next; last = last->next);
 	for (slast = n->stack; slast && slast->snext; slast = slast->snext);
 
-	for (c = selmon->clients; c; c = next) {
+	for (c = selws->clients; c; c = next) {
 		next = c->next;
 		if (!ISVISIBLE(c))
 			continue;
-		tagmonresize(c, c->mon, n);
+		tagmonresize(c, c->ws->mon, n);
 		unfocus(c, 1, NULL);
 		detach(c);
 		detachstack(c);
-		c->mon = n;
+		c->ws = n;
 		c->tags = n->tagset[n->seltags]; /* assign tags of target monitor */
 		c->next = NULL;
 		c->snext = NULL;
@@ -33,7 +33,7 @@ tagallmon(const Arg *arg)
 			n->stack = slast = c;
 		if (ISFULLSCREEN(c)) {
 			if (!ISFAKEFULLSCREEN(c)) {
-				resizeclient(c, c->mon->mx, c->mon->my, c->mon->mw, c->mon->mh);
+				resizeclient(c, c->ws->mon->mx, c->ws->mon->my, c->ws->mon->mw, c->ws->mon->mh);
 				XRaiseWindow(dpy, c->win);
 			}
 		}

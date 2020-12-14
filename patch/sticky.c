@@ -1,8 +1,8 @@
 void
 togglesticky(const Arg *arg)
 {
-	if (!selmon->sel)
+	if (!selws->sel)
 		return;
-	setflag(selmon->sel, Sticky, !ISSTICKY(selmon->sel));
-	arrange(selmon);
+	setflag(selws->sel, Sticky, !ISSTICKY(selws->sel));
+	arrange(selws);
 }

@@ -1,23 +1,23 @@
 void
 removescratch(const Arg *arg)
 {
-	Client *c = selmon->sel;
+	Client *c = selws->sel;
 	if (!c)
 		return;
 	unsigned int scratchtag = SPTAG(arg->ui);
-	c->tags = c->mon->tagset[c->mon->seltags] ^ scratchtag;
-	arrange(c->mon);
+	c->tags = c->ws->tagset[c->ws->seltags] ^ scratchtag;
+	arrange(c->ws);
 }
 
 void
 setscratch(const Arg *arg)
 {
-	Client *c = selmon->sel;
+	Client *c = selws->sel;
 	if (!c)
 		return;
 	unsigned int scratchtag = SPTAG(arg->ui);
 	c->tags = scratchtag;
-	arrange(c->mon);
+	arrange(c->ws);
 }
 
 void
@@ -31,7 +31,7 @@ togglescratch(const Arg *arg)
 	Arg sparg = {.v = scratchpads[arg->ui].cmd};
 
 	for (mon = mons; mon; mon = mon->next) {
-		for (c = mon->clients; c; c = next) {
+		for (c = ws->clients; c; c = next) {
 			next = c->next;
 			if (!(c->tags & scratchtag))
 				continue;
@@ -43,11 +43,11 @@ togglescratch(const Arg *arg)
 				setclientstate(c, NormalState);
 				newtagset = 0;
 			} else
-				newtagset = selmon->tagset[selmon->seltags] ^ scratchtag;
+				newtagset = selmon->tagset[selws->seltags] ^ scratchtag;
 
-			if (c->mon != selmon) {
-				if (c->mon->tagset[c->mon->seltags] & SPTAGMASK)
-					c->mon->tagset[c->mon->seltags] ^= scratchtag;
+			if (c->ws != selmon) {
+				if (c->ws->tagset[c->ws->seltags] & SPTAGMASK)
+					c->ws->tagset[c->ws->seltags] ^= scratchtag;
 				if (c->w > selmon->ww)
 					nw = selmon->ww - c->bw * 2;
 				if (c->h > selmon->wh)
@@ -61,16 +61,16 @@ togglescratch(const Arg *arg)
 
 	if (found) {
 		if (newtagset) {
-			selmon->tagset[selmon->seltags] = newtagset;
+			selmon->tagset[selws->seltags] = newtagset;
 			focus(NULL);
-			arrange(selmon);
+			arrange(selws);
 		}
 		if (ISVISIBLE(found)) {
 			focus(found);
-			restack(selmon);
+			restack(selws);
 		}
 	} else {
-		selmon->tagset[selmon->seltags] |= scratchtag;
+		selmon->tagset[selws->seltags] |= scratchtag;
 		spawn(&sparg);
 	}
 }

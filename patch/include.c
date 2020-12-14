@@ -46,7 +46,6 @@
 #endif
 #include "killunsel.c"
 #include "nomodbuttons.c"
-#include "pertag.c"
 #include "push.c"
 #include "restartsig.c"
 #include "rotatestack.c"

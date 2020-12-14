@@ -3,7 +3,7 @@ tagicon(Monitor *m, int tag)
 {
 	Client *c;
 	char *icon;
-	for (c = m->clients; c && (!(c->tags & 1 << tag) || HIDDEN(c)); c = c->next);
+	for (c = m->ws->clients; c && (!(c->tags & 1 << tag) || HIDDEN(c)); c = c->next);
 	if (c && tagicons[IconsOccupied][0] != NULL)
 		icon = geticon(m, tag, IconsOccupied);
 	else {

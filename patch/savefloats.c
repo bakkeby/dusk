@@ -1,6 +1,6 @@
 void savefloats(const Arg *arg)
 {
-	Client *c = selmon->sel;
+	Client *c = selws->sel;
 	if (arg && arg->v)
 		c = (Client*)arg->v;
 	if (!c)

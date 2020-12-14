@@ -1,7 +1,7 @@
 void
 transferall(const Arg *arg)
 {
-	Client *c, *n = selmon->clients, *attachfrom = NULL;
+	Client *c, *n = selws->clients, *attachfrom = NULL;
 	int i = 0, nstackclients = 0;
 	while (n) {
 		c = n;
@@ -21,5 +21,5 @@ transferall(const Arg *arg)
 		i++;
 	}
 	selmon->nmaster = nstackclients;
-	arrange(selmon);
+	arrange(selws);
 }

@@ -36,7 +36,7 @@ dump_client(yajl_gen gen, Client *c)
     YSTR("name"); YSTR(c->name);
     YSTR("tags"); YINT(c->tags);
     YSTR("window_id"); YINT(c->win);
-    YSTR("monitor_number"); YINT(c->mon->num);
+    YSTR("monitor_number"); YINT(c->ws->mon->num);
 
     YSTR("geometry"); YMAP(
       YSTR("current"); YMAP (
@@ -129,11 +129,11 @@ dump_monitor(yajl_gen gen, Monitor *mon, int is_selected)
     YSTR("clients"); YMAP(
       YSTR("selected"); YINT(mon->sel ? mon->sel->win : 0);
       YSTR("stack"); YARR(
-        for (Client* c = mon->stack; c; c = c->snext)
+        for (Client* c = ws->stack; c; c = c->snext)
           YINT(c->win);
       )
       YSTR("all"); YARR(
-        for (Client* c = mon->clients; c; c = c->next)
+        for (Client* c = ws->clients; c; c = c->next)
           YINT(c->win);
       )
     )

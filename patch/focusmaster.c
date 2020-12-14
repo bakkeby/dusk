@@ -6,7 +6,7 @@ focusmaster(const Arg *arg)
 	if (selmon->nmaster < 1)
 		return;
 
-	c = nexttiled(selmon->clients);
+	c = nexttiled(selws->clients);
 
 	if (c)
 		focus(c);

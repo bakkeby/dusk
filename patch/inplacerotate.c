@@ -5,14 +5,14 @@ insertclient(Client *item, Client *insertItem, int after)
 	if (item == NULL || insertItem == NULL || item == insertItem)
 		return;
 	detach(insertItem);
-	if (!after && selmon->clients == item) {
+	if (!after && selws->clients == item) {
 		attach(insertItem);
 		return;
 	}
 	if (after) {
 		c = item;
 	} else {
-		for (c = selmon->clients; c; c = c->next) {
+		for (c = selws->clients; c; c = c->next) {
 			if (c->next == item)
 				break;
 		}
@@ -73,7 +73,7 @@ inplacerotate(const Arg *arg)
 
 	// Restore focus position
 	i = 0;
-	for (c = selmon->clients; c; c = c->next) {
+	for (c = selws->clients; c; c = c->next) {
 		if (!ISVISIBLE(c) || (ISFLOATING(c)))
 			continue;
 		if (i == selidx) {

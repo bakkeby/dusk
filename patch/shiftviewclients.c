@@ -5,11 +5,11 @@ shiftviewclients(const Arg *arg)
 	Client *c;
 	unsigned int tagmask = 0;
 
-	for (c = selmon->clients; c; c = c->next)
+	for (c = selws->clients; c; c = c->next)
 		if (!(c->tags & SPTAGMASK))
 			tagmask = tagmask | c->tags;
 
-	shifted.ui = selmon->tagset[selmon->seltags] & ~SPTAGMASK;
+	shifted.ui = selmon->tagset[selws->seltags] & ~SPTAGMASK;
 	if (arg->i > 0) // left circular shift
 		do {
 			shifted.ui = (shifted.ui << arg->i)

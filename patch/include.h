@@ -42,7 +42,6 @@
 #include "ipc/util.h"
 #include "killunsel.h"
 #include "nomodbuttons.h"
-#include "pertag.h"
 #include "push.h"
 #include "restartsig.h"
 #include "rotatestack.h"

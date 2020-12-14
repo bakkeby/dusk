@@ -2,8 +2,8 @@
 Client *
 findbefore(Client *c) {
 	Client *p;
-	if (!c || c == c->mon->clients)
+	if (!c || c == c->ws->clients)
 		return NULL;
-	for (p = c->mon->clients; p && p->next != c; p = p->next);
+	for (p = c->ws->clients; p && p->next != c; p = p->next);
 	return p;
 }

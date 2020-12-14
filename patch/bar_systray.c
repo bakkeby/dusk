@@ -75,8 +75,8 @@ draw_systray(Bar *bar, BarArg *a)
 		w += i->w;
 		if (i->next)
 			w += systrayspacing;
-		if (i->mon != bar->mon)
-			i->mon = bar->mon;
+		if (i->ws->mon != bar->mon)
+			i->ws->mon = bar->mon;
 	}
 
 	XMoveResizeWindow(dpy, systray->win, bar->bx + a->x + lrpad / 2, (w ? bar->by + a->y + (a->h - systray->h) / 2 : -bar->by - a->y), MAX(w, 1), systray->h);

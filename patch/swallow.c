@@ -27,7 +27,7 @@ swallow(Client *p, Client *c)
 	XUnmapWindow(dpy, p->win);
 
 	p->swallowing = c;
-	c->mon = p->mon;
+	c->ws = p->mon;
 
 	Window w = p->win;
 	p->win = c->win;
@@ -59,13 +59,13 @@ unswallow(Client *c)
 	/* unfullscreen the client */
 	setfullscreen(c, 0, 0);
 	updatetitle(c);
-	arrange(c->mon);
+	arrange(c->ws);
 	XMapWindow(dpy, c->win);
 	XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
 	setfloatinghint(c);
 	setclientstate(c, NormalState);
 	focus(NULL);
-	arrange(c->mon);
+	arrange(c->ws);
 }
 
 pid_t
@@ -169,7 +169,7 @@ termforwin(const Client *w)
 	if (!w->pid || ISTERMINAL(w))
 		return NULL;
 
-	c = selmon->sel;
+	c = selws->sel;
 	if (c && ISTERMINAL(c) && !c->swallowing && c->pid && isdescprocess(c->pid, w->pid))
 		return c;
 

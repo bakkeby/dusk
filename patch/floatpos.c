@@ -1,9 +1,9 @@
 void
 floatpos(const Arg *arg)
 {
-	Client *c = selmon->sel;
+	Client *c = selws->sel;
 
-	if (!c || (selmon->lt[selmon->sellt]->arrange && !ISFLOATING(c)))
+	if (!c || (selmon->lt[selws->sellt]->arrange && !ISFLOATING(c)))
 		return;
 
 	setfloatpos(c, (char *)arg->v);
@@ -23,7 +23,7 @@ setfloatpos(Client *c, const char *floatpos)
 
 	if (!c || !floatpos)
 		return;
-	if (selmon->lt[selmon->sellt]->arrange && !ISFLOATING(c))
+	if (selmon->lt[selws->sellt]->arrange && !ISFLOATING(c))
 		return;
 
 	switch(sscanf(floatpos, "%d%c %d%c %d%c %d%c", &x, &xCh, &y, &yCh, &w, &wCh, &h, &hCh)) {
@@ -53,11 +53,11 @@ setfloatpos(Client *c, const char *floatpos)
 			return;
 	}
 
-	getgaps(c->mon, &oh, &ov, &ih, &iv, &n);
-	wx = c->mon->wx + ov;
-	wy = c->mon->wy + oh;
-	ww = c->mon->ww - 2*ov;
-	wh = c->mon->wh - 2*oh;
+	getgaps(c->ws->mon, &oh, &ov, &ih, &iv, &n);
+	wx = c->ws->mon->wx + ov;
+	wy = c->ws->mon->wy + oh;
+	ww = c->ws->mon->ww - 2*ov;
+	wh = c->ws->mon->wh - 2*oh;
 	addflag(c, IgnoreSizeHints);
 
 	getfloatpos(x, xCh, w, wCh, wx, ww, c->x, c->w, c->bw, floatposgrid_x, &c->x, &c->w);
