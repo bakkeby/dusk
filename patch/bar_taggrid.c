@@ -10,8 +10,9 @@ draw_taggrid(Bar *bar, BarArg *a)
 	unsigned int x, y, h, max_x = 0, columns, occ = 0;
 	int invert, i,j, k;
 	Client *c;
+	Workspace *ws = MWS(bar->mon);
 
-	for (c = bar->mon->ws->clients; c; c = c->next)
+	for (c = bar->mon->selws->clients; c; c = c->next)
 		occ |= c->tags;
 
 	max_x = x = a->x + lrpad / 2;
@@ -28,7 +29,7 @@ draw_taggrid(Bar *bar, BarArg *a)
 		x = a->x + lrpad / 2;
 		for (k = 0; k < columns; k++, i++) {
 			if (i < NUMTAGS) {
-				invert = bar->mon->ws->tagset[bar->mon->ws->seltags] & 1 << i ? 0 : 1;
+				invert = ws->tags & 1 << i ? 0 : 1;
 
 				/* Select active color for current square */
 				XSetForeground(drw->dpy, drw->gc, !invert ? scheme[SchemeTagsSel][ColBg].pixel :
@@ -74,8 +75,9 @@ click_taggrid(Bar *bar, Arg *arg, BarArg *a)
 void
 taggridmovetag(const Arg *arg)
 {
+	Workspace *ws = WS;
 	unsigned int columns;
-	unsigned int new_tagset = 0;
+	unsigned int new_tags = 0;
 	unsigned int pos, i;
 	int col, row;
 	Arg new_arg;
@@ -83,7 +85,7 @@ taggridmovetag(const Arg *arg)
 	columns = NUMTAGS / taggridrows + ((NUMTAGS % taggridrows > 0) ? 1 : 0);
 
 	for (i = 0; i < NUMTAGS; ++i) {
-		if (!(selmon->tagset[selws->seltags] & 1 << i)) {
+		if (!(ws->tags & 1 << i)) {
 			continue;
 		}
 		pos = i;
@@ -131,9 +133,9 @@ taggridmovetag(const Arg *arg)
 				pos = row * columns + col;
 			}
 		}
-		new_tagset |= 1 << pos;
+		new_tags |= 1 << pos;
 	}
-	new_arg.ui = new_tagset;
+	new_arg.ui = new_tags;
 	if (arg->ui & TAGGRID_TOGGLETAG) {
 		toggletag(&new_arg);
 	}

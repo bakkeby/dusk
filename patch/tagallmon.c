@@ -20,7 +20,7 @@ tagallmon(const Arg *arg)
 		detach(c);
 		detachstack(c);
 		c->ws = n;
-		c->tags = n->tagset[n->seltags]; /* assign tags of target monitor */
+		c->tags = n->tags[n->seltags]; /* assign tags of target monitor */
 		c->next = NULL;
 		c->snext = NULL;
 		if (last)

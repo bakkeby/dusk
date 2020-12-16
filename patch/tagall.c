@@ -14,7 +14,7 @@ tagall(const Arg *arg)
 			if (!floating_only || ISFLOATING(c))
 				for (j = 0; j < NUMTAGS; j++)
 				{
-					if (c->tags & 1 << j && selmon->tagset[selws->seltags] & 1 << j)
+					if (c->tags & 1 << j && selmon->tags[selws->seltags] & 1 << j)
 					{
 						c->tags = c->tags ^ (1 << j & TAGMASK);
 						c->tags = c->tags | 1 << (tag-1);

@@ -9,7 +9,7 @@ shiftviewclients(const Arg *arg)
 		if (!(c->tags & SPTAGMASK))
 			tagmask = tagmask | c->tags;
 
-	shifted.ui = selmon->tagset[selws->seltags] & ~SPTAGMASK;
+	shifted.ui = selmon->tags[selws->seltags] & ~SPTAGMASK;
 	if (arg->i > 0) // left circular shift
 		do {
 			shifted.ui = (shifted.ui << arg->i)

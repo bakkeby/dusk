@@ -702,18 +702,15 @@ ipc_get_dwm_client(IPCClient *ipc_client, const char *msg, const Monitor *mons)
 
 	// Find client with specified window XID
 	for (const Monitor *m = mons; m; m = m->next)
-		for (Client *c = m->clients; c; c = c->next)
-			if (c->win == win) {
-				yajl_gen gen;
-				ipc_reply_init_message(&gen);
-
-				dump_client(gen, c);
-
-				ipc_reply_prepare_send_message(gen, ipc_client,
-																			 IPC_TYPE_GET_DWM_CLIENT);
-
-				return 0;
-			}
+		for (Workspace *ws = m->workspaces; ws; ws = ws->next)
+			for (Client *c = ws->clients; c; c = c->next)
+				if (c->win == win) {
+					yajl_gen gen;
+					ipc_reply_init_message(&gen);
+					dump_client(gen, c);
+					ipc_reply_prepare_send_message(gen, ipc_client, IPC_TYPE_GET_DWM_CLIENT);
+					return 0;
+				}
 
 	ipc_prepare_reply_failure(ipc_client, IPC_TYPE_GET_DWM_CLIENT,
 														"Client with window id %d not found", win);
@@ -1087,35 +1084,37 @@ ipc_focused_state_change_event(const int mon_num, const Window client_id,
 void
 ipc_send_events(Monitor *mons, Monitor **lastselmon, Monitor *selmon)
 {
+	Workspace *ws;
 	for (Monitor *m = mons; m; m = m->next) {
-		unsigned int urg = 0, occ = 0, tagset = 0;
+		ws = MWS(m);
+		unsigned int urg = 0, occ = 0, tags = 0;
 
-		for (Client *c = m->clients; c; c = c->next) {
+		for (Client *c = ws->clients; c; c = c->next) {
 			occ |= c->tags;
 
 			if (ISURGENT(c))
 				urg |= c->tags;
 		}
-		tagset = m->tagset[m->seltags];
+		tags = ws->tags;
 
-		TagState new_state = {.selected = tagset, .occupied = occ, .urgent = urg};
+		TagState new_state = {.selected = tags, .occupied = occ, .urgent = urg};
 
-		if (memcmp(&m->tagstate, &new_state, sizeof(TagState)) != 0) {
-			ipc_tag_change_event(m->num, m->tagstate, new_state);
-			m->tagstate = new_state;
+		if (memcmp(&ws->tagstate, &new_state, sizeof(TagState)) != 0) {
+			ipc_tag_change_event(m->num, ws->tagstate, new_state);
+			ws->tagstate = new_state;
 		}
 
-		if (m->lastsel != m->sel) {
-			ipc_client_focus_change_event(m->num, m->lastsel, m->sel);
-			m->lastsel = m->sel;
+		if (ws->lastsel != ws->sel) {
+			ipc_client_focus_change_event(m->num, ws->lastsel, ws->sel);
+			ws->lastsel = ws->sel;
 		}
 
-		if (strcmp(m->ltsymbol, m->lastltsymbol) != 0 ||
-				m->lastlt != m->lt[m->sellt]) {
-			ipc_layout_change_event(m->num, m->lastltsymbol, m->lastlt, m->ltsymbol,
-															m->lt[m->sellt]);
-			strcpy(m->lastltsymbol, m->ltsymbol);
-			m->lastlt = m->lt[m->sellt];
+		if (strcmp(ws->ltsymbol, ws->lastltsymbol) != 0 ||
+				ws->lastlt != ws->layout) {
+			ipc_layout_change_event(m->num, ws->lastltsymbol, ws->lastlt, ws->ltsymbol,
+															ws->layout);
+			strcpy(ws->lastltsymbol, ws->ltsymbol);
+			ws->lastlt = ws->layout;
 		}
 
 		if (*lastselmon != selmon) {
@@ -1124,11 +1123,11 @@ ipc_send_events(Monitor *mons, Monitor **lastselmon, Monitor *selmon)
 			*lastselmon = selmon;
 		}
 
-		Client *sel = m->sel;
+		Client *sel = ws->sel;
 		if (!sel)
 			continue;
 
-		ClientState *o = &m->sel->prevstate;
+		ClientState *o = &ws->sel->prevstate;
 		ClientState n = {.oldstate = WASFLOATING(sel),
 							 .isfixed = ISFIXED(sel),
 							 .isfloating = ISFLOATING(sel),
@@ -1136,7 +1135,7 @@ ipc_send_events(Monitor *mons, Monitor **lastselmon, Monitor *selmon)
 							 .isurgent = ISURGENT(sel),
 							 .neverfocus = NEVERFOCUS(sel)};
 		if (memcmp(o, &n, sizeof(ClientState)) != 0) {
-			ipc_focused_state_change_event(m->num, m->sel->win, o, &n);
+			ipc_focused_state_change_event(m->num, ws->sel->win, o, &n);
 			*o = n;
 		}
 	}

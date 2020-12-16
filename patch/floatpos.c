@@ -1,9 +1,10 @@
 void
 floatpos(const Arg *arg)
 {
-	Client *c = selws->sel;
+	Workspace *ws = WS;
+	Client *c = ws->sel;
 
-	if (!c || (selmon->lt[selws->sellt]->arrange && !ISFLOATING(c)))
+	if (!c || (ws->layout->arrange && !ISFLOATING(c)))
 		return;
 
 	setfloatpos(c, (char *)arg->v);
@@ -20,10 +21,11 @@ setfloatpos(Client *c, const char *floatpos)
 	int x, y, w, h, wx, ww, wy, wh;
 	int oh, ov, ih, iv;
 	unsigned int n;
+	Workspace *ws = WS;
 
 	if (!c || !floatpos)
 		return;
-	if (selmon->lt[selws->sellt]->arrange && !ISFLOATING(c))
+	if (ws->layout->arrange && !ISFLOATING(c))
 		return;
 
 	switch(sscanf(floatpos, "%d%c %d%c %d%c %d%c", &x, &xCh, &y, &yCh, &w, &wCh, &h, &hCh)) {

@@ -54,8 +54,8 @@ setgapsex(const Arg *arg)
 		iv = (arg->i & 0x7f);
 
 	/* Auto enable gaps if disabled */
-	if (!selws->enablegaps)
-		selws->enablegaps = 1;
+	if (!selmon->selws->enablegaps)
+		selmon->selws->enablegaps = 1;
 
 	setgaps(oh, ov, ih, iv);
 }
@@ -63,7 +63,7 @@ setgapsex(const Arg *arg)
 static void
 togglegaps(const Arg *arg)
 {
-	selws->enablegaps = !selws->enablegaps;
+	selmon->selws->enablegaps = !selmon->selws->enablegaps;
 	arrange(NULL);
 }
 
@@ -154,10 +154,10 @@ static void
 getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc)
 {
 	unsigned int n, oe, ie;
-	oe = ie = selws->enablegaps;
+	oe = ie = selmon->selws->enablegaps;
 	Client *c;
 
-	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
+	for (n = 0, c = nexttiled(m->selws->clients); c; c = nexttiled(c->next), n++);
 	if (enabled(SmartGaps) && n == 1) {
 		oe = smartgaps_fact; // outer gaps disabled or multiplied when only one client
 	}

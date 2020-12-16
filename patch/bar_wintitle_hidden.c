@@ -25,10 +25,11 @@ calc_wintitle_hidden(
 	Arg *arg, BarArg *barg
 ) {
 	Client *c;
+	Workspace *ws = MWS(m);
 	int clientsnhidden = 0, w, r;
 	int groupactive = GRP_HIDDEN;
 
-	for (c = m->clients; c; c = c->next) {
+	for (c = ws->clients; c; c = c->next) {
 		if (!ISVISIBLE(c))
 			continue;
 		if (HIDDEN(c))
@@ -40,6 +41,6 @@ calc_wintitle_hidden(
 
 	w = tabw / clientsnhidden;
 	r = tabw % clientsnhidden;
-	c = flextitledrawarea(m, m->clients, offx, r, w, clientsnhidden, SCHEMEFOR(GRP_HIDDEN), 0, 1, 0, passx, tabfn, arg, barg);
+	c = flextitledrawarea(m, ws->clients, offx, r, w, clientsnhidden, SCHEMEFOR(GRP_HIDDEN), 0, 1, 0, passx, tabfn, arg, barg);
 	return 1;
 }

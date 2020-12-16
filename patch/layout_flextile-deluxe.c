@@ -44,13 +44,14 @@ getfactsforrange(Monitor *m, int an, int ai, int size, int *rest, float *fact)
 	float facts;
 	Client *c;
 	int total = 0;
+	Workspace *ws = MWS(m);
 
 	facts = 0;
-	for (i = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++)
+	for (i = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), i++)
 		if (i >= ai && i < (ai + an))
 			facts += c->cfact;
 
-	for (i = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++)
+	for (i = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), i++)
 		if (i >= ai && i < (ai + an))
 			total += size * (c->cfact / facts);
 
@@ -62,6 +63,7 @@ static void
 setlayoutaxisex(const Arg *arg)
 {
 	int axis, arr;
+	Workspace *ws = WS;
 
 	axis = arg->i & 0x3; // lower two bytes indicates layout, master or stack1-2
 	arr = ((arg->i & 0xFC) >> 2); // remaining six upper bytes indicate arrangement
@@ -70,8 +72,7 @@ setlayoutaxisex(const Arg *arg)
 			|| (axis > 0 && (arr > AXIS_LAST || arr < 0)))
 		arr = 0;
 
-	selmon->ltaxis[axis] = arr;
-	selmon->pertag->ltaxis[selmon->pertag->curtag][axis] = selmon->ltaxis[axis];
+	ws->ltaxis[axis] = arr;
 	arrangemon(selmon);
 }
 
@@ -84,14 +85,16 @@ setlayoutex(const Arg *arg)
 static void
 layout_no_split(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n)
 {
-	(&flextiles[m->ltaxis[m->nmaster >= n ? MASTER : STACK]])->arrange(m, x, y, h, w, ih, iv, n, n, 0);
+	Workspace *ws = MWS(m);
+	(&flextiles[ws->ltaxis[ws->nmaster >= n ? MASTER : STACK]])->arrange(m, x, y, h, w, ih, iv, n, n, 0);
 }
 
 static void
 layout_split_vertical(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n)
 {
+	Workspace *ws = MWS(m);
 	/* Split master into master + stack if we have enough clients */
-	if (m->nmaster && n > m->nmaster) {
+	if (ws->nmaster && n > ws->nmaster) {
 		layout_split_vertical_fixed(m, x, y, h, w, ih, iv, n);
 	} else {
 		layout_no_split(m, x, y, h, w, ih, iv, n);
@@ -102,27 +105,29 @@ static void
 layout_split_vertical_fixed(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n)
 {
 	int sw, sx;
+	Workspace *ws = MWS(m);
 
-	sw = (w - iv) * (1 - m->mfact);
-	w = (w - iv) * m->mfact;
-	if (m->ltaxis[LAYOUT] < 0) { // mirror
+	sw = (w - iv) * (1 - ws->mfact);
+	w = (w - iv) * ws->mfact;
+	if (ws->ltaxis[LAYOUT] < 0) { // mirror
 		sx = x;
 		x += sw + iv;
 	} else {
 		sx = x + w + iv;
 	}
 
-	(&flextiles[m->ltaxis[MASTER]])->arrange(m, x, y, h, w, ih, iv, n, m->nmaster, 0);
-	(&flextiles[m->ltaxis[STACK]])->arrange(m, sx, y, h, sw, ih, iv, n, n - m->nmaster, m->nmaster);
+	(&flextiles[ws->ltaxis[MASTER]])->arrange(m, x, y, h, w, ih, iv, n, ws->nmaster, 0);
+	(&flextiles[ws->ltaxis[STACK]])->arrange(m, sx, y, h, sw, ih, iv, n, n - ws->nmaster, ws->nmaster);
 }
 
 static void
 layout_split_vertical_dual_stack(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n)
 {
+	Workspace *ws = MWS(m);
 	/* Split master into master + stack if we have enough clients */
-	if (!m->nmaster || n <= m->nmaster) {
+	if (!ws->nmaster || n <= ws->nmaster) {
 		layout_no_split(m, x, y, h, w, ih, iv, n);
-	} else if (n <= m->nmaster + (m->nstack ? m->nstack : 1)) {
+	} else if (n <= ws->nmaster + (ws->nstack ? ws->nstack : 1)) {
 		layout_split_vertical(m, x, y, h, w, ih, iv, n);
 	} else {
 		layout_split_vertical_dual_stack_fixed(m, x, y, h, w, ih, iv, n);
@@ -133,33 +138,35 @@ static void
 layout_split_vertical_dual_stack_fixed(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n)
 {
 	int sh, sw, sx, oy, sc;
+	Workspace *ws = MWS(m);
 
-	if (m->nstack)
-		sc = m->nstack;
+	if (ws->nstack)
+		sc = ws->nstack;
 	else
-		sc = (n - m->nmaster) / 2 + ((n - m->nmaster) % 2 > 0 ? 1 : 0);
+		sc = (n - ws->nmaster) / 2 + ((n - ws->nmaster) % 2 > 0 ? 1 : 0);
 
-	sw = (w - iv) * (1 - m->mfact);
+	sw = (w - iv) * (1 - ws->mfact);
 	sh = (h - ih) / 2;
-	w = (w - iv) * m->mfact;
+	w = (w - iv) * ws->mfact;
 	oy = y + sh + ih;
-	if (m->ltaxis[LAYOUT] < 0) { // mirror
+	if (ws->ltaxis[LAYOUT] < 0) { // mirror
 		sx = x;
 		x += sw + iv;
 	} else {
 		sx = x + w + iv;
 	}
 
-	(&flextiles[m->ltaxis[MASTER]])->arrange(m, x, y, h, w, ih, iv, n, m->nmaster, 0);
-	(&flextiles[m->ltaxis[STACK]])->arrange(m, sx, y, sh, sw, ih, iv, n, sc, m->nmaster);
-	(&flextiles[m->ltaxis[STACK2]])->arrange(m, sx, oy, sh, sw, ih, iv, n, n - m->nmaster - sc, m->nmaster + sc);
+	(&flextiles[ws->ltaxis[MASTER]])->arrange(m, x, y, h, w, ih, iv, n, ws->nmaster, 0);
+	(&flextiles[ws->ltaxis[STACK]])->arrange(m, sx, y, sh, sw, ih, iv, n, sc, ws->nmaster);
+	(&flextiles[ws->ltaxis[STACK2]])->arrange(m, sx, oy, sh, sw, ih, iv, n, n - ws->nmaster - sc, ws->nmaster + sc);
 }
 
 static void
 layout_split_horizontal(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n)
 {
+	Workspace *ws = MWS(m);
 	/* Split master into master + stack if we have enough clients */
-	if (m->nmaster && n > m->nmaster) {
+	if (ws->nmaster && n > ws->nmaster) {
 		layout_split_horizontal_fixed(m, x, y, h, w, ih, iv, n);
 	} else {
 		layout_no_split(m, x, y, h, w, ih, iv, n);
@@ -170,27 +177,29 @@ static void
 layout_split_horizontal_fixed(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n)
 {
 	int sh, sy;
+	Workspace *ws = MWS(m);
 
-	sh = (h - ih) * (1 - m->mfact);
-	h = (h - ih) * m->mfact;
-	if (m->ltaxis[LAYOUT] < 0) { // mirror
+	sh = (h - ih) * (1 - ws->mfact);
+	h = (h - ih) * ws->mfact;
+	if (ws->ltaxis[LAYOUT] < 0) { // mirror
 		sy = y;
 		y += sh + ih;
 	} else {
 		sy = y + h + ih;
 	}
 
-	(&flextiles[m->ltaxis[MASTER]])->arrange(m, x, y, h, w, ih, iv, n, m->nmaster, 0);
-	(&flextiles[m->ltaxis[STACK]])->arrange(m, x, sy, sh, w, ih, iv, n, n - m->nmaster, m->nmaster);
+	(&flextiles[ws->ltaxis[MASTER]])->arrange(m, x, y, h, w, ih, iv, n, ws->nmaster, 0);
+	(&flextiles[ws->ltaxis[STACK]])->arrange(m, x, sy, sh, w, ih, iv, n, n - ws->nmaster, ws->nmaster);
 }
 
 static void
 layout_split_horizontal_dual_stack(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n)
 {
+	Workspace *ws = MWS(m);
 	/* Split master into master + stack if we have enough clients */
-	if (!m->nmaster || n <= m->nmaster) {
+	if (!ws->nmaster || n <= ws->nmaster) {
 		layout_no_split(m, x, y, h, w, ih, iv, n);
-	} else if (n <= m->nmaster + (m->nstack ? m->nstack : 1)) {
+	} else if (n <= ws->nmaster + (ws->nstack ? ws->nstack : 1)) {
 		layout_split_horizontal(m, x, y, h, w, ih, iv, n);
 	} else {
 		layout_split_horizontal_dual_stack_fixed(m, x, y, h, w, ih, iv, n);
@@ -201,35 +210,37 @@ static void
 layout_split_horizontal_dual_stack_fixed(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n)
 {
 	int sh, sy, ox, sc;
+	Workspace *ws = MWS(m);
 
-	if (m->nstack)
-		sc = m->nstack;
+	if (ws->nstack)
+		sc = ws->nstack;
 	else
-		sc = (n - m->nmaster) / 2 + ((n - m->nmaster) % 2 > 0 ? 1 : 0);
+		sc = (n - ws->nmaster) / 2 + ((n - ws->nmaster) % 2 > 0 ? 1 : 0);
 
-	sh = (h - ih) * (1 - m->mfact);
-	h = (h - ih) * m->mfact;
+	sh = (h - ih) * (1 - ws->mfact);
+	h = (h - ih) * ws->mfact;
 	sw = (w - iv) / 2;
 	ox = x + sw + iv;
-	if (m->ltaxis[LAYOUT] < 0) { // mirror
+	if (ws->ltaxis[LAYOUT] < 0) { // mirror
 		sy = y;
 		y += sh + ih;
 	} else {
 		sy = y + h + ih;
 	}
 
-	(&flextiles[m->ltaxis[MASTER]])->arrange(m, x, y, h, w, ih, iv, n, m->nmaster, 0);
-	(&flextiles[m->ltaxis[STACK]])->arrange(m, x, sy, sh, sw, ih, iv, n, sc, m->nmaster);
-	(&flextiles[m->ltaxis[STACK2]])->arrange(m, ox, sy, sh, sw, ih, iv, n, n - m->nmaster - sc, m->nmaster + sc);
+	(&flextiles[ws->ltaxis[MASTER]])->arrange(m, x, y, h, w, ih, iv, n, ws->nmaster, 0);
+	(&flextiles[ws->ltaxis[STACK]])->arrange(m, x, sy, sh, sw, ih, iv, n, sc, ws->nmaster);
+	(&flextiles[ws->ltaxis[STACK2]])->arrange(m, ox, sy, sh, sw, ih, iv, n, n - ws->nmaster - sc, ws->nmaster + sc);
 }
 
 static void
 layout_split_centered_vertical(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n)
 {
+	Workspace *ws = MWS(m);
 	/* Split master into master + stack if we have enough clients */
-	if (!m->nmaster || n <= m->nmaster) {
+	if (!ws->nmaster || n <= ws->nmaster) {
 		layout_no_split(m, x, y, h, w, ih, iv, n);
-	} else if (n <= m->nmaster + (m->nstack ? m->nstack : 1)) {
+	} else if (n <= ws->nmaster + (ws->nstack ? ws->nstack : 1)) {
 		layout_split_vertical(m, x, y, h, w, ih, iv, n);
 	} else {
 		layout_split_centered_vertical_fixed(m, x, y, h, w, ih, iv, n);
@@ -240,15 +251,16 @@ static void
 layout_split_centered_vertical_fixed(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n)
 {
 	int sw, sx, ox, sc;
+	Workspace *ws = MWS(m);
 
-	if (m->nstack)
-		sc = m->nstack;
+	if (ws->nstack)
+		sc = ws->nstack;
 	else
-		sc = (n - m->nmaster) / 2 + ((n - m->nmaster) % 2 > 0 ? 1 : 0);
+		sc = (n - ws->nmaster) / 2 + ((n - ws->nmaster) % 2 > 0 ? 1 : 0);
 
-	sw = (w - 2*iv) * (1 - m->mfact) / 2;
-	w = (w - 2*iv) * m->mfact;
-	if (m->ltaxis[LAYOUT] < 0)  { // mirror
+	sw = (w - 2*iv) * (1 - ws->mfact) / 2;
+	w = (w - 2*iv) * ws->mfact;
+	if (ws->ltaxis[LAYOUT] < 0)  { // mirror
 		sx = x;
 		x += sw + iv;
 		ox = x + w + iv;
@@ -258,18 +270,19 @@ layout_split_centered_vertical_fixed(Monitor *m, int x, int y, int h, int w, int
 		sx = x + w + iv;
 	}
 
-	(&flextiles[m->ltaxis[MASTER]])->arrange(m, x, y, h, w, ih, iv, n, m->nmaster, 0);
-	(&flextiles[m->ltaxis[STACK]])->arrange(m, sx, y, h, sw, ih, iv, n, sc, m->nmaster);
-	(&flextiles[m->ltaxis[STACK2]])->arrange(m, ox, y, h, sw, ih, iv, n, n - m->nmaster - sc, m->nmaster + sc);
+	(&flextiles[ws->ltaxis[MASTER]])->arrange(m, x, y, h, w, ih, iv, n, ws->nmaster, 0);
+	(&flextiles[ws->ltaxis[STACK]])->arrange(m, sx, y, h, sw, ih, iv, n, sc, ws->nmaster);
+	(&flextiles[ws->ltaxis[STACK2]])->arrange(m, ox, y, h, sw, ih, iv, n, n - ws->nmaster - sc, ws->nmaster + sc);
 }
 
 static void
 layout_split_centered_horizontal(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n)
 {
+	Workspace *ws = MWS(m);
 	/* Split master into master + stack if we have enough clients */
-	if (!m->nmaster || n <= m->nmaster) {
+	if (!ws->nmaster || n <= ws->nmaster) {
 		layout_no_split(m, x, y, h, w, ih, iv, n);
-	} else if (n <= m->nmaster + (m->nstack ? m->nstack : 1)) {
+	} else if (n <= ws->nmaster + (ws->nstack ? ws->nstack : 1)) {
 		layout_split_horizontal(m, x, y, h, w, ih, iv, n);
 	} else {
 		layout_split_centered_horizontal_fixed(m, x, y, h, w, ih, iv, n);
@@ -280,15 +293,16 @@ static void
 layout_split_centered_horizontal_fixed(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n)
 {
 	int sh, sy, oy, sc;
+	Workspace *ws = MWS(m);
 
-	if (m->nstack)
-		sc = m->nstack;
+	if (ws->nstack)
+		sc = ws->nstack;
 	else
-		sc = (n - m->nmaster) / 2 + ((n - m->nmaster) % 2 > 0 ? 1 : 0);
+		sc = (n - ws->nmaster) / 2 + ((n - ws->nmaster) % 2 > 0 ? 1 : 0);
 
-	sh = (h - 2*ih) * (1 - m->mfact) / 2;
-	h = (h - 2*ih) * m->mfact;
-	if (m->ltaxis[LAYOUT] < 0)  { // mirror
+	sh = (h - 2*ih) * (1 - ws->mfact) / 2;
+	h = (h - 2*ih) * ws->mfact;
+	if (ws->ltaxis[LAYOUT] < 0)  { // mirror
 		sy = y;
 		y += sh + ih;
 		oy = y + h + ih;
@@ -298,16 +312,17 @@ layout_split_centered_horizontal_fixed(Monitor *m, int x, int y, int h, int w, i
 		sy = y + h + ih;
 	}
 
-	(&flextiles[m->ltaxis[MASTER]])->arrange(m, x, y, h, w, ih, iv, n, m->nmaster, 0);
-	(&flextiles[m->ltaxis[STACK]])->arrange(m, x, sy, sh, w, ih, iv, n, sc, m->nmaster);
-	(&flextiles[m->ltaxis[STACK2]])->arrange(m, x, oy, sh, w, ih, iv, n, n - m->nmaster - sc, m->nmaster + sc);
+	(&flextiles[ws->ltaxis[MASTER]])->arrange(m, x, y, h, w, ih, iv, n, ws->nmaster, 0);
+	(&flextiles[ws->ltaxis[STACK]])->arrange(m, x, sy, sh, w, ih, iv, n, sc, ws->nmaster);
+	(&flextiles[ws->ltaxis[STACK2]])->arrange(m, x, oy, sh, w, ih, iv, n, n - ws->nmaster - sc, ws->nmaster + sc);
 }
 
 static void
 layout_floating_master(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n)
 {
+	Workspace *ws = MWS(m);
 	/* Split master into master + stack if we have enough clients */
-	if (!m->nmaster || n <= m->nmaster) {
+	if (!ws->nmaster || n <= ws->nmaster) {
 		layout_no_split(m, x, y, h, w, ih, iv, n);
 	} else {
 		layout_floating_master_fixed(m, x, y, h, w, ih, iv, n);
@@ -318,21 +333,22 @@ static void
 layout_floating_master_fixed(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n)
 {
 	int mh, mw;
+	Workspace *ws = MWS(m);
 
 	/* Draw stack area first */
-	(&flextiles[m->ltaxis[STACK]])->arrange(m, x, y, h, w, ih, iv, n, n - m->nmaster, m->nmaster);
+	(&flextiles[ws->ltaxis[STACK]])->arrange(m, x, y, h, w, ih, iv, n, n - ws->nmaster, ws->nmaster);
 
 	if (w > h) {
-		mw = w * m->mfact;
+		mw = w * ws->mfact;
 		mh = h * 0.9;
 	} else {
 		mw = w * 0.9;
-		mh = h * m->mfact;
+		mh = h * ws->mfact;
 	}
 	x = x + (w - mw) / 2;
 	y = y + (h - mh) / 2;
 
-	(&flextiles[m->ltaxis[MASTER]])->arrange(m, x, y, mh, mw, ih, iv, n, m->nmaster, 0);
+	(&flextiles[ws->ltaxis[MASTER]])->arrange(m, x, y, mh, mw, ih, iv, n, ws->nmaster, 0);
 }
 
 static void
@@ -347,7 +363,7 @@ arrange_left_to_right(Monitor *m, int x, int y, int h, int w, int ih, int iv, in
 
 	w -= iv * (an - 1);
 	getfactsforrange(m, an, ai, w, &rest, &facts);
-	for (i = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++) {
+	for (i = 0, c = nexttiled(m->selws->clients); c; c = nexttiled(c->next), i++) {
 		if (i >= ai && i < (ai + an)) {
 			fact = c->cfact;
 			resize(c, x, y, w * (fact / facts) + ((i - ai) < rest ? 1 : 0) - (2 * c->bw), h - (2 * c->bw), 0);
@@ -362,13 +378,14 @@ arrange_top_to_bottom(Monitor *m, int x, int y, int h, int w, int ih, int iv, in
 	int i, rest;
 	float facts, fact = 1;
 	Client *c;
+	Workspace *ws = MWS(m);
 
 	if (ai + an > n)
 		an = n - ai;
 
 	h -= ih * (an - 1);
 	getfactsforrange(m, an, ai, h, &rest, &facts);
-	for (i = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++) {
+	for (i = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), i++) {
 		if (i >= ai && i < (ai + an)) {
 			fact = c->cfact;
 			resize(c, x, y, w - (2 * c->bw), h * (fact / facts) + ((i - ai) < rest ? 1 : 0) - (2 * c->bw), 0);
@@ -383,16 +400,16 @@ arrange_monocle(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n, i
 	int i, stackno, minstackno = 0xFFFFFF;
 	Client *c, *s, *f = NULL;
 
-	for (i = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++)
+	for (i = 0, c = nexttiled(m->selws->clients); c; c = nexttiled(c->next), i++)
 		if (i >= ai && i < (ai + an)) {
-			for (stackno = 0, s = m->stack; s && s != c; s = s->snext, ++stackno);
+			for (stackno = 0, s = m->selws->stack; s && s != c; s = s->snext, ++stackno);
 			if (stackno < minstackno) {
 				f = s;
 				minstackno = stackno;
 			}
 		}
 
-	for (i = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++)
+	for (i = 0, c = nexttiled(m->selws->clients); c; c = nexttiled(c->next), i++)
 		if (i >= ai && i < (ai + an)) {
 			if (c == f) {
 				XMoveWindow(dpy, c->win, x, y);
@@ -420,7 +437,7 @@ arrange_gridmode(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n, 
 	cw = (w - iv * (cols - 1)) / (cols ? cols : 1);
 	chrest = h - ih * (rows - 1) - ch * rows;
 	cwrest = w - iv * (cols - 1) - cw * cols;
-	for (i = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++) {
+	for (i = 0, c = nexttiled(m->selws->clients); c; c = nexttiled(c->next), i++) {
 		if (i >= ai && i < (ai + an)) {
 			cc = ((i - ai) / rows); // client column number
 			cr = ((i - ai) % rows); // client row number
@@ -470,7 +487,7 @@ arrange_gapplessgrid(Monitor *m, int x, int y, int h, int w, int ih, int iv, int
 	cw = (w - iv * (cols - 1)) / cols;
 	crest = (w - iv * (cols - 1)) - cw * cols;
 
-	for (i = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), i++) {
+	for (i = 0, c = nexttiled(m->selws->clients); c; c = nexttiled(c->next), i++) {
 		if (i >= ai && i < (ai + an)) {
 			if (cc/rows + 1 > cols - an%cols) {
 				rows = an/cols + 1;
@@ -539,8 +556,9 @@ arrange_fibonacci(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n,
 {
 	int i, j, nv, hrest = 0, wrest = 0, nx = x, ny = y, nw = w, nh = h, r = 1;
 	Client *c;
+	Workspace *ws = MWS(m);
 
-	for (i = 0, j = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), j++) {
+	for (i = 0, j = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), j++) {
 		if (j >= ai && j < (ai + an)) {
 			if (r) {
 				if ((i % 2 && ((nh - ih) / 2) <= (bh + 2 * c->bw)) || (!(i % 2) && ((nw - iv) / 2) <= (bh + 2 * c->bw))) {
@@ -594,7 +612,7 @@ arrange_fibonacci(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n,
 				}
 				if (i == 0)	{
 					if (an != 1) {
-						nw = (w - iv) - (w - iv) * (1 - m->mfact);
+						nw = (w - iv) - (w - iv) * (1 - ws->mfact);
 						wrest = 0;
 					}
 					ny = y;
@@ -627,27 +645,28 @@ flextile(Monitor *m)
 	unsigned int n;
 	int oh = 0, ov = 0, ih = 0, iv = 0; // gaps outer/inner horizontal/vertical
 	getgaps(m, &oh, &ov, &ih, &iv, &n);
+	Workspace *ws = MWS(m);
 
-	if (m->lt[m->sellt]->preset.layout != m->ltaxis[LAYOUT] ||
-			m->lt[m->sellt]->preset.masteraxis != m->ltaxis[MASTER] ||
-			m->lt[m->sellt]->preset.stack1axis != m->ltaxis[STACK] ||
-			m->lt[m->sellt]->preset.stack2axis != m->ltaxis[STACK2])
+	if (ws->layout->preset.layout != ws->ltaxis[LAYOUT] ||
+			ws->layout->preset.masteraxis != ws->ltaxis[MASTER] ||
+			ws->layout->preset.stack1axis != ws->ltaxis[STACK] ||
+			ws->layout->preset.stack2axis != ws->ltaxis[STACK2])
 		setflexsymbols(m, n);
-	else if (m->lt[m->sellt]->preset.symbolfunc != NULL)
-		m->lt[m->sellt]->preset.symbolfunc(m, n);
+	else if (ws->layout->preset.symbolfunc != NULL)
+		ws->layout->preset.symbolfunc(m, n);
 
 	if (n == 0)
 		return;
 
 	if (enabled(SmartGapsMonocle)) {
 		/* Apply outer gap factor if full screen monocle */
-		if (abs(m->ltaxis[MASTER]) == MONOCLE && (abs(m->ltaxis[LAYOUT]) == NO_SPLIT || n <= m->nmaster)) {
+		if (abs(ws->ltaxis[MASTER]) == MONOCLE && (abs(ws->ltaxis[LAYOUT]) == NO_SPLIT || n <= ws->nmaster)) {
 			oh = m->gappoh * smartgaps_fact;
 			ov = m->gappov * smartgaps_fact;
 		}
 	}
 
-	(&flexlayouts[abs(m->ltaxis[LAYOUT])])->arrange(m, m->wx + ov, m->wy + oh, m->wh - 2*oh, m->ww - 2*ov, ih, iv, n);
+	(&flexlayouts[abs(m->selws->ltaxis[LAYOUT])])->arrange(m, m->wx + ov, m->wy + oh, m->wh - 2*oh, m->ww - 2*ov, ih, iv, n);
 	return;
 }
 
@@ -657,64 +676,67 @@ setflexsymbols(Monitor *m, unsigned int n)
 	int l;
 	char sym1, sym2, sym3;
 	Client *c;
+	Workspace *ws = MWS(m);
 
 	if (n == 0)
-		for (c = nexttiled(m->clients); c; c = nexttiled(c->next), n++);
+		for (c = nexttiled(ws->clients); c; c = nexttiled(c->next), n++);
 
-	l = abs(m->ltaxis[LAYOUT]);
-	if (m->ltaxis[MASTER] == MONOCLE && (l == NO_SPLIT || !m->nmaster || n <= m->nmaster)) {
+	l = abs(m->selws->ltaxis[LAYOUT]);
+	if (ws->ltaxis[MASTER] == MONOCLE && (l == NO_SPLIT || !ws->nmaster || n <= ws->nmaster)) {
 		monoclesymbols(m, n);
 		return;
 	}
 
-	if (m->ltaxis[STACK] == MONOCLE && (l == SPLIT_VERTICAL || l == SPLIT_HORIZONTAL_FIXED)) {
+	if (ws->ltaxis[STACK] == MONOCLE && (l == SPLIT_VERTICAL || l == SPLIT_HORIZONTAL_FIXED)) {
 		decksymbols(m, n);
 		return;
 	}
 
 	/* Layout symbols */
-	if (l == NO_SPLIT || !m->nmaster) {
-		sym1 = sym2 = sym3 = (int)tilesymb[m->ltaxis[MASTER]];
+	if (l == NO_SPLIT || !m->selws->nmaster) {
+		sym1 = sym2 = sym3 = (int)tilesymb[ws->ltaxis[MASTER]];
 	} else {
 		sym2 = layoutsymb[l];
-		if (m->ltaxis[LAYOUT] < 0) {
-			sym1 = tilesymb[m->ltaxis[STACK]];
-			sym3 = tilesymb[m->ltaxis[MASTER]];
+		if (ws->ltaxis[LAYOUT] < 0) {
+			sym1 = tilesymb[ws->ltaxis[STACK]];
+			sym3 = tilesymb[ws->ltaxis[MASTER]];
 		} else {
-			sym1 = tilesymb[m->ltaxis[MASTER]];
-			sym3 = tilesymb[m->ltaxis[STACK]];
+			sym1 = tilesymb[ws->ltaxis[MASTER]];
+			sym3 = tilesymb[ws->ltaxis[STACK]];
 		}
 	}
 
-	snprintf(m->ltsymbol, sizeof m->ltsymbol, "%c%c%c", sym1, sym2, sym3);
+	snprintf(ws->ltsymbol, sizeof ws->ltsymbol, "%c%c%c", sym1, sym2, sym3);
 }
 
 static void
 monoclesymbols(Monitor *m, unsigned int n)
 {
+	Workspace *ws = MWS(m);
 	if (n > 0)
-		snprintf(m->ltsymbol, sizeof m->ltsymbol, "[%d]", n);
+		snprintf(ws->ltsymbol, sizeof ws->ltsymbol, "[%d]", n);
 	else
-		snprintf(m->ltsymbol, sizeof m->ltsymbol, "[M]");
+		snprintf(ws->ltsymbol, sizeof ws->ltsymbol, "[M]");
 }
 
 static void
 decksymbols(Monitor *m, unsigned int n)
 {
-	if (n > m->nmaster)
-		snprintf(m->ltsymbol, sizeof m->ltsymbol, "[]%d", n);
+	Workspace *ws = MWS(m);
+	if (n > ws->nmaster)
+		snprintf(ws->ltsymbol, sizeof ws->ltsymbol, "[]%d", n);
 	else
-		snprintf(m->ltsymbol, sizeof m->ltsymbol, "[D]");
+		snprintf(ws->ltsymbol, sizeof ws->ltsymbol, "[D]");
 }
 
 /* Mirror layout axis for flextile */
 void
 mirrorlayout(const Arg *arg)
 {
-	if (!selmon->lt[selws->sellt]->arrange)
+	Workspace *ws = WS;
+	if (!selmon->selws->layout->arrange)
 		return;
-	selmon->ltaxis[LAYOUT] *= -1;
-	selmon->pertag->ltaxis[selmon->pertag->curtag][0] = selmon->ltaxis[LAYOUT];
+	ws->ltaxis[LAYOUT] *= -1;
 	arrangemon(selmon);
 }
 
@@ -724,31 +746,31 @@ rotatelayoutaxis(const Arg *arg)
 {
 	int incr = (arg->i > 0 ? 1 : -1);
 	int axis = abs(arg->i) - 1;
+	Workspace *ws = WS;
 
-	if (!selmon->lt[selws->sellt]->arrange)
+	if (!ws->layout->arrange)
 		return;
 	if (axis == LAYOUT) {
-		if (selmon->ltaxis[LAYOUT] >= 0) {
-			selmon->ltaxis[LAYOUT] += incr;
-			if (selmon->ltaxis[LAYOUT] >= LAYOUT_LAST)
-				selmon->ltaxis[LAYOUT] = 0;
-			else if (selmon->ltaxis[LAYOUT] < 0)
-				selmon->ltaxis[LAYOUT] = LAYOUT_LAST - 1;
+		if (ws->ltaxis[LAYOUT] >= 0) {
+			ws->ltaxis[LAYOUT] += incr;
+			if (ws->ltaxis[LAYOUT] >= LAYOUT_LAST)
+				ws->ltaxis[LAYOUT] = 0;
+			else if (ws->ltaxis[LAYOUT] < 0)
+				ws->ltaxis[LAYOUT] = LAYOUT_LAST - 1;
 		} else {
-			selmon->ltaxis[LAYOUT] -= incr;
-			if (selmon->ltaxis[LAYOUT] <= -LAYOUT_LAST)
-				selmon->ltaxis[LAYOUT] = 0;
-			else if (selmon->ltaxis[LAYOUT] > 0)
-				selmon->ltaxis[LAYOUT] = -LAYOUT_LAST + 1;
+			ws->ltaxis[LAYOUT] -= incr;
+			if (ws->ltaxis[LAYOUT] <= -LAYOUT_LAST)
+				ws->ltaxis[LAYOUT] = 0;
+			else if (ws->ltaxis[LAYOUT] > 0)
+				ws->ltaxis[LAYOUT] = -LAYOUT_LAST + 1;
 		}
 	} else {
-		selmon->ltaxis[axis] += incr;
-		if (selmon->ltaxis[axis] >= AXIS_LAST)
-			selmon->ltaxis[axis] = 0;
-		else if (selmon->ltaxis[axis] < 0)
-			selmon->ltaxis[axis] = AXIS_LAST - 1;
+		ws->ltaxis[axis] += incr;
+		if (ws->ltaxis[axis] >= AXIS_LAST)
+			ws->ltaxis[axis] = 0;
+		else if (ws->ltaxis[axis] < 0)
+			ws->ltaxis[axis] = AXIS_LAST - 1;
 	}
-	selmon->pertag->ltaxis[selmon->pertag->curtag][axis] = selmon->ltaxis[axis];
 	arrangemon(selmon);
 	setflexsymbols(selmon, 0);
 }

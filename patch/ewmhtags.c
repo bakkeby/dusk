@@ -7,7 +7,7 @@ persistmonitorstate(Monitor *m)
 
 	sprintf(atom, "_DAWN_MONITOR_TAGS_%u", m->num);
 
-	unsigned long data[] = { m->tagset[m->seltags] };
+	unsigned long data[] = { m->tags[m->seltags] };
 	XChangeProperty(dpy, root, XInternAtom(dpy, atom, False), XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
 
 	/* set dawn client atoms */
@@ -108,7 +108,7 @@ getmonitorstate(Monitor *m)
 	}
 
 	if (tags)
-		m->tagset[m->seltags] = tags;
+		m->tags[m->seltags] = tags;
 }
 
 void
@@ -128,7 +128,7 @@ setviewport(void)
 void
 updatecurrentdesktop(void)
 {
-	long rawdata[] = { selmon->tagset[selws->seltags] };
+	long rawdata[] = { selmon->tags[selws->seltags] };
 	int i = 0;
 	while (*rawdata >> (i + 1)) {
 		i++;

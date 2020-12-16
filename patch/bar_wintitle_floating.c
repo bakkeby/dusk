@@ -27,8 +27,9 @@ calc_wintitle_floating(
 	Client *c;
 	int clientsnfloating = 0, w, r;
 	int groupactive = GRP_FLOAT;
+	Workspace *ws = MWS(m);
 
-	for (c = m->clients; c; c = c->next) {
+	for (c = ws->clients; c; c = c->next) {
 		if (!ISVISIBLE(c) || HIDDEN(c))
 			continue;
 		if (ISFLOATING(c))
@@ -40,6 +41,6 @@ calc_wintitle_floating(
 
 	w = tabw / clientsnfloating;
 	r = tabw % clientsnfloating;
-	c = flextitledrawarea(m, m->clients, offx, r, w, clientsnfloating, SCHEMEFOR(GRP_FLOAT), 0, 0, 1, passx, tabfn, arg, barg);
+	c = flextitledrawarea(m, ws->clients, offx, r, w, clientsnfloating, SCHEMEFOR(GRP_FLOAT), 0, 0, 1, passx, tabfn, arg, barg);
 	return 1;
 }

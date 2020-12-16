@@ -21,7 +21,7 @@ hide(Client *c) {
 	XSelectInput(dpy, w, ca.your_event_mask);
 	XUngrabServer(dpy);
 
-	if (ISFLOATING(c) || !c->ws->lt[c->ws->sellt]->arrange) {
+	if (ISFLOATING(c) || !c->ws->layout->arrange) {
 		for (n = c->snext; n && (!ISVISIBLE(n) || HIDDEN(n)); n = n->snext);
 		if (!n)
 			for (n = c->ws->stack; n && (!ISVISIBLE(n) || HIDDEN(n)); n = n->snext);
@@ -31,7 +31,7 @@ hide(Client *c) {
 			n = prevvisible(c);
 	}
 	focus(n);
-	arrange(c->ws);
+	arrange(c->ws->mon);
 }
 
 void
@@ -42,7 +42,7 @@ show(Client *c)
 
 	XMapWindow(dpy, c->win);
 	setclientstate(c, NormalState);
-	arrange(c->ws);
+	arrange(c->ws->mon);
 }
 
 void
@@ -70,7 +70,7 @@ showhideclient(const Arg *arg)
 {
 	Client *c = (Client*)arg->v;
 	if (!c)
-		c = selws->sel;
+		c = WS->sel;
 	if (!c)
 		return;
 

@@ -9,32 +9,34 @@ keyrelease(XEvent *e)
 void
 combotag(const Arg *arg)
 {
-	if (selws->sel && arg->ui & TAGMASK) {
-		if (selws->sel->reverttags)
-			selws->sel->reverttags = 0;
+	Workspace *ws = WS;
+	if (ws->sel && arg->ui & TAGMASK) {
+		if (ws->sel->reverttags)
+			ws->sel->reverttags = 0;
 		if (combo) {
-			selws->sel->tags |= arg->ui & TAGMASK;
+			ws->sel->tags |= arg->ui & TAGMASK;
 		} else {
 			combo = 1;
-			selws->sel->tags = arg->ui & TAGMASK;
+			ws->sel->tags = arg->ui & TAGMASK;
 		}
 		focus(NULL);
-		arrange(selws);
+		arrange(ws->mon);
 	}
 }
 
 void
 comboview(const Arg *arg)
 {
+	Workspace *ws = WS;
 	unsigned newtags = arg->ui & TAGMASK;
 	if (combo) {
-		selws->tagset[selws->seltags] |= newtags;
+		ws->tags |= newtags;
 	} else {
-		selws->seltags ^= 1;	/*toggle tagset*/
+		ws->prevtags = ws->tags;
 		combo = 1;
 		if (newtags)
 			view(&((Arg) { .ui = newtags }));
 	}
 	focus(NULL);
-	arrange(selws);
+	arrange(ws->mon);
 }

@@ -1,13 +1,13 @@
 int
 width_ltsymbol(Bar *bar, BarArg *a)
 {
-	return TEXTW(bar->mon->ltsymbol);
+	return TEXTW(bar->mon->selws->ltsymbol);
 }
 
 int
 draw_ltsymbol(Bar *bar, BarArg *a)
 {
-	return drw_text(drw, a->x, a->y, a->w, a->h, lrpad / 2, bar->mon->ltsymbol, 0, False);
+	return drw_text(drw, a->x, a->y, a->w, a->h, lrpad / 2, bar->mon->selws->ltsymbol, 0, False);
 }
 
 int

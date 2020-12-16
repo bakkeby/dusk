@@ -20,8 +20,9 @@ draw_tags(Bar *bar, BarArg *a)
 	char *icon;
 	Client *c;
 	Monitor *m = bar->mon;
+	Workspace *ws = MWS(m);
 
-	for (c = m->ws->clients; c; c = c->next) {
+	for (c = m->selws->clients; c; c = c->next) {
 		occ |= c->tags == 255 ? 0 : c->tags;
 		if (ISURGENT(c))
 			urg |= c->tags;
@@ -34,7 +35,7 @@ draw_tags(Bar *bar, BarArg *a)
 			continue;
 
 		drw_setscheme(drw, scheme[
-			m->ws->tagset[m->ws->seltags] & 1 << i
+			ws->tags & 1 << i
 			? SchemeTagsSel
 			: urg & 1 << i
 			? SchemeUrg

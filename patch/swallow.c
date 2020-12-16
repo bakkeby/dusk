@@ -27,7 +27,7 @@ swallow(Client *p, Client *c)
 	XUnmapWindow(dpy, p->win);
 
 	p->swallowing = c;
-	c->ws = p->mon;
+	c->ws = p->ws;
 
 	Window w = p->win;
 	p->win = c->win;
@@ -37,9 +37,9 @@ swallow(Client *p, Client *c)
 		(unsigned char *) &(p->win), 1);
 	updatetitle(p);
 	s = scanner ? c : p;
-	setfloatinghint(s);
+	// setfloatinghint(s); TODO
 	XMoveResizeWindow(dpy, s->win, s->x, s->y, s->w, s->h);
-	arrange(p->mon);
+	arrange(p->ws->mon);
 	configure(p);
 	updateclientlist();
 
@@ -59,13 +59,13 @@ unswallow(Client *c)
 	/* unfullscreen the client */
 	setfullscreen(c, 0, 0);
 	updatetitle(c);
-	arrange(c->ws);
+	arrange(c->ws->mon);
 	XMapWindow(dpy, c->win);
 	XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
-	setfloatinghint(c);
+	// setfloatinghint(c); TODO
 	setclientstate(c, NormalState);
 	focus(NULL);
-	arrange(c->ws);
+	arrange(c->ws->mon);
 }
 
 pid_t
@@ -163,22 +163,22 @@ isdescprocess(pid_t p, pid_t c)
 Client *
 termforwin(const Client *w)
 {
-	Client *c;
 	Monitor *m;
+	Workspace *ws;
+	Client *c;
 
 	if (!w->pid || ISTERMINAL(w))
 		return NULL;
 
-	c = selws->sel;
+	c = WS->sel;
 	if (c && ISTERMINAL(c) && !c->swallowing && c->pid && isdescprocess(c->pid, w->pid))
 		return c;
 
-	for (m = mons; m; m = m->next) {
-		for (c = m->clients; c; c = c->next) {
-			if (ISTERMINAL(c) && !c->swallowing && c->pid && isdescprocess(c->pid, w->pid))
-				return c;
-		}
-	}
+	for (m = mons; m; m = m->next)
+		for (ws = m->workspaces; ws; ws = ws->next)
+			for (c = ws->clients; c; c = c->next)
+				if (ISTERMINAL(c) && !c->swallowing && c->pid && isdescprocess(c->pid, w->pid))
+					return c;
 
 	return NULL;
 }
@@ -186,15 +186,15 @@ termforwin(const Client *w)
 Client *
 swallowingclient(Window w)
 {
-	Client *c;
 	Monitor *m;
+	Workspace *ws;
+	Client *c;
 
-	for (m = mons; m; m = m->next) {
-		for (c = m->clients; c; c = c->next) {
-			if (c->swallowing && c->swallowing->win == w)
-				return c;
-		}
-	}
+	for (m = mons; m; m = m->next)
+		for (ws = m->workspaces; ws; ws = ws->next)
+			for (c = ws->clients; c; c = c->next)
+				if (c->swallowing && c->swallowing->win == w)
+					return c;
 
 	return NULL;
 }

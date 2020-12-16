@@ -98,10 +98,11 @@ dump_client(yajl_gen gen, Client *c)
 int
 dump_monitor(yajl_gen gen, Monitor *mon, int is_selected)
 {
+  Workspace *ws = MWS(mon);
   // clang-format off
   YMAP(
-    YSTR("master_factor"); YDOUBLE(mon->mfact);
-    YSTR("num_master"); YINT(mon->nmaster);
+    YSTR("master_factor"); YDOUBLE(ws->mfact);
+    YSTR("num_master"); YINT(ws->nmaster);
     YSTR("num"); YINT(mon->num);
     YSTR("is_selected"); YBOOL(is_selected);
 
@@ -119,15 +120,15 @@ dump_monitor(yajl_gen gen, Monitor *mon, int is_selected)
       YSTR("height"); YINT(mon->wh);
     )
 
-    YSTR("tagset"); YMAP(
-      YSTR("current");  YINT(mon->tagset[mon->seltags]);
-      YSTR("old"); YINT(mon->tagset[mon->seltags ^ 1]);
+    YSTR("tags"); YMAP(
+      YSTR("current");  YINT(ws->tags);
+      YSTR("old"); YINT(ws->prevtags);
     )
 
     YSTR("tag_state"); dump_tag_state(gen, mon->tagstate);
 
     YSTR("clients"); YMAP(
-      YSTR("selected"); YINT(mon->sel ? mon->sel->win : 0);
+      YSTR("selected"); YINT(ws->sel ? ws->sel->win : 0);
       YSTR("stack"); YARR(
         for (Client* c = ws->stack; c; c = c->snext)
           YINT(c->win);
@@ -140,12 +141,12 @@ dump_monitor(yajl_gen gen, Monitor *mon, int is_selected)
 
     YSTR("layout"); YMAP(
       YSTR("symbol"); YMAP(
-        YSTR("current"); YSTR(mon->ltsymbol);
-        YSTR("old"); YSTR(mon->lastltsymbol);
+        YSTR("current"); YSTR(ws->ltsymbol);
+        YSTR("old"); YSTR(ws->lastltsymbol);
       )
       YSTR("address"); YMAP(
-        YSTR("current"); YINT((uintptr_t)mon->lt[mon->sellt]);
-        YSTR("old"); YINT((uintptr_t)mon->lt[mon->sellt ^ 1]);
+        YSTR("current"); YINT((uintptr_t)ws->layout);
+        YSTR("old"); YINT((uintptr_t)ws->prevlayout);
       )
     )
 
