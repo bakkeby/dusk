@@ -3,10 +3,11 @@ setcfact(const Arg *arg)
 {
 	float f;
 	Client *c;
+	Workspace *ws = WS;
 
-	c = selws->sel;
+	c = ws->sel;
 
-	if (!arg || !c || !selmon->lt[selws->sellt]->arrange)
+	if (!arg || !c || !ws->layout->arrange)
 		return;
 	if (!arg->f)
 		f = 1.0;
@@ -19,5 +20,5 @@ setcfact(const Arg *arg)
 	else if (f > 4.0)
 		f = 4.0;
 	c->cfact = f;
-	arrangemon(selmon);
+	arrangemon(ws->mon);
 }

@@ -1,13 +1,14 @@
 void
 swaptags(const Arg *arg)
 {
+	Workspace *ws = WS;
 	unsigned int newtag = arg->ui & TAGMASK;
-	unsigned int curtag = selmon->tags[selws->seltags];
+	unsigned int curtag = ws->tags;
 
 	if (newtag == curtag || !curtag || (curtag & (curtag-1)))
 		return;
 
-	for (Client *c = selws->clients; c != NULL; c = c->next) {
+	for (Client *c = ws->clients; c != NULL; c = c->next) {
 		if ((c->tags & newtag) || (c->tags & curtag))
 			c->tags ^= curtag ^ newtag;
 
@@ -15,8 +16,8 @@ swaptags(const Arg *arg)
 			c->tags = newtag;
 	}
 
-	selmon->tags[selws->seltags] = newtag;
+	ws->tags = newtag;
 
 	focus(NULL);
-	arrange(selws);
+	arrange(ws->mon);
 }

@@ -1,8 +1,9 @@
 void
 togglesticky(const Arg *arg)
 {
-	if (!selws->sel)
+	Workspace *ws = WS;
+	if (!ws->sel)
 		return;
-	setflag(selws->sel, Sticky, !ISSTICKY(selws->sel));
-	arrange(selws);
+	setflag(ws->sel, Sticky, !ISSTICKY(ws->sel));
+	arrange(ws->mon);
 }

@@ -2,11 +2,12 @@ void
 focusmaster(const Arg *arg)
 {
 	Client *c;
+	Workspace *ws = WS;
 
-	if (selmon->nmaster < 1)
+	if (ws->nmaster < 1)
 		return;
 
-	c = nexttiled(selws->clients);
+	c = nexttiled(ws->clients);
 
 	if (c)
 		focus(c);

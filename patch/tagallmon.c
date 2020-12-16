@@ -1,6 +1,7 @@
 void
 tagallmon(const Arg *arg)
 {
+	Workspace *ws = WS, *nws;
 	Monitor *n;
 	Client *c, *last, *slast, *next;
 
@@ -8,10 +9,11 @@ tagallmon(const Arg *arg)
 		return;
 
 	n = dirtomon(arg->i);
-	for (last = n->clients; last && last->next; last = last->next);
-	for (slast = n->stack; slast && slast->snext; slast = slast->snext);
+	nws = MWS(n);
+	for (last = nws->clients; last && last->next; last = last->next);
+	for (slast = nws->stack; slast && slast->snext; slast = slast->snext);
 
-	for (c = selws->clients; c; c = next) {
+	for (c = ws->clients; c; c = next) {
 		next = c->next;
 		if (!ISVISIBLE(c))
 			continue;
@@ -19,21 +21,21 @@ tagallmon(const Arg *arg)
 		unfocus(c, 1, NULL);
 		detach(c);
 		detachstack(c);
-		c->ws = n;
-		c->tags = n->tags[n->seltags]; /* assign tags of target monitor */
+		c->ws = nws;
+		c->tags = nws->tags; /* assign tags of target monitor */
 		c->next = NULL;
 		c->snext = NULL;
 		if (last)
 			last = last->next = c;
 		else
-			n->clients = last = c;
+			nws->clients = last = c;
 		if (slast)
 			slast = slast->snext = c;
 		else
-			n->stack = slast = c;
+			nws->stack = slast = c;
 		if (ISFULLSCREEN(c)) {
 			if (!ISFAKEFULLSCREEN(c)) {
-				resizeclient(c, c->ws->mon->mx, c->ws->mon->my, c->ws->mon->mw, c->ws->mon->mh);
+				resizeclient(c, n->mx, n->my, n->mw, n->mh);
 				XRaiseWindow(dpy, c->win);
 			}
 		}

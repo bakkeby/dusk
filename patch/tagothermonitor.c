@@ -25,17 +25,18 @@ tagprevmon(const Arg *arg)
 void
 tagothermon(const Arg *arg, int dir)
 {
+	Workspace *ws = WS;
 	Client *sel;
 	Monitor *newmon;
 
-	if (!selws->sel || !mons->next)
+	if (!ws->sel || !mons->next)
 		return;
-	sel = selws->sel;
+	sel = ws->sel;
 	newmon = dirtomon(dir);
 	sendmon(sel, newmon);
 	if (arg->ui & TAGMASK) {
 		sel->tags = arg->ui & TAGMASK;
 		focus(NULL);
-		arrange(newmon->ws);
+		arrange(newmon);
 	}
 }

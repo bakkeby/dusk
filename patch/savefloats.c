@@ -1,6 +1,7 @@
 void savefloats(const Arg *arg)
 {
-	Client *c = selws->sel;
+	Workspace *ws = WS;
+	Client *c = ws->sel;
 	if (arg && arg->v)
 		c = (Client*)arg->v;
 	if (!c)

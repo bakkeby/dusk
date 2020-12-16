@@ -1,7 +1,8 @@
 void
 togglenomodbuttons(const Arg *arg)
 {
+	Workspace *ws = WS;
 	togglefunc(AllowNoModifierButtons);
-	if (selws->sel)
-		grabbuttons(selws->sel, 1);
+	if (ws->sel)
+		grabbuttons(ws->sel, 1);
 }

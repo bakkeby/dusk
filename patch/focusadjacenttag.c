@@ -3,73 +3,79 @@
 void
 tagtoleft(const Arg *arg)
 {
-	if (selws->sel != NULL
-	&& __builtin_popcount(selmon->tags[selws->seltags] & TAGMASK) == 1
-	&& selmon->tags[selws->seltags] > 1) {
-		selws->sel->tags >>= 1;
+	Workspace *ws = WS;
+	if (ws->sel != NULL
+	&& __builtin_popcount(ws->tags & TAGMASK) == 1
+	&& ws->tags > 1) {
+		ws->sel->tags >>= 1;
 		focus(NULL);
-		arrange(selws);
+		arrange(ws->mon);
 	}
 }
 
 void
 tagtoright(const Arg *arg)
 {
-	if (selws->sel != NULL
-	&& __builtin_popcount(selmon->tags[selws->seltags] & TAGMASK) == 1
-	&& selmon->tags[selws->seltags] & (TAGMASK >> 1)) {
-		selws->sel->tags <<= 1;
+	Workspace *ws = WS;
+	if (ws->sel != NULL
+	&& __builtin_popcount(ws->tags & TAGMASK) == 1
+	&& ws->tags & (TAGMASK >> 1)) {
+		ws->sel->tags <<= 1;
 		focus(NULL);
-		arrange(selws);
+		arrange(ws->mon);
 	}
 }
 
 void
 viewtoleft(const Arg *arg)
 {
-	if (__builtin_popcount(selmon->tags[selws->seltags] & TAGMASK) == 1
-	&& selmon->tags[selws->seltags] > 1) {
-		selws->seltags ^= 1; /* toggle sel tags */
-		selmon->tags[selws->seltags] = selmon->tags[selws->seltags ^ 1] >> 1;
+	Workspace *ws = WS;
+	if (__builtin_popcount(ws->tags & TAGMASK) == 1
+	&& ws->tags > 1) {
+		ws->prevtags = ws->tags;
+		ws->tags >>= 1;
 		focus(NULL);
-		arrange(selws);
+		arrange(ws->mon);
 	}
 }
 
 void
 viewtoright(const Arg *arg)
 {
-	if (__builtin_popcount(selmon->tags[selws->seltags] & TAGMASK) == 1
-	&& selmon->tags[selws->seltags] & (TAGMASK >> 1)) {
-		selws->seltags ^= 1; /* toggle sel tags */
-		selmon->tags[selws->seltags] = selmon->tags[selws->seltags ^ 1] << 1;
+	Workspace *ws = WS;
+	if (__builtin_popcount(ws->tags & TAGMASK) == 1
+	&& ws->tags & (TAGMASK >> 1)) {
+		ws->prevtags = ws->tags;
+		ws->tags <<= 1;
 		focus(NULL);
-		arrange(selws);
+		arrange(ws->mon);
 	}
 }
 
 void
 tagandviewtoleft(const Arg *arg)
 {
-	if (__builtin_popcount(selmon->tags[selws->seltags] & TAGMASK) == 1
-	&& selmon->tags[selws->seltags] > 1) {
-		selws->sel->tags >>= 1;
-		selws->seltags ^= 1; /* toggle sel tags */
-		selmon->tags[selws->seltags] = selmon->tags[selws->seltags ^ 1] >> 1;
-		focus(selws->sel);
-		arrange(selws);
+	Workspace *ws = WS;
+	if (__builtin_popcount(ws->tags & TAGMASK) == 1
+	&& ws->tags > 1) {
+		ws->sel->tags >>= 1;
+		ws->prevtags = ws->tags;
+		ws->tags >>= 1;
+		focus(ws->sel);
+		arrange(ws->mon);
 	}
 }
 
 void
 tagandviewtoright(const Arg *arg)
 {
-	if (__builtin_popcount(selmon->tags[selws->seltags] & TAGMASK) == 1
-	&& selmon->tags[selws->seltags] & (TAGMASK >> 1)) {
-		selws->sel->tags <<= 1;
-		selws->seltags ^= 1; /* toggle sel tags */
-		selmon->tags[selws->seltags] = selmon->tags[selws->seltags ^ 1] << 1;
-		focus(selws->sel);
-		arrange(selws);
+	Workspace *ws = WS;
+	if (__builtin_popcount(ws->tags & TAGMASK) == 1
+	&& ws->tags & (TAGMASK >> 1)) {
+		ws->sel->tags <<= 1;
+		ws->prevtags = ws->tags;
+		ws->tags <<= 1;
+		focus(ws->sel);
+		arrange(ws->mon);
 	}
 }

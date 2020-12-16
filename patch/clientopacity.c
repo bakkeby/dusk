@@ -1,7 +1,8 @@
 void
 changeopacity(const Arg *arg)
 {
-	Client *c = selws->sel;
+	Workspace *ws = WS;
+	Client *c = ws->sel;
 	if (!c)
 		return;
 	c->opacity += (c->opacity == 0 ? 1.0 + arg->f : arg->f);

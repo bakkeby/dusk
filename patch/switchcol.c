@@ -1,27 +1,28 @@
 void
 switchcol(const Arg *arg)
 {
+	Workspace *ws = WS;
 	Client *c, *t;
 	int col = 0;
 	int i;
 
-	if (!selws->sel)
+	if (!ws->sel)
 		return;
-	for (i = 0, c = nexttiled(selws->clients); c ;
+	for (i = 0, c = nexttiled(ws->clients); c ;
 	     c = nexttiled(c->next), i++) {
-		if (c == selws->sel)
-			col = (i + 1) > selmon->nmaster;
+		if (c == ws->sel)
+			col = (i + 1) > ws->nmaster;
 	}
-	if (i <= selmon->nmaster)
+	if (i <= ws->nmaster)
 		return;
-	for (c = selws->stack; c; c = c->snext) {
+	for (c = ws->stack; c; c = c->snext) {
 		if (!ISVISIBLE(c))
 			continue;
-		for (i = 0, t = nexttiled(selws->clients); t && t != c;
+		for (i = 0, t = nexttiled(ws->clients); t && t != c;
 		     t = nexttiled(t->next), i++);
-		if (t && (i + 1 > selmon->nmaster) != col) {
+		if (t && (i + 1 > ws->nmaster) != col) {
 			focus(c);
-			restack(selws);
+			restack(ws);
 			break;
 		}
 	}

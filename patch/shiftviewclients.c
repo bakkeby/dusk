@@ -1,15 +1,16 @@
 void
 shiftviewclients(const Arg *arg)
 {
+	Workspace *ws = WS;
 	Arg shifted;
 	Client *c;
 	unsigned int tagmask = 0;
 
-	for (c = selws->clients; c; c = c->next)
+	for (c = ws->clients; c; c = c->next)
 		if (!(c->tags & SPTAGMASK))
 			tagmask = tagmask | c->tags;
 
-	shifted.ui = selmon->tags[selws->seltags] & ~SPTAGMASK;
+	shifted.ui = ws->tags & ~SPTAGMASK;
 	if (arg->i > 0) // left circular shift
 		do {
 			shifted.ui = (shifted.ui << arg->i)

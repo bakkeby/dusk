@@ -364,7 +364,7 @@ struct Monitor {
 	int gappoh;           /* horizontal outer gaps */
 	int gappov;           /* vertical outer gaps */
 	int showbar;
-	// unsigned int borderpx;
+	unsigned int borderpx;
 	// unsigned int seltags;
 	// unsigned int sellt;
 	// unsigned int tags[2];
@@ -376,11 +376,11 @@ struct Monitor {
 	Workspace *workspaces, *selws;
 	Bar *bar;
 	//const Layout *lt[2];
-	int iconset;
-	char lastltsymbol[16]; // TODO undecided about these IPC values
-	TagState tagstate;
-	Client *lastsel;
-	const Layout *lastlt;
+	int iconset; // TODO iconset with monitor or workspaces
+	// char lastltsymbol[16]; // TODO undecided about these IPC values
+	// TagState tagstate;
+	// Client *lastsel;
+	// const Layout *lastlt;
 };
 //
 struct Workspace {
@@ -394,7 +394,7 @@ struct Workspace {
 //	int gappiv;           /* vertical gap between windows */
 //	int gappoh;           /* horizontal outer gaps */
 //	int gappov;           /* vertical outer gaps */
-	unsigned int borderpx;
+	// unsigned int borderpx;
 	unsigned int seltags;
 	unsigned int sellt;
 	unsigned int tags;
@@ -1212,7 +1212,7 @@ createmon(int num)
 	// m->nmaster = nmaster;
 	// m->nstack = nstack;
 	m->showbar = showbar;
-	// m->borderpx = borderpx;
+	m->borderpx = borderpx;
 	m->gappih = gappih;
 	m->gappiv = gappiv;
 	m->gappoh = gappoh;
@@ -1222,7 +1222,7 @@ createmon(int num)
 	ws->mfact = mfact;
 	ws->nmaster = nmaster;
 	ws->nstack = nstack;
-	ws->borderpx = borderpx;
+	// ws->borderpx = borderpx;
 	ws->enablegaps = 1;
 	// ws->gappih = gappih;
 	// ws->gappiv = gappiv;
@@ -1890,11 +1890,11 @@ manage(Window w, XWindowAttributes *wa)
 	fprintf(stderr, "manage: %d\n", 1);
 	updatetitle(c);
 	fprintf(stderr, "manage: %d (%s)\n", 2, c->name);
-	// getclientflags(c);
+	getclientflags(c);
 	fprintf(stderr, "manage: %d (%s)\n", 3, c->name);
-	// getclienttags(c);
+	getclienttags(c);
 	fprintf(stderr, "manage: %d (%s)\n", 4, c->name);
-	//getclientopacity(c); // TODO
+	getclientopacity(c);
 	fprintf(stderr, "manage: %d (%s)\n", 5, c->name);
 
 	if (!c->ws) {
@@ -1930,7 +1930,7 @@ manage(Window w, XWindowAttributes *wa)
 		}
 	}
 
-	c->bw = (NOBORDER(c) ? 0 : c->ws->borderpx);
+	c->bw = (NOBORDER(c) ? 0 : c->ws->mon->borderpx);
 
 	fprintf(stderr, "manage: %d (%s)\n", 14, c->name);
 
@@ -1970,7 +1970,7 @@ manage(Window w, XWindowAttributes *wa)
 	fprintf(stderr, "manage: %d (%s)\n", 23, c->name);
 	updatewmhints(c);
 	fprintf(stderr, "manage: %d (%s)\n", 24, c->name);
-	// updatemotifhints(c); TODO
+	updatemotifhints(c);
 	fprintf(stderr, "manage: %d (%s)\n", 25, c->name);
 
 	if (ISCENTERED(c)) {
@@ -2055,7 +2055,7 @@ manage(Window w, XWindowAttributes *wa)
 
 	if (focusclient)
 		focus(NULL);
-	// setfloatinghint(c); TODO
+	setfloatinghint(c);
 	fprintf(stderr, "manage: %d (%s) (end)\n", 40, c->name);
 }
 
@@ -2275,15 +2275,15 @@ propertynotify(XEvent *e)
 			if (c == c->ws->sel)
 				drawbar(c->ws->mon);
 		}
-		// else if (ev->atom == motifatom)
-		// 	updatemotifhints(c); TODO
+		else if (ev->atom == motifatom)
+			updatemotifhints(c);
 	}
 }
 
 void
 quit(const Arg *arg)
 {
-	// Monitor *m; TODO
+	Monitor *m;
 	size_t i;
 	if (arg->i)
 		restart = 1;
@@ -2297,8 +2297,8 @@ quit(const Arg *arg)
 		}
 	}
 
-	// for (m = mons; m; m = m->next) TODO
-	// 	persistmonitorstate(m);
+	for (m = mons; m; m = m->next)
+		persistmonitorstate(m);
 }
 
 Monitor *
@@ -2418,8 +2418,8 @@ resizemouse(const Arg *arg)
 			}
 			if (!ws->layout->arrange || ISFLOATING(c)) {
 				resizeclient(c, nx, ny, nw, nh);
-				// if (enabled(AutoSaveFloats)) TODO
-				// 	savefloats(NULL);
+				if (enabled(AutoSaveFloats))
+					savefloats(NULL);
 			}
 			break;
 		}
@@ -2832,7 +2832,7 @@ setup(void)
 	allowed[NetWMActionClose] = XInternAtom(dpy, "_NET_WM_ACTION_CLOSE", False);
 	allowed[NetWMActionAbove] = XInternAtom(dpy, "_NET_WM_ACTION_ABOVE", False);
 	allowed[NetWMActionBelow] = XInternAtom(dpy, "_NET_WM_ACTION_BELOW", False);
-	// motifatom = XInternAtom(dpy, "_MOTIF_WM_HINTS", False); TODO
+	motifatom = XInternAtom(dpy, "_MOTIF_WM_HINTS", False);
 	xatom[Manager] = XInternAtom(dpy, "MANAGER", False);
 	xatom[Xembed] = XInternAtom(dpy, "_XEMBED", False);
 	xatom[XembedInfo] = XInternAtom(dpy, "_XEMBED_INFO", False);
@@ -2869,10 +2869,10 @@ setup(void)
 	/* EWMH support per view */
 	XChangeProperty(dpy, root, netatom[NetSupported], XA_ATOM, 32,
 		PropModeReplace, (unsigned char *) netatom, NetLast);
-	// setnumdesktops(); TODO
-	// setcurrentdesktop();
-	// setdesktopnames();
-	// setviewport();
+	setnumdesktops();
+	setcurrentdesktop();
+	setdesktopnames();
+	setviewport();
 	XDeleteProperty(dpy, root, netatom[NetClientList]);
 	XDeleteProperty(dpy, root, netatom[NetClientListStacking]);
 	/* select events */
@@ -3143,7 +3143,7 @@ togglefloating(const Arg *arg)
 	}
 	arrangemon(c->ws->mon);
 	restack(c->ws);
-	// setfloatinghint(c); // TODO
+	setfloatinghint(c);
 }
 
 void
@@ -3169,7 +3169,7 @@ togglemaximize(Client *c, int maximize_vert, int maximize_horz)
 			resizeclient(c, c->sfx, c->y, c->sfw, c->h);
 			return;
 		}
-		// savefloats(&((Arg) { .v = c })); TODO
+		savefloats(&((Arg) { .v = c }));
 	}
 
  	SETFLOATING(c);
@@ -3199,7 +3199,7 @@ toggletag(const Arg *arg)
 		focus(NULL);
 		arrange(ws->mon);
 	}
-	// updatecurrentdesktop(); TODO
+	updatecurrentdesktop();
 }
 
 void
@@ -3236,7 +3236,7 @@ toggleview(const Arg *arg)
 		focus(NULL);
 		arrange(ws->mon);
 	}
-	// updatecurrentdesktop(); TODO
+	updatecurrentdesktop();
 }
 
 void
@@ -3440,8 +3440,8 @@ updategeom(void)
 				memcpy(&unique[j++], &info[i], sizeof(XineramaScreenInfo));
 		XFree(info);
 		nn = j;
-		// if (enabled(SortScreens)) TODO
-		// 	sortscreens(unique, nn);
+		if (enabled(SortScreens))
+			sortscreens(unique, nn);
 		if (n <= nn) { /* new monitors available */
 			for (i = n; i < nn; i++) {
 				for (m = mons; m && m->next; m = m->next);
@@ -3592,10 +3592,10 @@ updatetitle(Client *c)
 	if (c->name[0] == '\0') /* hack to mark broken clients */
 		strcpy(c->name, broken);
 
-	// for (Monitor *m = mons; m; m = m->next) { TODO
-	// 	if (m->selws->sel == c && strcmp(oldname, c->name) != 0)
-	// 		ipc_focused_title_change_event(m->num, c->win, oldname, c->name);
-	// }
+	for (Monitor *m = mons; m; m = m->next) {
+		if (m->selws->sel == c && strcmp(oldname, c->name) != 0)
+			ipc_focused_title_change_event(m->num, c->win, oldname, c->name);
+	}
 }
 
 void
@@ -3635,7 +3635,7 @@ view(const Arg *arg)
 		ws->tags = arg->ui & TAGMASK;
 	focus(NULL);
 	arrange(ws->mon);
-	// updatecurrentdesktop(); TODO
+	updatecurrentdesktop();
 }
 
 Client *

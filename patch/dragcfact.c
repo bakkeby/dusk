@@ -6,8 +6,9 @@ dragcfact(const Arg *arg)
 	Client *c;
 	XEvent ev;
 	Time lasttime = 0;
+	Workspace *ws = WS;
 
-	if (!(c = selws->sel))
+	if (!(c = ws->sel))
 		return;
 	if (ISFLOATING(c)) {
 		resizemouse(arg);
@@ -16,7 +17,7 @@ dragcfact(const Arg *arg)
 
 	if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c)) /* no support resizing fullscreen windows by mouse */
 		return;
-	restack(selws);
+	restack(ws);
 
 	if (XGrabPointer(dpy, root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
 		None, cursor[CurIronCross]->cursor, CurrentTime) != GrabSuccess)

@@ -1,7 +1,8 @@
 void
 tagall(const Arg *arg)
 {
-	if (!selws->clients)
+	Workspace *ws = WS;
+	if (!ws->clients)
 		return;
 	/* if parameter starts with F, just move floating windows */
 	int floating_only = (char *)arg->v && ((char *)arg->v)[0] == 'F' ? 1 : 0;
@@ -9,17 +10,17 @@ tagall(const Arg *arg)
 	int j;
 	Client* c;
 	if (tag >= 0 && tag < NUMTAGS)
-		for (c = selws->clients; c; c = c->next)
+		for (c = ws->clients; c; c = c->next)
 		{
 			if (!floating_only || ISFLOATING(c))
 				for (j = 0; j < NUMTAGS; j++)
 				{
-					if (c->tags & 1 << j && selmon->tags[selws->seltags] & 1 << j)
+					if (c->tags & 1 << j && ws->tags & 1 << j)
 					{
 						c->tags = c->tags ^ (1 << j & TAGMASK);
 						c->tags = c->tags | 1 << (tag-1);
 					}
 				}
 		}
-	arrange(selws);
+	arrange(ws->mon);
 }

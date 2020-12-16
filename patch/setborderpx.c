@@ -1,6 +1,7 @@
 void
 setborderpx(const Arg *arg)
 {
+	Workspace *ws = WS;
 	Client *c;
 	Bar *bar;
 	int prev_borderpx = selmon->borderpx;
@@ -22,14 +23,14 @@ setborderpx(const Arg *arg)
 			XMoveResizeWindow(dpy, bar->win, bar->bx, bar->by, bar->bw, bar->bh);
 	}
 
-	for (c = selws->clients; c; c = c->next)
+	for (c = ws->clients; c; c = c->next)
 	{
 		if (c->bw + arg->i < 0)
 			c->bw = 0;
 		else
 			c->bw = selmon->borderpx;
 
-		if (ISFLOATING(c) || !selmon->lt[selws->sellt]->arrange)
+		if (ISFLOATING(c) || !ws->layout->arrange)
 		{
 			if (arg->i != 0 && prev_borderpx + arg->i >= 0)
 				resize(c, c->x, c->y, c->w-(arg->i*2), c->h-(arg->i*2), 0);
@@ -41,5 +42,5 @@ setborderpx(const Arg *arg)
 				resize(c, c->x, c->y, c->w - 2*(borderpx - prev_borderpx), c->h - 2*(borderpx - prev_borderpx), 0);
 		}
 	}
-	arrangemon(selmon);
+	arrangemon(ws->mon);
 }

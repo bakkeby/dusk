@@ -23,7 +23,7 @@ updatemotifhints(Client *c)
 			if (motif[MWM_HINTS_DECORATIONS_FIELD] & MWM_DECOR_ALL ||
 				motif[MWM_HINTS_DECORATIONS_FIELD] & MWM_DECOR_BORDER ||
 				motif[MWM_HINTS_DECORATIONS_FIELD] & MWM_DECOR_TITLE)
-				c->bw = c->oldbw = c->ws->borderpx;
+				c->bw = c->oldbw = c->ws->mon->borderpx;
 			else
 				c->bw = c->oldbw = 0;
 

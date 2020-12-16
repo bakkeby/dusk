@@ -8,6 +8,7 @@ dragmfact(const Arg *arg)
 	int center = 0, horizontal = 0, mirror = 0, fixed = 0; // layout configuration
 	double fact;
 	Monitor *m;
+	Workspace *ws = WS;
 	XEvent ev;
 	Time lasttime = 0;
 
@@ -22,8 +23,8 @@ dragmfact(const Arg *arg)
 
 	if (!n)
 		return;
-	else if (m->lt[m->sellt]->arrange == &flextile) {
-		int layout = m->ltaxis[LAYOUT];
+	else if (ws->layout->arrange == &flextile) {
+		int layout = ws->ltaxis[LAYOUT];
 		if (layout < 0) {
 			mirror = 1;
 			layout *= -1;
@@ -35,7 +36,7 @@ dragmfact(const Arg *arg)
 
 		if (layout == SPLIT_HORIZONTAL || layout == SPLIT_HORIZONTAL_DUAL_STACK)
 			horizontal = 1;
-		else if (layout == SPLIT_CENTERED_VERTICAL && (fixed || n - m->nmaster > 1))
+		else if (layout == SPLIT_CENTERED_VERTICAL && (fixed || n - ws->nmaster > 1))
 			center = 1;
 		else if (layout == FLOATING_MASTER) {
 			center = 1;
@@ -43,16 +44,16 @@ dragmfact(const Arg *arg)
 				horizontal = 1;
 		}
 		else if (layout == SPLIT_CENTERED_HORIZONTAL) {
-			if (fixed || n - m->nmaster > 1)
+			if (fixed || n - ws->nmaster > 1)
 				center = 1;
 			horizontal = 1;
 		}
 	}
 
 	/* do not allow mfact to be modified under certain conditions */
-	if (!m->lt[m->sellt]->arrange                    // floating layout
-		|| (!fixed && m->nmaster && n <= m->nmaster) // no master
-		|| (m->lt[m->sellt]->arrange == &flextile && m->ltaxis[LAYOUT] == NO_SPLIT)
+	if (!ws->layout->arrange                    // floating layout
+		|| (!fixed && ws->nmaster && n <= ws->nmaster) // no master
+		|| (ws->layout->arrange == &flextile && ws->ltaxis[LAYOUT] == NO_SPLIT)
 	)
 		return;
 
@@ -64,22 +65,22 @@ dragmfact(const Arg *arg)
 	if (center) {
 		if (horizontal) {
 			px = ax + aw / 2;
-			py = ay + ah / 2 + (ah - 2*ih) * (m->mfact / 2.0) + ih / 2;
+			py = ay + ah / 2 + (ah - 2*ih) * (ws->mfact / 2.0) + ih / 2;
 		} else { // vertical split
-			px = ax + aw / 2 + (aw - 2*iv) * m->mfact / 2.0 + iv / 2;
+			px = ax + aw / 2 + (aw - 2*iv) * ws->mfact / 2.0 + iv / 2;
 			py = ay + ah / 2;
 		}
 	} else if (horizontal) {
 		px = ax + aw / 2;
 		if (mirror)
-			py = ay + (ah - ih) * (1.0 - m->mfact) + ih / 2;
+			py = ay + (ah - ih) * (1.0 - ws->mfact) + ih / 2;
 		else
-			py = ay + ((ah - ih) * m->mfact) + ih / 2;
+			py = ay + ((ah - ih) * ws->mfact) + ih / 2;
 	} else { // vertical split
 		if (mirror)
-			px = ax + (aw - iv) * (1.0 - m->mfact) + iv / 2;
+			px = ax + (aw - iv) * (1.0 - ws->mfact) + iv / 2;
 		else
-			px = ax + ((aw - iv) * m->mfact) + iv / 2;
+			px = ax + ((aw - iv) * ws->mfact) + iv / 2;
 		py = ay + ah / 2;
 	}
 

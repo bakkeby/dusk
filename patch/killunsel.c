@@ -2,12 +2,13 @@ void
 killunsel(const Arg *arg)
 {
 	Client *i = NULL;
+	Workspace *ws = WS;
 
-	if (!selws->sel)
+	if (!ws->sel)
 		return;
 
-	for (i = selws->clients; i; i = i->next) {
-		if (ISVISIBLE(i) && i != selws->sel) {
+	for (i = ws->clients; i; i = i->next) {
+		if (ISVISIBLE(i) && i != ws->sel) {
 			if (!sendevent(i->win, wmatom[WMDelete], NoEventMask, wmatom[WMDelete], CurrentTime, 0, 0, 0))
 			{
 				XGrabServer(dpy);

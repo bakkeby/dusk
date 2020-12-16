@@ -2,17 +2,18 @@ void
 insertclient(Client *item, Client *insertItem, int after)
 {
 	Client *c;
+	Workspace *ws = WS;
 	if (item == NULL || insertItem == NULL || item == insertItem)
 		return;
 	detach(insertItem);
-	if (!after && selws->clients == item) {
+	if (!after && ws->clients == item) {
 		attach(insertItem);
 		return;
 	}
 	if (after) {
 		c = item;
 	} else {
-		for (c = selws->clients; c; c = c->next) {
+		for (c = ws->clients; c; c = c->next) {
 			if (c->next == item)
 				break;
 		}
@@ -25,7 +26,8 @@ void
 inplacerotate(const Arg *arg)
 {
 	Monitor *m = selmon;
-	if (!m->sel || (ISFLOATING(m->sel) && !arg->f))
+	Workspace *ws = WS;
+	if (!ws->sel || (ISFLOATING(ws->sel) && !arg->f))
 		return;
 
 	unsigned int n, selidx = 0, i = 0, tidx, center, dualstack;
@@ -34,17 +36,17 @@ inplacerotate(const Arg *arg)
 		*thead = NULL, *ttail = NULL,
 		*mhead = NULL, *mtail = NULL;
 
-	for (n = 0, c = nexttiled(m->clients); c; c = nexttiled(c->next), ++n);
-	tidx = m->nmaster + (m->nstack > 0 ? m->nstack : (n - m->nmaster) / 2 + ((n - m->nmaster) % 2 > 0 ? 1 : 0));
+	for (n = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), ++n);
+	tidx = ws->nmaster + (ws->nstack > 0 ? ws->nstack : (n - ws->nmaster) / 2 + ((n - ws->nmaster) % 2 > 0 ? 1 : 0));
 
 	// Shift client
-	for (c = m->clients; c; c = c->next) {
+	for (c = ws->clients; c; c = c->next) {
 		if (ISVISIBLE(c) && !ISFLOATING(c) && !HIDDEN(c)) {
-			if (m->sel == c)
+			if (ws->sel == c)
 				selidx = i;
-			if (i == m->nmaster - 1)
+			if (i == ws->nmaster - 1)
 				mtail = c;
-			if (i == m->nmaster)
+			if (i == ws->nmaster)
 				shead = c;
 			if (i == tidx - 1)
 				stail = c;
@@ -59,21 +61,21 @@ inplacerotate(const Arg *arg)
 
 	center = iscenteredlayout(m, n);
 	dualstack = isdualstacklayout(m);
-	if ((!center && !dualstack) || (center && n <= m->nmaster + (m->nstack ? m->nstack : 1))) {
-		if (arg->i < 0 && selidx >= selmon->nmaster) insertclient(ttail, shead, 1);
-		if (arg->i > 0 && selidx >= selmon->nmaster) insertclient(shead, ttail, 0);
+	if ((!center && !dualstack) || (center && n <= ws->nmaster + (ws->nstack ? ws->nstack : 1))) {
+		if (arg->i < 0 && selidx >= ws->nmaster) insertclient(ttail, shead, 1);
+		if (arg->i > 0 && selidx >= ws->nmaster) insertclient(shead, ttail, 0);
 	} else {
-		if (arg->i < 0 && selidx >= selmon->nmaster && selidx < tidx) insertclient(stail, shead, 1);
-		if (arg->i > 0 && selidx >= selmon->nmaster && selidx < tidx) insertclient(shead, stail, 0);
+		if (arg->i < 0 && selidx >= ws->nmaster && selidx < tidx) insertclient(stail, shead, 1);
+		if (arg->i > 0 && selidx >= ws->nmaster && selidx < tidx) insertclient(shead, stail, 0);
 		if (arg->i < 0 && selidx >= tidx) insertclient(ttail, thead, 1);
 		if (arg->i > 0 && selidx >= tidx) insertclient(thead, ttail, 0);
 	}
-	if (arg->i < 0 && selidx < selmon->nmaster)  insertclient(mtail, mhead, 1);
-	if (arg->i > 0 && selidx < selmon->nmaster)  insertclient(mhead, mtail, 0);
+	if (arg->i < 0 && selidx < ws->nmaster)  insertclient(mtail, mhead, 1);
+	if (arg->i > 0 && selidx < ws->nmaster)  insertclient(mhead, mtail, 0);
 
 	// Restore focus position
 	i = 0;
-	for (c = selws->clients; c; c = c->next) {
+	for (c = ws->clients; c; c = c->next) {
 		if (!ISVISIBLE(c) || (ISFLOATING(c)))
 			continue;
 		if (i == selidx) {
@@ -82,6 +84,6 @@ inplacerotate(const Arg *arg)
 		}
 		i++;
 	}
-	arrangemon(selmon);
+	arrangemon(ws->mon);
 	focus(c);
 }

@@ -125,7 +125,7 @@ dump_monitor(yajl_gen gen, Monitor *mon, int is_selected)
       YSTR("old"); YINT(ws->prevtags);
     )
 
-    YSTR("tag_state"); dump_tag_state(gen, mon->tagstate);
+    YSTR("tag_state"); dump_tag_state(gen, mon->selws->tagstate);
 
     YSTR("clients"); YMAP(
       YSTR("selected"); YINT(ws->sel ? ws->sel->win : 0);

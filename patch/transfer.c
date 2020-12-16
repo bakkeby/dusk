@@ -1,33 +1,40 @@
 void
 transfer(const Arg *arg)
 {
-	Client *c, *mtail = selws->clients, *stail = NULL, *insertafter;
+	Workspace *ws = WS;
+	Client *c, *mtail = ws->clients, *stail = NULL, *insertafter;
 	int transfertostack = 0, i, nmasterclients;
 
-	for (i = 0, c = selws->clients; c; c = c->next) {
-		if (!ISVISIBLE(c) || ISFLOATING(c)) continue;
-		if (selws->sel == c) { transfertostack = i < selmon->nmaster && selmon->nmaster != 0; }
-		if (i < selmon->nmaster) { nmasterclients++; mtail = c; }
+	for (i = 0, c = ws->clients; c; c = c->next) {
+		if (!ISVISIBLE(c) || ISFLOATING(c))
+			continue;
+		if (ws->sel == c) {
+			transfertostack = i < ws->nmaster && ws->nmaster != 0;
+		}
+		if (i < ws->nmaster) {
+			nmasterclients++;
+			mtail = c;
+		}
 		stail = c;
 		i++;
 	}
-	if (ISFLOATING(selws->sel) || i == 0) {
+	if (ISFLOATING(ws->sel) || i == 0) {
 		return;
 	} else if (transfertostack) {
-		selmon->nmaster = MIN(i, selmon->nmaster) - 1;
+		ws->nmaster = MIN(i, ws->nmaster) - 1;
 		insertafter = stail;
 	} else {
-		selmon->nmaster = selmon->nmaster + 1;
+		ws->nmaster = ws->nmaster + 1;
 		insertafter = mtail;
 	}
-	if (insertafter != selws->sel) {
-		detach(selws->sel);
-		if (selmon->nmaster == 1 && !transfertostack) {
-		 attach(selws->sel); // Head prepend case
+	if (insertafter != ws->sel) {
+		detach(ws->sel);
+		if (ws->nmaster == 1 && !transfertostack) {
+		 attach(ws->sel); // Head prepend case
 		} else {
-			selws->sel->next = insertafter->next;
-			insertafter->next = selws->sel;
+			ws->sel->next = insertafter->next;
+			insertafter->next = ws->sel;
 		}
 	}
-	arrange(selws);
+	arrange(ws->mon);
 }

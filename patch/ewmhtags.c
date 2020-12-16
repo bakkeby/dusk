@@ -2,20 +2,22 @@ void
 persistmonitorstate(Monitor *m)
 {
 	Client *c;
+	Workspace *ws = MWS(m);
 	unsigned int i;
 	char atom[22];
 
-	sprintf(atom, "_DAWN_MONITOR_TAGS_%u", m->num);
+	sprintf(atom, "_DAWN_MONITOR_TAGS_%u", m->num); // TODO workspaces
 
-	unsigned long data[] = { m->tags[m->seltags] };
+	unsigned long data[] = { ws->tags };
 	XChangeProperty(dpy, root, XInternAtom(dpy, atom, False), XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
 
 	/* set dawn client atoms */
-	for (i = 1, c = m->clients; c; c = c->next, ++i) {
-		c->id = i;
-		setclientflags(c);
-		setclienttags(c);
-	}
+	for (ws = m->workspaces; ws; ws = ws->next)
+		for (i = 1, c = ws->clients; c; c = c->next, ++i) {
+			c->id = i;
+			setclientflags(c);
+			setclienttags(c);
+		}
 
 	XSync(dpy, False);
 }
@@ -95,7 +97,7 @@ getmonitorstate(Monitor *m)
 	unsigned char *p = NULL;
 	Atom da, tags = None;
 
-	sprintf(atom, "_DAWN_MONITOR_TAGS_%u", m->num);
+	sprintf(atom, "_DAWN_MONITOR_TAGS_%u", m->num); // TODO workspaces
 
 	Atom monitortags = XInternAtom(dpy, atom, True);
 	if (!monitortags)
@@ -108,7 +110,7 @@ getmonitorstate(Monitor *m)
 	}
 
 	if (tags)
-		m->tags[m->seltags] = tags;
+		m->selws->tags = tags; // tmp workspaces
 }
 
 void
@@ -128,7 +130,8 @@ setviewport(void)
 void
 updatecurrentdesktop(void)
 {
-	long rawdata[] = { selmon->tags[selws->seltags] };
+
+	long rawdata[] = { WS->tags }; // TODO workspaces
 	int i = 0;
 	while (*rawdata >> (i + 1)) {
 		i++;

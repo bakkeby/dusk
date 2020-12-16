@@ -24,12 +24,13 @@ void
 rotatestack(const Arg *arg)
 {
 	Client *c = NULL, *f;
+	Workspace *ws = WS;
 
-	if (!selws->sel)
+	if (!ws->sel)
 		return;
-	f = selws->sel;
+	f = ws->sel;
 	if (arg->i > 0) {
-		for (c = nexttiled(selws->clients); c && nexttiled(c->next); c = nexttiled(c->next));
+		for (c = nexttiled(ws->clients); c && nexttiled(c->next); c = nexttiled(c->next));
 		if (c) {
 			detach(c);
 			attach(c);
@@ -37,7 +38,7 @@ rotatestack(const Arg *arg)
 			attachstack(c);
 		}
 	} else {
-		if ((c = nexttiled(selws->clients))) {
+		if ((c = nexttiled(ws->clients))) {
 			detach(c);
 			enqueue(c);
 			detachstack(c);
@@ -45,8 +46,8 @@ rotatestack(const Arg *arg)
 		}
 	}
 	if (c) {
-		arrange(selws);
+		arrange(ws->mon);
 		focus(f);
-		restack(selws);
+		restack(ws);
 	}
 }

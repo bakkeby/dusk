@@ -1,13 +1,15 @@
 void
 transferall(const Arg *arg)
 {
-	Client *c, *n = selws->clients, *attachfrom = NULL;
+	Workspace *ws = WS;
+	Client *c, *n = ws->clients, *attachfrom = NULL;
 	int i = 0, nstackclients = 0;
 	while (n) {
 		c = n;
 		n = c->next;
-		if (!ISVISIBLE(c) || ISFLOATING(c)) continue;
-		if (i >= selmon->nmaster) {
+		if (!ISVISIBLE(c) || ISFLOATING(c))
+			continue;
+		if (i >= ws->nmaster) {
 			detach(c);
 			if (!attachfrom) {
 				attach(c);
@@ -20,6 +22,6 @@ transferall(const Arg *arg)
 		}
 		i++;
 	}
-	selmon->nmaster = nstackclients;
-	arrange(selws);
+	ws->nmaster = nstackclients;
+	arrange(ws->mon);
 }
