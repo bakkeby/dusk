@@ -638,12 +638,14 @@ static Button buttons[] = {
 
 static const char *ipcsockpath = "/tmp/dawn.sock";
 static IPCCommand ipccommands[] = {
+	IPCCOMMAND( changeopacity, 1, {ARG_TYPE_FLOAT} ),
 	IPCCOMMAND( cycleiconset, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( cyclelayout, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( defaultgaps, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( enable, 1, {ARG_TYPE_UINT} ),
 	IPCCOMMAND( disable, 1, {ARG_TYPE_UINT} ),
 	IPCCOMMAND( floatpos, 1, {ARG_TYPE_STR} ),
+	IPCCOMMAND( focusdir, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( focusmaster, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( focusmon, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( focusstack, 1, {ARG_TYPE_SINT} ),
@@ -667,6 +669,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( pushdown, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( pushup, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( quit, 1, {ARG_TYPE_SINT} ), // 0 = quit, 1 = restart
+	IPCCOMMAND( removescratch, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( setborderpx, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( seticonset, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( setlayoutaxisex, 1, {ARG_TYPE_SINT} ),
@@ -675,11 +678,13 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( setcfact, 1, {ARG_TYPE_FLOAT} ),
 	IPCCOMMAND( setmfact, 1, {ARG_TYPE_FLOAT} ),
 	IPCCOMMAND( setgapsex, 1, {ARG_TYPE_SINT} ),
+	IPCCOMMAND( setscratch, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( setstatus, 1, {ARG_TYPE_STR} ),
 	IPCCOMMAND( shiftview, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( shiftviewclients, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( stackpush, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( stackfocus, 1, {ARG_TYPE_SINT} ),
+	IPCCOMMAND( swaptags, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( switchcol, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( tag, 1, {ARG_TYPE_UINT} ),
 	IPCCOMMAND( tagall, 1, {ARG_TYPE_STR} ), // e.g. "4" or "F4" to only move floating windows to tag 4
@@ -699,6 +704,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( togglefloating, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( togglefullscreen, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( togglegaps, 1, {ARG_TYPE_NONE} ),
+	IPCCOMMAND( togglenomodbuttons, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( togglescratch, 1, {ARG_TYPE_UINT} ),
 	IPCCOMMAND( togglesticky, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( toggletag, 1, {ARG_TYPE_UINT} ),
