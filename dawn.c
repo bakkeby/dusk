@@ -585,6 +585,7 @@ static Clr **scheme;
 static Display *dpy;
 static Drw *drw;
 static Monitor *mons, *selmon;
+static Workspace *workspaces;
 static Window root, wmcheckwin;
 
 /* configuration, allows nested code to access above variables */
@@ -902,10 +903,10 @@ cleanup(void)
 	XSetInputFocus(dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
 	XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
 
-	// ipc_cleanup(); TODO
+	ipc_cleanup();
 
-	// if (close(epoll_fd) < 0)
-	// 	fprintf(stderr, "Failed to close epoll file descriptor\n");
+	if (close(epoll_fd) < 0)
+		fprintf(stderr, "Failed to close epoll file descriptor\n");
 }
 
 void
@@ -1234,7 +1235,7 @@ createmon(int num)
 	m->workspaces = ws;
 	m->selws = ws;
 	fprintf(stderr, "createmon: %d\n", 2);
-	// getmonitorstate(m); // TODO EWMH
+	getmonitorstate(m);
 	for (j = 0; j < LENGTH(monrules); j++) {
 		mr = &monrules[j];
 		fprintf(stderr, "createmon: %f\n", 2.0);
@@ -1936,7 +1937,7 @@ manage(Window w, XWindowAttributes *wa)
 
 	if (c->opacity) {
 		fprintf(stderr, "manage: %d (%s)\n", 15, c->name);
-		// opacity(c, c->opacity); TODO
+		opacity(c, c->opacity);
 	}
 
 	fprintf(stderr, "manage: %d (%s)\n", 16, c->name);
@@ -2174,8 +2175,8 @@ movemouse(const Arg *arg)
 				togglefloating(NULL);
 			if (!selmon->selws->layout->arrange || ISFLOATING(c)) {
 				resize(c, nx, ny, c->w, c->h, 1);
-//				if (enabled(AutoSaveFloats)) TODO
-//					savefloats(NULL); TODO
+				if (enabled(AutoSaveFloats))
+					savefloats(NULL);
 			}
 			break;
 		}
