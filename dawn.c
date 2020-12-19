@@ -75,7 +75,7 @@
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X), False) + lrpad)
 #define HIDDEN(C)               ((getstate(C->win) == IconicState))
 
-#define WS                      selmon->selws
+#define WS                      selws
 #define MWS(M)                  M->selws
 
 /* enums */
@@ -373,7 +373,7 @@ struct Monitor {
 	// Client *sel;
 	// Client *stack;
 	Monitor *next;
-	Workspace *workspaces, *selws;
+	Workspace *selws; // *workspaces,
 	Bar *bar;
 	//const Layout *lt[2];
 	int iconset; // TODO iconset with monitor or workspaces
@@ -381,39 +381,6 @@ struct Monitor {
 	// TagState tagstate;
 	// Client *lastsel;
 	// const Layout *lastlt;
-};
-//
-struct Workspace {
-	char ltsymbol[16];
-	float mfact;
-	int ltaxis[4];
-	int nstack;
-	int nmaster;
-	int enablegaps;
-//	int gappih;           /* horizontal gap between windows */
-//	int gappiv;           /* vertical gap between windows */
-//	int gappoh;           /* horizontal outer gaps */
-//	int gappov;           /* vertical outer gaps */
-	// unsigned int borderpx;
-	unsigned int seltags;
-	unsigned int sellt;
-	unsigned int tags;
-	unsigned int prevtags;
-	Client *clients;
-	Client *sel;
-	Client *stack;
-	Client *prevzoom;
-	Workspace *next;
-	Monitor *mon;
-	// const Layout *lt[2];
-	const Layout *layout;
-	const Layout *prevlayout;
-	int iconset;
-	char lastltsymbol[16];
-	TagState tagstate;
-	Client *lastsel;
-	const Layout *lastlt;
-
 };
 
 typedef struct {
@@ -431,15 +398,42 @@ typedef struct {
 
 #define RULE(...) { .monitor = -1, ##__VA_ARGS__ },
 
+struct Workspace {
+	char ltsymbol[16];
+	char name[16];
+	float mfact;
+	int ltaxis[4];
+	int nstack;
+	int nmaster;
+	int enablegaps;
+	int pinned; // whether workspace is pinned to assigned monitor or not
+	unsigned int tags;
+	unsigned int prevtags;
+	Client *clients;
+	Client *sel;
+	Client *stack;
+	Client *prevzoom;
+	Workspace *next;
+	Monitor *mon;
+	const Layout *layout;
+	const Layout *prevlayout;
+	int iconset;
+	char lastltsymbol[16]; // --> prevltsymbol, or check if really needed
+	TagState tagstate; // TODO to WSState? is this really needed
+	Client *lastsel; // TODO --> prevsel
+	const Layout *lastlt; // TODO have IPC code use prevlayout instead
+};
+
 typedef struct {
+	char name[16];
 	int monitor;
-	int tag;
+	int pinned;
 	int layout;
 	float mfact;
 	int nmaster;
-	int showbar;
-	int topbar;
-} MonitorRule;
+	int nstack;
+	int enablegaps;
+} WorkspaceRule;
 
 /* function declarations */
 static void applyrules(Client *c);
@@ -457,6 +451,8 @@ static void configure(Client *c);
 static void configurenotify(XEvent *e);
 static void configurerequest(XEvent *e);
 static Monitor *createmon(int num);
+static void createworkspaces();
+static Workspace *createworkspace(const WorkspaceRule *r);
 static void destroynotify(XEvent *e);
 static void detach(Client *c);
 static void detachstack(Client *c);
@@ -585,7 +581,7 @@ static Clr **scheme;
 static Display *dpy;
 static Drw *drw;
 static Monitor *mons, *selmon;
-static Workspace *workspaces;
+static Workspace *workspaces, *selws;
 static Window root, wmcheckwin;
 
 /* configuration, allows nested code to access above variables */
@@ -654,7 +650,8 @@ applyrules(Client *c)
 				setfloatpos(c, r->floatpos);
 
 			if ((SWITCHTAG(c) || ENABLETAG(c)) && (NOSWALLOW(c) || !termforwin(c))) {
-				selmon = c->ws->mon;
+				selws = c->ws;
+				selmon = selws->mon;
 				newtags = SWITCHTAG(c) ? c->tags : c->ws->tags | c->tags;
 
 				/* Switch to the client's tag, but only if that tag is not already shown */
@@ -816,6 +813,7 @@ buttonpress(XEvent *e)
 		ws = MWS(m);
 		unfocus(ws->sel, 1, NULL);
 		selmon = m;
+		selws = ws;
 		focus(NULL);
 	}
 
@@ -873,15 +871,13 @@ cleanup(void)
 {
 	Arg a = {.ui = ~0};
 	Layout foo = { "", NULL };
-	Monitor *m;
 	Workspace *ws;
 	size_t i;
 	view(&a);
 	WS->layout = &foo;
-	for (m = mons; m; m = m->next)
-		for (ws = m->workspaces; ws; ws = ws->next)
-			while (ws->stack)
-				unmanage(ws->stack, 0);
+	for (ws = workspaces; ws; ws = ws->next)
+		while (ws->stack)
+			unmanage(ws->stack, 0);
 	XUngrabKey(dpy, AnyKey, AnyModifier, root);
 	while (mons)
 		cleanupmon(mons);
@@ -912,7 +908,7 @@ cleanup(void)
 void
 cleanupmon(Monitor *mon)
 {
-	Workspace *ws, *nextws;
+	Workspace *ws;
 	Monitor *m;
 	Bar *bar;
 
@@ -922,10 +918,9 @@ cleanupmon(Monitor *mon)
 		for (m = mons; m && m->next != mon; m = m->next);
 		m->next = mon->next;
 	}
-	for (ws = mon->workspaces; ws; ws = nextws) {
-		nextws = ws->next;
-		free(ws);
-	}
+	for (ws = workspaces; ws; ws = ws->next)
+		if (ws->mon == mon)
+			ws->mon = NULL;
 	for (bar = mon->bar; bar; bar = mon->bar) {
 		if (!bar->external) {
 			XUnmapWindow(dpy, bar->win);
@@ -1046,7 +1041,8 @@ clientmessage(XEvent *e)
 				if (i < NUMTAGS) {
 					if (c != ws->sel)
 						unfocus(ws->sel, 0, NULL);
-					selmon = c->ws->mon;
+					selws = c->ws;
+					selmon = selws->mon;
 					if (((1 << i) & TAGMASK) != WS->tags)
 						view(&((Arg) { .ui = 1 << i }));
 					focus(c);
@@ -1107,14 +1103,13 @@ configurenotify(XEvent *e)
 		if (updategeom() || dirty) {
 			drw_resize(drw, sw, sh);
 			updatebars();
-			for (m = mons; m; m = m->next) {
-				for (ws = m->workspaces; ws; ws = ws->next)
-					for (c = ws->clients; c; c = c->next)
-						if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c))
-							resizeclient(c, m->mx, m->my, m->mw, m->mh);
+			for (ws = workspaces; ws; ws = ws->next)
+				for (c = ws->clients; c; c = c->next)
+					if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c))
+						resizeclient(c, ws->mon->mx, ws->mon->my, ws->mon->mw, ws->mon->mh);
+			for (m = mons; m; m = m->next)
 				for (bar = m->bar; bar; bar = bar->next)
 					XMoveResizeWindow(dpy, bar->win, bar->bx, bar->by, bar->bw, bar->bh);
-			}
 			focus(NULL);
 			arrange(NULL);
 		}
@@ -1197,16 +1192,16 @@ createmon(int num)
 	fprintf(stderr, "createmon: -->\n");
 	Monitor *m;
 	int i, n, max_bars = 2, istopbar = topbar;
-	int layout;
+	// int layout;
 
 	const BarRule *br;
 	Bar *bar;
-	int j;
-	const MonitorRule *mr;
-	Workspace *ws;
+	// int j;
+	// const MonitorRule *mr;
+	// Workspace *ws;
 	fprintf(stderr, "createmon: %d\n", 0);
 	m = ecalloc(1, sizeof(Monitor));
-	ws = ecalloc(1, sizeof(Workspace));
+
 	fprintf(stderr, "createmon: %d\n", 1);
 	// m->tags[0] = m->tags[1] = 1;
 	// m->mfact = mfact;
@@ -1219,48 +1214,44 @@ createmon(int num)
 	m->gappoh = gappoh;
 	m->gappov = gappov;
 
-	ws->tags = ws->prevtags = 1;
-	ws->mfact = mfact;
-	ws->nmaster = nmaster;
-	ws->nstack = nstack;
 	// ws->borderpx = borderpx;
-	ws->enablegaps = 1;
+
 	// ws->gappih = gappih;
 	// ws->gappiv = gappiv;
 	// ws->gappoh = gappoh;
 	// ws->gappov = gappov;
-	ws->mon = m;
+	// ws->mon = m;
 
 	m->num = num;
-	m->workspaces = ws;
-	m->selws = ws;
+	// m->workspaces = ws;
+	// m->selws = ws;
 	fprintf(stderr, "createmon: %d\n", 2);
 	getmonitorstate(m);
-	for (j = 0; j < LENGTH(monrules); j++) {
-		mr = &monrules[j];
-		fprintf(stderr, "createmon: %f\n", 2.0);
-		if ((mr->monitor == -1 || mr->monitor == m->num)
-				&& (mr->tag <= 0 || (MWS(m)->tags & (1 << (mr->tag - 1))))) {
-			fprintf(stderr, "createmon: %f\n", 2.1);
-			layout = MAX(mr->layout, 0);
-			layout = MIN(layout, LENGTH(layouts) - 1);
-			fprintf(stderr, "createmon: %f\n", 2.2);
-			ws->layout = &layouts[layout];
-			ws->prevlayout = &layouts[1 % LENGTH(layouts)];
-			fprintf(stderr, "createmon: %f\n", 2.3);
-			strncpy(ws->ltsymbol, layouts[layout].symbol, sizeof ws->ltsymbol);
+	// for (j = 0; j < LENGTH(monrules); j++) {
+	// 	mr = &monrules[j];
+	// 	fprintf(stderr, "createmon: %f\n", 2.0);
+	// 	if ((mr->monitor == -1 || mr->monitor == m->num)
+	// 			&& (mr->tag <= 0 || (MWS(m)->tags & (1 << (mr->tag - 1))))) {
+	// 		fprintf(stderr, "createmon: %f\n", 2.1);
+	// 		layout = MAX(mr->layout, 0);
+	// 		layout = MIN(layout, LENGTH(layouts) - 1);
+	// 		fprintf(stderr, "createmon: %f\n", 2.2);
+	// 		ws->layout = &layouts[layout];
+	// 		ws->prevlayout = &layouts[1 % LENGTH(layouts)];
+	// 		fprintf(stderr, "createmon: %f\n", 2.3);
+	// 		strncpy(ws->ltsymbol, layouts[layout].symbol, sizeof ws->ltsymbol);
 
-			if (mr->mfact > -1)
-				ws->mfact = mr->mfact;
-			if (mr->nmaster > -1)
-				ws->nmaster = mr->nmaster;
-			if (mr->showbar > -1)
-				m->showbar = mr->showbar;
-			if (mr->topbar > -1)
-				istopbar = mr->topbar;
-			break;
-		}
-	}
+	// 		if (mr->mfact > -1)
+	// 			ws->mfact = mr->mfact;
+	// 		if (mr->nmaster > -1)
+	// 			ws->nmaster = mr->nmaster;
+	// 		if (mr->showbar > -1)
+	// 			m->showbar = mr->showbar;
+	// 		if (mr->topbar > -1)
+	// 			istopbar = mr->topbar;
+	// 		break;
+	// 	}
+	// }
 	fprintf(stderr, "createmon: %d\n", 3);
 	/* Derive the number of bars for this monitor based on bar rules */
 	for (n = -1, i = 0; i < LENGTH(barrules); i++) {
@@ -1283,19 +1274,15 @@ createmon(int num)
 		bar->bh = bh + bar->borderpx * 2;
 	}
 	fprintf(stderr, "createmon: %d\n", 4);
-	ws->ltaxis[LAYOUT] = ws->layout->preset.layout;
-	ws->ltaxis[MASTER] = ws->layout->preset.masteraxis;
-	ws->ltaxis[STACK]  = ws->layout->preset.stack1axis;
-	ws->ltaxis[STACK2] = ws->layout->preset.stack2axis;
 
-	for (i = 0; i <= NUMTAGS; i++) {
+	// for (i = 0; i <= NUMTAGS; i++) {
 
-		/* init layouts */
-		for (j = 0; j < LENGTH(monrules); j++) {
-			mr = &monrules[j];
-			if ((mr->monitor == -1 || mr->monitor == m->num) && (mr->tag == -1 || mr->tag == i)) {
-				layout = MAX(mr->layout, 0);
-				layout = MIN(layout, LENGTH(layouts) - 1);
+	// 	/* init layouts */
+	// 	for (j = 0; j < LENGTH(monrules); j++) {
+	// 		mr = &monrules[j];
+	// 		if ((mr->monitor == -1 || mr->monitor == m->num) && (mr->tag == -1 || mr->tag == i)) {
+	// 			layout = MAX(mr->layout, 0);
+	// 			layout = MIN(layout, LENGTH(layouts) - 1);
 				// m->pertag->ltidxs[i][0] = &layouts[layout];
 				// m->pertag->ltidxs[i][1] = m->lt[0];
 				// m->pertag->nmasters[i] = (mr->nmaster > -1 ? mr->nmaster : m->nmaster);
@@ -1305,15 +1292,61 @@ createmon(int num)
 				// m->pertag->ltaxis[i][MASTER] = m->pertag->ltidxs[i][0]->preset.masteraxis;
 				// m->pertag->ltaxis[i][STACK]  = m->pertag->ltidxs[i][0]->preset.stack1axis;
 				// m->pertag->ltaxis[i][STACK2] = m->pertag->ltidxs[i][0]->preset.stack2axis;
-				break;
-			}
-		}
+		// 		break;
+		// 	}
+		// }
 		// m->pertag->sellts[i] = m->sellt;
 
 		// m->pertag->enablegaps[i] = 1;
-	}
+	// }
 	fprintf(stderr, "createmon: <--\n");
 	return m;
+}
+
+void
+createworkspaces()
+{
+	fprintf(stderr, "createworkspaces: -->\n");
+	Workspace *pws;
+	int i;
+
+	pws = selws = workspaces = createworkspace(&wsrules[0]);
+	for (i = 1; i < LENGTH(wsrules); i++)
+		pws = pws->next = createworkspace(&wsrules[i]);
+
+	fprintf(stderr, "createworkspace: <--\n");
+}
+
+Workspace *
+createworkspace(const WorkspaceRule *r)
+{
+	Workspace *ws;
+	Monitor *m;
+	fprintf(stderr, "createworkspace: -->\n");
+	ws = ecalloc(1, sizeof(Workspace));
+
+	// TODO not 100% sure about this
+	if (r->monitor == -1) {
+		for (m = mons; m && m->num != r->monitor; m = m->next);
+		ws->mon = m;
+	}
+
+	strcpy(ws->name, r->name);
+	ws->tags = ws->prevtags = 1;
+	ws->pinned = (r->pinned == 1 ? 1 : 0);
+	ws->layout = (r->layout == -1 ? &layouts[0] : &layouts[MIN(r->layout, LENGTH(layouts))]);
+	ws->mfact = (r->mfact == -1 ? mfact : r->mfact);
+	ws->nmaster = (r->nmaster == -1 ? nmaster : r->nmaster);
+	ws->nstack = (r->nstack == -1 ? nstack : r->nstack);
+	ws->enablegaps = (r->enablegaps == -1 ? 1 : r->enablegaps);
+
+	ws->ltaxis[LAYOUT] = ws->layout->preset.layout;
+	ws->ltaxis[MASTER] = ws->layout->preset.masteraxis;
+	ws->ltaxis[STACK]  = ws->layout->preset.stack1axis;
+	ws->ltaxis[STACK2] = ws->layout->preset.stack2axis;
+
+	fprintf(stderr, "createworkspace: <--\n");
+	return ws;
 }
 
 void
@@ -1532,6 +1565,7 @@ enternotify(XEvent *e)
 	if ((ev->mode != NotifyNormal || ev->detail == NotifyInferior) && ev->window != root)
 		return;
 	c = wintoclient(ev->window);
+
 	m = c ? c->ws->mon : wintomon(ev->window);
 	if (m != selmon) {
 		sel = ws->sel;
@@ -1562,9 +1596,12 @@ focus(Client *c)
 	if (ws->sel && ws->sel != c)
 		unfocus(ws->sel, 0, c);
 	if (c) {
-		if (c->ws->mon != selmon) {
-			drawbar(selmon);
-			selmon = c->ws->mon;
+		if (c->ws != selws) {
+			if (c->ws->mon != selmon) {
+				drawbar(selmon);
+				selmon = c->ws->mon;
+			}
+			selws = c->ws;
 		}
 		if (ISURGENT(c))
 			seturgent(c, 0);
@@ -2284,7 +2321,6 @@ propertynotify(XEvent *e)
 void
 quit(const Arg *arg)
 {
-	Monitor *m;
 	size_t i;
 	if (arg->i)
 		restart = 1;
@@ -2298,8 +2334,8 @@ quit(const Arg *arg)
 		}
 	}
 
-	for (m = mons; m; m = m->next)
-		persistmonitorstate(m);
+	// for (m = mons; m; m = m->next)
+		persistmonitorstate(mons);
 }
 
 Monitor *
@@ -2783,6 +2819,8 @@ setup(void)
 	bh = bar_height ? bar_height : drw->fonts->h + vertpadbar;
 
 	updategeom();
+	createworkspaces();
+
 	/* init atoms */
 	utf8string = XInternAtom(dpy, "UTF8_STRING", False);
 	wmatom[WMProtocols] = XInternAtom(dpy, "WM_PROTOCOLS", False);
@@ -3425,10 +3463,8 @@ updategeom(void)
 {
 	int dirty = 0;
 #ifdef XINERAMA
-	Workspace *ws;
 	if (XineramaIsActive(dpy)) {
 		int i, j, n, nn;
-		Client *c;
 		Monitor *m;
 		XineramaScreenInfo *info = XineramaQueryScreens(dpy, &nn);
 		XineramaScreenInfo *unique = NULL;
@@ -3467,15 +3503,6 @@ updategeom(void)
 		} else { /* less monitors available nn < n */
 			for (i = nn; i < n; i++) {
 				for (m = mons; m && m->next; m = m->next);
-				for (ws = m->workspaces; ws; ws = ws->next)
-					while ((c = ws->clients)) {
-						dirty = 1;
-						m->selws->clients = c->next;
-						detachstack(c);
-						c->ws = mons->selws;
-						attach(c);
-						attachstack(c);
-					};
 				if (m == selmon)
 					selmon = mons;
 				cleanupmon(m);
@@ -3643,14 +3670,12 @@ Client *
 wintoclient(Window w)
 {
 	Client *c;
-	Monitor *m;
 	Workspace *ws;
 
-	for (m = mons; m; m = m->next)
-		for (ws = m->workspaces; ws; ws = ws->next)
-			for (c = ws->clients; c; c = c->next)
-				if (c->win == w)
-					return c;
+	for (ws = workspaces; ws; ws = ws->next)
+		for (c = ws->clients; c; c = c->next)
+			if (c->win == w)
+				return c;
 	return NULL;
 }
 

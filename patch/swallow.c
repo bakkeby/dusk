@@ -163,7 +163,6 @@ isdescprocess(pid_t p, pid_t c)
 Client *
 termforwin(const Client *w)
 {
-	Monitor *m;
 	Workspace *ws;
 	Client *c;
 
@@ -174,11 +173,10 @@ termforwin(const Client *w)
 	if (c && ISTERMINAL(c) && !c->swallowing && c->pid && isdescprocess(c->pid, w->pid))
 		return c;
 
-	for (m = mons; m; m = m->next)
-		for (ws = m->workspaces; ws; ws = ws->next)
-			for (c = ws->clients; c; c = c->next)
-				if (ISTERMINAL(c) && !c->swallowing && c->pid && isdescprocess(c->pid, w->pid))
-					return c;
+	for (ws = workspaces; ws; ws = ws->next)
+		for (c = ws->clients; c; c = c->next)
+			if (ISTERMINAL(c) && !c->swallowing && c->pid && isdescprocess(c->pid, w->pid))
+				return c;
 
 	return NULL;
 }
@@ -186,15 +184,13 @@ termforwin(const Client *w)
 Client *
 swallowingclient(Window w)
 {
-	Monitor *m;
 	Workspace *ws;
 	Client *c;
 
-	for (m = mons; m; m = m->next)
-		for (ws = m->workspaces; ws; ws = ws->next)
-			for (c = ws->clients; c; c = c->next)
-				if (c->swallowing && c->swallowing->win == w)
-					return c;
+	for (ws = workspaces; ws; ws = ws->next)
+		for (c = ws->clients; c; c = c->next)
+			if (c->swallowing && c->swallowing->win == w)
+				return c;
 
 	return NULL;
 }

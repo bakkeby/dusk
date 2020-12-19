@@ -12,7 +12,7 @@ persistmonitorstate(Monitor *m)
 	XChangeProperty(dpy, root, XInternAtom(dpy, atom, False), XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
 
 	/* set dawn client atoms */
-	for (ws = m->workspaces; ws; ws = ws->next)
+	for (ws = workspaces; ws; ws = ws->next)
 		for (i = 1, c = ws->clients; c; c = c->next, ++i) {
 			c->id = i;
 			setclientflags(c);

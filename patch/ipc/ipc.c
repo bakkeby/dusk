@@ -694,23 +694,23 @@ ipc_get_layouts(IPCClient *c, const Layout layouts[], const int layouts_len)
  * Returns -1 if the message could not be parsed
  */
 static int
-ipc_get_dwm_client(IPCClient *ipc_client, const char *msg, const Monitor *mons)
+ipc_get_dwm_client(IPCClient *ipc_client, const char *msg, const Monitor *mons) // TODO get rid of mons, or pass in workspaces
 {
 	Window win;
 
-	if (ipc_parse_get_dwm_client(msg, &win) < 0) return -1;
+	if (ipc_parse_get_dwm_client(msg, &win) < 0)
+		return -1;
 
 	// Find client with specified window XID
-	for (const Monitor *m = mons; m; m = m->next)
-		for (Workspace *ws = m->workspaces; ws; ws = ws->next)
-			for (Client *c = ws->clients; c; c = c->next)
-				if (c->win == win) {
-					yajl_gen gen;
-					ipc_reply_init_message(&gen);
-					dump_client(gen, c);
-					ipc_reply_prepare_send_message(gen, ipc_client, IPC_TYPE_GET_DWM_CLIENT);
-					return 0;
-				}
+	for (Workspace *ws = workspaces; ws; ws = ws->next)
+		for (Client *c = ws->clients; c; c = c->next)
+			if (c->win == win) {
+				yajl_gen gen;
+				ipc_reply_init_message(&gen);
+				dump_client(gen, c);
+				ipc_reply_prepare_send_message(gen, ipc_client, IPC_TYPE_GET_DWM_CLIENT);
+				return 0;
+			}
 
 	ipc_prepare_reply_failure(ipc_client, IPC_TYPE_GET_DWM_CLIENT,
 														"Client with window id %d not found", win);
