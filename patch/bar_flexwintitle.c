@@ -88,10 +88,12 @@ getschemefor(Monitor *m, int group, int activegroup)
 void
 getclientcounts(Monitor *m, int *groupactive, int *n, int *clientsnmaster, int *clientsnstack, int *clientsnstack2, int *clientsnfloating, int *clientsnhidden)
 {
+	fprintf(stderr, "getclientcounts: -->\n");
 	Workspace *ws = MWS(m);
 	Client *c;
 	int i, selidx = 0, cm = 0, cs1 = 0, cs2 = 0, cf = 0, ch = 0, center, dualstack;
 
+	fprintf(stderr, "getclientcounts: ws == NULL? %d\n", ws == NULL);
 	for (i = 0, c = ws->clients; c; c = c->next) {
 		if (!ISVISIBLE(c))
 			continue;
@@ -152,6 +154,7 @@ getclientcounts(Monitor *m, int *groupactive, int *n, int *clientsnmaster, int *
 	*clientsnstack2 = cs2;
 	*clientsnfloating = cf;
 	*clientsnhidden = ch;
+	fprintf(stderr, "getclientcounts: <--\n");
 }
 
 int

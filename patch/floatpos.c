@@ -55,7 +55,7 @@ setfloatpos(Client *c, const char *floatpos)
 			return;
 	}
 
-	getgaps(c->ws->mon, &oh, &ov, &ih, &iv, &n);
+	getgaps(c->ws, &oh, &ov, &ih, &iv, &n);
 	wx = c->ws->mon->wx + ov;
 	wy = c->ws->mon->wy + oh;
 	ww = c->ws->mon->ww - 2*ov;

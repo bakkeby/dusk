@@ -96,6 +96,7 @@ getmonitorstate(Monitor *m)
 	unsigned long dl;
 	unsigned char *p = NULL;
 	Atom da, tags = None;
+	Workspace *ws = MWS(m);
 
 	sprintf(atom, "_DAWN_MONITOR_TAGS_%u", m->num); // TODO workspaces
 
@@ -110,7 +111,7 @@ getmonitorstate(Monitor *m)
 	}
 
 	if (tags)
-		m->selws->tags = tags; // tmp workspaces
+		ws->tags = tags; // tmp workspaces
 }
 
 void

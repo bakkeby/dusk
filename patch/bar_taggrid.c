@@ -12,7 +12,7 @@ draw_taggrid(Bar *bar, BarArg *a)
 	Client *c;
 	Workspace *ws = MWS(bar->mon);
 
-	for (c = bar->mon->selws->clients; c; c = c->next)
+	for (c = ws->clients; c; c = c->next)
 		occ |= c->tags;
 
 	max_x = x = a->x + lrpad / 2;

@@ -12,6 +12,7 @@
 void
 drawindicator(Monitor *m, Client *c, unsigned int occ, int x, int y, int w, int h, unsigned int tag, int filled, int invert, int type)
 {
+	Workspace *ws = MWS(m);
 	int i, boxw, boxs, indn = 0;
 	if (!(occ & 1 << tag) || type == INDICATOR_NONE)
 		return;
@@ -19,7 +20,7 @@ drawindicator(Monitor *m, Client *c, unsigned int occ, int x, int y, int w, int 
 	boxs = drw->fonts->h / 9;
 	boxw = drw->fonts->h / 6 + 2;
 	if (filled == -1)
-		filled = m == selmon && m->selws->sel && m->selws->sel->tags & 1 << tag;
+		filled = m == selmon && ws->sel && ws->sel->tags & 1 << tag;
 
 	switch (type) {
 	default:
@@ -51,9 +52,9 @@ drawindicator(Monitor *m, Client *c, unsigned int occ, int x, int y, int w, int 
 		drw_rect(drw, x, y, w - 2, h, 0, invert);
 		break;
 	case INDICATOR_CLIENT_DOTS:
-		for (c = m->selws->clients; c; c = c->next) {
+		for (c = ws->clients; c; c = c->next) {
 			if (c->tags & (1 << tag)) {
-				drw_rect(drw, x, 1 + (indn * 2), m->selws->sel == c ? 6 : 1, 1, 1, invert);
+				drw_rect(drw, x, 1 + (indn * 2), ws->sel == c ? 6 : 1, 1, 1, invert);
 				indn++;
 			}
 			if (h <= 1 + (indn * 2)) {

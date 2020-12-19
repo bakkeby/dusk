@@ -151,20 +151,23 @@ incrivgaps(const Arg *arg)
 }
 
 static void
-getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc)
+getgaps(Workspace *ws, int *oh, int *ov, int *ih, int *iv, unsigned int *nc)
 {
+	fprintf(stderr, "getgaps: -->\n");
 	unsigned int n, oe, ie;
-	oe = ie = selmon->selws->enablegaps;
+	oe = ie = ws->enablegaps;
 	Client *c;
-
-	for (n = 0, c = nexttiled(m->selws->clients); c; c = nexttiled(c->next), n++);
+	fprintf(stderr, "getgaps: %d\n", 3);
+	for (n = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), n++);
+	fprintf(stderr, "getgaps: %d\n", 4);
 	if (enabled(SmartGaps) && n == 1) {
 		oe = smartgaps_fact; // outer gaps disabled or multiplied when only one client
 	}
-
-	*oh = m->gappoh*oe; // outer horizontal gap
-	*ov = m->gappov*oe; // outer vertical gap
-	*ih = m->gappih*ie; // inner horizontal gap
-	*iv = m->gappiv*ie; // inner vertical gap
+	fprintf(stderr, "getgaps: %d\n", 5);
+	*oh = ws->mon->gappoh*oe; // outer horizontal gap
+	*ov = ws->mon->gappov*oe; // outer vertical gap
+	*ih = ws->mon->gappih*ie; // inner horizontal gap
+	*iv = ws->mon->gappiv*ie; // inner vertical gap
 	*nc = n;            // number of clients
+	fprintf(stderr, "getgaps: <--\n");
 }

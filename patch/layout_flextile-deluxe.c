@@ -357,13 +357,14 @@ arrange_left_to_right(Monitor *m, int x, int y, int h, int w, int ih, int iv, in
 	int i, rest;
 	float facts, fact = 1;
 	Client *c;
+	Workspace *ws = MWS(m);
 
 	if (ai + an > n)
 		an = n - ai;
 
 	w -= iv * (an - 1);
 	getfactsforrange(m, an, ai, w, &rest, &facts);
-	for (i = 0, c = nexttiled(m->selws->clients); c; c = nexttiled(c->next), i++) {
+	for (i = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), i++) {
 		if (i >= ai && i < (ai + an)) {
 			fact = c->cfact;
 			resize(c, x, y, w * (fact / facts) + ((i - ai) < rest ? 1 : 0) - (2 * c->bw), h - (2 * c->bw), 0);
@@ -399,17 +400,18 @@ arrange_monocle(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n, i
 {
 	int i, stackno, minstackno = 0xFFFFFF;
 	Client *c, *s, *f = NULL;
+	Workspace *ws = MWS(m);
 
-	for (i = 0, c = nexttiled(m->selws->clients); c; c = nexttiled(c->next), i++)
+	for (i = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), i++)
 		if (i >= ai && i < (ai + an)) {
-			for (stackno = 0, s = m->selws->stack; s && s != c; s = s->snext, ++stackno);
+			for (stackno = 0, s = ws->stack; s && s != c; s = s->snext, ++stackno);
 			if (stackno < minstackno) {
 				f = s;
 				minstackno = stackno;
 			}
 		}
 
-	for (i = 0, c = nexttiled(m->selws->clients); c; c = nexttiled(c->next), i++)
+	for (i = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), i++)
 		if (i >= ai && i < (ai + an)) {
 			if (c == f) {
 				XMoveWindow(dpy, c->win, x, y);
@@ -425,6 +427,7 @@ arrange_gridmode(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n, 
 {
 	int i, cols, rows, ch, cw, cx, cy, cc, cr, chrest, cwrest; // counters
 	Client *c;
+	Workspace *ws = MWS(m);
 
 	/* grid dimensions */
 	for (rows = 0; rows <= an/2; rows++)
@@ -437,7 +440,7 @@ arrange_gridmode(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n, 
 	cw = (w - iv * (cols - 1)) / (cols ? cols : 1);
 	chrest = h - ih * (rows - 1) - ch * rows;
 	cwrest = w - iv * (cols - 1) - cw * cols;
-	for (i = 0, c = nexttiled(m->selws->clients); c; c = nexttiled(c->next), i++) {
+	for (i = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), i++) {
 		if (i >= ai && i < (ai + an)) {
 			cc = ((i - ai) / rows); // client column number
 			cr = ((i - ai) % rows); // client row number
@@ -472,6 +475,7 @@ arrange_gapplessgrid(Monitor *m, int x, int y, int h, int w, int ih, int iv, int
 {
 	int i, cols, rows, ch, cw, cn, rn, cc, rrest, crest; // counters
 	Client *c;
+	Workspace *ws = MWS(m);
 
 	/* grid dimensions */
 	for (cols = 1; cols <= an/2; cols++)
@@ -487,7 +491,7 @@ arrange_gapplessgrid(Monitor *m, int x, int y, int h, int w, int ih, int iv, int
 	cw = (w - iv * (cols - 1)) / cols;
 	crest = (w - iv * (cols - 1)) - cw * cols;
 
-	for (i = 0, c = nexttiled(m->selws->clients); c; c = nexttiled(c->next), i++) {
+	for (i = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), i++) {
 		if (i >= ai && i < (ai + an)) {
 			if (cc/rows + 1 > cols - an%cols) {
 				rows = an/cols + 1;
@@ -642,11 +646,14 @@ arrange_spiral(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n, in
 static void
 flextile(Monitor *m)
 {
+	fprintf(stderr, "flextile: -->\n");
 	unsigned int n;
 	int oh = 0, ov = 0, ih = 0, iv = 0; // gaps outer/inner horizontal/vertical
-	getgaps(m, &oh, &ov, &ih, &iv, &n);
+	fprintf(stderr, "flextile: %d\n", 1);
 	Workspace *ws = MWS(m);
+	getgaps(ws, &oh, &ov, &ih, &iv, &n);
 
+	fprintf(stderr, "flextile: %d\n", 3);
 	if (ws->layout->preset.layout != ws->ltaxis[LAYOUT] ||
 			ws->layout->preset.masteraxis != ws->ltaxis[MASTER] ||
 			ws->layout->preset.stack1axis != ws->ltaxis[STACK] ||
@@ -654,7 +661,7 @@ flextile(Monitor *m)
 		setflexsymbols(m, n);
 	else if (ws->layout->preset.symbolfunc != NULL)
 		ws->layout->preset.symbolfunc(m, n);
-
+	fprintf(stderr, "flextile: %d\n", 7);
 	if (n == 0)
 		return;
 
@@ -665,8 +672,9 @@ flextile(Monitor *m)
 			ov = m->gappov * smartgaps_fact;
 		}
 	}
-
-	(&flexlayouts[abs(m->selws->ltaxis[LAYOUT])])->arrange(m, m->wx + ov, m->wy + oh, m->wh - 2*oh, m->ww - 2*ov, ih, iv, n);
+	fprintf(stderr, "flextile: %d\n", 9);
+	(&flexlayouts[abs(ws->ltaxis[LAYOUT])])->arrange(m, m->wx + ov, m->wy + oh, m->wh - 2*oh, m->ww - 2*ov, ih, iv, n);
+	fprintf(stderr, "flextile: <--\n");
 	return;
 }
 
@@ -681,7 +689,7 @@ setflexsymbols(Monitor *m, unsigned int n)
 	if (n == 0)
 		for (c = nexttiled(ws->clients); c; c = nexttiled(c->next), n++);
 
-	l = abs(m->selws->ltaxis[LAYOUT]);
+	l = abs(ws->ltaxis[LAYOUT]);
 	if (ws->ltaxis[MASTER] == MONOCLE && (l == NO_SPLIT || !ws->nmaster || n <= ws->nmaster)) {
 		monoclesymbols(m, n);
 		return;
@@ -693,7 +701,7 @@ setflexsymbols(Monitor *m, unsigned int n)
 	}
 
 	/* Layout symbols */
-	if (l == NO_SPLIT || !m->selws->nmaster) {
+	if (l == NO_SPLIT || !ws->nmaster) {
 		sym1 = sym2 = sym3 = (int)tilesymb[ws->ltaxis[MASTER]];
 	} else {
 		sym2 = layoutsymb[l];
@@ -734,7 +742,7 @@ void
 mirrorlayout(const Arg *arg)
 {
 	Workspace *ws = WS;
-	if (!selmon->selws->layout->arrange)
+	if (!ws->layout->arrange)
 		return;
 	ws->ltaxis[LAYOUT] *= -1;
 	arrangemon(selmon);

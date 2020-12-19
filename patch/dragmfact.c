@@ -12,9 +12,9 @@ dragmfact(const Arg *arg)
 	XEvent ev;
 	Time lasttime = 0;
 
-	m = selmon;
+	getgaps(ws, &oh, &ov, &ih, &iv, &n);
 
-	getgaps(m, &oh, &ov, &ih, &iv, &n);
+	m = ws->mon;
 
 	ax = m->wx;
 	ay = m->wy;

@@ -76,7 +76,7 @@
 #define HIDDEN(C)               ((getstate(C->win) == IconicState))
 
 #define WS                      selws
-#define MWS(M)                  M->selws
+#define MWS(M)                  (M->selws ? M->selws : selws)
 
 /* enums */
 enum {
@@ -774,11 +774,15 @@ arrange(Monitor *m)
 void
 arrangemon(Monitor *m)
 {
+	fprintf(stderr, "arrangemon: -->\n");
 	Workspace *ws = MWS(m);
+	fprintf(stderr, "arrangemon: %d\n", 1);
 	strncpy(ws->ltsymbol, ws->layout->symbol, sizeof ws->ltsymbol);
 	if (ws->layout->arrange)
 		ws->layout->arrange(m);
+	fprintf(stderr, "arrangemon: %d\n", 3);
 	drawbar(m);
+	fprintf(stderr, "arrangemon: <--\n");
 }
 
 void
@@ -1314,22 +1318,21 @@ createworkspaces()
 	for (i = 1; i < LENGTH(wsrules); i++)
 		pws = pws->next = createworkspace(&wsrules[i]);
 
-	fprintf(stderr, "createworkspace: <--\n");
+	fprintf(stderr, "createworkspaces: <--\n");
 }
 
 Workspace *
 createworkspace(const WorkspaceRule *r)
 {
 	Workspace *ws;
-	Monitor *m;
+	Monitor *m = NULL;
 	fprintf(stderr, "createworkspace: -->\n");
 	ws = ecalloc(1, sizeof(Workspace));
 
 	// TODO not 100% sure about this
-	if (r->monitor == -1) {
+	if (r->monitor != -1)
 		for (m = mons; m && m->num != r->monitor; m = m->next);
-		ws->mon = m;
-	}
+	ws->mon = m ? m : mons;
 
 	strcpy(ws->name, r->name);
 	ws->tags = ws->prevtags = 1;
@@ -1411,9 +1414,11 @@ dirtomon(int dir)
 void
 drawbar(Monitor *m)
 {
+	fprintf(stderr, "drawbar: -->\n");
 	Bar *bar;
 	for (bar = m->bar; bar; bar = bar->next)
 		drawbarwin(bar);
+	fprintf(stderr, "drawbar: <--\n");
 }
 
 void
@@ -1429,21 +1434,25 @@ drawbarwin(Bar *bar)
 {
 	if (!bar || !bar->win || bar->external)
 		return;
+	fprintf(stderr, "drawbarwin: -->\n");
 
 	int r, w, total_drawn = 0, groupactive, ignored;
 	int rx, lx, rw, lw; // bar size, split between left and right if a center module is added
 	const BarRule *br;
 	Monitor *lastmon;
-
+	fprintf(stderr, "drawbarwin: %d\n", 3);
 	if (bar->borderpx) {
+		fprintf(stderr, "drawbarwin: %d\n", 4);
 		if (enabled(BarActiveGroupBorderColor))
 			getclientcounts(bar->mon, &groupactive, &ignored, &ignored, &ignored, &ignored, &ignored, &ignored);
 		else
 			groupactive = GRP_MASTER;
+		fprintf(stderr, "drawbarwin: %d\n", 5);
 		XSetForeground(drw->dpy, drw->gc, scheme[getschemefor(bar->mon, groupactive, bar->mon == selmon)][ColBorder].pixel);
+		fprintf(stderr, "drawbarwin: %d\n", 6);
 		XFillRectangle(drw->dpy, drw->drawable, drw->gc, 0, 0, bar->bw, bar->bh);
 	}
-
+	fprintf(stderr, "drawbarwin: %d\n", 22);
 	BarArg warg = { 0 };
 	BarArg darg  = { 0 };
 	warg.h = bar->bh - 2 * bar->borderpx;
@@ -1452,11 +1461,12 @@ drawbarwin(Bar *bar)
 	rx = lx = bar->borderpx;
 
 	for (lastmon = mons; lastmon && lastmon->next; lastmon = lastmon->next);
-
+	fprintf(stderr, "drawbarwin: %d\n", 33);
 	drw_setscheme(drw, scheme[SchemeNorm]);
 	drw_rect(drw, lx, bar->borderpx, lw, bar->bh - 2 * bar->borderpx, 1, 1);
 	for (r = 0; r < LENGTH(barrules); r++) {
 		br = &barrules[r];
+		fprintf(stderr, "drawbarwin: %d, rule %s\n", 35, br->name);
 		if (br->bar != bar->idx || !br->widthfunc || (br->monitor == 'A' && bar->mon != selmon))
 			continue;
 		if (br->monitor != 'A' && br->monitor != -1 && br->monitor != bar->mon->num &&
@@ -1475,7 +1485,7 @@ drawbarwin(Bar *bar)
 			rw = lw;
 			rx = lx;
 		}
-
+		fprintf(stderr, "drawbarwin: %d\n", 43);
 		switch(br->alignment) {
 		default:
 		case BAR_ALIGN_NONE:
@@ -1534,14 +1544,16 @@ drawbarwin(Bar *bar)
 		darg.y = bar->borderpx;
 		darg.h = bar->bh - 2 * bar->borderpx;
 		darg.w = bar->w[r];
+		fprintf(stderr, "drawbarwin: %d, rule %s\n", 53, br->name);
 		if (br->drawfunc)
 			total_drawn += br->drawfunc(bar, &darg);
 	}
-
+	fprintf(stderr, "drawbarwin: %d\n", 99);
 	if (total_drawn == 0 && bar->showbar) {
 		bar->showbar = 0;
 		updatebarpos(bar->mon);
 		XMoveResizeWindow(dpy, bar->win, bar->bx, bar->by, bar->bw, bar->bh);
+		fprintf(stderr, "drawbarwin: %d\n", 120);
 		arrangemon(bar->mon);
 	}
 	else if (total_drawn > 0 && !bar->showbar) {
@@ -1549,9 +1561,12 @@ drawbarwin(Bar *bar)
 		updatebarpos(bar->mon);
 		XMoveResizeWindow(dpy, bar->win, bar->bx, bar->by, bar->bw, bar->bh);
 		drw_map(drw, bar->win, 0, 0, bar->bw, bar->bh);
+		fprintf(stderr, "drawbarwin: %d\n", 130);
 		arrangemon(bar->mon);
 	} else
 		drw_map(drw, bar->win, 0, 0, bar->bw, bar->bh);
+
+	fprintf(stderr, "drawbarwin: <--\n");
 }
 
 void
@@ -2894,8 +2909,11 @@ setup(void)
 	for (i = 0; i < LENGTH(colors); i++)
 		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], ColCount);
 
+	fprintf(stderr, "setup: %d\n", 1);
 	updatebars();
+	fprintf(stderr, "setup: %d\n", 2);
 	updatestatus();
+	fprintf(stderr, "setup: %d\n", 3);
 
 	/* supporting window for NetWMCheck */
 	wmcheckwin = XCreateSimpleWindow(dpy, root, 0, 0, 1, 1, 0, 0, 0);
@@ -2924,6 +2942,8 @@ setup(void)
 	grabkeys(NULL);
 	focus(NULL);
 	setupepoll();
+
+	fprintf(stderr, "setup: <---\n");
 }
 
 
@@ -3614,15 +3634,16 @@ updatetitle(Client *c)
 {
 	char oldname[sizeof(c->name)];
 	strcpy(oldname, c->name);
+	Workspace *ws;
 
 	if (!gettextprop(c->win, netatom[NetWMName], c->name, sizeof c->name))
 		gettextprop(c->win, XA_WM_NAME, c->name, sizeof c->name);
 	if (c->name[0] == '\0') /* hack to mark broken clients */
 		strcpy(c->name, broken);
 
-	for (Monitor *m = mons; m; m = m->next) {
-		if (m->selws->sel == c && strcmp(oldname, c->name) != 0)
-			ipc_focused_title_change_event(m->num, c->win, oldname, c->name);
+	for (ws = workspaces; ws; ws = ws->next) {
+		if (ws->sel == c && strcmp(oldname, c->name) != 0)
+			ipc_focused_title_change_event(ws->mon->num, c->win, oldname, c->name);
 	}
 }
 

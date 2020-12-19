@@ -10,6 +10,6 @@ static void incrivgaps(const Arg *arg);
 static void togglegaps(const Arg *arg);
 
 /* Internals */
-static void getgaps(Monitor *m, int *oh, int *ov, int *ih, int *iv, unsigned int *nc);
+static void getgaps(Workspace *ws, int *oh, int *ov, int *ih, int *iv, unsigned int *nc);
 static void setgaps(int oh, int ov, int ih, int iv);
 static void setgapsex(const Arg *arg);

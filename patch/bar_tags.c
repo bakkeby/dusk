@@ -1,6 +1,7 @@
 int
 width_tags(Bar *bar, BarArg *a)
 {
+	fprintf(stderr, "width_tags: -->\n");
 	int w, i, tw;
 	for (w = 0, i = 0; i < NUMTAGS; i++) {
 		tw = TEXTW(tagicon(bar->mon, i));
@@ -8,12 +9,14 @@ width_tags(Bar *bar, BarArg *a)
 			continue;
 		w += tw;
 	}
+	fprintf(stderr, "width_tags: <--\n");
 	return w;
 }
 
 int
 draw_tags(Bar *bar, BarArg *a)
 {
+	fprintf(stderr, "draw_tags: -->\n");
 	int invert;
 	int w, x = a->x;
 	unsigned int i, occ = 0, urg = 0;
@@ -22,7 +25,7 @@ draw_tags(Bar *bar, BarArg *a)
 	Monitor *m = bar->mon;
 	Workspace *ws = MWS(m);
 
-	for (c = m->selws->clients; c; c = c->next) {
+	for (c = ws->clients; c; c = c->next) {
 		occ |= c->tags == 255 ? 0 : c->tags;
 		if (ISURGENT(c))
 			urg |= c->tags;
@@ -45,13 +48,14 @@ draw_tags(Bar *bar, BarArg *a)
 		drawindicator(m, NULL, occ, x, a->y, w, a->h, i, -1, invert, tagindicatortype);
 		x += w;
 	}
-
+	fprintf(stderr, "draw_tags: <--\n");
 	return 1;
 }
 
 int
 click_tags(Bar *bar, Arg *arg, BarArg *a)
 {
+	fprintf(stderr, "click_tags: -->\n");
 	int i = 0, tw, x = lrpad / 2;
 	do {
 		tw = TEXTW(tagicon(bar->mon, i));
@@ -61,5 +65,6 @@ click_tags(Bar *bar, Arg *arg, BarArg *a)
 	} while (a->x >= x && ++i < NUMTAGS);
 	if (i < NUMTAGS)
 		arg->ui = 1 << i;
+	fprintf(stderr, "click_tags: <--\n");
 	return ClkTagBar;
 }
