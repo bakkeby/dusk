@@ -11,7 +11,7 @@ persistmonitorstate(Monitor *m)
 	unsigned long data[] = { ws->tags };
 	XChangeProperty(dpy, root, XInternAtom(dpy, atom, False), XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
 
-	/* set dawn client atoms */
+	/* set dusk client atoms */
 	for (ws = workspaces; ws; ws = ws->next)
 		for (i = 1, c = ws->clients; c; c = c->next, ++i) {
 			c->id = i;
@@ -91,27 +91,27 @@ getclienttags(Client *c)
 void
 getmonitorstate(Monitor *m)
 {
-	char atom[22];
-	int di;
-	unsigned long dl;
-	unsigned char *p = NULL;
-	Atom da, tags = None;
-	Workspace *ws = MWS(m);
+	// char atom[22];
+	// int di;
+	// unsigned long dl;
+	// unsigned char *p = NULL;
+	// Atom da, tags = None;
+	// Workspace *ws = MWS(m);
 
-	sprintf(atom, "_DAWN_MONITOR_TAGS_%u", m->num); // TODO workspaces
+	// sprintf(atom, "_DAWN_MONITOR_TAGS_%u", m->num); // TODO workspaces
 
-	Atom monitortags = XInternAtom(dpy, atom, True);
-	if (!monitortags)
-		return;
+	// Atom monitortags = XInternAtom(dpy, atom, True);
+	// if (!monitortags)
+	// 	return;
 
-	if (XGetWindowProperty(dpy, root, monitortags, 0L, sizeof tags, False, AnyPropertyType,
-		&da, &di, &dl, &dl, &p) == Success && p) {
-		tags = *(Atom *)p;
-		XFree(p);
-	}
+	// if (XGetWindowProperty(dpy, root, monitortags, 0L, sizeof tags, False, AnyPropertyType,
+	// 	&da, &di, &dl, &dl, &p) == Success && p) {
+	// 	tags = *(Atom *)p;
+	// 	XFree(p);
+	// }
 
-	if (tags)
-		ws->tags = tags; // tmp workspaces
+	// if (tags)
+	// 	ws->tags = tags; // tmp workspaces
 }
 
 void

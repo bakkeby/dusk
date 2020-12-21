@@ -523,7 +523,7 @@ static Key keys[] = {
 	{ MODKEY,                       XK_Up,           focusdir,               {.i = 2 } }, // up
 	{ MODKEY,                       XK_Down,         focusdir,               {.i = 3 } }, // down
 
-	/* Unassigned key bidnings (available externally via the dawnc command) */
+	/* Unassigned key bidnings (available externally via the duskc command) */
 //	{ MODKEY,                       XK_,             incrgaps,               {.i = +1 } },
 //	{ MODKEY,                       XK_,             incrgaps,               {.i = -1 } },
 //	{ MODKEY,                       XK_,             incrigaps,              {.i = +1 } },
@@ -636,7 +636,7 @@ static Button buttons[] = {
 	{ ClkTagBar,                 MODKEY,                  Button3,        toggletag,      {0} },
 };
 
-static const char *ipcsockpath = "/tmp/dawn.sock";
+static const char *ipcsockpath = "/tmp/dusk.sock";
 static IPCCommand ipccommands[] = {
 	IPCCOMMAND( changeopacity, 1, {ARG_TYPE_FLOAT} ),
 	IPCCOMMAND( cycleiconset, 1, {ARG_TYPE_SINT} ),

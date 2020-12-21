@@ -120,12 +120,16 @@ dump_monitor(yajl_gen gen, Monitor *mon, int is_selected)
       YSTR("height"); YINT(mon->wh);
     )
 
+    YSTR("workspace"); YMAP(
+      YSTR("current"); YSTR(ws->name);
+    )
+
     YSTR("tags"); YMAP(
       YSTR("current");  YINT(ws->tags);
       YSTR("old"); YINT(ws->prevtags);
     )
 
-    YSTR("tag_state"); dump_tag_state(gen, mon->selws->tagstate);
+    YSTR("tag_state"); dump_tag_state(gen, ws->tagstate);
 
     YSTR("clients"); YMAP(
       YSTR("selected"); YINT(ws->sel ? ws->sel->win : 0);

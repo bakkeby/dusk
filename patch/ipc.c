@@ -64,7 +64,7 @@ setstatus(const Arg *arg)
 {
 	Monitor *m;
 	if (arg->v == NULL) {
-		strcpy(stext, "dawn-"VERSION);
+		strcpy(stext, "dusk-"VERSION);
 		estext[0] = '\0';
 	} else {
 		strcpy(rawstext, arg->v);

@@ -1,12 +1,12 @@
 /* See LICENSE file for copyright and license details.
  *
- * The dawn dynamic window manager is designed like any other X client as well.
+ * The dusk dynamic window manager is designed like any other X client as well.
  * It is driven through handling X events. In contrast to other X clients, a
  * window manager selects for SubstructureRedirectMask on the root window, to
  * receive events about window (dis-)appearance. Only one X connection at a
  * time is allowed to select for this event mask.
  *
- * The event handlers of dawn are organized in an array which is accessed
+ * The event handlers of dusk are organized in an array which is accessed
  * whenever a new event has been fetched. This allows event dispatching
  * in O(1) time.
  *
@@ -200,7 +200,7 @@ enum {
 	DawnClientTags,
 	SteamGame,
 	ClientLast
-}; /* dawn client atoms */
+}; /* dusk client atoms */
 
 /* https://specifications.freedesktop.org/wm-spec/latest/ar01s05.html - Application Window Properties */
 
@@ -651,7 +651,7 @@ applyrules(Client *c)
 
 			if ((SWITCHTAG(c) || ENABLETAG(c)) && (NOSWALLOW(c) || !termforwin(c))) {
 				selws = c->ws;
-				selmon = selws->mon;
+				selmon = (selws->mon == NULL ? mons : selws->mon);
 				newtags = SWITCHTAG(c) ? c->tags : c->ws->tags | c->tags;
 
 				/* Switch to the client's tag, but only if that tag is not already shown */
@@ -774,6 +774,8 @@ arrange(Monitor *m)
 void
 arrangemon(Monitor *m)
 {
+	Monitor *mon;
+	// Workspace *ws;
 	fprintf(stderr, "arrangemon: -->\n");
 	Workspace *ws = MWS(m);
 	fprintf(stderr, "arrangemon: %d\n", 1);
@@ -782,6 +784,13 @@ arrangemon(Monitor *m)
 		ws->layout->arrange(m);
 	fprintf(stderr, "arrangemon: %d\n", 3);
 	drawbar(m);
+	fprintf(stderr, "arrangemon: %d\n", 4);
+
+	for (mon = mons; mon; mon = mon->next)
+		fprintf(stderr, "arrangemon: monitor %d has selws %s\n", mon->num, mon->selws ? mon->selws->name : "NULL");
+
+	for (ws = workspaces; ws; ws = ws->next)
+		fprintf(stderr, "arrangemon: workspace %s has monitor %d\n", ws->name, ws->mon ? ws->mon->num : -1);
 	fprintf(stderr, "arrangemon: <--\n");
 }
 
@@ -975,7 +984,7 @@ clientmessage(XEvent *e)
 			updatesystrayicongeom(c, wa.width, wa.height);
 			XAddToSaveSet(dpy, c->win);
 			XSelectInput(dpy, c->win, StructureNotifyMask | PropertyChangeMask | ResizeRedirectMask);
-			XClassHint ch = {"dawnsystray", "dawnsystray"};
+			XClassHint ch = {"dusksystray", "dusksystray"};
 			XSetClassHint(dpy, c->win, &ch);
 			XReparentWindow(dpy, c->win, systray->win, 0, 0);
 			/* use parents background color */
@@ -1046,7 +1055,7 @@ clientmessage(XEvent *e)
 					if (c != ws->sel)
 						unfocus(ws->sel, 0, NULL);
 					selws = c->ws;
-					selmon = selws->mon;
+					selmon = (selws->mon == NULL ? mons : selws->mon);
 					if (((1 << i) & TAGMASK) != WS->tags)
 						view(&((Arg) { .ui = 1 << i }));
 					focus(c);
@@ -1127,6 +1136,7 @@ configurerequest(XEvent *e)
 	Monitor *m;
 	XConfigureRequestEvent *ev = &e->xconfigurerequest;
 	XWindowChanges wc;
+	Workspace *ws = WS;
 
 	if ((c = wintoclient(ev->window))) {
 
@@ -1139,7 +1149,7 @@ configurerequest(XEvent *e)
 			return;
 		if (ev->value_mask & CWBorderWidth)
 			c->bw = ev->border_width;
-		else if (ISFLOATING(c) || !selmon->selws->layout->arrange) {
+		else if (ISFLOATING(c) || !ws->layout->arrange) {
 			if (IGNORECFGREQPOS(c) && IGNORECFGREQSIZE(c))
 				return;
 
@@ -1311,12 +1321,28 @@ void
 createworkspaces()
 {
 	fprintf(stderr, "createworkspaces: -->\n");
-	Workspace *pws;
+	Workspace *pws, *ws;
+	Monitor *m;
 	int i;
 
 	pws = selws = workspaces = createworkspace(&wsrules[0]);
 	for (i = 1; i < LENGTH(wsrules); i++)
 		pws = pws->next = createworkspace(&wsrules[i]);
+
+	for (ws = workspaces, m = mons; ws; ws = ws->next) {
+		m = (m->next == NULL ? mons : m->next);
+		if (ws->mon == NULL) {
+			ws->mon = m;
+			if (m->selws == NULL)
+				m->selws = ws;
+		}
+	}
+
+	for (m = mons; m; m = m->next) {
+		fprintf(stderr, "createworkspaces: monitor %d associated with workspace %s\n", m->num, (m->selws == NULL ? "NULL" : m->selws->name));
+	}
+
+	selws = mons->selws;
 
 	fprintf(stderr, "createworkspaces: <--\n");
 }
@@ -1330,14 +1356,20 @@ createworkspace(const WorkspaceRule *r)
 	ws = ecalloc(1, sizeof(Workspace));
 
 	// TODO not 100% sure about this
-	if (r->monitor != -1)
+	if (r->monitor != -1) {
 		for (m = mons; m && m->num != r->monitor; m = m->next);
-	ws->mon = m ? m : mons;
+		if (m) {
+			ws->mon = m;
+			m->selws = ws;
+		}
+	}
 
 	strcpy(ws->name, r->name);
 	ws->tags = ws->prevtags = 1;
+
 	ws->pinned = (r->pinned == 1 ? 1 : 0);
 	ws->layout = (r->layout == -1 ? &layouts[0] : &layouts[MIN(r->layout, LENGTH(layouts))]);
+	ws->prevlayout = &layouts[1 % LENGTH(layouts)];
 	ws->mfact = (r->mfact == -1 ? mfact : r->mfact);
 	ws->nmaster = (r->nmaster == -1 ? nmaster : r->nmaster);
 	ws->nstack = (r->nstack == -1 ? nstack : r->nstack);
@@ -1434,25 +1466,25 @@ drawbarwin(Bar *bar)
 {
 	if (!bar || !bar->win || bar->external)
 		return;
-	fprintf(stderr, "drawbarwin: -->\n");
+	// fprintf(stderr, "drawbarwin: -->\n");
 
 	int r, w, total_drawn = 0, groupactive, ignored;
 	int rx, lx, rw, lw; // bar size, split between left and right if a center module is added
 	const BarRule *br;
 	Monitor *lastmon;
-	fprintf(stderr, "drawbarwin: %d\n", 3);
+	// fprintf(stderr, "drawbarwin: %d\n", 3);
 	if (bar->borderpx) {
-		fprintf(stderr, "drawbarwin: %d\n", 4);
+		// fprintf(stderr, "drawbarwin: %d\n", 4);
 		if (enabled(BarActiveGroupBorderColor))
 			getclientcounts(bar->mon, &groupactive, &ignored, &ignored, &ignored, &ignored, &ignored, &ignored);
 		else
 			groupactive = GRP_MASTER;
-		fprintf(stderr, "drawbarwin: %d\n", 5);
+		// fprintf(stderr, "drawbarwin: %d\n", 5);
 		XSetForeground(drw->dpy, drw->gc, scheme[getschemefor(bar->mon, groupactive, bar->mon == selmon)][ColBorder].pixel);
-		fprintf(stderr, "drawbarwin: %d\n", 6);
+		// fprintf(stderr, "drawbarwin: %d\n", 6);
 		XFillRectangle(drw->dpy, drw->drawable, drw->gc, 0, 0, bar->bw, bar->bh);
 	}
-	fprintf(stderr, "drawbarwin: %d\n", 22);
+	// fprintf(stderr, "drawbarwin: %d\n", 22);
 	BarArg warg = { 0 };
 	BarArg darg  = { 0 };
 	warg.h = bar->bh - 2 * bar->borderpx;
@@ -1461,21 +1493,24 @@ drawbarwin(Bar *bar)
 	rx = lx = bar->borderpx;
 
 	for (lastmon = mons; lastmon && lastmon->next; lastmon = lastmon->next);
-	fprintf(stderr, "drawbarwin: %d\n", 33);
+	// fprintf(stderr, "drawbarwin: %d\n", 33);
 	drw_setscheme(drw, scheme[SchemeNorm]);
 	drw_rect(drw, lx, bar->borderpx, lw, bar->bh - 2 * bar->borderpx, 1, 1);
 	for (r = 0; r < LENGTH(barrules); r++) {
 		br = &barrules[r];
-		fprintf(stderr, "drawbarwin: %d, rule %s\n", 35, br->name);
+		// fprintf(stderr, "drawbarwin: %d, rule %s\n", 35, br->name);
 		if (br->bar != bar->idx || !br->widthfunc || (br->monitor == 'A' && bar->mon != selmon))
 			continue;
+		// fprintf(stderr, "drawbarwin: %d, rule %s\n", 36, br->name);
 		if (br->monitor != 'A' && br->monitor != -1 && br->monitor != bar->mon->num &&
 				!(br->drawfunc == draw_systray && br->monitor > lastmon->num && bar->mon->num == 0)) // hack: draw systray on first monitor if the designated one is not available
 			continue;
+		// fprintf(stderr, "drawbarwin: %d, rule %s\n", 37, br->name);
 		drw_setscheme(drw, scheme[SchemeNorm]);
 		warg.w = (br->alignment < BAR_ALIGN_RIGHT_LEFT ? lw : rw);
-
+		// fprintf(stderr, "drawbarwin: %d, rule %s\n", 38, br->name);
 		w = br->widthfunc(bar, &warg);
+		// fprintf(stderr, "drawbarwin: %d, rule %s\n", 39, br->name);
 		w = MIN(warg.w, w);
 
 		if (lw <= 0) { // if left is exhausted then switch to right side, and vice versa
@@ -1485,7 +1520,7 @@ drawbarwin(Bar *bar)
 			rw = lw;
 			rx = lx;
 		}
-		fprintf(stderr, "drawbarwin: %d\n", 43);
+		// fprintf(stderr, "drawbarwin: %d\n", 43);
 		switch(br->alignment) {
 		default:
 		case BAR_ALIGN_NONE:
@@ -1544,16 +1579,16 @@ drawbarwin(Bar *bar)
 		darg.y = bar->borderpx;
 		darg.h = bar->bh - 2 * bar->borderpx;
 		darg.w = bar->w[r];
-		fprintf(stderr, "drawbarwin: %d, rule %s\n", 53, br->name);
+		// fprintf(stderr, "drawbarwin: %d, rule %s\n", 53, br->name);
 		if (br->drawfunc)
 			total_drawn += br->drawfunc(bar, &darg);
 	}
-	fprintf(stderr, "drawbarwin: %d\n", 99);
+	// fprintf(stderr, "drawbarwin: %d\n", 99);
 	if (total_drawn == 0 && bar->showbar) {
 		bar->showbar = 0;
 		updatebarpos(bar->mon);
 		XMoveResizeWindow(dpy, bar->win, bar->bx, bar->by, bar->bw, bar->bh);
-		fprintf(stderr, "drawbarwin: %d\n", 120);
+		// fprintf(stderr, "drawbarwin: %d\n", 120);
 		arrangemon(bar->mon);
 	}
 	else if (total_drawn > 0 && !bar->showbar) {
@@ -1561,34 +1596,49 @@ drawbarwin(Bar *bar)
 		updatebarpos(bar->mon);
 		XMoveResizeWindow(dpy, bar->win, bar->bx, bar->by, bar->bw, bar->bh);
 		drw_map(drw, bar->win, 0, 0, bar->bw, bar->bh);
-		fprintf(stderr, "drawbarwin: %d\n", 130);
+		// fprintf(stderr, "drawbarwin: %d\n", 130);
 		arrangemon(bar->mon);
 	} else
 		drw_map(drw, bar->win, 0, 0, bar->bw, bar->bh);
 
-	fprintf(stderr, "drawbarwin: <--\n");
+	// fprintf(stderr, "drawbarwin: <--\n");
 }
 
 void
 enternotify(XEvent *e)
 {
+	fprintf(stderr, "enternotify: -->\n");
 	Client *c, *sel;
 	Workspace *ws = WS;
 	Monitor *m;
 	XCrossingEvent *ev = &e->xcrossing;
 
+	fprintf(stderr, "enternotify: %d\n", 1);
 	if ((ev->mode != NotifyNormal || ev->detail == NotifyInferior) && ev->window != root)
 		return;
+	fprintf(stderr, "enternotify: %d\n", 2);
 	c = wintoclient(ev->window);
-
+	fprintf(stderr, "enternotify: %d\n", 3);
 	m = c ? c->ws->mon : wintomon(ev->window);
+	fprintf(stderr, "enternotify: %d (monitor %d)\n", 4, m->num);
 	if (m != selmon) {
+		fprintf(stderr, "enternotify: %d\n", 5);
 		sel = ws->sel;
+		if (sel)
+			fprintf(stderr, "enternotify: %d, unfocusing %s on workspace %s, focusing %s on workspace %s\n", 6, sel->name, sel->ws ? sel->ws->name : "NONE", c ? c->name : "NONE", c ? c->ws->name : "NONE");
+		else
+			fprintf(stderr, "enternotify: %d, no sel client on monitor %d\n", 7, ws->mon->num);
 		selmon = m;
-		unfocus(sel, 1, c);
+		selws = m->selws;
+		if (sel)
+			unfocus(sel, 1, c);
 	} else if (!c || c == ws->sel)
 		return;
+	else
+		fprintf(stderr, "enternotify: same monitor %d on workspace %s\n", m->num, m->selws ? m->selws->name : "NONE");
+	fprintf(stderr, "enternotify: %d\n", 9);
 	focus(c);
+	fprintf(stderr, "enternotify: <--\n");
 }
 
 void
@@ -2164,8 +2214,11 @@ motionnotify(XEvent *e)
 	if (ev->window != root)
 		return;
 	if ((m = recttomon(ev->x_root, ev->y_root, 1, 1)) != mon && mon) {
+		// fprintf(stderr, "motionnotify - new monitor %d\n", m->num);
 		sel = WS->sel;
 		selmon = m;
+		if (m->selws != NULL)
+			selws = m->selws;
 		unfocus(sel, 1, NULL);
 		focus(NULL);
 	}
@@ -2222,10 +2275,10 @@ movemouse(const Arg *arg)
 				ny = selmon->wy;
 			else if (abs((selmon->wy + selmon->wh) - (ny + HEIGHT(c))) < snap)
 				ny = selmon->wy + selmon->wh - HEIGHT(c);
-			if (!ISFLOATING(c) && selmon->selws->layout->arrange
+			if (!ISFLOATING(c) && ws->layout->arrange
 					&& (abs(nx - c->x) > snap || abs(ny - c->y) > snap))
 				togglefloating(NULL);
-			if (!selmon->selws->layout->arrange || ISFLOATING(c)) {
+			if (!ws->layout->arrange || ISFLOATING(c)) {
 				resize(c, nx, ny, c->w, c->h, 1);
 				if (enabled(AutoSaveFloats))
 					savefloats(NULL);
@@ -2241,6 +2294,7 @@ movemouse(const Arg *arg)
 		}
 		sendmon(c, m);
 		selmon = m;
+		selws = selmon->selws;
 		focus(NULL);
 	}
 	removeflag(c, MoveResize);
@@ -2274,6 +2328,7 @@ pop(Client *c)
 void
 propertynotify(XEvent *e)
 {
+	fprintf(stderr, "propertynotify: -->\n");
 	Client *c;
 	Window trans;
 	XPropertyEvent *ev = &e->xproperty;
@@ -2486,6 +2541,7 @@ resizemouse(const Arg *arg)
 		}
 		sendmon(c, m);
 		selmon = m;
+		selws = selmon->selws;
 		focus(NULL);
 	}
 	removeflag(c, MoveResize);
@@ -2604,6 +2660,7 @@ sendmon(Client *c, Monitor *m)
 	if (c->ws->mon == m)
 		return;
 	Workspace *ws = MWS(m);
+	fprintf(stderr, "sendmon: monitor %d workspace is %s, client %s's workspace is %s\n", m->num, m->selws->name, c->name, c->ws->name);
 	int hadfocus = (c == WS->sel);
 	unfocus(c, 1, NULL);
 	detach(c);
@@ -2616,7 +2673,7 @@ sendmon(Client *c, Monitor *m)
 		c->tags = ws->tags; /* assign tags of target monitor */
 	attachx(c);
 	attachstack(c);
-	arrange(m);
+	arrange(ws->mon);
 
 	if (hadfocus) {
 		focus(c);
@@ -2920,7 +2977,7 @@ setup(void)
 	XChangeProperty(dpy, wmcheckwin, netatom[NetWMCheck], XA_WINDOW, 32,
 		PropModeReplace, (unsigned char *) &wmcheckwin, 1);
 	XChangeProperty(dpy, wmcheckwin, netatom[NetWMName], utf8string, 8,
-		PropModeReplace, (unsigned char *) "dawn", 3);
+		PropModeReplace, (unsigned char *) "dusk", 3);
 	XChangeProperty(dpy, root, netatom[NetWMCheck], XA_WINDOW, 32,
 		PropModeReplace, (unsigned char *) &wmcheckwin, 1);
 	/* EWMH support per view */
@@ -3065,7 +3122,7 @@ spawn(const Arg *arg)
 		}
 		setsid();
 		execvp(((char **)arg->v)[0], (char **)arg->v);
-		fprintf(stderr, "dawn: execvp %s", ((char **)arg->v)[0]);
+		fprintf(stderr, "dusk: execvp %s", ((char **)arg->v)[0]);
 		perror(" failed");
 		exit(EXIT_SUCCESS);
 	}
@@ -3303,7 +3360,7 @@ unfocus(Client *c, int setfocus, Client *nextfocus)
 {
 	if (!c)
 		return;
-	if (ISFULLSCREEN(c) && ISVISIBLE(c) && c->ws->mon == selmon && nextfocus && !ISFLOATING(nextfocus))
+	if (ISFULLSCREEN(c) && ISVISIBLE(c) && c->ws == selws && nextfocus && !ISFLOATING(nextfocus))
 		if (!ISFAKEFULLSCREEN(c))
 			setfullscreen(c, 0, 0);
 	grabbuttons(c, 0);
@@ -3408,7 +3465,7 @@ updatebars(void)
 		.colormap = cmap,
 		.event_mask = ButtonPressMask|ExposureMask
 	};
-	XClassHint ch = {"dawn", "dawn"};
+	XClassHint ch = {"dusk", "dusk"};
 	for (m = mons; m; m = m->next) {
 		for (bar = m->bar; bar; bar = bar->next) {
 			if (bar->external)
@@ -3612,7 +3669,7 @@ updatestatus(void)
 {
 	Monitor *m;
 	if (!gettextprop(root, XA_WM_NAME, rawstext, sizeof(rawstext))) {
-		strcpy(stext, "dawn-"VERSION);
+		strcpy(stext, "dusk-"VERSION);
 		estext[0] = '\0';
 	} else {
 		char *e = strchr(rawstext, statussep);
@@ -3736,7 +3793,7 @@ xerror(Display *dpy, XErrorEvent *ee)
 	|| (ee->request_code == X_GrabKey && ee->error_code == BadAccess)
 	|| (ee->request_code == X_CopyArea && ee->error_code == BadDrawable))
 		return 0;
-	fprintf(stderr, "dawn: fatal error: request code=%d, error code=%d\n",
+	fprintf(stderr, "dusk: fatal error: request code=%d, error code=%d\n",
 		ee->request_code, ee->error_code);
 	return xerrorxlib(dpy, ee); /* may call exit */
 }
@@ -3752,7 +3809,7 @@ xerrordummy(Display *dpy, XErrorEvent *ee)
 int
 xerrorstart(Display *dpy, XErrorEvent *ee)
 {
-	die("dawn: another window manager is already running");
+	die("dusk: another window manager is already running");
 	return -1;
 }
 
@@ -3808,16 +3865,16 @@ int
 main(int argc, char *argv[])
 {
 	if (argc == 2 && !strcmp("-v", argv[1]))
-		die("dawn-"VERSION);
+		die("dusk-"VERSION);
 	else if (argc != 1)
-		die("usage: dawn [-v]");
+		die("usage: dusk [-v]");
 	if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
 		fputs("warning: no locale support\n", stderr);
 	if (!(dpy = XOpenDisplay(NULL)))
-		die("dawn: cannot open display");
+		die("dusk: cannot open display");
 
 	if (!(xcon = XGetXCBConnection(dpy)))
-		die("dawn: cannot get xcb connection\n");
+		die("dusk: cannot get xcb connection\n");
 
 	checkotherwm();
 	XrmInitialize(); // needed for xrdb / Xresources

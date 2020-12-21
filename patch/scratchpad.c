@@ -1,7 +1,8 @@
 void
 removescratch(const Arg *arg)
 {
-	Client *c = selmon->selws->sel;
+	Workspace *ws = WS;
+	Client *c = ws->sel;
 	if (!c)
 		return;
 	unsigned int scratchtag = SPTAG(arg->ui);
@@ -12,7 +13,8 @@ removescratch(const Arg *arg)
 void
 setscratch(const Arg *arg)
 {
-	Client *c = selmon->selws->sel;
+	Workspace *ws = WS;
+	Client *c = ws->sel;
 	if (!c)
 		return;
 	unsigned int scratchtag = SPTAG(arg->ui);
@@ -25,7 +27,7 @@ togglescratch(const Arg *arg)
 {
 	Client *c = NULL, *next = NULL, *found = NULL;
 	Monitor *mon;
-	Workspace *ws = selmon->selws;
+	Workspace *ws = WS;
 	unsigned int scratchtag = SPTAG(arg->ui);
 	unsigned int newtags = 0;
 	int nh = 0, nw = 0;

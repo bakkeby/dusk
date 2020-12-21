@@ -44,7 +44,7 @@
 
 typedef unsigned long Window;
 
-const char *DEFAULT_SOCKET_PATH = "/tmp/dawn.sock";
+const char *DEFAULT_SOCKET_PATH = "/tmp/dusk.sock";
 static int sock_fd = -1;
 static unsigned int ignore_reply = 0;
 

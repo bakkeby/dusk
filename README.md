@@ -4,7 +4,7 @@ If you are looking for dwm then you may want to check out [dwm-flexipatch](https
 
 ---
 
-![https://raw.githubusercontent.com/wiki/bakkeby/dwm-vanitygaps/dawn_scr01.png](https://raw.githubusercontent.com/wiki/bakkeby/dwm-vanitygaps/dawn_scr01.png)
+![https://raw.githubusercontent.com/wiki/bakkeby/dwm-vanitygaps/dusk_scr01.png](https://raw.githubusercontent.com/wiki/bakkeby/dwm-vanitygaps/dusk_scr01.png)
 
 ### Target audience
 
@@ -25,7 +25,7 @@ Preconfigur︣e t͜ag᷈ layout̘, mfact, nmaster, showbar, topͣb̓a͗ṙ,͢ ͝
 Add̨ gaps᷆ a︢rőund the ͘ba̭r᷆ as well thanks to the barpad̿d̙i̻n̸g̐ ͊p̶a͓t͘cͅh̀,̈ ̝the bar can also be decor̓ąt̃e̟d͞ ̵w̟i̬t͠h᷃ ᷂a᷀ ͜b̭o͊rͦd̒er\
 Con͜tro͉l the ̀pi̴x̃el ̈pͦerf̸e᷁c̑t̴ s̝i̩z͔e and position of levitating͆ ͌w̴i͈n̕d͝o͓ẘs̄ ̺t͟h̆anks to the humble and ̐g̒a̗p̟-̓a⃖w͊a̶r̲e̻ ͚f̖l̾o̷ǎt͗pos patch\
 Draw ̏c͓r͊azy ́s͌tuff i̷n th͢e ⃡st͟atus area with the help of thė ̴a͂w̷k̀w᷃a̳r̚d̍ ͚a͏nd crash-prone status2d᷀ ̳s̿c̹r⃖i̯p̺t̷i͍n⃑g͆ ̎l̢a̵n᷀g᷆uage\
-Remote con̪t͠r͍o⃜l⃑ ̓ťh̓e w͌ińdo᷅w⃗ ̌manager via the dawn clie̴n̿t͐ ᷂(͚d͒a⃑w̎n̐c̹)̚ lifted straight out of the̅ ̣I᷀P̴Ć ͉p̃ȃt᷂c̵h͔ ̂f̓or dwm\
+Remote con̪t͠r͍o⃜l⃑ ̓ťh̓e w͌ińdo᷅w⃗ ̌manager via the dusk clie̴n̿t͐ ᷂(͚d͒a⃑w̎n̐c̹)̚ lifted straight out of the̅ ̣I᷀P̴Ć ͉p̃ȃt᷂c̵h͔ ̂f̓or dwm\
 Experience s̕u̟dden̨ ̎s͐eg⃗men̐t͓at̓ion faults that typically h͂a͋p̟p͡e̔n͏ ̼r̰i̊g︡ht before you were abo︠ǘt᷃ ͎t̢o͜ ̝s̭a̻v͂é ⃛y͟our work\
 Client windowš ͚r̎e͑t̂a̡i̜n̂ ͍t̼h̖ȇi̛r̥ ͕t̯a̬g̏s͗,̻ ̳order, position, attitude᷃ ͖a͇n̠d̡ ᷀p͔ṟo᷉perties following a res̀t͒ä́r⃗t̀ ⃖o̚f̅ ᷆t᷄h͌e͊ ̞w̘indow manager\
 Take advantage o͢f⃛ ̗a͂n͎ ͒e̸x͢t̓r͕a̲ ̵s̙ṫa⃐t︢ȗs͂ ̶on the bar similar to ⃐t́ĥa⃗t̔ ̻o̱f͑ ̨t̶h᷄e legacy and limited͖ ̱u⃜s᷁ë ̤e̮x⃡t︡r⃑a᷃b̋ar patch for dwm\

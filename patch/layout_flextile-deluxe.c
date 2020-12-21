@@ -672,6 +672,7 @@ flextile(Monitor *m)
 			ov = m->gappov * smartgaps_fact;
 		}
 	}
+	m = ws->mon;
 	fprintf(stderr, "flextile: %d\n", 9);
 	(&flexlayouts[abs(ws->ltaxis[LAYOUT])])->arrange(m, m->wx + ov, m->wy + oh, m->wh - 2*oh, m->ww - 2*ov, ih, iv, n);
 	fprintf(stderr, "flextile: <--\n");
