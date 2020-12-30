@@ -22,8 +22,9 @@ typedef enum IPCMessageType {
   IPC_TYPE_GET_TAGS = 2,
   IPC_TYPE_GET_LAYOUTS = 3,
   IPC_TYPE_GET_DWM_CLIENT = 4,
-  IPC_TYPE_SUBSCRIBE = 5,
-  IPC_TYPE_EVENT = 6
+  IPC_TYPE_GET_WORKSPACES = 5,
+  IPC_TYPE_SUBSCRIBE = 6,
+  IPC_TYPE_EVENT = 7
 } IPCMessageType;
 
 typedef enum IPCEvent {

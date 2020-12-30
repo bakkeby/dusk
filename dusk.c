@@ -212,6 +212,7 @@ enum {
 	ClkWinTitle,
 	ClkClientWin,
 	ClkRootWin,
+	ClkWorkspaceBar,
 	ClkLast
 }; /* clicks */
 
@@ -373,7 +374,7 @@ struct Monitor {
 	// Client *sel;
 	// Client *stack;
 	Monitor *next;
-	Workspace *selws; // *workspaces,
+	Workspace *selws; // *workspaces, TODO do we need prevws as well? probably does not make sense vs "all of these workspaces were viewed"
 	Bar *bar;
 	//const Layout *lt[2];
 	int iconset; // TODO iconset with monitor or workspaces
@@ -406,6 +407,7 @@ struct Workspace {
 	int nstack;
 	int nmaster;
 	int enablegaps;
+	int visible;
 	int pinned; // whether workspace is pinned to assigned monitor or not
 	unsigned int tags;
 	unsigned int prevtags;
@@ -528,6 +530,7 @@ static void updatestatus(void);
 static void updatetitle(Client *c);
 static void updatewmhints(Client *c);
 static void view(const Arg *arg);
+
 static Client *wintoclient(Window w);
 static Monitor *wintomon(Window w);
 static int xerror(Display *dpy, XErrorEvent *ee);
@@ -537,7 +540,7 @@ static void zoom(const Arg *arg);
 
 /* bar functions */
 
-#include "patch/include.h"
+#include "lib/include.h"
 
 /* variables */
 static const char broken[] = "fubar";
@@ -587,7 +590,7 @@ static Window root, wmcheckwin;
 /* configuration, allows nested code to access above variables */
 #include "config.h"
 
-#include "patch/include.c"
+#include "lib/include.c"
 
 /* compile-time check if all tags fit into an unsigned int bit array. */
 struct NumTags { char limitexceeded[NUMTAGS > 31 ? -1 : 1]; };
@@ -774,9 +777,9 @@ arrange(Monitor *m)
 void
 arrangemon(Monitor *m)
 {
-	Monitor *mon;
+	// Monitor *mon;
 	// Workspace *ws;
-	fprintf(stderr, "arrangemon: -->\n");
+	fprintf(stderr, "arrangemon: --> monitor %d\n", m->num);
 	Workspace *ws = MWS(m);
 	fprintf(stderr, "arrangemon: %d\n", 1);
 	strncpy(ws->ltsymbol, ws->layout->symbol, sizeof ws->ltsymbol);
@@ -786,11 +789,11 @@ arrangemon(Monitor *m)
 	drawbar(m);
 	fprintf(stderr, "arrangemon: %d\n", 4);
 
-	for (mon = mons; mon; mon = mon->next)
-		fprintf(stderr, "arrangemon: monitor %d has selws %s\n", mon->num, mon->selws ? mon->selws->name : "NULL");
+	// for (mon = mons; mon; mon = mon->next)
+	// 	fprintf(stderr, "arrangemon: monitor %d has selws %s\n", mon->num, mon->selws ? mon->selws->name : "NULL");
 
-	for (ws = workspaces; ws; ws = ws->next)
-		fprintf(stderr, "arrangemon: workspace %s has monitor %d\n", ws->name, ws->mon ? ws->mon->num : -1);
+	// for (ws = workspaces; ws; ws = ws->next)
+	// 	fprintf(stderr, "arrangemon: workspace %s has monitor %d\n", ws->name, ws->mon ? ws->mon->num : -1);
 	fprintf(stderr, "arrangemon: <--\n");
 }
 
@@ -863,7 +866,7 @@ buttonpress(XEvent *e)
 	for (i = 0; i < LENGTH(buttons); i++) {
 		if (click == buttons[i].click && buttons[i].func && buttons[i].button == ev->button
 				&& CLEANMASK(buttons[i].mask) == CLEANMASK(ev->state)) {
-			buttons[i].func((click == ClkTagBar || click == ClkWinTitle) && buttons[i].arg.i == 0 ? &arg : &buttons[i].arg);
+			buttons[i].func((click == ClkWorkspaceBar || click == ClkTagBar || click == ClkWinTitle) && buttons[i].arg.i == 0 ? &arg : &buttons[i].arg);
 		}
 	}
 }
@@ -1329,20 +1332,22 @@ createworkspaces()
 	for (i = 1; i < LENGTH(wsrules); i++)
 		pws = pws->next = createworkspace(&wsrules[i]);
 
-	for (ws = workspaces, m = mons; ws; ws = ws->next) {
-		m = (m->next == NULL ? mons : m->next);
+	for (m = mons, ws = workspaces; ws; ws = ws->next) {
 		if (ws->mon == NULL) {
 			ws->mon = m;
-			if (m->selws == NULL)
+			if (m->selws == NULL) {
 				m->selws = ws;
+				m->selws->visible = 1;
+			}
 		}
+		m = (m->next == NULL ? mons : m->next);
 	}
 
 	for (m = mons; m; m = m->next) {
 		fprintf(stderr, "createworkspaces: monitor %d associated with workspace %s\n", m->num, (m->selws == NULL ? "NULL" : m->selws->name));
 	}
 
-	selws = mons->selws;
+	// selws = mons->selws;
 
 	fprintf(stderr, "createworkspaces: <--\n");
 }
@@ -1361,6 +1366,7 @@ createworkspace(const WorkspaceRule *r)
 		if (m) {
 			ws->mon = m;
 			m->selws = ws;
+			m->selws->visible = 1;
 		}
 	}
 
@@ -1607,7 +1613,7 @@ drawbarwin(Bar *bar)
 void
 enternotify(XEvent *e)
 {
-	fprintf(stderr, "enternotify: -->\n");
+	fprintf(stderr, "enternotify: --> selmon = %d\n", selmon->num);
 	Client *c, *sel;
 	Workspace *ws = WS;
 	Monitor *m;
@@ -1619,10 +1625,15 @@ enternotify(XEvent *e)
 	fprintf(stderr, "enternotify: %d\n", 2);
 	c = wintoclient(ev->window);
 	fprintf(stderr, "enternotify: %d\n", 3);
+	if (c)
+		fprintf(stderr, "enternotify: entered client %s on workspace %s on monitor %d\n", c->name, c->ws->name, c->ws->mon->num);
+	else
+		fprintf(stderr, "enternotify: no client found\n");
+
 	m = c ? c->ws->mon : wintomon(ev->window);
 	fprintf(stderr, "enternotify: %d (monitor %d)\n", 4, m->num);
 	if (m != selmon) {
-		fprintf(stderr, "enternotify: %d\n", 5);
+		fprintf(stderr, "enternotify: %d, mon %d mon->selws = %s\n", 5, m->num, m->selws->name);
 		sel = ws->sel;
 		if (sel)
 			fprintf(stderr, "enternotify: %d, unfocusing %s on workspace %s, focusing %s on workspace %s\n", 6, sel->name, sel->ws ? sel->ws->name : "NONE", c ? c->name : "NONE", c ? c->ws->name : "NONE");
@@ -1632,13 +1643,18 @@ enternotify(XEvent *e)
 		selws = m->selws;
 		if (sel)
 			unfocus(sel, 1, c);
-	} else if (!c || c == ws->sel)
-		return;
-	else
-		fprintf(stderr, "enternotify: same monitor %d on workspace %s\n", m->num, m->selws ? m->selws->name : "NONE");
+	} else {
+		fprintf(stderr, "enternotify: %d\n", 7);
+		if (!c || c == ws->sel) {
+			fprintf(stderr, "enternotify: %d <--\n", 8);
+			return;
+		}
+		else
+			fprintf(stderr, "enternotify: same monitor %d on workspace %s\n", m->num, m->selws ? m->selws->name : "NONE");
+	}
 	fprintf(stderr, "enternotify: %d\n", 9);
 	focus(c);
-	fprintf(stderr, "enternotify: <--\n");
+	fprintf(stderr, "enternotify: <-- selmon = %d\n", selmon->num);
 }
 
 void
@@ -2195,6 +2211,7 @@ maprequest(XEvent *e)
 void
 motionnotify(XEvent *e)
 {
+	// fprintf(stderr, "motionnotify: --> selmon is %d\n", selmon->num);
 	static Monitor *mon = NULL;
 	Monitor *m;
 	Client *sel;
@@ -2219,10 +2236,12 @@ motionnotify(XEvent *e)
 		selmon = m;
 		if (m->selws != NULL)
 			selws = m->selws;
+		// fprintf(stderr, "motionnotify: selws is now %s\n", selws->name);
 		unfocus(sel, 1, NULL);
 		focus(NULL);
 	}
 	mon = m;
+	// fprintf(stderr, "motionnotify: <-- selmon is %d\n", selmon->num);
 }
 
 void
@@ -2534,7 +2553,10 @@ resizemouse(const Arg *arg)
 
 	XUngrabPointer(dpy, CurrentTime);
 	while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
+	fprintf(stderr, "resizemouse: selmon = %d, c = %s\n", selmon->num, c->name);
 	if ((m = recttomon(c->x, c->y, c->w, c->h)) != selmon) {
+		fprintf(stderr, "resizemouse: selmon %d != mon %d\n", selmon->num, m->num);
+		fprintf(stderr, "resizemouse: c->x = %d, c->y = %d, c->w = %d, c->h = %d\n", c->x, c->y, c->w, c->h);
 		if (c->tags & SPTAGMASK) {
 			c->ws->tags ^= (c->tags & SPTAGMASK);
 			ws->tags |= (c->tags & SPTAGMASK);
@@ -2657,31 +2679,21 @@ scan(void)
 void
 sendmon(Client *c, Monitor *m)
 {
+	fprintf(stderr, "sendmon -->\n");
 	if (c->ws->mon == m)
 		return;
+
+	fprintf(stderr, "sendmon: selws = %s and m->selws = %s\n", selws->name, m->selws ? m->selws->name : "NONE");
 	Workspace *ws = MWS(m);
 	fprintf(stderr, "sendmon: monitor %d workspace is %s, client %s's workspace is %s\n", m->num, m->selws->name, c->name, c->ws->name);
-	int hadfocus = (c == WS->sel);
-	unfocus(c, 1, NULL);
-	detach(c);
-	detachstack(c);
-	arrange(c->ws->mon);
-	c->ws = ws;
-	c->id = 0;
 
-	if (!(c->tags & SPTAGMASK))
-		c->tags = ws->tags; /* assign tags of target monitor */
-	attachx(c);
-	attachstack(c);
-	arrange(ws->mon);
+	movetows(c, ws);
 
-	if (hadfocus) {
-		focus(c);
-		restack(c->ws);
-	} else
-		focus(NULL);
 	if (c->reverttags)
 		c->reverttags = 0;
+
+	fprintf(stderr, "sendmon: client's monitor is now %d and client's workspace is %s\n", c->ws->mon->num, c->ws->name);
+	fprintf(stderr, "sendmon <--\n");
 }
 
 void
@@ -2866,6 +2878,7 @@ setmfact(const Arg *arg)
 void
 setup(void)
 {
+	Monitor *m;
 	int i;
 	XSetWindowAttributes wa;
 	Atom utf8string;
@@ -3000,6 +3013,9 @@ setup(void)
 	focus(NULL);
 	setupepoll();
 
+	for (m = mons; m; m = m->next) {
+		showws(m->selws);
+	}
 	fprintf(stderr, "setup: <---\n");
 }
 

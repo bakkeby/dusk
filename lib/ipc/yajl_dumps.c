@@ -29,6 +29,39 @@ dump_tags(yajl_gen gen, int tags_len)
 }
 
 int
+dump_workspace(yajl_gen gen, const char *name, const int mon, const int visible, const int num_clients)
+{
+  // clang-format off
+  YMAP(
+    YSTR("monitor"); YINT(mon);
+    YSTR("visible"); YINT(visible);
+    YSTR("clients"); YINT(num_clients);
+    YSTR("name"); YSTR(name);
+  )
+  // clang-format on
+
+  return 0;
+}
+
+int
+dump_workspaces(yajl_gen gen)
+{
+  Workspace *ws;
+  Client *c;
+  int num_clients;
+  // clang-format off
+  YARR(
+    for (ws = workspaces; ws; ws = ws->next) {
+      for (num_clients = 0, c = ws->clients; c; c = c->next, ++num_clients);
+      dump_workspace(gen, ws->name, ws->mon->num, ws->visible, num_clients);
+    }
+  )
+  // clang-format on
+
+  return 0;
+}
+
+int
 dump_client(yajl_gen gen, Client *c)
 {
   // clang-format off

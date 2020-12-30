@@ -4,6 +4,7 @@
 #include "flags.h"
 #include "func.h"
 #include "warp.h"
+#include "workspace.h"
 #include "combo.h"
 
 #include "bar_alpha.h"
@@ -19,6 +20,7 @@
 #include "bar_wintitle_hidden.h"
 #include "bar_systray.h"
 #include "bar_wintitleactions.h"
+#include "bar_workspaces.h"
 
 /* Other patches */
 #include "attachx.h"

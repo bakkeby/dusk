@@ -31,7 +31,7 @@ static const unsigned int systrayspacing = 2;   /* systray spacing */
 static char *toggle_float_pos            = "50% 50% 80% 80%"; // default floating position when triggering togglefloatpos
 static const double defaultopacity       = 0;   /* client default opacity, e.g. 0.75. 0 means don't apply opacity. */
 
-/* Indicators: see patch/bar_indicators.h for options */
+/* Indicators: see lib/bar_indicators.h for options */
 static int tagindicatortype              = INDICATOR_BOTTOM_BAR_SLIM;
 static int fakefsindicatortype           = INDICATOR_PLUS;
 static int floatfakefsindicatortype      = INDICATOR_PLUS_AND_LARGER_SQUARE;

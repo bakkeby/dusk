@@ -664,9 +664,9 @@ ipc_get_tags(IPCClient *c, const int tags_len)
 	yajl_gen gen;
 	ipc_reply_init_message(&gen);
 
-	dump_tags(gen, tags_len);
+	dump_workspaces(gen);
 
-	ipc_reply_prepare_send_message(gen, c, IPC_TYPE_GET_TAGS);
+	ipc_reply_prepare_send_message(gen, c, IPC_TYPE_GET_WORKSPACES);
 }
 
 /**
@@ -716,6 +716,22 @@ ipc_get_dwm_client(IPCClient *ipc_client, const char *msg, const Monitor *mons) 
 														"Client with window id %d not found", win);
 	return -1;
 }
+
+/**
+ * Called when an IPC_TYPE_GET_WORKSPACES message is received from a client. It
+ * prepares a reply with info about all the tags in JSON.
+ */
+static void
+ipc_get_workspaces(IPCClient *c)
+{
+	yajl_gen gen;
+	ipc_reply_init_message(&gen);
+
+	dump_workspaces(gen);
+
+	ipc_reply_prepare_send_message(gen, c, IPC_TYPE_GET_TAGS);
+}
+
 
 /**
  * Called when an IPC_TYPE_SUBSCRIBE message is received from a client. It
@@ -1167,6 +1183,8 @@ ipc_handle_client_epoll_event(struct epoll_event *ev, Monitor *mons,
 			ipc_get_monitors(c, mons, selmon);
 		else if (msg_type == IPC_TYPE_GET_TAGS)
 			ipc_get_tags(c, tags_len);
+		else if (msg_type == IPC_TYPE_GET_WORKSPACES)
+			ipc_get_workspaces(c);
 		else if (msg_type == IPC_TYPE_GET_LAYOUTS)
 			ipc_get_layouts(c, layouts, layouts_len);
 		else if (msg_type == IPC_TYPE_RUN_COMMAND) {
