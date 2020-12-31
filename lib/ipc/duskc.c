@@ -11,7 +11,7 @@
 #include <unistd.h>
 #include <yajl/yajl_gen.h>
 
-#define IPC_MAGIC "DAWN-IPC"
+#define IPC_MAGIC "DUSK-IPC"
 // clang-format off
 #define IPC_MAGIC_ARR { 'D', 'A', 'W', 'N', '-', 'I', 'P', 'C' }
 // clang-format on

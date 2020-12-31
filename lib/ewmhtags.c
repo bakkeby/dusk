@@ -1,25 +1,43 @@
+// void
+// persistmonitorstate(Monitor *m)
+// {
+// 	Client *c;
+// 	Workspace *ws = MWS(m);
+// 	unsigned int i;
+// 	char atom[22];
+
+// 	sprintf(atom, "_DUSK_MONITOR_TAGS_%u", m->num); // TODO workspaces
+
+// 	unsigned long data[] = { ws->tags };
+// 	XChangeProperty(dpy, root, XInternAtom(dpy, atom, False), XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
+
+
+
+// 	XSync(dpy, False);
+// }
+
 void
-persistmonitorstate(Monitor *m)
+persistworkspacestate(Workspace *ws)
 {
+	fprintf(stderr, "persistworkspacestate: -->\n");
 	Client *c;
-	Workspace *ws = MWS(m);
 	unsigned int i;
 	char atom[22];
 
-	sprintf(atom, "_DAWN_MONITOR_TAGS_%u", m->num); // TODO workspaces
+	sprintf(atom, "_DUSK_WORKSPACE_%u", ws->num);
 
-	unsigned long data[] = { ws->tags };
+	unsigned long data[] = { ws->visible | ws->mon->num << 1 }; // potentially enablegaps, nmaster, nstack, mfact, pinned
 	XChangeProperty(dpy, root, XInternAtom(dpy, atom, False), XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
 
 	/* set dusk client atoms */
-	for (ws = workspaces; ws; ws = ws->next)
-		for (i = 1, c = ws->clients; c; c = c->next, ++i) {
-			c->id = i;
-			setclientflags(c);
-			setclienttags(c);
-		}
+	for (i = 1, c = ws->clients; c; c = c->next, ++i) {
+		c->id = i;
+		setclientflags(c);
+		setclienttags(c);
+	}
 
 	XSync(dpy, False);
+	fprintf(stderr, "persistworkspacestate: <--\n");
 }
 
 void
@@ -52,21 +70,20 @@ void
 setclientflags(Client *c)
 {
 	unsigned long data[] = { c->flags };
-	XChangeProperty(dpy, c->win, clientatom[DawnClientFlags], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
+	XChangeProperty(dpy, c->win, clientatom[DuskClientFlags], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
 }
 
 void
 setclienttags(Client *c)
 {
-	// TODO each workspace has an index (or num), then used to remember tags through restart
-	// unsigned long data[] = { c->ws->num | (c->id << 4) | (c->tags << 12)};
-	// XChangeProperty(dpy, c->win, clientatom[DawnClientTags], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
+	unsigned long data[] = { c->ws->num | (c->id << 6) | (c->tags << 14)};
+	XChangeProperty(dpy, c->win, clientatom[DuskClientTags], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
 }
 
 void
 getclientflags(Client *c)
 {
-	Atom flags = getatomprop(c, clientatom[DawnClientFlags], AnyPropertyType);
+	Atom flags = getatomprop(c, clientatom[DuskClientFlags], AnyPropertyType);
 	if (flags)
 		c->flags |= flags;
 }
@@ -74,18 +91,19 @@ getclientflags(Client *c)
 void
 getclienttags(Client *c)
 {
-	// TODO each workspace has an index (or num), then used to remember tags through restart
-	// Monitor *m;
-	// Atom clienttags = getatomprop(c, clientatom[DawnClientTags], AnyPropertyType);
-	// if (clienttags) {
-	// 	c->tags = (clienttags >> 12) & TAGMASK;
-	// 	c->id = (clienttags & 0xFF0) >> 4;
-	// 	for (m = mons; m; m = m->next)
-	// 		if (m->num == (clienttags & 0xF)) {
-	// 			c->ws = m;
-	// 			break;
-	// 		}
-	// }
+	fprintf(stderr, "getclienttags: -->\n");
+	Workspace *ws;
+	Atom clienttags = getatomprop(c, clientatom[DuskClientTags], AnyPropertyType);
+	if (clienttags) {
+		c->tags = (clienttags >> 14) & TAGMASK;
+		c->id = (clienttags & 0x3FC0) >> 6;
+		for (ws = workspaces; ws; ws = ws->next)
+			if (ws->num == (clienttags & 0x3F)) {
+				c->ws = ws;
+				break;
+			}
+	}
+	fprintf(stderr, "getclienttags: <--\n");
 }
 
 void
@@ -98,7 +116,7 @@ getmonitorstate(Monitor *m)
 	// Atom da, tags = None;
 	// Workspace *ws = MWS(m);
 
-	// sprintf(atom, "_DAWN_MONITOR_TAGS_%u", m->num); // TODO workspaces
+	// sprintf(atom, "_DUSK_MONITOR_TAGS_%u", m->num); // TODO workspaces
 
 	// Atom monitortags = XInternAtom(dpy, atom, True);
 	// if (!monitortags)
@@ -112,6 +130,43 @@ getmonitorstate(Monitor *m)
 
 	// if (tags)
 	// 	ws->tags = tags; // tmp workspaces
+}
+
+void
+getworkspacestate(Workspace *ws)
+{
+	fprintf(stderr, "getworkspacestate: -->\n");
+	Monitor *m;
+	char atom[22];
+	int di, mon;
+	unsigned long dl;
+	unsigned char *p = NULL;
+	Atom da, settings = None;
+
+	sprintf(atom, "_DUSK_WORKSPACE_%u", ws->num);
+
+	Atom wsatom = XInternAtom(dpy, atom, True);
+	if (!wsatom)
+		return;
+
+	if (XGetWindowProperty(dpy, root, wsatom, 0L, sizeof settings, False, AnyPropertyType,
+		&da, &di, &dl, &dl, &p) == Success && p) {
+		settings = *(Atom *)p;
+		XFree(p);
+	}
+
+	if (settings) {
+		mon = settings >> 1;
+		for (m = mons; m && m->num != mon; m = m->next);
+		if (m) {
+			ws->mon = m;
+			ws->visible = settings & 1;
+			fprintf(stderr, "getworkspacestate: found monitor %d for workspace %s, visible = %d\n", m->num, ws->name, ws->visible);
+			if (ws->visible)
+				ws->mon->selws = ws; // TODO refactor, we so something similar in createworkspaces
+		}
+	}
+	fprintf(stderr, "getworkspacestate: <--\n");
 }
 
 void

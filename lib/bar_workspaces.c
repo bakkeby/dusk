@@ -3,11 +3,14 @@ width_workspaces(Bar *bar, BarArg *a)
 {
 	Workspace *ws;
 	fprintf(stderr, "width_workspaces: -->\n");
-	int w = 0;
+	int w = 0, tw;
 	for (ws = workspaces; ws; ws = ws->next) {
 		if (ws->mon != bar->mon)
 			continue;
-		w += TEXTW(ws->name);
+		tw = TEXTW(wsicon(ws));
+		if (tw <= lrpad)
+			continue;
+		w += tw;
 	}
 	fprintf(stderr, "width_workspaces: <--\n");
 	return w;
@@ -31,7 +34,7 @@ draw_workspaces(Bar *bar, BarArg *a)
 			if (ISURGENT(c))
 				urg++;
 
-		icon = ws->name;
+		icon = wsicon(ws);
 		w = TEXTW(icon);
 		if (w <= lrpad)
 			continue;
@@ -44,7 +47,7 @@ draw_workspaces(Bar *bar, BarArg *a)
 			: SchemeTagsNorm
 		]);
 		drw_text(drw, x, a->y, w, a->h, lrpad / 2, icon, inv, False);
-		// drawindicator(m, NULL, occ, x, a->y, w, a->h, i, -1, invert, tagindicatortype); // TODO indicators
+		drawindicator(m, NULL, ws->clients != NULL, x, a->y, w, a->h, -1, 0, wsindicatortype);
 		x += w;
 	}
 	fprintf(stderr, "draw_workspaces: <--\n");

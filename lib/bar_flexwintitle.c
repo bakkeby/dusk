@@ -126,16 +126,20 @@ getclientcounts(Monitor *m, int *groupactive, int *n, int *clientsnmaster, int *
 			cs1++;
 		i++;
 	}
-
+	fprintf(stderr, "getclientcounts: %d\n", 30);
 	*n = cm + cs1 + cs2 + cf + ch;
+	fprintf(stderr, "getclientcounts: %d\n", 31);
 	center = iscenteredlayout(m, *n);
+	fprintf(stderr, "getclientcounts: %d\n", 32);
 	dualstack = isdualstacklayout(m);
+	fprintf(stderr, "getclientcounts: %d\n", 33);
 
 	if ((!center && !dualstack) || (center && *n <= ws->nmaster + (ws->nstack ? ws->nstack : 1))) {
 		cs1 += cs2;
 		cs2 = 0;
 	}
 
+	fprintf(stderr, "getclientcounts: %d\n", 35);
 	if (!ws->sel)
 		*groupactive = GRP_NOSELECTION;
 	else if (HIDDEN(ws->sel))
@@ -257,7 +261,7 @@ flextitledraw(Monitor *m, Client *c, int unused, int x, int w, int tabscheme, Ar
 		pad = (w - TEXTW(c->name) + lrpad) / 2;
 
 	drw_text(drw, x, barg->y, w, barg->h, pad, c->name, 0, False);
-	drawstateindicator(m, c, 1, x + 2, barg->y, w, barg->h, 0, 0, 0);
+	drawstateindicator(m, c, 1, x + 2, barg->y, w, barg->h, 0, 0);
 
 	if (FLEXWINTITLE_BORDERS) {
 		XSetForeground(drw->dpy, drw->gc, scheme[SchemeSel][ColBorder].pixel);
@@ -271,9 +275,6 @@ flextitledraw(Monitor *m, Client *c, int unused, int x, int w, int tabscheme, Ar
 		if ((c->tags >> i) & 1)
 			nclienttags++;
 	}
-
-	if (TAGSINDICATOR == 2 || nclienttags > 1 || nviewtags > 1)
-		drawindicator(m, c, 1, x, barg->y, w, barg->h, 0, 0, 0, INDICATOR_RIGHT_TAGS);
 }
 
 void

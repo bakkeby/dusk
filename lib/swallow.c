@@ -38,7 +38,8 @@ swallow(Client *p, Client *c)
 	updatetitle(p);
 	s = scanner ? c : p;
 	setfloatinghint(s);
-	XMoveResizeWindow(dpy, s->win, s->x, s->y, s->w, s->h);
+	/* The swallowed client may have a different border size compared to the swallowing client */
+	XMoveResizeWindow(dpy, s->win, s->x, s->y, s->w - 2*c->bw, s->h - 2*c->bw);
 	arrange(p->ws->mon);
 	configure(p);
 	updateclientlist();

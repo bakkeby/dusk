@@ -1,6 +1,7 @@
 static void getclientflags(Client *c);
 static void getclienttags(Client *c);
-static void persistmonitorstate(Monitor *m);
+// static void persistmonitorstate(Monitor *m);
+static void persistworkspacestate(Workspace *ws);
 static void setcurrentdesktop(void);
 static void setdesktopnames(void);
 static void setfloatinghint(Client *c);

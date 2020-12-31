@@ -196,8 +196,8 @@ enum {
 
 enum {
 	IsFloating,
-	DawnClientFlags,
-	DawnClientTags,
+	DuskClientFlags,
+	DuskClientTags,
 	SteamGame,
 	ClientLast
 }; /* dusk client atoms */
@@ -350,7 +350,6 @@ typedef struct {
 	LayoutPreset preset;
 } Layout;
 
-typedef struct Pertag Pertag;
 struct Monitor {
 	// char ltsymbol[16];
 	// float mfact;
@@ -394,10 +393,10 @@ typedef struct {
 	unsigned int tags;
 	unsigned long flags;
 	const char *floatpos;
-	int monitor;
+	const char *workspace;
 } Rule;
 
-#define RULE(...) { .monitor = -1, ##__VA_ARGS__ },
+#define RULE(...) { .tags = 0, ##__VA_ARGS__ },
 
 struct Workspace {
 	char ltsymbol[16];
@@ -408,6 +407,7 @@ struct Workspace {
 	int nmaster;
 	int enablegaps;
 	int visible;
+	int num;
 	int pinned; // whether workspace is pinned to assigned monitor or not
 	unsigned int tags;
 	unsigned int prevtags;
@@ -420,10 +420,14 @@ struct Workspace {
 	const Layout *layout;
 	const Layout *prevlayout;
 	int iconset;
-	char lastltsymbol[16]; // --> prevltsymbol, or check if really needed
+	char lastltsymbol[16]; // --> prevltsymbol, or check if really needed, monitor prevworkspace?
 	TagState tagstate; // TODO to WSState? is this really needed
 	Client *lastsel; // TODO --> prevsel
 	const Layout *lastlt; // TODO have IPC code use prevlayout instead
+
+	char *icondef;
+	char *iconvac;
+	char *iconocc;
 };
 
 typedef struct {
@@ -435,6 +439,9 @@ typedef struct {
 	int nmaster;
 	int nstack;
 	int enablegaps;
+	char *icondef;
+	char *iconvac;
+	char *iconocc;
 } WorkspaceRule;
 
 /* function declarations */
@@ -454,7 +461,7 @@ static void configurenotify(XEvent *e);
 static void configurerequest(XEvent *e);
 static Monitor *createmon(int num);
 static void createworkspaces();
-static Workspace *createworkspace(const WorkspaceRule *r);
+static Workspace *createworkspace(int num);
 static void destroynotify(XEvent *e);
 static void detach(Client *c);
 static void detachstack(Client *c);
@@ -605,7 +612,7 @@ applyrules(Client *c)
 	unsigned int i;
 	unsigned int newtags;
 	const Rule *r;
-	Monitor *m;
+	Workspace *ws = NULL;
 	XClassHint ch = { NULL, NULL };
 
 	fprintf(stderr, "applyrules: %d (%s)\n", 1, c->name);
@@ -645,13 +652,14 @@ applyrules(Client *c)
 			if (r->opacity)
 				c->opacity = r->opacity;
 
-			for (m = mons; m && m->num != r->monitor; m = m->next);
-			if (m)
-				c->ws = MWS(m);
+			if (r->workspace)
+				for (ws = workspaces; ws && strcmp(ws->name, r->workspace) != 0; ws = ws->next);
+			c->ws = ws ? ws : selws;
 
 			if (ISFLOATING(c) && r->floatpos)
 				setfloatpos(c, r->floatpos);
 
+			// TODO switch workspaces
 			if ((SWITCHTAG(c) || ENABLETAG(c)) && (NOSWALLOW(c) || !termforwin(c))) {
 				selws = c->ws;
 				selmon = (selws->mon == NULL ? mons : selws->mon);
@@ -670,7 +678,7 @@ applyrules(Client *c)
 			}
 
 			if (enabled(Debug))
-				fprintf(stderr, "applyrules: client rule %d matched:\n    class: %s\n    role: %s\n    instance: %s\n    title: %s\n    wintype: %s\n    tags: %d\n    flags: %ld\n    floatpos: %s\n    monitor: %d\n",
+				fprintf(stderr, "applyrules: client rule %d matched:\n    class: %s\n    role: %s\n    instance: %s\n    title: %s\n    wintype: %s\n    tags: %d\n    flags: %ld\n    floatpos: %s\n    workspace: %s\n",
 					i,
 					r->class ? r->class : "NULL",
 					r->role ? r->role : "NULL",
@@ -680,7 +688,7 @@ applyrules(Client *c)
 					r->tags,
 					r->flags,
 					r->floatpos ? r->floatpos : "NULL",
-					r->monitor);
+					r->workspace);
 			break; // only allow one rule match
 		}
 	}
@@ -1328,9 +1336,9 @@ createworkspaces()
 	Monitor *m;
 	int i;
 
-	pws = selws = workspaces = createworkspace(&wsrules[0]);
+	pws = selws = workspaces = createworkspace(0);
 	for (i = 1; i < LENGTH(wsrules); i++)
-		pws = pws->next = createworkspace(&wsrules[i]);
+		pws = pws->next = createworkspace(i);
 
 	for (m = mons, ws = workspaces; ws; ws = ws->next) {
 		if (ws->mon == NULL) {
@@ -1353,12 +1361,15 @@ createworkspaces()
 }
 
 Workspace *
-createworkspace(const WorkspaceRule *r)
+createworkspace(int num)
 {
+	const WorkspaceRule *r = &wsrules[num];
 	Workspace *ws;
 	Monitor *m = NULL;
 	fprintf(stderr, "createworkspace: -->\n");
 	ws = ecalloc(1, sizeof(Workspace));
+
+	ws->num = num;
 
 	// TODO not 100% sure about this
 	if (r->monitor != -1) {
@@ -1385,6 +1396,13 @@ createworkspace(const WorkspaceRule *r)
 	ws->ltaxis[MASTER] = ws->layout->preset.masteraxis;
 	ws->ltaxis[STACK]  = ws->layout->preset.stack1axis;
 	ws->ltaxis[STACK2] = ws->layout->preset.stack2axis;
+
+	/* icons */
+	ws->icondef = r->icondef;
+	ws->iconvac = r->iconvac;
+	ws->iconocc = r->iconocc;
+
+	getworkspacestate(ws);
 
 	fprintf(stderr, "createworkspace: <--\n");
 	return ws;
@@ -2410,6 +2428,7 @@ propertynotify(XEvent *e)
 void
 quit(const Arg *arg)
 {
+	Workspace *ws;
 	size_t i;
 	if (arg->i)
 		restart = 1;
@@ -2424,7 +2443,12 @@ quit(const Arg *arg)
 	}
 
 	// for (m = mons; m; m = m->next)
-		persistmonitorstate(mons);
+		// persistmonitorstate(mons);
+
+	for (ws = workspaces; ws; ws = ws->next)
+		persistworkspacestate(ws);
+
+
 }
 
 Monitor *
@@ -2915,8 +2939,8 @@ setup(void)
 	wmatom[WMWindowRole] = XInternAtom(dpy, "WM_WINDOW_ROLE", False);
 	wmatom[WMChangeState] = XInternAtom(dpy, "WM_CHANGE_STATE", False);
 	clientatom[IsFloating] = XInternAtom(dpy, "_IS_FLOATING", False);
-	clientatom[DawnClientFlags] = XInternAtom(dpy, "_DAWN_CLIENT_FLAGS", False);
-	clientatom[DawnClientTags] = XInternAtom(dpy, "_DAWN_CLIENT_TAGS", False);
+	clientatom[DuskClientFlags] = XInternAtom(dpy, "_DUSK_CLIENT_FLAGS", False);
+	clientatom[DuskClientTags] = XInternAtom(dpy, "_DUSK_CLIENT_TAGS", False);
 	clientatom[SteamGame] = XInternAtom(dpy, "STEAM_GAME", False);
 	netatom[NetActiveWindow] = XInternAtom(dpy, "_NET_ACTIVE_WINDOW", False);
 	netatom[NetClientList] = XInternAtom(dpy, "_NET_CLIENT_LIST", False);
@@ -3016,6 +3040,7 @@ setup(void)
 	for (m = mons; m; m = m->next) {
 		showws(m->selws);
 	}
+	selws = selmon->selws; // TODO hacky
 	fprintf(stderr, "setup: <---\n");
 }
 

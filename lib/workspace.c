@@ -1,3 +1,21 @@
+char *
+wsicon(Workspace *ws)
+{
+	char *icon = enabled(AltWorkspaceIcons)
+		? ws->name
+		: ws->clients
+		? ws->iconocc
+		: ws->visible && TEXTW(ws->icondef) <= lrpad
+		? ws->iconvac
+		: ws->icondef;
+
+	if (icon == NULL)
+		icon = ws->name;
+
+	return icon;
+}
+
+
 void
 hidews(Workspace *ws)
 {

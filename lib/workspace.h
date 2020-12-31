@@ -1,3 +1,4 @@
+static char * wsicon(Workspace *ws);
 static void hidews(Workspace *ws);
 static void hidewsclients(Workspace *ws);
 static void showws(Workspace *ws);

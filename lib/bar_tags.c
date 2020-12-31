@@ -45,7 +45,7 @@ draw_tags(Bar *bar, BarArg *a)
 			: SchemeTagsNorm
 		]);
 		drw_text(drw, x, a->y, w, a->h, lrpad / 2, icon, invert, False);
-		drawindicator(m, NULL, occ, x, a->y, w, a->h, i, -1, invert, tagindicatortype);
+		drawindicator(m, NULL, (occ & 1 << i), x, a->y, w, a->h, -1, invert, tagindicatortype);
 		x += w;
 	}
 	fprintf(stderr, "draw_tags: <--\n");
