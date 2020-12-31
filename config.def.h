@@ -418,9 +418,7 @@ static const Layout layouts[] = {
 	{ MODKEY|Ctrl,                  KEY,      toggleview,     {.ui = 1 << TAG} }, \
 	{ MODKEY|Shift,                 KEY,      combotag,       {.ui = 1 << TAG} }, \
 	{ MODKEY|Ctrl|Shift,            KEY,      toggletag,      {.ui = 1 << TAG} }, \
-	{ MODKEY|Alt|ShiftMask,         KEY,      swaptags,       {.ui = 1 << TAG} }, \
-	{ MODKEY|Alt,                   KEY,      tagnextmon,     {.ui = 1 << TAG} }, \
-	{ MODKEY|Alt|ControlMask,       KEY,      tagprevmon,     {.ui = 1 << TAG} },
+	{ MODKEY|Alt|ShiftMask,         KEY,      swaptags,       {.ui = 1 << TAG} },
 
 #define STACKKEYS(MOD,ACTION) \
 	{ MOD, XK_j, ACTION, {.i = INC(+1) } }, \
@@ -691,8 +689,6 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( tagallmon, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( taggridmovetag, 1, {ARG_TYPE_UINT} ),
 	IPCCOMMAND( tagmon, 1, {ARG_TYPE_UINT} ),
-	IPCCOMMAND( tagnextmonex, 1, {ARG_TYPE_UINT} ),
-	IPCCOMMAND( tagprevmonex, 1, {ARG_TYPE_UINT} ),
 	IPCCOMMAND( tagswapmon, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( tagtoleft, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( tagtoright, 1, {ARG_TYPE_NONE} ),

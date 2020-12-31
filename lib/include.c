@@ -66,7 +66,6 @@
 #include "switchcol.c"
 #include "tagall.c"
 #include "tagallmon.c"
-#include "tagothermonitor.c"
 #include "tagswapmon.c"
 #include "togglefullscreen.c"
 #include "transfer.c"
