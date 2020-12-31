@@ -153,9 +153,7 @@ getworkspacestate(Workspace *ws)
 		&da, &di, &dl, &dl, &p) == Success && p) {
 		settings = *(Atom *)p;
 		XFree(p);
-	}
 
-	if (settings) {
 		mon = settings >> 1;
 		for (m = mons; m && m->num != mon; m = m->next);
 		if (m) {

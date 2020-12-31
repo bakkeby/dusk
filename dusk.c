@@ -1687,7 +1687,8 @@ expose(XEvent *e)
 void
 focus(Client *c)
 {
-	Workspace *ws = WS;
+	fprintf(stderr, "focus: --> client %s\n", c->name);
+	Workspace *ws = c ? c->ws : selws;
 	Client *f;
 	XWindowChanges wc;
 	if (!c || !ISVISIBLE(c))
@@ -1741,9 +1742,10 @@ focus(Client *c)
 			ws->ltaxis[MASTER] == MONOCLE ||
 			ws->ltaxis[STACK] == MONOCLE ||
 			ws->ltaxis[STACK2] == MONOCLE))
-		arrangemon(selmon);
+		arrangemon(ws->mon);
 	else
-		drawbar(selmon);
+		drawbar(ws->mon);
+	fprintf(stderr, "focus: <-- client %s\n", c->name);
 }
 
 /* there are some broken focus acquiring clients needing extra handling */
@@ -3399,6 +3401,7 @@ toggleview(const Arg *arg)
 void
 unfocus(Client *c, int setfocus, Client *nextfocus)
 {
+	fprintf(stderr, "unfocus: --> client %s\n", !c ? "NULL" : c->name);
 	if (!c)
 		return;
 	if (ISFULLSCREEN(c) && ISVISIBLE(c) && c->ws == selws && nextfocus && !ISFLOATING(nextfocus))
@@ -3409,6 +3412,7 @@ unfocus(Client *c, int setfocus, Client *nextfocus)
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
 		XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
 	}
+	fprintf(stderr, "unfocus: <-- client %s\n", c->name);
 }
 
 void

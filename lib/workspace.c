@@ -162,10 +162,14 @@ viewws(const Arg *arg)
 	// focus(NULL);
 	if (ws->pinned) {
 		fprintf(stderr, "viewws: ws %s pinned\n", ws->name);
-		if (ws->mon->selws->visible)
-			hidews(ws->mon->selws);
-		showws(ws);
-		arrange(ws->mon);
+		if (!ws->visible) {
+			if (ws->mon->selws->visible)
+				hidews(ws->mon->selws);
+			showws(ws);
+			arrange(ws->mon);
+		}
+		fprintf(stderr, "viewws: focusing on client %s\n", ws->sel == NULL ? "NULL" : ws->sel->name);
+		focus(ws->sel);
 	} else {
 		fprintf(stderr, "viewws: ws %s not pinned\n", ws->name);
 		if (ws->mon != selmon) {
