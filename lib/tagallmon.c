@@ -17,7 +17,7 @@ tagallmon(const Arg *arg)
 		next = c->next;
 		if (!ISVISIBLE(c))
 			continue;
-		tagmonresize(c, c->ws->mon, n);
+		clientmonresize(c, c->ws->mon, n);
 		unfocus(c, 1, NULL);
 		detach(c);
 		detachstack(c);

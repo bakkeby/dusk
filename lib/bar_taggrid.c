@@ -80,7 +80,7 @@ taggridmovetag(const Arg *arg)
 	unsigned int new_tags = 0;
 	unsigned int pos, i;
 	int col, row;
-	Arg new_arg;
+	// Arg new_arg;
 
 	columns = NUMTAGS / taggridrows + ((NUMTAGS % taggridrows > 0) ? 1 : 0);
 
@@ -135,17 +135,17 @@ taggridmovetag(const Arg *arg)
 		}
 		new_tags |= 1 << pos;
 	}
-	new_arg.ui = new_tags;
+	// new_arg.ui = new_tags;
 	if (arg->ui & TAGGRID_TOGGLETAG) {
-		toggletag(&new_arg);
+		// toggletag(&new_arg);
 	}
 	if (arg->ui & TAGGRID_TAG) {
-		tag(&new_arg);
+		// tag(&new_arg);
 	}
 	if (arg->ui & TAGGRID_VIEW) {
-		view (&new_arg);
+		// view (&new_arg);
 	}
 	if (arg->ui & TAGGRID_TOGGLEVIEW) {
-		toggleview (&new_arg);
+		// toggleview (&new_arg);
 	}
 }

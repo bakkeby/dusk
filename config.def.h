@@ -32,7 +32,7 @@ static char *toggle_float_pos            = "50% 50% 80% 80%"; // default floatin
 static const double defaultopacity       = 0;   /* client default opacity, e.g. 0.75. 0 means don't apply opacity. */
 
 /* Indicators: see lib/bar_indicators.h for options */
-static int tagindicatortype              = INDICATOR_BOTTOM_BAR_SLIM;
+static int wsindicatortype               = INDICATOR_BOTTOM_BAR_SLIM;
 static int fakefsindicatortype           = INDICATOR_PLUS;
 static int floatfakefsindicatortype      = INDICATOR_PLUS_AND_LARGER_SQUARE;
 static int floatindicatortype            = INDICATOR_TOP_LEFT_LARGER_SQUARE;
@@ -413,13 +413,6 @@ static const Layout layouts[] = {
 /* key definitions */
 #define MODKEY Super
 
-#define TAGKEYS(KEY,TAG) \
-	{ MODKEY,                       KEY,      comboview,      {.ui = 1 << TAG} }, \
-	{ MODKEY|Ctrl,                  KEY,      toggleview,     {.ui = 1 << TAG} }, \
-	{ MODKEY|Shift,                 KEY,      combotag,       {.ui = 1 << TAG} }, \
-	{ MODKEY|Ctrl|Shift,            KEY,      toggletag,      {.ui = 1 << TAG} }, \
-	{ MODKEY|Alt|ShiftMask,         KEY,      swaptags,       {.ui = 1 << TAG} },
-
 #define STACKKEYS(MOD,ACTION) \
 	{ MOD, XK_j, ACTION, {.i = INC(+1) } }, \
 	{ MOD, XK_k, ACTION, {.i = INC(-1) } }, \
@@ -510,8 +503,8 @@ static Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_minus,        changeopacity,          {.f = -0.05 } },
 	{ MODKEY|Shift,                 XK_comma,        focusmon,               {.i = -1 } },
 	{ MODKEY|Shift,                 XK_period,       focusmon,               {.i = +1 } },
-	{ MODKEY|Alt,                   XK_comma,        tagmon,                 {.i = -1 } },
-	{ MODKEY|Alt,                   XK_period,       tagmon,                 {.i = +1 } },
+	{ MODKEY|Alt,                   XK_comma,        clienttomon,            {.i = -1 } },
+	{ MODKEY|Alt,                   XK_period,       clienttomon,            {.i = +1 } },
 	{ MODKEY|Alt|Shift,             XK_comma,        tagallmon,              {.i = +1 } },
 	{ MODKEY|Alt|Shift,             XK_period,       tagallmon,              {.i = -1 } },
 	{ MODKEY|Alt|Ctrl,              XK_comma,        tagswapmon,             {.i = +1 } },
@@ -576,16 +569,6 @@ static Key keys[] = {
 //	{ MODKEY,                       XK_,             taggridmovetag,         { .ui = TAGGRID_DOWN  | TAGGRID_TAG | TAGGRID_VIEW } },
 //	{ MODKEY,                       XK_,             taggridmovetag,         { .ui = TAGGRID_RIGHT | TAGGRID_TAG | TAGGRID_VIEW } },
 //	{ MODKEY,                       XK_,             taggridmovetag,         { .ui = TAGGRID_LEFT  | TAGGRID_TAG | TAGGRID_VIEW } },
-
-	TAGKEYS(                        XK_1,                                    0)
-	TAGKEYS(                        XK_2,                                    1)
-	TAGKEYS(                        XK_3,                                    2)
-	TAGKEYS(                        XK_4,                                    3)
-	TAGKEYS(                        XK_5,                                    4)
-	TAGKEYS(                        XK_6,                                    5)
-	TAGKEYS(                        XK_7,                                    6)
-	TAGKEYS(                        XK_8,                                    7)
-	TAGKEYS(                        XK_9,                                    8)
 };
 
 /* button definitions */
@@ -626,17 +609,14 @@ static Button buttons[] = {
 	{ ClkClientWin,              MODKEY,                  Button5,        inplacerotate,  {.i = -1 } },
 	{ ClkClientWin,              MODKEY|Alt,              Button4,        cyclelayout,    {.i = -1 } },
 	{ ClkClientWin,              MODKEY|Alt,              Button5,        cyclelayout,    {.i = +1 } },
-	{ ClkTagBar,                 0,                       Button1,        view,           {0} },
-	{ ClkTagBar,                 0,                       Button3,        toggleview,     {0} },
 	{ ClkTagBar,                 0,                       Button4,        cycleiconset,   {.i = +1 } },
 	{ ClkTagBar,                 0,                       Button5,        cycleiconset,   {.i = -1 } },
-	{ ClkTagBar,                 MODKEY,                  Button1,        tag,            {0} },
-	{ ClkTagBar,                 MODKEY,                  Button3,        toggletag,      {0} },
 };
 
 static const char *ipcsockpath = "/tmp/dusk.sock";
 static IPCCommand ipccommands[] = {
 	IPCCOMMAND( changeopacity, 1, {ARG_TYPE_FLOAT} ),
+	IPCCOMMAND( clienttomon, 1, {ARG_TYPE_UINT} ),
 	IPCCOMMAND( cycleiconset, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( cyclelayout, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( defaultgaps, 1, {ARG_TYPE_NONE} ),
@@ -688,7 +668,6 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( tagall, 1, {ARG_TYPE_STR} ), // e.g. "4" or "F4" to only move floating windows to tag 4
 	IPCCOMMAND( tagallmon, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( taggridmovetag, 1, {ARG_TYPE_UINT} ),
-	IPCCOMMAND( tagmon, 1, {ARG_TYPE_UINT} ),
 	IPCCOMMAND( tagswapmon, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( tagtoleft, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( tagtoright, 1, {ARG_TYPE_NONE} ),
@@ -703,8 +682,6 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( togglenomodbuttons, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( togglescratch, 1, {ARG_TYPE_UINT} ),
 	IPCCOMMAND( togglesticky, 1, {ARG_TYPE_NONE} ),
-	IPCCOMMAND( toggletag, 1, {ARG_TYPE_UINT} ),
-	IPCCOMMAND( toggleview, 1, {ARG_TYPE_UINT} ),
 	IPCCOMMAND( transfer, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( transferall, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( unfloatvisible, 1, {ARG_TYPE_NONE} ),

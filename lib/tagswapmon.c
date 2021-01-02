@@ -34,7 +34,7 @@ tagswapmon(const Arg *arg)
 	}
 
 	for (c = sc; c; c = next) {
-		tagmonresize(c, selmon, n);
+		clientmonresize(c, selmon, n);
 		next = c->next;
 		c->ws = nws;
 		c->tags = nws->tags; /* assign tags of target monitor */
@@ -49,7 +49,7 @@ tagswapmon(const Arg *arg)
 	}
 
 	for (c = mc; c; c = next) {
-		tagmonresize(c, n, selmon);
+		clientmonresize(c, n, selmon);
 		next = c->next;
 		c->ws = ws;
 		c->tags = ws->tags; /* assign tags of target monitor */

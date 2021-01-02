@@ -456,7 +456,11 @@ static void buttonpress(XEvent *e);
 static void checkotherwm(void);
 static void cleanup(void);
 static void cleanupmon(Monitor *mon);
+static void clientfittomon(Client *c, Monitor *m, int *cx, int *cy, int *cw, int *ch);
 static void clientmessage(XEvent *e);
+static void clientmonresize(Client *c, Monitor *old, Monitor *m);
+static void clientrelposmon(Client *c, Monitor *o, Monitor *n, int *cx, int *cy, int *cw, int *ch);
+static void clienttomon(const Arg *arg);
 static void configure(Client *c);
 static void configurenotify(XEvent *e);
 static void configurerequest(XEvent *e);
@@ -493,7 +497,7 @@ static void motionnotify(XEvent *e);
 static void movemouse(const Arg *arg);
 static Client *nexttiled(Client *c);
 static Client *prevtiled(Client *c);
-static void pop(Client *);
+// static void pop(Client *);
 static void propertynotify(XEvent *e);
 static void quit(const Arg *arg);
 static Monitor *recttomon(int x, int y, int w, int h);
@@ -515,16 +519,9 @@ static void seturgent(Client *c, int urg);
 static void showhide(Client *c);
 static void sigchld(int unused);
 static void spawn(const Arg *arg);
-static void tag(const Arg *arg);
-static void tagfittomon(Client *c, Monitor *m, int *cx, int *cy, int *cw, int *ch);
-static void tagmon(const Arg *arg);
-static void tagmonresize(Client *c, Monitor *old, Monitor *m);
-static void tagrelposmon(Client *c, Monitor *o, Monitor *n, int *cx, int *cy, int *cw, int *ch);
 static void togglebar(const Arg *arg);
 static void togglefloating(const Arg *arg);
 static void togglemaximize(Client *c, int maximize_vert, int maximize_horz);
-static void toggletag(const Arg *arg);
-static void toggleview(const Arg *arg);
 static void unfocus(Client *c, int setfocus, Client *nextfocus);
 static void unmanage(Client *c, int destroyed);
 static void unmapnotify(XEvent *e);
@@ -568,7 +565,7 @@ static int (*xerrorxlib)(Display *, XErrorEvent *);
 static unsigned int numlockmask = 0;
 static void (*handler[LASTEvent]) (XEvent *) = {
 	[ButtonPress] = buttonpress,
-	[ButtonRelease] = keyrelease,
+	// [ButtonRelease] = keyrelease,
 	[ClientMessage] = clientmessage,
 	[ConfigureNotify] = configurenotify,
 	[ConfigureRequest] = configurerequest,
@@ -577,7 +574,7 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 	[Expose] = expose,
 	[FocusIn] = focusin,
 	[KeyPress] = keypress,
-	[KeyRelease] = keyrelease,
+	// [KeyRelease] = keyrelease,
 	[MappingNotify] = mappingnotify,
 	[MapRequest] = maprequest,
 	[MotionNotify] = motionnotify,
@@ -963,6 +960,19 @@ cleanupmon(Monitor *mon)
 }
 
 void
+clientfittomon(Client *c, Monitor *m, int *cx, int *cy, int *cw, int *ch)
+{
+	if (*cx < m->wx)
+		*cx = m->wx + m->gappov;
+	if (*cy < m->wy)
+		*cy = m->wy + m->gappoh;
+	if (*cx + *cw > m->wx + m->ww)
+		*cx = m->wx + m->ww - *cw - m->gappov;
+	if (*cy + *ch > m->wy + m->wh)
+		*cy = m->my + m->wh - *ch - m->gappoh;
+}
+
+void
 clientmessage(XEvent *e)
 {
 	XWindowAttributes wa;
@@ -1086,6 +1096,73 @@ clientmessage(XEvent *e)
 			show(c);
 	} else if (cme->message_type == netatom[NetWMMoveResize]) {
 		resizemouse(&((Arg) { .v = c }));
+	}
+}
+
+void
+clientmonresize(Client *c, Monitor *o, Monitor *n)
+{
+	if (ISFLOATING(c) && (!ISFULLSCREEN(c) || ISFAKEFULLSCREEN(c)))
+		clientrelposmon(c, o, n, &c->x, &c->y, &c->w, &c->h);
+	else
+		clientrelposmon(c, o, n, &c->oldx, &c->oldy, &c->oldw, &c->oldh);
+
+	if (c->sfx != -9999)
+		clientrelposmon(c, o, n, &c->sfx, &c->sfy, &c->sfw, &c->sfh);
+}
+
+/* Works out a client's (c) position on a new monitor (n) relative to that of the position on
+ * another (o) monitor.
+ *
+ * Formula:
+ *                (n->ww - c->w)
+ *    x = n->wx + -------------- * (c->x - o->wx)
+ *                (o->ww - c->w)
+ */
+void
+clientrelposmon(Client *c, Monitor *o, Monitor *n, int *cx, int *cy, int *cw, int *ch)
+{
+	int ncw = MIN(*cw, MIN(o->ww, n->ww) - 2 * c->bw - 2 * n->gappov);
+	int nch = MIN(*ch, MIN(o->wh, n->wh) - 2 * c->bw - 2 * n->gappoh);
+
+	clientfittomon(c, o, cx, cy, cw, ch);
+
+	if (*cw != ncw || (o->ww - *cw <= 0)) {
+		*cw = ncw;
+		*cx = n->wx + n->gappov;
+	} else
+		*cx = n->wx + (n->ww - *cw) * (*cx - o->wx) / (o->ww - *cw);
+
+	if (*ch != nch || (o->wh - *ch <= 0)) {
+		*ch = nch;
+		*cy = n->wy + n->gappoh;
+	} else
+		*cy = n->wy + (n->wh - *ch) * (*cy - o->wy) / (o->wh - *ch);
+
+	clientfittomon(c, n, cx, cy, cw, ch);
+}
+
+void
+clienttomon(const Arg *arg)
+{
+	Client *c = WS->sel;
+	if (!c || !mons->next)
+		return;
+	Monitor *m = WS->mon;
+	Monitor *n = dirtomon(arg->i);
+	clientmonresize(c, c->ws->mon, n);
+	if (ISFULLSCREEN(c)) {
+		setflag(c, FullScreen, 0);
+		sendmon(c, n);
+		setflag(c, FullScreen, 1);
+		if (!ISFAKEFULLSCREEN(c)) {
+			resizeclient(c, m->mx, m->my, m->mw, m->mh);
+			XRaiseWindow(dpy, c->win);
+		}
+	} else {
+		sendmon(c, dirtomon(arg->i));
+		if (ISFLOATING(c))
+			resizeclient(c, c->x, c->y, c->w, c->h);
 	}
 }
 
@@ -2364,15 +2441,16 @@ prevtiled(Client *c)
 	return r;
 }
 
-void
-pop(Client *c)
-{
-	detach(c);
-	attach(c);
-	focus(c);
-	arrangemon(c->ws->mon);
-	restack(c->ws);
-}
+// TODO do we need this?
+// void
+// pop(Client *c)
+// {
+// 	detach(c);
+// 	attach(c);
+// 	focus(c);
+// 	arrangemon(c->ws->mon);
+// 	restack(c->ws);
+// }
 
 void
 propertynotify(XEvent *e)
@@ -3182,104 +3260,6 @@ spawn(const Arg *arg)
 }
 
 void
-tag(const Arg *arg)
-{
-	Workspace *ws = WS;
-	if (ws->sel && arg->ui & TAGMASK) {
-		ws->sel->tags = arg->ui & TAGMASK;
-
-		if (ws->sel->reverttags)
-			ws->sel->reverttags = 0;
-
-		focus(NULL);
-		arrange(ws->mon);
-		if (enabled(ViewOnTag) && (arg->ui & TAGMASK) != ws->tags)
-			view(arg);
-	}
-}
-
-void
-tagfittomon(Client *c, Monitor *m, int *cx, int *cy, int *cw, int *ch)
-{
-	if (*cx < m->wx)
-		*cx = m->wx + m->gappov;
-	if (*cy < m->wy)
-		*cy = m->wy + m->gappoh;
-	if (*cx + *cw > m->wx + m->ww)
-		*cx = m->wx + m->ww - *cw - m->gappov;
-	if (*cy + *ch > m->wy + m->wh)
-		*cy = m->my + m->wh - *ch - m->gappoh;
-}
-
-void
-tagmon(const Arg *arg)
-{
-	Client *c = WS->sel;
-	if (!c || !mons->next)
-		return;
-	Monitor *m = WS->mon;
-	Monitor *n = dirtomon(arg->i);
-	tagmonresize(c, c->ws->mon, n);
-	if (ISFULLSCREEN(c)) {
-		setflag(c, FullScreen, 0);
-		sendmon(c, n);
-		setflag(c, FullScreen, 1);
-		if (!ISFAKEFULLSCREEN(c)) {
-			resizeclient(c, m->mx, m->my, m->mw, m->mh);
-			XRaiseWindow(dpy, c->win);
-		}
-	} else {
-		sendmon(c, dirtomon(arg->i));
-		if (ISFLOATING(c))
-			resizeclient(c, c->x, c->y, c->w, c->h);
-	}
-}
-
-
-void
-tagmonresize(Client *c, Monitor *o, Monitor *n)
-{
-	if (ISFLOATING(c) && (!ISFULLSCREEN(c) || ISFAKEFULLSCREEN(c)))
-		tagrelposmon(c, o, n, &c->x, &c->y, &c->w, &c->h);
-	else
-		tagrelposmon(c, o, n, &c->oldx, &c->oldy, &c->oldw, &c->oldh);
-
-	if (c->sfx != -9999)
-		tagrelposmon(c, o, n, &c->sfx, &c->sfy, &c->sfw, &c->sfh);
-}
-
-/* Works out a client's (c) position on a new monitor (n) relative to that of the position on
- * another (o) monitor.
- *
- * Formula:
- *                (n->ww - c->w)
- *    x = n->wx + -------------- * (c->x - o->wx)
- *                (o->ww - c->w)
- */
-void
-tagrelposmon(Client *c, Monitor *o, Monitor *n, int *cx, int *cy, int *cw, int *ch)
-{
-	int ncw = MIN(*cw, MIN(o->ww, n->ww) - 2 * c->bw - 2 * n->gappov);
-	int nch = MIN(*ch, MIN(o->wh, n->wh) - 2 * c->bw - 2 * n->gappoh);
-
-	tagfittomon(c, o, cx, cy, cw, ch);
-
-	if (*cw != ncw || (o->ww - *cw <= 0)) {
-		*cw = ncw;
-		*cx = n->wx + n->gappov;
-	} else
-		*cx = n->wx + (n->ww - *cw) * (*cx - o->wx) / (o->ww - *cw);
-
-	if (*ch != nch || (o->wh - *ch <= 0)) {
-		*ch = nch;
-		*cy = n->wy + n->gappoh;
-	} else
-		*cy = n->wy + (n->wh - *ch) * (*cy - o->wy) / (o->wh - *ch);
-
-	tagfittomon(c, n, cx, cy, cw, ch);
-}
-
-void
 togglebar(const Arg *arg)
 {
 	Bar *bar;
@@ -3352,60 +3332,6 @@ togglemaximize(Client *c, int maximize_vert, int maximize_horz)
 		setfloatpos(c, "0% -1y 100% -1h");
 
 	resizeclient(c, c->x, c->y, c->w, c->h);
-}
-
-void
-toggletag(const Arg *arg)
-{
-	unsigned int newtags;
-	Workspace *ws = WS;
-
-	if (!ws->sel)
-		return;
-	newtags = ws->sel->tags ^ (arg->ui & TAGMASK);
-	if (newtags) {
-		ws->sel->tags = newtags;
-		focus(NULL);
-		arrange(ws->mon);
-	}
-	updatecurrentdesktop();
-}
-
-void
-toggleview(const Arg *arg)
-{
-	Workspace *ws = WS;
-	unsigned int newtags = ws->tags ^ (arg->ui & TAGMASK);
-
-	if (enabled(TagIntoStack)) {
-		Client *const selected = ws->sel;
-
-		// clients in the master area should be the same after we add a new tag
-		Client **const masters = calloc(ws->nmaster, sizeof(Client *));
-		if (!masters)
-			die("fatal: could not calloc() %u bytes \n", ws->nmaster * sizeof(Client *));
-		// collect (from last to first) references to all clients in the master area
-		Client *c;
-		size_t j;
-		for (c = nexttiled(ws->clients), j = 0; c && j < ws->nmaster; c = nexttiled(c->next), ++j)
-			masters[ws->nmaster - (j + 1)] = c;
-		// put the master clients at the front of the list
-		// > go from the 'last' master to the 'first'
-		for (j = 0; j < ws->nmaster; ++j)
-			if (masters[j])
-				pop(masters[j]);
-		free(masters);
-
-		// we also want to be sure not to mutate the focus
-		focus(selected);
-	}
-
-	if (newtags) {
-		ws->tags = newtags;
-		focus(NULL);
-		arrange(ws->mon);
-	}
-	updatecurrentdesktop();
 }
 
 void
