@@ -77,6 +77,7 @@
 
 #define WS                      selws
 #define MWS(M)                  (M->selws ? M->selws : selws)
+#define MWSNAME(M)              (M->selws ? M->selws->name : "NULL")
 
 /* enums */
 enum {
@@ -1376,8 +1377,10 @@ createworkspace(int num)
 		for (m = mons; m && m->num != r->monitor; m = m->next);
 		if (m) {
 			ws->mon = m;
-			m->selws = ws;
-			m->selws->visible = 1;
+			if (!m->selws) {
+				m->selws = ws;
+				m->selws->visible = 1;
+			}
 		}
 	}
 
@@ -1651,14 +1654,15 @@ enternotify(XEvent *e)
 	m = c ? c->ws->mon : wintomon(ev->window);
 	fprintf(stderr, "enternotify: %d (monitor %d)\n", 4, m->num);
 	if (m != selmon) {
-		fprintf(stderr, "enternotify: %d, mon %d mon->selws = %s\n", 5, m->num, m->selws->name);
+		fprintf(stderr, "enternotify: %d, mon %d mon->selws = %s\n", 5, m->num, MWSNAME(m));
 		sel = ws->sel;
 		if (sel)
 			fprintf(stderr, "enternotify: %d, unfocusing %s on workspace %s, focusing %s on workspace %s\n", 6, sel->name, sel->ws ? sel->ws->name : "NONE", c ? c->name : "NONE", c ? c->ws->name : "NONE");
 		else
 			fprintf(stderr, "enternotify: %d, no sel client on monitor %d\n", 7, ws->mon->num);
 		selmon = m;
-		selws = m->selws;
+		if (m->selws)
+			selws = m->selws;
 		if (sel)
 			unfocus(sel, 1, c);
 	} else {
@@ -1668,7 +1672,7 @@ enternotify(XEvent *e)
 			return;
 		}
 		else
-			fprintf(stderr, "enternotify: same monitor %d on workspace %s\n", m->num, m->selws ? m->selws->name : "NONE");
+			fprintf(stderr, "enternotify: same monitor %d on workspace %s\n", m->num, MWSNAME(m));
 	}
 	fprintf(stderr, "enternotify: %d\n", 9);
 	focus(c);
@@ -2250,7 +2254,7 @@ motionnotify(XEvent *e)
 
 	if (ev->window != root)
 		return;
-	if ((m = recttomon(ev->x_root, ev->y_root, 1, 1)) != mon && mon) {
+	if ((m = recttomon(ev->x_root, ev->y_root, 1, 1)) != mon) {
 		// fprintf(stderr, "motionnotify - new monitor %d\n", m->num);
 		sel = WS->sel;
 		selmon = m;
@@ -2709,9 +2713,9 @@ sendmon(Client *c, Monitor *m)
 	if (c->ws->mon == m)
 		return;
 
-	fprintf(stderr, "sendmon: selws = %s and m->selws = %s\n", selws->name, m->selws ? m->selws->name : "NONE");
+	fprintf(stderr, "sendmon: selws = %s and m->selws = %s\n", selws->name, MWSNAME(m));
 	Workspace *ws = MWS(m);
-	fprintf(stderr, "sendmon: monitor %d workspace is %s, client %s's workspace is %s\n", m->num, m->selws->name, c->name, c->ws->name);
+	fprintf(stderr, "sendmon: monitor %d workspace is %s, client %s's workspace is %s\n", m->num, MWSNAME(m), c->name, c->ws->name);
 
 	movetows(c, ws);
 

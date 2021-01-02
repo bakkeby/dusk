@@ -9,7 +9,7 @@
 
 // clang-format off
 #define IPC_MAGIC "DUSK-IPC"
-#define IPC_MAGIC_ARR { 'D', 'A', 'W', 'N', '-', 'I', 'P', 'C'}
+#define IPC_MAGIC_ARR { 'D', 'U', 'S', 'K', '-', 'I', 'P', 'C'}
 #define IPC_MAGIC_LEN 8 // Not including null char
 
 #define IPCCOMMAND(FUNC, ARGC, TYPES)                                          \

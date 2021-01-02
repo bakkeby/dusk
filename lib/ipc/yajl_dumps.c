@@ -29,12 +29,13 @@ dump_tags(yajl_gen gen, int tags_len)
 }
 
 int
-dump_workspace(yajl_gen gen, const char *name, const int mon, const int visible, const int num_clients)
+dump_workspace(yajl_gen gen, const char *name, const int mon, const int visible, const int pinned, const int num_clients)
 {
   // clang-format off
   YMAP(
     YSTR("monitor"); YINT(mon);
     YSTR("visible"); YINT(visible);
+    YSTR("pinned"); YINT(pinned);
     YSTR("clients"); YINT(num_clients);
     YSTR("name"); YSTR(name);
   )
@@ -53,7 +54,7 @@ dump_workspaces(yajl_gen gen)
   YARR(
     for (ws = workspaces; ws; ws = ws->next) {
       for (num_clients = 0, c = ws->clients; c; c = c->next, ++num_clients);
-      dump_workspace(gen, ws->name, ws->mon->num, ws->visible, num_clients);
+      dump_workspace(gen, ws->name, ws->mon->num, ws->visible, ws->pinned, num_clients);
     }
   )
   // clang-format on

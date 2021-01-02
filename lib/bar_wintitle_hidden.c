@@ -1,7 +1,7 @@
 int
 width_wintitle_hidden(Bar *bar, BarArg *a)
 {
-	fprintf(stderr, "width_wintitle_hidden <-->");
+	fprintf(stderr, "width_wintitle_hidden <-->\n");
 	return a->w;
 }
 

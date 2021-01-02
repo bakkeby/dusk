@@ -26,7 +26,7 @@ persistworkspacestate(Workspace *ws)
 
 	sprintf(atom, "_DUSK_WORKSPACE_%u", ws->num);
 
-	unsigned long data[] = { ws->visible | ws->mon->num << 1 }; // potentially enablegaps, nmaster, nstack, mfact, pinned
+	unsigned long data[] = { ws->visible | ws->pinned << 1 | ws->mon->num << 2 }; // potentially enablegaps, nmaster, nstack, mfact, pinned
 	XChangeProperty(dpy, root, XInternAtom(dpy, atom, False), XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
 
 	/* set dusk client atoms */
@@ -154,12 +154,14 @@ getworkspacestate(Workspace *ws)
 		settings = *(Atom *)p;
 		XFree(p);
 
-		mon = settings >> 1;
+		mon = settings >> 2;
 		for (m = mons; m && m->num != mon; m = m->next);
 		if (m) {
 			ws->mon = m;
-			ws->visible = settings & 1;
-			fprintf(stderr, "getworkspacestate: found monitor %d for workspace %s, visible = %d\n", m->num, ws->name, ws->visible);
+			ws->visible = settings & 0x1;
+			ws->pinned = (settings & 0x2) >> 1;
+
+			fprintf(stderr, "getworkspacestate: found monitor %d for workspace %s, visible = %d, pinned = %d (settings = %ld)\n", m->num, ws->name, ws->visible, ws->pinned, settings);
 			if (ws->visible)
 				ws->mon->selws = ws; // TODO refactor, we so something similar in createworkspaces
 		}
