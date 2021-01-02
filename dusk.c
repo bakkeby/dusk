@@ -76,8 +76,8 @@
 #define HIDDEN(C)               ((getstate(C->win) == IconicState))
 
 #define WS                      selws
-#define MWS(M)                  (M->selws ? M->selws : selws)
-#define MWSNAME(M)              (M->selws ? M->selws->name : "NULL")
+#define MWS(M)                  (M && M->selws ? M->selws : selws)
+#define MWSNAME(M)              (M && M->selws ? M->selws->name : "NULL")
 
 /* enums */
 enum {
@@ -461,6 +461,7 @@ static void clientmessage(XEvent *e);
 static void clientmonresize(Client *c, Monitor *old, Monitor *m);
 static void clientrelposmon(Client *c, Monitor *o, Monitor *n, int *cx, int *cy, int *cw, int *ch);
 static void clienttomon(const Arg *arg);
+static void clientstomon(const Arg *arg);
 static void configure(Client *c);
 static void configurenotify(XEvent *e);
 static void configurerequest(XEvent *e);
@@ -769,13 +770,17 @@ applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact)
 void
 arrange(Monitor *m)
 {
+
 	Workspace *ws = MWS(m);
-	if (!ws->visible)
+	fprintf(stderr, "arrange: ws = %s\n", ws ? ws->name : "NULL");
+	if (!ws || !ws->visible)
 		return;
+	fprintf(stderr, "arrange: %d\n", 2);
 	if (m)
 		showhide(ws->stack);
 	else for (m = mons; m; m = m->next)
 		showhide(ws->stack);
+	fprintf(stderr, "arrange: %d\n", 3);
 	if (m) {
 		arrangemon(m);
 		restack(ws);
@@ -1167,6 +1172,54 @@ clienttomon(const Arg *arg)
 }
 
 void
+clientstomon(const Arg *arg)
+{
+	Workspace *ws = WS, *nws;
+	Monitor *n;
+	Client *c, *last, *slast, *next;
+
+	if (!mons->next)
+		return;
+
+	n = dirtomon(arg->i);
+	nws = MWS(n);
+	for (last = nws->clients; last && last->next; last = last->next);
+	for (slast = nws->stack; slast && slast->snext; slast = slast->snext);
+
+	for (c = ws->clients; c; c = next) {
+		next = c->next;
+		if (!ISVISIBLE(c))
+			continue;
+		if (ISFLOATING(c))
+			clientmonresize(c, c->ws->mon, n);
+		unfocus(c, 1, NULL);
+		detach(c);
+		detachstack(c);
+		c->ws = nws;
+		c->tags = nws->tags; /* assign tags of target monitor */
+		c->next = NULL;
+		c->snext = NULL;
+		if (last)
+			last = last->next = c;
+		else
+			nws->clients = last = c;
+		if (slast)
+			slast = slast->snext = c;
+		else
+			nws->stack = slast = c;
+		if (ISFULLSCREEN(c)) {
+			if (!ISFAKEFULLSCREEN(c)) {
+				resizeclient(c, n->mx, n->my, n->mw, n->mh);
+				XRaiseWindow(dpy, c->win);
+			}
+		}
+	}
+
+	focus(NULL);
+	arrange(NULL);
+}
+
+void
 configure(Client *c)
 {
 	XConfigureEvent ce;
@@ -1519,6 +1572,7 @@ detach(Client *c)
 
 	for (tc = &c->ws->clients; *tc && *tc != c; tc = &(*tc)->next);
 	*tc = c->next;
+	c->next = NULL;
 }
 
 void
@@ -1533,6 +1587,7 @@ detachstack(Client *c)
 		for (t = c->ws->stack; t && !ISVISIBLE(t); t = t->snext);
 		c->ws->sel = t;
 	}
+	c->snext = NULL;
 }
 
 Monitor *
