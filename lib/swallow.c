@@ -39,8 +39,14 @@ swallow(Client *p, Client *c)
 	s = scanner ? c : p;
 	setfloatinghint(s);
 	/* The swallowed client may have a different border size compared to the swallowing client */
-	XMoveResizeWindow(dpy, s->win, s->x, s->y, s->w - 2*c->bw, s->h - 2*c->bw);
-	arrange(p->ws->mon);
+	if (p->ws->visible) {
+		// TODO take resize hints into account? for floating windows at least?
+		XMoveResizeWindow(dpy, s->win, s->x, s->y, s->w - 2*c->bw, s->h - 2*c->bw);
+		arrange(p->ws->mon);
+	} else {
+		XMoveWindow(dpy, s->win, WIDTH(s) * -2, s->y);
+	}
+
 	configure(p);
 	updateclientlist();
 
@@ -62,11 +68,14 @@ unswallow(Client *c)
 	updatetitle(c);
 	arrange(c->ws->mon);
 	XMapWindow(dpy, c->win);
-	XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
 	setfloatinghint(c);
 	setclientstate(c, NormalState);
-	focus(NULL);
-	arrange(c->ws->mon);
+	if (c->ws->visible) {
+		XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
+		focus(NULL);
+		arrange(c->ws->mon);
+	} else
+		XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
 }
 
 pid_t

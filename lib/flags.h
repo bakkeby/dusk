@@ -29,7 +29,7 @@ static const unsigned long
 	AttachAside = 0x100000,
 	AttachBelow = 0x200000,
 	AttachBottom = 0x400000,
-	SwitchTag = 0x800000, // automatically moves you to the tag of the newly opened application
+	SwitchWorkspace = 0x800000, // automatically moves you to the tag of the newly opened application
 	EnableTag = 0x1000000, // enables the tag of the newly opened application in addition to your existing enabled tags
 	RevertTag = 0x2000000, // if SwitchTag or EnableTag, closing that window reverts the view back to what it was previously
 	IgnoreCfgReq = 0x4000000, // ignore all configure requests coming from the client
@@ -99,7 +99,7 @@ static const unsigned long
 #define ONLYMODBUTTONS(C) (C->flags & OnlyModButtons)
 #define RESTOREFAKEFULLSCREEN(C) (C->flags & RestoreFakeFullScreen)
 #define RULED(C) (C->flags & Ruled)
-#define SWITCHTAG(C) (C->flags & SwitchTag)
+#define SWITCHWORKSPACE(C) (C->flags & SwitchWorkspace)
 #define ENABLETAG(C) (C->flags & EnableTag)
 #define REVERTTAG(C) (C->flags & RevertTag)
 #define MOVERESIZE(C) (C->flags & MoveResize)

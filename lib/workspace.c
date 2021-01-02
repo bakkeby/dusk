@@ -154,18 +154,47 @@ viewws(const Arg *arg)
 {
 	fprintf(stderr, "viewws: -->\n");
 
-	Monitor *omon;
-	Workspace *ws, *mws;
-	ws = (Workspace*)arg->v;
+	Workspace *ws = (Workspace*)arg->v;
+	viewwsonmon(ws, selmon);
+
+	fprintf(stderr, "viewws: <--\n");
+}
+
+void
+viewwsbyname(const Arg *arg)
+{
+	fprintf(stderr, "viewwsbyname: -->\n");
+	Workspace *ws;
+	char *wsname = (char*)arg->v;
+	for (ws = workspaces; ws && strcmp(ws->name, wsname) != 0; ws = ws->next);
+	if (!ws)
+		return;
+
+	viewws(&((Arg) { .v = ws }));
+	focus(ws->sel);
+	fprintf(stderr, "viewwsbyname: <--\n");
+}
+
+void
+viewwsonmon(Workspace *ws, Monitor *m)
+{
+	fprintf(stderr, "viewwsonmon: -->\n");
+
+	if (m == NULL)
+		m = selmon;
+
+	Monitor *omon = NULL;
+	Workspace *ows = NULL, *hws = NULL;
 
 	if (ws == NULL)
-		fprintf(stderr, "viewws: arg->v is NULL\n");
+		fprintf(stderr, "viewwsonmon: arg->v is NULL\n");
 	else
-		fprintf(stderr, "viewws: arg->v is %s\n", ws->name);
+		fprintf(stderr, "viewwsonmon: arg->v is %s\n", ws->name);
 
 	// for (ws = workspaces; ws != arg->v; ws = ws->next);
-	if (!ws || (selws == ws && selmon == ws->mon)) {
-		fprintf(stderr, "viewws: because %s\n", !ws ? "!ws" : selws == ws ? "selws == ws && selmon == ws->mon" : "eh");
+	if (!ws || (selws == ws && m == ws->mon)) {
+		fprintf(stderr, "viewwsonmon: because %s\n", !ws ? "!ws" : selws == ws ? "selws == ws && m == ws->mon" : "eh");
+		arrange(ws->mon);
 		return;
 	}
 
@@ -182,94 +211,84 @@ viewws(const Arg *arg)
 
 	// focus(NULL);
 	if (ws->pinned) {
-		fprintf(stderr, "viewws: ws %s pinned, visible = %d\n", ws->name, ws->visible);
+		fprintf(stderr, "viewwsonmon: ws %s pinned, visible = %d\n", ws->name, ws->visible);
 		if (!ws->visible) {
 			if (ws->mon->selws && ws->mon->selws->visible)
-				hidews(ws->mon->selws);
+				hws = ws->mon->selws;
 			showws(ws);
 			arrange(ws->mon);
 		}
-		fprintf(stderr, "viewws: focusing on client %s\n", ws->sel == NULL ? "NULL" : ws->sel->name);
+		fprintf(stderr, "viewwsonmon: focusing on client %s\n", ws->sel == NULL ? "NULL" : ws->sel->name);
 		focus(ws->sel);
 	} else {
-		fprintf(stderr, "viewws: ws %s not pinned\n", ws->name);
-		if (ws->mon != selmon) {
-			fprintf(stderr, "viewws: ws->mon != selmon\n");
+		fprintf(stderr, "viewwsonmon: ws %s not pinned\n", ws->name);
+		if (ws->mon != m) {
+			fprintf(stderr, "viewwsonmon: ws->mon != m\n");
 			if (ws->visible) {
-				fprintf(stderr, "viewws: ws->visible\n");
-				if (!selmon->selws || selmon->selws->pinned) {
-					fprintf(stderr, "viewws: selmon->selws->pinned\n");
-					if (selmon->selws)
-						hidews(selmon->selws);
+				fprintf(stderr, "viewwsonmon: ws->visible\n");
+				if (!m->selws || m->selws->pinned) {
+					fprintf(stderr, "viewwsonmon: m->selws->pinned\n");
+					if (m->selws)
+						hws = m->selws;
 					omon = ws->mon;
 					/* Try to find the next available workspace on said monitor */
-					for (mws = ws->next; mws && mws->mon != ws->mon; mws = mws->next);
-					if (!mws)
-						for (mws = workspaces; mws && mws != ws && mws->mon != ws->mon; mws = mws->next);
-					if (mws == ws)
-						mws = NULL;
+					for (ows = ws->next; ows && ows->mon != ws->mon; ows = ows->next);
+					if (!ows)
+						for (ows = workspaces; ows && ows != ws && ows->mon != ws->mon; ows = ows->next);
+					if (ows == ws)
+						ows = NULL;
 
-					fprintf(stderr, "viewws: mws is %s\n", mws ? mws->name : "NULL");
-					omon->selws = mws;
-					ws->mon = selmon;
-					selmon->selws = ws;
+					fprintf(stderr, "viewwsonmon: mws is %s\n", ows ? ows->name : "NULL");
+					omon->selws = ows;
+					ws->mon = m;
+					m->selws = ws;
 					selws = ws;
 					showws(selws);
-					if (mws)
-						showws(mws);
-					drawbar(omon);
+					if (ows)
+						showws(ows);
+					// drawbar(omon);
 
 					// TODO what to do if the currently selected workspace is pinned?
 					//      1) move the other workspace here (similar to below !ws->visible)
 					//      2) show the next available workspace on said monitor
 
 				} else {
-					fprintf(stderr, "viewws: !selmon->selws->pinned\n");
-					mws = selmon->selws; // TODO can selmon->selws be null?
-					mws->mon = ws->mon;
-					ws->mon = selmon;
-					fprintf(stderr, "views: set %s->mon to %d and %s->mon to %d\n", mws->name, mws->mon->num, ws->name, ws->mon->num);
+					fprintf(stderr, "viewwsonmon: !m->selws->pinned\n");
+					ows = m->selws; // TODO can m->selws be null?
+					ows->mon = ws->mon;
+					ws->mon = m;
+					fprintf(stderr, "views: set %s->mon to %d and %s->mon to %d\n", ows->name, ows->mon->num, ws->name, ws->mon->num);
 					selws = ws;
-					showws(mws);
+					showws(ows);
 					showws(ws);
 				}
 			} else {
-				fprintf(stderr, "viewws: !ws->visible\n");
+				fprintf(stderr, "viewwsonmon: !ws->visible\n");
 				omon = ws->mon;
 				// This is partially the same as the else below, also partially the same as the
 				// pinned example, perhaps we need to nail down the different ways of manipulating
 				// workspaces, definitely would be good with some refactoring
-				if (selmon->selws && selmon->selws->visible)
-					hidews(selmon->selws);
-				ws->mon = selmon;
+				if (m->selws && m->selws->visible)
+					hws = m->selws;
+				ws->mon = m;
 				selws = ws;
 				showws(ws);
-				drawbar(omon);
 				// drawbar(ws->mon); // TODO not sure this is needed, should be handled by showws --> arrange --> arrangemon --> drawbar
 			}
 		} else {
-			fprintf(stderr, "viewws: ws->mon == selmon, selmon->selws = %s and selws = %s, selmon->selws->visible = %d\n", MWSNAME(selmon), selws->name, selmon->selws ? selmon->selws->visible : 0);
-			if (selmon->selws && selmon->selws->visible)
-				hidews(selmon->selws);
+			fprintf(stderr, "viewwsonmon: ws->mon == m, m->selws = %s and selws = %s, m->selws->visible = %d\n", MWSNAME(m), selws->name, m->selws ? m->selws->visible : 0);
+
+			if (m->selws && m->selws->visible)
+				hws = m->selws;
 			selws = ws;
 			showws(ws);
 		}
-		// arrange(selmon);
+		// arrange(m);
 	}
+	if (hws)
+		hidews(hws); // hiding after showing workspace to avoid flickering (seeing the background for a brief second) when changing workspace
+	if (omon)
+		drawbar(omon);
 	updatecurrentdesktop();
-	fprintf(stderr, "viewws: <--\n");
-}
-
-void
-viewwsbyname(const Arg *arg)
-{
-	fprintf(stderr, "viewwsbyname: -->\n");
-	Workspace *ws;
-	char *wsname = (char*)arg->v;
-	for (ws = workspaces; ws && strcmp(ws->name, wsname) != 0; ws = ws->next);
-	if (!ws)
-		return;
-
-	viewws(&((Arg) { .v = ws }));
-	fprintf(stderr, "viewwsbyname: <--\n");
+	fprintf(stderr, "viewwsonmon: <--\n");
 }

@@ -611,7 +611,7 @@ applyrules(Client *c)
 	Atom wintype, game_id;
 	char role[64];
 	unsigned int i;
-	unsigned int newtags;
+	// unsigned int newtags; // TODO remove
 	const Rule *r;
 	Workspace *ws = NULL;
 	XClassHint ch = { NULL, NULL };
@@ -660,24 +660,25 @@ applyrules(Client *c)
 			if (ISFLOATING(c) && r->floatpos)
 				setfloatpos(c, r->floatpos);
 
+
 			// TODO switch workspaces
-			if ((SWITCHTAG(c) || ENABLETAG(c)) && (NOSWALLOW(c) || !termforwin(c))) {
-				selws = c->ws;
-				selmon = (selws->mon == NULL ? mons : selws->mon);
-				newtags = SWITCHTAG(c) ? c->tags : c->ws->tags | c->tags;
-
-				/* Switch to the client's tag, but only if that tag is not already shown */
-				if (newtags && !(c->tags & c->ws->tags)) {
-					if (REVERTTAG(c))
-						c->reverttags = c->ws->tags;
-					if (SWITCHTAG(c)) {
-						view(&((Arg) { .ui = newtags }));
-					} else {
-						c->ws->tags = newtags;
-					}
-				}
-			}
-
+			// if ((SWITCHTAG(c) || ENABLETAG(c)) && (NOSWALLOW(c) || !termforwin(c))) {
+			// 	selws = c->ws;
+			// 	selmon = (selws->mon == NULL ? mons : selws->mon);
+			// 	newtags = SWITCHTAG(c) ? c->tags : c->ws->tags | c->tags;
+			//
+			// 	/* Switch to the client's tag, but only if that tag is not already shown */
+			// 	if (newtags && !(c->tags & c->ws->tags)) {
+			// 		if (REVERTTAG(c))
+			// 			c->reverttags = c->ws->tags;
+			// 		if (SWITCHTAG(c)) {
+			// 			view(&((Arg) { .ui = newtags }));
+			// 		} else {
+			// 			c->ws->tags = newtags;
+			// 		}
+			// 	}
+			// }
+			//
 			if (enabled(Debug))
 				fprintf(stderr, "applyrules: client rule %d matched:\n    class: %s\n    role: %s\n    instance: %s\n    title: %s\n    wintype: %s\n    tags: %d\n    flags: %ld\n    floatpos: %s\n    workspace: %s\n",
 					i,
@@ -772,6 +773,8 @@ void
 arrange(Monitor *m)
 {
 	Workspace *ws = MWS(m);
+	if (!ws->visible)
+		return;
 	if (m)
 		showhide(ws->stack);
 	else for (m = mons; m; m = m->next)
@@ -2189,7 +2192,10 @@ manage(Window w, XWindowAttributes *wa)
 	fprintf(stderr, "manage: %d (%s)\n", 36, c->name);
 	if (!(term && swallow(term, c))) {
 		fprintf(stderr, "manage: %d (%s)\n", 37, c->name);
-		arrange(c->ws->mon);
+		if (SWITCHWORKSPACE(c))
+			viewwsonmon(c->ws, c->ws->mon);
+		else
+			arrange(c->ws->mon);
 		fprintf(stderr, "manage: %d (%s)\n", 38, c->name);
 		if (!HIDDEN(c))
 			XMapWindow(dpy, c->win);

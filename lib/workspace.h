@@ -12,3 +12,4 @@ static void togglepinnedws(const Arg *arg);
 
 static void viewws(const Arg *arg);
 static void viewwsbyname(const Arg *arg);
+static void viewwsonmon(Workspace *ws, Monitor *m);
