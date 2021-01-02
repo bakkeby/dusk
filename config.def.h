@@ -94,15 +94,15 @@ static char titleselbgcolor[]            = "#330000";
 static char titleselbordercolor[]        = "#330000";
 static char titleselfloatcolor[]         = "#8a902c";
 
-static char tagsnormfgcolor[]            = "#C6BDBD";
-static char tagsnormbgcolor[]            = "#180A13";
-static char tagsnormbordercolor[]        = "#444444";
-static char tagsnormfloatcolor[]         = "#787590";
+static char wsnormfgcolor[]              = "#C6BDBD";
+static char wsnormbgcolor[]              = "#180A13";
+static char wsnormbordercolor[]          = "#444444";
+static char wsnormfloatcolor[]           = "#787590";
 
-static char tagsselfgcolor[]             = "#FFF7D4";
-static char tagsselbgcolor[]             = "#330000";
-static char tagsselbordercolor[]         = "#330000";
-static char tagsselfloatcolor[]          = "#8a902c";
+static char wsselfgcolor[]               = "#FFF7D4";
+static char wsselbgcolor[]               = "#330000";
+static char wsselbordercolor[]           = "#330000";
+static char wsselfloatcolor[]            = "#8a902c";
 
 static char hidfgcolor[]                 = "#c278b6";
 static char hidbgcolor[]                 = "#222222";
@@ -201,8 +201,8 @@ static char *colors[][ColCount] = {
 	[SchemeSel]          = { selfgcolor,       selbgcolor,       selbordercolor,       selfloatcolor },
 	[SchemeTitleNorm]    = { titlenormfgcolor, titlenormbgcolor, titlenormbordercolor, titlenormfloatcolor },
 	[SchemeTitleSel]     = { titleselfgcolor,  titleselbgcolor,  titleselbordercolor,  titleselfloatcolor },
-	[SchemeTagsNorm]     = { tagsnormfgcolor,  tagsnormbgcolor,  tagsnormbordercolor,  tagsnormfloatcolor },
-	[SchemeTagsSel]      = { tagsselfgcolor,   tagsselbgcolor,   tagsselbordercolor,   tagsselfloatcolor },
+	[SchemeTagsNorm]     = { wsnormfgcolor,    wsnormbgcolor,    wsnormbordercolor,    wsnormfloatcolor },
+	[SchemeTagsSel]      = { wsselfgcolor,     wsselbgcolor,     wsselbordercolor,     wsselfloatcolor },
 	[SchemeHid]          = { hidfgcolor,       hidbgcolor,       hidbordercolor,       hidfloatcolor },
 	[SchemeUrg]          = { urgfgcolor,       urgbgcolor,       urgbordercolor,       urgfloatcolor },
 	[SchemeFlexActTTB]   = { titleselfgcolor,  actTTBbgcolor,    actTTBbgcolor,        c000000 },

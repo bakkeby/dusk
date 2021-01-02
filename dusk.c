@@ -1780,11 +1780,13 @@ focus(Client *c)
 	if (ws->sel && ws->sel != c)
 		unfocus(ws->sel, 0, c);
 	if (c) {
+		fprintf(stderr, "focus: so if (c) and c = %s\n", c ? c->name : "NULL");
 		if (c->ws != selws) {
 			if (c->ws->mon != selmon) {
 				drawbar(selmon);
 				selmon = c->ws->mon;
 			}
+			fprintf(stderr, "focus: set selws to c->ws = %s\n", c->ws->name);
 			selws = c->ws;
 		}
 		if (ISURGENT(c))

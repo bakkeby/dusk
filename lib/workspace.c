@@ -155,7 +155,7 @@ viewws(const Arg *arg)
 	fprintf(stderr, "viewws: -->\n");
 
 	Workspace *ws = (Workspace*)arg->v;
-	viewwsonmon(ws, selmon);
+	viewwsonmon(ws, NULL);
 
 	fprintf(stderr, "viewws: <--\n");
 }
@@ -170,8 +170,8 @@ viewwsbyname(const Arg *arg)
 	if (!ws)
 		return;
 
-	viewws(&((Arg) { .v = ws }));
-	focus(ws->sel);
+	viewwsonmon(ws, NULL);
+	focus(ws->sel); // TODO hmmm
 	fprintf(stderr, "viewwsbyname: <--\n");
 }
 
@@ -216,10 +216,8 @@ viewwsonmon(Workspace *ws, Monitor *m)
 			if (ws->mon->selws && ws->mon->selws->visible)
 				hws = ws->mon->selws;
 			showws(ws);
-			arrange(ws->mon);
 		}
-		fprintf(stderr, "viewwsonmon: focusing on client %s\n", ws->sel == NULL ? "NULL" : ws->sel->name);
-		focus(ws->sel);
+		// fprintf(stderr, "viewwsonmon: focusing on client %s\n", ws->sel == NULL ? "NULL" : ws->sel->name);
 	} else {
 		fprintf(stderr, "viewwsonmon: ws %s not pinned\n", ws->name);
 		if (ws->mon != m) {
@@ -258,7 +256,6 @@ viewwsonmon(Workspace *ws, Monitor *m)
 					ows->mon = ws->mon;
 					ws->mon = m;
 					fprintf(stderr, "views: set %s->mon to %d and %s->mon to %d\n", ows->name, ows->mon->num, ws->name, ws->mon->num);
-					selws = ws;
 					showws(ows);
 					showws(ws);
 				}
@@ -271,7 +268,6 @@ viewwsonmon(Workspace *ws, Monitor *m)
 				if (m->selws && m->selws->visible)
 					hws = m->selws;
 				ws->mon = m;
-				selws = ws;
 				showws(ws);
 				// drawbar(ws->mon); // TODO not sure this is needed, should be handled by showws --> arrange --> arrangemon --> drawbar
 			}
@@ -280,7 +276,6 @@ viewwsonmon(Workspace *ws, Monitor *m)
 
 			if (m->selws && m->selws->visible)
 				hws = m->selws;
-			selws = ws;
 			showws(ws);
 		}
 		// arrange(m);
