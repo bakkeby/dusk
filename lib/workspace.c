@@ -53,6 +53,9 @@ void
 showwsclients(Workspace *ws)
 {
 	fprintf(stderr, "showwsclients --> %s\n", ws->name);
+
+	// TODO: probably need something in here to handle moving fullscreen windows from one monitor
+	// to another
 	showhide(ws->stack);
 	fprintf(stderr, "showwsclients <--\n");
 	// Client *c;
