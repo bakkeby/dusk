@@ -1,28 +1,24 @@
 void
 shiftviewclients(const Arg *arg)
 {
-	Workspace *ws = WS;
-	Arg shifted;
-	Client *c;
-	unsigned int tagmask = 0;
+	Workspace *ws = WS, *nws = NULL, *tws;
 
-	for (c = ws->clients; c; c = c->next)
-		if (!(c->tags & SPTAGMASK))
-			tagmask = tagmask | c->tags;
+	if (arg->i > 0) { // right circular shift
+		for (nws = ws->next; nws && !(nws->mon == ws->mon && nws->clients); nws = nws->next);
+		if (!nws && ws != workspaces)
+			for (tws = workspaces; tws && tws != ws; tws = tws->next)
+				if (tws->mon == ws->mon && tws->clients) {
+					nws = tws;
+					break;
+				}
+	} else { // left circular shift
+		for (tws = workspaces; tws && !(nws && tws == ws); tws = tws->next)
+			if (tws->mon == ws->mon && tws->clients)
+				nws = tws;
+	}
 
-	shifted.ui = ws->tags & ~SPTAGMASK;
-	if (arg->i > 0) // left circular shift
-		do {
-			shifted.ui = (shifted.ui << arg->i)
-			   | (shifted.ui >> (NUMTAGS - arg->i));
-			shifted.ui &= ~SPTAGMASK;
-		} while (tagmask && !(shifted.ui & tagmask));
-	else // right circular shift
-		do {
-			shifted.ui = (shifted.ui >> -arg->i)
-			   | (shifted.ui << (NUMTAGS + arg->i));
-			shifted.ui &= ~SPTAGMASK;
-		} while (tagmask && !(shifted.ui & tagmask));
+	if (!nws)
+		return;
 
-	view(&shifted);
+	viewwsonmon(nws, nws->mon);
 }
