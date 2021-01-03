@@ -73,7 +73,7 @@ setlayoutaxisex(const Arg *arg)
 		arr = 0;
 
 	ws->ltaxis[axis] = arr;
-	arrangemon(selmon);
+	arrangews(ws);
 }
 
 static void
@@ -746,7 +746,7 @@ mirrorlayout(const Arg *arg)
 	if (!ws->layout->arrange)
 		return;
 	ws->ltaxis[LAYOUT] *= -1;
-	arrangemon(selmon);
+	arrangews(ws);
 }
 
 /* Rotate layout axis for flextile */
@@ -780,6 +780,6 @@ rotatelayoutaxis(const Arg *arg)
 		else if (ws->ltaxis[axis] < 0)
 			ws->ltaxis[axis] = AXIS_LAST - 1;
 	}
-	arrangemon(selmon);
+	arrangews(ws);
 	setflexsymbols(selmon, 0);
 }

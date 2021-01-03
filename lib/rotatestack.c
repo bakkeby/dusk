@@ -46,7 +46,7 @@ rotatestack(const Arg *arg)
 		}
 	}
 	if (c) {
-		arrange(ws->mon);
+		arrange(ws);
 		focus(f);
 		restack(ws);
 	}

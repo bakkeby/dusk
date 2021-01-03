@@ -8,5 +8,5 @@ unfloatvisible(const Arg *arg)
 		if (ISVISIBLE(c) && ISFLOATING(c))
 			setflag(c, Floating, ISFIXED(c));
 
-	arrangemon(ws->mon);
+	arrangews(ws);
 }

@@ -12,7 +12,7 @@ stackfocus(const Arg *arg)
 	    i -= ISVISIBLE(c) ? 1 : 0, p = c, c = c->next);
 	focus(c ? c : p);
 	restack(ws);
-	arrangemon(ws->mon);
+	arrangews(ws);
 }
 
 void
@@ -37,7 +37,7 @@ stackpush(const Arg *arg)
 		sel->next = c->next;
 		c->next = sel;
 	}
-	arrangemon(ws->mon);
+	arrangews(ws);
 }
 
 int

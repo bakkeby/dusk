@@ -22,10 +22,6 @@
     yajl_gen_map_close(gen);                                                   \
   }
 
-int dump_tag(yajl_gen gen, const char *name, const int tag_mask);
-
-int dump_tags(yajl_gen gen, int tags_len);
-
 int dump_client(yajl_gen gen, Client *c);
 
 int dump_monitor(yajl_gen gen, Monitor *mon, int is_selected);

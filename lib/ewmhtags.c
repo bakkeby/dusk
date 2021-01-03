@@ -1,21 +1,3 @@
-// void
-// persistmonitorstate(Monitor *m)
-// {
-// 	Client *c;
-// 	Workspace *ws = MWS(m);
-// 	unsigned int i;
-// 	char atom[22];
-
-// 	sprintf(atom, "_DUSK_MONITOR_TAGS_%u", m->num); // TODO workspaces
-
-// 	unsigned long data[] = { ws->tags };
-// 	XChangeProperty(dpy, root, XInternAtom(dpy, atom, False), XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
-
-
-
-// 	XSync(dpy, False);
-// }
-
 void
 persistworkspacestate(Workspace *ws)
 {
@@ -26,14 +8,14 @@ persistworkspacestate(Workspace *ws)
 
 	sprintf(atom, "_DUSK_WORKSPACE_%u", ws->num);
 
-	unsigned long data[] = { ws->visible | ws->pinned << 1 | ws->mon->num << 2 }; // potentially enablegaps, nmaster, nstack, mfact, pinned
+	unsigned long data[] = { ws->visible | ws->pinned << 1 | ws->mon->num << 2 }; // potentially enablegaps, nmaster, nstack, mfact
 	XChangeProperty(dpy, root, XInternAtom(dpy, atom, False), XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
 
 	/* set dusk client atoms */
 	for (i = 1, c = ws->clients; c; c = c->next, ++i) {
 		c->id = i;
 		setclientflags(c);
-		setclienttags(c);
+		setclientfields(c);
 	}
 
 	XSync(dpy, False);
@@ -50,12 +32,16 @@ setcurrentdesktop(void)
 void
 setdesktopnames(void)
 {
-	int i;
+	int i, num_workspaces;
+	Workspace *ws;
 	XTextProperty text;
-	char *tags[NUMTAGS];
-	for (i = 0; i < NUMTAGS; i++)
-		tags[i] = tagicon(selmon, i);
-	Xutf8TextListToTextProperty(dpy, tags, NUMTAGS, XUTF8StringStyle, &text);
+	for (num_workspaces = 0, ws = workspaces; ws; ws = ws->next, ++num_workspaces);
+
+	char *wslist[num_workspaces];
+	for (i = 0, ws = workspaces; ws; ws = ws->next, ++i) {
+		wslist[i] = wsicon(ws);
+	}
+	Xutf8TextListToTextProperty(dpy, wslist, NUMTAGS, XUTF8StringStyle, &text);
 	XSetTextProperty(dpy, root, &text, netatom[NetDesktopNames]);
 }
 
@@ -74,9 +60,9 @@ setclientflags(Client *c)
 }
 
 void
-setclienttags(Client *c)
+setclientfields(Client *c)
 {
-	unsigned long data[] = { c->ws->num | (c->id << 6) | (c->tags << 14)};
+	unsigned long data[] = { c->ws->num | (c->id << 6) | (c->scratchkey << 14)};
 	XChangeProperty(dpy, c->win, clientatom[DuskClientTags], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
 }
 
@@ -85,30 +71,34 @@ getclientflags(Client *c)
 {
 	Atom flags = getatomprop(c, clientatom[DuskClientFlags], AnyPropertyType);
 	if (flags)
-		c->flags |= flags;
+		c->flags = flags;
 }
 
 void
-getclienttags(Client *c)
+getclientfields(Client *c)
 {
-	fprintf(stderr, "getclienttags: -->\n");
+	fprintf(stderr, "getclientfields: -->\n");
 	Workspace *ws;
-	Atom clienttags = getatomprop(c, clientatom[DuskClientTags], AnyPropertyType);
-	if (clienttags) {
-		c->tags = (clienttags >> 14) & TAGMASK;
-		c->id = (clienttags & 0x3FC0) >> 6;
+	Atom fields = getatomprop(c, clientatom[DuskClientTags], AnyPropertyType);
+	if (fields) {
+		c->scratchkey = (fields >> 14);
+		c->id = (fields & 0x3FC0) >> 6;
 		for (ws = workspaces; ws; ws = ws->next)
-			if (ws->num == (clienttags & 0x3F)) {
+			if (ws->num == (fields & 0x3F)) {
 				c->ws = ws;
 				break;
 			}
 	}
-	fprintf(stderr, "getclienttags: <--\n");
+	fprintf(stderr, "getclientfields: <--\n");
 }
 
 void
 getmonitorstate(Monitor *m)
 {
+	// TODO the only thing that might be worth remembering here are gapps, borderpx and showbar
+	//      if these are fine to be "reset" as part of a restart then we can get rid of this func
+
+
 	// char atom[22];
 	// int di;
 	// unsigned long dl;
@@ -158,7 +148,7 @@ getworkspacestate(Workspace *ws)
 		for (m = mons; m && m->num != mon; m = m->next);
 		if (m) {
 			ws->mon = m;
-			ws->visible = settings & 0x1;
+			ws->visible = settings & 1;
 			ws->pinned = (settings & 0x2) >> 1;
 
 			fprintf(stderr, "getworkspacestate: found monitor %d for workspace %s, visible = %d, pinned = %d (settings = %ld)\n", m->num, ws->name, ws->visible, ws->pinned, settings);

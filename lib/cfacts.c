@@ -20,5 +20,5 @@ setcfact(const Arg *arg)
 	else if (f > 4.0)
 		f = 4.0;
 	c->cfact = f;
-	arrangemon(ws->mon);
+	arrangews(ws);
 }

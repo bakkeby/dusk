@@ -3,32 +3,6 @@
 #include <stdint.h>
 
 int
-dump_tag(yajl_gen gen, const char *name, const int tag_mask)
-{
-  // clang-format off
-  YMAP(
-    YSTR("bit_mask"); YINT(tag_mask);
-    YSTR("name"); YSTR(name);
-  )
-  // clang-format on
-
-  return 0;
-}
-
-int
-dump_tags(yajl_gen gen, int tags_len)
-{
-  // clang-format off
-  YARR(
-    for (int i = 0; i < tags_len; i++)
-      dump_tag(gen, tagicon(mons, i), 1 << i);
-  )
-  // clang-format on
-
-  return 0;
-}
-
-int
 dump_workspace(yajl_gen gen, const char *name, const int mon, const int visible, const int pinned, const int num_clients)
 {
   // clang-format off

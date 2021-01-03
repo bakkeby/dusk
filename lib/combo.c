@@ -20,7 +20,7 @@ combotag(const Arg *arg)
 			ws->sel->tags = arg->ui & TAGMASK;
 		}
 		focus(NULL);
-		arrange(ws->mon);
+		arrange(ws);
 	}
 }
 
@@ -38,5 +38,5 @@ comboview(const Arg *arg)
 			view(&((Arg) { .ui = newtags }));
 	}
 	focus(NULL);
-	arrange(ws->mon);
+	arrange(ws);
 }

@@ -9,7 +9,7 @@ tagtoleft(const Arg *arg)
 	&& ws->tags > 1) {
 		ws->sel->tags >>= 1;
 		focus(NULL);
-		arrange(ws->mon);
+		arrange(ws);
 	}
 }
 
@@ -22,7 +22,7 @@ tagtoright(const Arg *arg)
 	&& ws->tags & (TAGMASK >> 1)) {
 		ws->sel->tags <<= 1;
 		focus(NULL);
-		arrange(ws->mon);
+		arrange(ws);
 	}
 }
 
@@ -35,7 +35,7 @@ viewtoleft(const Arg *arg)
 		ws->prevtags = ws->tags;
 		ws->tags >>= 1;
 		focus(NULL);
-		arrange(ws->mon);
+		arrange(ws);
 	}
 }
 
@@ -48,7 +48,7 @@ viewtoright(const Arg *arg)
 		ws->prevtags = ws->tags;
 		ws->tags <<= 1;
 		focus(NULL);
-		arrange(ws->mon);
+		arrange(ws);
 	}
 }
 
@@ -62,7 +62,7 @@ tagandviewtoleft(const Arg *arg)
 		ws->prevtags = ws->tags;
 		ws->tags >>= 1;
 		focus(ws->sel);
-		arrange(ws->mon);
+		arrange(ws);
 	}
 }
 
@@ -76,6 +76,6 @@ tagandviewtoright(const Arg *arg)
 		ws->prevtags = ws->tags;
 		ws->tags <<= 1;
 		focus(ws->sel);
-		arrange(ws->mon);
+		arrange(ws);
 	}
 }

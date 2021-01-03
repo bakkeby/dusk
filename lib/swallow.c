@@ -42,7 +42,7 @@ swallow(Client *p, Client *c)
 	if (p->ws->visible) {
 		// TODO take resize hints into account? for floating windows at least?
 		XMoveResizeWindow(dpy, s->win, s->x, s->y, s->w - 2*c->bw, s->h - 2*c->bw);
-		arrange(p->ws->mon);
+		arrange(p->ws);
 	} else {
 		XMoveWindow(dpy, s->win, WIDTH(s) * -2, s->y);
 	}
@@ -66,14 +66,14 @@ unswallow(Client *c)
 	/* unfullscreen the client */
 	setfullscreen(c, 0, 0);
 	updatetitle(c);
-	arrange(c->ws->mon);
+	arrange(c->ws);
 	XMapWindow(dpy, c->win);
 	setfloatinghint(c);
 	setclientstate(c, NormalState);
 	if (c->ws->visible) {
 		XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
 		focus(NULL);
-		arrange(c->ws->mon);
+		arrange(c->ws);
 	} else
 		XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
 }

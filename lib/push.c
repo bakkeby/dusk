@@ -25,7 +25,7 @@ pushup(const Arg *arg)
 		c->next = sel;
 	}
 	focus(sel);
-	arrangemon(selmon);
+	arrangews(ws);
 }
 
 void
@@ -48,5 +48,5 @@ pushdown(const Arg *arg)
 		attach(sel);
 	}
 	focus(sel);
-	arrangemon(selmon);
+	arrangews(ws);
 }

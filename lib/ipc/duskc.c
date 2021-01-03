@@ -361,15 +361,6 @@ get_monitors()
 }
 
 static int
-get_tags()
-{
-  send_message(IPC_TYPE_GET_TAGS, 1, (uint8_t *)"");
-  print_socket_reply();
-
-  return 0;
-}
-
-static int
 get_layouts()
 {
   send_message(IPC_TYPE_GET_LAYOUTS, 1, (uint8_t *)"");
@@ -475,8 +466,6 @@ print_usage(const char *name)
   puts("");
   puts("  get_monitors                    Get monitor properties");
   puts("");
-  puts("  get_tags                        Get list of tags");
-  puts("");
   puts("  get_layouts                     Get list of layouts");
   puts("");
   puts("  get_dwm_client <window_id>      Get dwm client proprties");
@@ -529,8 +518,6 @@ main(int argc, char *argv[])
     run_command(command, command_args, command_argc);
   } else if (strcmp(argv[i], "get_monitors") == 0) {
     get_monitors();
-  } else if (strcmp(argv[i], "get_tags") == 0) {
-    get_tags();
   } else if (strcmp(argv[i], "get_layouts") == 0) {
     get_layouts();
   } else if (strcmp(argv[i], "get_dwm_client") == 0) {

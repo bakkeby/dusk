@@ -22,5 +22,5 @@ tagall(const Arg *arg)
 					}
 				}
 		}
-	arrange(ws->mon);
+	arrange(ws);
 }

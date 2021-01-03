@@ -21,7 +21,7 @@ draw_taggrid(Bar *bar, BarArg *a)
 	columns = NUMTAGS / taggridrows + ((NUMTAGS % taggridrows > 0) ? 1 : 0);
 
 	/* Firstly we will fill the borders of squares */
-	XSetForeground(drw->dpy, drw->gc, scheme[SchemeTagsNorm][ColBg].pixel);
+	XSetForeground(drw->dpy, drw->gc, scheme[SchemeWsNorm][ColBg].pixel);
 	XFillRectangle(dpy, drw->drawable, drw->gc, x, y, h*columns + 1, a->h);
 
 	/* We will draw NUMTAGS squares in tagraws raws. */
@@ -32,19 +32,19 @@ draw_taggrid(Bar *bar, BarArg *a)
 				invert = ws->tags & 1 << i ? 0 : 1;
 
 				/* Select active color for current square */
-				XSetForeground(drw->dpy, drw->gc, !invert ? scheme[SchemeTagsSel][ColBg].pixel :
-									scheme[SchemeTagsNorm][ColFg].pixel);
+				XSetForeground(drw->dpy, drw->gc, !invert ? scheme[SchemeWsSel][ColBg].pixel :
+									scheme[SchemeWsNorm][ColFg].pixel);
 				XFillRectangle(dpy, drw->drawable, drw->gc, x+1, y+1, h-1, h-1);
 
 				/* Mark square if tag has client */
 				if (occ & 1 << i) {
-					XSetForeground(drw->dpy, drw->gc, !invert ? scheme[SchemeTagsSel][ColFg].pixel :
-									scheme[SchemeTagsNorm][ColBg].pixel);
+					XSetForeground(drw->dpy, drw->gc, !invert ? scheme[SchemeWsSel][ColFg].pixel :
+									scheme[SchemeWsNorm][ColBg].pixel);
 					XFillRectangle(dpy, drw->drawable, drw->gc, x + 1, y + 1,
 								   h / 2, h / 2);
 				}
 			} else {
-				XSetForeground(drw->dpy, drw->gc, scheme[SchemeTagsNorm][ColBg].pixel);
+				XSetForeground(drw->dpy, drw->gc, scheme[SchemeWsNorm][ColBg].pixel);
 				XFillRectangle(dpy, drw->drawable, drw->gc, x+1, y+1, h-1, h);
 			}
 			x += h;

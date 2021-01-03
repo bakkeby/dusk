@@ -19,5 +19,5 @@ swaptags(const Arg *arg)
 	ws->tags = newtag;
 
 	focus(NULL);
-	arrange(ws->mon);
+	arrange(ws);
 }

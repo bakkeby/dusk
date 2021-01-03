@@ -23,5 +23,5 @@ transferall(const Arg *arg)
 		i++;
 	}
 	ws->nmaster = nstackclients;
-	arrange(ws->mon);
+	arrange(ws);
 }

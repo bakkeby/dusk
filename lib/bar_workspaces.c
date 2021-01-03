@@ -41,10 +41,10 @@ draw_workspaces(Bar *bar, BarArg *a)
 
 		drw_setscheme(drw, scheme[
 			ws == ws->mon->selws
-			? SchemeTagsSel
+			? SchemeWsSel
 			: urg
 			? SchemeUrg
-			: SchemeTagsNorm
+			: SchemeWsNorm
 		]);
 		drw_text(drw, x, a->y, w, a->h, lrpad / 2, icon, inv, False);
 		drawindicator(m, NULL, ws->clients != NULL, x, a->y, w, a->h, -1, 0, wsindicatortype);

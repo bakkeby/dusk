@@ -36,5 +36,5 @@ transfer(const Arg *arg)
 			insertafter->next = ws->sel;
 		}
 	}
-	arrange(ws->mon);
+	arrange(ws);
 }

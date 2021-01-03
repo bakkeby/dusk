@@ -33,7 +33,7 @@ showws(Workspace *ws)
 	ws->mon->selws = ws;
 	selws = ws;
 	showwsclients(ws);
-	arrange(ws->mon);
+	arrange(ws);
 	fprintf(stderr, "showws <--\n");
 }
 
@@ -94,8 +94,12 @@ movetows(Client *c, Workspace *ws)
 		fprintf(stderr, "movetows: no client received for ws %s\n", ws->name);
 		return;
 	}
-	fprintf(stderr, "movetows: --> client %s --> workspace %s\n", c->name, ws->name);
+	int changemon = !MOVERESIZE(c) && c->ws->mon != ws->mon;
 
+	if (changemon) {
+		clientmonresize(c, c->ws->mon, ws->mon);
+	}
+	fprintf(stderr, "movetows: --> client %s --> workspace %s\n", c->name, ws->name);
 	int hadfocus = (c == WS->sel);
 	unfocus(c, 1, NULL);
 	detach(c);
@@ -103,28 +107,29 @@ movetows(Client *c, Workspace *ws)
 	c->next = NULL;
 
 	if (c->ws->visible)
-		arrange(c->ws->mon);
+		arrange(c->ws);
 
 	c->ws = ws;
 	c->id = 0;
-
-	if (!(c->tags & SPTAGMASK)) // TODO SPTAGMASK, scratchpads
-		c->tags = ws->tags; /* assign tags of target monitor */
 
 	attachx(c);
 	attachstack(c);
 
 	if (ws->visible) {
-		arrange(ws->mon);
+		arrange(ws);
 		if (hadfocus) {
 			focus(c);
 			restack(c->ws);
 		} else {
 			focus(NULL);
 		}
+		if (changemon)
+			clientfsrestore(c);
 	} else {
 		XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y); // TODO separate function to hide clients?
 	}
+
+	drawbar(c->ws->mon);
 
 	fprintf(stderr, "movetows: <--\n");
 }
@@ -197,7 +202,7 @@ viewwsonmon(Workspace *ws, Monitor *m)
 	// for (ws = workspaces; ws != arg->v; ws = ws->next);
 	if (!ws || (selws == ws && m == ws->mon)) {
 		fprintf(stderr, "viewwsonmon: because %s\n", !ws ? "!ws" : selws == ws ? "selws == ws && m == ws->mon" : "eh");
-		arrange(ws->mon);
+		arrange(ws);
 		return;
 	}
 
@@ -210,6 +215,10 @@ viewwsonmon(Workspace *ws, Monitor *m)
 	 *      - ws2m0 --> shown
 	 * quite difficult to write these out in text
 	 */
+
+
+	// TODO: one bug
+	//       1) when I started gedit and switched workspaces gedit (floating) would not move, not sure why
 
 
 	// focus(NULL);
@@ -228,11 +237,16 @@ viewwsonmon(Workspace *ws, Monitor *m)
 			if (ws->visible) {
 				fprintf(stderr, "viewwsonmon: ws->visible\n");
 				if (!m->selws || m->selws->pinned) {
+					/* The current workspace is pinned, or there are no workspaces on the current
+					 * monitor. In this case, move the other workspace to the current monitor and
+					 * change to the next available workspace on the other monitor. */
 					fprintf(stderr, "viewwsonmon: m->selws->pinned\n");
+					clientsmonresize(ws->clients, ws->mon, selmon);
 					if (m->selws)
 						hws = m->selws;
 					omon = ws->mon;
-					/* Try to find the next available workspace on said monitor */
+
+					/* Find the next available workspace on said monitor */
 					for (ows = ws->next; ows && ows->mon != ws->mon; ows = ows->next);
 					if (!ows)
 						for (ows = workspaces; ows && ows != ws && ows->mon != ws->mon; ows = ows->next);
@@ -244,26 +258,28 @@ viewwsonmon(Workspace *ws, Monitor *m)
 					ws->mon = m;
 					m->selws = ws;
 					selws = ws;
-					showws(selws);
+					showws(ws);
+					clientsfsrestore(ws->clients);
 					if (ows)
 						showws(ows);
 					// drawbar(omon);
-
-					// TODO what to do if the currently selected workspace is pinned?
-					//      1) move the other workspace here (similar to below !ws->visible)
-					//      2) show the next available workspace on said monitor
-
 				} else {
 					fprintf(stderr, "viewwsonmon: !m->selws->pinned\n");
-					ows = m->selws; // TODO can m->selws be null?
+					ows = m->selws;
+					clientsmonresize(ows->clients, ows->mon, ws->mon);
+					clientsmonresize(ws->clients, ws->mon, ows->mon);
 					ows->mon = ws->mon;
 					ws->mon = m;
 					fprintf(stderr, "views: set %s->mon to %d and %s->mon to %d\n", ows->name, ows->mon->num, ws->name, ws->mon->num);
+
 					showws(ows);
 					showws(ws);
+					clientsfsrestore(ows->clients);
+					clientsfsrestore(ws->clients);
 				}
 			} else {
 				fprintf(stderr, "viewwsonmon: !ws->visible\n");
+				clientsmonresize(ws->clients, ws->mon, selmon);
 				omon = ws->mon;
 				// This is partially the same as the else below, also partially the same as the
 				// pinned example, perhaps we need to nail down the different ways of manipulating
@@ -272,7 +288,8 @@ viewwsonmon(Workspace *ws, Monitor *m)
 					hws = m->selws;
 				ws->mon = m;
 				showws(ws);
-				// drawbar(ws->mon); // TODO not sure this is needed, should be handled by showws --> arrange --> arrangemon --> drawbar
+				clientsfsrestore(ws->clients);
+				// drawbar(ws->mon); // TODO not sure this is needed, should be handled by showws --> arrange --> arrangews --> drawbar
 			}
 		} else {
 			fprintf(stderr, "viewwsonmon: ws->mon == m, m->selws = %s and selws = %s, m->selws->visible = %d\n", MWSNAME(m), selws->name, m->selws ? m->selws->visible : 0);

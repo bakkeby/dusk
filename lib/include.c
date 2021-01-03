@@ -1,6 +1,5 @@
 /* Bar functionality */
 #include "bar_indicators.c"
-#include "bar_tagicons.c"
 #include "flags.c"
 #include "func.c"
 #include "warp.c"
@@ -48,10 +47,10 @@
 #include "killunsel.c"
 #include "nomodbuttons.c"
 #include "push.c"
+#include "renamed_scratchpads.c"
 #include "restartsig.c"
 #include "rotatestack.c"
 #include "savefloats.c"
-#include "scratchpad.c"
 #include "setborderpx.c"
 #include "shiftview.c"
 #include "shiftviewclients.c"

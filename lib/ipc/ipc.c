@@ -655,21 +655,6 @@ ipc_get_monitors(IPCClient *c, Monitor *mons, Monitor *selmon)
 }
 
 /**
- * Called when an IPC_TYPE_GET_TAGS message is received from a client. It
- * prepares a reply with info about all the tags in JSON.
- */
-static void
-ipc_get_tags(IPCClient *c, const int tags_len)
-{
-	yajl_gen gen;
-	ipc_reply_init_message(&gen);
-
-	dump_workspaces(gen);
-
-	ipc_reply_prepare_send_message(gen, c, IPC_TYPE_GET_WORKSPACES);
-}
-
-/**
  * Called when an IPC_TYPE_GET_LAYOUTS message is received from a client. It
  * prepares a reply with a JSON array of available layouts
  */
@@ -1181,8 +1166,6 @@ ipc_handle_client_epoll_event(struct epoll_event *ev, Monitor *mons,
 
 		if (msg_type == IPC_TYPE_GET_MONITORS)
 			ipc_get_monitors(c, mons, selmon);
-		else if (msg_type == IPC_TYPE_GET_TAGS)
-			ipc_get_tags(c, tags_len);
 		else if (msg_type == IPC_TYPE_GET_WORKSPACES)
 			ipc_get_workspaces(c);
 		else if (msg_type == IPC_TYPE_GET_LAYOUTS)

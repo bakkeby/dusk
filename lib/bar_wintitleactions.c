@@ -31,7 +31,7 @@ hide(Client *c) {
 			n = prevvisible(c);
 	}
 	focus(n);
-	arrange(c->ws->mon);
+	arrange(c->ws);
 }
 
 void
@@ -42,7 +42,7 @@ show(Client *c)
 
 	XMapWindow(dpy, c->win);
 	setclientstate(c, NormalState);
-	arrange(c->ws->mon);
+	arrange(c->ws);
 }
 
 void

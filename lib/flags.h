@@ -44,7 +44,7 @@ static const unsigned long
 	 * internally to ignore such configure requests while movemouse or resizemouse are being used. */
 	MoveResize = 0x100000000, // used internally to indicate that the client is being moved or resized
 	NoBorder = 0x200000000,
-	FlagPlaceholder17179869184 = 0x400000000,
+	Invisible = 0x400000000, // by default all clients are visible, used by scratchpads to hide clients
 	FlagPlaceholder34359738368 = 0x800000000,
 	FlagPlaceholder68719476736 = 0x1000000000,
 	FlagPlaceholder137438953472 = 0x2000000000,
@@ -87,6 +87,7 @@ static const unsigned long
 #define ISTERMINAL(C) (C->flags & Terminal)
 #define ISTRANSIENT(C) (C->flags & Transient)
 #define ISURGENT(C) (C->flags & Urgent)
+#define ISVISIBLE(C) (C->ws->visible && !(C->flags & Invisible))
 #define IGNORECFGREQ(C) (C->flags & IgnoreCfgReq)
 #define IGNORECFGREQPOS(C) (C->flags & IgnoreCfgReqPos)
 #define IGNORECFGREQSIZE(C) (C->flags & IgnoreCfgReqSize)

@@ -84,6 +84,6 @@ inplacerotate(const Arg *arg)
 		}
 		i++;
 	}
-	arrangemon(ws->mon);
+	arrangews(ws);
 	focus(c);
 }

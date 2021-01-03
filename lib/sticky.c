@@ -5,5 +5,5 @@ togglesticky(const Arg *arg)
 	if (!ws->sel)
 		return;
 	setflag(ws->sel, Sticky, !ISSTICKY(ws->sel));
-	arrange(ws->mon);
+	arrange(ws);
 }
