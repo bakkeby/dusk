@@ -291,10 +291,11 @@ viewwsonmon(Workspace *ws, Monitor *m)
 				clientsfsrestore(ws->clients);
 				// drawbar(ws->mon); // TODO not sure this is needed, should be handled by showws --> arrange --> arrangews --> drawbar
 			}
+
 		} else {
 			fprintf(stderr, "viewwsonmon: ws->mon == m, m->selws = %s and selws = %s, m->selws->visible = %d\n", MWSNAME(m), selws->name, m->selws ? m->selws->visible : 0);
 
-			if (m->selws && m->selws->visible)
+			if (m->selws && ws != m->selws && m->selws->visible)
 				hws = m->selws;
 			showws(ws);
 		}
@@ -302,8 +303,13 @@ viewwsonmon(Workspace *ws, Monitor *m)
 	}
 	if (hws)
 		hidews(hws); // hiding after showing workspace to avoid flickering (seeing the background for a brief second) when changing workspace
-	if (omon)
+	if (omon) {
+		/* if all workspaces have been moved over then clear selws for the other monitor */
+		for (ws = workspaces; ws && ws->mon != omon; ws = ws->next);
+		if (!ws)
+			omon->selws = NULL;
 		drawbar(omon);
+	}
 	updatecurrentdesktop();
 	fprintf(stderr, "viewwsonmon: <--\n");
 }
