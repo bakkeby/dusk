@@ -507,8 +507,6 @@ static Key keys[] = {
 	{ MODKEY|Alt,                   XK_period,       clienttomon,            {.i = +1 } },
 	{ MODKEY|Alt|Shift,             XK_comma,        tagallmon,              {.i = +1 } },
 	{ MODKEY|Alt|Shift,             XK_period,       tagallmon,              {.i = -1 } },
-	{ MODKEY|Alt|Ctrl,              XK_comma,        tagswapmon,             {.i = +1 } },
-	{ MODKEY|Alt|Ctrl,              XK_period,       tagswapmon,             {.i = -1 } },
 	{ MODKEY,                       XK_Left,         focusdir,               {.i = 0 } }, // left
 	{ MODKEY,                       XK_Right,        focusdir,               {.i = 1 } }, // right
 	{ MODKEY,                       XK_Up,           focusdir,               {.i = 2 } }, // up
@@ -538,8 +536,6 @@ static Key keys[] = {
 //	{ MODKEY,                       XK_,             focusmaster,           {0} },
 //	{ MODKEY,                       XK_,             tagallmon,              {.i = +1 } },
 //	{ MODKEY,                       XK_,             tagallmon,              {.i = -1 } },
-//	{ MODKEY,                       XK_,             tagswapmon,             {.i = +1 } },
-//	{ MODKEY,                       XK_,             tagswapmon,             {.i = -1 } },
 //	{ MODKEY,                       XK_,             transfer,               {0} },
 //	{ MODKEY,                       XK_,             transferall,            {0} },
 //	{ MODKEY,                       XK_,             togglesticky,           {0} },
@@ -668,7 +664,6 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( tagall, 1, {ARG_TYPE_STR} ), // e.g. "4" or "F4" to only move floating windows to tag 4
 	IPCCOMMAND( tagallmon, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( taggridmovetag, 1, {ARG_TYPE_UINT} ),
-	IPCCOMMAND( tagswapmon, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( tagtoleft, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( tagtoright, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( tagandviewtoleft, 1, {ARG_TYPE_NONE} ),

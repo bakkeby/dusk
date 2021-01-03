@@ -60,7 +60,6 @@
 #include "swaptags.h"
 #include "switchcol.h"
 #include "tagall.h"
-#include "tagswapmon.h"
 #include "togglefullscreen.h"
 #include "transfer.h"
 #include "transferall.h"
