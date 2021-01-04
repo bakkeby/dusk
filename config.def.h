@@ -48,7 +48,6 @@ static unsigned long functionality = 0
 //	|Warp
 	|FocusOnNetActive
 	|AllowNoModifierButtons
-	|TagIntoStack
 //	|ColorEmoji
 //	|Debug
 //	|FocusedOnTop
@@ -72,47 +71,45 @@ static const char statussep              = ';'; /* separator between status bars
 static const char *fonts[]               = { "monospace:size=10" };
 static const char dmenufont[]            = "monospace:size=10";
 
-static char c000000[]                    = "#000000"; // placeholder value
-
 static char normfgcolor[]                = "#C6BDBD";
 static char normbgcolor[]                = "#180A13";
 static char normbordercolor[]            = "#444444";
-static char normfloatcolor[]             = "#787590";
 
 static char selfgcolor[]                 = "#FFF7D4";
 static char selbgcolor[]                 = "#330000";
 static char selbordercolor[]             = "#330000";
-static char selfloatcolor[]              = "#8a902c";
 
 static char titlenormfgcolor[]           = "#C6BDBD";
 static char titlenormbgcolor[]           = "#180A13";
 static char titlenormbordercolor[]       = "#330000";
-static char titlenormfloatcolor[]        = "#787590";
 
 static char titleselfgcolor[]            = "#FFF7D4";
 static char titleselbgcolor[]            = "#330000";
 static char titleselbordercolor[]        = "#330000";
-static char titleselfloatcolor[]         = "#8a902c";
 
 static char wsnormfgcolor[]              = "#C6BDBD";
 static char wsnormbgcolor[]              = "#180A13";
 static char wsnormbordercolor[]          = "#444444";
-static char wsnormfloatcolor[]           = "#787590";
 
 static char wsselfgcolor[]               = "#FFF7D4";
 static char wsselbgcolor[]               = "#330000";
 static char wsselbordercolor[]           = "#330000";
-static char wsselfloatcolor[]            = "#8a902c";
 
 static char hidfgcolor[]                 = "#c278b6";
 static char hidbgcolor[]                 = "#222222";
 static char hidbordercolor[]             = "#330000";
-static char hidfloatcolor[]              = "#f76e0c";
 
 static char urgfgcolor[]                 = "#bbbbbb";
 static char urgbgcolor[]                 = "#222222";
 static char urgbordercolor[]             = "#d10f3f";
-static char urgfloatcolor[]              = "#db8fd9";
+
+static char scratchnormcolor[]           = "#C6BDBD";
+static char scratchnormbgcolor[]         = "#180A13";
+static char scratchnormbordercolor[]     = "#FF8800";
+
+static char scratchselcolor[]            = "#FFF7D4";
+static char scratchselbgcolor[]          = "#330000";
+static char scratchselbordercolor[]      = "#FF0000";
 
 static char normTTBbgcolor[]             = "#330000";
 static char normLTRbgcolor[]             = "#330033";
@@ -156,10 +153,12 @@ static const unsigned int alphas[][3] = {
 	[SchemeSel]          = { OPAQUE, baralpha, borderalpha },
 	[SchemeTitleNorm]    = { OPAQUE, baralpha, borderalpha },
 	[SchemeTitleSel]     = { OPAQUE, baralpha, borderalpha },
-	[SchemeWsNorm]     = { OPAQUE, baralpha, borderalpha },
-	[SchemeWsSel]      = { OPAQUE, baralpha, borderalpha },
+	[SchemeWsNorm]       = { OPAQUE, baralpha, borderalpha },
+	[SchemeWsSel]        = { OPAQUE, baralpha, borderalpha },
 	[SchemeHid]          = { OPAQUE, baralpha, borderalpha },
 	[SchemeUrg]          = { OPAQUE, baralpha, borderalpha },
+	[SchemeScratchSel]   = { OPAQUE, baralpha, borderalpha },
+	[SchemeScratchNorm]  = { OPAQUE, baralpha, borderalpha },
 	[SchemeFlexActTTB]   = { OPAQUE, baralpha, borderalpha },
 	[SchemeFlexActLTR]   = { OPAQUE, baralpha, borderalpha },
 	[SchemeFlexActMONO]  = { OPAQUE, baralpha, borderalpha },
@@ -196,48 +195,50 @@ static const unsigned int alphas[][3] = {
 };
 
 static char *colors[][ColCount] = {
-	/*                       fg                bg                border                float */
-	[SchemeNorm]         = { normfgcolor,      normbgcolor,      normbordercolor,      normfloatcolor },
-	[SchemeSel]          = { selfgcolor,       selbgcolor,       selbordercolor,       selfloatcolor },
-	[SchemeTitleNorm]    = { titlenormfgcolor, titlenormbgcolor, titlenormbordercolor, titlenormfloatcolor },
-	[SchemeTitleSel]     = { titleselfgcolor,  titleselbgcolor,  titleselbordercolor,  titleselfloatcolor },
-	[SchemeWsNorm]     = { wsnormfgcolor,    wsnormbgcolor,    wsnormbordercolor,    wsnormfloatcolor },
-	[SchemeWsSel]      = { wsselfgcolor,     wsselbgcolor,     wsselbordercolor,     wsselfloatcolor },
-	[SchemeHid]          = { hidfgcolor,       hidbgcolor,       hidbordercolor,       hidfloatcolor },
-	[SchemeUrg]          = { urgfgcolor,       urgbgcolor,       urgbordercolor,       urgfloatcolor },
-	[SchemeFlexActTTB]   = { titleselfgcolor,  actTTBbgcolor,    actTTBbgcolor,        c000000 },
-	[SchemeFlexActLTR]   = { titleselfgcolor,  actLTRbgcolor,    actLTRbgcolor,        c000000 },
-	[SchemeFlexActMONO]  = { titleselfgcolor,  actMONObgcolor,   actMONObgcolor,       c000000 },
-	[SchemeFlexActGRID]  = { titleselfgcolor,  actGRIDbgcolor,   actGRIDbgcolor,       c000000 },
-	[SchemeFlexActGRD1]  = { titleselfgcolor,  actGRD1bgcolor,   actGRD1bgcolor,       c000000 },
-	[SchemeFlexActGRD2]  = { titleselfgcolor,  actGRD2bgcolor,   actGRD2bgcolor,       c000000 },
-	[SchemeFlexActGRDM]  = { titleselfgcolor,  actGRDMbgcolor,   actGRDMbgcolor,       c000000 },
-	[SchemeFlexActHGRD]  = { titleselfgcolor,  actHGRDbgcolor,   actHGRDbgcolor,       c000000 },
-	[SchemeFlexActDWDL]  = { titleselfgcolor,  actDWDLbgcolor,   actDWDLbgcolor,       c000000 },
-	[SchemeFlexActSPRL]  = { titleselfgcolor,  actSPRLbgcolor,   actSPRLbgcolor,       c000000 },
-	[SchemeFlexActFloat] = { titleselfgcolor,  actfloatbgcolor,  actfloatbgcolor,      c000000 },
-	[SchemeFlexInaTTB]   = { titlenormfgcolor, normTTBbgcolor,   normTTBbgcolor,       c000000 },
-	[SchemeFlexInaLTR]   = { titlenormfgcolor, normLTRbgcolor,   normLTRbgcolor,       c000000 },
-	[SchemeFlexInaMONO]  = { titlenormfgcolor, normMONObgcolor,  normMONObgcolor,      c000000 },
-	[SchemeFlexInaGRID]  = { titlenormfgcolor, normGRIDbgcolor,  normGRIDbgcolor,      c000000 },
-	[SchemeFlexInaGRD1]  = { titlenormfgcolor, normGRD1bgcolor,  normGRD1bgcolor,      c000000 },
-	[SchemeFlexInaGRD2]  = { titlenormfgcolor, normGRD2bgcolor,  normGRD2bgcolor,      c000000 },
-	[SchemeFlexInaGRDM]  = { titlenormfgcolor, normGRDMbgcolor,  normGRDMbgcolor,      c000000 },
-	[SchemeFlexInaHGRD]  = { titlenormfgcolor, normHGRDbgcolor,  normHGRDbgcolor,      c000000 },
-	[SchemeFlexInaDWDL]  = { titlenormfgcolor, normDWDLbgcolor,  normDWDLbgcolor,      c000000 },
-	[SchemeFlexInaSPRL]  = { titlenormfgcolor, normSPRLbgcolor,  normSPRLbgcolor,      c000000 },
-	[SchemeFlexInaFloat] = { titlenormfgcolor, normfloatbgcolor, normfloatbgcolor,     c000000 },
-	[SchemeFlexSelTTB]   = { titleselfgcolor,  selTTBbgcolor,    selTTBbgcolor,        c000000 },
-	[SchemeFlexSelLTR]   = { titleselfgcolor,  selLTRbgcolor,    selLTRbgcolor,        c000000 },
-	[SchemeFlexSelMONO]  = { titleselfgcolor,  selMONObgcolor,   selMONObgcolor,       c000000 },
-	[SchemeFlexSelGRID]  = { titleselfgcolor,  selGRIDbgcolor,   selGRIDbgcolor,       c000000 },
-	[SchemeFlexSelGRD1]  = { titleselfgcolor,  selGRD1bgcolor,   selGRD1bgcolor,       c000000 },
-	[SchemeFlexSelGRD2]  = { titleselfgcolor,  selGRD2bgcolor,   selGRD2bgcolor,       c000000 },
-	[SchemeFlexSelGRDM]  = { titleselfgcolor,  selGRDMbgcolor,   selGRDMbgcolor,       c000000 },
-	[SchemeFlexSelHGRD]  = { titleselfgcolor,  selHGRDbgcolor,   selHGRDbgcolor,       c000000 },
-	[SchemeFlexSelDWDL]  = { titleselfgcolor,  selDWDLbgcolor,   selDWDLbgcolor,       c000000 },
-	[SchemeFlexSelSPRL]  = { titleselfgcolor,  selSPRLbgcolor,   selSPRLbgcolor,       c000000 },
-	[SchemeFlexSelFloat] = { titleselfgcolor,  selfloatbgcolor,  selfloatbgcolor,      c000000 },
+	/*                       fg                bg                border                */
+	[SchemeNorm]         = { normfgcolor,      normbgcolor,      normbordercolor },
+	[SchemeSel]          = { selfgcolor,       selbgcolor,       selbordercolor },
+	[SchemeTitleNorm]    = { titlenormfgcolor, titlenormbgcolor, titlenormbordercolor },
+	[SchemeTitleSel]     = { titleselfgcolor,  titleselbgcolor,  titleselbordercolor },
+	[SchemeWsNorm]       = { wsnormfgcolor,    wsnormbgcolor,    wsnormbordercolor },
+	[SchemeWsSel]        = { wsselfgcolor,     wsselbgcolor,     wsselbordercolor },
+	[SchemeHid]          = { hidfgcolor,       hidbgcolor,       hidbordercolor },
+	[SchemeUrg]          = { urgfgcolor,       urgbgcolor,       urgbordercolor },
+	[SchemeScratchNorm]  = { scratchnormcolor, scratchnormbgcolor, scratchnormbordercolor, },
+	[SchemeScratchSel]   = { scratchselcolor,  scratchselbgcolor,  scratchselbordercolor,  },
+	[SchemeFlexActTTB]   = { titleselfgcolor,  actTTBbgcolor,    actTTBbgcolor },
+	[SchemeFlexActLTR]   = { titleselfgcolor,  actLTRbgcolor,    actLTRbgcolor },
+	[SchemeFlexActMONO]  = { titleselfgcolor,  actMONObgcolor,   actMONObgcolor },
+	[SchemeFlexActGRID]  = { titleselfgcolor,  actGRIDbgcolor,   actGRIDbgcolor },
+	[SchemeFlexActGRD1]  = { titleselfgcolor,  actGRD1bgcolor,   actGRD1bgcolor },
+	[SchemeFlexActGRD2]  = { titleselfgcolor,  actGRD2bgcolor,   actGRD2bgcolor },
+	[SchemeFlexActGRDM]  = { titleselfgcolor,  actGRDMbgcolor,   actGRDMbgcolor },
+	[SchemeFlexActHGRD]  = { titleselfgcolor,  actHGRDbgcolor,   actHGRDbgcolor },
+	[SchemeFlexActDWDL]  = { titleselfgcolor,  actDWDLbgcolor,   actDWDLbgcolor },
+	[SchemeFlexActSPRL]  = { titleselfgcolor,  actSPRLbgcolor,   actSPRLbgcolor },
+	[SchemeFlexActFloat] = { titleselfgcolor,  actfloatbgcolor,  actfloatbgcolor },
+	[SchemeFlexInaTTB]   = { titlenormfgcolor, normTTBbgcolor,   normTTBbgcolor },
+	[SchemeFlexInaLTR]   = { titlenormfgcolor, normLTRbgcolor,   normLTRbgcolor },
+	[SchemeFlexInaMONO]  = { titlenormfgcolor, normMONObgcolor,  normMONObgcolor },
+	[SchemeFlexInaGRID]  = { titlenormfgcolor, normGRIDbgcolor,  normGRIDbgcolor },
+	[SchemeFlexInaGRD1]  = { titlenormfgcolor, normGRD1bgcolor,  normGRD1bgcolor },
+	[SchemeFlexInaGRD2]  = { titlenormfgcolor, normGRD2bgcolor,  normGRD2bgcolor },
+	[SchemeFlexInaGRDM]  = { titlenormfgcolor, normGRDMbgcolor,  normGRDMbgcolor },
+	[SchemeFlexInaHGRD]  = { titlenormfgcolor, normHGRDbgcolor,  normHGRDbgcolor },
+	[SchemeFlexInaDWDL]  = { titlenormfgcolor, normDWDLbgcolor,  normDWDLbgcolor },
+	[SchemeFlexInaSPRL]  = { titlenormfgcolor, normSPRLbgcolor,  normSPRLbgcolor },
+	[SchemeFlexInaFloat] = { titlenormfgcolor, normfloatbgcolor, normfloatbgcolor },
+	[SchemeFlexSelTTB]   = { titleselfgcolor,  selTTBbgcolor,    selTTBbgcolor },
+	[SchemeFlexSelLTR]   = { titleselfgcolor,  selLTRbgcolor,    selLTRbgcolor },
+	[SchemeFlexSelMONO]  = { titleselfgcolor,  selMONObgcolor,   selMONObgcolor },
+	[SchemeFlexSelGRID]  = { titleselfgcolor,  selGRIDbgcolor,   selGRIDbgcolor },
+	[SchemeFlexSelGRD1]  = { titleselfgcolor,  selGRD1bgcolor,   selGRD1bgcolor },
+	[SchemeFlexSelGRD2]  = { titleselfgcolor,  selGRD2bgcolor,   selGRD2bgcolor },
+	[SchemeFlexSelGRDM]  = { titleselfgcolor,  selGRDMbgcolor,   selGRDMbgcolor },
+	[SchemeFlexSelHGRD]  = { titleselfgcolor,  selHGRDbgcolor,   selHGRDbgcolor },
+	[SchemeFlexSelDWDL]  = { titleselfgcolor,  selDWDLbgcolor,   selDWDLbgcolor },
+	[SchemeFlexSelSPRL]  = { titleselfgcolor,  selSPRLbgcolor,   selSPRLbgcolor },
+	[SchemeFlexSelFloat] = { titleselfgcolor,  selfloatbgcolor,  selfloatbgcolor },
 };
 
 static const char *const autostart[] = {
@@ -246,15 +247,9 @@ static const char *const autostart[] = {
 };
 
 
-const char *spcmd1[] = {"st", "-n", "spterm", "-g", "120x34", NULL };
-const char *spcmd2[] = {"st", "-n", "spfm", "-g", "144x41", "-e", "ranger", NULL };
-const char *spcmd3[] = {"keepassxc", NULL };
-static Sp scratchpads[] = {
-   /* name          cmd  */
-   {"spterm",      spcmd1},
-   {"spranger",    spcmd2},
-   {"keepassxc",   spcmd3},
-};
+static const char *spcmd1[] = {"w", "st", "-n", "spterm (w)", "-g", "120x34", NULL };
+static const char *spcmd2[] = {"e", "st", "-n", "spterm (e)", "-g", "120x34", NULL };
+static const char *spcmd3[] = {"r", "st", "-n", "spfm (r)", "-g", "144x41", "-e", "ranger", NULL };
 
 /* There are two options when it comes to per-client rules:
  *  - a typical struct table or
@@ -285,21 +280,19 @@ static const Rule rules[] = {
 	RULE(.wintype = WTYPE "UTILITY", .flags = AlwaysOnTop|Centered|Floating)
 	RULE(.wintype = WTYPE "TOOLBAR", .flags = AlwaysOnTop|Centered|Floating)
 	RULE(.wintype = WTYPE "SPLASH", .flags = AlwaysOnTop|Centered|Floating)
-	RULE(.instance = "spterm", .tags = SPTAG(0), .flags = Floating)
-	RULE(.instance = "spfm", .tags = SPTAG(1), .flags = Floating)
-	RULE(.instance = "keepassxc", .tags = SPTAG(2))
-	RULE(.title = "TermScratchpad (r)", .floatpos = "50% 50% 80% 80%", .tags = SPTAG(2), .flags = AlwaysOnTop|Floating)
-	RULE(.title = "TermScratchpad (t)", .floatpos = "50% 50% 80% 80%", .tags = SPTAG(3), .flags = AlwaysOnTop|Floating)
-	RULE(.class = "Gimp", .tags = 1 << 4, .flags = Floating|SwitchTag)
-	RULE(.class = "firefox", .tags = 1 << 7, .flags = AttachMaster|SwitchTag)
+	RULE(.instance = "spterm (w)", .scratchkey = 'w', .flags = Floating)
+	RULE(.instance = "spterm (e)", .scratchkey = 'e', .flags = Floating)
+	RULE(.instance = "spfm (r)", .scratchkey = 'r', .flags = Floating)
+	RULE(.class = "Gimp", .workspace = "5", .flags = Floating|SwitchTag)
+	RULE(.class = "firefox", .workspace = "8", .flags = AttachMaster|SwitchTag)
 	RULE(.class = "Steam", .flags = IgnoreCfgReqPos|Floating|Centered)
 	RULE(.class = "steam_app_", .flags = IgnoreCfgReqPos|Floating|Centered)
 	RULE(.class = "Google-chrome", .role = "GtkFileChooserDialog", .floatpos = "50% 50%", .flags = AlwaysOnTop|Floating)
 	RULE(.role = "pop-up", .flags = AlwaysOnTop|Floating|Centered)
-	RULE(.role = "browser", .tags = 1 << 7, .monitor = 0, .flags = AttachMaster|OnlyModButtons|SwitchTag)
+	RULE(.role = "browser", .workspace = "8", .flags = AttachMaster|OnlyModButtons|SwitchTag)
 	RULE(.class = "Gnome-terminal", .role = "gnome-terminal-preferences", .flags = Centered)
-	RULE(.class = "Diffuse", .tags = 1 << 3, .flags = NoSwallow|SwitchTag|RevertTag)
-	RULE(.class = "File-roller", .tags = 1 << 8, .flags = Centered|Floating|SwitchTag|RevertTag)
+	RULE(.class = "Diffuse", .workspace = "4", .flags = NoSwallow|SwitchTag|RevertTag)
+	RULE(.class = "File-roller", .workspace = "9", .flags = Centered|Floating|SwitchTag|RevertTag)
 	RULE(.class = "Alacritty", .flags = Terminal|IgnoreCfgReqPos|IgnoreCfgReqSize)
 	RULE(.class = "st-256color", .flags = Terminal|AttachBottom)
 	RULE(.class = "XTerm", .flags = Terminal)
@@ -322,7 +315,7 @@ static const Rule rules[] = {
 static const BarRule barrules[] = {
 	/* monitor  bar    alignment               widthfunc                 drawfunc                 clickfunc                 name */
 	{ -1,       0,     BAR_ALIGN_LEFT,         width_stbutton,           draw_stbutton,           click_stbutton,           "statusbutton" },
-	{ -1,       0,     BAR_ALIGN_LEFT,         width_tags,               draw_tags,               click_tags,               "tags" },
+	{ -1,       0,     BAR_ALIGN_LEFT,         width_workspaces,         draw_workspaces,         click_workspaces,         "workspaces" },
 	{ -1,       0,     BAR_ALIGN_LEFT,         width_taggrid,            draw_taggrid,            click_taggrid,            "taggrid" },
 	{ 'A',      0,     BAR_ALIGN_RIGHT,        width_systray,            draw_systray,            click_systray,            "systray" },
 	{ -1,       0,     BAR_ALIGN_LEFT,         width_ltsymbol,           draw_ltsymbol,           click_ltsymbol,           "layout" },
@@ -333,49 +326,19 @@ static const BarRule barrules[] = {
 	{ -1,       1,     BAR_ALIGN_LEFT,         width_wintitle_floating,  draw_wintitle_floating,  click_wintitle_floating,  "wintitle_floating" },
 };
 
-static const MonitorRule monrules[] = {
-	/* monitor  tag   layout  mfact  nmaster  showbar  topbar */
-	{  1,       -1,   2,      -1,    -1,      -1,      -1     }, // use a different layout for the second monitor
-	{  -1,      -1,   0,      -1,    -1,      -1,      -1     }, // default
+static const WorkspaceRule wsrules[] = {
+	/*                                                                     ------ icons ------
+	   name,  monitor,  pinned,  layout,  mfact,  nmaster,  nstack,  gaps, def,   vac,   occ,  */
+	{  "1",    1,       0,       0,       -1,    -1,       -1,      -1,   }, //  "",    " ₁",  "◉₁", },
+	{  "2",    1,       0,       9,       .80,   -1,       -1,      -1,   }, //  "",    " ₂",  "☢₂", },
+	{  "3",    1,       0,       0,       -1,    -1,       -1,      -1,   }, //  "",    " ₃",  "❖₃", },
+	{  "4",    1,       0,       0,       -1,    -1,       -1,      -1,   }, //  "",    " ₄",  "⚉₄", },
+	{  "5",    1,       0,       0,       -1,    -1,       -1,      -1,   }, //  "",    " ₅",  "♻₅", },
+	{  "6",    1,       0,       0,       -1,    -1,       -1,      -1,   }, //  "",    " ₆",  "⌬₆", },
+	{  "7",    1,       0,       10,      .75,   -1,       -1,      -1,   }, //  "",    " ₇",  "♹₇", },
+	{  "8",    1,       0,       1,       -1,    -1,       -1,      -1,   }, //  "",    " ₈",  "✇₈", },
+	{  "9",    0,       0,       0,       -1,    -1,       -1,      -1,   }, //  "",    " ₉",  "☉₉", },
 };
-
-/* Tags
- * In a traditional dwm the number of tags in use can be changed simply by changing the number
- * of strings in the tags array. This build does things a bit different which has some added
- * benefits. If you need to change the number of tags here then change the NUMTAGS macro in dwm.c.
- *
- * Examples:
- *
- *  1) static char *tagicons[][NUMTAGS*2] = {
- *         [IconsDefault] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F", "G", "H", "I" },
- *     }
- *
- *  2) static char *tagicons[][1] = {
- *         [IconsDefault] = { "•" },
- *     }
- *
- * The first example would result in the tags on the first monitor to be 1 through 9, while the
- * tags for the second monitor would be named A through I. A third monitor would start again at
- * 1 through 9 while the tags on a fourth monitor would also be named A through I. Note the tags
- * count of NUMTAGS*2 in the array initialiser which defines how many tag text / icon exists in
- * the array. This can be changed to *3 to add separate icons for a third monitor.
- *
- * For the second example each tag would be represented as a bullet point. Both cases work the
- * same from a technical standpoint - the icon index is derived from the tag index and the monitor
- * index. If the icon index is is greater than the number of tag icons then it will wrap around
- * until it an icon matches. Similarly if there are two tag icons then it would alternate between
- * them.
- *
- * If a tag icon is an empty string then that tag will be hidden unless it is occupied by clients.
- * In practice this would allow for selective hiding of unoccupied tags, e.g. always show "web"
- * or "email" tags, but hide the rest unless they have clients.
- */
-static char *tagicons[][NUMTAGS*2] = {
-	[IconsDefault]        = { " ₁", " ₂", " ₃", " ₄", " ₅", " ₆", " ₇", " ₈", " ₉", " ₁", " ₂", " ₃", " ₄", " ₅", " ₆", " ₇", " ₈", " ₉" },
-	[IconsVacant]         = { " ₁", " ₂", " ₃", " ₄", " ₅", " ₆", " ₇", " ₈", " ₉", " ₁", " ₂", " ₃", " ₄", " ₅", " ₆", " ₇", " ₈", " ₉" },
-	[IconsOccupied]       = { "◉₁", "☢₂", "❖₃", "⚉₄", "♻₅", "⌬₆", "♹₇", "✇₈", "☉₉", "☋₁", "ℓ₂", "҂₃", "∆₄", "√₅", "∏₆", "Ξ₇", "Ω₈", "ƒ₉" },
-};
-
 /* layout(s) */
 static const float mfact     = 0.50; /* factor of master area size [0.05..0.95] */
 static const int nmaster     = 1;    /* number of clients in master area */
@@ -394,8 +357,8 @@ static const Layout layouts[] = {
 	{ "TTT",      flextile,         { -1, -1, SPLIT_HORIZONTAL, LEFT_TO_RIGHT, LEFT_TO_RIGHT, 0, NULL } }, // bstack
 	{ "===",      flextile,         { -1, -1, SPLIT_HORIZONTAL, LEFT_TO_RIGHT, TOP_TO_BOTTOM, 0, NULL } }, // bstackhoriz
 	{ "==#",      flextile,         { -1, -1, SPLIT_HORIZONTAL, TOP_TO_BOTTOM, GAPPLESSGRID, 0, NULL } }, // bstackgrid
-	{ "|M|",      flextile,         { -1, -1, SPLIT_CENTERED_VERTICAL, TOP_TO_BOTTOM, TOP_TO_BOTTOM, TOP_TO_BOTTOM, NULL } }, // centeredmaster
-	{ "-M-",      flextile,         { -1, -1, SPLIT_CENTERED_HORIZONTAL, LEFT_TO_RIGHT, LEFT_TO_RIGHT, LEFT_TO_RIGHT, NULL } }, // centeredmaster horiz
+	{ "|M|",      flextile,         { -1, -1, SPLIT_CENTERED_VERTICAL, LEFT_TO_RIGHT, TOP_TO_BOTTOM, TOP_TO_BOTTOM, NULL } }, // centeredmaster
+	{ "-M-",      flextile,         { -1, -1, SPLIT_CENTERED_HORIZONTAL, TOP_TO_BOTTOM, LEFT_TO_RIGHT, LEFT_TO_RIGHT, NULL } }, // centeredmaster horiz
 	{ ":::",      flextile,         { -1, -1, NO_SPLIT, GAPPLESSGRID, GAPPLESSGRID, 0, NULL } }, // gappless grid
 	{ "[\\]",     flextile,         { -1, -1, NO_SPLIT, DWINDLE, DWINDLE, 0, NULL } }, // fibonacci dwindle
 	{ "(@)",      flextile,         { -1, -1, NO_SPLIT, SPIRAL, SPIRAL, 0, NULL } }, // fibonacci spiral
@@ -412,6 +375,15 @@ static const Layout layouts[] = {
 
 /* key definitions */
 #define MODKEY Super
+
+#define SCRATCHKEYS(KEY,CMD) \
+	{ MODKEY,                      KEY,      togglescratch,  {.v = CMD } }, \
+	{ MODKEY|Ctrl,                 KEY,      setscratch,     {.v = CMD } }, \
+	{ MODKEY|Ctrl|Shift,           KEY,      removescratch,  {.v = CMD } },
+
+#define WSKEYS(KEY,NAME) \
+	{ MODKEY,                      KEY,      viewwsbyname,   {.v = NAME} }, \
+	{ MODKEY|Shift,                KEY,      movetowsbyname, {.v = NAME} },
 
 #define STACKKEYS(MOD,ACTION) \
 	{ MOD, XK_j, ACTION, {.i = INC(+1) } }, \
@@ -466,6 +438,7 @@ static Key keys[] = {
 	{ MODKEY|Shift,                 XK_o,            setcfact,               {0} },
 
 	{ MODKEY,                       XK_Tab,          view,                   {0} },
+	{ MODKEY,                       XK_a,            togglepinnedws,         {0} },
 	{ MODKEY,                       XK_comma,        shiftviewclients,       { .i = -1 } },
 	{ MODKEY,                       XK_period,       shiftviewclients,       { .i = +1 } },
 	{ MODKEY,                       XK_z,            showhideclient,         {0} },
@@ -503,10 +476,10 @@ static Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_minus,        changeopacity,          {.f = -0.05 } },
 	{ MODKEY|Shift,                 XK_comma,        focusmon,               {.i = -1 } },
 	{ MODKEY|Shift,                 XK_period,       focusmon,               {.i = +1 } },
-	{ MODKEY|Alt,                   XK_comma,        clienttomon,            {.i = -1 } },
-	{ MODKEY|Alt,                   XK_period,       clienttomon,            {.i = +1 } },
-	{ MODKEY|Alt|Shift,             XK_comma,        tagallmon,              {.i = +1 } },
-	{ MODKEY|Alt|Shift,             XK_period,       tagallmon,              {.i = -1 } },
+	{ MODKEY|Alt,                   XK_comma,        clienttomon,            {.i = -1 } }, // sends the current client to an adjacent monitor
+	{ MODKEY|Alt,                   XK_period,       clienttomon,            {.i = +1 } }, // sends the current client to an adjacent monitor
+	{ MODKEY|Alt|Shift,             XK_comma,        clientstomon,           {.i = +1 } }, // sends all clients to an adjacent monitor
+	{ MODKEY|Alt|Shift,             XK_period,       clientstomon,           {.i = -1 } }, // sends all clients to an adjacent monitor
 	{ MODKEY,                       XK_Left,         focusdir,               {.i = 0 } }, // left
 	{ MODKEY,                       XK_Right,        focusdir,               {.i = 1 } }, // right
 	{ MODKEY,                       XK_Up,           focusdir,               {.i = 2 } }, // up
@@ -534,8 +507,8 @@ static Key keys[] = {
 //	{ MODKEY,                       XK_,             shiftview,              { .i = -1 } },
 //	{ MODKEY,                       XK_,             shiftview,              { .i = +1 } },
 //	{ MODKEY,                       XK_,             focusmaster,           {0} },
-//	{ MODKEY,                       XK_,             tagallmon,              {.i = +1 } },
-//	{ MODKEY,                       XK_,             tagallmon,              {.i = -1 } },
+//	{ MODKEY,                       XK_,             clientstomon,           {.i = +1 } },
+//	{ MODKEY,                       XK_,             clientstomon,           {.i = -1 } },
 //	{ MODKEY,                       XK_,             transfer,               {0} },
 //	{ MODKEY,                       XK_,             transferall,            {0} },
 //	{ MODKEY,                       XK_,             togglesticky,           {0} },
@@ -556,19 +529,24 @@ static Key keys[] = {
 //	{ MODKEY,                       XK_,             tagtoright,             {0} },
 //	{ MODKEY,                       XK_,             tagandviewtoleft,       {0} },
 //	{ MODKEY,                       XK_,             tagandviewtoright,      {0} },
-//  // taggrid - change tags by direction, e.g. left, right, up, down
-//	{ MODKEY,                       XK_,             taggridmovetag,         { .ui = TAGGRID_UP    | TAGGRID_VIEW } },
-//	{ MODKEY,                       XK_,             taggridmovetag,         { .ui = TAGGRID_DOWN  | TAGGRID_VIEW } },
-//	{ MODKEY,                       XK_,             taggridmovetag,         { .ui = TAGGRID_RIGHT | TAGGRID_VIEW } },
-//	{ MODKEY,                       XK_,             taggridmovetag,         { .ui = TAGGRID_LEFT  | TAGGRID_VIEW } },
-//	{ MODKEY,                       XK_,             taggridmovetag,         { .ui = TAGGRID_UP    | TAGGRID_TAG | TAGGRID_VIEW } },
-//	{ MODKEY,                       XK_,             taggridmovetag,         { .ui = TAGGRID_DOWN  | TAGGRID_TAG | TAGGRID_VIEW } },
-//	{ MODKEY,                       XK_,             taggridmovetag,         { .ui = TAGGRID_RIGHT | TAGGRID_TAG | TAGGRID_VIEW } },
-//	{ MODKEY,                       XK_,             taggridmovetag,         { .ui = TAGGRID_LEFT  | TAGGRID_TAG | TAGGRID_VIEW } },
+
+	SCRATCHKEYS(                    XK_w,                                    spcmd1)
+	SCRATCHKEYS(                    XK_e,                                    spcmd2)
+	SCRATCHKEYS(                    XK_r,                                    spcmd3)
+
+	WSKEYS(                         XK_1,                                    "1")
+	WSKEYS(                         XK_2,                                    "2")
+	WSKEYS(                         XK_3,                                    "3")
+	WSKEYS(                         XK_4,                                    "4")
+	WSKEYS(                         XK_5,                                    "5")
+	WSKEYS(                         XK_6,                                    "6")
+	WSKEYS(                         XK_7,                                    "7")
+	WSKEYS(                         XK_8,                                    "8")
+	WSKEYS(                         XK_9,                                    "9")
 };
 
 /* button definitions */
-/* click can be ClkButton, ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle, ClkClientWin, or ClkRootWin */
+/* click can be ClkButton, ClkWorkspaceBar, ClkLtSymbol, ClkStatusText, ClkWinTitle, ClkClientWin, or ClkRootWin */
 static Button buttons[] = {
 	/* click                     event mask               button          function        argument */
 	{ ClkButton,                 0,                       Button1,        spawn,          {.v = termcmd } },
@@ -605,15 +583,16 @@ static Button buttons[] = {
 	{ ClkClientWin,              MODKEY,                  Button5,        inplacerotate,  {.i = -1 } },
 	{ ClkClientWin,              MODKEY|Alt,              Button4,        cyclelayout,    {.i = -1 } },
 	{ ClkClientWin,              MODKEY|Alt,              Button5,        cyclelayout,    {.i = +1 } },
-	{ ClkTagBar,                 0,                       Button4,        cycleiconset,   {.i = +1 } },
-	{ ClkTagBar,                 0,                       Button5,        cycleiconset,   {.i = -1 } },
+	{ ClkWorkspaceBar,           0,                       Button1,        viewws,         {0} },
+	{ ClkWorkspaceBar,           MODKEY,                  Button1,        movews,         {0} },
+	{ ClkWorkspaceBar,           MODKEY,                  Button2,        togglepinnedws, {0} },
 };
 
 static const char *ipcsockpath = "/tmp/dusk.sock";
 static IPCCommand ipccommands[] = {
 	IPCCOMMAND( changeopacity, 1, {ARG_TYPE_FLOAT} ),
 	IPCCOMMAND( clienttomon, 1, {ARG_TYPE_UINT} ),
-	IPCCOMMAND( cycleiconset, 1, {ARG_TYPE_SINT} ),
+	IPCCOMMAND( clientstomon, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( cyclelayout, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( defaultgaps, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( enable, 1, {ARG_TYPE_UINT} ),
@@ -645,7 +624,6 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( quit, 1, {ARG_TYPE_SINT} ), // 0 = quit, 1 = restart
 	IPCCOMMAND( removescratch, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( setborderpx, 1, {ARG_TYPE_SINT} ),
-	IPCCOMMAND( seticonset, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( setlayoutaxisex, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( setlayoutex, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( setlayoutsafe, 1, {ARG_TYPE_PTR} ),
@@ -660,9 +638,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( stackfocus, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( swaptags, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( switchcol, 1, {ARG_TYPE_NONE} ),
-	IPCCOMMAND( tag, 1, {ARG_TYPE_UINT} ),
 	IPCCOMMAND( tagall, 1, {ARG_TYPE_STR} ), // e.g. "4" or "F4" to only move floating windows to tag 4
-	IPCCOMMAND( tagallmon, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( taggridmovetag, 1, {ARG_TYPE_UINT} ),
 	IPCCOMMAND( tagtoleft, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( tagtoright, 1, {ARG_TYPE_NONE} ),
@@ -680,7 +656,6 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( transfer, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( transferall, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( unfloatvisible, 1, {ARG_TYPE_NONE} ),
-	IPCCOMMAND( view, 1, {ARG_TYPE_UINT} ),
 	IPCCOMMAND( viewtoleft, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( viewtoright, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( winview, 1, {ARG_TYPE_NONE} ),
