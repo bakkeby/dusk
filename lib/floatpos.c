@@ -28,7 +28,7 @@ setfloatpos(Client *c, const char *floatpos)
 	if (ws->layout->arrange && !ISFLOATING(c))
 		return;
 
-	switch(sscanf(floatpos, "%d%c %d%c %d%c %d%c", &x, &xCh, &y, &yCh, &w, &wCh, &h, &hCh)) {
+	switch (sscanf(floatpos, "%d%c %d%c %d%c %d%c", &x, &xCh, &y, &yCh, &w, &wCh, &h, &hCh)) {
 		case 4:
 			if (xCh == 'w' || xCh == 'W') {
 				w = x; wCh = xCh;
@@ -77,7 +77,7 @@ getfloatpos(int pos, char pCh, int size, char sCh, int min_p, int max_s, int cp,
 
 	cs += 2*cbw;
 
-	switch(pCh) {
+	switch (pCh) {
 	case 'A': // absolute position
 		cp = pos;
 		break;
@@ -125,7 +125,7 @@ getfloatpos(int pos, char pCh, int size, char sCh, int min_p, int max_s, int cp,
 		break;
 	}
 
-	switch(sCh) {
+	switch (sCh) {
 	case 'A': // absolute size
 		cs = size;
 		break;

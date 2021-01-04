@@ -17,6 +17,10 @@ persistworkspacestate(Workspace *ws)
 		c->id = i;
 		setclientflags(c);
 		setclientfields(c);
+		if (c->swallowing) {
+			setclientflags(c->swallowing);
+			setclientfields(c->swallowing);
+		}
 	}
 
 	XSync(dpy, False);

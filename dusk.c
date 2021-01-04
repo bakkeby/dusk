@@ -166,6 +166,7 @@ enum {
 	NetWMWindowType,
 	NetWMWindowTypeDock,
 	NetWMMoveResize,
+	NetWMUserTime,
 	NetLast
 }; /* EWMH atoms */
 
@@ -776,26 +777,34 @@ applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact)
 void
 arrange(Workspace *ws)
 {
-	fprintf(stderr, "arrange: ws = %s\n", ws ? ws->name : "NULL");
-	if (ws && !ws->visible)
+	fprintf(stderr, "arrange -->: ws = %s\n", ws ? ws->name : "NULL");
+	if (ws && !ws->visible) {
+		hidewsclients(ws);
+		fprintf(stderr, "arrange: <-- (hidewsclients) because ws %s is not visible\n", ws->name);
 		return;
+	}
 	fprintf(stderr, "arrange: %d\n", 2);
 	if (ws)
 		showhide(ws->stack);
 	else for (ws = workspaces; ws; ws = ws->next)
 		if (ws->visible)
 			showhide(ws->stack);
+		else
+			hidewsclients(ws);
 	fprintf(stderr, "arrange: %d\n", 3);
 	if (ws) {
 		arrangews(ws);
 		restack(ws);
 	} else for (ws = workspaces; ws; ws = ws->next)
 		arrangews(ws);
+	fprintf(stderr, "arrange: <--\n");
 }
 
 void
 arrangews(Workspace *ws)
 {
+	if (!ws->visible)
+		return;
 	// Monitor *mon;
 	// Workspace *ws;
 	fprintf(stderr, "arrangews: --> ws %s\n", ws->name);
@@ -1706,7 +1715,7 @@ drawbarwin(Bar *bar)
 			rx = lx;
 		}
 		// fprintf(stderr, "drawbarwin: %d\n", 43);
-		switch(br->alignment) {
+		switch (br->alignment) {
 		default:
 		case BAR_ALIGN_NONE:
 		case BAR_ALIGN_LEFT_LEFT:
@@ -1792,15 +1801,14 @@ drawbarwin(Bar *bar)
 void
 enternotify(XEvent *e)
 {
-	fprintf(stderr, "enternotify: --> selmon = %d\n", selmon->num);
 	Client *c, *sel;
 	Workspace *ws = WS;
 	Monitor *m;
 	XCrossingEvent *ev = &e->xcrossing;
 
-	fprintf(stderr, "enternotify: %d\n", 1);
 	if ((ev->mode != NotifyNormal || ev->detail == NotifyInferior) && ev->window != root)
 		return;
+	fprintf(stderr, "enternotify: --> selmon = %d\n", selmon->num);
 	fprintf(stderr, "enternotify: %d\n", 2);
 	c = wintoclient(ev->window);
 	fprintf(stderr, "enternotify: %d\n", 3);
@@ -1849,7 +1857,11 @@ expose(XEvent *e)
 void
 focus(Client *c)
 {
-	fprintf(stderr, "focus: --> client %s\n", c->name);
+	fprintf(stderr, "focus: --> client %s\n", c ? c->name : "NULL");
+	if (c && !c->ws->visible) {
+		fprintf(stderr, "focus: <-- because ws %s is not visible\n", c->ws->name);
+		return;
+	}
 	Workspace *ws = c ? c->ws : selws;
 	Client *f;
 	XWindowChanges wc;
@@ -2244,6 +2256,7 @@ manage(Window w, XWindowAttributes *wa)
 
 	fprintf(stderr, "manage: %d (%s)\n", 16, c->name);
 	m = c->ws->mon;
+	// focusclient = c->ws->visible;
 
 	if (c->x + WIDTH(c) > m->mx + m->mw)
 		c->x = m->mx + m->mw - WIDTH(c);
@@ -2321,10 +2334,13 @@ manage(Window w, XWindowAttributes *wa)
 	fprintf(stderr, "manage: %d (%s)\n", 31, c->name);
 	if (focusclient)
 		attachstack(c);
-	else {
+	else if (c->ws->sel) {
 		c->snext = c->ws->sel->snext;
 		c->ws->sel->snext = c;
+	} else {
+		c->ws->sel = c;
 	}
+
 	fprintf(stderr, "manage: %d (%s)\n", 32, c->name);
 	XChangeProperty(dpy, root, netatom[NetClientList], XA_WINDOW, 32, PropModeAppend,
 		(unsigned char *) &(c->win), 1);
@@ -2352,9 +2368,11 @@ manage(Window w, XWindowAttributes *wa)
 		else
 			arrange(c->ws);
 		fprintf(stderr, "manage: %d (%s)\n", 38, c->name);
-		if (!HIDDEN(c))
+		if (!HIDDEN(c)) {
 			XMapWindow(dpy, c->win);
+		}
 	}
+
 	fprintf(stderr, "manage: %d (%s)\n", 39, c->name);
 
 	if (focusclient)
@@ -2454,7 +2472,7 @@ movemouse(const Arg *arg)
 	addflag(c, MoveResize);
 	do {
 		XMaskEvent(dpy, MOUSEMASK|ExposureMask|SubstructureRedirectMask, &ev);
-		switch(ev.type) {
+		switch (ev.type) {
 		case ConfigureRequest:
 		case Expose:
 		case MapRequest:
@@ -2533,7 +2551,6 @@ prevtiled(Client *c)
 void
 propertynotify(XEvent *e)
 {
-	fprintf(stderr, "propertynotify: -->\n");
 	Client *c;
 	Window trans;
 	XPropertyEvent *ev = &e->xproperty;
@@ -2561,10 +2578,10 @@ propertynotify(XEvent *e)
 		return; /* ignore */
 	} else if ((c = wintoclient(ev->window))) {
 
-		if (enabled(Debug))
+		if (enabled(Debug) && ev->atom != netatom[NetWMUserTime])
 			fprintf(stderr, "propertynotify: received message type of %s (%ld) for client %s\n", XGetAtomName(dpy, ev->atom), ev->atom, c->name);
 
-		switch(ev->atom) {
+		switch (ev->atom) {
 		default: break;
 		case XA_WM_TRANSIENT_FOR:
 			if (IGNOREPROPTRANSIENTFOR(c))
@@ -2655,7 +2672,14 @@ resizeclient(Client *c, int x, int y, int w, int h)
 	c->y = wc.y = y;
 	c->w = wc.width = w;
 	c->h = wc.height = h;
+
+	if (!c->ws->visible) {
+		addflag(c, NeedResize);
+		return;
+	}
+
 	wc.border_width = c->bw;
+
 	if (enabled(NoBorders) && ((nexttiled(c->ws->clients) == c && !nexttiled(c->next)))
 		&& (ISFAKEFULLSCREEN(c) || !ISFULLSCREEN(c))
 		&& !ISFLOATING(c)
@@ -2711,7 +2735,7 @@ resizemouse(const Arg *arg)
 	addflag(c, MoveResize);
 	do {
 		XMaskEvent(dpy, MOUSEMASK|ExposureMask|SubstructureRedirectMask, &ev);
-		switch(ev.type) {
+		switch (ev.type) {
 		case ConfigureRequest:
 		case Expose:
 		case MapRequest:
@@ -3131,6 +3155,7 @@ setup(void)
 	netatom[NetWMMaximizedVert] = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False);
 	netatom[NetWMMaximizedHorz] = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
 	netatom[NetWMMoveResize] = XInternAtom(dpy, "_NET_WM_MOVERESIZE", False);
+	netatom[NetWMUserTime] = XInternAtom(dpy, "_NET_WM_USER_TIME", False);
 	netatom[NetWMName] = XInternAtom(dpy, "_NET_WM_NAME", False);
 	netatom[NetWMState] = XInternAtom(dpy, "_NET_WM_STATE", False);
 	netatom[NetWMWindowOpacity] = XInternAtom(dpy, "_NET_WM_WINDOW_OPACITY", False);
