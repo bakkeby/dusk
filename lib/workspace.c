@@ -37,8 +37,6 @@ showws(Workspace *ws)
 	fprintf(stderr, "showws <--\n");
 }
 
-
-
 void
 hidewsclients(Workspace *ws)
 {

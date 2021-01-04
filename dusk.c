@@ -988,8 +988,7 @@ clientmessage(XEvent *e)
 	XSetWindowAttributes swa;
 	XClientMessageEvent *cme = &e->xclient;
 	Client *c = wintoclient(cme->window);
-	Workspace *ws = WS;
-	unsigned int i, maximize_vert, maximize_horz;
+	unsigned int maximize_vert, maximize_horz;
 	int setfakefullscreen = 0;
 
 	if (enabled(Systray) && systray && cme->window == systray->win && cme->message_type == netatom[NetSystemTrayOP]) {
@@ -1081,22 +1080,11 @@ clientmessage(XEvent *e)
 			togglemaximize(c, maximize_vert, maximize_horz);
 	} else if (cme->message_type == netatom[NetActiveWindow]) {
 		if (enabled(FocusOnNetActive)) {
-			if (c->tags & c->ws->tags)
+			if (c->ws->visible)
 				focus(c);
-			else {
-				for (i = 0; i < NUMTAGS && !((1 << i) & c->tags); i++);
-				if (i < NUMTAGS) {
-					if (c != ws->sel)
-						unfocus(ws->sel, 0, NULL);
-					selws = c->ws;
-					selmon = (selws->mon == NULL ? mons : selws->mon);
-					if (((1 << i) & TAGMASK) != WS->tags)
-						view(&((Arg) { .ui = 1 << i }));
-					focus(c);
-					restack(ws);
-				}
-			}
-		} else if (c != WS->sel && !ISURGENT(c))
+			else
+				viewwsonmon(c->ws, c->ws->mon);
+		} else if (c != selws->sel && !ISURGENT(c))
 			seturgent(c, 1);
 	} else if (cme->message_type == wmatom[WMChangeState]) {
 		if (cme->data.l[0] == IconicState && !HIDDEN(c))
@@ -2322,10 +2310,8 @@ manage(Window w, XWindowAttributes *wa)
 	if (!ISFLOATING(c) && (ISFIXED(c) || WASFLOATING(c) || getatomprop(c, clientatom[IsFloating], AnyPropertyType)))
 		SETFLOATING(c);
 
-	if (ISFLOATING(c)) {
+	if (ISFLOATING(c))
 		XRaiseWindow(dpy, c->win);
-		XSetWindowBorder(dpy, w, scheme[SchemeNorm][ColFloat].pixel);
-	}
 
 	XChangeProperty(dpy, c->win, netatom[NetWMAllowedActions], XA_ATOM, 32,
 		PropModeReplace, (unsigned char *) allowed, NetWMActionLast);
@@ -3793,12 +3779,9 @@ updatewmhints(Client *c)
 		} else
 			setflag(c, Urgent, wmh->flags & XUrgencyHint);
 
-		if (ISURGENT(c)) {
-			if (ISFLOATING(c))
-				XSetWindowBorder(dpy, c->win, scheme[SchemeUrg][ColFloat].pixel);
-			else
-				XSetWindowBorder(dpy, c->win, scheme[SchemeUrg][ColBorder].pixel);
-		}
+		if (ISURGENT(c))
+			XSetWindowBorder(dpy, c->win, scheme[SchemeUrg][ColBorder].pixel);
+
 		setflag(c, NeverFocus, wmh->flags & InputHint ? !wmh->input : 0);
 		XFree(wmh);
 	}
