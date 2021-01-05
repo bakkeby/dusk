@@ -55,8 +55,7 @@ typedef enum IPCMessageType {
   IPC_TYPE_GET_LAYOUTS = 3,
   IPC_TYPE_GET_DWM_CLIENT = 4,
   IPC_TYPE_GET_WORKSPACES = 5,
-  IPC_TYPE_SUBSCRIBE = 6,
-  IPC_TYPE_EVENT = 7
+  IPC_TYPE_EVENT = 6
 } IPCMessageType;
 
 // Every IPC message must begin with this
@@ -407,40 +406,6 @@ get_workspaces()
   return 0;
 }
 
-static int
-subscribe(const char *event)
-{
-  const unsigned char *msg;
-  size_t msg_size;
-
-  yajl_gen gen = yajl_gen_alloc(NULL);
-
-  // Message format:
-  // {
-  //   "event": "<event>",
-  //   "action": "subscribe"
-  // }
-  // clang-format off
-  YMAP(
-    YSTR("event"); YSTR(event);
-    YSTR("action"); YSTR("subscribe");
-  )
-  // clang-format on
-
-  yajl_gen_get_buf(gen, &msg, &msg_size);
-
-  send_message(IPC_TYPE_SUBSCRIBE, msg_size, (uint8_t *)msg);
-
-  if (!ignore_reply)
-    print_socket_reply();
-  else
-    flush_socket_reply();
-
-  yajl_gen_free(gen);
-
-  return 0;
-}
-
 static void
 usage_error(const char *prog_name, const char *format, ...)
 {
@@ -472,19 +437,10 @@ print_usage(const char *name)
   puts("");
   puts("  get_workspaces                  Get list of workspaces");
   puts("");
-  puts("  subscribe [events...]           Subscribe to specified events");
-  puts("                                  Options: " IPC_EVENT_TAG_CHANGE ",");
-  puts("                                  " IPC_EVENT_LAYOUT_CHANGE ",");
-  puts("                                  " IPC_EVENT_CLIENT_FOCUS_CHANGE ",");
-  puts("                                  " IPC_EVENT_MONITOR_FOCUS_CHANGE ",");
-  puts("                                  " IPC_EVENT_FOCUSED_TITLE_CHANGE ",");
-  puts("                                  " IPC_EVENT_FOCUSED_STATE_CHANGE);
-  puts("");
   puts("  help                            Display this message");
   puts("");
   puts("Options:");
-  puts("  --ignore-reply                  Don't print reply messages from");
-  puts("                                  run_command and subscribe.");
+  puts("  --ignore-reply                  Don't print reply messages from run_command.");
   puts("");
 }
 
@@ -531,15 +487,6 @@ main(int argc, char *argv[])
       usage_error(prog_name, "Expected the window id");
   } else if (strcmp(argv[i], "get_workspaces") == 0) {
     get_workspaces();
-  } else if (strcmp(argv[i], "subscribe") == 0) {
-    if (++i < argc) {
-      for (int j = i; j < argc; j++) subscribe(argv[j]);
-    } else
-      usage_error(prog_name, "Expected event name");
-    // Keep listening for events forever
-    while (1) {
-      print_socket_reply();
-    }
   } else
     usage_error(prog_name, "Invalid argument '%s'", argv[i]);
 

@@ -194,7 +194,7 @@ enum {
 enum {
 	IsFloating,
 	DuskClientFlags,
-	DuskClientTags,
+	DuskClientFields,
 	SteamGame,
 	ClientLast
 }; /* dusk client atoms */
@@ -203,7 +203,6 @@ enum {
 
 enum {
 	ClkButton,
-	ClkTagBar,
 	ClkLtSymbol,
 	ClkStatusText,
 	ClkWinTitle,
@@ -234,13 +233,6 @@ enum {
 	STACK,        // indicates the tile arrangement for the stack area
 	STACK2,       // indicates the tile arrangement for the secondary stack area
 	LTAXIS_LAST,
-};
-
-typedef struct TagState TagState;
-struct TagState {
-	int selected;
-	int occupied;
-	int urgent;
 };
 
 typedef struct ClientState ClientState;
@@ -311,7 +303,6 @@ struct Client {
 	int bw, oldbw;
 	char scratchkey;
 	unsigned int id;
-	unsigned int tags;
 	double opacity;
 	pid_t pid;
 	Client *next;
@@ -349,11 +340,6 @@ typedef struct {
 } Layout;
 
 struct Monitor {
-	// char ltsymbol[16];
-	// float mfact;
-	// int ltaxis[4];
-	// int nstack;
-	// int nmaster;
 	int num;              /* monitor index */
 	int mx, my, mw, mh;   /* screen size */
 	int wx, wy, ww, wh;   /* window area  */
@@ -363,21 +349,9 @@ struct Monitor {
 	int gappov;           /* vertical outer gaps */
 	int showbar;
 	unsigned int borderpx;
-	// unsigned int seltags;
-	// unsigned int sellt;
-	// unsigned int tags[2];
-	// int showbar;
-	// Client *clients;
-	// Client *sel;
-	// Client *stack;
 	Monitor *next;
 	Workspace *selws; // *workspaces, TODO do we need prevws as well? probably does not make sense vs "all of these workspaces were viewed"
 	Bar *bar;
-	//const Layout *lt[2];
-	// char lastltsymbol[16]; // TODO undecided about these IPC values
-	// TagState tagstate;
-	// Client *lastsel;
-	// const Layout *lastlt;
 };
 
 typedef struct {
@@ -406,8 +380,6 @@ struct Workspace {
 	int visible;
 	int num;
 	int pinned; // whether workspace is pinned to assigned monitor or not
-	unsigned int tags;
-	unsigned int prevtags;
 	Client *clients;
 	Client *sel;
 	Client *stack;
@@ -418,7 +390,7 @@ struct Workspace {
 	const Layout *prevlayout;
 	int iconset;
 	char lastltsymbol[16]; // --> prevltsymbol, or check if really needed, monitor prevworkspace?
-	TagState tagstate; // TODO to WSState? is this really needed
+
 	Client *lastsel; // TODO --> prevsel
 	const Layout *lastlt; // TODO have IPC code use prevlayout instead
 
@@ -858,7 +830,7 @@ buttonpress(XEvent *e)
 	for (i = 0; i < LENGTH(buttons); i++) {
 		if (click == buttons[i].click && buttons[i].func && buttons[i].button == ev->button
 				&& CLEANMASK(buttons[i].mask) == CLEANMASK(ev->state)) {
-			buttons[i].func((click == ClkWorkspaceBar || click == ClkTagBar || click == ClkWinTitle) && buttons[i].arg.i == 0 ? &arg : &buttons[i].arg);
+			buttons[i].func((click == ClkWorkspaceBar || click == ClkWinTitle) && buttons[i].arg.i == 0 ? &arg : &buttons[i].arg);
 		}
 	}
 }
@@ -973,7 +945,7 @@ clientmessage(XEvent *e)
 				return;
 			}
 
-			c->ws = WS;
+			c->ws = selws;
 			c->next = systray->icons;
 			systray->icons = c;
 			XGetWindowAttributes(dpy, c->win, &wa);
@@ -983,8 +955,6 @@ clientmessage(XEvent *e)
 			c->oldbw = wa.border_width;
 			c->bw = 0;
 			SETFLOATING(c);
-			/* reuse tags field as mapped status */
-			c->tags = 1;
 			updatesizehints(c);
 			updatesystrayicongeom(c, wa.width, wa.height);
 			XAddToSaveSet(dpy, c->win);
@@ -1199,9 +1169,6 @@ clientstomon(const Arg *arg)
 		detach(c);
 		detachstack(c);
 		c->ws = nws;
-		c->tags = nws->tags; /* assign tags of target monitor */
-		c->next = NULL;
-		c->snext = NULL;
 		if (last)
 			last = last->next = c;
 		else
@@ -1439,7 +1406,6 @@ createworkspace(int num)
 	}
 
 	strcpy(ws->name, r->name);
-	ws->tags = ws->prevtags = 1;
 
 	ws->pinned = (r->pinned == 1 ? 1 : 0);
 	ws->layout = (r->layout == -1 ? &layouts[0] : &layouts[MIN(r->layout, LENGTH(layouts))]);
@@ -3015,7 +2981,7 @@ setup(void)
 	wmatom[WMChangeState] = XInternAtom(dpy, "WM_CHANGE_STATE", False);
 	clientatom[IsFloating] = XInternAtom(dpy, "_IS_FLOATING", False);
 	clientatom[DuskClientFlags] = XInternAtom(dpy, "_DUSK_CLIENT_FLAGS", False);
-	clientatom[DuskClientTags] = XInternAtom(dpy, "_DUSK_CLIENT_TAGS", False);
+	clientatom[DuskClientFields] = XInternAtom(dpy, "_DUSK_CLIENT_FIELDS", False);
 	clientatom[SteamGame] = XInternAtom(dpy, "STEAM_GAME", False);
 	netatom[NetActiveWindow] = XInternAtom(dpy, "_NET_ACTIVE_WINDOW", False);
 	netatom[NetClientList] = XInternAtom(dpy, "_NET_CLIENT_LIST", False);
@@ -3646,19 +3612,10 @@ updatestatus(void)
 void
 updatetitle(Client *c)
 {
-	char oldname[sizeof(c->name)];
-	strcpy(oldname, c->name);
-	Workspace *ws;
-
 	if (!gettextprop(c->win, netatom[NetWMName], c->name, sizeof c->name))
 		gettextprop(c->win, XA_WM_NAME, c->name, sizeof c->name);
 	if (c->name[0] == '\0') /* hack to mark broken clients */
 		strcpy(c->name, broken);
-
-	for (ws = workspaces; ws; ws = ws->next) {
-		if (ws->sel == c && strcmp(oldname, c->name) != 0)
-			ipc_focused_title_change_event(ws->mon->num, c->win, oldname, c->name);
-	}
 }
 
 void

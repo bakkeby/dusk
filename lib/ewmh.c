@@ -67,7 +67,7 @@ void
 setclientfields(Client *c)
 {
 	unsigned long data[] = { c->ws->num | (c->id << 6) | (c->scratchkey << 14)};
-	XChangeProperty(dpy, c->win, clientatom[DuskClientTags], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
+	XChangeProperty(dpy, c->win, clientatom[DuskClientFields], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
 }
 
 void
@@ -83,7 +83,7 @@ getclientfields(Client *c)
 {
 	fprintf(stderr, "getclientfields: -->\n");
 	Workspace *ws;
-	Atom fields = getatomprop(c, clientatom[DuskClientTags], AnyPropertyType);
+	Atom fields = getatomprop(c, clientatom[DuskClientFields], AnyPropertyType);
 	if (fields) {
 		c->scratchkey = (fields >> 14);
 		c->id = (fields & 0x3FC0) >> 6;
@@ -151,12 +151,6 @@ setviewport(void)
 void
 updatecurrentdesktop(void)
 {
-
-	long rawdata[] = { WS->tags }; // TODO workspaces
-	int i = 0;
-	while (*rawdata >> (i + 1)) {
-		i++;
-	}
-	long data[] = { i };
+	long data[] = { selws->num };
 	XChangeProperty(dpy, root, netatom[NetCurrentDesktop], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
 }

@@ -23,8 +23,7 @@ typedef enum IPCMessageType {
   IPC_TYPE_GET_LAYOUTS = 3,
   IPC_TYPE_GET_DWM_CLIENT = 4,
   IPC_TYPE_GET_WORKSPACES = 5,
-  IPC_TYPE_SUBSCRIBE = 6,
-  IPC_TYPE_EVENT = 7
+  IPC_TYPE_EVENT = 6
 } IPCMessageType;
 
 typedef enum IPCEvent {
@@ -35,11 +34,6 @@ typedef enum IPCEvent {
   IPC_EVENT_FOCUSED_TITLE_CHANGE = 1 << 4,
   IPC_EVENT_FOCUSED_STATE_CHANGE = 1 << 5
 } IPCEvent;
-
-typedef enum IPCSubscriptionAction {
-  IPC_ACTION_UNSUBSCRIBE = 0,
-  IPC_ACTION_SUBSCRIBE = 1
-} IPCSubscriptionAction;
 
 /**
  * Every IPC packet starts with this structure
@@ -203,86 +197,6 @@ void ipc_prepare_reply_failure(IPCClient *c, IPCMessageType msg_type,
  * @param msg_type Type of message
  */
 void ipc_prepare_reply_success(IPCClient *c, IPCMessageType msg_type);
-
-/**
- * Send a tag_change_event to all subscribers. Should be called only when there
- * has been a tag state change.
- *
- * @param mon_num The index of the monitor (Monitor.num property)
- * @param old_state The old tag state
- * @param new_state The new (now current) tag state
- */
-void ipc_tag_change_event(const int mon_num, TagState old_state,
-                          TagState new_state);
-
-/**
- * Send a client_focus_change_event to all subscribers. Should be called only
- * when the client focus changes.
- *
- * @param mon_num The index of the monitor (Monitor.num property)
- * @param old_client The old DWM client selection (Monitor.oldsel)
- * @param new_client The new (now current) DWM client selection
- */
-void ipc_client_focus_change_event(const int mon_num, Client *old_client,
-                                   Client *new_client);
-
-/**
- * Send a layout_change_event to all subscribers. Should be called only
- * when there has been a layout change.
- *
- * @param mon_num The index of the monitor (Monitor.num property)
- * @param old_symbol The old layout symbol
- * @param old_layout Address to the old Layout
- * @param new_symbol The new (now current) layout symbol
- * @param new_layout Address to the new Layout
- */
-void ipc_layout_change_event(const int mon_num, const char *old_symbol,
-                             const Layout *old_layout, const char *new_symbol,
-                             const Layout *new_layout);
-
-/**
- * Send a monitor_focus_change_event to all subscribers. Should be called only
- * when the monitor focus changes.
- *
- * @param last_mon_num The index of the previously selected monitor
- * @param new_mon_num The index of the newly selected monitor
- */
-void ipc_monitor_focus_change_event(const int last_mon_num,
-                                    const int new_mon_num);
-
-/**
- * Send a focused_title_change_event to all subscribers. Should only be called
- * if a selected client has a title change.
- *
- * @param mon_num Index of the client's monitor
- * @param client_id Window XID of client
- * @param old_name Old name of the client window
- * @param new_name New name of the client window
- */
-void ipc_focused_title_change_event(const int mon_num, const Window client_id,
-                                    const char *old_name, const char *new_name);
-
-/**
- * Send a focused_state_change_event to all subscribers. Should only be called
- * if a selected client has a state change.
- *
- * @param mon_num Index of the client's monitor
- * @param client_id Window XID of client
- * @param old_state Old state of the client
- * @param new_state New state of the client
- */
-void ipc_focused_state_change_event(const int mon_num, const Window client_id,
-                                    const ClientState *old_state,
-                                    const ClientState *new_state);
-/**
- * Check to see if an event has occured and call the *_change_event functions
- * accordingly
- *
- * @param mons Address of Monitor pointing to start of linked list
- * @param lastselmon Address of pointer to previously selected monitor
- * @param selmon Address of selected Monitor
- */
-void ipc_send_events(Monitor *mons, Monitor **lastselmon, Monitor *selmon);
 
 /**
  * Handle an epoll event caused by a registered IPC client. Read, process, and

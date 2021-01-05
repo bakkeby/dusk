@@ -42,7 +42,6 @@ dump_client(yajl_gen gen, Client *c)
   // clang-format off
   YMAP(
     YSTR("name"); YSTR(c->name);
-    YSTR("tags"); YINT(c->tags);
     YSTR("window_id"); YINT(c->win);
     YSTR("monitor_number"); YINT(c->ws->mon->num);
 
@@ -132,13 +131,6 @@ dump_monitor(yajl_gen gen, Monitor *mon, int is_selected)
       YSTR("current"); YSTR(ws->name);
     )
 
-    YSTR("tags"); YMAP(
-      YSTR("current");  YINT(ws->tags);
-      YSTR("old"); YINT(ws->prevtags);
-    )
-
-    YSTR("tag_state"); dump_tag_state(gen, ws->tagstate);
-
     YSTR("clients"); YMAP(
       YSTR("selected"); YINT(ws->sel ? ws->sel->win : 0);
       YSTR("stack"); YARR(
@@ -204,37 +196,6 @@ dump_layouts(yajl_gen gen, const Layout layouts[], const int layouts_len)
         YSTR("address"); YINT((uintptr_t)(layouts + i));
       )
     }
-  )
-  // clang-format on
-
-  return 0;
-}
-
-int
-dump_tag_state(yajl_gen gen, TagState state)
-{
-  // clang-format off
-  YMAP(
-    YSTR("selected"); YINT(state.selected);
-    YSTR("occupied"); YINT(state.occupied);
-    YSTR("urgent"); YINT(state.urgent);
-  )
-  // clang-format on
-
-  return 0;
-}
-
-int
-dump_tag_event(yajl_gen gen, int mon_num, TagState old_state,
-               TagState new_state)
-{
-  // clang-format off
-  YMAP(
-    YSTR("tag_change_event"); YMAP(
-      YSTR("monitor_number"); YINT(mon_num);
-      YSTR("old_state"); dump_tag_state(gen, old_state);
-      YSTR("new_state"); dump_tag_state(gen, new_state);
-    )
   )
   // clang-format on
 

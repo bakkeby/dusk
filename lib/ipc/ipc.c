@@ -211,42 +211,6 @@ ipc_write_message(int fd, const void *buf, size_t count)
 }
 
 /**
- * Initialization for generic event message. This is used to allocate the yajl
- * handle, set yajl options, and in the future any other initialization that
- * should occur for event messages.
- */
-static void
-ipc_event_init_message(yajl_gen *gen)
-{
-	*gen = yajl_gen_alloc(NULL);
-	yajl_gen_config(*gen, yajl_gen_beautify, 1);
-}
-
-/**
- * Prepares buffers of IPC subscribers of specified event using buffer from yajl
- * handle.
- */
-static void
-ipc_event_prepare_send_message(yajl_gen gen, IPCEvent event)
-{
-	const unsigned char *buffer;
-	size_t len = 0;
-
-	yajl_gen_get_buf(gen, &buffer, &len);
-	len++;  // For null char
-
-	for (IPCClient *c = ipc_clients; c; c = c->next) {
-		if (c->subscriptions & event) {
-			DEBUG("Sending selected client change event to fd %d\n", c->fd);
-			ipc_prepare_send_message(c, IPC_TYPE_EVENT, len, (char *)buffer);
-		}
-	}
-
-	// Not documented, but this frees temp_buffer
-	yajl_gen_free(gen);
-}
-
-/**
  * Initialization for generic reply message. This is used to allocate the yajl
  * handle, set yajl options, and in the future any other initialization that
  * should occur for reply messages.
@@ -453,94 +417,6 @@ ipc_validate_run_command(IPCParsedCommand *parsed, const IPCCommand actual)
 }
 
 /**
- * Convert event name to their IPCEvent equivalent enum value
- *
- * Returns 0 if a valid event name was given
- * Returns -1 otherwise
- */
-static int
-ipc_event_stoi(const char *subscription, IPCEvent *event)
-{
-	if (strcmp(subscription, "tag_change_event") == 0)
-		*event = IPC_EVENT_TAG_CHANGE;
-	else if (strcmp(subscription, "client_focus_change_event") == 0)
-		*event = IPC_EVENT_CLIENT_FOCUS_CHANGE;
-	else if (strcmp(subscription, "layout_change_event") == 0)
-		*event = IPC_EVENT_LAYOUT_CHANGE;
-	else if (strcmp(subscription, "monitor_focus_change_event") == 0)
-		*event = IPC_EVENT_MONITOR_FOCUS_CHANGE;
-	else if (strcmp(subscription, "focused_title_change_event") == 0)
-		*event = IPC_EVENT_FOCUSED_TITLE_CHANGE;
-	else if (strcmp(subscription, "focused_state_change_event") == 0)
-		*event = IPC_EVENT_FOCUSED_STATE_CHANGE;
-	else
-		return -1;
-	return 0;
-}
-
-/**
- * Parse a IPC_TYPE_SUBSCRIBE message from a client. This function extracts the
- * event name and the subscription action from the message.
- *
- * Returns 0 if message was successfully parsed
- * Returns -1 otherwise
- */
-static int
-ipc_parse_subscribe(const char *msg, IPCSubscriptionAction *subscribe,
-										IPCEvent *event)
-{
-	char error_buffer[100];
-	yajl_val parent = yajl_tree_parse((char *)msg, error_buffer, 100);
-
-	if (parent == NULL) {
-		fputs("Failed to parse command from client\n", stderr);
-		fprintf(stderr, "%s\n", error_buffer);
-		return -1;
-	}
-
-	// Format:
-	// {
-	//   "event": "<event name>"
-	//   "action": "<subscribe|unsubscribe>"
-	// }
-	const char *event_path[] = {"event", 0};
-	yajl_val event_val = yajl_tree_get(parent, event_path, yajl_t_string);
-
-	if (event_val == NULL) {
-		fputs("No 'event' key found in client message\n", stderr);
-		return -1;
-	}
-
-	const char *event_str = YAJL_GET_STRING(event_val);
-	DEBUG("Received event: %s\n", event_str);
-
-	if (ipc_event_stoi(event_str, event) < 0) return -1;
-
-	const char *action_path[] = {"action", 0};
-	yajl_val action_val = yajl_tree_get(parent, action_path, yajl_t_string);
-
-	if (action_val == NULL) {
-		fputs("No 'action' key found in client message\n", stderr);
-		return -1;
-	}
-
-	const char *action = YAJL_GET_STRING(action_val);
-
-	if (strcmp(action, "subscribe") == 0)
-		*subscribe = IPC_ACTION_SUBSCRIBE;
-	else if (strcmp(action, "unsubscribe") == 0)
-		*subscribe = IPC_ACTION_UNSUBSCRIBE;
-	else {
-		fputs("Invalid action specified for subscription\n", stderr);
-		return -1;
-	}
-
-	yajl_tree_free(parent);
-
-	return 0;
-}
-
-/**
  * Parse an IPC_TYPE_GET_DWM_CLIENT message from a client. This function
  * extracts the window id from the message.
  *
@@ -704,7 +580,7 @@ ipc_get_dwm_client(IPCClient *ipc_client, const char *msg, const Monitor *mons) 
 
 /**
  * Called when an IPC_TYPE_GET_WORKSPACES message is received from a client. It
- * prepares a reply with info about all the tags in JSON.
+ * prepares a reply with info about all the workspaces in JSON.
  */
 static void
 ipc_get_workspaces(IPCClient *c)
@@ -714,43 +590,7 @@ ipc_get_workspaces(IPCClient *c)
 
 	dump_workspaces(gen);
 
-	ipc_reply_prepare_send_message(gen, c, IPC_TYPE_GET_TAGS);
-}
-
-
-/**
- * Called when an IPC_TYPE_SUBSCRIBE message is received from a client. It
- * subscribes/unsubscribes the client from the specified event and replies with
- * the result.
- *
- * Returns 0 if the message was successfully parsed.
- * Returns -1 if the message could not be parsed
- */
-static int
-ipc_subscribe(IPCClient *c, const char *msg)
-{
-	IPCSubscriptionAction action = IPC_ACTION_SUBSCRIBE;
-	IPCEvent event = 0;
-
-	if (ipc_parse_subscribe(msg, &action, &event)) {
-		ipc_prepare_reply_failure(c, IPC_TYPE_SUBSCRIBE, "Event does not exist");
-		return -1;
-	}
-
-	if (action == IPC_ACTION_SUBSCRIBE) {
-		DEBUG("Subscribing client on fd %d to %d\n", c->fd, event);
-		c->subscriptions |= event;
-	} else if (action == IPC_ACTION_UNSUBSCRIBE) {
-		DEBUG("Unsubscribing client on fd %d to %d\n", c->fd, event);
-		c->subscriptions ^= event;
-	} else {
-		ipc_prepare_reply_failure(c, IPC_TYPE_SUBSCRIBE,
-															"Invalid subscription action");
-		return -1;
-	}
-
-	ipc_prepare_reply_success(c, IPC_TYPE_SUBSCRIBE);
-	return 0;
+	ipc_reply_prepare_send_message(gen, c, IPC_TYPE_GET_WORKSPACES);
 }
 
 int
@@ -1020,128 +860,6 @@ ipc_prepare_reply_success(IPCClient *c, IPCMessageType msg_type)
 	ipc_prepare_send_message(c, msg_type, msg_len, success_msg);
 }
 
-void
-ipc_tag_change_event(int mon_num, TagState old_state, TagState new_state)
-{
-	yajl_gen gen;
-	ipc_event_init_message(&gen);
-	dump_tag_event(gen, mon_num, old_state, new_state);
-	ipc_event_prepare_send_message(gen, IPC_EVENT_TAG_CHANGE);
-}
-
-void
-ipc_client_focus_change_event(int mon_num, Client *old_client,
-															Client *new_client)
-{
-	yajl_gen gen;
-	ipc_event_init_message(&gen);
-	dump_client_focus_change_event(gen, old_client, new_client, mon_num);
-	ipc_event_prepare_send_message(gen, IPC_EVENT_CLIENT_FOCUS_CHANGE);
-}
-
-void
-ipc_layout_change_event(const int mon_num, const char *old_symbol,
-												const Layout *old_layout, const char *new_symbol,
-												const Layout *new_layout)
-{
-	yajl_gen gen;
-	ipc_event_init_message(&gen);
-	dump_layout_change_event(gen, mon_num, old_symbol, old_layout, new_symbol,
-													 new_layout);
-	ipc_event_prepare_send_message(gen, IPC_EVENT_LAYOUT_CHANGE);
-}
-
-void
-ipc_monitor_focus_change_event(const int last_mon_num, const int new_mon_num)
-{
-	yajl_gen gen;
-	ipc_event_init_message(&gen);
-	dump_monitor_focus_change_event(gen, last_mon_num, new_mon_num);
-	ipc_event_prepare_send_message(gen, IPC_EVENT_MONITOR_FOCUS_CHANGE);
-}
-
-void
-ipc_focused_title_change_event(const int mon_num, const Window client_id,
-															 const char *old_name, const char *new_name)
-{
-	yajl_gen gen;
-	ipc_event_init_message(&gen);
-	dump_focused_title_change_event(gen, mon_num, client_id, old_name, new_name);
-	ipc_event_prepare_send_message(gen, IPC_EVENT_FOCUSED_TITLE_CHANGE);
-}
-
-void
-ipc_focused_state_change_event(const int mon_num, const Window client_id,
-															 const ClientState *old_state,
-															 const ClientState *new_state)
-{
-	yajl_gen gen;
-	ipc_event_init_message(&gen);
-	dump_focused_state_change_event(gen, mon_num, client_id, old_state,
-																	new_state);
-	ipc_event_prepare_send_message(gen, IPC_EVENT_FOCUSED_STATE_CHANGE);
-}
-
-void
-ipc_send_events(Monitor *mons, Monitor **lastselmon, Monitor *selmon)
-{
-	Workspace *ws;
-	for (Monitor *m = mons; m; m = m->next) {
-		ws = MWS(m);
-		unsigned int urg = 0, occ = 0, tags = 0;
-
-		for (Client *c = ws->clients; c; c = c->next) {
-			occ |= c->tags;
-
-			if (ISURGENT(c))
-				urg |= c->tags;
-		}
-		tags = ws->tags;
-
-		TagState new_state = {.selected = tags, .occupied = occ, .urgent = urg};
-
-		if (memcmp(&ws->tagstate, &new_state, sizeof(TagState)) != 0) {
-			ipc_tag_change_event(m->num, ws->tagstate, new_state);
-			ws->tagstate = new_state;
-		}
-
-		if (ws->lastsel != ws->sel) {
-			ipc_client_focus_change_event(m->num, ws->lastsel, ws->sel);
-			ws->lastsel = ws->sel;
-		}
-
-		if (strcmp(ws->ltsymbol, ws->lastltsymbol) != 0 ||
-				ws->lastlt != ws->layout) {
-			ipc_layout_change_event(m->num, ws->lastltsymbol, ws->lastlt, ws->ltsymbol,
-															ws->layout);
-			strcpy(ws->lastltsymbol, ws->ltsymbol);
-			ws->lastlt = ws->layout;
-		}
-
-		if (*lastselmon != selmon) {
-			if (*lastselmon != NULL)
-				ipc_monitor_focus_change_event((*lastselmon)->num, selmon->num);
-			*lastselmon = selmon;
-		}
-
-		Client *sel = ws->sel;
-		if (!sel)
-			continue;
-
-		ClientState *o = &ws->sel->prevstate;
-		ClientState n = {.oldstate = WASFLOATING(sel),
-							 .isfixed = ISFIXED(sel),
-							 .isfloating = ISFLOATING(sel),
-							 .isfullscreen = ISFULLSCREEN(sel),
-							 .isurgent = ISURGENT(sel),
-							 .neverfocus = NEVERFOCUS(sel)};
-		if (memcmp(o, &n, sizeof(ClientState)) != 0) {
-			ipc_focused_state_change_event(m->num, ws->sel->win, o, &n);
-			*o = n;
-		}
-	}
-}
-
 int
 ipc_handle_client_epoll_event(struct epoll_event *ev, Monitor *mons,
 															Monitor **lastselmon, Monitor *selmon, const int tags_len,
@@ -1172,11 +890,8 @@ ipc_handle_client_epoll_event(struct epoll_event *ev, Monitor *mons,
 			ipc_get_layouts(c, layouts, layouts_len);
 		else if (msg_type == IPC_TYPE_RUN_COMMAND) {
 			if (ipc_run_command(c, msg) < 0) return -1;
-			ipc_send_events(mons, lastselmon, selmon);
 		} else if (msg_type == IPC_TYPE_GET_DWM_CLIENT) {
 			if (ipc_get_dwm_client(c, msg, mons) < 0) return -1;
-		} else if (msg_type == IPC_TYPE_SUBSCRIBE) {
-			if (ipc_subscribe(c, msg) < 0) return -1;
 		} else {
 			fprintf(stderr, "Invalid message type received from fd %d", fd);
 			ipc_prepare_reply_failure(c, msg_type, "Invalid message type: %d",

@@ -30,31 +30,7 @@ int dump_monitors(yajl_gen gen, Monitor *mons, Monitor *selmon);
 
 int dump_layouts(yajl_gen gen, const Layout layouts[], const int layouts_len);
 
-int dump_tag_state(yajl_gen gen, TagState state);
-
-int dump_tag_event(yajl_gen gen, int mon_num, TagState old_state,
-                   TagState new_state);
-
-int dump_client_focus_change_event(yajl_gen gen, Client *old_client,
-                                   Client *new_client, int mon_num);
-
-int dump_layout_change_event(yajl_gen gen, const int mon_num,
-                             const char *old_symbol, const Layout *old_layout,
-                             const char *new_symbol, const Layout *new_layout);
-
-int dump_monitor_focus_change_event(yajl_gen gen, const int last_mon_num,
-                                    const int new_mon_num);
-
-int dump_focused_title_change_event(yajl_gen gen, const int mon_num,
-                                    const Window client_id,
-                                    const char *old_name, const char *new_name);
-
 int dump_client_state(yajl_gen gen, const ClientState *state);
-
-int dump_focused_state_change_event(yajl_gen gen, const int mon_num,
-                                    const Window client_id,
-                                    const ClientState *old_state,
-                                    const ClientState *new_state);
 
 int dump_error_message(yajl_gen gen, const char *reason);
 

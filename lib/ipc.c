@@ -11,7 +11,6 @@ handlexevent(struct epoll_event *ev)
 			XNextEvent(dpy, &ev);
 			if (handler[ev.type]) {
 				handler[ev.type](&ev); /* call handler */
-				ipc_send_events(mons, &lastselmon, selmon);
 			}
 		}
 	} else if (ev-> events & EPOLLHUP)
