@@ -54,7 +54,6 @@
 #include "stacker.h"
 #include "sticky.h"
 #include "swallow.h"
-#include "swaptags.h"
 #include "switchcol.h"
 #include "togglefullscreen.h"
 #include "transfer.h"

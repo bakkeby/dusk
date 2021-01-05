@@ -624,7 +624,6 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( shiftviewclients, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( stackpush, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( stackfocus, 1, {ARG_TYPE_SINT} ),
-	IPCCOMMAND( swaptags, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( switchcol, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( toggle, 1, {ARG_TYPE_UINT} ), // toggle functionality on and off
 	IPCCOMMAND( togglebar, 1, {ARG_TYPE_NONE} ),

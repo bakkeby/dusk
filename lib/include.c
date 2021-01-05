@@ -58,7 +58,6 @@
 #include "stacker.c"
 #include "sticky.c"
 #include "swallow.c"
-#include "swaptags.c"
 #include "switchcol.c"
 #include "togglefullscreen.c"
 #include "transfer.c"
