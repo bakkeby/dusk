@@ -98,36 +98,6 @@ getclientfields(Client *c)
 }
 
 void
-getmonitorstate(Monitor *m)
-{
-	// TODO the only thing that might be worth remembering here are gapps, borderpx and showbar
-	//      if these are fine to be "reset" as part of a restart then we can get rid of this func
-
-
-	// char atom[22];
-	// int di;
-	// unsigned long dl;
-	// unsigned char *p = NULL;
-	// Atom da, tags = None;
-	// Workspace *ws = MWS(m);
-
-	// sprintf(atom, "_DUSK_MONITOR_TAGS_%u", m->num); // TODO workspaces
-
-	// Atom monitortags = XInternAtom(dpy, atom, True);
-	// if (!monitortags)
-	// 	return;
-
-	// if (XGetWindowProperty(dpy, root, monitortags, 0L, sizeof tags, False, AnyPropertyType,
-	// 	&da, &di, &dl, &dl, &p) == Success && p) {
-	// 	tags = *(Atom *)p;
-	// 	XFree(p);
-	// }
-
-	// if (tags)
-	// 	ws->tags = tags; // tmp workspaces
-}
-
-void
 getworkspacestate(Workspace *ws)
 {
 	fprintf(stderr, "getworkspacestate: --> %s\n", ws->name);

@@ -12,11 +12,11 @@
  *
  * Each child of the root window is called a client, except windows which have
  * set the override_redirect flag. Clients are organized in a linked client
- * list on each monitor, the focus history is remembered through a stack list
- * on each monitor. Each client contains a bit array to indicate the tags of a
- * client.
+ * list on each workspace. The focus history is remembered through a stack list
+ * on each workspace. A workspace client area is restricted on a per monitor
+ * basis.
  *
- * Keys and tagging rules are organized as arrays and defined in config.h.
+ * Keys and workspace rules are organized as arrays and defined in config.h.
  *
  * To understand everything else, start reading main().
  */
@@ -60,8 +60,6 @@
 #define CLEANMASK(mask)         (mask & ~(numlockmask|LockMask) & (ShiftMask|ControlMask|Mod1Mask|Mod2Mask|Mod3Mask|Mod4Mask|Mod5Mask))
 #define INTERSECT(x,y,w,h,m)    (MAX(0, MIN((x)+(w),(m)->wx+(m)->ww) - MAX((x),(m)->wx)) \
                                * MAX(0, MIN((y)+(h),(m)->wy+(m)->wh) - MAX((y),(m)->wy)))
-#define ISVISIBLEONTAG(C, T)    ((C->tags & T) || (C->flags & Sticky))
-// #define ISVISIBLE(C)            ISVISIBLEONTAG(C, C->ws->tags)
 #define LENGTH(X)               (sizeof X / sizeof X[0])
 #define MOUSEMASK               (BUTTONMASK|PointerMotionMask)
 #define WIDTH(X)                ((X)->w + 2 * (X)->bw)
@@ -317,13 +315,13 @@ struct Client {
 	char scratchkey;
 	unsigned int id;
 	unsigned int tags;
-	unsigned int reverttags; /* holds the original tag info from when the client was opened */
 	double opacity;
 	pid_t pid;
 	Client *next;
 	Client *snext;
 	Client *swallowing;
 	Workspace *ws;
+	Workspace *revertws; /* holds the original workspace info from when the client was opened */
 	Window win;
 	ClientState prevstate;
 	unsigned long flags;
@@ -540,7 +538,6 @@ static void updatesizehints(Client *c);
 static void updatestatus(void);
 static void updatetitle(Client *c);
 static void updatewmhints(Client *c);
-static void view(const Arg *arg);
 
 static Client *wintoclient(Window w);
 static Monitor *wintomon(Window w);
@@ -665,25 +662,9 @@ applyrules(Client *c)
 			if (ISFLOATING(c) && r->floatpos)
 				setfloatpos(c, r->floatpos);
 
+			if (REVERTWORKSPACE(c))
+				c->revertws = selws;
 
-			// TODO switch workspaces
-			// if ((SWITCHTAG(c) || ENABLETAG(c)) && (NOSWALLOW(c) || !termforwin(c))) {
-			// 	selws = c->ws;
-			// 	selmon = (selws->mon == NULL ? mons : selws->mon);
-			// 	newtags = SWITCHTAG(c) ? c->tags : c->ws->tags | c->tags;
-			//
-			// 	/* Switch to the client's tag, but only if that tag is not already shown */
-			// 	if (newtags && !(c->tags & c->ws->tags)) {
-			// 		if (REVERTTAG(c))
-			// 			c->reverttags = c->ws->tags;
-			// 		if (SWITCHTAG(c)) {
-			// 			view(&((Arg) { .ui = newtags }));
-			// 		} else {
-			// 			c->ws->tags = newtags;
-			// 		}
-			// 	}
-			// }
-			//
 			if (enabled(Debug))
 				fprintf(stderr, "applyrules: client rule %d matched:\n    class: %s\n    role: %s\n    instance: %s\n    title: %s\n    wintype: %s\n    tags: %d\n    flags: %ld\n    floatpos: %s\n    workspace: %s\n",
 					i,
@@ -912,12 +893,10 @@ checkotherwm(void)
 void
 cleanup(void)
 {
-	Arg a = {.ui = ~0};
 	Layout foo = { "", NULL };
 	Workspace *ws;
 	size_t i;
-	view(&a);
-	WS->layout = &foo;
+	selws->layout = &foo;
 	for (ws = workspaces; ws; ws = ws->next)
 		while (ws->stack)
 			unmanage(ws->stack, 0);
@@ -1200,6 +1179,14 @@ clienttomon(const Arg *arg)
 	// } else if (ISFLOATING(c)) {
 	// 	resizeclient(c, c->x, c->y, c->w, c->h);
 	// }
+
+	// TODO other calls to sendmon also have these lines to set focus, do we want focus to follow
+	// a client when moving to another monitor? move away vs move to focus
+	// selmon = m;
+	// selws = selmon->selws;
+	// focus(NULL);
+
+
 	fprintf(stderr, "clienttomon: <--\n");
 }
 
@@ -1380,77 +1367,29 @@ configurerequest(XEvent *e)
 Monitor *
 createmon(int num)
 {
-	fprintf(stderr, "createmon: -->\n");
 	Monitor *m;
 	int i, n, max_bars = 2, istopbar = topbar;
-	// int layout;
 
 	const BarRule *br;
 	Bar *bar;
-	// int j;
-	// const MonitorRule *mr;
-	// Workspace *ws;
-	fprintf(stderr, "createmon: %d\n", 0);
+
 	m = ecalloc(1, sizeof(Monitor));
 
-	fprintf(stderr, "createmon: %d\n", 1);
-	// m->tags[0] = m->tags[1] = 1;
-	// m->mfact = mfact;
-	// m->nmaster = nmaster;
-	// m->nstack = nstack;
 	m->showbar = showbar;
 	m->borderpx = borderpx;
 	m->gappih = gappih;
 	m->gappiv = gappiv;
 	m->gappoh = gappoh;
 	m->gappov = gappov;
-
-	// ws->borderpx = borderpx;
-
-	// ws->gappih = gappih;
-	// ws->gappiv = gappiv;
-	// ws->gappoh = gappoh;
-	// ws->gappov = gappov;
-	// ws->mon = m;
-
 	m->num = num;
-	// m->workspaces = ws;
-	// m->selws = ws;
-	fprintf(stderr, "createmon: %d\n", 2);
-	getmonitorstate(m);
-	// for (j = 0; j < LENGTH(monrules); j++) {
-	// 	mr = &monrules[j];
-	// 	fprintf(stderr, "createmon: %f\n", 2.0);
-	// 	if ((mr->monitor == -1 || mr->monitor == m->num)
-	// 			&& (mr->tag <= 0 || (MWS(m)->tags & (1 << (mr->tag - 1))))) {
-	// 		fprintf(stderr, "createmon: %f\n", 2.1);
-	// 		layout = MAX(mr->layout, 0);
-	// 		layout = MIN(layout, LENGTH(layouts) - 1);
-	// 		fprintf(stderr, "createmon: %f\n", 2.2);
-	// 		ws->layout = &layouts[layout];
-	// 		ws->prevlayout = &layouts[1 % LENGTH(layouts)];
-	// 		fprintf(stderr, "createmon: %f\n", 2.3);
-	// 		strncpy(ws->ltsymbol, layouts[layout].symbol, sizeof ws->ltsymbol);
 
-	// 		if (mr->mfact > -1)
-	// 			ws->mfact = mr->mfact;
-	// 		if (mr->nmaster > -1)
-	// 			ws->nmaster = mr->nmaster;
-	// 		if (mr->showbar > -1)
-	// 			m->showbar = mr->showbar;
-	// 		if (mr->topbar > -1)
-	// 			istopbar = mr->topbar;
-	// 		break;
-	// 	}
-	// }
-	fprintf(stderr, "createmon: %d\n", 3);
 	/* Derive the number of bars for this monitor based on bar rules */
 	for (n = -1, i = 0; i < LENGTH(barrules); i++) {
 		br = &barrules[i];
 		if (br->monitor == 'A' || br->monitor == -1 || br->monitor == m->num)
 			n = MAX(br->bar, n);
 	}
-	fprintf(stderr, "createmon: %d\n", 4);
+
 	for (i = 0; i <= n && i < max_bars; i++) {
 		bar = ecalloc(1, sizeof(Bar));
 		bar->mon = m;
@@ -1464,40 +1403,13 @@ createmon(int num)
 		bar->borderpx = enabled(BarBorder) ? borderpx : 0;
 		bar->bh = bh + bar->borderpx * 2;
 	}
-	fprintf(stderr, "createmon: %d\n", 4);
 
-	// for (i = 0; i <= NUMTAGS; i++) {
-
-	// 	/* init layouts */
-	// 	for (j = 0; j < LENGTH(monrules); j++) {
-	// 		mr = &monrules[j];
-	// 		if ((mr->monitor == -1 || mr->monitor == m->num) && (mr->tag == -1 || mr->tag == i)) {
-	// 			layout = MAX(mr->layout, 0);
-	// 			layout = MIN(layout, LENGTH(layouts) - 1);
-				// m->pertag->ltidxs[i][0] = &layouts[layout];
-				// m->pertag->ltidxs[i][1] = m->lt[0];
-				// m->pertag->nmasters[i] = (mr->nmaster > -1 ? mr->nmaster : m->nmaster);
-				// m->pertag->mfacts[i] = (mr->mfact > -1 ? mr->mfact : m->mfact);
-				// m->pertag->showbars[i] = (mr->showbar > -1 ? mr->showbar : m->showbar);
-				// m->pertag->ltaxis[i][LAYOUT] = m->pertag->ltidxs[i][0]->preset.layout;
-				// m->pertag->ltaxis[i][MASTER] = m->pertag->ltidxs[i][0]->preset.masteraxis;
-				// m->pertag->ltaxis[i][STACK]  = m->pertag->ltidxs[i][0]->preset.stack1axis;
-				// m->pertag->ltaxis[i][STACK2] = m->pertag->ltidxs[i][0]->preset.stack2axis;
-		// 		break;
-		// 	}
-		// }
-		// m->pertag->sellts[i] = m->sellt;
-
-		// m->pertag->enablegaps[i] = 1;
-	// }
-	fprintf(stderr, "createmon: <--\n");
 	return m;
 }
 
 void
 createworkspaces()
 {
-	fprintf(stderr, "createworkspaces: -->\n");
 	Workspace *pws, *ws;
 	Monitor *m;
 	int i;
@@ -1516,25 +1428,16 @@ createworkspaces()
 		}
 		m = (m->next == NULL ? mons : m->next);
 	}
-
-	for (m = mons; m; m = m->next) {
-		fprintf(stderr, "createworkspaces: monitor %d associated with workspace %s\n", m->num, (m->selws == NULL ? "NULL" : m->selws->name));
-	}
-
-	// selws = mons->selws;
-
-	fprintf(stderr, "createworkspaces: <--\n");
 }
 
 Workspace *
 createworkspace(int num)
 {
-	const WorkspaceRule *r = &wsrules[num];
-	Workspace *ws;
 	Monitor *m = NULL;
-	fprintf(stderr, "createworkspace: -->\n");
-	ws = ecalloc(1, sizeof(Workspace));
+	Workspace *ws;
+	const WorkspaceRule *r = &wsrules[num];
 
+	ws = ecalloc(1, sizeof(Workspace));
 	ws->num = num;
 
 	// TODO not 100% sure about this
@@ -1564,15 +1467,12 @@ createworkspace(int num)
 	ws->ltaxis[MASTER] = ws->layout->preset.masteraxis;
 	ws->ltaxis[STACK]  = ws->layout->preset.stack1axis;
 	ws->ltaxis[STACK2] = ws->layout->preset.stack2axis;
-
-	/* icons */
-	ws->icondef = r->icondef;
-	ws->iconvac = r->iconvac;
-	ws->iconocc = r->iconocc;
+	ws->icondef = r->icondef; // default icons
+	ws->iconvac = r->iconvac; // vacant icons
+	ws->iconocc = r->iconocc; // occupied icons
 
 	getworkspacestate(ws);
 
-	fprintf(stderr, "createworkspace: <--\n");
 	return ws;
 }
 
@@ -1870,7 +1770,7 @@ focus(Client *c)
 	if (ws->sel && ws->sel != c)
 		unfocus(ws->sel, 0, c);
 	if (c) {
-		fprintf(stderr, "focus: so if (c) and c = %s\n", c ? c->name : "NULL");
+		fprintf(stderr, "focus: so if (c) and c = %s, selmon = %d, selws = %s, selws->mon = %d, selws->sel = %s, c->ws = %s\n", c ? c->name : "NULL", selmon->num, selws->name, selws->mon->num, selws->sel ? selws->sel->name : "NULL", c->ws->name);
 		if (c->ws != selws) {
 			if (c->ws->mon != selmon) {
 				drawbar(selmon);
@@ -2219,14 +2119,12 @@ manage(Window w, XWindowAttributes *wa)
 			addflag(c, Transient);
 			addflag(c, Centered);
 			c->ws = t->ws;
-			c->tags = t->tags;
 		} else {
 			fprintf(stderr, "manage: %d (%s)\n", 8, c->name);
 			c->ws = WS;
 		}
 	}
-	if (!c->tags)
-		c->tags = (c->ws->tags & ~SPTAGMASK);
+
 	fprintf(stderr, "manage: %d (%s)\n", 9, c->name);
 
 	if (!RULED(c)) {
@@ -2365,6 +2263,9 @@ manage(Window w, XWindowAttributes *wa)
 		fprintf(stderr, "manage: %d (%s)\n", 37, c->name);
 		if (SWITCHWORKSPACE(c))
 			viewwsonmon(c->ws, c->ws->mon);
+		else if (ENABLEWORKSPACE(c))
+			// TODO
+			arrange(c->ws);
 		else
 			arrange(c->ws);
 		fprintf(stderr, "manage: %d (%s)\n", 38, c->name);
@@ -2510,10 +2411,6 @@ movemouse(const Arg *arg)
 	} while (ev.type != ButtonRelease);
 	XUngrabPointer(dpy, CurrentTime);
 	if ((m = recttomon(c->x, c->y, c->w, c->h)) != selmon) {
-		if (c->tags & SPTAGMASK) {
-			c->ws->tags ^= (c->tags & SPTAGMASK);
-			WS->tags |= (c->tags & SPTAGMASK);
-		}
 		sendmon(c, m);
 		selmon = m;
 		selws = selmon->selws;
@@ -2773,10 +2670,6 @@ resizemouse(const Arg *arg)
 	if ((m = recttomon(c->x, c->y, c->w, c->h)) != selmon) {
 		fprintf(stderr, "resizemouse: selmon %d != mon %d\n", selmon->num, m->num);
 		fprintf(stderr, "resizemouse: c->x = %d, c->y = %d, c->w = %d, c->h = %d\n", c->x, c->y, c->w, c->h);
-		if (c->tags & SPTAGMASK) {
-			c->ws->tags ^= (c->tags & SPTAGMASK);
-			ws->tags |= (c->tags & SPTAGMASK);
-		}
 		sendmon(c, m);
 		selmon = m;
 		selws = selmon->selws;
@@ -2792,7 +2685,7 @@ restack(Workspace *ws)
 	Client *c;
 	XEvent ev;
 	XWindowChanges wc;
-	int n;
+	int n = 0;
 
 	if (!ws->sel)
 		return;
@@ -2811,8 +2704,9 @@ restack(Workspace *ws)
 	while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
 
 	if (enabled(Warp)) {
-		for (n = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), n++);
-		if (ws == WS && (ws->tags & ws->sel->tags) && (
+		if (ws->nmaster)
+			for (c = nexttiled(ws->clients); c && n <= ws->nmaster; c = nexttiled(c->next), n++);
+		if (ws == selws && (
 			!(ws->ltaxis[MASTER] == MONOCLE && (abs(ws->ltaxis[LAYOUT] == NO_SPLIT || !ws->nmaster || n <= ws->nmaster)))
 			|| ISFLOATING(ws->sel))
 		)
@@ -2905,8 +2799,8 @@ sendmon(Client *c, Monitor *m)
 
 	movetows(c, ws);
 
-	if (c->reverttags)
-		c->reverttags = 0;
+	if (c->revertws)
+		c->revertws = NULL;
 
 	fprintf(stderr, "sendmon: client's monitor is now %d and client's workspace is %s\n", c->ws->mon->num, c->ws->name);
 	fprintf(stderr, "sendmon <--\n");
@@ -2960,13 +2854,16 @@ sendevent(Window w, Atom proto, int mask, long d0, long d1, long d2, long d3, lo
 void
 setfocus(Client *c)
 {
+	fprintf(stderr, "setfocus: --> %s\n", c->name);
 	if (!NEVERFOCUS(c)) {
 		XSetInputFocus(dpy, c->win, RevertToPointerRoot, CurrentTime);
 		XChangeProperty(dpy, root, netatom[NetActiveWindow],
 			XA_WINDOW, 32, PropModeReplace,
 			(unsigned char *) &(c->win), 1);
+		selws->sel = c;
 	}
 	sendevent(c->win, wmatom[WMTakeFocus], NoEventMask, wmatom[WMTakeFocus], CurrentTime, 0, 0, 0);
+	fprintf(stderr, "setfocus: <-- %s\n", c->name);
 }
 
 void
@@ -3462,7 +3359,7 @@ void
 unmanage(Client *c, int destroyed)
 {
 	Workspace *ws = c->ws;
-	unsigned int reverttags = c->reverttags;
+	Workspace *revertws = c->revertws;
 	XWindowChanges wc;
 
 	if (c->swallowing) {
@@ -3501,8 +3398,8 @@ unmanage(Client *c, int destroyed)
 	updateclientlist();
 	arrange(ws);
 
-	if (reverttags && ((reverttags & TAGMASK) != WS->tags))
-		view(&((Arg) { .ui = reverttags }));
+	if (revertws && !revertws->visible)
+		viewwsonmon(revertws, revertws->mon);
 }
 
 void
@@ -3810,23 +3707,6 @@ updatewmhints(Client *c)
 		setflag(c, NeverFocus, wmh->flags & InputHint ? !wmh->input : 0);
 		XFree(wmh);
 	}
-}
-
-void
-view(const Arg *arg)
-{
-	Workspace *ws = WS;
-	if (arg->ui && (arg->ui & TAGMASK) == ws->tags)
-	{
-		view(&((Arg) { .ui = 0 }));
-		return;
-	}
-	ws->prevtags = ws->tags;
-	if (arg->ui & TAGMASK)
-		ws->tags = arg->ui & TAGMASK;
-	focus(NULL);
-	arrange(ws);
-	updatecurrentdesktop();
 }
 
 Client *

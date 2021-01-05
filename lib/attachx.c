@@ -38,7 +38,7 @@ attachx(Client *c)
 		}
 	} else if (attachmode == AttachAside) {
 		for (at = c->ws->clients, n = 0; at; at = at->next)
-			if (!ISFLOATING(at) && ISVISIBLEONTAG(at, c->tags))
+			if (!ISFLOATING(at))
 				if (++n >= c->ws->nmaster)
 					break;
 

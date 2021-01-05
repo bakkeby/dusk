@@ -29,9 +29,9 @@ static const unsigned long
 	AttachAside = 0x100000,
 	AttachBelow = 0x200000,
 	AttachBottom = 0x400000,
-	SwitchWorkspace = 0x800000, // automatically moves you to the tag of the newly opened application
-	EnableTag = 0x1000000, // enables the tag of the newly opened application in addition to your existing enabled tags
-	RevertTag = 0x2000000, // if SwitchTag or EnableTag, closing that window reverts the view back to what it was previously
+	SwitchWorkspace = 0x800000, // automatically moves you to the workspace of the newly opened application
+	EnableWorkspace = 0x1000000, // enables the workspace of the newly opened application in addition to your existing viewed workspaces
+	RevertWorkspace = 0x2000000, // if SwitchWorkspace or EnableWorkspace, closing that window reverts the view back to what it was previously
 	IgnoreCfgReq = 0x4000000, // ignore all configure requests coming from the client
 	IgnoreCfgReqPos = 0x8000000, // ignore the x,y position details of configure requests coming from the client
 	IgnoreCfgReqSize = 0x10000000, // ignore the size details of configure requests coming from the client
@@ -102,8 +102,8 @@ static const unsigned long
 #define RESTOREFAKEFULLSCREEN(C) (C->flags & RestoreFakeFullScreen)
 #define RULED(C) (C->flags & Ruled)
 #define SWITCHWORKSPACE(C) (C->flags & SwitchWorkspace)
-#define ENABLETAG(C) (C->flags & EnableTag)
-#define REVERTTAG(C) (C->flags & RevertTag)
+#define ENABLEWORKSPACE(C) (C->flags & EnableWorkspace)
+#define REVERTWORKSPACE(C) (C->flags & RevertWorkspace)
 #define MOVERESIZE(C) (C->flags & MoveResize)
 
 #define WASFLOATING(C) (C->prevflags & Floating)
