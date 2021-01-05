@@ -64,7 +64,6 @@
 #include "transferall.h"
 #include "unfloatvisible.h"
 #include "vanitygaps.h"
-#include "winview.h"
 #include "zoomswap.h"
 #include "xrdb.h"
 

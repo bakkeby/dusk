@@ -445,7 +445,6 @@ static Key keys[] = {
 	{ MODKEY,                       XK_q,            killclient,             {0} },
 	{ MODKEY|Shift,                 XK_q,            quit,                   {0} }, // exit
 	{ MODKEY|Ctrl|Shift,            XK_q,            quit,                   {1} }, // restart
-	{ MODKEY,                       XK_o,            winview,                {0} },
 	{ MODKEY,                       XK_bracketright, rotatelayoutaxis,       {.i = +1 } },   /* flextile, 1 = layout axis */
 	{ MODKEY|Alt,                   XK_bracketright, rotatelayoutaxis,       {.i = +2 } },   /* flextile, 2 = master axis */
 	{ MODKEY|Shift,                 XK_bracketright, rotatelayoutaxis,       {.i = +3 } },   /* flextile, 3 = stack axis */
@@ -658,7 +657,6 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( unfloatvisible, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( viewtoleft, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( viewtoright, 1, {ARG_TYPE_NONE} ),
-	IPCCOMMAND( winview, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( xrdb, 1, {ARG_TYPE_NONE} ), // reload xrdb / Xresources
 	IPCCOMMAND( zoom, 1, {ARG_TYPE_NONE} ),
 };
