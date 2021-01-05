@@ -88,12 +88,10 @@ getschemefor(Monitor *m, int group, int activegroup)
 void
 getclientcounts(Monitor *m, int *groupactive, int *n, int *clientsnmaster, int *clientsnstack, int *clientsnstack2, int *clientsnfloating, int *clientsnhidden)
 {
-	fprintf(stderr, "getclientcounts: -->\n");
 	Workspace *ws = MWS(m);
 	Client *c;
 	int i, selidx = 0, cm = 0, cs1 = 0, cs2 = 0, cf = 0, ch = 0, center, dualstack;
 
-	fprintf(stderr, "getclientcounts: ws == NULL? %d\n", ws == NULL);
 	for (i = 0, c = ws->clients; c; c = c->next) {
 		if (!ISVISIBLE(c))
 			continue;
@@ -126,20 +124,15 @@ getclientcounts(Monitor *m, int *groupactive, int *n, int *clientsnmaster, int *
 			cs1++;
 		i++;
 	}
-	fprintf(stderr, "getclientcounts: %d\n", 30);
 	*n = cm + cs1 + cs2 + cf + ch;
-	fprintf(stderr, "getclientcounts: %d\n", 31);
 	center = iscenteredlayout(m, *n);
-	fprintf(stderr, "getclientcounts: %d\n", 32);
 	dualstack = isdualstacklayout(m);
-	fprintf(stderr, "getclientcounts: %d\n", 33);
 
 	if ((!center && !dualstack) || (center && *n <= ws->nmaster + (ws->nstack ? ws->nstack : 1))) {
 		cs1 += cs2;
 		cs2 = 0;
 	}
 
-	fprintf(stderr, "getclientcounts: %d\n", 35);
 	if (!ws->sel)
 		*groupactive = GRP_NOSELECTION;
 	else if (HIDDEN(ws->sel))
@@ -158,7 +151,6 @@ getclientcounts(Monitor *m, int *groupactive, int *n, int *clientsnmaster, int *
 	*clientsnstack2 = cs2;
 	*clientsnfloating = cf;
 	*clientsnhidden = ch;
-	fprintf(stderr, "getclientcounts: <--\n");
 }
 
 int
@@ -243,7 +235,7 @@ flextitledraw(Monitor *m, Client *c, int unused, int x, int w, int tabscheme, Ar
 		return;
 	Workspace *ws = MWS(m);
 
-	int i, nclienttags = 0, nviewtags = 0, pad = lrpad / 2;
+	int pad = lrpad / 2;
 	int clientscheme = (
 		c->scratchkey != 0 && c == ws->sel
 		? SchemeScratchSel
@@ -257,8 +249,10 @@ flextitledraw(Monitor *m, Client *c, int unused, int x, int w, int tabscheme, Ar
 		? SchemeUrg
 		: tabscheme
 	);
+
 	drw_setscheme(drw, scheme[clientscheme]);
 	XSetWindowBorder(dpy, c->win, scheme[clientscheme][ColBorder].pixel);
+
 	if (w <= TEXTW("A") - lrpad + pad) // reduce text padding if wintitle is too small
 		pad = (w - TEXTW("A") + lrpad < 0 ? 0 : (w - TEXTW("A") + lrpad) / 2);
 	else if (enabled(CenteredWindowName) && TEXTW(c->name) < w)
@@ -271,13 +265,6 @@ flextitledraw(Monitor *m, Client *c, int unused, int x, int w, int tabscheme, Ar
 		XSetForeground(drw->dpy, drw->gc, scheme[SchemeSel][ColBorder].pixel);
 		XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, barg->y, FLEXWINTITLE_BORDERS, barg->h);
 		XFillRectangle(drw->dpy, drw->drawable, drw->gc, x + w - (x + w >= barg->w ? 1 : 0), barg->y, FLEXWINTITLE_BORDERS, barg->h);
-	}
-	/* Optional tags icons */
-	for (i = 0; i < NUMTAGS; i++) {
-		if ((ws->tags >> i) & 1)
-			nviewtags++;
-		if ((c->tags >> i) & 1)
-			nclienttags++;
 	}
 }
 

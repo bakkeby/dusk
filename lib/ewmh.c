@@ -37,16 +37,15 @@ setcurrentdesktop(void)
 void
 setdesktopnames(void)
 {
-	int i, num_workspaces;
+	int i;
 	Workspace *ws;
 	XTextProperty text;
-	for (num_workspaces = 0, ws = workspaces; ws; ws = ws->next, ++num_workspaces);
 
 	char *wslist[num_workspaces];
-	for (i = 0, ws = workspaces; ws; ws = ws->next, ++i) {
+	for (i = 0, ws = workspaces; ws; ws = ws->next, ++i)
 		wslist[i] = wsicon(ws);
-	}
-	Xutf8TextListToTextProperty(dpy, wslist, NUMTAGS, XUTF8StringStyle, &text);
+
+	Xutf8TextListToTextProperty(dpy, wslist, num_workspaces, XUTF8StringStyle, &text);
 	XSetTextProperty(dpy, root, &text, netatom[NetDesktopNames]);
 }
 
@@ -138,7 +137,7 @@ getworkspacestate(Workspace *ws)
 void
 setnumdesktops(void)
 {
-	long data[] = { NUMTAGS };
+	long data[] = { num_workspaces };
 	XChangeProperty(dpy, root, netatom[NetNumberOfDesktops], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
 }
 

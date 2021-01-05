@@ -52,9 +52,8 @@ static unsigned long functionality = 0
 //	|BarActiveGroupBorderColor
 //	|DecorationHints
 //	|NoBorder
-//	|PerTagBar
 //	|SortScreens
-//	|ViewOnTag
+//	|ViewOnWs
 //	|Xresources
 //	|AutoSaveFloats
 ;
@@ -244,28 +243,21 @@ static const char *const autostart[] = {
 	NULL /* terminate */
 };
 
-
 static const char *spcmd1[] = {"w", "st", "-n", "spterm (w)", "-g", "120x34", NULL };
 static const char *spcmd2[] = {"e", "st", "-n", "spterm (e)", "-g", "120x34", NULL };
 static const char *spcmd3[] = {"r", "st", "-n", "spfm (r)", "-g", "144x41", "-e", "ranger", NULL };
 
-/* There are two options when it comes to per-client rules:
- *  - a typical struct table or
- *  - using the RULE macro
+/* Bar rules allow you to configure what is shown where on the bar, as well as
+ * introducing your own bar modules.
  *
- * A traditional struct table looks like this:
- *    // class      instance  title  wintype  tags mask  monitor
- *    { "Gimp",     NULL,     NULL,  NULL,    1 << 4,    -1 },
- *    { "Firefox",  NULL,     NULL,  NULL,    1 << 7,    -1 },
- *
- * The RULE macro has the default values set for each field allowing you to only
- * specify the values that are relevant for your rule, e.g.
- *
- *    RULE(.class = "Gimp", .tags = 1 << 4)
- *    RULE(.class = "Firefox", .tags = 1 << 7)
- *
- * Refer to the Rule struct definition for the list of available fields depending on
- * the patches you enable.
+ *    monitor:
+ *      -1  show on all monitors
+ *       0  show on monitor 0
+ *      'A' show on active monitor (i.e. focused / selected) (or just -1 for active?)
+ *    bar - bar index, 0 is default, 1 is extrabar
+ *    alignment - how the module is aligned compared to other modules
+ *    widthfunc, drawfunc, clickfunc - providing bar module width, draw and click functions
+ *    name - does nothing, intended for visual clue and for logging / debugging
  */
 static const Rule rules[] = {
 	/* xprop(1):
@@ -281,16 +273,16 @@ static const Rule rules[] = {
 	RULE(.instance = "spterm (w)", .scratchkey = 'w', .flags = Floating)
 	RULE(.instance = "spterm (e)", .scratchkey = 'e', .flags = Floating)
 	RULE(.instance = "spfm (r)", .scratchkey = 'r', .flags = Floating)
-	RULE(.class = "Gimp", .workspace = "5", .flags = Floating|SwitchTag)
-	RULE(.class = "firefox", .workspace = "8", .flags = AttachMaster|SwitchTag)
+	RULE(.class = "Gimp", .workspace = "5", .flags = Floating|SwitchWorkspace)
+	RULE(.class = "firefox", .workspace = "8", .flags = AttachMaster|SwitchWorkspace)
 	RULE(.class = "Steam", .flags = IgnoreCfgReqPos|Floating|Centered)
 	RULE(.class = "steam_app_", .flags = IgnoreCfgReqPos|Floating|Centered)
 	RULE(.class = "Google-chrome", .role = "GtkFileChooserDialog", .floatpos = "50% 50%", .flags = AlwaysOnTop|Floating)
 	RULE(.role = "pop-up", .flags = AlwaysOnTop|Floating|Centered)
-	RULE(.role = "browser", .workspace = "8", .flags = AttachMaster|OnlyModButtons|SwitchTag)
+	RULE(.role = "browser", .workspace = "8", .flags = AttachMaster|OnlyModButtons|SwitchWorkspace)
 	RULE(.class = "Gnome-terminal", .role = "gnome-terminal-preferences", .flags = Centered)
-	RULE(.class = "Diffuse", .workspace = "4", .flags = NoSwallow|SwitchTag|RevertTag)
-	RULE(.class = "File-roller", .workspace = "9", .flags = Centered|Floating|SwitchTag|RevertTag)
+	RULE(.class = "Diffuse", .workspace = "4", .flags = NoSwallow|SwitchWorkspace|RevertWorkspace)
+	RULE(.class = "File-roller", .workspace = "9", .flags = Centered|Floating|SwitchWorkspace|RevertWorkspace)
 	RULE(.class = "Alacritty", .flags = Terminal|IgnoreCfgReqPos|IgnoreCfgReqSize)
 	RULE(.class = "st-256color", .flags = Terminal|AttachBottom)
 	RULE(.class = "XTerm", .flags = Terminal)
@@ -466,8 +458,6 @@ static Key keys[] = {
 	{ MODKEY|Ctrl|Shift,            XK_r,            removescratch,          {.ui = 2 } },
 	{ MODKEY,                       XK_f,            togglefullscreen,       {0} },
 	{ MODKEY|Shift,                 XK_f,            togglefakefullscreen,   {0} },
-	{ MODKEY,                       XK_0,            view,                   {.ui = ~SPTAGMASK } },
-	{ MODKEY|Shift,                 XK_0,            tag,                    {.ui = ~SPTAGMASK } },
 	{ MODKEY|ShiftMask,             XK_plus,         changeopacity,          {.f = +0.05 } },
 	{ MODKEY|ShiftMask,             XK_minus,        changeopacity,          {.f = -0.05 } },
 	{ MODKEY|Shift,                 XK_comma,        focusmon,               {.i = -1 } },

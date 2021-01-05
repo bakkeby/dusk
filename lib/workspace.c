@@ -82,6 +82,9 @@ movews(const Arg *arg)
 	Workspace *ws = (Workspace*)arg->v;
 	Client *c = selws->sel;
 	movetows(c, ws);
+	if (enabled(ViewOnWs) && !ws->visible)
+		viewwsonmon(ws, ws->mon);
+
 	fprintf(stderr, "movews: <--");
 }
 

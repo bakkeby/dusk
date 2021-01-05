@@ -2,7 +2,6 @@ int
 width_workspaces(Bar *bar, BarArg *a)
 {
 	Workspace *ws;
-	fprintf(stderr, "width_workspaces: -->\n");
 	int w = 0, tw;
 	for (ws = workspaces; ws; ws = ws->next) {
 		if (ws->mon != bar->mon)
@@ -12,14 +11,12 @@ width_workspaces(Bar *bar, BarArg *a)
 			continue;
 		w += tw;
 	}
-	fprintf(stderr, "width_workspaces: <--\n");
 	return w;
 }
 
 int
 draw_workspaces(Bar *bar, BarArg *a)
 {
-	fprintf(stderr, "draw_workspaces: -->\n");
 	int w, x = a->x;
 	unsigned int inv, occ, urg;
 	char *icon;
@@ -50,14 +47,12 @@ draw_workspaces(Bar *bar, BarArg *a)
 		drawindicator(m, NULL, ws->clients != NULL, x, a->y, w, a->h, -1, 0, wsindicatortype);
 		x += w;
 	}
-	fprintf(stderr, "draw_workspaces: <--\n");
 	return 1;
 }
 
 int
 click_workspaces(Bar *bar, Arg *arg, BarArg *a)
 {
-	fprintf(stderr, "click_workspaces: -->\n");
 	Workspace *ws = workspaces;
 	int x = lrpad / 2;
 
@@ -65,23 +60,8 @@ click_workspaces(Bar *bar, Arg *arg, BarArg *a)
 		if (ws->mon != bar->mon)
 			continue;
 		x += TEXTW(ws->name);
-		fprintf(stderr, "click_workspaces: click x = %d, x = %d, ws = %s\n", a->x, x, ws->name);
 	} while (a->x >= x && (ws = ws->next));
 	arg->v = ws;
-	if (arg->v == NULL)
-		fprintf(stderr, "click_workspaces: set arg->v to NULL\n");
-	else
-		fprintf(stderr, "click_workspaces: set arg->v to %s\n", ws->name);
 
-	// int i = 0, tw, x = lrpad / 2;
-	// do {
-	// 	tw = TEXTW(tagicon(bar->mon, i));
-	// 	if (tw <= lrpad)
-	// 		continue;
-	// 	x += tw;
-	// } while (a->x >= x && ++i < NUMTAGS);
-	// if (i < NUMTAGS)
-	// 	arg->ui = 1 << i;
-	fprintf(stderr, "click_workspaces: <--\n");
 	return ClkWorkspaceBar;
 }

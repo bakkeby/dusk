@@ -54,7 +54,6 @@
 #define Button7                 7
 #define Button8                 8
 #define Button9                 9
-#define NUMTAGS                 9
 #define BARRULES                20
 #define BUTTONMASK              (ButtonPressMask|ButtonReleaseMask)
 #define CLEANMASK(mask)         (mask & ~(numlockmask|LockMask) & (ShiftMask|ControlMask|Mod1Mask|Mod2Mask|Mod3Mask|Mod4Mask|Mod5Mask))
@@ -65,8 +64,6 @@
 #define WIDTH(X)                ((X)->w + 2 * (X)->bw)
 #define HEIGHT(X)               ((X)->h + 2 * (X)->bw)
 #define WTYPE                   "_NET_WM_WINDOW_TYPE_"
-#define TAGMASK                 ((1 << NUMTAGS) - 1)
-#define SPTAGMASK               ((1 << NUMTAGS) - 1)
 #define TEXTWM(X)               (drw_fontset_getwidth(drw, (X), True) + lrpad)
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X), False) + lrpad)
 #define HIDDEN(C)               ((getstate(C->win) == IconicState))
@@ -390,14 +387,13 @@ typedef struct {
 	const char *title;
 	const char *wintype;
 	double opacity;
-	unsigned int tags;
 	unsigned long flags;
 	const char *floatpos;
 	const char scratchkey;
 	const char *workspace;
 } Rule;
 
-#define RULE(...) { .tags = 0, ##__VA_ARGS__ },
+#define RULE(...) { .flags = 0, ##__VA_ARGS__ },
 
 struct Workspace {
 	char ltsymbol[16];
@@ -558,11 +554,12 @@ static char estext[1024];
 static char rawestext[1024];
 
 static int screen;
-static int sw, sh;           /* X display screen geometry width, height */
-static int bh;               /* bar geometry */
-static int lrpad;            /* sum of left and right padding for text */
-static int force_warp = 0;   /* force warp in some situations, e.g. killclient */
-static int ignore_warp = 0;  /* force skip warp in some situations, e.g. dragmfact, dragcfact */
+static int sw, sh;             /* X display screen geometry width, height */
+static int bh;                 /* bar geometry */
+static int lrpad;              /* sum of left and right padding for text */
+static int force_warp = 0;     /* force warp in some situations, e.g. killclient */
+static int ignore_warp = 0;    /* force skip warp in some situations, e.g. dragmfact, dragcfact */
+static int num_workspaces = 0; /* the number of available workspaces */
 
 static int (*xerrorxlib)(Display *, XErrorEvent *);
 static unsigned int numlockmask = 0;
@@ -600,9 +597,6 @@ static Window root, wmcheckwin;
 
 #include "lib/include.c"
 
-/* compile-time check if all tags fit into an unsigned int bit array. */
-struct NumTags { char limitexceeded[NUMTAGS > 31 ? -1 : 1]; };
-
 /* function implementations */
 void
 applyrules(Client *c)
@@ -611,7 +605,6 @@ applyrules(Client *c)
 	Atom wintype, game_id;
 	char role[64];
 	unsigned int i;
-	// unsigned int newtags; // TODO remove
 	const Rule *r;
 	Workspace *ws = NULL;
 	XClassHint ch = { NULL, NULL };
@@ -642,14 +635,6 @@ applyrules(Client *c)
 		&& (!r->wintype || wintype == XInternAtom(dpy, r->wintype, False)))
 		{
 			c->flags |= Ruled | r->flags;
-			if (r->tags & TAGMASK)
-				c->tags = r->tags;
-
-			if ((r->tags & SPTAGMASK) && ISFLOATING(c)) {
-				c->x = c->ws->mon->wx + (c->ws->mon->ww / 2 - WIDTH(c) / 2);
-				c->y = c->ws->mon->wy + (c->ws->mon->wh / 2 - HEIGHT(c) / 2);
-			}
-
 			c->scratchkey = r->scratchkey;
 
 			if (r->opacity)
@@ -659,21 +644,20 @@ applyrules(Client *c)
 				for (ws = workspaces; ws && strcmp(ws->name, r->workspace) != 0; ws = ws->next);
 			c->ws = ws ? ws : selws;
 
-			if (ISFLOATING(c) && r->floatpos)
-				setfloatpos(c, r->floatpos);
+			if (ISFLOATING(c))
+				setfloatpos(c, r->floatpos ? r->floatpos : "50% 50%");
 
 			if (REVERTWORKSPACE(c))
 				c->revertws = selws;
 
 			if (enabled(Debug))
-				fprintf(stderr, "applyrules: client rule %d matched:\n    class: %s\n    role: %s\n    instance: %s\n    title: %s\n    wintype: %s\n    tags: %d\n    flags: %ld\n    floatpos: %s\n    workspace: %s\n",
+				fprintf(stderr, "applyrules: client rule %d matched:\n    class: %s\n    role: %s\n    instance: %s\n    title: %s\n    wintype: %s\n    flags: %ld\n    floatpos: %s\n    workspace: %s\n",
 					i,
 					r->class ? r->class : "NULL",
 					r->role ? r->role : "NULL",
 					r->instance ? r->instance : "NULL",
 					r->title ? r->title : "NULL",
 					r->wintype ? r->wintype : "NULL",
-					r->tags,
 					r->flags,
 					r->floatpos ? r->floatpos : "NULL",
 					r->workspace);
@@ -1417,6 +1401,8 @@ createworkspaces()
 	pws = selws = workspaces = createworkspace(0);
 	for (i = 1; i < LENGTH(wsrules); i++)
 		pws = pws->next = createworkspace(i);
+
+	num_workspaces = i;
 
 	for (m = mons, ws = workspaces; ws; ws = ws->next) {
 		if (ws->mon == NULL) {
@@ -2740,7 +2726,7 @@ run(void)
 				ipc_handle_socket_epoll_event(events + i);
 			} else if (ipc_is_client_registered(event_fd)) {
 				if (ipc_handle_client_epoll_event(events + i, mons, &lastselmon, selmon,
-						NUMTAGS, layouts, LENGTH(layouts)) < 0) {
+						num_workspaces, layouts, LENGTH(layouts)) < 0) {
 					fprintf(stderr, "Error handling IPC event on fd %d\n", event_fd);
 				}
 			} else
@@ -3154,21 +3140,7 @@ showhide(Client *c)
 {
 	if (!c)
 		return;
-	// Monitor *m = c->ws->mon;
 	if (ISVISIBLE(c)) {
-		// if (
-		// 	(c->tags & SPTAGMASK) &&
-		// 	ISFLOATING(c) &&
-		// 	(
-		// 		c->x < m->mx ||
-		// 		c->x > m->mx + m->mw ||
-		// 		c->y < m->my ||
-		// 		c->y > m->my + m->mh
-		// 	)
-		// ) {
-		// 	c->x = m->wx + (m->ww / 2 - WIDTH(c) / 2);
-		// 	c->y = m->wy + (m->wh / 2 - HEIGHT(c) / 2);
-		// }
 		/* show clients top down */
 		if (!c->ws->layout->arrange && c->sfx != -9999 && !ISFULLSCREEN(c)) {
 			XMoveWindow(dpy, c->win, c->sfx, c->sfy);

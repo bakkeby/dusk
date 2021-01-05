@@ -35,7 +35,7 @@ static const unsigned long
 	FuncPlaceholder0x20000 = 0x20000,
 	FuncPlaceholder0x40000 = 0x40000,
 	SortScreens = 0x80000, // only applies on startup
-	ViewOnTag = 0x100000, // follow a window to the tag it is being moved to
+	ViewOnWs = 0x100000, // follow a window to the workspace it is being moved to
 	Xresources = 0x200000, // xrdb patch
 	AutoSaveFloats = 0x400000, // auto save float posistion when using movemouse or resizemouse
 	Debug = 0x800000,

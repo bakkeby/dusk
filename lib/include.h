@@ -28,7 +28,7 @@
 #include "decorationhints.h"
 #include "dragcfact.h"
 #include "dragmfact.h"
-#include "ewmhtags.h"
+#include "ewmh.h"
 #include "fakefullscreenclient.h"
 #include "floatpos.h"
 #include "focusdir.h"
