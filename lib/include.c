@@ -62,7 +62,6 @@
 #include "swallow.c"
 #include "swaptags.c"
 #include "switchcol.c"
-#include "tagall.c"
 #include "togglefullscreen.c"
 #include "transfer.c"
 #include "transferall.c"

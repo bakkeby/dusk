@@ -518,8 +518,6 @@ static Key keys[] = {
 //	{ MODKEY,                       XK_,             rotatestack,            {.i = -1 } },
 //	{ MODKEY,                       XK_,             unfloatvisible,         {0} },
 //	{ MODKEY,                       XK_,             switchcol,              {0} },
-//	{ MODKEY,                       XK_,             tagall,                 {.v = "F3"} },
-//	{ MODKEY,                       XK_,             tagall,                 {.v = "4"} },
 //	{ MODKEY,                       XK_,             setlayout,              {.v = &layouts[0]} },
 //	{ MODKEY,                       XK_,             xrdb,                   {0 } },
 //	{ MODKEY,                       XK_,             viewtoleft,             {0} },
@@ -637,7 +635,6 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( stackfocus, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( swaptags, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( switchcol, 1, {ARG_TYPE_NONE} ),
-	IPCCOMMAND( tagall, 1, {ARG_TYPE_STR} ), // e.g. "4" or "F4" to only move floating windows to tag 4
 	IPCCOMMAND( taggridmovetag, 1, {ARG_TYPE_UINT} ),
 	IPCCOMMAND( tagtoleft, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( tagtoright, 1, {ARG_TYPE_NONE} ),
