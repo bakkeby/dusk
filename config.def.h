@@ -18,8 +18,6 @@ static const int bar_height              = 0;   /* 0 means derive from font, >= 
 static const int vertpad                 = borderpx;  /* vertical (outer) padding of bar */
 static const int sidepad                 = borderpx;  /* horizontal (outer) padding of bar */
 
-static const int taggridrows             = 2;   /* number of rows to render the tag grid */
-
 static int floatposgrid_x                = 5;   /* float grid columns */
 static int floatposgrid_y                = 5;   /* float grid rows */
 
@@ -316,7 +314,6 @@ static const BarRule barrules[] = {
 	/* monitor  bar    alignment               widthfunc                 drawfunc                 clickfunc                 name */
 	{ -1,       0,     BAR_ALIGN_LEFT,         width_stbutton,           draw_stbutton,           click_stbutton,           "statusbutton" },
 	{ -1,       0,     BAR_ALIGN_LEFT,         width_workspaces,         draw_workspaces,         click_workspaces,         "workspaces" },
-	{ -1,       0,     BAR_ALIGN_LEFT,         width_taggrid,            draw_taggrid,            click_taggrid,            "taggrid" },
 	{ 'A',      0,     BAR_ALIGN_RIGHT,        width_systray,            draw_systray,            click_systray,            "systray" },
 	{ -1,       0,     BAR_ALIGN_LEFT,         width_ltsymbol,           draw_ltsymbol,           click_ltsymbol,           "layout" },
 	{ 'A',      0,     BAR_ALIGN_RIGHT,        width_status2d,           draw_status2d,           click_statuscmd,          "status2d" },
@@ -520,12 +517,6 @@ static Key keys[] = {
 //	{ MODKEY,                       XK_,             switchcol,              {0} },
 //	{ MODKEY,                       XK_,             setlayout,              {.v = &layouts[0]} },
 //	{ MODKEY,                       XK_,             xrdb,                   {0 } },
-//	{ MODKEY,                       XK_,             viewtoleft,             {0} },
-//	{ MODKEY,                       XK_,             viewtoright,            {0} },
-//	{ MODKEY,                       XK_,             tagtoleft,              {0} },
-//	{ MODKEY,                       XK_,             tagtoright,             {0} },
-//	{ MODKEY,                       XK_,             tagandviewtoleft,       {0} },
-//	{ MODKEY,                       XK_,             tagandviewtoright,      {0} },
 
 	SCRATCHKEYS(                    XK_w,                                    spcmd1)
 	SCRATCHKEYS(                    XK_e,                                    spcmd2)
@@ -635,11 +626,6 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( stackfocus, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( swaptags, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( switchcol, 1, {ARG_TYPE_NONE} ),
-	IPCCOMMAND( taggridmovetag, 1, {ARG_TYPE_UINT} ),
-	IPCCOMMAND( tagtoleft, 1, {ARG_TYPE_NONE} ),
-	IPCCOMMAND( tagtoright, 1, {ARG_TYPE_NONE} ),
-	IPCCOMMAND( tagandviewtoleft, 1, {ARG_TYPE_NONE} ),
-	IPCCOMMAND( tagandviewtoright, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( toggle, 1, {ARG_TYPE_UINT} ), // toggle functionality on and off
 	IPCCOMMAND( togglebar, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( togglefakefullscreen, 1, {ARG_TYPE_NONE} ),
@@ -652,8 +638,6 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( transfer, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( transferall, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( unfloatvisible, 1, {ARG_TYPE_NONE} ),
-	IPCCOMMAND( viewtoleft, 1, {ARG_TYPE_NONE} ),
-	IPCCOMMAND( viewtoright, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( xrdb, 1, {ARG_TYPE_NONE} ), // reload xrdb / Xresources
 	IPCCOMMAND( zoom, 1, {ARG_TYPE_NONE} ),
 };
