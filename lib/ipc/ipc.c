@@ -861,10 +861,14 @@ ipc_prepare_reply_success(IPCClient *c, IPCMessageType msg_type)
 }
 
 int
-ipc_handle_client_epoll_event(struct epoll_event *ev, Monitor *mons,
-															Monitor **lastselmon, Monitor *selmon, const int tags_len,
-															const Layout *layouts, const int layouts_len)
-{
+ipc_handle_client_epoll_event(
+	struct epoll_event *ev, Monitor *mons,
+	Monitor **lastselmon,
+	Monitor *selmon,
+	const int num_workspaces,
+	const Layout *layouts,
+	const int layouts_len
+) {
 	int fd = ev->data.fd;
 	IPCClient *c = ipc_get_client(fd);
 
@@ -873,14 +877,16 @@ ipc_handle_client_epoll_event(struct epoll_event *ev, Monitor *mons,
 		ipc_drop_client(c);
 	} else if (ev->events & EPOLLOUT) {
 		DEBUG("Sending message to client at fd %d...\n", fd);
-		if (c->buffer_size) ipc_write_client(c);
+		if (c->buffer_size)
+			ipc_write_client(c);
 	} else if (ev->events & EPOLLIN) {
 		IPCMessageType msg_type = 0;
 		uint32_t msg_size = 0;
 		char *msg = NULL;
 
 		DEBUG("Received message from fd %d\n", fd);
-		if (ipc_read_client(c, &msg_type, &msg_size, &msg) < 0) return -1;
+		if (ipc_read_client(c, &msg_type, &msg_size, &msg) < 0)
+			return -1;
 
 		if (msg_type == IPC_TYPE_GET_MONITORS)
 			ipc_get_monitors(c, mons, selmon);
@@ -889,13 +895,14 @@ ipc_handle_client_epoll_event(struct epoll_event *ev, Monitor *mons,
 		else if (msg_type == IPC_TYPE_GET_LAYOUTS)
 			ipc_get_layouts(c, layouts, layouts_len);
 		else if (msg_type == IPC_TYPE_RUN_COMMAND) {
-			if (ipc_run_command(c, msg) < 0) return -1;
+			if (ipc_run_command(c, msg) < 0)
+				return -1;
 		} else if (msg_type == IPC_TYPE_GET_DWM_CLIENT) {
-			if (ipc_get_dwm_client(c, msg, mons) < 0) return -1;
+			if (ipc_get_dwm_client(c, msg, mons) < 0)
+				return -1;
 		} else {
 			fprintf(stderr, "Invalid message type received from fd %d", fd);
-			ipc_prepare_reply_failure(c, msg_type, "Invalid message type: %d",
-																msg_type);
+			ipc_prepare_reply_failure(c, msg_type, "Invalid message type: %d", msg_type);
 		}
 		free(msg);
 	} else {
@@ -909,7 +916,8 @@ ipc_handle_client_epoll_event(struct epoll_event *ev, Monitor *mons,
 int
 ipc_handle_socket_epoll_event(struct epoll_event *ev)
 {
-	if (!(ev->events & EPOLLIN)) return -1;
+	if (!(ev->events & EPOLLIN))
+		return -1;
 
 	// EPOLLIN means incoming client connection request
 	fputs("Received EPOLLIN event on socket\n", stderr);

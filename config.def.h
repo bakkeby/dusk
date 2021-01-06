@@ -102,11 +102,11 @@ static char urgbordercolor[]             = "#d10f3f";
 
 static char scratchnormcolor[]           = "#C6BDBD";
 static char scratchnormbgcolor[]         = "#180A13";
-static char scratchnormbordercolor[]     = "#FF8800";
+static char scratchnormbordercolor[]     = "#77547E";
 
 static char scratchselcolor[]            = "#FFF7D4";
 static char scratchselbgcolor[]          = "#330000";
-static char scratchselbordercolor[]      = "#FF0000";
+static char scratchselbordercolor[]      = "#894B9F";
 
 static char normTTBbgcolor[]             = "#330000";
 static char normLTRbgcolor[]             = "#330033";
@@ -192,50 +192,50 @@ static const unsigned int alphas[][3] = {
 };
 
 static char *colors[][ColCount] = {
-	/*                       fg                bg                border                */
-	[SchemeNorm]         = { normfgcolor,      normbgcolor,      normbordercolor },
-	[SchemeSel]          = { selfgcolor,       selbgcolor,       selbordercolor },
-	[SchemeTitleNorm]    = { titlenormfgcolor, titlenormbgcolor, titlenormbordercolor },
-	[SchemeTitleSel]     = { titleselfgcolor,  titleselbgcolor,  titleselbordercolor },
-	[SchemeWsNorm]       = { wsnormfgcolor,    wsnormbgcolor,    wsnormbordercolor },
-	[SchemeWsSel]        = { wsselfgcolor,     wsselbgcolor,     wsselbordercolor },
-	[SchemeHid]          = { hidfgcolor,       hidbgcolor,       hidbordercolor },
-	[SchemeUrg]          = { urgfgcolor,       urgbgcolor,       urgbordercolor },
+	/*                       fg                bg                  border                  */
+	[SchemeNorm]         = { normfgcolor,      normbgcolor,        normbordercolor,        },
+	[SchemeSel]          = { selfgcolor,       selbgcolor,         selbordercolor,         },
+	[SchemeTitleNorm]    = { titlenormfgcolor, titlenormbgcolor,   titlenormbordercolor,   },
+	[SchemeTitleSel]     = { titleselfgcolor,  titleselbgcolor,    titleselbordercolor,    },
+	[SchemeWsNorm]       = { wsnormfgcolor,    wsnormbgcolor,      wsnormbordercolor,      },
+	[SchemeWsSel]        = { wsselfgcolor,     wsselbgcolor,       wsselbordercolor,       },
+	[SchemeHid]          = { hidfgcolor,       hidbgcolor,         hidbordercolor,         },
+	[SchemeUrg]          = { urgfgcolor,       urgbgcolor,         urgbordercolor,         },
 	[SchemeScratchNorm]  = { scratchnormcolor, scratchnormbgcolor, scratchnormbordercolor, },
 	[SchemeScratchSel]   = { scratchselcolor,  scratchselbgcolor,  scratchselbordercolor,  },
-	[SchemeFlexActTTB]   = { titleselfgcolor,  actTTBbgcolor,    actTTBbgcolor },
-	[SchemeFlexActLTR]   = { titleselfgcolor,  actLTRbgcolor,    actLTRbgcolor },
-	[SchemeFlexActMONO]  = { titleselfgcolor,  actMONObgcolor,   actMONObgcolor },
-	[SchemeFlexActGRID]  = { titleselfgcolor,  actGRIDbgcolor,   actGRIDbgcolor },
-	[SchemeFlexActGRD1]  = { titleselfgcolor,  actGRD1bgcolor,   actGRD1bgcolor },
-	[SchemeFlexActGRD2]  = { titleselfgcolor,  actGRD2bgcolor,   actGRD2bgcolor },
-	[SchemeFlexActGRDM]  = { titleselfgcolor,  actGRDMbgcolor,   actGRDMbgcolor },
-	[SchemeFlexActHGRD]  = { titleselfgcolor,  actHGRDbgcolor,   actHGRDbgcolor },
-	[SchemeFlexActDWDL]  = { titleselfgcolor,  actDWDLbgcolor,   actDWDLbgcolor },
-	[SchemeFlexActSPRL]  = { titleselfgcolor,  actSPRLbgcolor,   actSPRLbgcolor },
-	[SchemeFlexActFloat] = { titleselfgcolor,  actfloatbgcolor,  actfloatbgcolor },
-	[SchemeFlexInaTTB]   = { titlenormfgcolor, normTTBbgcolor,   normTTBbgcolor },
-	[SchemeFlexInaLTR]   = { titlenormfgcolor, normLTRbgcolor,   normLTRbgcolor },
-	[SchemeFlexInaMONO]  = { titlenormfgcolor, normMONObgcolor,  normMONObgcolor },
-	[SchemeFlexInaGRID]  = { titlenormfgcolor, normGRIDbgcolor,  normGRIDbgcolor },
-	[SchemeFlexInaGRD1]  = { titlenormfgcolor, normGRD1bgcolor,  normGRD1bgcolor },
-	[SchemeFlexInaGRD2]  = { titlenormfgcolor, normGRD2bgcolor,  normGRD2bgcolor },
-	[SchemeFlexInaGRDM]  = { titlenormfgcolor, normGRDMbgcolor,  normGRDMbgcolor },
-	[SchemeFlexInaHGRD]  = { titlenormfgcolor, normHGRDbgcolor,  normHGRDbgcolor },
-	[SchemeFlexInaDWDL]  = { titlenormfgcolor, normDWDLbgcolor,  normDWDLbgcolor },
-	[SchemeFlexInaSPRL]  = { titlenormfgcolor, normSPRLbgcolor,  normSPRLbgcolor },
-	[SchemeFlexInaFloat] = { titlenormfgcolor, normfloatbgcolor, normfloatbgcolor },
-	[SchemeFlexSelTTB]   = { titleselfgcolor,  selTTBbgcolor,    selTTBbgcolor },
-	[SchemeFlexSelLTR]   = { titleselfgcolor,  selLTRbgcolor,    selLTRbgcolor },
-	[SchemeFlexSelMONO]  = { titleselfgcolor,  selMONObgcolor,   selMONObgcolor },
-	[SchemeFlexSelGRID]  = { titleselfgcolor,  selGRIDbgcolor,   selGRIDbgcolor },
-	[SchemeFlexSelGRD1]  = { titleselfgcolor,  selGRD1bgcolor,   selGRD1bgcolor },
-	[SchemeFlexSelGRD2]  = { titleselfgcolor,  selGRD2bgcolor,   selGRD2bgcolor },
-	[SchemeFlexSelGRDM]  = { titleselfgcolor,  selGRDMbgcolor,   selGRDMbgcolor },
-	[SchemeFlexSelHGRD]  = { titleselfgcolor,  selHGRDbgcolor,   selHGRDbgcolor },
-	[SchemeFlexSelDWDL]  = { titleselfgcolor,  selDWDLbgcolor,   selDWDLbgcolor },
-	[SchemeFlexSelSPRL]  = { titleselfgcolor,  selSPRLbgcolor,   selSPRLbgcolor },
-	[SchemeFlexSelFloat] = { titleselfgcolor,  selfloatbgcolor,  selfloatbgcolor },
+	[SchemeFlexActTTB]   = { titleselfgcolor,  actTTBbgcolor,      actTTBbgcolor,          },
+	[SchemeFlexActLTR]   = { titleselfgcolor,  actLTRbgcolor,      actLTRbgcolor,          },
+	[SchemeFlexActMONO]  = { titleselfgcolor,  actMONObgcolor,     actMONObgcolor,         },
+	[SchemeFlexActGRID]  = { titleselfgcolor,  actGRIDbgcolor,     actGRIDbgcolor,         },
+	[SchemeFlexActGRD1]  = { titleselfgcolor,  actGRD1bgcolor,     actGRD1bgcolor,         },
+	[SchemeFlexActGRD2]  = { titleselfgcolor,  actGRD2bgcolor,     actGRD2bgcolor,         },
+	[SchemeFlexActGRDM]  = { titleselfgcolor,  actGRDMbgcolor,     actGRDMbgcolor,         },
+	[SchemeFlexActHGRD]  = { titleselfgcolor,  actHGRDbgcolor,     actHGRDbgcolor,         },
+	[SchemeFlexActDWDL]  = { titleselfgcolor,  actDWDLbgcolor,     actDWDLbgcolor,         },
+	[SchemeFlexActSPRL]  = { titleselfgcolor,  actSPRLbgcolor,     actSPRLbgcolor,         },
+	[SchemeFlexActFloat] = { titleselfgcolor,  actfloatbgcolor,    actfloatbgcolor,        },
+	[SchemeFlexInaTTB]   = { titlenormfgcolor, normTTBbgcolor,     normTTBbgcolor,         },
+	[SchemeFlexInaLTR]   = { titlenormfgcolor, normLTRbgcolor,     normLTRbgcolor,         },
+	[SchemeFlexInaMONO]  = { titlenormfgcolor, normMONObgcolor,    normMONObgcolor,        },
+	[SchemeFlexInaGRID]  = { titlenormfgcolor, normGRIDbgcolor,    normGRIDbgcolor,        },
+	[SchemeFlexInaGRD1]  = { titlenormfgcolor, normGRD1bgcolor,    normGRD1bgcolor,        },
+	[SchemeFlexInaGRD2]  = { titlenormfgcolor, normGRD2bgcolor,    normGRD2bgcolor,        },
+	[SchemeFlexInaGRDM]  = { titlenormfgcolor, normGRDMbgcolor,    normGRDMbgcolor,        },
+	[SchemeFlexInaHGRD]  = { titlenormfgcolor, normHGRDbgcolor,    normHGRDbgcolor,        },
+	[SchemeFlexInaDWDL]  = { titlenormfgcolor, normDWDLbgcolor,    normDWDLbgcolor,        },
+	[SchemeFlexInaSPRL]  = { titlenormfgcolor, normSPRLbgcolor,    normSPRLbgcolor,        },
+	[SchemeFlexInaFloat] = { titlenormfgcolor, normfloatbgcolor,   normfloatbgcolor,       },
+	[SchemeFlexSelTTB]   = { titleselfgcolor,  selTTBbgcolor,      selTTBbgcolor,          },
+	[SchemeFlexSelLTR]   = { titleselfgcolor,  selLTRbgcolor,      selLTRbgcolor,          },
+	[SchemeFlexSelMONO]  = { titleselfgcolor,  selMONObgcolor,     selMONObgcolor,         },
+	[SchemeFlexSelGRID]  = { titleselfgcolor,  selGRIDbgcolor,     selGRIDbgcolor,         },
+	[SchemeFlexSelGRD1]  = { titleselfgcolor,  selGRD1bgcolor,     selGRD1bgcolor,         },
+	[SchemeFlexSelGRD2]  = { titleselfgcolor,  selGRD2bgcolor,     selGRD2bgcolor,         },
+	[SchemeFlexSelGRDM]  = { titleselfgcolor,  selGRDMbgcolor,     selGRDMbgcolor,         },
+	[SchemeFlexSelHGRD]  = { titleselfgcolor,  selHGRDbgcolor,     selHGRDbgcolor,         },
+	[SchemeFlexSelDWDL]  = { titleselfgcolor,  selDWDLbgcolor,     selDWDLbgcolor,         },
+	[SchemeFlexSelSPRL]  = { titleselfgcolor,  selSPRLbgcolor,     selSPRLbgcolor,         },
+	[SchemeFlexSelFloat] = { titleselfgcolor,  selfloatbgcolor,    selfloatbgcolor,        },
 };
 
 static const char *const autostart[] = {
@@ -247,17 +247,22 @@ static const char *spcmd1[] = {"w", "st", "-n", "spterm (w)", "-g", "120x34", NU
 static const char *spcmd2[] = {"e", "st", "-n", "spterm (e)", "-g", "120x34", NULL };
 static const char *spcmd3[] = {"r", "st", "-n", "spfm (r)", "-g", "144x41", "-e", "ranger", NULL };
 
-/* Bar rules allow you to configure what is shown where on the bar, as well as
- * introducing your own bar modules.
+/* There are two options when it comes to per-client rules:
+ *  - a traditional struct table or
+ *  - using the RULE macro
  *
- *    monitor:
- *      -1  show on all monitors
- *       0  show on monitor 0
- *      'A' show on active monitor (i.e. focused / selected) (or just -1 for active?)
- *    bar - bar index, 0 is default, 1 is extrabar
- *    alignment - how the module is aligned compared to other modules
- *    widthfunc, drawfunc, clickfunc - providing bar module width, draw and click functions
- *    name - does nothing, intended for visual clue and for logging / debugging
+ * A traditional struct table looks like this:
+ *    // class      role      instance  title  wintype  opacity   flags   floatpos   scratchkey   workspace
+ *    { "Gimp",     NULL,     NULL,     NULL,  NULL,    0,        0,      NULL,      NULL,        "4"        },
+ *    { "Firefox",  NULL,     NULL,     NULL,  NULL,    0,        0,      NULL,      NULL,        "9"        },
+ *
+ * The RULE macro has the default values set for each field allowing you to only
+ * specify the values that are relevant for your rule, e.g.
+ *
+ *    RULE(.class = "Gimp", .workspace = "5")
+ *    RULE(.class = "Firefox", .workspace = "9")
+ *
+ * Refer to the Rule struct definition for the list of available fields.
  */
 static const Rule rules[] = {
 	/* xprop(1):
@@ -279,7 +284,7 @@ static const Rule rules[] = {
 	RULE(.class = "steam_app_", .flags = IgnoreCfgReqPos|Floating|Centered)
 	RULE(.class = "Google-chrome", .role = "GtkFileChooserDialog", .floatpos = "50% 50%", .flags = AlwaysOnTop|Floating)
 	RULE(.role = "pop-up", .flags = AlwaysOnTop|Floating|Centered)
-	RULE(.role = "browser", .workspace = "8", .flags = AttachMaster|OnlyModButtons|SwitchWorkspace)
+	RULE(.role = "browser", .workspace = "8", .flags = AttachBelow|OnlyModButtons|SwitchWorkspace)
 	RULE(.class = "Gnome-terminal", .role = "gnome-terminal-preferences", .flags = Centered)
 	RULE(.class = "Diffuse", .workspace = "4", .flags = NoSwallow|SwitchWorkspace|RevertWorkspace)
 	RULE(.class = "File-roller", .workspace = "9", .flags = Centered|Floating|SwitchWorkspace|RevertWorkspace)
@@ -425,15 +430,14 @@ static Key keys[] = {
 	{ MODKEY|Shift,                 XK_h,            setcfact,               {.f = +0.25} },
 	{ MODKEY|Shift,                 XK_l,            setcfact,               {.f = -0.25} },
 	{ MODKEY|Shift,                 XK_o,            setcfact,               {0} },
-
-	{ MODKEY,                       XK_Tab,          view,                   {0} },
 	{ MODKEY,                       XK_a,            togglepinnedws,         {0} },
 	{ MODKEY,                       XK_comma,        shiftviewclients,       { .i = -1 } },
 	{ MODKEY,                       XK_period,       shiftviewclients,       { .i = +1 } },
 	{ MODKEY,                       XK_z,            showhideclient,         {0} },
 	{ MODKEY,                       XK_q,            killclient,             {0} },
-	{ MODKEY|Shift,                 XK_q,            quit,                   {0} }, // exit
-	{ MODKEY|Ctrl|Shift,            XK_q,            quit,                   {1} }, // restart
+	{ MODKEY|Shift,                 XK_q,            quit,                   {1} }, // restart
+	{ MODKEY|Ctrl|Shift,            XK_q,            quit,                   {0} }, // exit
+	{ MODKEY,                       XK_m,            zoom,                   {0} },
 	{ MODKEY,                       XK_bracketright, rotatelayoutaxis,       {.i = +1 } },   /* flextile, 1 = layout axis */
 	{ MODKEY|Alt,                   XK_bracketright, rotatelayoutaxis,       {.i = +2 } },   /* flextile, 2 = master axis */
 	{ MODKEY|Shift,                 XK_bracketright, rotatelayoutaxis,       {.i = +3 } },   /* flextile, 3 = stack axis */
@@ -447,15 +451,6 @@ static Key keys[] = {
 	{ MODKEY|Shift,                 XK_g,            savefloats,             {0} }, // pins a client's floating position and size
 	{ MODKEY,                       XK_g,            togglefloating,         {0} },
 	{ Ctrl|Alt,                     XK_Tab,          togglenomodbuttons,     {0} },
-	{ MODKEY,                       XK_w,            togglescratch,          {.ui = 0 } },
-	{ MODKEY,                       XK_e,            togglescratch,          {.ui = 1 } },
-	{ MODKEY,                       XK_r,            togglescratch,          {.ui = 2 } },
-	{ MODKEY|Ctrl,                  XK_w,            setscratch,             {.ui = 0 } },
-	{ MODKEY|Ctrl,                  XK_e,            setscratch,             {.ui = 1 } },
-	{ MODKEY|Ctrl,                  XK_r,            setscratch,             {.ui = 2 } },
-	{ MODKEY|Ctrl|Shift,            XK_w,            removescratch,          {.ui = 0 } },
-	{ MODKEY|Ctrl|Shift,            XK_e,            removescratch,          {.ui = 1 } },
-	{ MODKEY|Ctrl|Shift,            XK_r,            removescratch,          {.ui = 2 } },
 	{ MODKEY,                       XK_f,            togglefullscreen,       {0} },
 	{ MODKEY|Shift,                 XK_f,            togglefakefullscreen,   {0} },
 	{ MODKEY|ShiftMask,             XK_plus,         changeopacity,          {.f = +0.05 } },
@@ -559,8 +554,6 @@ static Button buttons[] = {
 	{ ClkClientWin,              MODKEY|Shift,            Button5,        rotatestack,    {.i = -1 } },
 	{ ClkClientWin,              MODKEY,                  Button4,        inplacerotate,  {.i = +1 } },
 	{ ClkClientWin,              MODKEY,                  Button5,        inplacerotate,  {.i = -1 } },
-	{ ClkClientWin,              MODKEY|Alt,              Button4,        cyclelayout,    {.i = -1 } },
-	{ ClkClientWin,              MODKEY|Alt,              Button5,        cyclelayout,    {.i = +1 } },
 	{ ClkWorkspaceBar,           0,                       Button1,        viewws,         {0} },
 	{ ClkWorkspaceBar,           MODKEY,                  Button1,        movews,         {0} },
 	{ ClkWorkspaceBar,           MODKEY,                  Button2,        togglepinnedws, {0} },

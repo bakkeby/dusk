@@ -19,21 +19,11 @@
 typedef enum IPCMessageType {
   IPC_TYPE_RUN_COMMAND = 0,
   IPC_TYPE_GET_MONITORS = 1,
-  IPC_TYPE_GET_TAGS = 2,
+  IPC_TYPE_GET_WORKSPACES = 2,
   IPC_TYPE_GET_LAYOUTS = 3,
   IPC_TYPE_GET_DWM_CLIENT = 4,
-  IPC_TYPE_GET_WORKSPACES = 5,
-  IPC_TYPE_EVENT = 6
+  IPC_TYPE_EVENT = 5
 } IPCMessageType;
-
-typedef enum IPCEvent {
-  IPC_EVENT_TAG_CHANGE = 1 << 0,
-  IPC_EVENT_CLIENT_FOCUS_CHANGE = 1 << 1,
-  IPC_EVENT_LAYOUT_CHANGE = 1 << 2,
-  IPC_EVENT_MONITOR_FOCUS_CHANGE = 1 << 3,
-  IPC_EVENT_FOCUSED_TITLE_CHANGE = 1 << 4,
-  IPC_EVENT_FOCUSED_STATE_CHANGE = 1 << 5
-} IPCEvent;
 
 /**
  * Every IPC packet starts with this structure
@@ -206,10 +196,9 @@ void ipc_prepare_reply_success(IPCClient *c, IPCMessageType msg_type);
  *
  * @param ev Associated epoll event returned by epoll_wait
  * @param mons Address of Monitor pointing to start of linked list
- * @param selmon Address of selected Monitor
  * @param lastselmon Address of pointer to previously selected monitor
- * @param tags Array of tag names
- * @param tags_len Length of tags array
+ * @param selmon Address of selected Monitor
+ * @param num_workspaces number of workspaces
  * @param layouts Array of available layouts
  * @param layouts_len Length of layouts array
  *
@@ -217,7 +206,7 @@ void ipc_prepare_reply_success(IPCClient *c, IPCMessageType msg_type);
  * or handling incoming messages or unhandled epoll event.
  */
 int ipc_handle_client_epoll_event(struct epoll_event *ev, Monitor *mons,
-                                  Monitor **lastselmon, Monitor *selmon, const int tags_len,
+                                  Monitor **lastselmon, Monitor *selmon, const int num_workspaces,
                                   const Layout *layouts, const int layouts_len);
 
 /**

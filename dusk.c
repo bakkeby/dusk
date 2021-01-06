@@ -1796,12 +1796,14 @@ focusmon(const Arg *arg)
 		return;
 	if ((m = dirtomon(arg->i)) == selmon)
 		return;
-	sel = WS->sel;
+	sel = selws->sel;
 	selmon = m;
+	if (m->selws)
+		selws = m->selws;
 	unfocus(sel, 0, NULL);
 	focus(NULL);
 	if (enabled(Warp))
-		warp(WS->sel);
+		warp(selws->sel);
 }
 
 void
@@ -2695,8 +2697,7 @@ run(void)
 						num_workspaces, layouts, LENGTH(layouts)) < 0) {
 					fprintf(stderr, "Error handling IPC event on fd %d\n", event_fd);
 				}
-			} else
-			{
+			} else {
 				fprintf(stderr, "Got event from unknown fd %d, ptr %p, u32 %d, u64 %lu",
 				event_fd, events[i].data.ptr, events[i].data.u32,
 				events[i].data.u64);

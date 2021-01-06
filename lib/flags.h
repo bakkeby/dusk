@@ -16,7 +16,7 @@ static const unsigned long
 	RestoreFakeFullScreen = 0x80,
 	Centered = 0x100,
 	Permanent = 0x200, // client can't be killed
-	Sticky = 0x400, // client shows on all tags
+	Sticky = 0x400, // TODO client shows on all workspaces (or remove)
 	Hidden = 0x800,
 	Terminal = 0x1000,
 	NoSwallow = 0x2000,

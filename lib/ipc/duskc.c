@@ -17,13 +17,6 @@
 // clang-format on
 #define IPC_MAGIC_LEN 8  // Not including null char
 
-#define IPC_EVENT_TAG_CHANGE "tag_change_event"
-#define IPC_EVENT_CLIENT_FOCUS_CHANGE "client_focus_change_event"
-#define IPC_EVENT_LAYOUT_CHANGE "layout_change_event"
-#define IPC_EVENT_MONITOR_FOCUS_CHANGE "monitor_focus_change_event"
-#define IPC_EVENT_FOCUSED_TITLE_CHANGE "focused_title_change_event"
-#define IPC_EVENT_FOCUSED_STATE_CHANGE "focused_state_change_event"
-
 #define YSTR(str) yajl_gen_string(gen, (unsigned char *)str, strlen(str))
 #define YINT(num) yajl_gen_integer(gen, num)
 #define YDOUBLE(num) yajl_gen_double(gen, num)
@@ -51,11 +44,10 @@ static unsigned int ignore_reply = 0;
 typedef enum IPCMessageType {
   IPC_TYPE_RUN_COMMAND = 0,
   IPC_TYPE_GET_MONITORS = 1,
-  IPC_TYPE_GET_TAGS = 2,
+  IPC_TYPE_GET_WORKSPACES = 2,
   IPC_TYPE_GET_LAYOUTS = 3,
   IPC_TYPE_GET_DWM_CLIENT = 4,
-  IPC_TYPE_GET_WORKSPACES = 5,
-  IPC_TYPE_EVENT = 6
+  IPC_TYPE_EVENT = 5
 } IPCMessageType;
 
 // Every IPC message must begin with this

@@ -4,7 +4,7 @@
 #include "func.c"
 #include "warp.c"
 #include "workspace.c"
-// #include "combo.c"
+// #include "combo.c" // TODO
 
 #include "bar_alpha.c"
 #include "bar_dwmblocks.c"
