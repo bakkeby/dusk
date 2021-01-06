@@ -28,11 +28,11 @@ typedef enum IPCMessageType {
 /**
  * Every IPC packet starts with this structure
  */
-typedef struct dwm_ipc_header {
+typedef struct dusk_ipc_header {
   uint8_t magic[IPC_MAGIC_LEN];
   uint32_t size;
   uint8_t type;
-} __attribute((packed)) dwm_ipc_header_t;
+} __attribute((packed)) dusk_ipc_header_t;
 
 typedef enum ArgType {
   ARG_TYPE_NONE = 0,

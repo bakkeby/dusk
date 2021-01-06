@@ -165,6 +165,7 @@ viewws(const Arg *arg)
 
 	Workspace *ws = (Workspace*)arg->v;
 	viewwsonmon(ws, NULL);
+	focus(NULL);
 
 	fprintf(stderr, "viewws: <--\n");
 }
@@ -180,7 +181,7 @@ viewwsbyname(const Arg *arg)
 		return;
 
 	viewwsonmon(ws, NULL);
-	focus(ws->sel); // TODO hmmm
+	focus(NULL);
 	fprintf(stderr, "viewwsbyname: <--\n");
 }
 

@@ -95,7 +95,7 @@ ipc_recv_message(int fd, uint8_t *msg_type, uint32_t *reply_size,
 								 uint8_t **reply)
 {
 	uint32_t read_bytes = 0;
-	const int32_t to_read = sizeof(dwm_ipc_header_t);
+	const int32_t to_read = sizeof(dusk_ipc_header_t);
 	char header[to_read];
 	char *walk = header;
 
@@ -321,7 +321,7 @@ ipc_parse_run_command(char *msg, IPCParsedCommand *parsed_command)
 	*argc = args_val->u.array.len;
 
 	// If no arguments are specified, make a dummy argument to pass to the
-	// function. This is just the way dwm's void(Arg*) functions are setup.
+	// function. This is just the way dusk's void(Arg*) functions are setup.
 	if (*argc == 0) {
 		*args = (Arg *)malloc(sizeof(Arg));
 		*arg_types = (ArgType *)malloc(sizeof(ArgType));
@@ -417,14 +417,14 @@ ipc_validate_run_command(IPCParsedCommand *parsed, const IPCCommand actual)
 }
 
 /**
- * Parse an IPC_TYPE_GET_DWM_CLIENT message from a client. This function
+ * Parse an IPC_TYPE_GET_DUSK_CLIENT message from a client. This function
  * extracts the window id from the message.
  *
  * Returns 0 if message was successfully parsed
  * Returns -1 otherwise
  */
 static int
-ipc_parse_get_dwm_client(const char *msg, Window *win)
+ipc_parse_get_dusk_client(const char *msg, Window *win)
 {
 	char error_buffer[100];
 
@@ -462,7 +462,7 @@ ipc_parse_get_dwm_client(const char *msg, Window *win)
  *
  * NOTE: There is currently no check for argument validity beyond the number of
  * arguments given and types of arguments. There is also no way to check if the
- * function succeeded based on dwm's void(const Arg*) function types. Pointer
+ * function succeeded based on dusk's void(const Arg*) function types. Pointer
  * arguments can cause crashes if they are not validated in the function itself.
  *
  * Returns 0 if message was successfully parsed
@@ -546,7 +546,7 @@ ipc_get_layouts(IPCClient *c, const Layout layouts[], const int layouts_len)
 }
 
 /**
- * Called when an IPC_TYPE_GET_DWM_CLIENT message is received from a client. It
+ * Called when an IPC_TYPE_GET_DUSK_CLIENT message is received from a client. It
  * prepares a JSON reply with the properties of the client with the specified
  * window XID.
  *
@@ -555,11 +555,11 @@ ipc_get_layouts(IPCClient *c, const Layout layouts[], const int layouts_len)
  * Returns -1 if the message could not be parsed
  */
 static int
-ipc_get_dwm_client(IPCClient *ipc_client, const char *msg, const Monitor *mons) // TODO get rid of mons, or pass in workspaces
+ipc_get_dusk_client(IPCClient *ipc_client, const char *msg, const Monitor *mons) // TODO get rid of mons, or pass in workspaces
 {
 	Window win;
 
-	if (ipc_parse_get_dwm_client(msg, &win) < 0)
+	if (ipc_parse_get_dusk_client(msg, &win) < 0)
 		return -1;
 
 	// Find client with specified window XID
@@ -569,11 +569,11 @@ ipc_get_dwm_client(IPCClient *ipc_client, const char *msg, const Monitor *mons) 
 				yajl_gen gen;
 				ipc_reply_init_message(&gen);
 				dump_client(gen, c);
-				ipc_reply_prepare_send_message(gen, ipc_client, IPC_TYPE_GET_DWM_CLIENT);
+				ipc_reply_prepare_send_message(gen, ipc_client, IPC_TYPE_GET_DUSK_CLIENT);
 				return 0;
 			}
 
-	ipc_prepare_reply_failure(ipc_client, IPC_TYPE_GET_DWM_CLIENT,
+	ipc_prepare_reply_failure(ipc_client, IPC_TYPE_GET_DUSK_CLIENT,
 														"Client with window id %d not found", win);
 	return -1;
 }
@@ -801,10 +801,10 @@ void
 ipc_prepare_send_message(IPCClient *c, const IPCMessageType msg_type,
 												 const uint32_t msg_size, const char *msg)
 {
-	dwm_ipc_header_t header = {
+	dusk_ipc_header_t header = {
 			.magic = IPC_MAGIC_ARR, .type = msg_type, .size = msg_size};
 
-	uint32_t header_size = sizeof(dwm_ipc_header_t);
+	uint32_t header_size = sizeof(dusk_ipc_header_t);
 	uint32_t packet_size = header_size + msg_size;
 
 	if (c->buffer == NULL)
@@ -897,8 +897,8 @@ ipc_handle_client_epoll_event(
 		else if (msg_type == IPC_TYPE_RUN_COMMAND) {
 			if (ipc_run_command(c, msg) < 0)
 				return -1;
-		} else if (msg_type == IPC_TYPE_GET_DWM_CLIENT) {
-			if (ipc_get_dwm_client(c, msg, mons) < 0)
+		} else if (msg_type == IPC_TYPE_GET_DUSK_CLIENT) {
+			if (ipc_get_dusk_client(c, msg, mons) < 0)
 				return -1;
 		} else {
 			fprintf(stderr, "Invalid message type received from fd %d", fd);

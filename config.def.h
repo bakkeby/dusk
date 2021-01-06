@@ -388,9 +388,6 @@ static const Layout layouts[] = {
 	{ MOD, XK_a, ACTION, {.i = 2 } }, \
 	{ MOD, XK_z, ACTION, {.i = -1 } },
 
-/* helper for spawning shell commands in the pre dwm-5.0 fashion */
-#define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
-
 /* commands */
 static const char *dmenucmd[] = {
 	"dmenu_run",

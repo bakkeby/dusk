@@ -1,4 +1,4 @@
-/* dwm will keep pid's of processes from autostart array and kill them at quit */
+/* dusk will keep pid's of processes from autostart array and kill them at quit */
 static pid_t *autostart_pids;
 static size_t autostart_len;
 
@@ -18,7 +18,7 @@ autostart_exec()
 		if ((autostart_pids[i] = fork()) == 0) {
 			setsid();
 			execvp(*p, (char *const *)p);
-			fprintf(stderr, "dwm: execvp %s\n", *p);
+			fprintf(stderr, "dusk: execvp %s\n", *p);
 			perror(" failed");
 			_exit(EXIT_FAILURE);
 		}

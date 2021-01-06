@@ -46,22 +46,22 @@ typedef enum IPCMessageType {
   IPC_TYPE_GET_MONITORS = 1,
   IPC_TYPE_GET_WORKSPACES = 2,
   IPC_TYPE_GET_LAYOUTS = 3,
-  IPC_TYPE_GET_DWM_CLIENT = 4,
+  IPC_TYPE_GET_DUSK_CLIENT = 4,
   IPC_TYPE_EVENT = 5
 } IPCMessageType;
 
 // Every IPC message must begin with this
-typedef struct dwm_ipc_header {
+typedef struct dusk_ipc_header {
   uint8_t magic[IPC_MAGIC_LEN];
   uint32_t size;
   uint8_t type;
-} __attribute((packed)) dwm_ipc_header_t;
+} __attribute((packed)) dusk_ipc_header_t;
 
 static int
 recv_message(uint8_t *msg_type, uint32_t *reply_size, uint8_t **reply)
 {
   uint32_t read_bytes = 0;
-  const int32_t to_read = sizeof(dwm_ipc_header_t);
+  const int32_t to_read = sizeof(dusk_ipc_header_t);
   char header[to_read];
   char *walk = header;
 
@@ -194,10 +194,10 @@ connect_to_socket()
 static int
 send_message(IPCMessageType msg_type, uint32_t msg_size, uint8_t *msg)
 {
-  dwm_ipc_header_t header = {
+  dusk_ipc_header_t header = {
       .magic = IPC_MAGIC_ARR, .size = msg_size, .type = msg_type};
 
-  size_t header_size = sizeof(dwm_ipc_header_t);
+  size_t header_size = sizeof(dusk_ipc_header_t);
   size_t total_size = header_size + msg_size;
 
   uint8_t buffer[total_size];
@@ -361,7 +361,7 @@ get_layouts()
 }
 
 static int
-get_dwm_client(Window win)
+get_dusk_client(Window win)
 {
   const unsigned char *msg;
   size_t msg_size;
@@ -380,7 +380,7 @@ get_dwm_client(Window win)
 
   yajl_gen_get_buf(gen, &msg, &msg_size);
 
-  send_message(IPC_TYPE_GET_DWM_CLIENT, msg_size, (uint8_t *)msg);
+  send_message(IPC_TYPE_GET_DUSK_CLIENT, msg_size, (uint8_t *)msg);
 
   print_socket_reply();
 
@@ -425,7 +425,7 @@ print_usage(const char *name)
   puts("");
   puts("  get_layouts                     Get list of layouts");
   puts("");
-  puts("  get_dwm_client <window_id>      Get dwm client proprties");
+  puts("  get_dusk_client <window_id>     Get dusk client proprties");
   puts("");
   puts("  get_workspaces                  Get list of workspaces");
   puts("");
@@ -468,11 +468,11 @@ main(int argc, char *argv[])
     get_monitors();
   } else if (strcmp(argv[i], "get_layouts") == 0) {
     get_layouts();
-  } else if (strcmp(argv[i], "get_dwm_client") == 0) {
+  } else if (strcmp(argv[i], "get_dusk_client") == 0) {
     if (++i < argc) {
       if (is_unsigned_int(argv[i])) {
         Window win = atol(argv[i]);
-        get_dwm_client(win);
+        get_dusk_client(win);
       } else
         usage_error(prog_name, "Expected unsigned integer argument");
     } else

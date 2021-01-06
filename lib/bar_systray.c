@@ -52,7 +52,7 @@ draw_systray(Bar *bar, BarArg *a)
 			sendevent(root, xatom[Manager], StructureNotifyMask, CurrentTime, netatom[NetSystemTray], systray->win, 0, 0);
 			XSync(dpy, False);
 		} else {
-			fprintf(stderr, "dwm: unable to obtain system tray.\n");
+			fprintf(stderr, "dusk: unable to obtain system tray.\n");
 			free(systray);
 			systray = NULL;
 			return 0;

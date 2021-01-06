@@ -886,6 +886,7 @@ cleanup(void)
 void
 cleanupmon(Monitor *mon)
 {
+	fprintf(stderr, "cleanupmon: -->\n");
 	Workspace *ws;
 	Monitor *m;
 	Bar *bar;
@@ -910,6 +911,7 @@ cleanupmon(Monitor *mon)
 		free(bar);
 	}
 	free(mon);
+	fprintf(stderr, "cleanupmon: <--\n");
 }
 
 void
@@ -1663,11 +1665,11 @@ enternotify(XEvent *e)
 	fprintf(stderr, "enternotify: --> selmon = %d\n", selmon->num);
 	fprintf(stderr, "enternotify: %d\n", 2);
 	c = wintoclient(ev->window);
-	fprintf(stderr, "enternotify: %d\n", 3);
+	fprintf(stderr, "enternotify: %d - window %ld\n", 3, ev->window);
 	if (c)
 		fprintf(stderr, "enternotify: entered client %s on workspace %s on monitor %d\n", c->name, c->ws->name, c->ws->mon->num);
 	else
-		fprintf(stderr, "enternotify: no client found\n");
+		fprintf(stderr, "enternotify: no client found for window %ld\n", ev->window);
 
 	m = c ? c->ws->mon : wintomon(ev->window);
 	fprintf(stderr, "enternotify: %d (monitor %d)\n", 4, m->num);
@@ -1685,7 +1687,7 @@ enternotify(XEvent *e)
 			unfocus(sel, 1, c);
 	} else {
 		fprintf(stderr, "enternotify: %d\n", 7);
-		if (!c || c == ws->sel) {
+		if (selws == m->selws && (!c || (m->selws && c == m->selws->sel))) {
 			fprintf(stderr, "enternotify: %d <--\n", 8);
 			return;
 		}
@@ -1764,8 +1766,8 @@ focus(Client *c)
 	} else {
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
 		XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
+		ws->sel = ws->stack;
 	}
-	ws->sel = c;
 	if (ws->layout->arrange == flextile && (
 			ws->ltaxis[MASTER] == MONOCLE ||
 			ws->ltaxis[STACK] == MONOCLE ||
@@ -2184,13 +2186,11 @@ manage(Window w, XWindowAttributes *wa)
 	fprintf(stderr, "manage: %d (%s)\n", 30, c->name);
 	attachx(c);
 	fprintf(stderr, "manage: %d (%s)\n", 31, c->name);
-	if (focusclient)
+	if (focusclient || !c->ws->sel || !c->ws->stack)
 		attachstack(c);
-	else if (c->ws->sel) {
+	else {
 		c->snext = c->ws->sel->snext;
 		c->ws->sel->snext = c;
-	} else {
-		c->ws->sel = c;
 	}
 
 	fprintf(stderr, "manage: %d (%s)\n", 32, c->name);
@@ -2210,8 +2210,6 @@ manage(Window w, XWindowAttributes *wa)
 	if (c->ws == WS)
 		unfocus(WS->sel, 0, c);
 
-	if (focusclient)
-		c->ws->sel = c;
 	fprintf(stderr, "manage: %d (%s)\n", 36, c->name);
 	if (!(term && swallow(term, c))) {
 		fprintf(stderr, "manage: %d (%s)\n", 37, c->name);
@@ -2478,13 +2476,8 @@ quit(const Arg *arg)
 		}
 	}
 
-	// for (m = mons; m; m = m->next)
-		// persistmonitorstate(mons);
-
 	for (ws = workspaces; ws; ws = ws->next)
 		persistworkspacestate(ws);
-
-
 }
 
 Monitor *
@@ -2814,6 +2807,8 @@ setfocus(Client *c)
 			XA_WINDOW, 32, PropModeReplace,
 			(unsigned char *) &(c->win), 1);
 		selws->sel = c;
+		if (selws != c->ws)
+			c->ws->sel = c;
 	}
 	sendevent(c->win, wmatom[WMTakeFocus], NoEventMask, wmatom[WMTakeFocus], CurrentTime, 0, 0, 0);
 	fprintf(stderr, "setfocus: <-- %s\n", c->name);
@@ -3787,6 +3782,8 @@ main(int argc, char *argv[])
 	if (restart)
 		execvp(argv[0], argv);
 	cleanup();
+	fprintf(stderr, "main: after cleanup(), calling XCloseDisplay\n");
 	XCloseDisplay(dpy);
+	fprintf(stderr, "main: after XCloseDisplay, returning EXIT_SUCCESS\n");
 	return EXIT_SUCCESS;
 }
