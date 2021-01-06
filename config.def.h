@@ -406,102 +406,69 @@ static const char *termcmd[]  = { "st", NULL };
 
 static Key keys[] = {
 	/* modifier                     key              function                argument */
-	{ MODKEY,                       XK_d,            spawn,                  {.v = dmenucmd } },
-	{ MODKEY,                       XK_Return,       spawn,                  {.v = termcmd } },
-	{ MODKEY,                       XK_b,            togglebar,              {0} },
+	{ MODKEY,                       XK_d,            spawn,                  {.v = dmenucmd } }, // spawn dmenu for launching other programs
+	{ MODKEY,                       XK_Return,       spawn,                  {.v = termcmd } }, // spawn a terminal
+	{ MODKEY,                       XK_b,            togglebar,              {0} }, // toggles the display of the bar(s) on the current monitor
 
-	STACKKEYS(AltGr|Ctrl,                            stackfocus)
-	STACKKEYS(AltGr|Ctrl|Shift,                      stackpush)
+	{ MODKEY,                       XK_j,            focusstack,             {.i = +1 } }, // focus on the next client in the stack
+	{ MODKEY,                       XK_k,            focusstack,             {.i = -1 } }, // focus on the previous client in the stack
+	{ MODKEY|Alt|Shift,             XK_e,            focusstack,             {.i = +2 } }, // allows focusing on hidden clients
+	{ MODKEY|Alt|Shift,             XK_r,            focusstack,             {.i = -2 } }, // allows focusing on hidden clients
+	{ MODKEY,                       XK_Left,         focusdir,               {.i = 0 } }, // focus on the client left of the currently focused client
+	{ MODKEY,                       XK_Right,        focusdir,               {.i = 1 } }, // focus on the client right of the currently focused client
+	{ MODKEY,                       XK_Up,           focusdir,               {.i = 2 } }, // focus on the client above the currently focused client
+	{ MODKEY,                       XK_Down,         focusdir,               {.i = 3 } }, // focus on the client below the currently focused client
 
-	{ MODKEY,                       XK_j,            focusstack,             {.i = +1 } },
-	{ MODKEY,                       XK_k,            focusstack,             {.i = -1 } },
-	{ MODKEY|Alt|Shift,             XK_e,            focusstack,             {.i = +2 } },
-	{ MODKEY|Alt|Shift,             XK_r,            focusstack,             {.i = -2 } },
-
-	{ MODKEY|Ctrl,                  XK_j,            pushdown,               {0} },
-	{ MODKEY|Ctrl,                  XK_k,            pushup,                 {0} },
-	{ MODKEY,                       XK_i,            incnmaster,             {.i = +1 } },
-	{ MODKEY,                       XK_u,            incnmaster,             {.i = -1 } },
-	{ MODKEY|Ctrl,                  XK_i,            incnstack,              {.i = +1 } },
-	{ MODKEY|Ctrl,                  XK_u,            incnstack,              {.i = -1 } },
-	{ MODKEY,                       XK_h,            setmfact,               {.f = -0.05} },
-	{ MODKEY,                       XK_l,            setmfact,               {.f = +0.05} },
-
-	{ MODKEY|Shift,                 XK_h,            setcfact,               {.f = +0.25} },
-	{ MODKEY|Shift,                 XK_l,            setcfact,               {.f = -0.25} },
+	{ MODKEY|Ctrl,                  XK_j,            pushdown,               {0} }, // move the selected client down the stack
+	{ MODKEY|Ctrl,                  XK_k,            pushup,                 {0} }, // move the selected client up the stack
+	{ MODKEY,                       XK_i,            incnmaster,             {.i = +1 } }, // increase the number of clients in the master area
+	{ MODKEY,                       XK_u,            incnmaster,             {.i = -1 } }, // decrease the number of clients in the master area
+	{ MODKEY|Ctrl,                  XK_i,            incnstack,              {.i = +1 } }, // increase the number of clients in the primary (first) stack area
+	{ MODKEY|Ctrl,                  XK_u,            incnstack,              {.i = -1 } }, // increase the number of clients in the primary (first) stack area
+	{ MODKEY,                       XK_h,            setmfact,               {.f = -0.05} }, // decrease the size of the master area compared to the stack area(s)
+	{ MODKEY,                       XK_l,            setmfact,               {.f = +0.05} }, // increase the size of the master area compared to the stack area(s)
+	{ MODKEY|Shift,                 XK_h,            setcfact,               {.f = +0.25} }, // increase size respective to other windows within the same area
+	{ MODKEY|Shift,                 XK_l,            setcfact,               {.f = -0.25} }, // decrease client size respective to other windows within the same area
 	{ MODKEY|Shift,                 XK_o,            setcfact,               {0} },
-	{ MODKEY,                       XK_a,            togglepinnedws,         {0} },
-	{ MODKEY,                       XK_comma,        shiftviewclients,       { .i = -1 } },
-	{ MODKEY,                       XK_period,       shiftviewclients,       { .i = +1 } },
-	{ MODKEY,                       XK_z,            showhideclient,         {0} },
-	{ MODKEY,                       XK_q,            killclient,             {0} },
-	{ MODKEY|Shift,                 XK_q,            quit,                   {1} }, // restart
-	{ MODKEY|Ctrl|Shift,            XK_q,            quit,                   {0} }, // exit
-	{ MODKEY,                       XK_m,            zoom,                   {0} },
-	{ MODKEY,                       XK_bracketright, rotatelayoutaxis,       {.i = +1 } },   /* flextile, 1 = layout axis */
-	{ MODKEY|Alt,                   XK_bracketright, rotatelayoutaxis,       {.i = +2 } },   /* flextile, 2 = master axis */
-	{ MODKEY|Shift,                 XK_bracketright, rotatelayoutaxis,       {.i = +3 } },   /* flextile, 3 = stack axis */
-	{ MODKEY|Ctrl,                  XK_bracketright, rotatelayoutaxis,       {.i = +4 } },   /* flextile, 4 = secondary stack axis */
-	{ MODKEY,                       XK_bracketleft,  rotatelayoutaxis,       {.i = -1 } },   /* flextile, 1 = layout axis */
-	{ MODKEY|Alt,                   XK_bracketleft,  rotatelayoutaxis,       {.i = -2 } },   /* flextile, 2 = master axis */
-	{ MODKEY|Shift,                 XK_bracketleft,  rotatelayoutaxis,       {.i = -3 } },   /* flextile, 3 = stack axis */
-	{ MODKEY|Ctrl,                  XK_bracketleft,  rotatelayoutaxis,       {.i = -4 } },   /* flextile, 4 = secondary stack axis */
-	{ MODKEY|Ctrl,                  XK_m,            mirrorlayout,           {0} },          /* flextile, flip master and stack areas */
-	{ MODKEY,                       XK_space,        setlayout,              {0} }, // toggles previous layout
+
+	{ MODKEY,                       XK_backslash,    togglepinnedws,         {0} }, // toggle pinning of currently selected workspace on the current monitor
+	{ MODKEY,                       XK_z,            showhideclient,         {0} }, // hide the currently selected client (or show if hidden)
+	{ MODKEY,                       XK_q,            killclient,             {0} }, // close the currently focused window
+	{ MODKEY|Shift,                 XK_q,            quit,                   {1} }, // restart dusk
+	{ MODKEY|Ctrl|Shift,            XK_q,            quit,                   {0} }, // exit dusk
+	{ MODKEY,                       XK_m,            zoom,                   {0} }, // moves the currently focused window to/from the master area (for tiled layouts)
+
+	{ MODKEY,                       XK_bracketleft,  rotatelayoutaxis,       {.i = -1 } }, // cycle through the available layout splits (horizontal, vertical, centered, no split, etc.)
+	{ MODKEY,                       XK_bracketright, rotatelayoutaxis,       {.i = +1 } }, // cycle through the available layout splits (horizontal, vertical, centered, no split, etc.)
+	{ MODKEY|Alt,                   XK_bracketleft,  rotatelayoutaxis,       {.i = -2 } }, // cycle through the available tiling arrangements for the master area
+	{ MODKEY|Alt,                   XK_bracketright, rotatelayoutaxis,       {.i = +2 } }, // cycle through the available tiling arrangements for the master area
+	{ MODKEY|Shift,                 XK_bracketleft,  rotatelayoutaxis,       {.i = -3 } }, // cycle through the available tiling arrangements for the primary (first) stack area
+	{ MODKEY|Shift,                 XK_bracketright, rotatelayoutaxis,       {.i = +3 } }, // cycle through the available tiling arrangements for the primary (first) stack area
+	{ MODKEY|Ctrl,                  XK_bracketleft,  rotatelayoutaxis,       {.i = -4 } }, // cycle through the available tiling arrangements for the secondary stack area
+	{ MODKEY|Ctrl,                  XK_bracketright, rotatelayoutaxis,       {.i = +4 } }, // cycle through the available tiling arrangements for the secondary stack area
+	{ MODKEY|Ctrl,                  XK_m,            mirrorlayout,           {0} }, // flip the master and stack areas
+	{ MODKEY,                       XK_space,        setlayout,              {0} }, // toggles between current and previous layout
+
 	{ MODKEY|Shift,                 XK_g,            savefloats,             {0} }, // pins a client's floating position and size
-	{ MODKEY,                       XK_g,            togglefloating,         {0} },
-	{ Ctrl|Alt,                     XK_Tab,          togglenomodbuttons,     {0} },
-	{ MODKEY,                       XK_f,            togglefullscreen,       {0} },
-	{ MODKEY|Shift,                 XK_f,            togglefakefullscreen,   {0} },
-	{ MODKEY|ShiftMask,             XK_plus,         changeopacity,          {.f = +0.05 } },
-	{ MODKEY|ShiftMask,             XK_minus,        changeopacity,          {.f = -0.05 } },
-	{ MODKEY|Shift,                 XK_comma,        focusmon,               {.i = -1 } },
-	{ MODKEY|Shift,                 XK_period,       focusmon,               {.i = +1 } },
+	{ MODKEY,                       XK_g,            togglefloating,         {0} }, // toggles between tiled and floating arrangement for the currently focused client
+	{ MODKEY,                       XK_f,            togglefullscreen,       {0} }, // toggles fullscreen for the currently selected client
+	{ MODKEY|Shift,                 XK_f,            togglefakefullscreen,   {0} }, // toggles "fake" fullscreen for the selected window
+	{ Ctrl|Alt,                     XK_Tab,          togglenomodbuttons,     {0} }, // disables / enables keybindings that are not accompanied by any modifier buttons for a client
+	{ MODKEY|ShiftMask,             XK_plus,         changeopacity,          {.f = +0.05 } }, // increase the client opacity (for compositors that support _NET_WM_OPACITY)
+	{ MODKEY|ShiftMask,             XK_minus,        changeopacity,          {.f = -0.05 } }, // decrease the client opacity (for compositors that support _NET_WM_OPACITY)
+
+	{ MODKEY|Shift,                 XK_comma,        focusmon,               {.i = -1 } }, // focus on the previous monitor, if any
+	{ MODKEY|Shift,                 XK_period,       focusmon,               {.i = +1 } }, // focus on the next monitor, if any
 	{ MODKEY|Alt,                   XK_comma,        clienttomon,            {.i = -1 } }, // sends the current client to an adjacent monitor
 	{ MODKEY|Alt,                   XK_period,       clienttomon,            {.i = +1 } }, // sends the current client to an adjacent monitor
 	{ MODKEY|Alt|Shift,             XK_comma,        clientstomon,           {.i = +1 } }, // sends all clients to an adjacent monitor
 	{ MODKEY|Alt|Shift,             XK_period,       clientstomon,           {.i = -1 } }, // sends all clients to an adjacent monitor
-	{ MODKEY,                       XK_Left,         focusdir,               {.i = 0 } }, // left
-	{ MODKEY,                       XK_Right,        focusdir,               {.i = 1 } }, // right
-	{ MODKEY,                       XK_Up,           focusdir,               {.i = 2 } }, // up
-	{ MODKEY,                       XK_Down,         focusdir,               {.i = 3 } }, // down
+	{ MODKEY,                       XK_comma,        shiftviewclients,       {.i = -1 } }, // move to the previous workspace (on the current monitor) that has clients
+	{ MODKEY,                       XK_period,       shiftviewclients,       {.i = +1 } }, // move to the next workspace (on the current monitor) that has clients
 
-	/* Unassigned key bidnings (available externally via the duskc command) */
-//	{ MODKEY,                       XK_,             incrgaps,               {.i = +1 } },
-//	{ MODKEY,                       XK_,             incrgaps,               {.i = -1 } },
-//	{ MODKEY,                       XK_,             incrigaps,              {.i = +1 } },
-//	{ MODKEY,                       XK_,             incrigaps,              {.i = -1 } },
-//	{ MODKEY,                       XK_,             incrogaps,              {.i = +1 } },
-//	{ MODKEY,                       XK_,             incrogaps,              {.i = -1 } },
-//	{ MODKEY,                       XK_,             incrihgaps,             {.i = +1 } },
-//	{ MODKEY,                       XK_,             incrihgaps,             {.i = -1 } },
-//	{ MODKEY,                       XK_,             incrivgaps,             {.i = +1 } },
-//	{ MODKEY,                       XK_,             incrivgaps,             {.i = -1 } },
-//	{ MODKEY,                       XK_,             incrohgaps,             {.i = +1 } },
-//	{ MODKEY,                       XK_,             incrohgaps,             {.i = -1 } },
-//	{ MODKEY,                       XK_,             incrovgaps,             {.i = +1 } },
-//	{ MODKEY,                       XK_,             incrovgaps,             {.i = -1 } },
-//	{ MODKEY,                       XK_,             togglegaps,             {0} },
-//	{ MODKEY,                       XK_,             defaultgaps,            {0} },
-//	{ MODKEY,                       XK_,             cyclelayout,            {.i = -1 } },
-//	{ MODKEY,                       XK_,             cyclelayout,            {.i = +1 } },
-//	{ MODKEY,                       XK_,             shiftview,              { .i = -1 } },
-//	{ MODKEY,                       XK_,             shiftview,              { .i = +1 } },
-//	{ MODKEY,                       XK_,             focusmaster,           {0} },
-//	{ MODKEY,                       XK_,             clientstomon,           {.i = +1 } },
-//	{ MODKEY,                       XK_,             clientstomon,           {.i = -1 } },
-//	{ MODKEY,                       XK_,             transfer,               {0} },
-//	{ MODKEY,                       XK_,             transferall,            {0} },
-//	{ MODKEY,                       XK_,             togglesticky,           {0} },
-//	{ MODKEY,                       XK_,             focusurgent,            {0} },
-//	{ MODKEY,                       XK_,             inplacerotate,          {.i = +1} },
-//	{ MODKEY,                       XK_,             inplacerotate,          {.i = -1} },
-//	{ MODKEY,                       XK_,             rotatestack,            {.i = +1 } },
-//	{ MODKEY,                       XK_,             rotatestack,            {.i = -1 } },
-//	{ MODKEY,                       XK_,             unfloatvisible,         {0} },
-//	{ MODKEY,                       XK_,             switchcol,              {0} },
-//	{ MODKEY,                       XK_,             setlayout,              {.v = &layouts[0]} },
-//	{ MODKEY,                       XK_,             xrdb,                   {0 } },
+
+	STACKKEYS(AltGr|Ctrl,                            stackfocus)                           // focus on the nth client in the stack, see the STACKKEYS macro for keybindings
+	STACKKEYS(AltGr|Ctrl|Shift,                      stackpush)                            // move the currently focused client to the nth place in the stack
 
 	SCRATCHKEYS(                    XK_w,                                    spcmd1)
 	SCRATCHKEYS(                    XK_e,                                    spcmd2)
@@ -516,20 +483,55 @@ static Key keys[] = {
 	WSKEYS(                         XK_7,                                    "7")
 	WSKEYS(                         XK_8,                                    "8")
 	WSKEYS(                         XK_9,                                    "9")
+
+	/* Unassigned key bindings (available externally via the duskc command) */
+//	{ MODKEY,                       XK_,             incrgaps,               {.i = +1 } }, // increase all gaps (outer, inner, horizontal and vertical)
+//	{ MODKEY,                       XK_,             incrgaps,               {.i = -1 } }, // decrease all gaps (outer, inner, horizontal and vertical)
+//	{ MODKEY,                       XK_,             incrigaps,              {.i = +1 } }, // increase inner gaps (horizontal and vertical)
+//	{ MODKEY,                       XK_,             incrigaps,              {.i = -1 } }, // decrease inner gaps (horizontal and vertical)
+//	{ MODKEY,                       XK_,             incrogaps,              {.i = +1 } }, // increase outer gaps (horizontal and vertical)
+//	{ MODKEY,                       XK_,             incrogaps,              {.i = -1 } }, // decrease outer gaps (horizontal and vertical)
+//	{ MODKEY,                       XK_,             incrihgaps,             {.i = +1 } }, // increase inner horizontal gaps
+//	{ MODKEY,                       XK_,             incrihgaps,             {.i = -1 } }, // decrease inner horizontal gaps
+//	{ MODKEY,                       XK_,             incrivgaps,             {.i = +1 } }, // increase inner vertical gaps
+//	{ MODKEY,                       XK_,             incrivgaps,             {.i = -1 } }, // decrease inner vertical gaps
+//	{ MODKEY,                       XK_,             incrohgaps,             {.i = +1 } }, // increase outer horizontal gaps
+//	{ MODKEY,                       XK_,             incrohgaps,             {.i = -1 } }, // decrease outer horizontal gaps
+//	{ MODKEY,                       XK_,             incrovgaps,             {.i = +1 } }, // increase outer vertical gaps
+//	{ MODKEY,                       XK_,             incrovgaps,             {.i = -1 } }, // decrease outer vertical gaps
+//	{ MODKEY,                       XK_,             togglegaps,             {0} }, // enables and disables the rendering of gaps in tiled layouts
+//	{ MODKEY,                       XK_,             defaultgaps,            {0} }, // revert gaps to the default settings
+//	{ MODKEY,                       XK_,             cyclelayout,            {.i = -1 } }, // cycle through the available layouts
+//	{ MODKEY,                       XK_,             cyclelayout,            {.i = +1 } }, // cycle through the available layouts (in reverse)
+//	{ MODKEY,                       XK_,             shiftview,              { .i = -1 } }, // move to the workspace on the immediate left of the current workspace on the current monitor (wraps around)
+//	{ MODKEY,                       XK_,             shiftview,              { .i = +1 } }, // move to the workspace on the immediate right of the current workspace on the current monitor (wraps around)
+//	{ MODKEY,                       XK_,             focusmaster,            {0} }, // change focus to the first client in the stack (master)
+//	{ MODKEY,                       XK_,             transfer,               {0} }, // move a client between the master and stack area automatically adjusting nmaster
+//	{ MODKEY,                       XK_,             transferall,            {0} }, // swaps all clients in the stack area with all clients in the master area
+//	{ MODKEY,                       XK_,             togglesticky,           {0} }, // makes a client show on all workspaces)
+//	{ MODKEY,                       XK_,             focusurgent,            {0} }, // focus on the client marked as urgent
+//	{ MODKEY,                       XK_,             inplacerotate,          {.i = +1} }, // rotate clients within the respective area (master, primary stack, secondary stack) clockwise
+//	{ MODKEY,                       XK_,             inplacerotate,          {.i = -1} }, // rotate clients within the respective area (master, primary stack, secondary stack) counter-clockwise
+//	{ MODKEY,                       XK_,             rotatestack,            {.i = +1 } }, // rotate all clients (clockwise)
+//	{ MODKEY,                       XK_,             rotatestack,            {.i = -1 } }, // rotate all clients (counter-clockwise)
+//	{ MODKEY,                       XK_,             unfloatvisible,         {0} }, // makes all floating clients on the currently selected workspace tiled
+//	{ MODKEY,                       XK_,             switchcol,              {0} }, // changes focus between the master and the primary stack area
+//	{ MODKEY,                       XK_,             setlayout,              {.v = &layouts[0]} }, // sets a specific layout, see the layouts array for indices
+//	{ MODKEY,                       XK_,             xrdb,                   {0 } }, // reloads colors from XResources
 };
 
 /* button definitions */
 /* click can be ClkButton, ClkWorkspaceBar, ClkLtSymbol, ClkStatusText, ClkWinTitle, ClkClientWin, or ClkRootWin */
 static Button buttons[] = {
 	/* click                     event mask               button          function        argument */
-	{ ClkButton,                 0,                       Button1,        spawn,          {.v = termcmd } },
-	{ ClkLtSymbol,               0,                       Button1,        setlayout,      {0} },
-	{ ClkLtSymbol,               0,                       Button4,        cyclelayout,    {.i = +1 } },
-	{ ClkLtSymbol,               0,                       Button5,        cyclelayout,    {.i = -1 } },
-	{ ClkWinTitle,               0,                       Button1,        focuswin,       {0} },
-	{ ClkWinTitle,               0,                       Button3,        showhideclient, {0} },
-	{ ClkWinTitle,               0,                       Button2,        zoom,           {0} },
-	{ ClkStatusText,             0,                       Button1,        sigdwmblocks,   {.i = 1 } },
+	{ ClkButton,                 0,                       Button1,        spawn,          {.v = termcmd } }, // spawns a terminal
+	{ ClkLtSymbol,               0,                       Button1,        setlayout,      {0} }, // toggles between current and previous layout
+	{ ClkLtSymbol,               0,                       Button4,        cyclelayout,    {.i = +1 } }, // cycle through the available layouts
+	{ ClkLtSymbol,               0,                       Button5,        cyclelayout,    {.i = -1 } }, // cycle through the available layouts (in reverse)
+	{ ClkWinTitle,               0,                       Button1,        focuswin,       {0} }, // focus on the given client
+	{ ClkWinTitle,               0,                       Button3,        showhideclient, {0} }, // hide the currently selected client (or show if hidden)
+	{ ClkWinTitle,               0,                       Button2,        zoom,           {0} }, // moves the currently focused window to/from the master area (for tiled layouts)
+	{ ClkStatusText,             0,                       Button1,        sigdwmblocks,   {.i = 1 } }, // sends mouse button presses to dwmblocks when clicking on the status
 	{ ClkStatusText,             0,                       Button2,        sigdwmblocks,   {.i = 2 } },
 	{ ClkStatusText,             0,                       Button3,        sigdwmblocks,   {.i = 3 } },
 	{ ClkStatusText,             0,                       Button4,        sigdwmblocks,   {.i = 4 } },
@@ -541,22 +543,22 @@ static Button buttons[] = {
 	{ ClkStatusText,             Shift,                   Button1,        sigdwmblocks,   {.i = 10 } },
 	{ ClkStatusText,             Shift,                   Button2,        sigdwmblocks,   {.i = 11 } },
 	{ ClkStatusText,             Shift,                   Button3,        sigdwmblocks,   {.i = 12 } },
-	{ ClkClientWin,              MODKEY,                  Button1,        movemouse,      {0} },
-	{ ClkClientWin,              MODKEY|Alt,              Button2,        togglefloating, {0} },
-	{ ClkClientWin,              MODKEY,                  Button3,        resizemouse,    {0} },
-	{ ClkClientWin,              0,                       Button8,        movemouse,      {0} },
-	{ ClkClientWin,              0,                       Button9,        resizemouse,    {0} },
-	{ ClkClientWin,              MODKEY,                  Button2,        zoom,           {0} },
-	{ ClkClientWin,              MODKEY|Shift,            Button3,        dragcfact,      {0} },
-	{ ClkClientWin,              MODKEY|Shift,            Button1,        dragmfact,      {0} },
-	{ ClkRootWin,                MODKEY|Shift,            Button1,        dragmfact,      {0} },
-	{ ClkClientWin,              MODKEY|Shift,            Button4,        rotatestack,    {.i = +1 } },
-	{ ClkClientWin,              MODKEY|Shift,            Button5,        rotatestack,    {.i = -1 } },
-	{ ClkClientWin,              MODKEY,                  Button4,        inplacerotate,  {.i = +1 } },
-	{ ClkClientWin,              MODKEY,                  Button5,        inplacerotate,  {.i = -1 } },
-	{ ClkWorkspaceBar,           0,                       Button1,        viewws,         {0} },
-	{ ClkWorkspaceBar,           MODKEY,                  Button1,        movews,         {0} },
-	{ ClkWorkspaceBar,           MODKEY,                  Button2,        togglepinnedws, {0} },
+	{ ClkClientWin,              MODKEY,                  Button1,        movemouse,      {0} }, // moves a client window into a floating position
+	{ ClkClientWin,              MODKEY|Alt,              Button2,        togglefloating, {0} }, // toggles between tiled and floating arrangement for given client
+	{ ClkClientWin,              MODKEY,                  Button3,        resizemouse,    {0} }, // change the size of a floating client window
+	{ ClkClientWin,              0,                       Button8,        movemouse,      {0} }, // move a client window using extra mouse buttons (previous)
+	{ ClkClientWin,              0,                       Button9,        resizemouse,    {0} }, // resize a client window using extra mouse buttons (next)
+	{ ClkClientWin,              MODKEY,                  Button2,        zoom,           {0} }, // moves the currently focused window to/from the master area (for tiled layouts)
+	{ ClkClientWin,              MODKEY|Shift,            Button3,        dragcfact,      {0} }, // dynamically change a client's size respective to other windows within the same area
+	{ ClkClientWin,              MODKEY|Shift,            Button1,        dragmfact,      {0} }, // dynamically change the size of the master area compared to the stack area(s)
+	{ ClkRootWin,                MODKEY|Shift,            Button1,        dragmfact,      {0} }, // dynamically change the size of the master area compared to the stack area(s)
+	{ ClkClientWin,              MODKEY,                  Button4,        inplacerotate,  {.i = +1 } }, // rotate clients within the respective area (master, primary stack, secondary stack) clockwise
+	{ ClkClientWin,              MODKEY,                  Button5,        inplacerotate,  {.i = -1 } }, // rotate clients within the respective area (master, primary stack, secondary stack) counter-clockwise
+	{ ClkClientWin,              MODKEY|Shift,            Button4,        rotatestack,    {.i = +1 } }, // rotate all clients (clockwise)
+	{ ClkClientWin,              MODKEY|Shift,            Button5,        rotatestack,    {.i = -1 } }, // rotate all clients (counter-clockwise)
+	{ ClkWorkspaceBar,           0,                       Button1,        viewws,         {0} }, // view the workspace by clicking on workspace icon
+	{ ClkWorkspaceBar,           MODKEY,                  Button1,        movews,         {0} }, // move the currently focused client to given workspace
+	{ ClkWorkspaceBar,           MODKEY,                  Button2,        togglepinnedws, {0} }, // toggles the pinning of a workspace to the current monitor
 };
 
 static const char *ipcsockpath = "/tmp/dusk.sock";
