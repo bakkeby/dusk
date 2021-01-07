@@ -43,6 +43,7 @@ dump_client(yajl_gen gen, Client *c)
   YMAP(
     YSTR("name"); YSTR(c->name);
     YSTR("window_id"); YINT(c->win);
+    YSTR("workspace"); YSTR(c->ws->name);
     YSTR("monitor_number"); YINT(c->ws->mon->num);
 
     YSTR("geometry"); YMAP(
@@ -88,13 +89,40 @@ dump_client(yajl_gen gen, Client *c)
       YSTR("old"); YINT(c->oldbw);
     )
 
-    YSTR("states"); YMAP(
-      YSTR("is_fixed"); YBOOL(ISFIXED(c));
-      YSTR("is_floating"); YBOOL(ISFLOATING(c));
-      YSTR("is_urgent"); YBOOL(ISURGENT(c));
-      YSTR("never_focus"); YBOOL(NEVERFOCUS(c));
-      YSTR("old_state"); YBOOL(WASFLOATING(c));
-      YSTR("is_fullscreen"); YBOOL(ISFULLSCREEN(c));
+    YSTR("flags"); YMAP(
+      YSTR("AlwaysOnTop"); YBOOL(ALWAYSONTOP(c));
+      YSTR("Floating"); YBOOL(ISFLOATING(c));
+      YSTR("Fixed"); YBOOL(ISFIXED(c));
+      YSTR("Locked"); YBOOL(ISLOCKED(c));
+      YSTR("Sticky"); YBOOL(ISSTICKY(c));
+      YSTR("Centered"); YBOOL(ISCENTERED(c));
+      YSTR("FullScreen"); YBOOL(ISFULLSCREEN(c));
+      YSTR("FakeFullScreen"); YBOOL(ISFAKEFULLSCREEN(c));
+      YSTR("Permanent"); YBOOL(ISPERMANENT(c));
+      YSTR("Terminal"); YBOOL(ISTERMINAL(c));
+      YSTR("Transient"); YBOOL(ISTRANSIENT(c));
+      YSTR("Urgent"); YBOOL(ISURGENT(c));
+      YSTR("Visible"); YBOOL(ISVISIBLE(c));
+      YSTR("IgnoreCfgReq"); YBOOL(IGNORECFGREQ(c));
+      YSTR("IgnoreCfgReqPos"); YBOOL(IGNORECFGREQPOS(c));
+      YSTR("IgnoreCfgReqSize"); YBOOL(IGNORECFGREQSIZE(c));
+      YSTR("IgnorePropTransientFor"); YBOOL(IGNOREPROPTRANSIENTFOR(c));
+      YSTR("IgnoreSizeHints"); YBOOL(IGNORESIZEHINTS(c));
+      YSTR("IgnoreDecorationHints"); YBOOL(IGNOREDECORATIONHINTS(c));
+      YSTR("NeedResize"); YBOOL(NEEDRESIZE(c));
+      YSTR("NeverFocus"); YBOOL(NEVERFOCUS(c));
+      YSTR("NoBorder"); YBOOL(NOBORDER(c));
+      YSTR("NoSwallow"); YBOOL(NOSWALLOW(c));
+      YSTR("OnlyModButtons"); YBOOL(ONLYMODBUTTONS(c));
+      YSTR("RestoreFakeFullScreen"); YBOOL(RESTOREFAKEFULLSCREEN(c));
+      YSTR("Ruled"); YBOOL(RULED(c));
+      YSTR("SwitchWorkspace"); YBOOL(SWITCHWORKSPACE(c));
+      YSTR("EnableWorkspace"); YBOOL(ENABLEWORKSPACE(c));
+      YSTR("RevertWorkspace"); YBOOL(REVERTWORKSPACE(c));
+      YSTR("MoveResize"); YBOOL(MOVERESIZE(c));
+      YSTR("WasFloating"); YBOOL(WASFLOATING(c));
+      YSTR("WasFakeFullscreen"); YBOOL(WASFAKEFULLSCREEN(c));
+      YSTR("WasFullscreen"); YBOOL(WASFULLSCREEN(c));
     )
   )
   // clang-format on
