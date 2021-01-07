@@ -17,7 +17,7 @@ static const unsigned long
 	Centered = 0x100,
 	Permanent = 0x200, // client can't be killed
 	Sticky = 0x400, // TODO client shows on all workspaces (or remove)
-	Hidden = 0x800,
+	Hidden = 0x800, // TODO not used, IconicState
 	Terminal = 0x1000,
 	NoSwallow = 0x2000,
 	Locked = 0x4000, // used by setfullscreen, prevents state change

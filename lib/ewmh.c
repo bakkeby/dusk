@@ -59,8 +59,10 @@ setfloatinghint(Client *c)
 void
 setclientflags(Client *c)
 {
-	unsigned long data[] = { c->flags };
-	XChangeProperty(dpy, c->win, clientatom[DuskClientFlags], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
+	unsigned long data1[] = { c->flags & 0xFFFFFFFF };
+	unsigned long data2[] = { c->flags >> 32 };
+	XChangeProperty(dpy, c->win, clientatom[DuskClientFlags1], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data1, 1);
+	XChangeProperty(dpy, c->win, clientatom[DuskClientFlags2], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data2, 1);
 }
 
 void
@@ -73,15 +75,16 @@ setclientfields(Client *c)
 void
 getclientflags(Client *c)
 {
-	Atom flags = getatomprop(c, clientatom[DuskClientFlags], AnyPropertyType);
-	if (flags)
-		c->flags = flags;
+	unsigned long flags1 = getatomprop(c, clientatom[DuskClientFlags1], AnyPropertyType) & 0xFFFFFFFF;
+	unsigned long flags2 = getatomprop(c, clientatom[DuskClientFlags2], AnyPropertyType);
+
+	if (flags1 || flags2)
+		c->flags = flags1 | (flags2 << 32);
 }
 
 void
 getclientfields(Client *c)
 {
-	fprintf(stderr, "getclientfields: -->\n");
 	Workspace *ws;
 	Atom fields = getatomprop(c, clientatom[DuskClientFields], AnyPropertyType);
 	if (fields) {
@@ -93,7 +96,6 @@ getclientfields(Client *c)
 				break;
 			}
 	}
-	fprintf(stderr, "getclientfields: <--\n");
 }
 
 void

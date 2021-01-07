@@ -193,7 +193,8 @@ enum {
 
 enum {
 	IsFloating,
-	DuskClientFlags,
+	DuskClientFlags1,
+	DuskClientFlags2,
 	DuskClientFields,
 	SteamGame,
 	ClientLast
@@ -367,7 +368,7 @@ typedef struct {
 	const char *workspace;
 } Rule;
 
-#define RULE(...) { .flags = 0, ##__VA_ARGS__ },
+#define RULE(...) { .scratchkey = 0, ##__VA_ARGS__ },
 
 struct Workspace {
 	char ltsymbol[16];
@@ -1374,12 +1375,11 @@ createworkspaces()
 	num_workspaces = i;
 
 	for (m = mons, ws = workspaces; ws; ws = ws->next) {
-		if (ws->mon == NULL) {
+		if (ws->mon == NULL)
 			ws->mon = m;
-			if (m->selws == NULL) {
-				m->selws = ws;
-				m->selws->visible = 1;
-			}
+		if (m->selws == NULL) {
+			m->selws = ws;
+			m->selws->visible = 1;
 		}
 		m = (m->next == NULL ? mons : m->next);
 	}
@@ -1398,13 +1398,8 @@ createworkspace(int num)
 	// TODO not 100% sure about this
 	if (r->monitor != -1) {
 		for (m = mons; m && m->num != r->monitor; m = m->next);
-		if (m) {
+		if (m)
 			ws->mon = m;
-			if (!m->selws) {
-				m->selws = ws;
-				m->selws->visible = 1;
-			}
-		}
 	}
 
 	strcpy(ws->name, r->name);
@@ -1848,19 +1843,29 @@ Atom
 getatomprop(Client *c, Atom prop, Atom req)
 {
 	int di;
-	unsigned long dl;
+	unsigned long dl, dm;
 	unsigned char *p = NULL;
 	Atom da, atom = None;
+	// unsigned int homm;
 
+// getatomprop: returning atom 0 homm 0, da = 0, di = 0, dl = 0, dm = 0 for client TermScratchpad (t)
+// getatomprop: returning atom 18446744072635809797 homm 5, da = 6, di = 32, dl = 1, dm = 0 for client TermScratchpad (t)
+// getatomprop: returning atom 1900614 homm 70, da = 6, di = 32, dl = 1, dm = 0 for client TermScratchpad (t)
+// da = 6 = CARDINAL
+// di = 32 bit
+// dl = 1, number of itms returned
+// dm = 0, bytes after return
 	/* FIXME getatomprop should return the number of items and a pointer to
 	 * the stored data instead of this workaround */
 	if (XGetWindowProperty(dpy, c->win, prop, 0L, sizeof atom, False, req,
-		&da, &di, &dl, &dl, &p) == Success && p) {
+		&da, &di, &dl, &dm, &p) == Success && p) {
 		atom = *(Atom *)p;
+		// homm = *(unsigned int *)p;
 		if (da == xatom[XembedInfo] && dl == 2)
 			atom = ((Atom *)p)[1];
 		XFree(p);
 	}
+	// fprintf(stderr, "getatomprop: returning atom %lu homm %u, da = %lu, di = %d, dl = %lu, dm = %lu for client %s\n", atom, homm, da, di, dl, dm, c->name);
 	return atom;
 }
 
@@ -2100,7 +2105,6 @@ manage(Window w, XWindowAttributes *wa)
 	}
 
 	c->bw = (NOBORDER(c) ? 0 : c->ws->mon->borderpx);
-
 	fprintf(stderr, "manage: %d (%s)\n", 14, c->name);
 
 	if (c->opacity) {
@@ -2185,10 +2189,12 @@ manage(Window w, XWindowAttributes *wa)
 
 	fprintf(stderr, "manage: %d (%s)\n", 30, c->name);
 	attachx(c);
-	fprintf(stderr, "manage: %d (%s)\n", 31, c->name);
-	if (focusclient || !c->ws->sel || !c->ws->stack)
+
+	if (focusclient || !c->ws->sel || !c->ws->stack) {
+		fprintf(stderr, "manage: %d (%s) (attachstack)\n", 31, c->name);
 		attachstack(c);
-	else {
+	} else {
+		fprintf(stderr, "manage: %d.2 (%s) (attach after sel)\n", 31, c->name);
 		c->snext = c->ws->sel->snext;
 		c->ws->sel->snext = c;
 	}
@@ -2210,6 +2216,8 @@ manage(Window w, XWindowAttributes *wa)
 	if (c->ws == WS)
 		unfocus(WS->sel, 0, c);
 
+	if (focusclient)
+		c->ws->sel = c; // needed for the XRaiseWindow that takes place in restack
 	fprintf(stderr, "manage: %d (%s)\n", 36, c->name);
 	if (!(term && swallow(term, c))) {
 		fprintf(stderr, "manage: %d (%s)\n", 37, c->name);
@@ -2218,8 +2226,8 @@ manage(Window w, XWindowAttributes *wa)
 		else if (ENABLEWORKSPACE(c))
 			// TODO
 			arrange(c->ws);
-		else
-			arrange(c->ws);
+
+		arrange(c->ws);
 		fprintf(stderr, "manage: %d (%s)\n", 38, c->name);
 		if (!HIDDEN(c)) {
 			XMapWindow(dpy, c->win);
@@ -2229,7 +2237,7 @@ manage(Window w, XWindowAttributes *wa)
 	fprintf(stderr, "manage: %d (%s)\n", 39, c->name);
 
 	if (focusclient)
-		focus(NULL);
+		focus(c);
 	setfloatinghint(c);
 	fprintf(stderr, "manage: %d (%s) (end)\n", 40, c->name);
 }
@@ -2385,17 +2393,6 @@ prevtiled(Client *c)
 	for (p = nexttiled(c->ws->clients), r = NULL; p && p != c && (r = p); p = nexttiled(p->next));
 	return r;
 }
-
-// TODO do we need this?
-// void
-// pop(Client *c)
-// {
-// 	detach(c);
-// 	attach(c);
-// 	focus(c);
-// 	arrangews(c->ws);
-// 	restack(c->ws);
-// }
 
 void
 propertynotify(XEvent *e)
@@ -2628,7 +2625,7 @@ resizemouse(const Arg *arg)
 void
 restack(Workspace *ws)
 {
-	Monitor *m = ws->mon;
+	fprintf(stderr, "restack --> ws %s\n", ws ? ws->name : "NULL");
 	Client *c;
 	XEvent ev;
 	XWindowChanges wc;
@@ -2636,11 +2633,13 @@ restack(Workspace *ws)
 
 	if (!ws->sel)
 		return;
-	if (ISFLOATING(ws->sel) || !ws->layout->arrange)
+	if (ISFLOATING(ws->sel) || !ws->layout->arrange) {
+		fprintf(stderr, "restack: %d XRaiseWindow for client %s\n", 5, ws->sel->name);
 		XRaiseWindow(dpy, ws->sel->win);
+	}
 	if (ws->layout->arrange) {
 		wc.stack_mode = Below;
-		wc.sibling = m->bar->win;
+		wc.sibling = ws->mon->bar->win;
 		for (c = ws->stack; c; c = c->snext)
 			if (!ISFLOATING(c) && ISVISIBLE(c)) {
 				XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
@@ -2659,6 +2658,7 @@ restack(Workspace *ws)
 		)
 			warp(ws->sel);
 	}
+	fprintf(stderr, "restack <-- ws %s\n", ws ? ws->name : "NULL");
 }
 
 void
@@ -2976,7 +2976,8 @@ setup(void)
 	wmatom[WMWindowRole] = XInternAtom(dpy, "WM_WINDOW_ROLE", False);
 	wmatom[WMChangeState] = XInternAtom(dpy, "WM_CHANGE_STATE", False);
 	clientatom[IsFloating] = XInternAtom(dpy, "_IS_FLOATING", False);
-	clientatom[DuskClientFlags] = XInternAtom(dpy, "_DUSK_CLIENT_FLAGS", False);
+	clientatom[DuskClientFlags1] = XInternAtom(dpy, "_DUSK_CLIENT_FLAGS1", False);
+	clientatom[DuskClientFlags2] = XInternAtom(dpy, "_DUSK_CLIENT_FLAGS2", False);
 	clientatom[DuskClientFields] = XInternAtom(dpy, "_DUSK_CLIENT_FIELDS", False);
 	clientatom[SteamGame] = XInternAtom(dpy, "STEAM_GAME", False);
 	netatom[NetActiveWindow] = XInternAtom(dpy, "_NET_ACTIVE_WINDOW", False);
