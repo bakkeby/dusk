@@ -40,7 +40,7 @@ static const unsigned long
 	AutoSaveFloats = 0x400000, // auto save float posistion when using movemouse or resizemouse
 	Debug = 0x800000,
 	AltWorkspaceIcons = 0x1000000, // show the workspace name instead of the icons
-	FuncPlaceholder0x2000000 = 0x2000000,
+	GreedyMonitor = 0x2000000, // when viewing a workspace the monitor is greedy and gives nothing in return (i.e. disables swap of workspaces)
 	FuncPlaceholder0x4000000 = 0x4000000,
 	FuncPlaceholder0x8000000 = 0x8000000,
 	FuncPlaceholder0x10000000 = 0x10000000,

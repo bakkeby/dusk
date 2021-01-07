@@ -189,6 +189,7 @@ void
 viewwsonmon(Workspace *ws, Monitor *m)
 {
 	fprintf(stderr, "viewwsonmon: -->\n");
+	int do_warp = 0;
 
 	if (m == NULL)
 		m = selmon;
@@ -218,27 +219,26 @@ viewwsonmon(Workspace *ws, Monitor *m)
 	 * quite difficult to write these out in text
 	 */
 
-
-	// TODO: one bug
-	//       1) when I started gedit and switched workspaces gedit (floating) would not move, not sure why
-
-
-	// focus(NULL);
 	if (ws->pinned) {
 		fprintf(stderr, "viewwsonmon: ws %s pinned, visible = %d\n", ws->name, ws->visible);
+		if (selws->mon != ws->mon)
+			do_warp = 1;
 		if (!ws->visible) {
 			if (ws->mon->selws && ws->mon->selws->visible)
 				hws = ws->mon->selws;
 			showws(ws);
 		}
-		// fprintf(stderr, "viewwsonmon: focusing on client %s\n", ws->sel == NULL ? "NULL" : ws->sel->name);
+		if (do_warp) {
+			fprintf(stderr, "viewwsonmon: warping to client %s\n", ws->sel ? ws->sel->name : "NULL");
+			warp(ws->sel);
+		}
 	} else {
 		fprintf(stderr, "viewwsonmon: ws %s not pinned\n", ws->name);
 		if (ws->mon != m) {
 			fprintf(stderr, "viewwsonmon: ws->mon != m\n");
 			if (ws->visible) {
 				fprintf(stderr, "viewwsonmon: ws->visible\n");
-				if (!m->selws || m->selws->pinned) {
+				if (enabled(GreedyMonitor) || !m->selws || m->selws->pinned) {
 					/* The current workspace is pinned, or there are no workspaces on the current
 					 * monitor. In this case, move the other workspace to the current monitor and
 					 * change to the next available workspace on the other monitor. */
