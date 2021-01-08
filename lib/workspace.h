@@ -1,16 +1,25 @@
 static char * wsicon(Workspace *ws);
 static void adjustwsformonitor(Workspace *ws, Monitor *m);
+static Workspace * getwsbyname(const Arg *arg);
 static void hidews(Workspace *ws);
 static void hidewsclients(Workspace *ws);
 static void showws(Workspace *ws);
 static void showwsclients(Workspace *ws);
 
 static void movews(const Arg *arg);
+static void movewsdir(const Arg *arg);
 static void movetows(Client *c, Workspace *ws);
 static void movetowsbyname(const Arg *arg);
+static void moveallclientstows(Workspace *from, Workspace *to);
+static void movealltowsbyname(const Arg *arg);
+
+static void swapws(const Arg *arg);
+static void swapwsclients(Workspace *ws, Workspace *ows);
+static void swapwsbyname(const Arg *arg);
 
 static void togglepinnedws(const Arg *arg);
 
 static void viewws(const Arg *arg);
 static void viewwsbyname(const Arg *arg);
+static void viewwsdir(const Arg *arg);
 static void viewwsonmon(Workspace *ws, Monitor *m);

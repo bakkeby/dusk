@@ -50,8 +50,6 @@
 #include "rotatestack.c"
 #include "savefloats.c"
 #include "setborderpx.c"
-#include "shiftview.c"
-#include "shiftviewclients.c"
 #ifdef XINERAMA
 #include "sortscreens.c"
 #endif // XINERAMA

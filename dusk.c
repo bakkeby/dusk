@@ -444,6 +444,7 @@ static void destroynotify(XEvent *e);
 static void detach(Client *c);
 static void detachstack(Client *c);
 static Monitor *dirtomon(int dir);
+static Workspace *dirtows(int dir);
 static void drawbar(Monitor *m);
 static void drawbars(void);
 static void drawbarwin(Bar *bar);
@@ -1147,46 +1148,21 @@ clienttomon(const Arg *arg)
 	fprintf(stderr, "clienttomon: <--\n");
 }
 
+/* Moves all clients from one monitor to another.
+ * More specifically it moves all clients from the selected workspace on the current monitor
+ * to the selected workspace on an adjacent monitor. */
 void
 clientstomon(const Arg *arg)
 {
-	Workspace *ws = WS, *nws;
+	Workspace *ws = selws, *nws;
 	Monitor *n;
-	Client *c, *last, *slast, *next;
 
 	if (!mons->next)
 		return;
 
 	n = dirtomon(arg->i);
 	nws = MWS(n);
-	for (last = nws->clients; last && last->next; last = last->next);
-	for (slast = nws->stack; slast && slast->snext; slast = slast->snext);
-
-	for (c = ws->clients; c; c = next) {
-		next = c->next;
-		if (!ISVISIBLE(c))
-			continue;
-		if (ISFLOATING(c))
-			clientmonresize(c, c->ws->mon, n);
-		unfocus(c, 1, NULL);
-		detach(c);
-		detachstack(c);
-		c->ws = nws;
-		if (last)
-			last = last->next = c;
-		else
-			nws->clients = last = c;
-		if (slast)
-			slast = slast->snext = c;
-		else
-			nws->stack = slast = c;
-		if (ISFULLSCREEN(c)) {
-			if (!ISFAKEFULLSCREEN(c)) {
-				resizeclient(c, n->mx, n->my, n->mw, n->mh);
-				XRaiseWindow(dpy, c->win);
-			}
-		}
-	}
+	moveallclientstows(ws, nws);
 
 	focus(NULL);
 	arrange(NULL);
@@ -1484,6 +1460,32 @@ dirtomon(int dir)
 	else
 		for (m = mons; m->next != selmon; m = m->next);
 	return m;
+}
+
+/* Returns the workspace found in a given direction -1/+1 on the
+ * current monitor. The direction is circular, i.e. it wraps around.
+ * Passing -2/+2 results in only workspaces that contain clients to
+ * be returned. */
+Workspace *
+dirtows(int dir)
+{
+	Workspace *ws = selws, *nws = NULL, *tws;
+
+	if (dir > 0) { // right circular search
+		for (nws = ws->next; nws && !(nws->mon == ws->mon && (dir != 2 || nws->clients)); nws = nws->next);
+		if (!nws && ws != workspaces)
+			for (tws = workspaces; tws && tws != ws; tws = tws->next)
+				if (tws->mon == ws->mon && (dir != 2 || tws->clients)) {
+					nws = tws;
+					break;
+				}
+	} else { // left circular search
+		for (tws = workspaces; tws && !(nws && tws == ws); tws = tws->next)
+			if (tws->mon == ws->mon && (dir != -2 || tws->clients))
+				nws = tws;
+	}
+
+	return nws;
 }
 
 void

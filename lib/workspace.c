@@ -27,7 +27,6 @@ adjustwsformonitor(Workspace *ws, Monitor *m)
 		layoutmonconvert(ws, ws->mon, m);
 }
 
-
 void
 hidews(Workspace *ws)
 {
@@ -72,10 +71,48 @@ movews(const Arg *arg)  // TODO movews - bad name perhaps?
 	Workspace *ws = (Workspace*)arg->v;
 	Client *c = selws->sel;
 	movetows(c, ws);
-	if (enabled(ViewOnWs) && !ws->visible)
-		viewwsonmon(ws, ws->mon);
 
 	fprintf(stderr, "movews: <--");
+}
+
+void
+swapws(const Arg *arg)
+{
+	swapwsclients(selws, (Workspace*)arg->v);
+}
+
+void
+swapwsbyname(const Arg *arg)
+{
+	Workspace *ows = getwsbyname(arg);
+	swapwsclients(selws, ows);
+	viewwsonmon(ows, ows->mon);
+}
+
+void
+swapwsclients(Workspace *ws, Workspace *ows)
+{
+	Client *c;
+
+	if (ws == ows)
+		return;
+
+	clientsmonresize(ws->clients, ws->mon, ows->mon);
+	clientsmonresize(ows->clients, ows->mon, ws->mon);
+
+	c = ws->clients;
+	ws->clients = ows->clients;
+	ows->clients = c;
+
+	c = ws->stack;
+	ws->stack = ows->stack;
+	ows->stack = c;
+
+	for (c = ws->clients; c; c = c->next)
+		c->ws = ws;
+
+	for (c = ows->clients; c; c = c->next)
+		c->ws = ows;
 }
 
 void
@@ -87,9 +124,9 @@ movetows(Client *c, Workspace *ws)
 	}
 	int changemon = !MOVERESIZE(c) && c->ws->mon != ws->mon;
 
-	if (changemon) {
+	if (changemon)
 		clientmonresize(c, c->ws->mon, ws->mon);
-	}
+
 	fprintf(stderr, "movetows: --> client %s --> workspace %s\n", c->name, ws->name);
 	int hadfocus = (c == WS->sel);
 	unfocus(c, 1, NULL);
@@ -106,7 +143,9 @@ movetows(Client *c, Workspace *ws)
 	attachx(c);
 	attachstack(c);
 
-	if (ws->visible) {
+	if (enabled(ViewOnWs) && !ws->visible)
+		viewwsonmon(ws, ws->mon);
+	else if (ws->visible) {
 		arrange(ws);
 		if (hadfocus) {
 			focus(c);
@@ -124,18 +163,84 @@ movetows(Client *c, Workspace *ws)
 
 	fprintf(stderr, "movetows: <--\n");
 }
+
+void
+moveallclientstows(Workspace *from, Workspace *to)
+{
+	Client *c, *clients = from->clients, *last, *slast;
+
+	if (from == to)
+		return;
+
+	for (last = to->clients; last && last->next; last = last->next);
+	for (slast = to->stack; slast && slast->snext; slast = slast->snext);
+
+	clientsmonresize(clients, from->mon, to->mon);
+
+	if (last)
+		last->next = from->clients;
+	else
+		to->clients = from->clients;
+
+	if (slast)
+		slast->snext = from->stack;
+	else
+		to->stack = from->stack;
+
+	from->clients = NULL;
+	from->stack = NULL;
+
+	for (c = clients; c; c = c->next)
+		c->ws = to;
+
+	clientsfsrestore(clients);
+}
+
 void
 movetowsbyname(const Arg *arg)
 {
 	fprintf(stderr, "movetowsbyname: -->\n");
-	Workspace *ws;
-	char *wsname = (char*)arg->v;
-	for (ws = workspaces; ws && strcmp(ws->name, wsname) != 0; ws = ws->next);
+	Workspace *ws = getwsbyname(arg);
 	if (!ws)
 		return;
 
 	movetows(selws->sel, ws);
 	fprintf(stderr, "movetowsbyname: <--\n");
+}
+
+void
+movealltowsbyname(const Arg *arg)
+{
+	Workspace *ws = getwsbyname(arg);
+	if (!ws)
+		return;
+
+	moveallclientstows(selws, ws);
+	arrange(NULL);
+}
+
+/* View an adjacent workspace on the current monitor */
+void
+viewwsdir(const Arg *arg)
+{
+	Workspace *nws = dirtows(arg->i);
+
+	if (!nws)
+		return;
+
+	viewwsonmon(nws, nws->mon);
+}
+
+/* Send client to an adjacent workspace on the current monitor */
+void
+movewsdir(const Arg *arg)
+{
+	Workspace *nws = dirtows(arg->i);
+
+	if (!nws)
+		return;
+
+	movetows(selws->sel, nws);
 }
 
 void
@@ -164,12 +269,7 @@ void
 viewwsbyname(const Arg *arg)
 {
 	fprintf(stderr, "viewwsbyname: -->\n");
-	Workspace *ws;
-	char *wsname = (char*)arg->v;
-	for (ws = workspaces; ws && strcmp(ws->name, wsname) != 0; ws = ws->next);
-	if (!ws)
-		return;
-
+	Workspace *ws = getwsbyname(arg);
 	viewwsonmon(ws, NULL);
 	focus(NULL);
 	fprintf(stderr, "viewwsbyname: <--\n");
@@ -288,4 +388,13 @@ viewwsonmon(Workspace *ws, Monitor *m)
 	}
 	updatecurrentdesktop();
 	fprintf(stderr, "viewwsonmon: <--\n");
+}
+
+Workspace *
+getwsbyname(const Arg *arg)
+{
+	Workspace *ws;
+	char *wsname = (char*)arg->v;
+	for (ws = workspaces; ws && strcmp(ws->name, wsname) != 0; ws = ws->next);
+	return ws;
 }

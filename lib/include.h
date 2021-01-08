@@ -46,8 +46,6 @@
 #include "rotatestack.h"
 #include "savefloats.h"
 #include "setborderpx.h"
-#include "shiftview.h"
-#include "shiftviewclients.h"
 #ifdef XINERAMA
 #include "sortscreens.h"
 #endif // XINERAMA
