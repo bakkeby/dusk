@@ -4,6 +4,9 @@ static void mirrorlayout(const Arg *arg);
 static void rotatelayoutaxis(const Arg *arg);
 static void setlayoutaxisex(const Arg *arg);
 static void setlayoutex(const Arg *arg);
+static void layoutmonconvert(Workspace *ws, Monitor *from, Monitor *to);
+static int convert_arrange(int arrange);
+static int convert_split(int split);
 
 /* Symbol handlers */
 static void setflexsymbols(Monitor *m, unsigned int n);

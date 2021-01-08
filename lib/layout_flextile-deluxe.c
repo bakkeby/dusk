@@ -83,6 +83,70 @@ setlayoutex(const Arg *arg)
 }
 
 static void
+layoutmonconvert(Workspace *ws, Monitor *from, Monitor *to)
+{
+	int from_orientation = from->mw < from->mh;
+	int to_orientation = to->mw < to->mh;
+
+	if (from_orientation == to_orientation)
+		return;
+
+	if (ws->layout->arrange != flextile)
+		return;
+
+	ws->ltaxis[LAYOUT] = convert_split(ws->ltaxis[LAYOUT]);
+	ws->ltaxis[MASTER] = convert_arrange(ws->ltaxis[MASTER]);
+	ws->ltaxis[STACK] = convert_arrange(ws->ltaxis[STACK]);
+	ws->ltaxis[STACK2] = convert_arrange(ws->ltaxis[STACK2]);
+}
+
+static int
+convert_split(int split)
+{
+	switch (split) {
+	case SPLIT_VERTICAL:
+		return SPLIT_HORIZONTAL;
+	case SPLIT_HORIZONTAL:
+		return SPLIT_VERTICAL;
+	case SPLIT_CENTERED_VERTICAL:
+		return SPLIT_CENTERED_HORIZONTAL;
+	case SPLIT_CENTERED_HORIZONTAL:
+		return SPLIT_CENTERED_VERTICAL;
+	case SPLIT_VERTICAL_DUAL_STACK:
+		return SPLIT_HORIZONTAL_DUAL_STACK;
+	case SPLIT_HORIZONTAL_DUAL_STACK:
+		return SPLIT_VERTICAL_DUAL_STACK;
+	case SPLIT_VERTICAL_FIXED:
+		return SPLIT_HORIZONTAL_FIXED;
+	case SPLIT_HORIZONTAL_FIXED:
+		return SPLIT_VERTICAL_FIXED;
+	case SPLIT_CENTERED_VERTICAL_FIXED:
+		return SPLIT_CENTERED_HORIZONTAL_FIXED;
+	case SPLIT_CENTERED_HORIZONTAL_FIXED:
+		return SPLIT_CENTERED_VERTICAL_FIXED;
+	case SPLIT_VERTICAL_DUAL_STACK_FIXED:
+		return SPLIT_HORIZONTAL_DUAL_STACK_FIXED;
+	case SPLIT_HORIZONTAL_DUAL_STACK_FIXED:
+		return SPLIT_VERTICAL_DUAL_STACK_FIXED;
+	}
+
+	return split;
+}
+
+static int
+convert_arrange(int arrange)
+{
+	if (arrange == TOP_TO_BOTTOM)
+		return LEFT_TO_RIGHT;
+
+	if (arrange == LEFT_TO_RIGHT)
+		return TOP_TO_BOTTOM;
+
+	return arrange;
+}
+
+
+static void
 layout_no_split(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n)
 {
 	Workspace *ws = MWS(m);

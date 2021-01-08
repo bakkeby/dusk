@@ -15,6 +15,18 @@ wsicon(Workspace *ws)
 	return icon;
 }
 
+void
+adjustwsformonitor(Workspace *ws, Monitor *m)
+{
+	if (ws->mon == m)
+		return;
+
+	clientsmonresize(ws->clients, ws->mon, m);
+
+	if (enabled(SmartLayoutConvertion))
+		layoutmonconvert(ws, ws->mon, m);
+}
+
 
 void
 hidews(Workspace *ws)
@@ -50,33 +62,11 @@ hidewsclients(Workspace *ws)
 void
 showwsclients(Workspace *ws)
 {
-	fprintf(stderr, "showwsclients --> %s\n", ws->name);
-
-	// TODO: probably need something in here to handle moving fullscreen windows from one monitor
-	// to another
 	showhide(ws->stack);
-	fprintf(stderr, "showwsclients <--\n");
-	// Client *c;
-	// for (c = ws->stack; c; c = c->snext) {
-	// 	/* show clients top down */
-	// 	if (!c->ws->layout->arrange && c->sfx != -9999 && !ISFULLSCREEN(c)) {
-	// 		XMoveWindow(dpy, c->win, c->sfx, c->sfy);
-	// 		resize(c, c->sfx, c->sfy, c->sfw, c->sfh, 0);
-	// 		continue;
-	// 	}
-	// 	if (NEEDRESIZE(c)) {
-	// 		removeflag(c, NeedResize);
-	// 		XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
-	// 	} else {
-	// 		XMoveWindow(dpy, c->win, c->x, c->y);
-	// 	}
-	// 	if ((!c->ws->layout->arrange || ISFLOATING(c)) && !ISFULLSCREEN(c))
-	// 		resize(c, c->x, c->y, c->w, c->h, 0);
-	// }
 }
 
 void
-movews(const Arg *arg)
+movews(const Arg *arg)  // TODO movews - bad name perhaps?
 {
 	fprintf(stderr, "movews: -->");
 	Workspace *ws = (Workspace*)arg->v;
@@ -197,27 +187,11 @@ viewwsonmon(Workspace *ws, Monitor *m)
 	Monitor *omon = NULL;
 	Workspace *ows = NULL, *hws = NULL;
 
-	if (ws == NULL)
-		fprintf(stderr, "viewwsonmon: arg->v is NULL\n");
-	else
-		fprintf(stderr, "viewwsonmon: arg->v is %s\n", ws->name);
-
-	// for (ws = workspaces; ws != arg->v; ws = ws->next);
 	if (!ws || (selws == ws && m == ws->mon)) {
 		fprintf(stderr, "viewwsonmon: because %s\n", !ws ? "!ws" : selws == ws ? "selws == ws && m == ws->mon" : "eh");
 		arrange(ws);
 		return;
 	}
-
-	/* Focus on the workspace on the monitor it resides on */
-
-	/*
-	 * Scenarios:
-	 *   View ws2m0, current ws1m0v
-	 *      - ws1m0 --> hidden
-	 *      - ws2m0 --> shown
-	 * quite difficult to write these out in text
-	 */
 
 	if (ws->pinned) {
 		fprintf(stderr, "viewwsonmon: ws %s pinned, visible = %d\n", ws->name, ws->visible);
@@ -243,10 +217,11 @@ viewwsonmon(Workspace *ws, Monitor *m)
 					 * monitor. In this case, move the other workspace to the current monitor and
 					 * change to the next available workspace on the other monitor. */
 					fprintf(stderr, "viewwsonmon: m->selws->pinned\n");
-					clientsmonresize(ws->clients, ws->mon, selmon);
+					adjustwsformonitor(ws, selmon);
 					if (m->selws)
 						hws = m->selws;
 					omon = ws->mon;
+
 
 					/* Find the next available workspace on said monitor */
 					for (ows = ws->next; ows && ows->mon != ws->mon; ows = ows->next);
@@ -268,8 +243,8 @@ viewwsonmon(Workspace *ws, Monitor *m)
 				} else {
 					fprintf(stderr, "viewwsonmon: !m->selws->pinned\n");
 					ows = m->selws;
-					clientsmonresize(ows->clients, ows->mon, ws->mon);
-					clientsmonresize(ws->clients, ws->mon, ows->mon);
+					adjustwsformonitor(ows, ws->mon);
+					adjustwsformonitor(ws, ows->mon);
 					ows->mon = ws->mon;
 					ws->mon = m;
 					fprintf(stderr, "views: set %s->mon to %d and %s->mon to %d\n", ows->name, ows->mon->num, ws->name, ws->mon->num);
@@ -281,7 +256,7 @@ viewwsonmon(Workspace *ws, Monitor *m)
 				}
 			} else {
 				fprintf(stderr, "viewwsonmon: !ws->visible\n");
-				clientsmonresize(ws->clients, ws->mon, selmon);
+				adjustwsformonitor(ws, m);
 				omon = ws->mon;
 				// This is partially the same as the else below, also partially the same as the
 				// pinned example, perhaps we need to nail down the different ways of manipulating
@@ -291,7 +266,6 @@ viewwsonmon(Workspace *ws, Monitor *m)
 				ws->mon = m;
 				showws(ws);
 				clientsfsrestore(ws->clients);
-				// drawbar(ws->mon); // TODO not sure this is needed, should be handled by showws --> arrange --> arrangews --> drawbar
 			}
 
 		} else {

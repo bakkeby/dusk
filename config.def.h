@@ -56,6 +56,8 @@ static unsigned long functionality = 0
 //	|ViewOnWs
 //	|Xresources
 //	|AutoSaveFloats
+//	|GreedyMonitor
+	|SmartLayoutConvertion
 ;
 
 static const char statussep              = ';'; /* separator between status bars */

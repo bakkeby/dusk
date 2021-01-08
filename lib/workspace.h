@@ -1,4 +1,5 @@
 static char * wsicon(Workspace *ws);
+static void adjustwsformonitor(Workspace *ws, Monitor *m);
 static void hidews(Workspace *ws);
 static void hidewsclients(Workspace *ws);
 static void showws(Workspace *ws);

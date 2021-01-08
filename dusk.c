@@ -1489,11 +1489,9 @@ dirtomon(int dir)
 void
 drawbar(Monitor *m)
 {
-	fprintf(stderr, "drawbar: -->\n");
 	Bar *bar;
 	for (bar = m->bar; bar; bar = bar->next)
 		drawbarwin(bar);
-	fprintf(stderr, "drawbar: <--\n");
 }
 
 void
@@ -1509,25 +1507,21 @@ drawbarwin(Bar *bar)
 {
 	if (!bar || !bar->win || bar->external)
 		return;
-	// fprintf(stderr, "drawbarwin: -->\n");
 
 	int r, w, total_drawn = 0, groupactive, ignored;
 	int rx, lx, rw, lw; // bar size, split between left and right if a center module is added
 	const BarRule *br;
 	Monitor *lastmon;
-	// fprintf(stderr, "drawbarwin: %d\n", 3);
+
 	if (bar->borderpx) {
-		// fprintf(stderr, "drawbarwin: %d\n", 4);
 		if (enabled(BarActiveGroupBorderColor))
 			getclientcounts(bar->mon, &groupactive, &ignored, &ignored, &ignored, &ignored, &ignored, &ignored);
 		else
 			groupactive = GRP_MASTER;
-		// fprintf(stderr, "drawbarwin: %d\n", 5);
 		XSetForeground(drw->dpy, drw->gc, scheme[getschemefor(bar->mon, groupactive, bar->mon == selmon)][ColBorder].pixel);
-		// fprintf(stderr, "drawbarwin: %d\n", 6);
 		XFillRectangle(drw->dpy, drw->drawable, drw->gc, 0, 0, bar->bw, bar->bh);
 	}
-	// fprintf(stderr, "drawbarwin: %d\n", 22);
+
 	BarArg warg = { 0 };
 	BarArg darg  = { 0 };
 	warg.h = bar->bh - 2 * bar->borderpx;
@@ -1536,24 +1530,19 @@ drawbarwin(Bar *bar)
 	rx = lx = bar->borderpx;
 
 	for (lastmon = mons; lastmon && lastmon->next; lastmon = lastmon->next);
-	// fprintf(stderr, "drawbarwin: %d\n", 33);
+
 	drw_setscheme(drw, scheme[SchemeNorm]);
 	drw_rect(drw, lx, bar->borderpx, lw, bar->bh - 2 * bar->borderpx, 1, 1);
 	for (r = 0; r < LENGTH(barrules); r++) {
 		br = &barrules[r];
-		// fprintf(stderr, "drawbarwin: %d, rule %s\n", 35, br->name);
 		if (br->bar != bar->idx || !br->widthfunc || (br->monitor == 'A' && bar->mon != selmon))
 			continue;
-		// fprintf(stderr, "drawbarwin: %d, rule %s\n", 36, br->name);
 		if (br->monitor != 'A' && br->monitor != -1 && br->monitor != bar->mon->num &&
 				!(br->drawfunc == draw_systray && br->monitor > lastmon->num && bar->mon->num == 0)) // hack: draw systray on first monitor if the designated one is not available
 			continue;
-		// fprintf(stderr, "drawbarwin: %d, rule %s\n", 37, br->name);
 		drw_setscheme(drw, scheme[SchemeNorm]);
 		warg.w = (br->alignment < BAR_ALIGN_RIGHT_LEFT ? lw : rw);
-		// fprintf(stderr, "drawbarwin: %d, rule %s\n", 38, br->name);
 		w = br->widthfunc(bar, &warg);
-		// fprintf(stderr, "drawbarwin: %d, rule %s\n", 39, br->name);
 		w = MIN(warg.w, w);
 
 		if (lw <= 0) { // if left is exhausted then switch to right side, and vice versa
@@ -1563,7 +1552,7 @@ drawbarwin(Bar *bar)
 			rw = lw;
 			rx = lx;
 		}
-		// fprintf(stderr, "drawbarwin: %d\n", 43);
+
 		switch (br->alignment) {
 		default:
 		case BAR_ALIGN_NONE:
@@ -1622,16 +1611,15 @@ drawbarwin(Bar *bar)
 		darg.y = bar->borderpx;
 		darg.h = bar->bh - 2 * bar->borderpx;
 		darg.w = bar->w[r];
-		// fprintf(stderr, "drawbarwin: %d, rule %s\n", 53, br->name);
+
 		if (br->drawfunc)
 			total_drawn += br->drawfunc(bar, &darg);
 	}
-	// fprintf(stderr, "drawbarwin: %d\n", 99);
+
 	if (total_drawn == 0 && bar->showbar) {
 		bar->showbar = 0;
 		updatebarpos(bar->mon);
 		XMoveResizeWindow(dpy, bar->win, bar->bx, bar->by, bar->bw, bar->bh);
-		// fprintf(stderr, "drawbarwin: %d\n", 120);
 		arrangews(bar->mon->selws);
 	}
 	else if (total_drawn > 0 && !bar->showbar) {
@@ -1639,12 +1627,9 @@ drawbarwin(Bar *bar)
 		updatebarpos(bar->mon);
 		XMoveResizeWindow(dpy, bar->win, bar->bx, bar->by, bar->bw, bar->bh);
 		drw_map(drw, bar->win, 0, 0, bar->bw, bar->bh);
-		// fprintf(stderr, "drawbarwin: %d\n", 130);
 		arrangews(bar->mon->selws);
 	} else
 		drw_map(drw, bar->win, 0, 0, bar->bw, bar->bh);
-
-	// fprintf(stderr, "drawbarwin: <--\n");
 }
 
 void
