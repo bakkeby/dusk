@@ -56,6 +56,8 @@ click_workspaces(Bar *bar, Arg *arg, BarArg *a)
 	Workspace *ws = workspaces;
 	int x = lrpad / 2;
 
+	for (ws = workspaces; ws && ws->mon != bar->mon; ws = ws->next); // find first workspace for mon
+
 	do {
 		if (ws->mon != bar->mon)
 			continue;

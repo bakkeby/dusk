@@ -888,7 +888,6 @@ cleanup(void)
 void
 cleanupmon(Monitor *mon)
 {
-	fprintf(stderr, "cleanupmon: -->\n");
 	Workspace *ws;
 	Monitor *m;
 	Bar *bar;
@@ -900,8 +899,10 @@ cleanupmon(Monitor *mon)
 		m->next = mon->next;
 	}
 	for (ws = workspaces; ws; ws = ws->next)
-		if (ws->mon == mon)
-			ws->mon = NULL;
+		if (ws->mon == mon) {
+			ws->mon = mons;
+			ws->visible = 0;
+		}
 	for (bar = mon->bar; bar; bar = mon->bar) {
 		if (!bar->external) {
 			XUnmapWindow(dpy, bar->win);
@@ -913,7 +914,6 @@ cleanupmon(Monitor *mon)
 		free(bar);
 	}
 	free(mon);
-	fprintf(stderr, "cleanupmon: <--\n");
 }
 
 void
@@ -1118,33 +1118,14 @@ clientrelposmon(Client *c, Monitor *o, Monitor *n, int *cx, int *cy, int *cw, in
 void
 clienttomon(const Arg *arg)
 {
-	fprintf(stderr, "clienttomon: -->\n");
-	Client *c = WS->sel;
+	Client *c = selws->sel;
 	if (!c || !mons->next)
 		return;
-	fprintf(stderr, "clienttomon: %d\n", 1);
-	// Monitor *m = WS->mon;
-	// fprintf(stderr, "clienttomon: %d, m = %d\n", 2, m->num);
-	Monitor *n = dirtomon(arg->i);
-	fprintf(stderr, "clienttomon: %d, n = %d\n", 3, n->num);
-	fprintf(stderr, "clienttomon: %d\n", 4);
-	// clientmonresize(c, m, n);
-	sendmon(c, n); // TODO sendmon gets less and less relevant
-	// if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c)) {
-	// 	resizeclient(c, c->ws->mon->mx, c->ws->mon->my, c->ws->mon->mw, c->ws->mon->mh);
-	// 	XRaiseWindow(dpy, c->win);
-	// } else if (ISFLOATING(c)) {
-	// 	resizeclient(c, c->x, c->y, c->w, c->h);
-	// }
 
-	// TODO other calls to sendmon also have these lines to set focus, do we want focus to follow
-	// a client when moving to another monitor? move away vs move to focus
-	// selmon = m;
-	// selws = selmon->selws;
-	// focus(NULL);
+	Monitor *m = dirtomon(arg->i);
 
-
-	fprintf(stderr, "clienttomon: <--\n");
+	if (m->selws)
+		movetows(c, m->selws);
 }
 
 /* Moves all clients from one monitor to another.
@@ -1153,18 +1134,18 @@ clienttomon(const Arg *arg)
 void
 clientstomon(const Arg *arg)
 {
-	Workspace *ws = selws, *nws;
-	Monitor *n;
+	Workspace *ws = selws;
+	Monitor *m;
 
 	if (!mons->next)
 		return;
 
-	n = dirtomon(arg->i);
-	nws = MWS(n);
-	moveallclientstows(ws, nws);
-
-	focus(NULL);
-	arrange(NULL);
+	m = dirtomon(arg->i);
+	if (m->selws) {
+		moveallclientstows(ws, m->selws);
+		focus(NULL);
+		arrange(NULL);
+	}
 }
 
 void
@@ -2358,8 +2339,9 @@ movemouse(const Arg *arg)
 	XUngrabPointer(dpy, CurrentTime);
 	if ((m = recttomon(c->x, c->y, c->w, c->h)) != selmon) {
 		sendmon(c, m);
+		if (m->selws)
+			selws = m->selws;
 		selmon = m;
-		selws = selmon->selws;
 		focus(NULL);
 	}
 	removeflag(c, MoveResize);
@@ -2601,8 +2583,9 @@ resizemouse(const Arg *arg)
 		fprintf(stderr, "resizemouse: selmon %d != mon %d\n", selmon->num, m->num);
 		fprintf(stderr, "resizemouse: c->x = %d, c->y = %d, c->w = %d, c->h = %d\n", c->x, c->y, c->w, c->h);
 		sendmon(c, m);
+		if (m->selws)
+			selws = m->selws;
 		selmon = m;
-		selws = selmon->selws;
 		focus(NULL);
 	}
 	removeflag(c, MoveResize);
@@ -2721,21 +2704,14 @@ scan(void)
 void
 sendmon(Client *c, Monitor *m)
 {
-	fprintf(stderr, "sendmon -->\n");
-	if (c->ws->mon == m)
+	if (c->ws->mon == m || !m->selws)
 		return;
 
-	fprintf(stderr, "sendmon: selws = %s and m->selws = %s\n", selws->name, MWSNAME(m));
-	Workspace *ws = MWS(m);
-	fprintf(stderr, "sendmon: monitor %d workspace is %s, client %s's workspace is %s\n", m->num, MWSNAME(m), c->name, c->ws->name);
+	detach(c);
+	detachstack(c);
 
-	movetows(c, ws);
-
-	if (c->revertws)
-		c->revertws = NULL;
-
-	fprintf(stderr, "sendmon: client's monitor is now %d and client's workspace is %s\n", c->ws->mon->num, c->ws->name);
-	fprintf(stderr, "sendmon <--\n");
+	attachx(c, AttachBottom, m->selws);
+	attachstack(c);
 }
 
 void

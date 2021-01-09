@@ -148,11 +148,8 @@ movetows(Client *c, Workspace *ws)
 		arrange(ws);
 		if (enabled(ViewOnWs) && hadfocus)
 			warp(c);
-	}
-	else
+	} else
 		XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y); // TODO separate function to hide clients?
-
-	// drawbar(c->ws->mon); // wrong place?
 }
 
 void
