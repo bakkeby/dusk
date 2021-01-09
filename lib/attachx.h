@@ -1,1 +1,2 @@
-static void attachx(Client *c);
+static void attachx(Client *c, unsigned long mode, Workspace *ws);
+static void attachstackx(Client *c, unsigned long mode, Workspace *ws);

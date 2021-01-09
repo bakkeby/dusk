@@ -51,11 +51,9 @@ showws(Workspace *ws)
 void
 hidewsclients(Workspace *ws)
 {
-	fprintf(stderr, "hidewsclients --> %s\n", ws->name);
 	Client *c;
 	for (c = ws->stack; c; c = c->snext)
 		XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
-	fprintf(stderr, "hidewsclients <--\n");
 }
 
 void
@@ -67,12 +65,9 @@ showwsclients(Workspace *ws)
 void
 movews(const Arg *arg)  // TODO movews - bad name perhaps?
 {
-	fprintf(stderr, "movews: -->");
 	Workspace *ws = (Workspace*)arg->v;
 	Client *c = selws->sel;
 	movetows(c, ws);
-
-	fprintf(stderr, "movews: <--");
 }
 
 void
@@ -84,128 +79,112 @@ swapws(const Arg *arg)
 void
 swapwsbyname(const Arg *arg)
 {
-	Workspace *ows = getwsbyname(arg);
-	swapwsclients(selws, ows);
-	viewwsonmon(ows, ows->mon);
+	swapwsclients(selws, getwsbyname(arg));
 }
 
 void
-swapwsclients(Workspace *ws, Workspace *ows)
+swapwsclients(Workspace *ws1, Workspace *ws2)
 {
-	Client *c;
+	Client *c1, *c2;
 
-	if (ws == ows)
+	if (ws1 == ws2)
 		return;
 
-	clientsmonresize(ws->clients, ws->mon, ows->mon);
-	clientsmonresize(ows->clients, ows->mon, ws->mon);
+	clientsmonresize(ws1->clients, ws1->mon, ws2->mon);
+	clientsmonresize(ws2->clients, ws2->mon, ws1->mon);
 
-	c = ws->clients;
-	ws->clients = ows->clients;
-	ows->clients = c;
+	c1 = ws1->clients;
+	c2 = ws2->clients;
+	ws1->clients = NULL;
+	ws2->clients = NULL;
 
-	c = ws->stack;
-	ws->stack = ows->stack;
-	ows->stack = c;
+	attachx(c1, AttachBottom, ws2);
+	attachx(c2, AttachBottom, ws1);
 
-	for (c = ws->clients; c; c = c->next)
-		c->ws = ws;
+	clientsfsrestore(c1);
+	clientsfsrestore(c2);
 
-	for (c = ows->clients; c; c = c->next)
-		c->ws = ows;
+	c1 = ws1->stack;
+	c2 = ws2->stack;
+	ws1->stack = NULL;
+	ws2->stack = NULL;
+
+	attachstackx(c1, AttachBottom, ws2);
+	attachstackx(c2, AttachBottom, ws1);
+
+	arrange(NULL);
 }
 
 void
 movetows(Client *c, Workspace *ws)
 {
-	if (!c) {
-		fprintf(stderr, "movetows: no client received for ws %s\n", ws->name);
+	if (!c)
 		return;
-	}
-	int changemon = !MOVERESIZE(c) && c->ws->mon != ws->mon;
 
-	if (changemon)
-		clientmonresize(c, c->ws->mon, ws->mon);
+	int hadfocus = (c == selws->sel);
 
-	fprintf(stderr, "movetows: --> client %s --> workspace %s\n", c->name, ws->name);
-	int hadfocus = (c == WS->sel);
+	clientmonresize(c, c->ws->mon, ws->mon);
+
 	unfocus(c, 1, NULL);
 	detach(c);
 	detachstack(c);
-	c->next = NULL;
 
 	if (c->ws->visible)
 		arrange(c->ws);
 
-	c->ws = ws;
-	c->id = 0;
-
-	attachx(c);
+	attachx(c, AttachBottom, ws);
 	attachstack(c);
+
+	clientsfsrestore(c);
+
+	if (hadfocus && ws->visible)
+		focus(c);
+	else
+		focus(NULL);
 
 	if (enabled(ViewOnWs) && !ws->visible)
 		viewwsonmon(ws, ws->mon);
 	else if (ws->visible) {
 		arrange(ws);
-		if (hadfocus) {
-			focus(c);
-			restack(c->ws);
-		} else {
-			focus(NULL);
-		}
-		if (changemon)
-			clientfsrestore(c);
-	} else {
-		XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y); // TODO separate function to hide clients?
+		if (enabled(ViewOnWs) && hadfocus)
+			warp(c);
 	}
+	else
+		XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y); // TODO separate function to hide clients?
 
-	drawbar(c->ws->mon);
-
-	fprintf(stderr, "movetows: <--\n");
+	// drawbar(c->ws->mon); // wrong place?
 }
 
 void
 moveallclientstows(Workspace *from, Workspace *to)
 {
-	Client *c, *clients = from->clients, *last, *slast;
+	Client *clients = from->clients;
 
-	if (from == to)
+	if (!clients || from == to)
 		return;
-
-	for (last = to->clients; last && last->next; last = last->next);
-	for (slast = to->stack; slast && slast->snext; slast = slast->snext);
 
 	clientsmonresize(clients, from->mon, to->mon);
 
-	if (last)
-		last->next = from->clients;
-	else
-		to->clients = from->clients;
+	attachx(from->clients, AttachBottom, to);
+	attachstackx(from->stack, AttachBottom, to);
 
-	if (slast)
-		slast->snext = from->stack;
-	else
-		to->stack = from->stack;
+	clientsfsrestore(clients);
 
 	from->clients = NULL;
 	from->stack = NULL;
 
-	for (c = clients; c; c = c->next)
-		c->ws = to;
-
-	clientsfsrestore(clients);
+	if (enabled(ViewOnWs) && !to->visible)
+		viewwsonmon(to, to->mon);
 }
 
 void
 movetowsbyname(const Arg *arg)
 {
-	fprintf(stderr, "movetowsbyname: -->\n");
 	Workspace *ws = getwsbyname(arg);
 	if (!ws)
 		return;
 
 	movetows(selws->sel, ws);
-	fprintf(stderr, "movetowsbyname: <--\n");
 }
 
 void
@@ -216,19 +195,6 @@ movealltowsbyname(const Arg *arg)
 		return;
 
 	moveallclientstows(selws, ws);
-	arrange(NULL);
-}
-
-/* View an adjacent workspace on the current monitor */
-void
-viewwsdir(const Arg *arg)
-{
-	Workspace *nws = dirtows(arg->i);
-
-	if (!nws)
-		return;
-
-	viewwsonmon(nws, nws->mon);
 }
 
 /* Send client to an adjacent workspace on the current monitor */
@@ -243,6 +209,18 @@ movewsdir(const Arg *arg)
 	movetows(selws->sel, nws);
 }
 
+/* View an adjacent workspace on the current monitor */
+void
+viewwsdir(const Arg *arg)
+{
+	Workspace *nws = dirtows(arg->i);
+
+	if (!nws)
+		return;
+
+	viewwsonmon(nws, nws->mon);
+}
+
 void
 togglepinnedws(const Arg *arg)
 {
@@ -250,29 +228,18 @@ togglepinnedws(const Arg *arg)
 	if (arg->v)
 		ws = (Workspace*)arg->v;
 	ws->pinned = !ws->pinned;
-	fprintf(stderr, "togglepinnedws: set ws %s pinned to %d\n", ws->name, ws->pinned);
 }
 
 void
 viewws(const Arg *arg)
 {
-	fprintf(stderr, "viewws: -->\n");
-
-	Workspace *ws = (Workspace*)arg->v;
-	viewwsonmon(ws, NULL);
-	focus(NULL);
-
-	fprintf(stderr, "viewws: <--\n");
+	viewwsonmon((Workspace*)arg->v, NULL);
 }
 
 void
 viewwsbyname(const Arg *arg)
 {
-	fprintf(stderr, "viewwsbyname: -->\n");
-	Workspace *ws = getwsbyname(arg);
-	viewwsonmon(ws, NULL);
-	focus(NULL);
-	fprintf(stderr, "viewwsbyname: <--\n");
+	viewwsonmon(getwsbyname(arg), NULL);
 }
 
 void
@@ -302,10 +269,6 @@ viewwsonmon(Workspace *ws, Monitor *m)
 				hws = ws->mon->selws;
 			showws(ws);
 		}
-		if (do_warp) {
-			fprintf(stderr, "viewwsonmon: warping to client %s\n", ws->sel ? ws->sel->name : "NULL");
-			warp(ws->sel);
-		}
 	} else {
 		fprintf(stderr, "viewwsonmon: ws %s not pinned\n", ws->name);
 		if (ws->mon != m) {
@@ -313,15 +276,17 @@ viewwsonmon(Workspace *ws, Monitor *m)
 			if (ws->visible) {
 				fprintf(stderr, "viewwsonmon: ws->visible\n");
 				if (enabled(GreedyMonitor) || !m->selws || m->selws->pinned) {
+					fprintf(stderr, "viewwsonmon: m->selws->pinned\n");
 					/* The current workspace is pinned, or there are no workspaces on the current
 					 * monitor. In this case, move the other workspace to the current monitor and
 					 * change to the next available workspace on the other monitor. */
-					fprintf(stderr, "viewwsonmon: m->selws->pinned\n");
+					do_warp = 1;
+
 					adjustwsformonitor(ws, selmon);
+
 					if (m->selws)
 						hws = m->selws;
 					omon = ws->mon;
-
 
 					/* Find the next available workspace on said monitor */
 					for (ows = ws->next; ows && ows->mon != ws->mon; ows = ows->next);
@@ -387,7 +352,13 @@ viewwsonmon(Workspace *ws, Monitor *m)
 		drawbar(omon);
 	}
 	updatecurrentdesktop();
+	focus(NULL);
 	fprintf(stderr, "viewwsonmon: <--\n");
+
+	if (do_warp && ws->sel) {
+		fprintf(stderr, "viewwsonmon: warping to client %s\n", ws->sel ? ws->sel->name : "NULL");
+		warp(ws->sel);
+	}
 }
 
 Workspace *

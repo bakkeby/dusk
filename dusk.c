@@ -1045,6 +1045,9 @@ clientmessage(XEvent *e)
 void
 clientmonresize(Client *c, Monitor *from, Monitor *to)
 {
+	if (!c || from == to)
+		return;
+
 	if (ISFLOATING(c) && (!ISFULLSCREEN(c) || ISFAKEFULLSCREEN(c)))
 		clientrelposmon(c, from, to, &c->x, &c->y, &c->w, &c->h);
 	else
@@ -1057,23 +1060,19 @@ clientmonresize(Client *c, Monitor *from, Monitor *to)
 void
 clientsmonresize(Client *clients, Monitor *from, Monitor *to)
 {
-	Client *c;
-
 	if (from == to)
 		return;
 
-	for (c = clients; c; c = c->next)
+	for (Client *c = clients; c; c = c->next)
 		clientmonresize(c, from, to);
 }
 
 void
 clientfsrestore(Client *c)
 {
-	if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c)) {
+	if (c && ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c)) {
 		resizeclient(c, c->ws->mon->mx, c->ws->mon->my, c->ws->mon->mw, c->ws->mon->mh);
 		XRaiseWindow(dpy, c->win);
-	} else if (ISFLOATING(c)) {
-		resizeclient(c, c->x, c->y, c->w, c->h);
 	}
 }
 
@@ -2175,7 +2174,7 @@ manage(Window w, XWindowAttributes *wa)
 		PropModeReplace, (unsigned char *) allowed, NetWMActionLast);
 
 	fprintf(stderr, "manage: %d (%s)\n", 30, c->name);
-	attachx(c);
+	attachx(c, 0, NULL);
 
 	if (focusclient || !c->ws->sel || !c->ws->stack) {
 		fprintf(stderr, "manage: %d (%s) (attachstack)\n", 31, c->name);
