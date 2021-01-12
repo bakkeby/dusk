@@ -34,6 +34,7 @@ dump_settings(yajl_gen gen)
       YSTR("Debug"); YBOOL(enabled(Debug));
       YSTR("AltWorkspaceIcons"); YBOOL(enabled(AltWorkspaceIcons));
       YSTR("GreedyMonitor"); YBOOL(enabled(GreedyMonitor));
+      YSTR("AutoHideScratchpads"); YBOOL(enabled(AutoHideScratchpads));
     )
   )
   // clang-format on

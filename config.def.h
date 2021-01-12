@@ -65,6 +65,7 @@ static unsigned long functionality = 0
 //	|AltWorkspaceIcons // show the workspace name instead of the icons
 //	|GreedyMonitor // when viewing a workspace the monitor is greedy and gives nothing in return (i.e. disables swap of workspaces)
 	|SmartLayoutConvertion // when moving a workspace from one monitor to another, automatically adjust layout based on monitor orientation (i.e. vertical vs horizontal)
+//	|AutoHideScratchpads // automatically hide open scratchpads when moving to another workspace
 ;
 
 static const char statussep              = ';'; /* separator between status bars */

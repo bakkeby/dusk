@@ -42,7 +42,7 @@ static const unsigned long
 	AltWorkspaceIcons = 0x1000000, // show the workspace name instead of the icons
 	GreedyMonitor = 0x2000000, // when viewing a workspace the monitor is greedy and gives nothing in return (i.e. disables swap of workspaces)
 	SmartLayoutConvertion = 0x4000000, // when moving a workspace from one monitor to another, automatically adjust layout based on monitor orientation (i.e. vertical vs horizontal)
-	FuncPlaceholder0x8000000 = 0x8000000,
+	AutoHideScratchpads = 0x8000000, // automatically hide open scratchpads when moving to another workspace
 	FuncPlaceholder0x10000000 = 0x10000000,
 	FuncPlaceholder0x20000000 = 0x20000000,
 	FuncPlaceholder0x40000000 = 0x40000000,

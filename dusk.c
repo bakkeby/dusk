@@ -3092,9 +3092,6 @@ showhide(Client *c)
 			resize(c, c->x, c->y, c->w, c->h, 0);
 		showhide(c->snext);
 	} else {
-		/* auto-hide scratchpads when moving to other workspaces */
-		if (c->scratchkey != 0)
-			addflag(c, Invisible); // TODO this doesn't seem to work
 		/* hide clients bottom up */
 		showhide(c->snext);
 		XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);

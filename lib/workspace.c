@@ -54,8 +54,13 @@ void
 hidewsclients(Workspace *ws)
 {
 	Client *c;
-	for (c = ws->stack; c; c = c->snext)
+	for (c = ws->stack; c; c = c->snext) {
 		XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
+		if (enabled(AutoHideScratchpads) && c->scratchkey != 0) {
+			/* auto-hide scratchpads when moving to other workspaces */
+			addflag(c, Invisible);
+		}
+	}
 }
 
 void
@@ -151,7 +156,7 @@ movetows(Client *c, Workspace *ws)
 		if (enabled(ViewOnWs) && hadfocus)
 			warp(c);
 	} else
-		XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y); // TODO separate function to hide clients?
+		XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
 }
 
 void
