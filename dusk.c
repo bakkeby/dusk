@@ -2462,12 +2462,17 @@ recttomon(int x, int y, int w, int h)
 void
 resize(Client *c, int x, int y, int w, int h, int interact)
 {
-	int xh = x, yh = y, wh = w, hh = h;
-	fprintf(stderr, "resize: x = %d, y = %d for client %s\n", x, y, c->name);
-	applysizehints(c, &xh, &yh, &wh, &hh, interact);
-		fprintf(stderr, "after applysizehints: x = %d, y = %d for client %s\n", x, y, c->name);
-		resizeclientpad(c, xh, yh, wh, hh, (w - wh) / 2, (h - hh) / 2);
-	// }
+	int xh = x, yh = y, wh = w, hh = h, xpad = 0, ypad = 0, a;
+
+	a = applysizehints(c, &xh, &yh, &wh, &hh, interact);
+
+	if (enabled(CenterSizeHintsClients)) {
+		xpad = (w - wh) / 2;
+		ypad = (h - hh) / 2;
+	}
+
+	if (a || xpad || ypad)
+		resizeclientpad(c, xh, yh, wh, hh, xpad, ypad);
 }
 
 void
@@ -2493,12 +2498,10 @@ resizeclientpad(Client *c, int x, int y, int w, int h, int xpad, int ypad)
 	c->w = wc.width = w;
 	c->h = wc.height = h;
 
-	if (enabled(CenterSizeHintsClients) && !ISFLOATING(c)) {
+	if (!ISFLOATING(c)) {
 		wc.x += xpad;
 		wc.y += ypad;
 	}
-
-	fprintf(stderr, "resizeclient: x = %d, y = %d, xpad = %d, ypad = %d for client %s\n", x, y, xpad, ypad, c->name);
 
 	if (!c->ws->visible) {
 		addflag(c, NeedResize);

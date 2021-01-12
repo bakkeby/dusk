@@ -16,6 +16,7 @@ swallow(Client *t, Client *c)
 	if (!RULED(c) && disabled(SwallowFloating) && ISFLOATING(c))
 		return 0;
 
+	fprintf(stderr, "swallow: client %s swallowing terminal %s\n", c->name, t->name);
 	replaceclient(t, c);
 	c->swallowing = t;
 
@@ -30,6 +31,7 @@ replaceclient(Client *old, Client *new)
 
 	new->ws = ws;
 	setflag(new, Floating, ISFLOATING(old));
+	addflag(new, IgnoreCfgReqPos);
 
 	new->next = old->next;
 	new->snext = old->snext;
