@@ -2,7 +2,7 @@ void
 focusmaster(const Arg *arg)
 {
 	Client *c;
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 
 	if (ws->nmaster < 1)
 		return;

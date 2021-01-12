@@ -24,7 +24,7 @@ void
 rotatestack(const Arg *arg)
 {
 	Client *c = NULL, *f;
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 
 	if (!ws->sel)
 		return;

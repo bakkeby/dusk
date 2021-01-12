@@ -38,26 +38,33 @@ static int tiledindicatortype            = INDICATOR_NONE;
 
 /* See util.h for options */
 static unsigned long functionality = 0
-	|Systray
-	|SwallowFloating
+//	|SmartGaps // enables no gaps if there is only one visible window
+//	|SmartGapsMonocle // enforces no (outer) gaps in monocle layout
+	|Systray // enables systray
+	|Swallow // allows terminals to swallow X applications started from the command line
+	|SwallowFloating // means swallow floating windows by default
 	|CenteredWindowName
-	|SpawnCwd
-	|BarBorder
-//	|Warp
+//	|BarActiveGroupBorderColor // use border color of active group, otherwise color for master group is used
+	|SpawnCwd // spawn applications in the currently selected client's working directory
+	|ColorEmoji
+//	|Status2DNoAlpha // option to not use alpha when drawing status2d status
+	|BarBorder // draw a border around the bar
+//	|NoBorders // as per the noborder patch, show no border when only one client in tiled mode
+//	|Warp // warp patch
+//	|FocusedOnTop
+//	|DecorationHints // used by setfullscreen, prevents state change
 	|FocusOnNetActive
 	|AllowNoModifierButtons
-//	|ColorEmoji
+//	|CenterSizeHintsClients // center tiled clients subject to size hints within their tiled area
+//	|ResizeHints // if enabled then dusk will respect size hints in tiled resizals
+//	|SortScreens // only applies on startup
+//	|ViewOnWs // follow a window to the workspace it is being moved to
+//	|Xresources // xrdb patch
+//	|AutoSaveFloats // auto save float posistion when using movemouse or resizemouse
 //	|Debug
-//	|FocusedOnTop
-//	|BarActiveGroupBorderColor
-//	|DecorationHints
-//	|NoBorder
-//	|SortScreens
-//	|ViewOnWs
-//	|Xresources
-//	|AutoSaveFloats
-//	|GreedyMonitor
-	|SmartLayoutConvertion
+//	|AltWorkspaceIcons // show the workspace name instead of the icons
+//	|GreedyMonitor // when viewing a workspace the monitor is greedy and gives nothing in return (i.e. disables swap of workspaces)
+	|SmartLayoutConvertion // when moving a workspace from one monitor to another, automatically adjust layout based on monitor orientation (i.e. vertical vs horizontal)
 ;
 
 static const char statussep              = ';'; /* separator between status bars */
@@ -339,7 +346,6 @@ static const WorkspaceRule wsrules[] = {
 static const float mfact     = 0.50; /* factor of master area size [0.05..0.95] */
 static const int nmaster     = 1;    /* number of clients in master area */
 static const int nstack      = 0;    /* number of clients in primary stack area */
-static const int resizehints = 0;    /* 1 means respect size hints in tiled resizals */
 
 static const Layout layouts[] = {
 	/* symbol     arrange function, { nmaster, nstack, layout, master axis, stack axis, secondary stack axis, symbol func } */

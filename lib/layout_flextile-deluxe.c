@@ -63,7 +63,7 @@ static void
 setlayoutaxisex(const Arg *arg)
 {
 	int axis, arr;
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 
 	axis = arg->i & 0x3; // lower two bytes indicates layout, master or stack1-2
 	arr = ((arg->i & 0xFC) >> 2); // remaining six upper bytes indicate arrangement
@@ -715,6 +715,7 @@ flextile(Monitor *m)
 	int oh = 0, ov = 0, ih = 0, iv = 0; // gaps outer/inner horizontal/vertical
 	fprintf(stderr, "flextile: %d\n", 1);
 	Workspace *ws = MWS(m);
+	fprintf(stderr, "flextile: %d - ws = %s\n", 2, ws ? ws->name : "NULL");
 	getgaps(ws, &oh, &ov, &ih, &iv, &n);
 
 	fprintf(stderr, "flextile: %d\n", 3);
@@ -806,7 +807,7 @@ decksymbols(Monitor *m, unsigned int n)
 void
 mirrorlayout(const Arg *arg)
 {
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	if (!ws->layout->arrange)
 		return;
 	ws->ltaxis[LAYOUT] *= -1;
@@ -819,7 +820,7 @@ rotatelayoutaxis(const Arg *arg)
 {
 	int incr = (arg->i > 0 ? 1 : -1);
 	int axis = abs(arg->i) - 1;
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 
 	if (!ws->layout->arrange)
 		return;

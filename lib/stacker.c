@@ -1,7 +1,7 @@
 void
 stackfocus(const Arg *arg)
 {
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	int i = stackpos(arg);
 	Client *c, *p;
 
@@ -18,7 +18,7 @@ stackfocus(const Arg *arg)
 void
 stackpush(const Arg *arg)
 {
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	int i = stackpos(arg);
 	Client *sel = ws->sel, *c, *p;
 
@@ -43,7 +43,7 @@ stackpush(const Arg *arg)
 int
 stackpos(const Arg *arg)
 {
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	int n, i;
 	Client *c, *l;
 

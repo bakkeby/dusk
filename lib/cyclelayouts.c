@@ -1,7 +1,7 @@
 void
 cyclelayout(const Arg *arg)
 {
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	Layout *l;
 	for (l = (Layout *)layouts; l != ws->layout; l++);
 	if (arg->i > 0) {

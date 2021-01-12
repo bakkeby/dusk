@@ -9,73 +9,63 @@ static int scanner;
 static xcb_connection_t *xcon;
 
 int
-swallow(Client *p, Client *c)
+swallow(Client *t, Client *c)
 {
-	Client *s;
-
-	if (NOSWALLOW(c) || ISTERMINAL(c))
+	if (disabled(Swallow) || NOSWALLOW(c) || ISTERMINAL(c))
 		return 0;
 	if (!RULED(c) && disabled(SwallowFloating) && ISFLOATING(c))
 		return 0;
 
-	XMapWindow(dpy, c->win);
-
-	detach(c);
-	detachstack(c);
-
-	setclientstate(c, WithdrawnState);
-	XUnmapWindow(dpy, p->win);
-
-	p->swallowing = c;
-	c->ws = p->ws;
-
-	Window w = p->win;
-	p->win = c->win;
-	c->win = w;
-
-	XChangeProperty(dpy, c->win, netatom[NetClientList], XA_WINDOW, 32, PropModeReplace,
-		(unsigned char *) &(p->win), 1);
-	updatetitle(p);
-	s = scanner ? c : p;
-	setfloatinghint(s);
-	/* The swallowed client may have a different border size compared to the swallowing client */
-	if (p->ws->visible) {
-		// TODO take resize hints into account? for floating windows at least?
-		XMoveResizeWindow(dpy, s->win, s->x, s->y, s->w - 2*c->bw, s->h - 2*c->bw);
-		arrange(p->ws);
-	} else {
-		XMoveWindow(dpy, s->win, WIDTH(s) * -2, s->y);
-	}
-
-	configure(p);
-	updateclientlist();
+	replaceclient(t, c);
+	c->swallowing = t;
 
 	return 1;
 }
 
 void
+replaceclient(Client *old, Client *new)
+{
+	Client *c = NULL;
+	Workspace *ws = old->ws;
+
+	new->ws = ws;
+	setflag(new, Floating, ISFLOATING(old));
+
+	new->next = old->next;
+	new->snext = old->snext;
+
+	if (old == ws->clients)
+		ws->clients = new;
+	else {
+		for (c = ws->clients; c && c->next != old; c = c->next);
+		c->next = new;
+	}
+
+	if (old == ws->stack)
+		ws->stack = new;
+	else {
+		for (c = ws->stack; c && c->snext != old; c = c->snext);
+		c->snext = new;
+	}
+
+	old->next = NULL;
+	old->snext = NULL;
+
+	XMoveWindow(dpy, old->win, WIDTH(old) * -2, old->y);
+
+	if (ws->visible) {
+		if (ISFLOATING(new))
+			resize(new, old->x, old->y, new->w - 2*new->bw, new->h - 2*new->bw, 0);
+		else
+			XMoveResizeWindow(dpy, new->win, old->x, old->y, old->w - 2*new->bw, old->h - 2*new->bw);
+	}
+}
+
+void
 unswallow(Client *c)
 {
-	c->win = c->swallowing->win;
-
-	free(c->swallowing);
+	replaceclient(c, c->swallowing);
 	c->swallowing = NULL;
-
-	XDeleteProperty(dpy, c->win, netatom[NetClientList]);
-
-	/* unfullscreen the client */
-	setfullscreen(c, 0, 0);
-	updatetitle(c);
-	arrange(c->ws);
-	XMapWindow(dpy, c->win);
-	setfloatinghint(c);
-	setclientstate(c, NormalState);
-	if (c->ws->visible) {
-		XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
-		focus(NULL);
-		arrange(c->ws);
-	} else
-		XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
 }
 
 pid_t
@@ -179,7 +169,7 @@ termforwin(const Client *w)
 	if (!w->pid || ISTERMINAL(w))
 		return NULL;
 
-	c = WS->sel;
+	c = selws->sel;
 	if (c && ISTERMINAL(c) && !c->swallowing && c->pid && isdescprocess(c->pid, w->pid))
 		return c;
 

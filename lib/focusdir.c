@@ -1,7 +1,7 @@
 void
 focusdir(const Arg *arg)
 {
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	Client *s = ws->sel, *f = NULL, *c, *next;
 
 	unsigned int score = -1;

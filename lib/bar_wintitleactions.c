@@ -70,7 +70,7 @@ showhideclient(const Arg *arg)
 {
 	Client *c = (Client*)arg->v;
 	if (!c)
-		c = WS->sel;
+		c = selws->sel;
 	if (!c)
 		return;
 

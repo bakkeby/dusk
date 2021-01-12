@@ -3,7 +3,7 @@ setcfact(const Arg *arg)
 {
 	float f;
 	Client *c;
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 
 	c = ws->sel;
 

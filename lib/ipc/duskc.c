@@ -47,7 +47,8 @@ typedef enum IPCMessageType {
   IPC_TYPE_GET_WORKSPACES = 2,
   IPC_TYPE_GET_LAYOUTS = 3,
   IPC_TYPE_GET_DUSK_CLIENT = 4,
-  IPC_TYPE_EVENT = 5
+  IPC_TYPE_GET_SETTINGS = 5,
+  IPC_TYPE_EVENT = 6
 } IPCMessageType;
 
 // Every IPC message must begin with this
@@ -398,6 +399,15 @@ get_workspaces()
   return 0;
 }
 
+static int
+get_settings()
+{
+  send_message(IPC_TYPE_GET_SETTINGS, 1, (uint8_t *)"");
+  print_socket_reply();
+
+  return 0;
+}
+
 static void
 usage_error(const char *prog_name, const char *format, ...)
 {
@@ -428,6 +438,8 @@ print_usage(const char *name)
   puts("  get_dusk_client <window_id>     Get dusk client proprties");
   puts("");
   puts("  get_workspaces                  Get list of workspaces");
+  puts("");
+  puts("  get_settings                    Get list of settings");
   puts("");
   puts("  help                            Display this message");
   puts("");
@@ -479,6 +491,8 @@ main(int argc, char *argv[])
       usage_error(prog_name, "Expected the window id");
   } else if (strcmp(argv[i], "get_workspaces") == 0) {
     get_workspaces();
+  } else if (strcmp(argv[i], "get_settings") == 0) {
+    get_settings();
   } else
     usage_error(prog_name, "Invalid argument '%s'", argv[i]);
 

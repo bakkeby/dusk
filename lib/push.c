@@ -1,7 +1,7 @@
 void
 pushup(const Arg *arg)
 {
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	Client *sel = ws->sel;
 	Client *c;
 
@@ -31,7 +31,7 @@ pushup(const Arg *arg)
 void
 pushdown(const Arg *arg)
 {
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	Client *sel = ws->sel;
 	Client *c;
 

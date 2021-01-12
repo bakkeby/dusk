@@ -1,7 +1,7 @@
 void
 transferall(const Arg *arg)
 {
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	Client *c, *n = ws->clients, *attachfrom = NULL;
 	int i = 0, nstackclients = 0;
 	while (n) {

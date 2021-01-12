@@ -9,7 +9,7 @@ keyrelease(XEvent *e)
 void
 combotag(const Arg *arg)
 {
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	if (ws->sel && arg->ui & TAGMASK) {
 		if (ws->sel->reverttags)
 			ws->sel->reverttags = 0;
@@ -27,7 +27,7 @@ combotag(const Arg *arg)
 void
 comboview(const Arg *arg)
 {
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	unsigned newtags = arg->ui & TAGMASK;
 	if (combo) {
 		ws->tags |= newtags;

@@ -8,7 +8,7 @@ dragmfact(const Arg *arg)
 	int center = 0, horizontal = 0, mirror = 0, fixed = 0; // layout configuration
 	double fact;
 	Monitor *m;
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	XEvent ev;
 	Time lasttime = 0;
 

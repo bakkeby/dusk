@@ -1,7 +1,7 @@
 void
 setborderpx(const Arg *arg)
 {
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	Client *c;
 	Bar *bar;
 	int prev_borderpx = selmon->borderpx;

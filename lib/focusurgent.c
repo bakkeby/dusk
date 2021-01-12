@@ -1,7 +1,7 @@
 void
 focusurgent(const Arg *arg)
 {
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	Client *c;
 	for (c = ws->clients; c && !ISURGENT(c); c = c->next);
 	if (c) {

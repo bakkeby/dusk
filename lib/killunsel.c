@@ -2,7 +2,7 @@ void
 killunsel(const Arg *arg)
 {
 	Client *i = NULL;
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 
 	if (!ws->sel)
 		return;

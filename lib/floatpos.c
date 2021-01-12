@@ -1,7 +1,7 @@
 void
 floatpos(const Arg *arg)
 {
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	Client *c = ws->sel;
 
 	if (!c || (ws->layout->arrange && !ISFLOATING(c)))
@@ -21,7 +21,7 @@ setfloatpos(Client *c, const char *floatpos)
 	int x, y, w, h, wx, ww, wy, wh;
 	int oh, ov, ih, iv;
 	unsigned int n;
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 
 	if (!c || !floatpos)
 		return;

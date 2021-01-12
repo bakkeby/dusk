@@ -1,7 +1,7 @@
 void
 togglefakefullscreen(const Arg *arg)
 {
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	Client *c = ws->sel;
 	if (!c)
 		return;

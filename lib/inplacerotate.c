@@ -2,7 +2,7 @@ void
 insertclient(Client *item, Client *insertItem, int after)
 {
 	Client *c;
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	if (item == NULL || insertItem == NULL || item == insertItem)
 		return;
 	detach(insertItem);
@@ -26,7 +26,7 @@ void
 inplacerotate(const Arg *arg)
 {
 	Monitor *m = selmon;
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	if (!ws->sel || (ISFLOATING(ws->sel) && !arg->f))
 		return;
 

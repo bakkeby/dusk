@@ -1,7 +1,7 @@
 void
 unfloatvisible(const Arg *arg)
 {
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	Client *c;
 
 	for (c = ws->clients; c; c = c->next)

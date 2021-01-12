@@ -39,7 +39,7 @@ setgaps(int oh, int ov, int ih, int iv)
 static void
 setgapsex(const Arg *arg)
 {
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	int oh = selmon->gappoh;
 	int ov = selmon->gappov;
 	int ih = selmon->gappih;
@@ -64,7 +64,7 @@ setgapsex(const Arg *arg)
 static void
 togglegaps(const Arg *arg)
 {
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	ws->enablegaps = !ws->enablegaps;
 	arrange(NULL);
 }

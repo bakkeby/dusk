@@ -6,7 +6,7 @@ dragcfact(const Arg *arg)
 	Client *c;
 	XEvent ev;
 	Time lasttime = 0;
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 
 	if (!(c = ws->sel))
 		return;

@@ -17,14 +17,14 @@
 static const unsigned long
 	SmartGaps = 0x1, // enables no gaps if there is only one visible window
 	SmartGapsMonocle = 0x2, // enforces no (outer) gaps in monocle layout
-	Systray = 0x4, // enables systray
+	Swallow = 0x4, // enables swallowing of clients
 	SwallowFloating = 0x8, // means swallow floating windows by default
 	CenteredWindowName = 0x10,
 	BarActiveGroupBorderColor = 0x20, // use border color of active group, otherwise color for master group is used
 	SpawnCwd = 0x40, // spawn applications in the currently selected client's working directory
 	ColorEmoji = 0x80,
 	Status2DNoAlpha = 0x100, // option to not use alpha when drawing status2d status
-	FuncPlaceholder0x200 = 0x200,
+	Systray = 0x200, // enables systray
 	BarBorder = 0x400, // draw a border around the bar
 	NoBorders = 0x800, // as per the noborder patch, show no border when only one client in tiled mode
 	Warp = 0x1000, // warp patch
@@ -32,8 +32,8 @@ static const unsigned long
 	DecorationHints = 0x4000, // used by setfullscreen, prevents state change
 	FocusOnNetActive = 0x8000,
 	AllowNoModifierButtons = 0x10000,
-	FuncPlaceholder0x20000 = 0x20000,
-	FuncPlaceholder0x40000 = 0x40000,
+	CenterSizeHintsClients = 0x20000, // center tiled clients subject to size hints within their tiled area
+	ResizeHints = 0x40000, // if enabled then dusk will respect size hints in tiled resizals
 	SortScreens = 0x80000, // only applies on startup
 	ViewOnWs = 0x100000, // follow a window to the workspace it is being moved to
 	Xresources = 0x200000, // xrdb patch

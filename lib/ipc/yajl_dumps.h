@@ -34,4 +34,9 @@ int dump_client_state(yajl_gen gen, const ClientState *state);
 
 int dump_error_message(yajl_gen gen, const char *reason);
 
+int dump_settings(yajl_gen gen);
+
+int dump_workspace(yajl_gen gen, const char *name, const int mon, const int visible, const int pinned, const int num_clients);
+int dump_workspaces(yajl_gen gen);
+
 #endif  // YAJL_DUMPS_H_

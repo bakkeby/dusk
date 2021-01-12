@@ -3,6 +3,45 @@
 #include <stdint.h>
 
 int
+dump_settings(yajl_gen gen)
+{
+  // clang-format off
+  YMAP(
+    YSTR("Functionality"); YMAP(
+      YSTR("SmartGaps"); YBOOL(enabled(SmartGaps));
+      YSTR("SmartGapsMonocle"); YBOOL(enabled(SmartGapsMonocle));
+      YSTR("Systray"); YBOOL(enabled(Systray));
+      YSTR("Swallow"); YBOOL(enabled(Swallow));
+      YSTR("SwallowFloating"); YBOOL(enabled(SwallowFloating));
+      YSTR("CenteredWindowName"); YBOOL(enabled(CenteredWindowName));
+      YSTR("BarActiveGroupBorderColor"); YBOOL(enabled(BarActiveGroupBorderColor));
+      YSTR("SpawnCwd"); YBOOL(enabled(SpawnCwd));
+      YSTR("ColorEmoji"); YBOOL(enabled(ColorEmoji));
+      YSTR("Status2DNoAlpha"); YBOOL(enabled(Status2DNoAlpha));
+      YSTR("BarBorder"); YBOOL(enabled(BarBorder));
+      YSTR("NoBorders"); YBOOL(enabled(NoBorders));
+      YSTR("Warp"); YBOOL(enabled(Warp));
+      YSTR("FocusedOnTop"); YBOOL(enabled(FocusedOnTop));
+      YSTR("DecorationHints"); YBOOL(enabled(DecorationHints));
+      YSTR("FocusOnNetActive"); YBOOL(enabled(FocusOnNetActive));
+      YSTR("AllowNoModifierButtons"); YBOOL(enabled(AllowNoModifierButtons));
+      YSTR("CenterSizeHintsClients"); YBOOL(enabled(CenterSizeHintsClients));
+      YSTR("ResizeHints"); YBOOL(enabled(ResizeHints));
+      YSTR("SortScreens"); YBOOL(enabled(SortScreens));
+      YSTR("ViewOnWs"); YBOOL(enabled(ViewOnWs));
+      YSTR("Xresources"); YBOOL(enabled(Xresources));
+      YSTR("AutoSaveFloats"); YBOOL(enabled(AutoSaveFloats));
+      YSTR("Debug"); YBOOL(enabled(Debug));
+      YSTR("AltWorkspaceIcons"); YBOOL(enabled(AltWorkspaceIcons));
+      YSTR("GreedyMonitor"); YBOOL(enabled(GreedyMonitor));
+    )
+  )
+  // clang-format on
+
+  return 0;
+}
+
+int
 dump_workspace(yajl_gen gen, const char *name, const int mon, const int visible, const int pinned, const int num_clients)
 {
   // clang-format off

@@ -1,7 +1,7 @@
 void
 switchcol(const Arg *arg)
 {
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	Client *c, *t;
 	int col = 0;
 	int i;

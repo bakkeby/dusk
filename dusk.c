@@ -68,9 +68,9 @@
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X), False) + lrpad)
 #define HIDDEN(C)               ((getstate(C->win) == IconicState))
 
-#define WS                      selws
 #define MWS(M)                  (M && M->selws ? M->selws : selws)
 #define MWSNAME(M)              (M && M->selws ? M->selws->name : "NULL")
+#define WSNAME(W)               (W ? W->name : "NULL")
 
 /* enums */
 enum {
@@ -471,12 +471,12 @@ static void motionnotify(XEvent *e);
 static void movemouse(const Arg *arg);
 static Client *nexttiled(Client *c);
 static Client *prevtiled(Client *c);
-// static void pop(Client *);
 static void propertynotify(XEvent *e);
 static void quit(const Arg *arg);
 static Monitor *recttomon(int x, int y, int w, int h);
 static void resize(Client *c, int x, int y, int w, int h, int interact);
 static void resizeclient(Client *c, int x, int y, int w, int h);
+static void resizeclientpad(Client *c, int x, int y, int w, int h, int xpad, int ypad);
 static void resizemouse(const Arg *arg);
 static void restack(Workspace *ws);
 static void run(void);
@@ -679,7 +679,7 @@ applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact)
 		*h = bh;
 	if (*w < bh)
 		*w = bh;
-	if (!IGNORESIZEHINTS(c) && (resizehints || ISFLOATING(c) || !c->ws->layout->arrange)) {
+	if (!IGNORESIZEHINTS(c) && (enabled(ResizeHints) || ISFLOATING(c) || !c->ws->layout->arrange)) {
 		/* see last two sentences in ICCCM 4.1.2.3 */
 		baseismin = c->basew == c->minw && c->baseh == c->minh;
 		if (!baseismin) { /* temporarily remove base dimensions */
@@ -824,7 +824,7 @@ buttonpress(XEvent *e)
 
 	if (click == ClkRootWin && (c = wintoclient(ev->window))) {
 		focus(c);
-		restack(WS);
+		restack(selws);
 		XAllowEvents(dpy, ReplayPointer, CurrentTime);
 		click = ClkClientWin;
 	}
@@ -1210,7 +1210,7 @@ configurerequest(XEvent *e)
 	Monitor *m;
 	XConfigureRequestEvent *ev = &e->xconfigurerequest;
 	XWindowChanges wc;
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 
 	if ((c = wintoclient(ev->window))) {
 
@@ -1618,7 +1618,7 @@ void
 enternotify(XEvent *e)
 {
 	Client *c, *sel;
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	Monitor *m;
 	XCrossingEvent *ev = &e->xcrossing;
 
@@ -1730,6 +1730,7 @@ focus(Client *c)
 		XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
 		ws->sel = ws->stack;
 	}
+	fprintf(stderr, "focus: ws = %s\n", ws ? ws->name : "NULL");
 	if (ws->layout->arrange == flextile && (
 			ws->ltaxis[MASTER] == MONOCLE ||
 			ws->ltaxis[STACK] == MONOCLE ||
@@ -1744,7 +1745,7 @@ focus(Client *c)
 void
 focusin(XEvent *e)
 {
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	XFocusChangeEvent *ev = &e->xfocus;
 	if (ws->sel && ev->window != ws->sel->win)
 		setfocus(ws->sel);
@@ -1774,7 +1775,7 @@ void
 focusstack(const Arg *arg)
 {
 	Client *c = NULL, *i;
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	int n;
 
 	if (!ws->sel)
@@ -1933,7 +1934,7 @@ grabkeys(const Arg *arg)
 void
 incnmaster(const Arg *arg)
 {
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	ws->nmaster = MAX(ws->nmaster + arg->i, 0);
 	if (ws->layout->arrange == flextile && (
 			ws->ltaxis[MASTER] == MONOCLE ||
@@ -1947,7 +1948,7 @@ incnmaster(const Arg *arg)
 void
 incnstack(const Arg *arg)
 {
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	ws->nstack = MAX(ws->nstack + arg->i, 0);
 	if (ws->layout->arrange == flextile && (
 			ws->ltaxis[MASTER] == MONOCLE ||
@@ -1992,7 +1993,7 @@ keypress(XEvent *e)
 void
 killclient(const Arg *arg)
 {
-	Client *c = WS->sel;
+	Client *c = selws->sel;
 	if (!c || ISPERMANENT(c))
 		return;
 	if (!sendevent(c->win, wmatom[WMDelete], NoEventMask, wmatom[WMDelete], CurrentTime, 0, 0, 0)) {
@@ -2049,7 +2050,7 @@ manage(Window w, XWindowAttributes *wa)
 			c->ws = t->ws;
 		} else {
 			fprintf(stderr, "manage: %d (%s)\n", 8, c->name);
-			c->ws = WS;
+			c->ws = selws;
 		}
 	}
 
@@ -2155,15 +2156,17 @@ manage(Window w, XWindowAttributes *wa)
 		PropModeReplace, (unsigned char *) allowed, NetWMActionLast);
 
 	fprintf(stderr, "manage: %d (%s)\n", 30, c->name);
-	attachx(c, 0, NULL);
+	if (!(term && swallow(term, c))) {
+		attachx(c, 0, NULL);
 
-	if (focusclient || !c->ws->sel || !c->ws->stack) {
-		fprintf(stderr, "manage: %d (%s) (attachstack)\n", 31, c->name);
-		attachstack(c);
-	} else {
-		fprintf(stderr, "manage: %d.2 (%s) (attach after sel)\n", 31, c->name);
-		c->snext = c->ws->sel->snext;
-		c->ws->sel->snext = c;
+		if (focusclient || !c->ws->sel || !c->ws->stack) {
+			fprintf(stderr, "manage: %d (%s) (attachstack)\n", 31, c->name);
+			attachstack(c);
+		} else {
+			fprintf(stderr, "manage: %d.2 (%s) (attach after sel)\n", 31, c->name);
+			c->snext = c->ws->sel->snext;
+			c->ws->sel->snext = c;
+		}
 	}
 
 	fprintf(stderr, "manage: %d (%s)\n", 32, c->name);
@@ -2180,25 +2183,26 @@ manage(Window w, XWindowAttributes *wa)
 		hide(c);
 	if (!HIDDEN(c))
 		setclientstate(c, NormalState);
-	if (c->ws == WS)
-		unfocus(WS->sel, 0, c);
+	if (c->ws == selws)
+		unfocus(selws->sel, 0, c);
 
 	if (focusclient)
 		c->ws->sel = c; // needed for the XRaiseWindow that takes place in restack
 	fprintf(stderr, "manage: %d (%s)\n", 36, c->name);
-	if (!(term && swallow(term, c))) {
+	if (!c->swallowing) {
 		fprintf(stderr, "manage: %d (%s)\n", 37, c->name);
 		if (SWITCHWORKSPACE(c))
 			viewwsonmon(c->ws, c->ws->mon);
 		else if (ENABLEWORKSPACE(c))
 			// TODO
 			arrange(c->ws);
+	}
+	fprintf(stderr, "manage: %f (%s)\n", 37.5, c->name);
 
-		arrange(c->ws);
-		fprintf(stderr, "manage: %d (%s)\n", 38, c->name);
-		if (!HIDDEN(c)) {
-			XMapWindow(dpy, c->win);
-		}
+	arrange(c->ws);
+	fprintf(stderr, "manage: %d (%s)\n", 38, c->name);
+	if (!HIDDEN(c)) {
+		XMapWindow(dpy, c->win);
 	}
 
 	fprintf(stderr, "manage: %d (%s)\n", 39, c->name);
@@ -2242,7 +2246,6 @@ maprequest(XEvent *e)
 void
 motionnotify(XEvent *e)
 {
-	// fprintf(stderr, "motionnotify: --> selmon is %d\n", selmon->num);
 	static Monitor *mon = NULL;
 	Monitor *m;
 	Client *sel;
@@ -2262,17 +2265,14 @@ motionnotify(XEvent *e)
 	if (ev->window != root)
 		return;
 	if ((m = recttomon(ev->x_root, ev->y_root, 1, 1)) != mon) {
-		// fprintf(stderr, "motionnotify - new monitor %d\n", m->num);
-		sel = WS->sel;
+		sel = selws->sel;
 		selmon = m;
-		if (m->selws != NULL)
+		if (m->selws)
 			selws = m->selws;
-		// fprintf(stderr, "motionnotify: selws is now %s\n", selws->name);
 		unfocus(sel, 1, NULL);
 		focus(NULL);
 	}
 	mon = m;
-	// fprintf(stderr, "motionnotify: <-- selmon is %d\n", selmon->num);
 }
 
 void
@@ -2280,7 +2280,7 @@ movemouse(const Arg *arg)
 {
 	int x, y, ocx, ocy, nx, ny;
 	Client *c;
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	Monitor *m;
 	XEvent ev;
 	Time lasttime = 0;
@@ -2462,12 +2462,22 @@ recttomon(int x, int y, int w, int h)
 void
 resize(Client *c, int x, int y, int w, int h, int interact)
 {
-	if (applysizehints(c, &x, &y, &w, &h, interact))
-		resizeclient(c, x, y, w, h);
+	int xh = x, yh = y, wh = w, hh = h;
+	fprintf(stderr, "resize: x = %d, y = %d for client %s\n", x, y, c->name);
+	applysizehints(c, &xh, &yh, &wh, &hh, interact);
+		fprintf(stderr, "after applysizehints: x = %d, y = %d for client %s\n", x, y, c->name);
+		resizeclientpad(c, xh, yh, wh, hh, (w - wh) / 2, (h - hh) / 2);
+	// }
 }
 
 void
 resizeclient(Client *c, int x, int y, int w, int h)
+{
+	resizeclientpad(c, x, y, w, h, 0, 0);
+}
+
+void
+resizeclientpad(Client *c, int x, int y, int w, int h, int xpad, int ypad)
 {
 	XWindowChanges wc;
 
@@ -2477,17 +2487,23 @@ resizeclient(Client *c, int x, int y, int w, int h)
 		c->oldw = c->w;
 		c->oldh = c->h;
 	}
+	wc.border_width = c->bw;
 	c->x = wc.x = x;
 	c->y = wc.y = y;
 	c->w = wc.width = w;
 	c->h = wc.height = h;
 
+	if (enabled(CenterSizeHintsClients) && !ISFLOATING(c)) {
+		wc.x += xpad;
+		wc.y += ypad;
+	}
+
+	fprintf(stderr, "resizeclient: x = %d, y = %d, xpad = %d, ypad = %d for client %s\n", x, y, xpad, ypad, c->name);
+
 	if (!c->ws->visible) {
 		addflag(c, NeedResize);
 		return;
 	}
-
-	wc.border_width = c->bw;
 
 	if (enabled(NoBorders) && ((nexttiled(c->ws->clients) == c && !nexttiled(c->next)))
 		&& (ISFAKEFULLSCREEN(c) || !ISFULLSCREEN(c))
@@ -2521,7 +2537,7 @@ resizemouse(const Arg *arg)
 	Window dummy;
 	Client *c;
 	Monitor *m;
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	XEvent ev;
 	Time lasttime = 0;
 
@@ -2529,7 +2545,7 @@ resizemouse(const Arg *arg)
 		return;
 	if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c)) /* no support resizing fullscreen windows by mouse */
 		return;
-	restack(WS);
+	restack(selws);
 	ocx = c->x;
 	ocy = c->y;
 	och = c->h;
@@ -2855,7 +2871,7 @@ void
 setlayout(const Arg *arg)
 {
 	const Layout *tmp;
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 	if (!arg || !arg->v || arg->v != ws->layout) {
 		tmp = ws->layout;
 		ws->layout = ws->prevlayout;
@@ -2886,7 +2902,7 @@ void
 setmfact(const Arg *arg)
 {
 	float f;
-	Workspace *ws = WS;
+	Workspace *ws = selws;
 
 	if (!arg || !ws->layout->arrange)
 		return;
@@ -3120,14 +3136,14 @@ spawn(const Arg *arg)
 	if (fork() == 0) {
 		if (dpy)
 			close(ConnectionNumber(dpy));
-		if (enabled(SpawnCwd) && WS->sel) {
+		if (enabled(SpawnCwd) && selws->sel) {
 			const char* const home = getenv("HOME");
 			assert(home && strchr(home, '/'));
 			const size_t homelen = strlen(home);
 			char *cwd, *pathbuf = NULL;
 			struct stat statbuf;
 
-			cwd = strtok(WS->sel->name, SPAWN_CWD_DELIM);
+			cwd = strtok(selws->sel->name, SPAWN_CWD_DELIM);
 			/* NOTE: strtok() alters selws->sel->name in-place,
 			 * but that does not matter because we are going to
 			 * exec() below anyway; nothing else will use it */
@@ -3174,7 +3190,7 @@ togglebar(const Arg *arg)
 void
 togglefloating(const Arg *arg)
 {
-	Client *c = WS->sel;
+	Client *c = selws->sel;
 	if (arg && arg->v)
 		c = (Client*)arg->v;
 	if (!c)
@@ -3249,28 +3265,25 @@ unfocus(Client *c, int setfocus, Client *nextfocus)
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
 		XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
 	}
+	c->ws->sel = NULL;
 	fprintf(stderr, "unfocus: <-- client %s\n", c->name);
 }
 
 void
 unmanage(Client *c, int destroyed)
 {
+	Client *s;
 	Workspace *ws = c->ws;
 	Workspace *revertws = c->revertws;
 	XWindowChanges wc;
 
-	if (c->swallowing) {
+	if (c->swallowing)
 		unswallow(c);
-		return;
-	}
 
-	Client *s = swallowingclient(c->win);
+	s = swallowingclient(c->win);
 	if (s) {
-		free(s->swallowing);
 		s->swallowing = NULL;
-		arrange(ws);
-		focus(NULL);
-		return;
+		revertws = NULL;
 	}
 
 	detach(c);
@@ -3287,9 +3300,6 @@ unmanage(Client *c, int destroyed)
 		XUngrabServer(dpy);
 	}
 	free(c);
-
-	if (s)
-		return;
 
 	focus(NULL);
 	updateclientlist();
@@ -3583,7 +3593,7 @@ updatewmhints(Client *c)
 	XWMHints *wmh;
 
 	if ((wmh = XGetWMHints(dpy, c->win))) {
-		if (c == WS->sel && wmh->flags & XUrgencyHint) {
+		if (c == selws->sel && wmh->flags & XUrgencyHint) {
 			wmh->flags &= ~XUrgencyHint;
 			XSetWMHints(dpy, c->win, wmh);
 		} else
@@ -3669,7 +3679,7 @@ xerrorstart(Display *dpy, XErrorEvent *ee)
 void
 zoom(const Arg *arg)
 {
-	Client *c = WS->sel, *at = NULL, *cold, *cprevious = NULL, *p;;
+	Client *c = selws->sel, *at = NULL, *cold, *cprevious = NULL, *p;;
 	if (arg && arg->v)
 		c = (Client*)arg->v;
 	if (!c)
