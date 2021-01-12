@@ -555,7 +555,7 @@ ipc_get_layouts(IPCClient *c, const Layout layouts[], const int layouts_len)
  * Returns -1 if the message could not be parsed
  */
 static int
-ipc_get_dusk_client(IPCClient *ipc_client, const char *msg, const Monitor *mons) // TODO get rid of mons, or pass in workspaces
+ipc_get_dusk_client(IPCClient *ipc_client, const char *msg)
 {
 	Window win;
 
@@ -915,7 +915,7 @@ ipc_handle_client_epoll_event(
 			if (ipc_run_command(c, msg) < 0)
 				return -1;
 		} else if (msg_type == IPC_TYPE_GET_DUSK_CLIENT) {
-			if (ipc_get_dusk_client(c, msg, mons) < 0)
+			if (ipc_get_dusk_client(c, msg) < 0)
 				return -1;
 		} else {
 			fprintf(stderr, "Invalid message type received from fd %d", fd);
