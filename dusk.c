@@ -351,7 +351,7 @@ struct Monitor {
 	int showbar;
 	unsigned int borderpx;
 	Monitor *next;
-	Workspace *selws; // *workspaces, TODO do we need prevws as well? probably does not make sense vs "all of these workspaces were viewed"
+	Workspace *selws;
 	Bar *bar;
 };
 
@@ -389,15 +389,9 @@ struct Workspace {
 	Monitor *mon;
 	const Layout *layout;
 	const Layout *prevlayout;
-	int iconset;
-	char lastltsymbol[16]; // --> prevltsymbol, or check if really needed, monitor prevworkspace?
-
-	Client *lastsel; // TODO --> prevsel
-	const Layout *lastlt; // TODO have IPC code use prevlayout instead
-
-	char *icondef;
-	char *iconvac;
-	char *iconocc;
+	char *icondef; // default icon
+	char *iconvac; // vacant icon (when workspace is selected, default is empty, and no clients)
+	char *iconocc; // when workspace has clients
 };
 
 typedef struct {
@@ -1351,7 +1345,6 @@ createworkspace(int num)
 	ws = ecalloc(1, sizeof(Workspace));
 	ws->num = num;
 
-	// TODO not 100% sure about this
 	if (r->monitor != -1) {
 		for (m = mons; m && m->num != r->monitor; m = m->next);
 		if (m)
@@ -2194,7 +2187,7 @@ manage(Window w, XWindowAttributes *wa)
 		if (SWITCHWORKSPACE(c))
 			viewwsonmon(c->ws, c->ws->mon);
 		else if (ENABLEWORKSPACE(c))
-			// TODO
+			// TODO (view multiple workspaces)
 			arrange(c->ws);
 	}
 	fprintf(stderr, "manage: %f (%s)\n", 37.5, c->name);
@@ -3057,12 +3050,9 @@ setup(void)
 	focus(NULL);
 	setupepoll();
 
-	for (m = mons; m; m = m->next) {
-		fprintf(stderr, "setup: showing monitor %d selws %s\n", m->num, m->selws ? m->selws->name : "NULL");
+	for (m = mons; m; m = m->next)
 		showws(m->selws);
-	}
-	selws = selmon->selws; // TODO hacky
-	fprintf(stderr, "setup: <---\n");
+	selws = selmon->selws;
 }
 
 

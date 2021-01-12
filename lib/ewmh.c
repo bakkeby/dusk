@@ -1,15 +1,12 @@
 void
 persistworkspacestate(Workspace *ws)
 {
-	fprintf(stderr, "persistworkspacestate: --> ws %s\n", ws->name);
 	Client *c;
 	unsigned int i;
 	char atom[22];
 
 	sprintf(atom, "_DUSK_WORKSPACE_%u", ws->num);
-	fprintf(stderr, "persistworkspacestate: ws = %s, pinned = %d, visible = %d, mon = %d\n", ws->name, ws->pinned, ws->visible, ws->mon->num);
 	unsigned long data[] = { ws->visible | ws->pinned << 1 | ws->mon->num << 2 }; // potentially enablegaps, nmaster, nstack, mfact
-	fprintf(stderr, "persistworkspacestate: data = %lu\n", *data);
 	XChangeProperty(dpy, root, XInternAtom(dpy, atom, False), XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
 
 	/* set dusk client atoms */
@@ -24,7 +21,6 @@ persistworkspacestate(Workspace *ws)
 	}
 
 	XSync(dpy, False);
-	fprintf(stderr, "persistworkspacestate: <--\n");
 }
 
 void
@@ -101,7 +97,6 @@ getclientfields(Client *c)
 void
 getworkspacestate(Workspace *ws)
 {
-	fprintf(stderr, "getworkspacestate: --> %s\n", ws->name);
 	Monitor *m;
 	char atom[22];
 	int di, mon;
@@ -124,16 +119,13 @@ getworkspacestate(Workspace *ws)
 		for (m = mons; m && m->num != mon; m = m->next);
 		if (m) {
 			ws->mon = m;
-			fprintf(stderr, "getworkspacestate: settings = %ld visible = %ld\n", settings, settings & 1);
 			ws->visible = settings & 1;
 			ws->pinned = (settings & 0x2) >> 1;
 
-			fprintf(stderr, "getworkspacestate: found monitor %d for workspace %s, visible = %d, pinned = %d (settings = %ld)\n", m->num, ws->name, ws->visible, ws->pinned, settings);
 			if (ws->visible)
-				ws->mon->selws = ws; // TODO refactor, we so something similar in createworkspaces
+				ws->mon->selws = ws;
 		}
 	}
-	fprintf(stderr, "getworkspacestate: <--\n");
 }
 
 void

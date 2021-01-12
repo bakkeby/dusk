@@ -39,6 +39,8 @@ hidews(Workspace *ws)
 void
 showws(Workspace *ws)
 {
+	if (!ws)
+		return;
 	fprintf(stderr, "showws --> %s\n", ws->name);
 	ws->visible = 1;
 	ws->mon->selws = ws;
@@ -63,7 +65,7 @@ showwsclients(Workspace *ws)
 }
 
 void
-movews(const Arg *arg)  // TODO movews - bad name perhaps?
+movews(const Arg *arg)
 {
 	Workspace *ws = (Workspace*)arg->v;
 	Client *c = selws->sel;

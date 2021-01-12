@@ -4,6 +4,7 @@ removescratch(const Arg *arg)
 	Client *c = selws->sel;
 	if (!c)
 		return;
+
 	c->scratchkey = 0;
 }
 
@@ -33,7 +34,6 @@ void spawnscratch(const Arg *arg)
 void
 togglescratch(const Arg *arg)
 {
-	fprintf(stderr, "togglescratch: -->\n");
 	Client *c, *next, *last = NULL, *found = NULL, *monclients = NULL;
 	Workspace *ws, *ows;
 	int scratchvisible = 0; // whether the scratchpads are currently visible or not
@@ -41,7 +41,6 @@ togglescratch(const Arg *arg)
 	int scratchmon = -1; // the monitor where the scratchpads exist
 	int numscratchpads = 0; // count of scratchpads
 
-	fprintf(stderr, "togglescratch: %d\n", 5);
 	/* Looping through monitors and client's twice, the first time to work out whether we need
 	   to move clients across from one monitor to another or not */
 	for (ws = workspaces; ws; ws = ws->next) {
@@ -56,7 +55,6 @@ togglescratch(const Arg *arg)
 			++numscratchpads;
 		}
 	}
-	fprintf(stderr, "togglescratch: %d\n", 18);
 
 	/* Now for the real deal. The logic should go like:
 	    - hidden scratchpads will be shown
@@ -106,8 +104,6 @@ togglescratch(const Arg *arg)
 		}
 	}
 
-	fprintf(stderr, "togglescratch: %d\n", 55);
-
 	/* Attach moved scratchpad clients on the selected monitor */
 	for (c = monclients; c; c = next) {
 		next = c->next;
@@ -122,10 +118,9 @@ togglescratch(const Arg *arg)
 		c->next = NULL;
 		attachstack(c);
 		removeflag(c, Invisible);
-			fprintf(stderr, "togglescratch: %d\n", 72);
+
 		/* Center floating scratchpad windows when moved from one monitor to another */
 		if (ISFLOATING(c)) {
-			// clientfittomon(c, selmon, &c->x, &c->y, &c->w, &c->h); // TODO check this
 			if (c->w > selws->mon->ww)
 				c->w = selws->mon->ww - c->bw * 2;
 			if (c->h > selws->mon->wh)
@@ -140,10 +135,7 @@ togglescratch(const Arg *arg)
 			resizeclient(c, c->x, c->y, c->w, c->h);
 			XRaiseWindow(dpy, c->win);
 		}
-			fprintf(stderr, "togglescratch: %d\n", 97);
 	}
-
-	fprintf(stderr, "togglescratch: %d\n", 99);
 
 	if (found) {
 		focus(ISVISIBLE(found) ? found : NULL);
@@ -153,5 +145,4 @@ togglescratch(const Arg *arg)
 	} else {
 		spawnscratch(arg);
 	}
-	fprintf(stderr, "togglescratch: <--\n");
 }

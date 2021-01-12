@@ -213,7 +213,7 @@ dump_monitor(yajl_gen gen, Monitor *mon, int is_selected)
     YSTR("layout"); YMAP(
       YSTR("symbol"); YMAP(
         YSTR("current"); YSTR(ws->ltsymbol);
-        YSTR("old"); YSTR(ws->lastltsymbol);
+        YSTR("old"); YSTR(ws->prevlayout->symbol);
       )
       YSTR("address"); YMAP(
         YSTR("current"); YINT((uintptr_t)ws->layout);
