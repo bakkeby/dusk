@@ -39,6 +39,8 @@ draw_workspaces(Bar *bar, BarArg *a)
 		drw_setscheme(drw, scheme[
 			ws == ws->mon->selws
 			? SchemeWsSel
+			: ws->visible
+			? SchemeWsVisible
 			: urg
 			? SchemeUrg
 			: SchemeWsNorm

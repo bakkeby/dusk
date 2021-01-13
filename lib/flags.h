@@ -46,7 +46,7 @@ static const unsigned long
 	NoBorder = 0x200000000,
 	Invisible = 0x400000000, // by default all clients are visible, used by scratchpads to hide clients
 	AlwaysOnTop = 0x800000000,
-	FlagPlaceholder68719476736 = 0x1000000000,
+	RespectSizeHints = 0x1000000000, // respect size hints for this client when ResizeHints is globally disabled
 	FlagPlaceholder137438953472 = 0x2000000000,
 	FlagPlaceholder274877906944 = 0x4000000000,
 	FlagPlaceholder549755813888 = 0x8000000000,
@@ -99,6 +99,7 @@ static const unsigned long
 #define NOBORDER(C) (C->flags & NoBorder)
 #define NOSWALLOW(C) (C->flags & NoSwallow)
 #define ONLYMODBUTTONS(C) (C->flags & OnlyModButtons)
+#define RESPECTSIZEHINTS(C) (C->flags & RespectSizeHints)
 #define RESTOREFAKEFULLSCREEN(C) (C->flags & RestoreFakeFullScreen)
 #define RULED(C) (C->flags & Ruled)
 #define SWITCHWORKSPACE(C) (C->flags & SwitchWorkspace)

@@ -166,7 +166,8 @@ ipc_recv_message(int fd, uint8_t *msg_type, uint32_t *reply_size,
 		} else if (n == -1) {
 			// TODO: Should we return and wait for another epoll event?
 			// This would require saving the partial read in some way.
-			if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) continue;
+			if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK)
+				continue;
 
 			free(*reply);
 			return -1;

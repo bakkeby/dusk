@@ -1,5 +1,5 @@
-static void flextile(Monitor *m);
-static void getfactsforrange(Monitor *m, int an, int ai, int size, int *rest, float *fact);
+static void flextile(Workspace *ws, int x, int y, int h, int w);
+static void getfactsforrange(Workspace *ws, int an, int ai, int size, int *rest, float *fact);
 static void mirrorlayout(const Arg *arg);
 static void rotatelayoutaxis(const Arg *arg);
 static void setlayoutaxisex(const Arg *arg);
@@ -9,38 +9,38 @@ static int convert_arrange(int arrange);
 static int convert_split(int split);
 
 /* Symbol handlers */
-static void setflexsymbols(Monitor *m, unsigned int n);
-static void monoclesymbols(Monitor *m, unsigned int n);
-static void decksymbols(Monitor *m, unsigned int n);
+static void setflexsymbols(Workspace *ws, unsigned int n);
+static void monoclesymbols(Workspace *ws, unsigned int n);
+static void decksymbols(Workspace *ws, unsigned int n);
 
 /* Layout split */
-static void layout_no_split(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n);
-static void layout_split_vertical(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n);
-static void layout_split_horizontal(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n);
-static void layout_split_vertical_dual_stack(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n);
-static void layout_split_horizontal_dual_stack(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n);
-static void layout_split_centered_vertical(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n);
-static void layout_split_centered_horizontal(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n);
-static void layout_floating_master(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n);
-static void layout_split_vertical_fixed(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n);
-static void layout_split_horizontal_fixed(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n);
-static void layout_split_vertical_dual_stack_fixed(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n);
-static void layout_split_horizontal_dual_stack_fixed(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n);
-static void layout_split_centered_vertical_fixed(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n);
-static void layout_split_centered_horizontal_fixed(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n);
-static void layout_floating_master_fixed(Monitor *m, int x, int y, int h, int w, int ih, int iv, int n);
+static void layout_no_split(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n);
+static void layout_split_vertical(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n);
+static void layout_split_horizontal(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n);
+static void layout_split_vertical_dual_stack(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n);
+static void layout_split_horizontal_dual_stack(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n);
+static void layout_split_centered_vertical(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n);
+static void layout_split_centered_horizontal(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n);
+static void layout_floating_master(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n);
+static void layout_split_vertical_fixed(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n);
+static void layout_split_horizontal_fixed(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n);
+static void layout_split_vertical_dual_stack_fixed(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n);
+static void layout_split_horizontal_dual_stack_fixed(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n);
+static void layout_split_centered_vertical_fixed(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n);
+static void layout_split_centered_horizontal_fixed(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n);
+static void layout_floating_master_fixed(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n);
 
 /* Layout tile arrangements */
-static void arrange_left_to_right(Monitor *m, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
-static void arrange_top_to_bottom(Monitor *m, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
-static void arrange_monocle(Monitor *m, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
-static void arrange_gapplessgrid(Monitor *m, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
-static void arrange_gapplessgrid_alt1(Monitor *m, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
-static void arrange_gapplessgrid_alt2(Monitor *m, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
-static void arrange_gridmode(Monitor *m, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
-static void arrange_horizgrid(Monitor *m, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
-static void arrange_dwindle(Monitor *m, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
-static void arrange_spiral(Monitor *m, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
+static void arrange_left_to_right(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
+static void arrange_top_to_bottom(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
+static void arrange_monocle(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
+static void arrange_gapplessgrid(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
+static void arrange_gapplessgrid_alt1(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
+static void arrange_gapplessgrid_alt2(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
+static void arrange_gridmode(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
+static void arrange_horizgrid(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
+static void arrange_dwindle(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
+static void arrange_spiral(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
 
 /* Layout arrangements */
 enum {

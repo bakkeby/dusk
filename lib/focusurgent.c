@@ -6,7 +6,7 @@ focusurgent(const Arg *arg)
 	for (c = ws->clients; c && !ISURGENT(c); c = c->next);
 	if (c) {
 		if (!c->ws->visible)
-			viewwsonmon(c->ws, c->ws->mon);
+			viewwsonmon(c->ws, c->ws->mon, 0);
 		focus(c);
 	}
 }

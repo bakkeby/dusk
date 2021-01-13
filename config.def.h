@@ -55,7 +55,7 @@ static unsigned long functionality = 0
 //	|DecorationHints // used by setfullscreen, prevents state change
 	|FocusOnNetActive
 	|AllowNoModifierButtons
-//	|CenterSizeHintsClients // center tiled clients subject to size hints within their tiled area
+	|CenterSizeHintsClients // center tiled clients subject to size hints within their tiled area
 //	|ResizeHints // if enabled then dusk will respect size hints in tiled resizals
 //	|SortScreens // only applies on startup
 //	|ViewOnWs // follow a window to the workspace it is being moved to
@@ -83,28 +83,27 @@ static char normbgcolor[]                = "#180A13";
 static char normbordercolor[]            = "#444444";
 
 static char selfgcolor[]                 = "#FFF7D4";
-static char selbgcolor[]                 = "#330000";
-static char selbordercolor[]             = "#330000";
+static char selbgcolor[]                 = "#440000";
+static char selbordercolor[]             = "#440000";
 
 static char titlenormfgcolor[]           = "#C6BDBD";
 static char titlenormbgcolor[]           = "#180A13";
-static char titlenormbordercolor[]       = "#330000";
+static char titlenormbordercolor[]       = "#440000";
 
 static char titleselfgcolor[]            = "#FFF7D4";
-static char titleselbgcolor[]            = "#330000";
-static char titleselbordercolor[]        = "#330000";
+static char titleselbgcolor[]            = "#440000";
+static char titleselbordercolor[]        = "#440000";
 
 static char wsnormfgcolor[]              = "#C6BDBD";
 static char wsnormbgcolor[]              = "#180A13";
-static char wsnormbordercolor[]          = "#444444";
-
+static char wsvisfgcolor[]               = "#FFF7D4";
+static char wsvisbgcolor[]               = "#440000";
 static char wsselfgcolor[]               = "#FFF7D4";
-static char wsselbgcolor[]               = "#330000";
-static char wsselbordercolor[]           = "#330000";
+static char wsselbgcolor[]               = "#550000";
 
 static char hidfgcolor[]                 = "#c278b6";
 static char hidbgcolor[]                 = "#222222";
-static char hidbordercolor[]             = "#330000";
+static char hidbordercolor[]             = "#440000";
 
 static char urgfgcolor[]                 = "#bbbbbb";
 static char urgbgcolor[]                 = "#222222";
@@ -115,7 +114,7 @@ static char scratchnormbgcolor[]         = "#180A13";
 static char scratchnormbordercolor[]     = "#77547E";
 
 static char scratchselcolor[]            = "#FFF7D4";
-static char scratchselbgcolor[]          = "#330000";
+static char scratchselbgcolor[]          = "#440000";
 static char scratchselbordercolor[]      = "#894B9F";
 
 static char normTTBbgcolor[]             = "#330000";
@@ -161,6 +160,7 @@ static const unsigned int alphas[][3] = {
 	[SchemeTitleNorm]    = { OPAQUE, baralpha, borderalpha },
 	[SchemeTitleSel]     = { OPAQUE, baralpha, borderalpha },
 	[SchemeWsNorm]       = { OPAQUE, baralpha, borderalpha },
+	[SchemeWsVisible]    = { OPAQUE, baralpha, borderalpha },
 	[SchemeWsSel]        = { OPAQUE, baralpha, borderalpha },
 	[SchemeHid]          = { OPAQUE, baralpha, borderalpha },
 	[SchemeUrg]          = { OPAQUE, baralpha, borderalpha },
@@ -205,10 +205,11 @@ static char *colors[][ColCount] = {
 	/*                       fg                bg                  border                  */
 	[SchemeNorm]         = { normfgcolor,      normbgcolor,        normbordercolor,        },
 	[SchemeSel]          = { selfgcolor,       selbgcolor,         selbordercolor,         },
-	[SchemeTitleNorm]    = { titlenormfgcolor, titlenormbgcolor,   titlenormbordercolor,   },
-	[SchemeTitleSel]     = { titleselfgcolor,  titleselbgcolor,    titleselbordercolor,    },
-	[SchemeWsNorm]       = { wsnormfgcolor,    wsnormbgcolor,      wsnormbordercolor,      },
-	[SchemeWsSel]        = { wsselfgcolor,     wsselbgcolor,       wsselbordercolor,       },
+	[SchemeTitleNorm]    = { titlenormfgcolor, titlenormbgcolor,                           },
+	[SchemeTitleSel]     = { titleselfgcolor,  titleselbgcolor,                            },
+	[SchemeWsNorm]       = { wsnormfgcolor,    wsnormbgcolor,                              },
+	[SchemeWsVisible]    = { wsvisfgcolor,     wsvisbgcolor,                               },
+	[SchemeWsSel]        = { wsselfgcolor,     wsselbgcolor,                               },
 	[SchemeHid]          = { hidfgcolor,       hidbgcolor,         hidbordercolor,         },
 	[SchemeUrg]          = { urgfgcolor,       urgbgcolor,         urgbordercolor,         },
 	[SchemeScratchNorm]  = { scratchnormcolor, scratchnormbgcolor, scratchnormbordercolor, },
@@ -333,15 +334,15 @@ static const BarRule barrules[] = {
 static const WorkspaceRule wsrules[] = {
 	/*                                                                     ------ icons ------
 	   name,  monitor,  pinned,  layout,  mfact,  nmaster,  nstack,  gaps, def,   vac,   occ,  */
-	{  "1",    1,       0,       0,       -1,    -1,       -1,      -1,   }, //  "",    " ₁",  "◉₁", },
-	{  "2",    1,       0,       9,       .80,   -1,       -1,      -1,   }, //  "",    " ₂",  "☢₂", },
-	{  "3",    1,       0,       0,       -1,    -1,       -1,      -1,   }, //  "",    " ₃",  "❖₃", },
-	{  "4",    1,       0,       0,       -1,    -1,       -1,      -1,   }, //  "",    " ₄",  "⚉₄", },
-	{  "5",    1,       0,       0,       -1,    -1,       -1,      -1,   }, //  "",    " ₅",  "♻₅", },
-	{  "6",    1,       0,       0,       -1,    -1,       -1,      -1,   }, //  "",    " ₆",  "⌬₆", },
-	{  "7",    1,       0,       10,      .75,   -1,       -1,      -1,   }, //  "",    " ₇",  "♹₇", },
-	{  "8",    1,       0,       1,       -1,    -1,       -1,      -1,   }, //  "",    " ₈",  "✇₈", },
-	{  "9",    0,       0,       0,       -1,    -1,       -1,      -1,   }, //  "",    " ₉",  "☉₉", },
+	{  "1",   -1,       0,       0,       -1,    -1,       -1,      -1,   }, //  "",    " ₁",  "◉₁", },
+	{  "2",   -1,       0,       9,       .80,   -1,       -1,      -1,   }, //  "",    " ₂",  "☢₂", },
+	{  "3",   -1,       0,       0,       -1,    -1,       -1,      -1,   }, //  "",    " ₃",  "❖₃", },
+	{  "4",   -1,       0,       0,       -1,    -1,       -1,      -1,   }, //  "",    " ₄",  "⚉₄", },
+	{  "5",   -1,       0,       0,       -1,    -1,       -1,      -1,   }, //  "",    " ₅",  "♻₅", },
+	{  "6",   -1,       0,       0,       -1,    -1,       -1,      -1,   }, //  "",    " ₆",  "⌬₆", },
+	{  "7",   -1,       0,       10,      .75,   -1,       -1,      -1,   }, //  "",    " ₇",  "♹₇", },
+	{  "8",   -1,       0,       1,       -1,    -1,       -1,      -1,   }, //  "",    " ₈",  "✇₈", },
+	{  "9",   -1,       0,       0,       -1,    -1,       -1,      -1,   }, //  "",    " ₉",  "☉₉", },
 };
 /* layout(s) */
 static const float mfact     = 0.50; /* factor of master area size [0.05..0.95] */
@@ -380,13 +381,16 @@ static const Layout layouts[] = {
 #define MODKEY Super
 
 #define SCRATCHKEYS(KEY,CMD) \
-	{ MODKEY,                      KEY,      togglescratch,  {.v = CMD } }, \
-	{ MODKEY|Ctrl,                 KEY,      setscratch,     {.v = CMD } }, \
-	{ MODKEY|Ctrl|Shift,           KEY,      removescratch,  {.v = CMD } },
+	{ MODKEY,                      KEY,      togglescratch,     {.v = CMD } }, \
+	{ MODKEY|Ctrl,                 KEY,      setscratch,        {.v = CMD } }, \
+	{ MODKEY|Ctrl|Shift,           KEY,      removescratch,     {.v = CMD } }, \
 
 #define WSKEYS(KEY,NAME) \
-	{ MODKEY,                      KEY,      viewwsbyname,   {.v = NAME} }, \
-	{ MODKEY|Shift,                KEY,      movetowsbyname, {.v = NAME} },
+	{ MODKEY,                      KEY,      viewwsbyname,      {.v = NAME} }, \
+	{ MODKEY|Shift,                KEY,      movetowsbyname,    {.v = NAME} }, \
+	{ MODKEY|Ctrl|Shift,           KEY,      movealltowsbyname, {.v = NAME} }, \
+	{ MODKEY|Ctrl,                 KEY,      swapwsbyname,      {.v = NAME} }, \
+	{ MODKEY|Alt,                  KEY,      enablewsbyname,    {.v = NAME} }, \
 
 #define STACKKEYS(MOD,ACTION) \
 	{ MOD, XK_j, ACTION, {.i = INC(+1) } }, \
@@ -441,7 +445,7 @@ static Key keys[] = {
 	{ MODKEY,                       XK_z,            showhideclient,         {0} }, // hide the currently selected client (or show if hidden)
 	{ MODKEY,                       XK_q,            killclient,             {0} }, // close the currently focused window
 	{ MODKEY|Shift,                 XK_q,            quit,                   {1} }, // restart dusk
-	{ MODKEY|Ctrl|Shift,            XK_q,            quit,                   {0} }, // exit dusk
+	{ MODKEY|Ctrl|Alt,              XK_q,            quit,                   {0} }, // exit dusk
 	{ MODKEY,                       XK_m,            zoom,                   {0} }, // moves the currently focused window to/from the master area (for tiled layouts)
 
 	{ MODKEY,                       XK_bracketleft,  rotatelayoutaxis,       {.i = -1 } }, // cycle through the available layout splits (horizontal, vertical, centered, no split, etc.)
@@ -469,8 +473,12 @@ static Key keys[] = {
 	{ MODKEY|Alt,                   XK_period,       clienttomon,            {.i = +1 } }, // sends the current client to an adjacent monitor
 	{ MODKEY|Alt|Shift,             XK_comma,        clientstomon,           {.i = +1 } }, // sends all clients to an adjacent monitor
 	{ MODKEY|Alt|Shift,             XK_period,       clientstomon,           {.i = -1 } }, // sends all clients to an adjacent monitor
-	{ MODKEY,                       XK_comma,        shiftviewclients,       {.i = -1 } }, // move to the previous workspace (on the current monitor) that has clients
-	{ MODKEY,                       XK_period,       shiftviewclients,       {.i = +1 } }, // move to the next workspace (on the current monitor) that has clients
+	{ MODKEY|Ctrl,                  XK_comma,        viewwsdir,              {.i = -1 } }, // view the workspace on the immediate left of current workspace (on the current monitor)
+	{ MODKEY|Ctrl,                  XK_period,       viewwsdir,              {.i = +1 } }, // view the workspace on the immediate right of current workspace (on the current monitor)
+	{ MODKEY,                       XK_comma,        viewwsdir,              {.i = -2 } }, // view the next workspace left of current workspace that has clients (on the current monitor)
+	{ MODKEY,                       XK_period,       viewwsdir,              {.i = +2 } }, // view the next workspace right of current workspace that has clients (on the current monitor)
+	{ MODKEY|Ctrl|Alt,              XK_comma,        movewsdir,              {.i = -1 } }, // move client to workspace on the immediate left of current workspace (on the current monitor)
+	{ MODKEY|Ctrl|Alt,              XK_period,       movewsdir,              {.i = +1 } }, // move client to workspace on the immediate right of current workspace (on the current monitor)
 
 
 	STACKKEYS(AltGr|Ctrl,                            stackfocus)                           // focus on the nth client in the stack, see the STACKKEYS macro for keybindings
@@ -509,8 +517,8 @@ static Key keys[] = {
 //	{ MODKEY,                       XK_,             defaultgaps,            {0} }, // revert gaps to the default settings
 //	{ MODKEY,                       XK_,             cyclelayout,            {.i = -1 } }, // cycle through the available layouts
 //	{ MODKEY,                       XK_,             cyclelayout,            {.i = +1 } }, // cycle through the available layouts (in reverse)
-//	{ MODKEY,                       XK_,             shiftview,              { .i = -1 } }, // move to the workspace on the immediate left of the current workspace on the current monitor (wraps around)
-//	{ MODKEY,                       XK_,             shiftview,              { .i = +1 } }, // move to the workspace on the immediate right of the current workspace on the current monitor (wraps around)
+//	{ MODKEY,                       XK_,             viewwsdir,              {.i = -1 } }, // move to the workspace on the immediate left of the current workspace on the current monitor (wraps around)
+//	{ MODKEY,                       XK_,             viewwsdir,              {.i = +1 } }, // move to the workspace on the immediate right of the current workspace on the current monitor (wraps around)
 //	{ MODKEY,                       XK_,             focusmaster,            {0} }, // change focus to the first client in the stack (master)
 //	{ MODKEY,                       XK_,             transfer,               {0} }, // move a client between the master and stack area automatically adjusting nmaster
 //	{ MODKEY,                       XK_,             transferall,            {0} }, // swaps all clients in the stack area with all clients in the master area
@@ -563,7 +571,9 @@ static Button buttons[] = {
 	{ ClkClientWin,              MODKEY|Shift,            Button4,        rotatestack,    {.i = +1 } }, // rotate all clients (clockwise)
 	{ ClkClientWin,              MODKEY|Shift,            Button5,        rotatestack,    {.i = -1 } }, // rotate all clients (counter-clockwise)
 	{ ClkWorkspaceBar,           0,                       Button1,        viewws,         {0} }, // view the workspace by clicking on workspace icon
-	{ ClkWorkspaceBar,           MODKEY,                  Button1,        movews,         {0} }, // move the currently focused client to given workspace
+	{ ClkWorkspaceBar,           MODKEY,                  Button1,        movews,         {0} }, // sends (moves) the currently focused client to given workspace
+	{ ClkWorkspaceBar,           MODKEY|Shift|Ctrl,       Button1,        swapws,         {0} }, // swaps all clients on current workspace with that of the given workspace
+	{ ClkWorkspaceBar,           MODKEY|Shift,            Button1,        enablews,       {0} }, // enables the workspace in addition to other workspaces
 	{ ClkWorkspaceBar,           MODKEY,                  Button2,        togglepinnedws, {0} }, // toggles the pinning of a workspace to the current monitor
 };
 
@@ -611,8 +621,6 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( setgapsex, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( setscratch, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( setstatus, 1, {ARG_TYPE_STR} ),
-	IPCCOMMAND( shiftview, 1, {ARG_TYPE_SINT} ),
-	IPCCOMMAND( shiftviewclients, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( stackpush, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( stackfocus, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( switchcol, 1, {ARG_TYPE_NONE} ),
@@ -628,6 +636,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( transfer, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( transferall, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( unfloatvisible, 1, {ARG_TYPE_NONE} ),
+	IPCCOMMAND( viewwsdir, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( xrdb, 1, {ARG_TYPE_NONE} ), // reload xrdb / Xresources
 	IPCCOMMAND( zoom, 1, {ARG_TYPE_NONE} ),
 };

@@ -93,6 +93,7 @@ enum {
 	SchemeTitleNorm,
 	SchemeTitleSel,
 	SchemeWsNorm,
+	SchemeWsVisible,
 	SchemeWsSel,
 	SchemeScratchSel,
 	SchemeScratchNorm,
@@ -312,7 +313,6 @@ struct Client {
 	Workspace *ws;
 	Workspace *revertws; /* holds the original workspace info from when the client was opened */
 	Window win;
-	ClientState prevstate;
 	unsigned long flags;
 	unsigned long prevflags;
 };
@@ -331,12 +331,12 @@ typedef struct {
 	int masteraxis; // master stack area
 	int stack1axis; // primary stack area
 	int stack2axis; // secondary stack area, e.g. centered master
-	void (*symbolfunc)(Monitor *, unsigned int);
+	void (*symbolfunc)(Workspace *, unsigned int);
 } LayoutPreset;
 
 typedef struct {
 	const char *symbol;
-	void (*arrange)(Monitor *);
+	void (*arrange)(Workspace *, int, int, int, int);
 	LayoutPreset preset;
 } Layout;
 
@@ -412,6 +412,7 @@ typedef struct {
 static void applyrules(Client *c);
 static int applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact);
 static void arrange(Workspace *ws);
+static void arrangemon(Monitor *m);
 static void arrangews(Workspace *ws);
 static void attach(Client *c);
 static void attachstack(Client *c);
@@ -594,8 +595,8 @@ applyrules(Client *c)
 	if (enabled(Debug))
 		fprintf(stderr, "applyrules: new client %s, class = '%s', instance = '%s', role = '%s', wintype = '%ld'\n", c->name, class, instance, role, wintype);
 
-	for (i = 0; i < LENGTH(rules); i++) {
-		r = &rules[i];
+	for (i = 0; i < LENGTH(clientrules); i++) {
+		r = &clientrules[i];
 		if ((!r->title || strstr(c->name, r->title))
 		&& (!r->class || strstr(class, r->class))
 		&& (!r->role || strstr(role, r->role))
@@ -673,7 +674,7 @@ applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact)
 		*h = bh;
 	if (*w < bh)
 		*w = bh;
-	if (!IGNORESIZEHINTS(c) && (enabled(ResizeHints) || ISFLOATING(c) || !c->ws->layout->arrange)) {
+	if (!IGNORESIZEHINTS(c) && (enabled(ResizeHints) || RESPECTSIZEHINTS(c) || ISFLOATING(c) || !c->ws->layout->arrange)) {
 		/* see last two sentences in ICCCM 4.1.2.3 */
 		baseismin = c->basew == c->minw && c->baseh == c->minh;
 		if (!baseismin) { /* temporarily remove base dimensions */
@@ -734,27 +735,26 @@ arrange(Workspace *ws)
 }
 
 void
+arrangemon(Monitor *m)
+{
+	Workspace *ws;
+	for (ws = workspaces; ws; ws = ws->next)
+		if (ws->mon == m)
+			arrange(ws);
+}
+void
 arrangews(Workspace *ws)
 {
+	int x = 0, y = 0, w = 0, h = 0;
+
 	if (!ws->visible)
 		return;
-	// Monitor *mon;
-	// Workspace *ws;
-	fprintf(stderr, "arrangews: --> ws %s\n", ws->name);
-	fprintf(stderr, "arrangews: %d\n", 1);
+
 	strncpy(ws->ltsymbol, ws->layout->symbol, sizeof ws->ltsymbol);
-	if (ws->layout->arrange)
-		ws->layout->arrange(ws->mon); // TODO arrange signature --> Workspace
-	fprintf(stderr, "arrangews: %d\n", 3);
-	drawbar(ws->mon);
-	fprintf(stderr, "arrangews: %d\n", 4);
-
-	// for (mon = mons; mon; mon = mon->next)
-	// 	fprintf(stderr, "arrangews: monitor %d has selws %s\n", mon->num, mon->selws ? mon->selws->name : "NULL");
-
-	// for (ws = workspaces; ws; ws = ws->next)
-	// 	fprintf(stderr, "arrangews: workspace %s has monitor %d\n", ws->name, ws->mon ? ws->mon->num : -1);
-	fprintf(stderr, "arrangews: <--\n");
+	if (ws->layout->arrange) {
+		getworkspacearea(ws, &x, &y, &h, &w);
+		ws->layout->arrange(ws, x, y, h, w);
+	}
 }
 
 void
@@ -1023,7 +1023,7 @@ clientmessage(XEvent *e)
 			if (c->ws->visible)
 				focus(c);
 			else
-				viewwsonmon(c->ws, c->ws->mon);
+				viewwsonmon(c->ws, c->ws->mon, 0);
 		} else if (c != selws->sel && !ISURGENT(c))
 			seturgent(c, 1);
 	} else if (cme->message_type == wmatom[WMChangeState]) {
@@ -1595,14 +1595,14 @@ drawbarwin(Bar *bar)
 		bar->showbar = 0;
 		updatebarpos(bar->mon);
 		XMoveResizeWindow(dpy, bar->win, bar->bx, bar->by, bar->bw, bar->bh);
-		arrangews(bar->mon->selws);
+		arrangemon(bar->mon);
 	}
 	else if (total_drawn > 0 && !bar->showbar) {
 		bar->showbar = 1;
 		updatebarpos(bar->mon);
 		XMoveResizeWindow(dpy, bar->win, bar->bx, bar->by, bar->bw, bar->bh);
 		drw_map(drw, bar->win, 0, 0, bar->bw, bar->bh);
-		arrangews(bar->mon->selws);
+		arrangemon(bar->mon);
 	} else
 		drw_map(drw, bar->win, 0, 0, bar->bw, bar->bh);
 }
@@ -1681,12 +1681,12 @@ focus(Client *c)
 	if (c) {
 		fprintf(stderr, "focus: so if (c) and c = %s, selmon = %d, selws = %s, selws->mon = %d, selws->sel = %s, c->ws = %s\n", c ? c->name : "NULL", selmon->num, selws->name, selws->mon->num, selws->sel ? selws->sel->name : "NULL", c->ws->name);
 		if (c->ws != selws) {
-			if (c->ws->mon != selmon) {
-				drawbar(selmon);
+			if (c->ws->mon != selmon)
 				selmon = c->ws->mon;
-			}
 			fprintf(stderr, "focus: set selws to c->ws = %s\n", c->ws->name);
 			selws = c->ws;
+			c->ws->mon->selws = c->ws;
+			drawbar(ws->mon);
 		}
 		if (ISURGENT(c))
 			seturgent(c, 0);
@@ -1807,26 +1807,16 @@ getatomprop(Client *c, Atom prop, Atom req)
 	unsigned long dl, dm;
 	unsigned char *p = NULL;
 	Atom da, atom = None;
-	// unsigned int homm;
 
-// getatomprop: returning atom 0 homm 0, da = 0, di = 0, dl = 0, dm = 0 for client TermScratchpad (t)
-// getatomprop: returning atom 18446744072635809797 homm 5, da = 6, di = 32, dl = 1, dm = 0 for client TermScratchpad (t)
-// getatomprop: returning atom 1900614 homm 70, da = 6, di = 32, dl = 1, dm = 0 for client TermScratchpad (t)
-// da = 6 = CARDINAL
-// di = 32 bit
-// dl = 1, number of itms returned
-// dm = 0, bytes after return
 	/* FIXME getatomprop should return the number of items and a pointer to
 	 * the stored data instead of this workaround */
 	if (XGetWindowProperty(dpy, c->win, prop, 0L, sizeof atom, False, req,
 		&da, &di, &dl, &dm, &p) == Success && p) {
 		atom = *(Atom *)p;
-		// homm = *(unsigned int *)p;
 		if (da == xatom[XembedInfo] && dl == 2)
 			atom = ((Atom *)p)[1];
 		XFree(p);
 	}
-	// fprintf(stderr, "getatomprop: returning atom %lu homm %u, da = %lu, di = %d, dl = %lu, dm = %lu for client %s\n", atom, homm, da, di, dl, dm, c->name);
 	return atom;
 }
 
@@ -2075,7 +2065,6 @@ manage(Window w, XWindowAttributes *wa)
 
 	fprintf(stderr, "manage: %d (%s)\n", 16, c->name);
 	m = c->ws->mon;
-	// focusclient = c->ws->visible;
 
 	if (c->x + WIDTH(c) > m->mx + m->mw)
 		c->x = m->mx + m->mw - WIDTH(c);
@@ -2149,28 +2138,26 @@ manage(Window w, XWindowAttributes *wa)
 		PropModeReplace, (unsigned char *) allowed, NetWMActionLast);
 
 	fprintf(stderr, "manage: %d (%s)\n", 30, c->name);
-	if (!(term && swallow(term, c))) {
+	if (term && swallow(term, c)) {
+		/* Do not let swallowed client steal focus unless the terminal has focus */
+		focusclient = (term == selws->sel);
+	} else {
+		/* Do not attach client if it is being swallowed */
 		attachx(c, 0, NULL);
 
-		if (focusclient || !c->ws->sel || !c->ws->stack) {
-			fprintf(stderr, "manage: %d (%s) (attachstack)\n", 31, c->name);
+		if (focusclient || !c->ws->sel || !c->ws->stack)
 			attachstack(c);
-		} else {
-			fprintf(stderr, "manage: %d.2 (%s) (attach after sel)\n", 31, c->name);
+		else {
 			c->snext = c->ws->sel->snext;
 			c->ws->sel->snext = c;
 		}
 	}
 
-	fprintf(stderr, "manage: %d (%s)\n", 32, c->name);
 	XChangeProperty(dpy, root, netatom[NetClientList], XA_WINDOW, 32, PropModeAppend,
 		(unsigned char *) &(c->win), 1);
-	fprintf(stderr, "manage: %d (%s)\n", 33, c->name);
 	XChangeProperty(dpy, root, netatom[NetClientListStacking], XA_WINDOW, 32, PropModePrepend,
 		(unsigned char *) &(c->win), 1);
-	fprintf(stderr, "manage: %d (%s)\n", 34, c->name);
 	XMoveResizeWindow(dpy, c->win, c->x + 2 * sw, c->y, c->w, c->h); /* some windows require this */
-	fprintf(stderr, "manage: %d (%s)\n", 35, c->name);
 
 	if ((c->flags & Hidden) && !HIDDEN(c))
 		hide(c);
@@ -2185,10 +2172,9 @@ manage(Window w, XWindowAttributes *wa)
 	if (!c->swallowing) {
 		fprintf(stderr, "manage: %d (%s)\n", 37, c->name);
 		if (SWITCHWORKSPACE(c))
-			viewwsonmon(c->ws, c->ws->mon);
+			viewwsonmon(c->ws, c->ws->mon, 0);
 		else if (ENABLEWORKSPACE(c))
-			// TODO (view multiple workspaces)
-			arrange(c->ws);
+			viewwsonmon(c->ws, c->ws->mon, 1);
 	}
 	fprintf(stderr, "manage: %f (%s)\n", 37.5, c->name);
 
@@ -2400,6 +2386,7 @@ propertynotify(XEvent *e)
 			break;
 		case XA_WM_NORMAL_HINTS:
 			updatesizehints(c);
+			resize(c, c->x, c->y, c->w, c->h, 0);
 			break;
 		case XA_WM_HINTS:
 			updatewmhints(c);
@@ -2606,7 +2593,6 @@ resizemouse(const Arg *arg)
 void
 restack(Workspace *ws)
 {
-	fprintf(stderr, "restack --> ws %s\n", ws ? ws->name : "NULL");
 	Client *c;
 	XEvent ev;
 	XWindowChanges wc;
@@ -2614,10 +2600,8 @@ restack(Workspace *ws)
 
 	if (!ws->sel)
 		return;
-	if (ISFLOATING(ws->sel) || !ws->layout->arrange) {
-		fprintf(stderr, "restack: %d XRaiseWindow for client %s\n", 5, ws->sel->name);
+	if (ISFLOATING(ws->sel) || !ws->layout->arrange)
 		XRaiseWindow(dpy, ws->sel->win);
-	}
 	if (ws->layout->arrange) {
 		wc.stack_mode = Below;
 		wc.sibling = ws->mon->bar->win;
@@ -2639,13 +2623,11 @@ restack(Workspace *ws)
 		)
 			warp(ws->sel);
 	}
-	fprintf(stderr, "restack <-- ws %s\n", ws ? ws->name : "NULL");
 }
 
 void
 run(void)
 {
-	fprintf(stderr, "run: begin\n");
 	int event_count = 0;
 	const int MAX_EVENTS = 10;
 	struct epoll_event events[MAX_EVENTS];
@@ -2866,13 +2848,18 @@ setfullscreen(Client *c, int fullscreen, int restorefakefullscreen)
 void
 setlayout(const Arg *arg)
 {
-	const Layout *tmp;
 	Workspace *ws = selws;
-	if (!arg || !arg->v || arg->v != ws->layout) {
-		tmp = ws->layout;
-		ws->layout = ws->prevlayout;
-		ws->prevlayout = tmp;
-	}
+	const Layout *tmp = ws->layout;
+
+	int fullarrange = (
+		ws->ltaxis[MASTER] == MONOCLE ||
+		ws->ltaxis[STACK] == MONOCLE ||
+		ws->ltaxis[STACK2] == MONOCLE
+	);
+
+	ws->layout = ws->prevlayout;
+	ws->prevlayout = tmp;
+
 	if (arg && arg->v)
 		ws->layout = (Layout *)arg->v;
 
@@ -2887,8 +2874,13 @@ setlayout(const Arg *arg)
 	ws->ltaxis[STACK2] = ws->layout->preset.stack2axis;
 
 	strncpy(ws->ltsymbol, ws->layout->symbol, sizeof ws->ltsymbol);
-	if (ws->sel)
-		arrangews(ws);
+
+	if (ws->sel) {
+		if (fullarrange)
+			arrange(ws);
+		else
+			arrangews(ws);
+	}
 	else
 		drawbar(selmon);
 }
@@ -3197,7 +3189,7 @@ togglefloating(const Arg *arg)
 			resizeclient(c, c->x, c->y, c->w, c->h);
 		}
 	}
-	arrangews(c->ws);
+	arrange(NULL);
 	restack(c->ws);
 	setfloatinghint(c);
 }
@@ -3296,7 +3288,7 @@ unmanage(Client *c, int destroyed)
 	arrange(ws);
 
 	if (revertws && !revertws->visible)
-		viewwsonmon(revertws, revertws->mon);
+		viewwsonmon(revertws, revertws->mon, 0);
 }
 
 void

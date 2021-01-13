@@ -30,10 +30,8 @@ adjustwsformonitor(Workspace *ws, Monitor *m)
 void
 hidews(Workspace *ws)
 {
-	fprintf(stderr, "hidews --> %s\n", ws->name);
 	ws->visible = 0;
 	hidewsclients(ws);
-	fprintf(stderr, "hidews <--\n");
 }
 
 void
@@ -46,7 +44,6 @@ showws(Workspace *ws)
 	ws->mon->selws = ws;
 	selws = ws;
 	showwsclients(ws);
-	arrange(ws);
 	fprintf(stderr, "showws <--\n");
 }
 
@@ -150,7 +147,7 @@ movetows(Client *c, Workspace *ws)
 		focus(NULL);
 
 	if (enabled(ViewOnWs) && !ws->visible)
-		viewwsonmon(ws, ws->mon);
+		viewwsonmon(ws, ws->mon, 0);
 	else if (ws->visible) {
 		arrange(ws);
 		if (enabled(ViewOnWs) && hadfocus)
@@ -178,7 +175,7 @@ moveallclientstows(Workspace *from, Workspace *to)
 	from->stack = NULL;
 
 	if (enabled(ViewOnWs) && !to->visible)
-		viewwsonmon(to, to->mon);
+		viewwsonmon(to, to->mon, 0);
 }
 
 void
@@ -222,7 +219,7 @@ viewwsdir(const Arg *arg)
 	if (!nws)
 		return;
 
-	viewwsonmon(nws, nws->mon);
+	viewwsonmon(nws, nws->mon, 0);
 }
 
 void
@@ -235,134 +232,123 @@ togglepinnedws(const Arg *arg)
 }
 
 void
+enablews(const Arg *arg)
+{
+	viewwsonmon((Workspace*)arg->v, NULL, 1);
+}
+
+void
+enablewsbyname(const Arg *arg)
+{
+	viewwsonmon(getwsbyname(arg), NULL, 1);
+}
+
+void
 viewws(const Arg *arg)
 {
-	viewwsonmon((Workspace*)arg->v, NULL);
+	viewwsonmon((Workspace*)arg->v, NULL, 0);
 }
 
 void
 viewwsbyname(const Arg *arg)
 {
-	viewwsonmon(getwsbyname(arg), NULL);
+	viewwsonmon(getwsbyname(arg), NULL, 0);
 }
 
 void
-viewwsonmon(Workspace *ws, Monitor *m)
+viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 {
-	fprintf(stderr, "viewwsonmon: -->\n");
 	int do_warp = 0;
 
 	if (m == NULL)
 		m = selmon;
 
-	Monitor *omon = NULL;
-	Workspace *ows = NULL, *hws = NULL;
+	Monitor *mon, *omon = NULL;
+	Workspace *w, *ows = NULL;
 
-	if (!ws || (selws == ws && m == ws->mon)) {
-		fprintf(stderr, "viewwsonmon: because %s\n", !ws ? "!ws" : selws == ws ? "selws == ws && m == ws->mon" : "eh");
-		arrange(ws);
-		return;
-	}
-
-	if (ws->pinned) {
-		fprintf(stderr, "viewwsonmon: ws %s pinned, visible = %d\n", ws->name, ws->visible);
+	if (enablews && ws->visible) {
+		/* Toggle workspace if it is already shown */
+		hidews(ws);
+	} else if (ws->pinned) {
+		/* The workspace is pinned, show it on the monitor it is assigned to */
 		if (selws->mon != ws->mon)
 			do_warp = 1;
-		if (!ws->visible) {
-			if (ws->mon->selws && ws->mon->selws->visible)
-				hws = ws->mon->selws;
+		if (!ws->visible)
 			showws(ws);
+	} else if (ws->mon == m) {
+		/* The workspace is already present on the current monitor, just show it */
+		showws(ws);
+	} else if (ws->visible) {
+		/* The workspace is already visible */
+		if (enabled(GreedyMonitor) || !m->selws || m->selws->pinned) {
+			/* The current workspace is pinned, or there are no workspaces on the current
+			 * monitor. In this case, move the other workspace to the current monitor and
+			 * change to the next available workspace on the other monitor. */
+			do_warp = 1;
+
+			adjustwsformonitor(ws, selmon);
+
+			omon = ws->mon;
+
+			/* Find the next available workspace on said monitor */
+			for (ows = ws->next; ows && ows->mon != ws->mon; ows = ows->next);
+			if (!ows)
+				for (ows = workspaces; ows && ows != ws && ows->mon != ws->mon; ows = ows->next);
+			if (ows == ws)
+				ows = NULL;
+
+			omon->selws = ows;
+
+			ws->mon = m;
+			m->selws = ws;
+			selws = ws;
+			showws(ws);
+			clientsfsrestore(ws->clients);
+			if (ows)
+				showws(ows);
+		} else {
+			/* Swap the selected workspace on this monitor with the visible desired workspace
+			 * on the other monitor. */
+			ows = m->selws;
+			adjustwsformonitor(ows, ws->mon);
+			adjustwsformonitor(ws, ows->mon);
+			ows->mon = ws->mon;
+			ws->mon = m;
+
+			showws(ows);
+			showws(ws);
+			clientsfsrestore(ows->clients);
+			clientsfsrestore(ws->clients);
 		}
 	} else {
-		fprintf(stderr, "viewwsonmon: ws %s not pinned\n", ws->name);
-		if (ws->mon != m) {
-			fprintf(stderr, "viewwsonmon: ws->mon != m\n");
-			if (ws->visible) {
-				fprintf(stderr, "viewwsonmon: ws->visible\n");
-				if (enabled(GreedyMonitor) || !m->selws || m->selws->pinned) {
-					fprintf(stderr, "viewwsonmon: m->selws->pinned\n");
-					/* The current workspace is pinned, or there are no workspaces on the current
-					 * monitor. In this case, move the other workspace to the current monitor and
-					 * change to the next available workspace on the other monitor. */
-					do_warp = 1;
-
-					adjustwsformonitor(ws, selmon);
-
-					if (m->selws)
-						hws = m->selws;
-					omon = ws->mon;
-
-					/* Find the next available workspace on said monitor */
-					for (ows = ws->next; ows && ows->mon != ws->mon; ows = ows->next);
-					if (!ows)
-						for (ows = workspaces; ows && ows != ws && ows->mon != ws->mon; ows = ows->next);
-					if (ows == ws)
-						ows = NULL;
-
-					fprintf(stderr, "viewwsonmon: mws is %s\n", ows ? ows->name : "NULL");
-					omon->selws = ows;
-					ws->mon = m;
-					m->selws = ws;
-					selws = ws;
-					showws(ws);
-					clientsfsrestore(ws->clients);
-					if (ows)
-						showws(ows);
-					// drawbar(omon);
-				} else {
-					fprintf(stderr, "viewwsonmon: !m->selws->pinned\n");
-					ows = m->selws;
-					adjustwsformonitor(ows, ws->mon);
-					adjustwsformonitor(ws, ows->mon);
-					ows->mon = ws->mon;
-					ws->mon = m;
-					fprintf(stderr, "views: set %s->mon to %d and %s->mon to %d\n", ows->name, ows->mon->num, ws->name, ws->mon->num);
-
-					showws(ows);
-					showws(ws);
-					clientsfsrestore(ows->clients);
-					clientsfsrestore(ws->clients);
-				}
-			} else {
-				fprintf(stderr, "viewwsonmon: !ws->visible\n");
-				adjustwsformonitor(ws, m);
-				omon = ws->mon;
-				// This is partially the same as the else below, also partially the same as the
-				// pinned example, perhaps we need to nail down the different ways of manipulating
-				// workspaces, definitely would be good with some refactoring
-				if (m->selws && m->selws->visible)
-					hws = m->selws;
-				ws->mon = m;
-				showws(ws);
-				clientsfsrestore(ws->clients);
-			}
-
-		} else {
-			fprintf(stderr, "viewwsonmon: ws->mon == m, m->selws = %s and selws = %s, m->selws->visible = %d\n", MWSNAME(m), selws->name, m->selws ? m->selws->visible : 0);
-
-			if (m->selws && ws != m->selws && m->selws->visible)
-				hws = m->selws;
-			showws(ws);
-		}
-		// arrange(m);
+		/* Workspace is not visible, just grab it */
+		adjustwsformonitor(ws, m);
+		ws->mon = m;
+		showws(ws);
+		clientsfsrestore(ws->clients);
 	}
-	if (hws)
-		hidews(hws); // hiding after showing workspace to avoid flickering (seeing the background for a brief second) when changing workspace
-	if (omon) {
-		/* if all workspaces have been moved over then clear selws for the other monitor */
-		for (ws = workspaces; ws && ws->mon != omon; ws = ws->next);
-		if (!ws)
-			omon->selws = NULL;
-		drawbar(omon);
+
+	if (!enablews) {
+		/* Note that we hide workspaces after showing workspaces to avoid flickering when
+		 * changing workspace (i.e. seeing the wallpaper for a fraction of a second). */
+		for (w = workspaces; w; w = w->next)
+			if (w != ws && w->mon == ws->mon && ws->visible)
+				hidews(w);
 	}
+
+	/* Clear the selected workspace for a monitor if there are no visible workspaces */
+	for (mon = mons; mon; mon = mon->next) {
+		for (w = workspaces; w && !(w->mon == mon && w->visible); w = w->next);
+		if (!w)
+			mon->selws = NULL;
+	}
+
+	arrangemon(ws->mon);
 	updatecurrentdesktop();
 	focus(NULL);
-	fprintf(stderr, "viewwsonmon: <--\n");
 
-	if (do_warp && ws->sel) {
-		fprintf(stderr, "viewwsonmon: warping to client %s\n", ws->sel ? ws->sel->name : "NULL");
+	if (do_warp && ws->sel)
 		warp(ws->sel);
-	}
 }
 
 Workspace *
@@ -372,4 +358,62 @@ getwsbyname(const Arg *arg)
 	char *wsname = (char*)arg->v;
 	for (ws = workspaces; ws && strcmp(ws->name, wsname) != 0; ws = ws->next);
 	return ws;
+}
+
+void
+getworkspacearea(Workspace *ws, int *wx, int *wy, int *wh, int *ww)
+{
+	Workspace *wsi;
+	int h, w, cols, rows;
+	int x, y, i, r, nw, iw, index = -1;
+
+	/* get a count of the number of visible workspaces for this monitor */
+	for (nw = 0, index = 0, wsi = workspaces; wsi; wsi = wsi->next) {
+		if (wsi->mon != ws->mon || !wsi->visible)
+			continue;
+		nw++;
+		if (wsi == ws)
+			index = nw;
+	}
+
+	x = ws->mon->wx;
+	y = ws->mon->wy;
+	h = ws->mon->wh;
+	w = ws->mon->ww;
+
+	if (w > h) {
+		if (w / nw < h / 2) {
+			rows = 2;
+			cols = nw / rows + (nw - (nw / rows));
+		} else {
+			rows = 1;
+			cols = nw;
+		}
+	} else {
+		if (h / nw < w / 2) {
+			cols = 2;
+			rows = nw / cols + (nw - (nw / cols));
+		} else {
+			cols = 1;
+			rows = nw;
+		}
+	}
+
+	w /= cols;
+	h /= rows;
+
+	for (iw = 0, i = 0; i < cols; ++i) {
+		for (r = 0; r < rows; ++r) {
+			++iw;
+			if (iw == index) {
+				*wx = x + i * w;
+				if (cols * rows > nw && iw == nw)
+					h = ws->mon->wh;
+				*wy = y + h * r;
+				*wh = h;
+				*ww = w;
+				return;
+			}
+		}
+	}
 }
