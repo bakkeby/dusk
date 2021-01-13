@@ -275,7 +275,7 @@ static const char *spcmd3[] = {"r", "st", "-n", "spfm (r)", "-g", "144x41", "-e"
  *
  * Refer to the Rule struct definition for the list of available fields.
  */
-static const Rule rules[] = {
+static const Rule clientrules[] = {
 	/* xprop(1):
 	 *	WM_CLASS(STRING) = instance, class
 	 *	WM_NAME(STRING) = title
