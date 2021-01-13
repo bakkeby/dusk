@@ -39,12 +39,10 @@ showws(Workspace *ws)
 {
 	if (!ws)
 		return;
-	fprintf(stderr, "showws --> %s\n", ws->name);
 	ws->visible = 1;
 	ws->mon->selws = ws;
 	selws = ws;
 	showwsclients(ws);
-	fprintf(stderr, "showws <--\n");
 }
 
 void
@@ -343,7 +341,8 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 			mon->selws = NULL;
 	}
 
-	arrangemon(ws->mon);
+	arrange(NULL);
+	drawbars();
 	updatecurrentdesktop();
 	focus(NULL);
 
@@ -365,7 +364,7 @@ getworkspacearea(Workspace *ws, int *wx, int *wy, int *wh, int *ww)
 {
 	Workspace *wsi;
 	int h, w, cols, rows;
-	int x, y, i, r, nw, iw, index = -1;
+	int x, y, c, r, nw, iw, index = -1;
 
 	/* get a count of the number of visible workspaces for this monitor */
 	for (nw = 0, index = 0, wsi = workspaces; wsi; wsi = wsi->next) {
@@ -384,35 +383,53 @@ getworkspacearea(Workspace *ws, int *wx, int *wy, int *wh, int *ww)
 	if (w > h) {
 		if (w / nw < h / 2) {
 			rows = 2;
-			cols = nw / rows + (nw - (nw / rows));
+			cols = nw / rows + (nw - rows * (nw / rows));
 		} else {
 			rows = 1;
 			cols = nw;
 		}
+
+		w /= cols;
+		h /= rows;
+
+		for (iw = 0, c = 0; c < cols; ++c) {
+			for (r = 0; r < rows; ++r) {
+				++iw;
+				if (iw == index) {
+					*wx = x + c * w;
+					if (cols * rows > nw && iw == nw)
+						h = ws->mon->wh;
+					*wy = y + h * r;
+					*wh = h;
+					*ww = w;
+					return;
+				}
+			}
+		}
 	} else {
 		if (h / nw < w / 2) {
 			cols = 2;
-			rows = nw / cols + (nw - (nw / cols));
+			rows = nw / cols + (nw - cols * (nw / cols));
 		} else {
 			cols = 1;
 			rows = nw;
 		}
-	}
 
-	w /= cols;
-	h /= rows;
+		w /= cols;
+		h /= rows;
 
-	for (iw = 0, i = 0; i < cols; ++i) {
-		for (r = 0; r < rows; ++r) {
-			++iw;
-			if (iw == index) {
-				*wx = x + i * w;
-				if (cols * rows > nw && iw == nw)
-					h = ws->mon->wh;
-				*wy = y + h * r;
-				*wh = h;
-				*ww = w;
-				return;
+		for (iw = 0, r = 0; r < rows; ++r) {
+			for (c = 0; c < cols; ++c) {
+				++iw;
+				if (iw == index) {
+					*wy = y + r * h;
+					if (cols * rows > nw && iw == nw)
+						w = ws->mon->ww;
+					*wx = x + w * c;
+					*wh = h;
+					*ww = w;
+					return;
+				}
 			}
 		}
 	}

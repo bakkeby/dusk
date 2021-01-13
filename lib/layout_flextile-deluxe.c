@@ -688,15 +688,11 @@ arrange_spiral(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n,
 static void
 flextile(Workspace *ws, int x, int y, int h, int w)
 {
-	fprintf(stderr, "flextile: -->\n");
 	unsigned int n;
 	int oh = 0, ov = 0, ih = 0, iv = 0; // gaps outer/inner horizontal/vertical
-	fprintf(stderr, "flextile: %d\n", 1);
 
-	fprintf(stderr, "flextile: %d - ws = %s\n", 2, ws ? ws->name : "NULL");
 	getgaps(ws, &oh, &ov, &ih, &iv, &n);
 
-	fprintf(stderr, "flextile: %d\n", 3);
 	if (ws->layout->preset.layout != ws->ltaxis[LAYOUT] ||
 			ws->layout->preset.masteraxis != ws->ltaxis[MASTER] ||
 			ws->layout->preset.stack1axis != ws->ltaxis[STACK] ||
@@ -704,7 +700,6 @@ flextile(Workspace *ws, int x, int y, int h, int w)
 		setflexsymbols(ws, n);
 	else if (ws->layout->preset.symbolfunc != NULL)
 		ws->layout->preset.symbolfunc(ws, n);
-	fprintf(stderr, "flextile: %d\n", 7);
 	if (n == 0)
 		return;
 
@@ -715,7 +710,6 @@ flextile(Workspace *ws, int x, int y, int h, int w)
 			ov = ws->mon->gappov * smartgaps_fact;
 		}
 	}
-	fprintf(stderr, "flextile: %d\n", 9);
 
 	x += ov;
 	y += oh;
@@ -723,7 +717,6 @@ flextile(Workspace *ws, int x, int y, int h, int w)
 	w -= 2*ov;
 
 	(&flexlayouts[abs(ws->ltaxis[LAYOUT])])->arrange(ws, x, y, h, w, ih, iv, n);
-	fprintf(stderr, "flextile: <--\n");
 	return;
 }
 

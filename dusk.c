@@ -578,7 +578,6 @@ applyrules(Client *c)
 	Workspace *ws = NULL;
 	XClassHint ch = { NULL, NULL };
 
-	fprintf(stderr, "applyrules: %d (%s)\n", 1, c->name);
 	/* rule matching */
 	XGetClassHint(dpy, c->win, &ch);
 	class    = ch.res_class ? ch.res_class : broken;
@@ -633,13 +632,11 @@ applyrules(Client *c)
 			break; // only allow one rule match
 		}
 	}
-	fprintf(stderr, "applyrules: %d (%s)\n", 2, c->name);
 
 	if (ch.res_class)
 		XFree(ch.res_class);
 	if (ch.res_name)
 		XFree(ch.res_name);
-	fprintf(stderr, "applyrules: %d (%s)\n", 3, c->name);
 }
 
 int
@@ -711,13 +708,11 @@ applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact)
 void
 arrange(Workspace *ws)
 {
-	fprintf(stderr, "arrange -->: ws = %s\n", ws ? ws->name : "NULL");
 	if (ws && !ws->visible) {
 		hidewsclients(ws);
-		fprintf(stderr, "arrange: <-- (hidewsclients) because ws %s is not visible\n", ws->name);
 		return;
 	}
-	fprintf(stderr, "arrange: %d\n", 2);
+
 	if (ws)
 		showhide(ws->stack);
 	else for (ws = workspaces; ws; ws = ws->next)
@@ -725,13 +720,12 @@ arrange(Workspace *ws)
 			showhide(ws->stack);
 		else
 			hidewsclients(ws);
-	fprintf(stderr, "arrange: %d\n", 3);
+
 	if (ws) {
 		arrangews(ws);
 		restack(ws);
 	} else for (ws = workspaces; ws; ws = ws->next)
 		arrangews(ws);
-	fprintf(stderr, "arrange: <--\n");
 }
 
 void
@@ -1617,41 +1611,20 @@ enternotify(XEvent *e)
 
 	if ((ev->mode != NotifyNormal || ev->detail == NotifyInferior) && ev->window != root)
 		return;
-	fprintf(stderr, "enternotify: --> selmon = %d\n", selmon->num);
-	fprintf(stderr, "enternotify: %d\n", 2);
 	c = wintoclient(ev->window);
-	fprintf(stderr, "enternotify: %d - window %ld\n", 3, ev->window);
-	if (c)
-		fprintf(stderr, "enternotify: entered client %s on workspace %s on monitor %d\n", c->name, c->ws->name, c->ws->mon->num);
-	else
-		fprintf(stderr, "enternotify: no client found for window %ld\n", ev->window);
 
 	m = c ? c->ws->mon : wintomon(ev->window);
-	fprintf(stderr, "enternotify: %d (monitor %d)\n", 4, m->num);
 	if (m != selmon) {
-		fprintf(stderr, "enternotify: %d, mon %d mon->selws = %s\n", 5, m->num, MWSNAME(m));
 		sel = ws->sel;
-		if (sel)
-			fprintf(stderr, "enternotify: %d, unfocusing %s on workspace %s, focusing %s on workspace %s\n", 6, sel->name, sel->ws ? sel->ws->name : "NONE", c ? c->name : "NONE", c ? c->ws->name : "NONE");
-		else
-			fprintf(stderr, "enternotify: %d, no sel client on monitor %d\n", 7, ws->mon->num);
 		selmon = m;
 		if (m->selws)
 			selws = m->selws;
 		if (sel)
 			unfocus(sel, 1, c);
-	} else {
-		fprintf(stderr, "enternotify: %d\n", 7);
-		if (selws == m->selws && (!c || (m->selws && c == m->selws->sel))) {
-			fprintf(stderr, "enternotify: %d <--\n", 8);
-			return;
-		}
-		else
-			fprintf(stderr, "enternotify: same monitor %d on workspace %s\n", m->num, MWSNAME(m));
-	}
-	fprintf(stderr, "enternotify: %d\n", 9);
+	} else if (selws == m->selws && (!c || (m->selws && c == m->selws->sel)))
+		return;
+
 	focus(c);
-	fprintf(stderr, "enternotify: <-- selmon = %d\n", selmon->num);
 }
 
 void
@@ -1666,11 +1639,9 @@ expose(XEvent *e)
 void
 focus(Client *c)
 {
-	fprintf(stderr, "focus: --> client %s\n", c ? c->name : "NULL");
-	if (c && !c->ws->visible) {
-		fprintf(stderr, "focus: <-- because ws %s is not visible\n", c->ws->name);
+	if (c && !c->ws->visible)
 		return;
-	}
+
 	Workspace *ws = c ? c->ws : selws;
 	Client *f;
 	XWindowChanges wc;
@@ -1679,11 +1650,9 @@ focus(Client *c)
 	if (ws->sel && ws->sel != c)
 		unfocus(ws->sel, 0, c);
 	if (c) {
-		fprintf(stderr, "focus: so if (c) and c = %s, selmon = %d, selws = %s, selws->mon = %d, selws->sel = %s, c->ws = %s\n", c ? c->name : "NULL", selmon->num, selws->name, selws->mon->num, selws->sel ? selws->sel->name : "NULL", c->ws->name);
 		if (c->ws != selws) {
 			if (c->ws->mon != selmon)
 				selmon = c->ws->mon;
-			fprintf(stderr, "focus: set selws to c->ws = %s\n", c->ws->name);
 			selws = c->ws;
 			c->ws->mon->selws = c->ws;
 			drawbar(ws->mon);
@@ -1723,7 +1692,7 @@ focus(Client *c)
 		XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
 		ws->sel = ws->stack;
 	}
-	fprintf(stderr, "focus: ws = %s\n", ws ? ws->name : "NULL");
+
 	if (ws->layout->arrange == flextile && (
 			ws->ltaxis[MASTER] == MONOCLE ||
 			ws->ltaxis[STACK] == MONOCLE ||
@@ -1731,7 +1700,6 @@ focus(Client *c)
 		arrangews(ws);
 	else
 		drawbar(ws->mon);
-	fprintf(stderr, "focus: <-- client %s\n", c->name);
 }
 
 /* there are some broken focus acquiring clients needing extra handling */
@@ -2014,56 +1982,37 @@ manage(Window w, XWindowAttributes *wa)
 	c->cfact = 1.0;
 	c->ws = NULL;
 
-	fprintf(stderr, "manage: %d\n", 1);
 	updatetitle(c);
-	fprintf(stderr, "manage: %d (%s)\n", 2, c->name);
 	getclientflags(c);
-	fprintf(stderr, "manage: %d (%s)\n", 3, c->name);
 	getclientfields(c);
-	fprintf(stderr, "manage: %d (%s)\n", 4, c->name);
 	getclientopacity(c);
-	fprintf(stderr, "manage: %d (%s)\n", 5, c->name);
 
 	if (!c->ws) {
-		fprintf(stderr, "manage: %d (%s)\n", 6, c->name);
 		if (XGetTransientForHint(dpy, w, &trans) && (t = wintoclient(trans))) {
-			fprintf(stderr, "manage: %d (%s)\n", 7, c->name);
 			addflag(c, Transient);
 			addflag(c, Centered);
 			c->ws = t->ws;
-		} else {
-			fprintf(stderr, "manage: %d (%s)\n", 8, c->name);
+		} else
 			c->ws = selws;
-		}
 	}
 
-	fprintf(stderr, "manage: %d (%s)\n", 9, c->name);
-
 	if (!RULED(c)) {
-		fprintf(stderr, "manage: %d (%s)\n", 10, c->name);
 		if (c->x == c->ws->mon->wx && c->y == c->ws->mon->wy)
 			addflag(c, Centered);
 
 		if (!ISTRANSIENT(c)) {
-			fprintf(stderr, "manage: %d (%s)\n", 11, c->name);
 			applyrules(c);
-			fprintf(stderr, "manage: %d (%s)\n", 12, c->name);
 			term = termforwin(c);
-			fprintf(stderr, "manage: %d (%s)\n", 13, c->name);
 			if (term)
 				c->ws = term->ws;
 		}
 	}
 
 	c->bw = (NOBORDER(c) ? 0 : c->ws->mon->borderpx);
-	fprintf(stderr, "manage: %d (%s)\n", 14, c->name);
 
-	if (c->opacity) {
-		fprintf(stderr, "manage: %d (%s)\n", 15, c->name);
+	if (c->opacity)
 		opacity(c, c->opacity);
-	}
 
-	fprintf(stderr, "manage: %d (%s)\n", 16, c->name);
 	m = c->ws->mon;
 
 	if (c->x + WIDTH(c) > m->mx + m->mw)
@@ -2071,47 +2020,32 @@ manage(Window w, XWindowAttributes *wa)
 	if (c->y + HEIGHT(c) > m->my + m->mh)
 		c->y = m->my + m->mh - HEIGHT(c);
 	c->x = MAX(c->x, m->mx);
-	fprintf(stderr, "manage: %d (%s)\n", 17, c->name);
 	/* only fix client y-offset, if the client center might cover the bar */
 	c->y = MAX(c->y, ((m->bar->by == m->my) && (c->x + (c->w / 2) >= m->wx)
 		&& (c->x + (c->w / 2) < m->wx + m->ww)) ? bh : m->my);
-	fprintf(stderr, "manage: %d (%s)\n", 18, c->name);
 	wc.border_width = c->bw;
 	XConfigureWindow(dpy, w, CWBorderWidth, &wc);
-	fprintf(stderr, "manage: %d (%s)\n", 19, c->name);
 	configure(c); /* propagates border_width, if size doesn't change */
-	fprintf(stderr, "manage: %d (%s)\n", 20, c->name);
 	updatesizehints(c);
-	fprintf(stderr, "manage: %d (%s)\n", 21, c->name);
 
 	/* If the client indicates that it is in fullscreen, or if the FullScreen flag has been
 	 * explictly set via client rules, then enable fullscreen now. */
 	if (getatomprop(c, netatom[NetWMState], XA_ATOM) == netatom[NetWMFullscreen] || ISFULLSCREEN(c)) {
-		fprintf(stderr, "manage: %d (%s)\n", 22, c->name);
 		setflag(c, FullScreen, 0);
 		setfullscreen(c, 1, 0);
 	}
-	fprintf(stderr, "manage: %d (%s)\n", 23, c->name);
+
 	updatewmhints(c);
-	fprintf(stderr, "manage: %d (%s)\n", 24, c->name);
 	updatemotifhints(c);
-	fprintf(stderr, "manage: %d (%s)\n", 25, c->name);
 
 	if (ISCENTERED(c)) {
-		fprintf(stderr, "manage: %d (%s)\n", 26, c->name);
 		if (ISTRANSIENT(c)) {
-			fprintf(stderr, "manage: %f (%s)\n", 26.1, c->name);
 			/* Transient windows are centered within the geometry of the parent window */
 			c->x = t->x + WIDTH(t) / 2 - WIDTH(c) / 2;
-			fprintf(stderr, "manage: %f (%s)\n", 26.2, c->name);
 			c->y = t->y + HEIGHT(t) / 2 - HEIGHT(c) / 2;
-			fprintf(stderr, "manage: %f (%s)\n", 26.3, c->name);
 		} else {
-			fprintf(stderr, "manage: %f (%s)\n", 26.4, c->name);
 			c->x = c->ws->mon->wx + (c->ws->mon->ww - WIDTH(c)) / 2;
-			fprintf(stderr, "manage: %f (%s)\n", 26.5, c->name);
 			c->y = c->ws->mon->wy + (c->ws->mon->wh - HEIGHT(c)) / 2;
-			fprintf(stderr, "manage: %f (%s)\n", 26.6, c->name);
 		}
 	}
 
@@ -2120,11 +2054,8 @@ manage(Window w, XWindowAttributes *wa)
 	c->sfw = c->w;
 	c->sfh = c->h;
 
-	fprintf(stderr, "manage: %d (%s)\n", 27, c->name);
 	XSelectInput(dpy, w, EnterWindowMask|FocusChangeMask|PropertyChangeMask|StructureNotifyMask);
-	fprintf(stderr, "manage: %d (%s)\n", 28, c->name);
 	grabbuttons(c, 0);
-	fprintf(stderr, "manage: %d (%s)\n", 29, c->name);
 
 	if (trans != None)
 		c->prevflags |= Floating;
@@ -2137,7 +2068,6 @@ manage(Window w, XWindowAttributes *wa)
 	XChangeProperty(dpy, c->win, netatom[NetWMAllowedActions], XA_ATOM, 32,
 		PropModeReplace, (unsigned char *) allowed, NetWMActionLast);
 
-	fprintf(stderr, "manage: %d (%s)\n", 30, c->name);
 	if (term && swallow(term, c)) {
 		/* Do not let swallowed client steal focus unless the terminal has focus */
 		focusclient = (term == selws->sel);
@@ -2168,28 +2098,22 @@ manage(Window w, XWindowAttributes *wa)
 
 	if (focusclient)
 		c->ws->sel = c; // needed for the XRaiseWindow that takes place in restack
-	fprintf(stderr, "manage: %d (%s)\n", 36, c->name);
+
 	if (!c->swallowing) {
-		fprintf(stderr, "manage: %d (%s)\n", 37, c->name);
 		if (SWITCHWORKSPACE(c))
 			viewwsonmon(c->ws, c->ws->mon, 0);
 		else if (ENABLEWORKSPACE(c))
 			viewwsonmon(c->ws, c->ws->mon, 1);
 	}
-	fprintf(stderr, "manage: %f (%s)\n", 37.5, c->name);
 
 	arrange(c->ws);
-	fprintf(stderr, "manage: %d (%s)\n", 38, c->name);
 	if (!HIDDEN(c)) {
 		XMapWindow(dpy, c->win);
 	}
 
-	fprintf(stderr, "manage: %d (%s)\n", 39, c->name);
-
 	if (focusclient)
 		focus(c);
 	setfloatinghint(c);
-	fprintf(stderr, "manage: %d (%s) (end)\n", 40, c->name);
 }
 
 void
@@ -2756,7 +2680,6 @@ sendevent(Window w, Atom proto, int mask, long d0, long d1, long d2, long d3, lo
 void
 setfocus(Client *c)
 {
-	fprintf(stderr, "setfocus: --> %s\n", c->name);
 	if (!NEVERFOCUS(c)) {
 		XSetInputFocus(dpy, c->win, RevertToPointerRoot, CurrentTime);
 		XChangeProperty(dpy, root, netatom[NetActiveWindow],
@@ -2767,7 +2690,6 @@ setfocus(Client *c)
 			c->ws->sel = c;
 	}
 	sendevent(c->win, wmatom[WMTakeFocus], NoEventMask, wmatom[WMTakeFocus], CurrentTime, 0, 0, 0);
-	fprintf(stderr, "setfocus: <-- %s\n", c->name);
 }
 
 void
@@ -2775,7 +2697,6 @@ setfullscreen(Client *c, int fullscreen, int restorefakefullscreen)
 {
 	Monitor *m = c->ws->mon;
 	int savestate = 0, restorestate = 0;
-	fprintf(stderr, "setfullscreen, fullscreen = %d, restorefakefullscreen = %d\n", fullscreen, restorefakefullscreen);
 
 	if ((!ISFAKEFULLSCREEN(c) && fullscreen && !ISFULLSCREEN(c)) // normal fullscreen
 			|| (RESTOREFAKEFULLSCREEN(c) && fullscreen)) // fake fullscreen --> actual fullscreen
@@ -3008,11 +2929,8 @@ setup(void)
 	for (i = 0; i < LENGTH(colors); i++)
 		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], ColCount);
 
-	fprintf(stderr, "setup: %d\n", 1);
 	updatebars();
-	fprintf(stderr, "setup: %d\n", 2);
 	updatestatus();
-	fprintf(stderr, "setup: %d\n", 3);
 
 	/* supporting window for NetWMCheck */
 	wmcheckwin = XCreateSimpleWindow(dpy, root, 0, 0, 1, 1, 0, 0, 0);
@@ -3236,7 +3154,6 @@ togglemaximize(Client *c, int maximize_vert, int maximize_horz)
 void
 unfocus(Client *c, int setfocus, Client *nextfocus)
 {
-	fprintf(stderr, "unfocus: --> client %s\n", !c ? "NULL" : c->name);
 	if (!c)
 		return;
 	if (ISFULLSCREEN(c) && ISVISIBLE(c) && c->ws == selws && nextfocus && !ISFLOATING(nextfocus))
@@ -3248,7 +3165,6 @@ unfocus(Client *c, int setfocus, Client *nextfocus)
 		XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
 	}
 	c->ws->sel = NULL;
-	fprintf(stderr, "unfocus: <-- client %s\n", c->name);
 }
 
 void
@@ -3737,8 +3653,6 @@ main(int argc, char *argv[])
 	if (restart)
 		execvp(argv[0], argv);
 	cleanup();
-	fprintf(stderr, "main: after cleanup(), calling XCloseDisplay\n");
 	XCloseDisplay(dpy);
-	fprintf(stderr, "main: after XCloseDisplay, returning EXIT_SUCCESS\n");
 	return EXIT_SUCCESS;
 }

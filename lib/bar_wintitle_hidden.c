@@ -1,12 +1,16 @@
 int
 width_wintitle_hidden(Bar *bar, BarArg *a)
 {
+	if (!bar->mon->selws)
+		return 0;
 	return a->w;
 }
 
 int
 draw_wintitle_hidden(Bar *bar, BarArg *a)
 {
+	if (!bar->mon->selws)
+		return 0;
 	drw_rect(drw, a->x, a->y, a->w, a->h, 1, 1);
 	return calc_wintitle_hidden(bar->mon, a->x, a->w, -1, flextitledraw, NULL, a);
 }
@@ -14,6 +18,8 @@ draw_wintitle_hidden(Bar *bar, BarArg *a)
 int
 click_wintitle_hidden(Bar *bar, Arg *arg, BarArg *a)
 {
+	if (!bar->mon->selws)
+		return 0;
 	calc_wintitle_hidden(bar->mon, 0, a->w, a->x, flextitleclick, arg, a);
 	return ClkWinTitle;
 }

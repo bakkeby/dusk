@@ -25,12 +25,16 @@ enum { GRP_NOSELECTION, GRP_MASTER, GRP_STACK1, GRP_STACK2, GRP_FLOAT, GRP_HIDDE
 int
 width_flexwintitle(Bar *bar, BarArg *a)
 {
+	if (!bar->mon->selws)
+		return 0;
 	return a->w;
 }
 
 int
 draw_flexwintitle(Bar *bar, BarArg *a)
 {
+	if (!bar->mon->selws)
+		return 0;
 	drw_rect(drw, a->x, a->y, a->w, a->h, 1, 1);
 	return flextitlecalculate(bar, a->x, a->w, -1, flextitledraw, NULL, a);
 }
@@ -38,6 +42,8 @@ draw_flexwintitle(Bar *bar, BarArg *a)
 int
 click_flexwintitle(Bar *bar, Arg *arg, BarArg *a)
 {
+	if (!bar->mon->selws)
+		return 0;
 	flextitlecalculate(bar, 0, a->w, a->x, flextitleclick, arg, a);
 	return ClkWinTitle;
 }

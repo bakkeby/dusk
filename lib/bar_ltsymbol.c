@@ -1,15 +1,17 @@
 int
 width_ltsymbol(Bar *bar, BarArg *a)
 {
-	Workspace *ws = MWS(bar->mon);
-	return TEXTW(ws->ltsymbol);
+	if (!bar->mon->selws)
+		return 0;
+	return TEXTW(bar->mon->selws->ltsymbol);
 }
 
 int
 draw_ltsymbol(Bar *bar, BarArg *a)
 {
-	Workspace *ws = MWS(bar->mon);
-	return drw_text(drw, a->x, a->y, a->w, a->h, lrpad / 2, ws->ltsymbol, 0, False);
+	if (!bar->mon->selws)
+		return 0;
+	return drw_text(drw, a->x, a->y, a->w, a->h, lrpad / 2, bar->mon->selws->ltsymbol, 0, False);
 }
 
 int
