@@ -18,7 +18,7 @@
 #define FLEXWINTITLE_FLOATWEIGHT 1   // floating window title weight, set to 0 to not show floating windows
 #endif
 
-#define SCHEMEFOR(c) getschemefor(m, c, groupactive == c)
+#define SCHEMEFOR(c) getschemefor(ws, c, groupactive == c)
 
 enum { GRP_NOSELECTION, GRP_MASTER, GRP_STACK1, GRP_STACK2, GRP_FLOAT, GRP_HIDDEN };
 
@@ -49,8 +49,8 @@ click_flexwintitle(Bar *bar, Arg *arg, BarArg *a)
 }
 
 Client *
-flextitledrawarea(Monitor *m, Client *c, int x, int r, int w, int max_clients, int scheme, int draw_tiled, int draw_hidden, int draw_floating,
-	int passx, void(*tabfn)(Monitor *, Client *, int, int, int, int, Arg *arg, BarArg *barg), Arg *arg, BarArg *barg)
+flextitledrawarea(Workspace *ws, Client *c, int x, int r, int w, int max_clients, int scheme, int draw_tiled, int draw_hidden, int draw_floating,
+	int passx, void(*tabfn)(Workspace *, Client *, int, int, int, int, Arg *arg, BarArg *barg), Arg *arg, BarArg *barg)
 {
 	int i;
 	for (i = 0; c && i < max_clients; c = c->next) {
@@ -62,7 +62,7 @@ flextitledrawarea(Monitor *m, Client *c, int x, int r, int w, int max_clients, i
 				(draw_hidden && HIDDEN(c))
 			)
 		) {
-			tabfn(m, c, passx, x, w + (i < r ? 1 : 0), scheme, arg, barg);
+			tabfn(ws, c, passx, x, w + (i < r ? 1 : 0), scheme, arg, barg);
 			x += w + (i < r ? 1 : 0);
 			i++;
 		}
@@ -71,16 +71,15 @@ flextitledrawarea(Monitor *m, Client *c, int x, int r, int w, int max_clients, i
 }
 
 int
-getschemefor(Monitor *m, int group, int activegroup)
+getschemefor(Workspace *ws, int group, int activegroup)
 {
-	Workspace *ws = MWS(m);
 	switch (group) {
 	case GRP_NOSELECTION:
 		return SchemeTitleNorm;
 	case GRP_MASTER:
 	case GRP_STACK1:
 	case GRP_STACK2:
-		if (ws->layout->arrange == &flextile)
+		if (ws && ws->layout->arrange == &flextile)
 			return (activegroup ? SchemeFlexActTTB + ws->ltaxis[group] : SchemeFlexInaTTB + ws->ltaxis[group]);
 		return SchemeTitleNorm;
 	case GRP_HIDDEN:
@@ -92,13 +91,22 @@ getschemefor(Monitor *m, int group, int activegroup)
 }
 
 void
-getclientcounts(Monitor *m, int *groupactive, int *n, int *clientsnmaster, int *clientsnstack, int *clientsnstack2, int *clientsnfloating, int *clientsnhidden)
+getclientcounts(Workspace *ws, int *groupactive, int *n, int *clientsnmaster, int *clientsnstack, int *clientsnstack2, int *clientsnfloating, int *clientsnhidden)
 {
-	Workspace *ws = MWS(m);
 	Client *c;
 	int i, selidx = 0, cm = 0, cs1 = 0, cs2 = 0, cf = 0, ch = 0, center, dualstack;
 
-	for (i = 0, c = ws->clients; c; c = c->next) {
+	if (!ws) {
+		*groupactive = GRP_NOSELECTION;
+		*clientsnmaster = cm;
+		*clientsnstack = cs1;
+		*clientsnstack2 = cs2;
+		*clientsnfloating = cf;
+		*clientsnhidden = ch;
+		return;
+	}
+
+	for (i = 0, c = (ws ? ws->clients : NULL); c; c = c->next) {
 		if (!ISVISIBLE(c))
 			continue;
 		if (HIDDEN(c)) {
@@ -131,8 +139,8 @@ getclientcounts(Monitor *m, int *groupactive, int *n, int *clientsnmaster, int *
 		i++;
 	}
 	*n = cm + cs1 + cs2 + cf + ch;
-	center = iscenteredlayout(m, *n);
-	dualstack = isdualstacklayout(m);
+	center = iscenteredlayout(ws, *n);
+	dualstack = isdualstacklayout(ws);
 
 	if ((!center && !dualstack) || (center && *n <= ws->nmaster + (ws->nstack ? ws->nstack : 1))) {
 		cs1 += cs2;
@@ -160,10 +168,9 @@ getclientcounts(Monitor *m, int *groupactive, int *n, int *clientsnmaster, int *
 }
 
 int
-isdualstacklayout(Monitor *m)
+isdualstacklayout(Workspace *ws)
 {
-	Workspace *ws = MWS(m);
-	if (ws->layout->arrange != &flextile)
+	if (!ws || ws->layout->arrange != &flextile)
 		return 0;
 
 	int layout = ws->ltaxis[LAYOUT];
@@ -179,10 +186,9 @@ isdualstacklayout(Monitor *m)
 }
 
 int
-iscenteredlayout(Monitor *m, int n)
+iscenteredlayout(Workspace *ws, int n)
 {
-	Workspace *ws = MWS(m);
-	if (ws->layout->arrange != &flextile)
+	if (!ws || ws->layout->arrange != &flextile)
 		return 0;
 
 	int layout = ws->ltaxis[LAYOUT];
@@ -199,10 +205,9 @@ iscenteredlayout(Monitor *m, int n)
 }
 
 int
-isfixedlayout(Monitor *m)
+isfixedlayout(Workspace *ws)
 {
-	Workspace *ws = MWS(m);
-	if (ws->layout->arrange != &flextile)
+	if (!ws || ws->layout->arrange != &flextile)
 		return 0;
 
 	int layout = ws->ltaxis[LAYOUT];
@@ -213,10 +218,9 @@ isfixedlayout(Monitor *m)
 }
 
 int
-ismirroredlayout(Monitor *m)
+ismirroredlayout(Workspace *ws)
 {
-	Workspace *ws = MWS(m);
-	if (ws->layout->arrange != &flextile)
+	if (!ws || ws->layout->arrange != &flextile)
 		return 0;
 
 	return ws->ltaxis[LAYOUT] < 0;
@@ -235,11 +239,10 @@ getselschemefor(int scheme)
 }
 
 void
-flextitledraw(Monitor *m, Client *c, int unused, int x, int w, int tabscheme, Arg *arg, BarArg *barg)
+flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme, Arg *arg, BarArg *barg)
 {
 	if (!c)
 		return;
-	Workspace *ws = MWS(m);
 
 	int pad = lrpad / 2;
 	int clientscheme = (
@@ -265,7 +268,7 @@ flextitledraw(Monitor *m, Client *c, int unused, int x, int w, int tabscheme, Ar
 		pad = (w - TEXTW(c->name) + lrpad) / 2;
 
 	drw_text(drw, x, barg->y, w, barg->h, pad, c->name, 0, False);
-	drawstateindicator(m, c, 1, x + 2, barg->y, w, barg->h, 0, 0);
+	drawstateindicator(ws, c, 1, x + 2, barg->y, w, barg->h, 0, 0);
 
 	if (FLEXWINTITLE_BORDERS) {
 		XSetForeground(drw->dpy, drw->gc, scheme[SchemeSel][ColBorder].pixel);
@@ -275,7 +278,7 @@ flextitledraw(Monitor *m, Client *c, int unused, int x, int w, int tabscheme, Ar
 }
 
 void
-flextitleclick(Monitor *m, Client *c, int passx, int x, int w, int unused, Arg *arg, BarArg *barg)
+flextitleclick(Workspace *ws, Client *c, int passx, int x, int w, int unused, Arg *arg, BarArg *barg)
 {
 	if (passx >= x && passx <= x + w)
 		arg->v = c;
@@ -284,12 +287,11 @@ flextitleclick(Monitor *m, Client *c, int passx, int x, int w, int unused, Arg *
 int
 flextitlecalculate(
 	Bar *bar, int offx, int tabw, int passx,
-	void(*tabfn)(Monitor *, Client *, int, int, int, int, Arg *arg, BarArg *barg),
+	void(*tabfn)(Workspace *, Client *, int, int, int, int, Arg *arg, BarArg *barg),
 	Arg *arg, BarArg *barg
 ) {
 	Client *c;
-	Monitor *m = bar->mon;
-	Workspace *ws = MWS(m);
+	Workspace *ws = bar->mon->selws;
 	int n, center = 0, mirror = 0, fixed = 0; // layout configuration
 	int groupactive = 0, clientsnmaster = 0, clientsnstack = 0, clientsnstack2 = 0, clientsnfloating = 0, clientsnhidden = 0;
 	int w, r, num = 0, den, fulllayout = 0;
@@ -298,14 +300,14 @@ flextitlecalculate(
 	int mas_x = offx, st1_x = offx, st2_x = offx, hid_x = offx, flt_x = offx;
 	int mas_w, st1_w, st2_w, hid_w;
 
-	getclientcounts(m, &groupactive, &n, &clientsnmaster, &clientsnstack, &clientsnstack2, &clientsnfloating, &clientsnhidden);
+	getclientcounts(ws, &groupactive, &n, &clientsnmaster, &clientsnstack, &clientsnstack2, &clientsnfloating, &clientsnhidden);
 
 	if (n == 0)
 	 	return 0;
 	else if (ws->layout->arrange == &flextile) {
-		mirror = ismirroredlayout(m);
-		fixed = isfixedlayout(m);
-		center = iscenteredlayout(m, n);
+		mirror = ismirroredlayout(ws);
+		fixed = isfixedlayout(ws);
+		center = iscenteredlayout(ws, n);
 	}
 
 	/* Certain layouts have no master / stack areas */
@@ -323,13 +325,13 @@ flextitlecalculate(
 		den = clientsnmaster + clientsnstack + clientsnstack2 + clientsnfloating + clientsnhidden;
 		w = num / den;
 		r = num % den; // rest
-		c = flextitledrawarea(m, c, mas_x, r, w, den, !ws->layout->arrange ? SchemeFlexActFloat : SCHEMEFOR(GRP_MASTER), 1, FLEXWINTITLE_HIDDENWEIGHT, FLEXWINTITLE_FLOATWEIGHT, passx, tabfn, arg, barg); // floating
+		c = flextitledrawarea(ws, c, mas_x, r, w, den, !ws->layout->arrange ? SchemeFlexActFloat : SCHEMEFOR(GRP_MASTER), 1, FLEXWINTITLE_HIDDENWEIGHT, FLEXWINTITLE_FLOATWEIGHT, passx, tabfn, arg, barg); // floating
 	/* no master and stack mode, e.g. monocole, grid layouts, fibonacci */
 	} else if (fulllayout) {
 		den = clientsnmaster + clientsnstack + clientsnstack2 + clientsnhidden;
 		w = num / den;
 		r = num % den; // rest
-		c = flextitledrawarea(m, c, mas_x, r, w, den, SCHEMEFOR(GRP_MASTER), 1, FLEXWINTITLE_HIDDENWEIGHT, 0, passx, tabfn, arg, barg); // full
+		c = flextitledrawarea(ws, c, mas_x, r, w, den, SCHEMEFOR(GRP_MASTER), 1, FLEXWINTITLE_HIDDENWEIGHT, 0, passx, tabfn, arg, barg); // full
 	/* tiled mode */
 	} else {
 		den = clientsnmaster * FLEXWINTITLE_MASTERWEIGHT + (clientsnstack + clientsnstack2) * FLEXWINTITLE_STACKWEIGHT + clientsnfloating * FLEXWINTITLE_FLOATWEIGHT + clientsnhidden * FLEXWINTITLE_HIDDENWEIGHT;
@@ -377,17 +379,17 @@ flextitlecalculate(
 		}
 
 		flt_x = hid_x + hid_w;
-		c = flextitledrawarea(m, c, mas_x, rr, w * FLEXWINTITLE_MASTERWEIGHT + rw, clientsnmaster, SCHEMEFOR(GRP_MASTER), 1, 0, 0, passx, tabfn, arg, barg); // master
+		c = flextitledrawarea(ws, c, mas_x, rr, w * FLEXWINTITLE_MASTERWEIGHT + rw, clientsnmaster, SCHEMEFOR(GRP_MASTER), 1, 0, 0, passx, tabfn, arg, barg); // master
 		rr -= clientsnmaster;
-		c = flextitledrawarea(m, c, st1_x, rr, w * FLEXWINTITLE_STACKWEIGHT + rw, clientsnstack, SCHEMEFOR(GRP_STACK1), 1, 0, 0, passx, tabfn, arg, barg); // stack1
+		c = flextitledrawarea(ws, c, st1_x, rr, w * FLEXWINTITLE_STACKWEIGHT + rw, clientsnstack, SCHEMEFOR(GRP_STACK1), 1, 0, 0, passx, tabfn, arg, barg); // stack1
 		rr -= clientsnstack;
 		if (clientsnstack2) {
-			c = flextitledrawarea(m, c, st2_x, rr, w * FLEXWINTITLE_STACKWEIGHT + rw, clientsnstack2, SCHEMEFOR(GRP_STACK2), 1, 0, 0, passx, tabfn, arg, barg); // stack2
+			c = flextitledrawarea(ws, c, st2_x, rr, w * FLEXWINTITLE_STACKWEIGHT + rw, clientsnstack2, SCHEMEFOR(GRP_STACK2), 1, 0, 0, passx, tabfn, arg, barg); // stack2
 			rr -= clientsnstack2;
 		}
-		c = flextitledrawarea(m, ws->clients, hid_x, rr, w * FLEXWINTITLE_HIDDENWEIGHT + rw, clientsnhidden, SCHEMEFOR(GRP_HIDDEN), 0, 1, 0, passx, tabfn, arg, barg); // hidden
+		c = flextitledrawarea(ws, ws->clients, hid_x, rr, w * FLEXWINTITLE_HIDDENWEIGHT + rw, clientsnhidden, SCHEMEFOR(GRP_HIDDEN), 0, 1, 0, passx, tabfn, arg, barg); // hidden
 		rr -= clientsnhidden;
-		c = flextitledrawarea(m, ws->clients, flt_x, rr, w * FLEXWINTITLE_FLOATWEIGHT + rw, clientsnfloating, SCHEMEFOR(GRP_FLOAT), 0, 0, 1, passx, tabfn, arg, barg); // floating
+		c = flextitledrawarea(ws, ws->clients, flt_x, rr, w * FLEXWINTITLE_FLOATWEIGHT + rw, clientsnfloating, SCHEMEFOR(GRP_FLOAT), 0, 0, 1, passx, tabfn, arg, barg); // floating
 	}
 	return 1;
 }

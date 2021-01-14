@@ -57,8 +57,8 @@
 #define BARRULES                20
 #define BUTTONMASK              (ButtonPressMask|ButtonReleaseMask)
 #define CLEANMASK(mask)         (mask & ~(numlockmask|LockMask) & (ShiftMask|ControlMask|Mod1Mask|Mod2Mask|Mod3Mask|Mod4Mask|Mod5Mask))
-#define INTERSECT(x,y,w,h,m)    (MAX(0, MIN((x)+(w),(m)->wx+(m)->ww) - MAX((x),(m)->wx)) \
-                               * MAX(0, MIN((y)+(h),(m)->wy+(m)->wh) - MAX((y),(m)->wy)))
+#define INTERSECT(x,y,w,h,z)    (MAX(0, MIN((x)+(w),(z)->wx+(z)->ww) - MAX((x),(z)->wx)) \
+                               * MAX(0, MIN((y)+(h),(z)->wy+(z)->wh) - MAX((y),(z)->wy)))
 #define LENGTH(X)               (sizeof X / sizeof X[0])
 #define MOUSEMASK               (BUTTONMASK|PointerMotionMask)
 #define WIDTH(X)                ((X)->w + 2 * (X)->bw)
@@ -336,7 +336,7 @@ typedef struct {
 
 typedef struct {
 	const char *symbol;
-	void (*arrange)(Workspace *, int, int, int, int);
+	void (*arrange)(Workspace *);
 	LayoutPreset preset;
 } Layout;
 
@@ -371,6 +371,7 @@ typedef struct {
 #define RULE(...) { .scratchkey = 0, ##__VA_ARGS__ },
 
 struct Workspace {
+	int wx, wy, ww, wh; /* workspace area */
 	char ltsymbol[16];
 	char name[16];
 	float mfact;
@@ -469,6 +470,7 @@ static Client *prevtiled(Client *c);
 static void propertynotify(XEvent *e);
 static void quit(const Arg *arg);
 static Monitor *recttomon(int x, int y, int w, int h);
+static Workspace *recttows(int x, int y, int w, int h);
 static void resize(Client *c, int x, int y, int w, int h, int interact);
 static void resizeclient(Client *c, int x, int y, int w, int h);
 static void resizeclientpad(Client *c, int x, int y, int w, int h, int xpad, int ypad);
@@ -477,7 +479,6 @@ static void restack(Workspace *ws);
 static void run(void);
 static void scan(void);
 static int sendevent(Window w, Atom proto, int m, long d0, long d1, long d2, long d3, long d4);
-static void sendmon(Client *c, Monitor *m);
 static void setclientstate(Client *c, long state);
 static void setfocus(Client *c);
 static void setfullscreen(Client *c, int fullscreen, int setfakefullscreen);
@@ -739,16 +740,12 @@ arrangemon(Monitor *m)
 void
 arrangews(Workspace *ws)
 {
-	int x = 0, y = 0, w = 0, h = 0;
-
 	if (!ws->visible)
 		return;
 
 	strncpy(ws->ltsymbol, ws->layout->symbol, sizeof ws->ltsymbol);
-	if (ws->layout->arrange) {
-		getworkspacearea(ws, &x, &y, &h, &w);
-		ws->layout->arrange(ws, x, y, h, w);
-	}
+	if (ws->layout->arrange)
+		ws->layout->arrange(ws);
 }
 
 void
@@ -1319,8 +1316,13 @@ createworkspaces()
 	num_workspaces = i;
 
 	for (m = mons, ws = workspaces; ws; ws = ws->next) {
-		if (ws->mon == NULL)
+		if (ws->mon == NULL) {
 			ws->mon = m;
+			ws->wx = m->wx;
+			ws->wy = m->wy;
+			ws->wh = m->wh;
+			ws->ww = m->ww;
+		}
 		if (m->selws == NULL) {
 			m->selws = ws;
 			m->selws->visible = 1;
@@ -1341,8 +1343,13 @@ createworkspace(int num)
 
 	if (r->monitor != -1) {
 		for (m = mons; m && m->num != r->monitor; m = m->next);
-		if (m)
+		if (m) {
 			ws->mon = m;
+			ws->wx = m->wx;
+			ws->wy = m->wy;
+			ws->wh = m->wh;
+			ws->ww = m->ww;
+		}
 	}
 
 	strcpy(ws->name, r->name);
@@ -1484,10 +1491,10 @@ drawbarwin(Bar *bar)
 
 	if (bar->borderpx) {
 		if (enabled(BarActiveGroupBorderColor))
-			getclientcounts(bar->mon, &groupactive, &ignored, &ignored, &ignored, &ignored, &ignored, &ignored);
+			getclientcounts(bar->mon->selws, &groupactive, &ignored, &ignored, &ignored, &ignored, &ignored, &ignored);
 		else
 			groupactive = GRP_MASTER;
-		XSetForeground(drw->dpy, drw->gc, scheme[getschemefor(bar->mon, groupactive, bar->mon == selmon)][ColBorder].pixel);
+		XSetForeground(drw->dpy, drw->gc, scheme[getschemefor(bar->mon->selws, groupactive, bar->mon == selmon)][ColBorder].pixel);
 		XFillRectangle(drw->dpy, drw->drawable, drw->gc, 0, 0, bar->bw, bar->bh);
 	}
 
@@ -1589,6 +1596,7 @@ drawbarwin(Bar *bar)
 		bar->showbar = 0;
 		updatebarpos(bar->mon);
 		XMoveResizeWindow(dpy, bar->win, bar->bx, bar->by, bar->bw, bar->bh);
+		setworkspaceareasformon(bar->mon);
 		arrangemon(bar->mon);
 	}
 	else if (total_drawn > 0 && !bar->showbar) {
@@ -1596,6 +1604,7 @@ drawbarwin(Bar *bar)
 		updatebarpos(bar->mon);
 		XMoveResizeWindow(dpy, bar->win, bar->bx, bar->by, bar->bw, bar->bh);
 		drw_map(drw, bar->win, 0, 0, bar->bw, bar->bh);
+		setworkspaceareasformon(bar->mon);
 		arrangemon(bar->mon);
 	} else
 		drw_map(drw, bar->win, 0, 0, bar->bw, bar->bh);
@@ -2149,8 +2158,8 @@ maprequest(XEvent *e)
 void
 motionnotify(XEvent *e)
 {
-	static Monitor *mon = NULL;
 	Monitor *m;
+	Workspace *ws;
 	Client *sel;
 	XMotionEvent *ev = &e->xmotion;
 
@@ -2167,7 +2176,15 @@ motionnotify(XEvent *e)
 
 	if (ev->window != root)
 		return;
-	if ((m = recttomon(ev->x_root, ev->y_root, 1, 1)) != mon) {
+	if ((ws = recttows(ev->x_root, ev->y_root, 1, 1)) && ws != selws) {
+		sel = selws->sel;
+		selws = ws;
+		selmon->selws = ws;
+		selmon = ws->mon;
+		unfocus(sel, 1, NULL);
+		focus(NULL);
+		drawbar(selmon);
+	} else if ((m = recttomon(ev->x_root, ev->y_root, 1, 1)) != selmon) {
 		sel = selws->sel;
 		selmon = m;
 		if (m->selws)
@@ -2175,7 +2192,6 @@ motionnotify(XEvent *e)
 		unfocus(sel, 1, NULL);
 		focus(NULL);
 	}
-	mon = m;
 }
 
 void
@@ -2183,8 +2199,7 @@ movemouse(const Arg *arg)
 {
 	int x, y, ocx, ocy, nx, ny;
 	Client *c;
-	Workspace *ws = selws;
-	Monitor *m;
+	Workspace *w, *ws = selws;
 	XEvent ev;
 	Time lasttime = 0;
 
@@ -2240,13 +2255,17 @@ movemouse(const Arg *arg)
 		}
 	} while (ev.type != ButtonRelease);
 	XUngrabPointer(dpy, CurrentTime);
-	if ((m = recttomon(c->x, c->y, c->w, c->h)) != selmon) {
-		sendmon(c, m);
-		if (m->selws)
-			selws = m->selws;
-		selmon = m;
-		focus(NULL);
+
+	if ((w = recttows(c->x, c->y, c->w, c->h)) && w != selws) {
+		detach(c);
+		detachstack(c);
+		attachx(c, AttachBottom, w);
+		attachstack(c);
+		selws = w;
+		selmon = w->mon;
+		focus(c);
 	}
+
 	removeflag(c, MoveResize);
 }
 
@@ -2363,6 +2382,20 @@ recttomon(int x, int y, int w, int h)
 	return r;
 }
 
+Workspace *
+recttows(int x, int y, int w, int h)
+{
+	Workspace *ws, *r = NULL;
+	int a, area = 0;
+
+	for (ws = workspaces; ws; ws = ws->next)
+		if (ws->visible && (a = INTERSECT(x, y, w, h, ws)) > area) {
+			area = a;
+			r = ws;
+		}
+	return r;
+}
+
 void
 resize(Client *c, int x, int y, int w, int h, int interact)
 {
@@ -2443,8 +2476,7 @@ resizemouse(const Arg *arg)
 	unsigned int dui;
 	Window dummy;
 	Client *c;
-	Monitor *m;
-	Workspace *ws = selws;
+	Workspace *w, *ws = selws;
 	XEvent ev;
 	Time lasttime = 0;
 
@@ -2501,15 +2533,15 @@ resizemouse(const Arg *arg)
 
 	XUngrabPointer(dpy, CurrentTime);
 	while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
-	fprintf(stderr, "resizemouse: selmon = %d, c = %s\n", selmon->num, c->name);
-	if ((m = recttomon(c->x, c->y, c->w, c->h)) != selmon) {
-		fprintf(stderr, "resizemouse: selmon %d != mon %d\n", selmon->num, m->num);
-		fprintf(stderr, "resizemouse: c->x = %d, c->y = %d, c->w = %d, c->h = %d\n", c->x, c->y, c->w, c->h);
-		sendmon(c, m);
-		if (m->selws)
-			selws = m->selws;
-		selmon = m;
-		focus(NULL);
+
+	if ((w = recttows(c->x, c->y, c->w, c->h)) && w != selws) {
+		detach(c);
+		detachstack(c);
+		attachx(c, AttachBottom, w);
+		attachstack(c);
+		selws = w;
+		selmon = w->mon;
+		focus(c);
 	}
 	removeflag(c, MoveResize);
 }
@@ -2617,19 +2649,6 @@ scan(void)
 		XFree(wins);
 	}
 	scanner = 0;
-}
-
-void
-sendmon(Client *c, Monitor *m)
-{
-	if (c->ws->mon == m || !m->selws)
-		return;
-
-	detach(c);
-	detachstack(c);
-
-	attachx(c, AttachBottom, m->selws);
-	attachstack(c);
 }
 
 void
@@ -3084,7 +3103,8 @@ togglebar(const Arg *arg)
 	updatebarpos(selmon);
 	for (bar = selmon->bar; bar; bar = bar->next)
 		XMoveResizeWindow(dpy, bar->win, bar->bx, bar->by, bar->bw, bar->bh);
-	arrangews(selws);
+	setworkspaceareasformon(selmon);
+	arrangemon(selmon);
 }
 
 void

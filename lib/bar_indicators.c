@@ -1,8 +1,7 @@
 /* Indicator properties, you can override these in your config.h if you want. */
 void
-drawindicator(Monitor *m, Client *c, unsigned int occ, int x, int y, int w, int h, int filled, int invert, int type)
+drawindicator(Workspace *ws, Client *c, unsigned int occ, int x, int y, int w, int h, int filled, int invert, int type)
 {
-	Workspace *ws = MWS(m);
 	int boxw, boxs, indn = 0;
 	if (!occ || type == INDICATOR_NONE)
 		return;
@@ -10,7 +9,7 @@ drawindicator(Monitor *m, Client *c, unsigned int occ, int x, int y, int w, int 
 	boxs = drw->fonts->h / 9;
 	boxw = drw->fonts->h / 6 + 2;
 	if (filled == -1)
-		filled = m == selmon;
+		filled = ws->mon == selmon;
 
 	switch (type) {
 	default:
@@ -68,14 +67,14 @@ drawindicator(Monitor *m, Client *c, unsigned int occ, int x, int y, int w, int 
 }
 
 void
-drawstateindicator(Monitor *m, Client *c, unsigned int occ, int x, int y, int w, int h, int filled, int invert)
+drawstateindicator(Workspace *ws, Client *c, unsigned int occ, int x, int y, int w, int h, int filled, int invert)
 {
 	if (ISFAKEFULLSCREEN(c) && ISFLOATING(c))
-		drawindicator(m, c, occ, x, y, w, h, filled, invert, floatfakefsindicatortype);
+		drawindicator(ws, c, occ, x, y, w, h, filled, invert, floatfakefsindicatortype);
 	else if (ISFAKEFULLSCREEN(c))
-		drawindicator(m, c, occ, x, y, w, h, filled, invert, fakefsindicatortype);
+		drawindicator(ws, c, occ, x, y, w, h, filled, invert, fakefsindicatortype);
 	else if (ISFLOATING(c))
-		drawindicator(m, c, occ, x, y, w, h, filled, invert, floatindicatortype);
+		drawindicator(ws, c, occ, x, y, w, h, filled, invert, floatindicatortype);
 	else
-		drawindicator(m, c, occ, x, y, w, h, filled, invert, tiledindicatortype);
+		drawindicator(ws, c, occ, x, y, w, h, filled, invert, tiledindicatortype);
 }

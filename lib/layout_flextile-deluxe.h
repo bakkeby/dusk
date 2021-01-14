@@ -1,4 +1,4 @@
-static void flextile(Workspace *ws, int x, int y, int h, int w);
+static void flextile(Workspace *ws);
 static void getfactsforrange(Workspace *ws, int an, int ai, int size, int *rest, float *fact);
 static void mirrorlayout(const Arg *arg);
 static void rotatelayoutaxis(const Arg *arg);

@@ -15,5 +15,5 @@ enum {
 	INDICATOR_PLUS_AND_LARGER_SQUARE,
 };
 
-static void drawindicator(Monitor *m, Client *c, unsigned int occ, int x, int y, int w, int h, int filled, int invert, int type);
-static void drawstateindicator(Monitor *m, Client *c, unsigned int occ, int x, int y, int w, int h, int filled, int invert);
+static void drawindicator(Workspace *ws, Client *c, unsigned int occ, int x, int y, int w, int h, int filled, int invert, int type);
+static void drawstateindicator(Workspace *ws, Client *c, unsigned int occ, int x, int y, int w, int h, int filled, int invert);

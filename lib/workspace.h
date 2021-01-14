@@ -1,7 +1,6 @@
 static char * wsicon(Workspace *ws);
 static void adjustwsformonitor(Workspace *ws, Monitor *m);
 static Workspace * getwsbyname(const Arg *arg);
-static void getworkspacearea(Workspace *ws, int *wx, int *wy, int *wh, int *ww);
 
 static void enablews(const Arg *arg);
 static void enablewsbyname(const Arg *arg);
@@ -27,3 +26,7 @@ static void viewws(const Arg *arg);
 static void viewwsbyname(const Arg *arg);
 static void viewwsdir(const Arg *arg);
 static void viewwsonmon(Workspace *ws, Monitor *m, int enablews);
+
+static void setworkspaceareas();
+static void setworkspaceareasformon(Monitor *mon);
+static Workspace * nextmonws(Monitor *mon, Workspace *ws);

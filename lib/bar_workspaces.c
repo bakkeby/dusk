@@ -17,12 +17,11 @@ width_workspaces(Bar *bar, BarArg *a)
 int
 draw_workspaces(Bar *bar, BarArg *a)
 {
+	Workspace *ws;
 	int w, x = a->x;
 	unsigned int inv, occ, urg;
 	char *icon;
 	Client *c;
-	Monitor *m = bar->mon;
-	Workspace *ws = MWS(m);
 
 	for (ws = workspaces; ws; ws = ws->next) {
 		if (ws->mon != bar->mon)
@@ -46,7 +45,7 @@ draw_workspaces(Bar *bar, BarArg *a)
 			: SchemeWsNorm
 		]);
 		drw_text(drw, x, a->y, w, a->h, lrpad / 2, icon, inv, False);
-		drawindicator(m, NULL, ws->clients != NULL, x, a->y, w, a->h, -1, 0, wsindicatortype);
+		drawindicator(ws, NULL, ws->clients != NULL, x, a->y, w, a->h, -1, 0, wsindicatortype);
 		x += w;
 	}
 	return 1;

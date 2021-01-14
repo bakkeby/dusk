@@ -25,7 +25,6 @@ insertclient(Client *item, Client *insertItem, int after)
 void
 inplacerotate(const Arg *arg)
 {
-	Monitor *m = selmon;
 	Workspace *ws = selws;
 	if (!ws->sel || (ISFLOATING(ws->sel) && !arg->f))
 		return;
@@ -59,8 +58,8 @@ inplacerotate(const Arg *arg)
 		}
 	}
 
-	center = iscenteredlayout(m, n);
-	dualstack = isdualstacklayout(m);
+	center = iscenteredlayout(ws, n);
+	dualstack = isdualstacklayout(ws);
 	if ((!center && !dualstack) || (center && n <= ws->nmaster + (ws->nstack ? ws->nstack : 1))) {
 		if (arg->i < 0 && selidx >= ws->nmaster) insertclient(ttail, shead, 1);
 		if (arg->i > 0 && selidx >= ws->nmaster) insertclient(shead, ttail, 0);

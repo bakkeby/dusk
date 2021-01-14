@@ -686,10 +686,11 @@ arrange_spiral(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n,
 }
 
 static void
-flextile(Workspace *ws, int x, int y, int h, int w)
+flextile(Workspace *ws)
 {
 	unsigned int n;
 	int oh = 0, ov = 0, ih = 0, iv = 0; // gaps outer/inner horizontal/vertical
+	int x, y, h, w;
 
 	getgaps(ws, &oh, &ov, &ih, &iv, &n);
 
@@ -711,10 +712,10 @@ flextile(Workspace *ws, int x, int y, int h, int w)
 		}
 	}
 
-	x += ov;
-	y += oh;
-	h -= 2*oh;
-	w -= 2*ov;
+	x = ws->wx + ov;
+	y = ws->wy + oh;
+	h = ws->wh - 2*oh;
+	w = ws->ww - 2*ov;
 
 	(&flexlayouts[abs(ws->ltaxis[LAYOUT])])->arrange(ws, x, y, h, w, ih, iv, n);
 	return;

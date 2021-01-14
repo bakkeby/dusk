@@ -264,10 +264,10 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 	Monitor *mon, *omon = NULL;
 	Workspace *w, *ows = NULL;
 
-	if (enablews && ws->visible) {
+	if (enablews && ws->visible && ws->mon == m) {
 		/* Toggle workspace if it is already shown */
 		hidews(ws);
-	} else if (ws->pinned) {
+	} else if (ws->pinned && !enablews) {
 		/* The workspace is pinned, show it on the monitor it is assigned to */
 		if (selws->mon != ws->mon)
 			do_warp = 1;
@@ -278,7 +278,7 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 		showws(ws);
 	} else if (ws->visible) {
 		/* The workspace is already visible */
-		if (enabled(GreedyMonitor) || !m->selws || m->selws->pinned) {
+		if (enabled(GreedyMonitor) || !m->selws || m->selws->pinned || enablews) {
 			/* The current workspace is pinned, or there are no workspaces on the current
 			 * monitor. In this case, move the other workspace to the current monitor and
 			 * change to the next available workspace on the other monitor. */
@@ -341,6 +341,7 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 			mon->selws = NULL;
 	}
 
+	setworkspaceareas();
 	arrange(NULL);
 	drawbars();
 	updatecurrentdesktop();
@@ -359,78 +360,79 @@ getwsbyname(const Arg *arg)
 	return ws;
 }
 
-void
-getworkspacearea(Workspace *ws, int *wx, int *wy, int *wh, int *ww)
+Workspace *
+nextmonws(Monitor *mon, Workspace *ws)
 {
-	Workspace *wsi;
-	int h, w, cols, rows;
-	int x, y, c, r, nw, iw, index = -1;
+	Workspace *w;
+	for (w = ws; w && !(w->mon == mon && w->visible); w = w->next);
+	return w;
+}
+
+void
+setworkspaceareas()
+{
+	Monitor *mon;
+	for (mon = mons; mon; mon = mon->next)
+		setworkspaceareasformon(mon);
+}
+
+void
+setworkspaceareasformon(Monitor *mon)
+{
+	Workspace *ws;
+	int rrest, crest, cols, rows, cw, ch, cn, rn, cc, nw, x, y;
 
 	/* get a count of the number of visible workspaces for this monitor */
-	for (nw = 0, index = 0, wsi = workspaces; wsi; wsi = wsi->next) {
-		if (wsi->mon != ws->mon || !wsi->visible)
-			continue;
-		nw++;
-		if (wsi == ws)
-			index = nw;
-	}
+	for (nw = 0, ws = nextmonws(mon, workspaces); ws; ws = nextmonws(mon, ws->next), ++nw);
+	if (!nw)
+		return;
 
-	x = ws->mon->wx;
-	y = ws->mon->wy;
-	h = ws->mon->wh;
-	w = ws->mon->ww;
-
-	if (w > h) {
-		if (w / nw < h / 2) {
+	/* grid dimensions */
+	if (mon->ww > mon->wh) {
+		if (mon->ww / nw < mon->wh / 2) {
 			rows = 2;
 			cols = nw / rows + (nw - rows * (nw / rows));
 		} else {
 			rows = 1;
 			cols = nw;
 		}
-
-		w /= cols;
-		h /= rows;
-
-		for (iw = 0, c = 0; c < cols; ++c) {
-			for (r = 0; r < rows; ++r) {
-				++iw;
-				if (iw == index) {
-					*wx = x + c * w;
-					if (cols * rows > nw && iw == nw)
-						h = ws->mon->wh;
-					*wy = y + h * r;
-					*wh = h;
-					*ww = w;
-					return;
-				}
-			}
-		}
 	} else {
-		if (h / nw < w / 2) {
+		if (mon->wh / nw < mon->ww / 2) {
 			cols = 2;
 			rows = nw / cols + (nw - cols * (nw / cols));
 		} else {
 			cols = 1;
 			rows = nw;
 		}
+	}
 
-		w /= cols;
-		h /= rows;
+	/* window geoms (cell height/width) */
+	ch = mon->wh / rows;
+	rrest = mon->wh - ch * rows;
+	cw = mon->ww / cols;
+	crest = mon->wh - cw * cols;
+	x = mon->wx;
+	y = mon->wy;
 
-		for (iw = 0, r = 0; r < rows; ++r) {
-			for (c = 0; c < cols; ++c) {
-				++iw;
-				if (iw == index) {
-					*wy = y + r * h;
-					if (cols * rows > nw && iw == nw)
-						w = ws->mon->ww;
-					*wx = x + w * c;
-					*wh = h;
-					*ww = w;
-					return;
-				}
-			}
+	cn = rn = cc = 0; // reset column no, row no, workspace count
+	for (ws = nextmonws(mon, workspaces); ws; ws = nextmonws(mon, ws->next)) {
+		if ((rows * cols) > nw && cc + 1 == nw) {
+			rows = 1;
+			ch = mon->wh;
+			rrest = 0;
+		}
+
+		ws->wx = x;
+		ws->wy = y + rn * ch + MIN(rn, rrest);
+		ws->wh = ch + (rn < rrest ? 1 : 0);
+		ws->ww = cw + (cn < crest ? 1 : 0);
+
+		rn++;
+		cc++;
+		if (rn >= rows) {
+			rn = 0;
+			x += cw + (cn < crest ? 1 : 0);
+			cn++;
 		}
 	}
 }
