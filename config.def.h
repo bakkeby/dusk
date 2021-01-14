@@ -331,24 +331,45 @@ static const BarRule barrules[] = {
 	{ -1,       1,     BAR_ALIGN_LEFT,         width_wintitle_floating,  draw_wintitle_floating,  click_wintitle_floating,  "wintitle_floating" },
 };
 
+/* Workspace rules define what workspaces are available and their properties.
+ *
+ *    name     - the name of the workspace, this is a reference used for keybindings - see WSKEYS
+ *    monitor  - the monitor number the workspace starts on by default, -1 means assign freely
+ *    pinned   - whether the workspace is pinned on the assigned monitor
+ *    layout   - the layout index the workspace should start with, refer to the layouts array
+ *    mfact    - factor of master area size, -1 means use global config
+ *    nmaster  - number of clients in master area, -1 means use global config
+ *    nstack   - number of clients in primary stack area, -1 means use global config
+ *    gaps     - whether gaps are enabled for the workspace, -1 means use global config
+ *
+ *    icons:
+ *       def   - the default icon shown for the workspace, if empty string then the workspace is
+ *               hidden by default, if NULL then the workspace name is used for the icon
+ *       vac   - the vacant icon shows if the workspace is selected, the default icon is an empty
+ *               string (hidden by default) and the workspace has no clients
+ *       occ   - the occupied icon shows if the workspace has clients
+ *
+ */
 static const WorkspaceRule wsrules[] = {
 	/*                                                                     ------ icons ------
 	   name,  monitor,  pinned,  layout,  mfact,  nmaster,  nstack,  gaps, def,   vac,   occ,  */
-	{  "1",   -1,       0,       0,       -1,    -1,       -1,      -1,   }, //  "",    " ₁",  "◉₁", },
-	{  "2",   -1,       0,       9,       .80,   -1,       -1,      -1,   }, //  "",    " ₂",  "☢₂", },
-	{  "3",   -1,       0,       0,       -1,    -1,       -1,      -1,   }, //  "",    " ₃",  "❖₃", },
-	{  "4",   -1,       0,       0,       -1,    -1,       -1,      -1,   }, //  "",    " ₄",  "⚉₄", },
-	{  "5",   -1,       0,       0,       -1,    -1,       -1,      -1,   }, //  "",    " ₅",  "♻₅", },
-	{  "6",   -1,       0,       0,       -1,    -1,       -1,      -1,   }, //  "",    " ₆",  "⌬₆", },
-	{  "7",   -1,       0,       10,      .75,   -1,       -1,      -1,   }, //  "",    " ₇",  "♹₇", },
-	{  "8",   -1,       0,       1,       -1,    -1,       -1,      -1,   }, //  "",    " ₈",  "✇₈", },
-	{  "9",   -1,       0,       0,       -1,    -1,       -1,      -1,   }, //  "",    " ₉",  "☉₉", },
+	{  "1",   -1,       0,       0,       -1,    -1,       -1,      -1,    "𝟣",   "",   "𝟭", },
+	{  "2",   -1,       0,       9,       .80,   -1,       -1,      -1,    "𝟤",   "",   "𝟮", },
+	{  "3",   -1,       0,       0,       -1,    -1,       -1,      -1,    "𝟥",   "",   "𝟯", },
+	{  "4",   -1,       0,       0,       -1,    -1,       -1,      -1,    "𝟦",   "",   "𝟰", },
+	{  "5",   -1,       0,       0,       -1,    -1,       -1,      -1,    "𝟧",   "",   "𝟱", },
+	{  "6",   -1,       0,       0,       -1,    -1,       -1,      -1,    "𝟨",   "",   "𝟲", },
+	{  "7",   -1,       0,       10,      .75,   -1,       -1,      -1,    "𝟩",   "",   "𝟳", },
+	{  "8",   -1,       0,       1,       -1,    -1,       -1,      -1,    "𝟪",   "",   "𝟴", },
+	{  "9",   -1,       0,       0,       -1,    -1,       -1,      -1,    "𝟫",   "",   "𝟵", },
 };
-/* layout(s) */
+
 static const float mfact     = 0.50; /* factor of master area size [0.05..0.95] */
 static const int nmaster     = 1;    /* number of clients in master area */
 static const int nstack      = 0;    /* number of clients in primary stack area */
+static const int enablegaps  = 1;    /* whether gaps are enabled by default or not */
 
+/* layout(s) */
 static const Layout layouts[] = {
 	/* symbol     arrange function, { nmaster, nstack, layout, master axis, stack axis, secondary stack axis, symbol func } */
 	{ "[]=",      flextile,         { -1, -1, SPLIT_VERTICAL, TOP_TO_BOTTOM, TOP_TO_BOTTOM, 0, NULL } }, // default tile layout

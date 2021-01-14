@@ -1362,7 +1362,7 @@ createworkspace(int num)
 	ws->mfact = (r->mfact == -1 ? mfact : r->mfact);
 	ws->nmaster = (r->nmaster == -1 ? nmaster : r->nmaster);
 	ws->nstack = (r->nstack == -1 ? nstack : r->nstack);
-	ws->enablegaps = (r->enablegaps == -1 ? 1 : r->enablegaps);
+	ws->enablegaps = (r->enablegaps == -1 ? enablegaps : r->enablegaps);
 
 	ws->ltaxis[LAYOUT] = ws->layout->preset.layout;
 	ws->ltaxis[MASTER] = ws->layout->preset.masteraxis;
