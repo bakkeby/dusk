@@ -117,3 +117,4 @@ static const unsigned long
 
 #define LOCK(C) (addflag(C, Locked))
 #define UNLOCK(C) (removeflag(C, Locked))
+#define HIDDEN(C) ((getstate(C->win) == IconicState))

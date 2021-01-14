@@ -173,8 +173,43 @@ dump_client(yajl_gen gen, Client *c)
 int
 dump_monitor(yajl_gen gen, Monitor *mon, int is_selected)
 {
-  Workspace *ws = MWS(mon);
+  Workspace *ws = mon->selws;
+
   // clang-format off
+  if (!ws) {
+    YMAP(
+      YSTR("num"); YINT(mon->num);
+      YSTR("is_selected"); YBOOL(is_selected);
+
+      YSTR("monitor_geometry"); YMAP(
+        YSTR("x"); YINT(mon->mx);
+        YSTR("y"); YINT(mon->my);
+        YSTR("width"); YINT(mon->mw);
+        YSTR("height"); YINT(mon->mh);
+      )
+
+      YSTR("window_geometry"); YMAP(
+        YSTR("x"); YINT(mon->wx);
+        YSTR("y"); YINT(mon->wy);
+        YSTR("width"); YINT(mon->ww);
+        YSTR("height"); YINT(mon->wh);
+      )
+
+      YSTR("workspace"); YMAP(
+        YSTR("current"); YSTR("NULL");
+      )
+
+      YSTR("bar"); YMAP(
+        YSTR("y"); YINT(mon->bar->by);
+        YSTR("is_shown"); YBOOL(mon->showbar);
+        YSTR("is_top"); YBOOL(mon->bar->topbar);
+        YSTR("window_id"); YINT(mon->bar->win);
+      )
+    )
+
+    return 0;
+  }
+
   YMAP(
     YSTR("master_factor"); YDOUBLE(ws->mfact);
     YSTR("num_master"); YINT(ws->nmaster);

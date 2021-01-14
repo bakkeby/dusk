@@ -66,11 +66,6 @@
 #define WTYPE                   "_NET_WM_WINDOW_TYPE_"
 #define TEXTWM(X)               (drw_fontset_getwidth(drw, (X), True) + lrpad)
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X), False) + lrpad)
-#define HIDDEN(C)               ((getstate(C->win) == IconicState))
-
-#define MWS(M)                  (M && M->selws ? M->selws : selws)
-#define MWSNAME(M)              (M && M->selws ? M->selws->name : "NULL")
-#define WSNAME(W)               (W ? W->name : "NULL")
 
 /* enums */
 enum {
@@ -779,10 +774,12 @@ buttonpress(XEvent *e)
 	click = ClkRootWin;
 	/* focus monitor if necessary */
 	if ((m = wintomon(ev->window)) && m != selmon) {
-		ws = MWS(m);
-		unfocus(ws->sel, 1, NULL);
+		ws = m->selws;
+		if (ws) {
+			unfocus(ws->sel, 1, NULL);
+			selws = ws;
+		}
 		selmon = m;
-		selws = ws;
 		focus(NULL);
 	}
 
@@ -3340,14 +3337,14 @@ updateclientlist()
 
 	XDeleteProperty(dpy, root, netatom[NetClientList]);
 	for (m = mons; m; m = m->next)
-		for (c = MWS(m)->clients; c; c = c->next)
+		for (c = (m->selws ? m->selws->clients : NULL); c; c = c->next)
 			XChangeProperty(dpy, root, netatom[NetClientList],
 				XA_WINDOW, 32, PropModeAppend,
 				(unsigned char *) &(c->win), 1);
 
 	XDeleteProperty(dpy, root, netatom[NetClientListStacking]);
 	for (m = mons; m; m = m->next)
-		for (c = MWS(m)->stack; c; c = c->snext)
+		for (c = (m->selws ? m->selws->stack : NULL); c; c = c->snext)
 			XChangeProperty(dpy, root, netatom[NetClientListStacking],
 				XA_WINDOW, 32, PropModeAppend,
 				(unsigned char *) &(c->win), 1);
