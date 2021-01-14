@@ -250,7 +250,8 @@ viewws(const Arg *arg)
 void
 viewwsbyname(const Arg *arg)
 {
-	viewwsonmon(getwsbyname(arg), NULL, 0);
+	viewwsonmon(getwsbyname(arg), NULL, combo);
+	combo = 1;
 }
 
 void

@@ -459,6 +459,7 @@ static void grabkeys(const Arg *arg);
 static void incnmaster(const Arg *arg);
 static void incnstack(const Arg *arg);
 static void keypress(XEvent *e);
+static void keyrelease(XEvent *e);
 static void killclient(const Arg *arg);
 static void manage(Window w, XWindowAttributes *wa);
 static void mappingnotify(XEvent *e);
@@ -530,12 +531,13 @@ static int lrpad;              /* sum of left and right padding for text */
 static int force_warp = 0;     /* force warp in some situations, e.g. killclient */
 static int ignore_warp = 0;    /* force skip warp in some situations, e.g. dragmfact, dragcfact */
 static int num_workspaces = 0; /* the number of available workspaces */
+static int combo = 0;          /* used for combo keys */
 
 static int (*xerrorxlib)(Display *, XErrorEvent *);
 static unsigned int numlockmask = 0;
 static void (*handler[LASTEvent]) (XEvent *) = {
 	[ButtonPress] = buttonpress,
-	// [ButtonRelease] = keyrelease,
+	[ButtonRelease] = keyrelease,
 	[ClientMessage] = clientmessage,
 	[ConfigureNotify] = configurenotify,
 	[ConfigureRequest] = configurerequest,
@@ -544,7 +546,7 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 	[Expose] = expose,
 	[FocusIn] = focusin,
 	[KeyPress] = keypress,
-	// [KeyRelease] = keyrelease,
+	[KeyRelease] = keyrelease,
 	[MappingNotify] = mappingnotify,
 	[MapRequest] = maprequest,
 	[MotionNotify] = motionnotify,
@@ -1948,6 +1950,12 @@ keypress(XEvent *e)
 				&& keys[i].func)
 			keys[i].func(&(keys[i].arg));
 	XFree(keysym);
+}
+
+void
+keyrelease(XEvent *e)
+{
+	combo = 0;
 }
 
 void

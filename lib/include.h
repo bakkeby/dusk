@@ -4,7 +4,6 @@
 #include "func.h"
 #include "warp.h"
 #include "workspace.h"
-// #include "combo.h"
 
 #include "bar_alpha.h"
 #include "bar_dwmblocks.h"
