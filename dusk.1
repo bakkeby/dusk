@@ -47,15 +47,18 @@ is read and displayed in the status text area. It can be set with the
 command.
 .TP
 .B Button1
-click on a workspace label to move windows to that workspace, click on the
-layout label toggles between the current and previous layout
+Click on a workspace label to move windows to that workspace, click on the
+layout label toggles between the current and previous layout.
 .TP
 .B Button3
-click on a workspace label toggles the display that workspace in addition to the
-currently displayed workspaces
+Click on a workspace label toggles the display that workspace in addition to the
+currently displayed workspaces.
 .TP
 .B Mod\-Button1
-click on a workspace label moves the focused window to that workspace
+Click on a workspace label moves the focused window to that workspace.
+.TP
+.B Mod\-Shift\-Button1
+Click on a workspace label view of that workspace in additon to the currently selected workspaces.
 .SS Keyboard commands
 The default Mod key in dusk is the Super key (a.k.a. the Windows key).
 .TP
@@ -70,13 +73,13 @@ Spawn
 for launching other programs.
 .TP
 .B Mod\-[w,e,r]
-Spawns, or shows, the designated scratchpad (or hides it if already shown)
+Spawns, or shows, the designated scratchpad (or hides it if already shown).
 .TP
 .B Mod\-Ctrl\-[w,e,r]
-Assigns a window to the designated scratchpad
+Assigns a window to the designated scratchpad.
 .TP
 .B Mod\-Ctrl\-Shift\-[w,e,r]
-Removes a window from the designated scratchpad
+Removes a window from the designated scratchpad.
 .TP
 .B Mod\-[Left,Right,Up,Down]
 Focus on client in a given direction (workspace borders wraps around).
@@ -174,7 +177,7 @@ Toggle focused window between tiled and floating state.
 Saves a client\'s floating postion and size (restored when toggling floating
 state using
 .B Mod\-g
-)
+).
 .TP
 .B Ctrl\-Alt\-Tab
 Disables or enables keybindings that are not accompanied by any modifier keys
@@ -185,8 +188,23 @@ the keyboard. Such features can be enabled or disabled on a per client basis.
 .B Mod\-Shift\-[1..n]
 Move focused window to the nth workspace.
 .TP
+.B Mod\-Ctrl\-[1..n]
+Swap all clients on the current workspace with all clients on the nth workspace.
+.TP
+.B Mod\-Alt\-[1..n]
+Toggle the nth workspace into view in addition to the currently viewed workspace(s).
+.TP
 .B Mod\-[1..n]
 View the nth workspace.
+.TP
+.B Mod\-[0]
+View all workspaces on the current monitor that has clients.
+.TP
+.B Mod\-Ctrl\-[0]
+View all workspaces on the current monitor.
+.TP
+.B Mod\-o
+View the selected workspace (only relevant when viewing multiple workspaces).
 .TP
 .B Mod\-backslash
 Toggle pinning of the current workspace.
