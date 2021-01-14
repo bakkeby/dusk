@@ -248,6 +248,44 @@ viewws(const Arg *arg)
 }
 
 void
+viewallwsonmon(const Arg *arg)
+{
+	Workspace *ws;
+	for (ws = workspaces; ws; ws = ws->next) {
+		if (ws->mon != selmon)
+			continue;
+		ws->visible = 1;
+	}
+	setworkspaceareas();
+	arrange(NULL);
+	drawbars();
+	updatecurrentdesktop();
+	focus(NULL);
+}
+
+void
+viewalloccwsonmon(const Arg *arg)
+{
+	Workspace *ws;
+	for (ws = workspaces; ws; ws = ws->next) {
+		if (ws->mon != selmon)
+			continue;
+		ws->visible = (ws->clients ? 1 : 0);
+	}
+	setworkspaceareas();
+	arrange(NULL);
+	drawbars();
+	updatecurrentdesktop();
+	focus(NULL);
+}
+
+void
+viewselws(const Arg *arg)
+{
+	viewwsonmon(selws, NULL, 0);
+}
+
+void
 viewwsbyname(const Arg *arg)
 {
 	viewwsonmon(getwsbyname(arg), NULL, combo);

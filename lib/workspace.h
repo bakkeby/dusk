@@ -22,6 +22,9 @@ static void swapwsbyname(const Arg *arg);
 
 static void togglepinnedws(const Arg *arg);
 
+static void viewallwsonmon(const Arg *arg);
+static void viewalloccwsonmon(const Arg *arg);
+static void viewselws(const Arg *arg);
 static void viewws(const Arg *arg);
 static void viewwsbyname(const Arg *arg);
 static void viewwsdir(const Arg *arg);
