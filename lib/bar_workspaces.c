@@ -26,14 +26,17 @@ draw_workspaces(Bar *bar, BarArg *a)
 	for (ws = workspaces; ws; ws = ws->next) {
 		if (ws->mon != bar->mon)
 			continue;
-		for (inv = urg = occ = 0, c = ws->clients; c; c = c->next, occ++)
-			if (ISURGENT(c))
-				urg++;
 
 		icon = wsicon(ws);
 		w = TEXTW(icon);
 		if (w <= lrpad)
 			continue;
+
+		for (inv = urg = occ = 0, c = ws->clients; c; c = c->next, occ++)
+			if (ISURGENT(c)) {
+				urg++;
+				break;
+			}
 
 		drw_setscheme(drw, scheme[
 			ws == ws->mon->selws
@@ -55,14 +58,19 @@ int
 click_workspaces(Bar *bar, Arg *arg, BarArg *a)
 {
 	Workspace *ws = workspaces;
-	int x = lrpad / 2;
+	int w, x = lrpad / 2;
 
 	for (ws = workspaces; ws && ws->mon != bar->mon; ws = ws->next); // find first workspace for mon
+	if (!ws)
+		return ClkWorkspaceBar;
 
 	do {
 		if (ws->mon != bar->mon)
 			continue;
-		x += TEXTW(ws->name);
+		w = TEXTW(wsicon(ws));
+		if (w <= lrpad)
+			continue;
+		x += w;
 	} while (a->x >= x && (ws = ws->next));
 	arg->v = ws;
 
