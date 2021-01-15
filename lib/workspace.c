@@ -1,3 +1,76 @@
+void
+createworkspaces()
+{
+	Workspace *pws, *ws;
+	Monitor *m;
+	int i;
+
+	pws = selws = workspaces = createworkspace(0);
+	for (i = 1; i < LENGTH(wsrules); i++)
+		pws = pws->next = createworkspace(i);
+
+	num_workspaces = i;
+
+	for (m = mons, ws = workspaces; ws; ws = ws->next) {
+		if (ws->mon == NULL) {
+			ws->mon = m;
+			ws->wx = m->wx;
+			ws->wy = m->wy;
+			ws->wh = m->wh;
+			ws->ww = m->ww;
+		}
+		if (m->selws == NULL) {
+			m->selws = ws;
+			m->selws->visible = 1;
+		}
+		m = (m->next == NULL ? mons : m->next);
+	}
+}
+
+Workspace *
+createworkspace(int num)
+{
+	Monitor *m = NULL;
+	Workspace *ws;
+	const WorkspaceRule *r = &wsrules[num];
+
+	ws = ecalloc(1, sizeof(Workspace));
+	ws->num = num;
+
+	if (r->monitor != -1) {
+		for (m = mons; m && m->num != r->monitor; m = m->next);
+		if (m) {
+			ws->mon = m;
+			ws->wx = m->wx;
+			ws->wy = m->wy;
+			ws->wh = m->wh;
+			ws->ww = m->ww;
+		}
+	}
+
+	strcpy(ws->name, r->name);
+
+	ws->pinned = (r->pinned == 1 ? 1 : 0);
+	ws->layout = (r->layout == -1 ? &layouts[0] : &layouts[MIN(r->layout, LENGTH(layouts))]);
+	ws->prevlayout = &layouts[1 % LENGTH(layouts)];
+	ws->mfact = (r->mfact == -1 ? mfact : r->mfact);
+	ws->nmaster = (r->nmaster == -1 ? nmaster : r->nmaster);
+	ws->nstack = (r->nstack == -1 ? nstack : r->nstack);
+	ws->enablegaps = (r->enablegaps == -1 ? enablegaps : r->enablegaps);
+
+	ws->ltaxis[LAYOUT] = ws->layout->preset.layout;
+	ws->ltaxis[MASTER] = ws->layout->preset.masteraxis;
+	ws->ltaxis[STACK]  = ws->layout->preset.stack1axis;
+	ws->ltaxis[STACK2] = ws->layout->preset.stack2axis;
+	ws->icondef = r->icondef; // default icons
+	ws->iconvac = r->iconvac; // vacant icons
+	ws->iconocc = r->iconocc; // occupied icons
+
+	getworkspacestate(ws);
+
+	return ws;
+}
+
 char *
 wsicon(Workspace *ws)
 {
