@@ -4,7 +4,7 @@ If you are looking for dwm then you may want to check out [dwm-flexipatch](https
 
 ---
 
-![https://raw.githubusercontent.com/wiki/bakkeby/dwm-vanitygaps/dusk_scr01.png](https://raw.githubusercontent.com/wiki/bakkeby/dwm-vanitygaps/dusk_scr01.png)
+![https://raw.githubusercontent.com/wiki/bakkeby/dwm-vanitygaps/dawn_scr01.png](https://raw.githubusercontent.com/wiki/bakkeby/dwm-vanitygaps/dawn_scr01.png)
 
 ### Target audience
 

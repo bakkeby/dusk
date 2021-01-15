@@ -59,6 +59,8 @@
 #define CLEANMASK(mask)         (mask & ~(numlockmask|LockMask) & (ShiftMask|ControlMask|Mod1Mask|Mod2Mask|Mod3Mask|Mod4Mask|Mod5Mask))
 #define INTERSECT(x,y,w,h,z)    (MAX(0, MIN((x)+(w),(z)->wx+(z)->ww) - MAX((x),(z)->wx)) \
                                * MAX(0, MIN((y)+(h),(z)->wy+(z)->wh) - MAX((y),(z)->wy)))
+#define INTERSECTC(x,y,w,h,z)   (MAX(0, MIN((x)+(w),(z)->x+(z)->w) - MAX((x),(z)->x)) \
+                               * MAX(0, MIN((y)+(h),(z)->y+(z)->h) - MAX((y),(z)->y)))
 #define LENGTH(X)               (sizeof X / sizeof X[0])
 #define MOUSEMASK               (BUTTONMASK|PointerMotionMask)
 #define WIDTH(X)                ((X)->w + 2 * (X)->bw)
@@ -459,12 +461,14 @@ static void mappingnotify(XEvent *e);
 static void maprequest(XEvent *e);
 static void motionnotify(XEvent *e);
 static void movemouse(const Arg *arg);
+static void moveplace(const Arg *arg);
 static Client *nexttiled(Client *c);
 static Client *prevtiled(Client *c);
 static void propertynotify(XEvent *e);
 static void quit(const Arg *arg);
 static Monitor *recttomon(int x, int y, int w, int h);
 static Workspace *recttows(int x, int y, int w, int h);
+static Client *recttoclient(int x, int y, int w, int h, int include_floating);
 static void resize(Client *c, int x, int y, int w, int h, int interact);
 static void resizeclient(Client *c, int x, int y, int w, int h);
 static void resizeclientpad(Client *c, int x, int y, int w, int h, int xpad, int ypad);
@@ -2199,6 +2203,105 @@ movemouse(const Arg *arg)
 	removeflag(c, MoveResize);
 }
 
+void
+moveplace(const Arg *arg)
+{
+	int x, y, ocx, ocy, nx = -9999, ny = -9999, freemove = 0;
+	Client *c, *r = NULL, *prevr;
+	Workspace *w, *ws = selws;
+	XEvent ev;
+	Time lasttime = 0;
+	unsigned long attachmode, prevattachmode;
+	attachmode = prevattachmode = AttachMaster;
+
+	if (!(c = ws->sel) || !ws->layout->arrange) /* no support for moveplace when floating layout is used */
+		return;
+	if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c)) /* no support placing fullscreen windows by mouse */
+		return;
+	restack(ws);
+	prevr = c;
+	ocx = c->x;
+	ocy = c->y;
+	if (XGrabPointer(dpy, root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
+		None, cursor[CurMove]->cursor, CurrentTime) != GrabSuccess)
+		return;
+	if (!getrootptr(&x, &y))
+		return;
+	addflag(c, MovePlace);
+	removeflag(c, IsFloating);
+
+	do {
+		XMaskEvent(dpy, MOUSEMASK|ExposureMask|SubstructureRedirectMask, &ev);
+		switch (ev.type) {
+		case ConfigureRequest:
+		case Expose:
+		case MapRequest:
+			handler[ev.type](&ev);
+			break;
+		case MotionNotify:
+			if ((ev.xmotion.time - lasttime) <= (1000 / 60))
+				continue;
+			lasttime = ev.xmotion.time;
+
+			nx = ocx + (ev.xmotion.x - x);
+			ny = ocy + (ev.xmotion.y - y);
+
+			if (!freemove && (abs(nx - c->x) > snap || abs(ny - c->y) > snap))
+				freemove = 1;
+
+			if (freemove)
+				XMoveWindow(dpy, c->win, nx, ny);
+
+			if ((w = recttows(ev.xmotion.x, ev.xmotion.y, 1, 1)) && w != selws) {
+				selws = w;
+				selmon = w->mon;
+			}
+
+			r = recttoclient(ev.xmotion.x, ev.xmotion.y, 1, 1, 0);
+
+			if (!r || r == c)
+				break;
+
+			if (abs(r->y - ev.xmotion.y) < r->h / 2)
+				attachmode = AttachAbove;
+			else
+				attachmode = AttachBelow;
+
+			if ((r && r != prevr) || (attachmode != prevattachmode)) {
+				detachstack(c);
+				detach(c);
+				if (c->ws != r->ws)
+					arrangews(c->ws);
+
+				r->ws->sel = r;
+				attachx(c, attachmode, r->ws);
+				attachstack(c);
+				arrangews(r->ws);
+				prevr = r;
+				prevattachmode = attachmode;
+			}
+			break;
+		}
+	} while (ev.type != ButtonRelease);
+	XUngrabPointer(dpy, CurrentTime);
+
+	if ((w = recttows(ev.xmotion.x, ev.xmotion.y, 1, 1)) && w != c->ws) {
+		detach(c);
+		detachstack(c);
+		arrangews(c->ws);
+		attachx(c, AttachBottom, w);
+		attachstack(c);
+		selws = w;
+		selmon = w->mon;
+		focus(c);
+	}
+
+	removeflag(c, MovePlace);
+	if (nx != -9999)
+		resize(c, nx, ny, c->w, c->h, 0);
+	arrangews(c->ws);
+}
+
 Client *
 nexttiled(Client *c)
 {
@@ -2326,6 +2429,21 @@ recttows(int x, int y, int w, int h)
 	return r;
 }
 
+Client *
+recttoclient(int x, int y, int w, int h, int include_floating)
+{
+	Client *c, *r = NULL;
+	int a, area = 0;
+
+	for (c = selws->clients; c; c = c->next) {
+		if (ISVISIBLE(c) && (include_floating || !ISFLOATING(c)) && (a = INTERSECTC(x, y, w, h, c)) > area) {
+			area = a;
+			r = c;
+		}
+	}
+	return r;
+}
+
 void
 resize(Client *c, int x, int y, int w, int h, int interact)
 {
@@ -2370,7 +2488,7 @@ resizeclientpad(Client *c, int x, int y, int w, int h, int xpad, int ypad)
 		wc.y += ypad;
 	}
 
-	if (!c->ws->visible) {
+	if (!c->ws->visible || MOVEPLACE(c)) {
 		addflag(c, NeedResize);
 		return;
 	}

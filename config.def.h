@@ -582,6 +582,7 @@ static Button buttons[] = {
 	{ ClkStatusText,             Shift,                   Button2,        sigdwmblocks,   {.i = 11 } },
 	{ ClkStatusText,             Shift,                   Button3,        sigdwmblocks,   {.i = 12 } },
 	{ ClkClientWin,              MODKEY,                  Button1,        movemouse,      {0} }, // moves a client window into a floating position
+	{ ClkClientWin,              MODKEY|Ctrl,             Button1,        moveplace,      {0} }, // moves a client window between tiled positions
 	{ ClkClientWin,              MODKEY|Alt,              Button2,        togglefloating, {0} }, // toggles between tiled and floating arrangement for given client
 	{ ClkClientWin,              MODKEY,                  Button3,        resizemouse,    {0} }, // change the size of a floating client window
 	{ ClkClientWin,              0,                       Button8,        movemouse,      {0} }, // move a client window using extra mouse buttons (previous)
