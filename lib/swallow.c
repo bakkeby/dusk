@@ -17,6 +17,7 @@ swallow(Client *t, Client *c)
 		return 0;
 
 	replaceclient(t, c);
+	addflag(c, IgnoreCfgReqPos);
 	c->swallowing = t;
 
 	return 1;
@@ -30,7 +31,6 @@ replaceclient(Client *old, Client *new)
 
 	new->ws = ws;
 	setflag(new, Floating, ISFLOATING(old));
-	addflag(new, IgnoreCfgReqPos);
 
 	new->next = old->next;
 	new->snext = old->snext;
@@ -58,7 +58,7 @@ replaceclient(Client *old, Client *new)
 		if (ISFLOATING(new))
 			resize(new, old->x, old->y, new->w - 2*new->bw, new->h - 2*new->bw, 0);
 		else
-			XMoveResizeWindow(dpy, new->win, old->x, old->y, old->w - 2*new->bw, old->h - 2*new->bw);
+			resize(new, old->x, old->y, old->w - 2*new->bw, old->h - 2*new->bw, 0);
 	}
 }
 
@@ -67,6 +67,7 @@ unswallow(Client *c)
 {
 	replaceclient(c, c->swallowing);
 	c->swallowing = NULL;
+
 }
 
 pid_t

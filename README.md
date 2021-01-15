@@ -1,4 +1,4 @@
-Please ignore. This is just my personal build of what once was dwm.
+Please ignore. This is just my personal build of what was once dwm.
 
 If you are looking for dwm then you may want to check out [dwm-flexipatch](https://github.com/bakkeby/dwm-flexipatch/) instead. Or just build your own [from scratch](https://dwm.suckless.org/).
 

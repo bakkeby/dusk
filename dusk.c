@@ -2228,7 +2228,7 @@ moveplace(const Arg *arg)
 	if (!getrootptr(&x, &y))
 		return;
 	addflag(c, MovePlace);
-	removeflag(c, IsFloating);
+	removeflag(c, Floating);
 
 	do {
 		XMaskEvent(dpy, MOUSEMASK|ExposureMask|SubstructureRedirectMask, &ev);
@@ -2504,6 +2504,7 @@ resizeclientpad(Client *c, int x, int y, int w, int h, int xpad, int ypad)
 	}
 	XConfigureWindow(dpy, c->win, CWX|CWY|CWWidth|CWHeight|CWBorderWidth, &wc);
 	configure(c);
+
 	if (ISFAKEFULLSCREEN(c) && WASFULLSCREEN(c)) {
 		/* Exception: if the client was in actual fullscreen and we exit out to fake fullscreen
 		 * mode, then the focus would drift to whichever window is under the mouse cursor at the
@@ -3269,7 +3270,7 @@ unmanage(Client *c, int destroyed)
 
 	focus(NULL);
 	updateclientlist();
-	arrange(ws);
+	arrangews(ws);
 
 	if (revertws && !revertws->visible)
 		viewwsonmon(revertws, revertws->mon, 0);
