@@ -2113,8 +2113,8 @@ motionnotify(XEvent *e)
 	if ((ws = recttows(ev->x_root, ev->y_root, 1, 1)) && ws != selws) {
 		sel = selws->sel;
 		selws = ws;
-		selmon->selws = ws;
 		selmon = ws->mon;
+		selmon->selws = ws;
 		unfocus(sel, 1, NULL);
 		focus(NULL);
 		drawbar(selmon);
