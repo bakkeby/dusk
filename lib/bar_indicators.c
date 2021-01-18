@@ -2,7 +2,7 @@
 void
 drawindicator(Workspace *ws, Client *c, unsigned int occ, int x, int y, int w, int h, int filled, int invert, int type)
 {
-	int boxw, boxs, indn = 0;
+	int boxw, boxs, indn = 0, i;
 	if (!occ || type == INDICATOR_NONE)
 		return;
 
@@ -18,6 +18,13 @@ drawindicator(Workspace *ws, Client *c, unsigned int occ, int x, int y, int w, i
 		break;
 	case INDICATOR_TOP_LEFT_LARGER_SQUARE:
 		drw_rect(drw, x + boxs + 2, y + boxs+1, boxw+1, boxw+1, filled, invert);
+		break;
+	case INDICATOR_TOP_RIGHT_TRIANGLE:
+		for (i = boxw; i > 0; --i)
+			drw_rect(drw, x + w - i, y + (boxw - i), i, 1, filled, invert);
+		break;
+	case INDICATOR_TOP_RIGHT_PIN:
+		drw_rect(drw, x + w - 2 * boxs, y + boxs, boxs, boxs, 1, invert);
 		break;
 	case INDICATOR_TOP_BAR:
 		drw_rect(drw, x + boxw, y, w - ( 2 * boxw + 1), boxw/2, filled, invert);

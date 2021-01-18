@@ -300,6 +300,7 @@ togglepinnedws(const Arg *arg)
 	if (arg->v)
 		ws = (Workspace*)arg->v;
 	ws->pinned = !ws->pinned;
+	drawbar(ws->mon);
 }
 
 void
