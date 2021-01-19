@@ -3507,10 +3507,10 @@ updatesizehints(Client *c)
 		c->maxh = size.max_height;
 	} else
 		c->maxw = c->maxh = 0;
-	if (size.flags & PMinSize) {
+	if (!IGNOREMINIMUMSIZEHINTS(c) && size.flags & PMinSize) {
 		c->minw = size.min_width;
 		c->minh = size.min_height;
-	} else if (size.flags & PBaseSize) {
+	} else if (!IGNOREMINIMUMSIZEHINTS(c) && size.flags & PBaseSize) {
 		c->minw = size.base_width;
 		c->minh = size.base_height;
 	} else

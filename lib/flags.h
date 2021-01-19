@@ -34,8 +34,8 @@ static const unsigned long
 	IgnoreCfgReqSize = 0x10000000, // ignore the size details of configure requests coming from the client
 	IgnorePropTransientFor = 0x20000000, // ignore WM_TRANSIENT_FOR property notifications for buggy client windows (e.g. WebStorm)
 	IgnoreSizeHints = 0x40000000, // ignore size hints for clients (floating and tiled), see floatpos
-	IgnoreDecorationHints = 0x80000000, // ignore decoration hints for client
-	FlagPlaceholder0x100000000 = 0x100000000,
+	IgnoreMinimumSizeHints = 0x80000000, // while respecting size hints in general ignore the minimum size restrictions to avoid overlapping windows
+	IgnoreDecorationHints = 0x100000000, // ignore decoration hints for client
 	NoBorder = 0x200000000, // indicates that the client should not be drawn with a border around it
 	FlagPlaceholder0x400000000 = 0x400000000,
 	FlagPlaceholder0x800000000 = 0x800000000,
@@ -91,6 +91,7 @@ static const unsigned long
 #define IGNORECFGREQSIZE(C) (C->flags & IgnoreCfgReqSize)
 #define IGNOREPROPTRANSIENTFOR(C) (C->flags & IgnorePropTransientFor)
 #define IGNORESIZEHINTS(C) (C->flags & IgnoreSizeHints)
+#define IGNOREMINIMUMSIZEHINTS(C) (C->flags & IgnoreMinimumSizeHints)
 #define IGNOREDECORATIONHINTS(C) (C->flags & IgnoreDecorationHints)
 #define NEEDRESIZE(C) (C->flags & NeedResize)
 #define NEVERFOCUS(C) (C->flags & NeverFocus)
