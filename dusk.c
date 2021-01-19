@@ -1929,7 +1929,6 @@ manage(Window w, XWindowAttributes *wa)
 	getclientflags(c);
 	getclientfields(c);
 	getclientopacity(c);
-
 	if (!c->ws) {
 		if (XGetTransientForHint(dpy, w, &trans) && (t = wintoclient(trans))) {
 			addflag(c, Transient);
@@ -1980,7 +1979,6 @@ manage(Window w, XWindowAttributes *wa)
 
 	updatewmhints(c);
 	updatemotifhints(c);
-
 	if (ISCENTERED(c)) {
 		if (ISTRANSIENT(c)) {
 			/* Transient windows are centered within the geometry of the parent window */
@@ -2210,6 +2208,7 @@ moveplace(const Arg *arg)
 	Client *c, *r = NULL, *prevr;
 	Workspace *w, *ws = selws;
 	XEvent ev;
+	XWindowAttributes wa;
 	Time lasttime = 0;
 	unsigned long attachmode, prevattachmode;
 	attachmode = prevattachmode = AttachMaster;
@@ -2220,8 +2219,6 @@ moveplace(const Arg *arg)
 		return;
 	restack(ws);
 	prevr = c;
-	ocx = c->x;
-	ocy = c->y;
 	if (XGrabPointer(dpy, root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
 		None, cursor[CurMove]->cursor, CurrentTime) != GrabSuccess)
 		return;
@@ -2229,6 +2226,11 @@ moveplace(const Arg *arg)
 		return;
 	addflag(c, MovePlace);
 	removeflag(c, Floating);
+
+	XGetWindowAttributes(dpy, c->win, &wa);
+	ocx = wa.x;
+	ocy = wa.y;
+	c->id = 0;
 
 	do {
 		XMaskEvent(dpy, MOUSEMASK|ExposureMask|SubstructureRedirectMask, &ev);
@@ -2246,7 +2248,7 @@ moveplace(const Arg *arg)
 			nx = ocx + (ev.xmotion.x - x);
 			ny = ocy + (ev.xmotion.y - y);
 
-			if (!freemove && (abs(nx - c->x) > snap || abs(ny - c->y) > snap))
+			if (!freemove && (abs(nx - ocx) > snap || abs(ny - ocy) > snap))
 				freemove = 1;
 
 			if (freemove)
@@ -2262,10 +2264,12 @@ moveplace(const Arg *arg)
 			if (!r || r == c)
 				break;
 
-			if (abs(r->y - ev.xmotion.y) < r->h / 2)
-				attachmode = AttachAbove;
-			else
-				attachmode = AttachBelow;
+			attachmode = AttachBelow;
+			if (((float)(r->y + r->h - ev.xmotion.y) / r->h) > ((float)(r->x + r->w - ev.xmotion.x) / r->w)) {
+				if (abs(r->y - ev.xmotion.y) < r->h / 2)
+					attachmode = AttachAbove;
+			} else if (abs(r->x - ev.xmotion.x) < r->w / 2)
+					attachmode = AttachAbove;
 
 			if ((r && r != prevr) || (attachmode != prevattachmode)) {
 				detachstack(c);

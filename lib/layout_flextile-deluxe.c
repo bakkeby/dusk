@@ -402,7 +402,7 @@ layout_floating_master_fixed(Workspace *ws, int x, int y, int h, int w, int ih, 
 static void
 arrange_left_to_right(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n, int an, int ai)
 {
-	int i, rest;
+	int i, rest, cw;
 	float facts, fact = 1;
 	Client *c;
 
@@ -414,8 +414,9 @@ arrange_left_to_right(Workspace *ws, int x, int y, int h, int w, int ih, int iv,
 	for (i = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), i++) {
 		if (i >= ai && i < (ai + an)) {
 			fact = c->cfact;
-			resize(c, x, y, w * (fact / facts) + ((i - ai) < rest ? 1 : 0) - (2 * c->bw), h - (2 * c->bw), 0);
-			x += WIDTH(c) + iv;
+			cw = w * (fact / facts) + ((i - ai) < rest ? 1 : 0);
+			resize(c, x, y, cw - (2 * c->bw), h - (2 * c->bw), 0);
+			x += cw + iv;
 		}
 	}
 }
@@ -423,7 +424,7 @@ arrange_left_to_right(Workspace *ws, int x, int y, int h, int w, int ih, int iv,
 static void
 arrange_top_to_bottom(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n, int an, int ai)
 {
-	int i, rest;
+	int i, rest, ch;
 	float facts, fact = 1;
 	Client *c;
 
@@ -435,8 +436,9 @@ arrange_top_to_bottom(Workspace *ws, int x, int y, int h, int w, int ih, int iv,
 	for (i = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), i++) {
 		if (i >= ai && i < (ai + an)) {
 			fact = c->cfact;
-			resize(c, x, y, w - (2 * c->bw), h * (fact / facts) + ((i - ai) < rest ? 1 : 0) - (2 * c->bw), 0);
-			y += HEIGHT(c) + ih;
+			ch = h * (fact / facts) + ((i - ai) < rest ? 1 : 0);
+			resize(c, x, y, w - (2 * c->bw), ch - (2 * c->bw), 0);
+			y += ch + ih;
 		}
 	}
 }
