@@ -1314,8 +1314,11 @@ destroynotify(XEvent *e)
 			fprintf(stderr, "destroynotify: received event for client %s\n", c->name);
 		unmanage(c, 1);
 	}
-	else if ((c = swallowingclient(ev->window)))
+	else if ((c = swallowingclient(ev->window))) {
+		if (enabled(Debug))
+			fprintf(stderr, "destroynotify: received event for swallowing client %s\n", c->name);
 		unmanage(c->swallowing, 1);
+	}
 	else if (enabled(Systray) && (c = wintosystrayicon(ev->window))) {
 		if (enabled(Debug))
 			fprintf(stderr, "destroynotify: removing systray icon for client %s\n", c->name);
@@ -3274,7 +3277,7 @@ unmanage(Client *c, int destroyed)
 
 	focus(NULL);
 	updateclientlist();
-	arrangews(ws);
+	arrange(ws);
 
 	if (revertws && !revertws->visible)
 		viewwsonmon(revertws, revertws->mon, 0);

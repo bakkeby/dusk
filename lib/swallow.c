@@ -67,7 +67,6 @@ unswallow(Client *c)
 {
 	replaceclient(c, c->swallowing);
 	c->swallowing = NULL;
-
 }
 
 pid_t
