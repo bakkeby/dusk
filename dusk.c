@@ -3183,8 +3183,8 @@ togglefloating(const Arg *arg)
 			resizeclient(c, c->x, c->y, c->w, c->h);
 		}
 	}
-	arrange(NULL);
-	restack(c->ws);
+	drawbar(c->ws->mon);
+	arrange(c->ws);
 	setfloatinghint(c);
 }
 
