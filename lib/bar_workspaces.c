@@ -48,7 +48,7 @@ draw_workspaces(Bar *bar, BarArg *a)
 			: SchemeWsNorm
 		]);
 		drw_text(drw, x, a->y, w, a->h, lrpad / 2, icon, inv, False);
-		drawindicator(ws, NULL, ws->clients != NULL, x, a->y, w, a->h, -1, 0, wsindicatortype);
+		drawindicator(ws, NULL, hasclients(ws), x, a->y, w, a->h, -1, 0, wsindicatortype);
 		drawindicator(ws, NULL, ws->pinned, x, a->y, w, a->h, -1, 0, wspinnedindicatortype);
 		x += w;
 	}

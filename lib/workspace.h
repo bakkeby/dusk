@@ -2,6 +2,7 @@ static void createworkspaces();
 static Workspace *createworkspace(int num);
 
 static char * wsicon(Workspace *ws);
+static int hasclients(Workspace *ws);
 static void adjustwsformonitor(Workspace *ws, Monitor *m);
 static Workspace * getwsbyname(const Arg *arg);
 

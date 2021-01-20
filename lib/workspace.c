@@ -76,7 +76,7 @@ wsicon(Workspace *ws)
 {
 	char *icon = enabled(AltWorkspaceIcons)
 		? ws->name
-		: ws->clients
+		: hasclients(ws)
 		? ws->iconocc
 		: ws->visible && TEXTW(ws->icondef) <= lrpad
 		? ws->iconvac
@@ -86,6 +86,17 @@ wsicon(Workspace *ws)
 		icon = ws->name;
 
 	return icon;
+}
+
+int
+hasclients(Workspace *ws)
+{
+	Client *c;
+	/* Check if the workspace has visible clients on it, intentionally not taking HIDDEN(c)
+	 * into account so that workspaces with client windows in iconic state are still marked
+	 * as having clients from a UI point of view */
+	for (c = ws->clients; c && (c->flags & Invisible); c = c->next);
+	return c != NULL;
 }
 
 void
