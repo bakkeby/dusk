@@ -26,7 +26,7 @@ persistworkspacestate(Workspace *ws)
 void
 setcurrentdesktop(void)
 {
-	long data[] = { 0 };
+	long data[] = { selws->num };
 	XChangeProperty(dpy, root, netatom[NetCurrentDesktop], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
 }
 

@@ -921,6 +921,7 @@ clientmessage(XEvent *e)
 	XWindowAttributes wa;
 	XSetWindowAttributes swa;
 	XClientMessageEvent *cme = &e->xclient;
+	Workspace *ws;
 	Client *c = wintoclient(cme->window);
 	unsigned int maximize_vert, maximize_horz;
 	int setfakefullscreen = 0;
@@ -959,6 +960,23 @@ clientmessage(XEvent *e)
 			XSync(dpy, False);
 			setclientstate(c, NormalState);
 		}
+		return;
+	}
+
+	if (cme->window == root) {
+		if (enabled(Debug)) {
+			fprintf(stderr, "clientmessage: received message type of %s (%ld) for root window\n", XGetAtomName(dpy, cme->message_type), cme->message_type);
+			fprintf(stderr, "    - data 0 = %s (%ld)\n", XGetAtomName(dpy, cme->data.l[0]), cme->data.l[0]);
+			fprintf(stderr, "    - data 1 = %s (%ld)\n", XGetAtomName(dpy, cme->data.l[1]), cme->data.l[1]);
+			fprintf(stderr, "    - data 2 = %s (%ld)\n", XGetAtomName(dpy, cme->data.l[2]), cme->data.l[2]);
+		}
+
+		if (cme->message_type == netatom[NetCurrentDesktop]) {
+			for (ws = workspaces; ws && ws->num != cme->data.l[0]; ws = ws->next);
+			if (ws)
+				viewwsonmon(ws, selmon, 0);
+		}
+
 		return;
 	}
 
