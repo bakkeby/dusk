@@ -1349,7 +1349,7 @@ void
 detach(Client *c)
 {
 	Client **tc;
-
+	c->id = 0;
 	for (tc = &c->ws->clients; *tc && *tc != c; tc = &(*tc)->next);
 	*tc = c->next;
 	c->next = NULL;
@@ -2251,7 +2251,6 @@ moveplace(const Arg *arg)
 	XGetWindowAttributes(dpy, c->win, &wa);
 	ocx = wa.x;
 	ocy = wa.y;
-	c->id = 0;
 
 	do {
 		XMaskEvent(dpy, MOUSEMASK|ExposureMask|SubstructureRedirectMask, &ev);
