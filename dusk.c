@@ -148,6 +148,7 @@ enum {
 	NetWMAllowedActions,
 	NetWMCheck,
 	NetWMDemandsAttention,
+	NetWMDesktop,
 	NetWMFullPlacement,
 	NetWMFullscreen,
 	NetWMName,
@@ -922,7 +923,7 @@ clientmessage(XEvent *e)
 	XSetWindowAttributes swa;
 	XClientMessageEvent *cme = &e->xclient;
 	Workspace *ws;
-	Client *c = wintoclient(cme->window);
+	Client *c;
 	unsigned int maximize_vert, maximize_horz;
 	int setfakefullscreen = 0;
 
@@ -972,16 +973,24 @@ clientmessage(XEvent *e)
 		}
 
 		if (cme->message_type == netatom[NetCurrentDesktop]) {
-			for (ws = workspaces; ws && ws->num != cme->data.l[0]; ws = ws->next);
-			if (ws)
+			if ((ws = getwsbyindex(cme->data.l[0])))
 				viewwsonmon(ws, selmon, 0);
 		}
 
 		return;
 	}
 
-	if (!c)
+	c = wintoclient(cme->window);
+	if (!c) {
+		fprintf(stderr, "Couldn't find client for window %lu\n", cme->window);
+		if (enabled(Debug)) {
+			fprintf(stderr, "clientmessage: received message type of %s (%ld)\n", XGetAtomName(dpy, cme->message_type), cme->message_type);
+			fprintf(stderr, "    - data 0 = %s (%ld)\n", (cme->data.l[0] == 0 ? "_NET_WM_STATE_REMOVE" : cme->data.l[0] == 1 ? "_NET_WM_STATE_ADD" : cme->data.l[0] == 2 ? "_NET_WM_STATE_TOGGLE" : "?"), cme->data.l[0]);
+			fprintf(stderr, "    - data 1 = %s (%ld)\n", XGetAtomName(dpy, cme->data.l[1]), cme->data.l[1]);
+			fprintf(stderr, "    - data 2 = %s (%ld)\n", XGetAtomName(dpy, cme->data.l[2]), cme->data.l[2]);
+		}
 		return;
+	}
 
 	if (enabled(Debug)) {
 		fprintf(stderr, "clientmessage: received message type of %s (%ld) for client %s\n", XGetAtomName(dpy, cme->message_type), cme->message_type, c->name);
@@ -1036,6 +1045,9 @@ clientmessage(XEvent *e)
 				viewwsonmon(c->ws, c->ws->mon, 0);
 		} else if (c != selws->sel && !ISURGENT(c))
 			seturgent(c, 1);
+	} else if (cme->message_type == netatom[NetWMDesktop]) {
+		if ((ws = getwsbyindex(cme->data.l[0])))
+			movetows(c, ws);
 	} else if (cme->message_type == wmatom[WMChangeState]) {
 		if (cme->data.l[0] == IconicState && !HIDDEN(c))
 			hide(c);
@@ -2976,6 +2988,7 @@ setup(void)
 	netatom[NetWMAllowedActions] = XInternAtom(dpy, "_NET_WM_ALLOWED_ACTIONS", False);
 	netatom[NetWMCheck] = XInternAtom(dpy, "_NET_SUPPORTING_WM_CHECK", False);
 	netatom[NetWMDemandsAttention] = XInternAtom(dpy, "_NET_WM_DEMANDS_ATTENTION", False);
+	netatom[NetWMDesktop] = XInternAtom(dpy, "_NET_WM_DESKTOP", False);
 	netatom[NetWMFullPlacement] = XInternAtom(dpy, "_NET_WM_FULL_PLACEMENT", False); /* https://specifications.freedesktop.org/wm-spec/latest/ar01s07.html */
 	netatom[NetWMFullscreen] = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
 	netatom[NetWMMaximizedVert] = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False);

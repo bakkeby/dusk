@@ -5,6 +5,7 @@ static char * wsicon(Workspace *ws);
 static int hasclients(Workspace *ws);
 static void adjustwsformonitor(Workspace *ws, Monitor *m);
 static Workspace * getwsbyname(const Arg *arg);
+static Workspace * getwsbyindex(int index);
 
 static void enablews(const Arg *arg);
 static void enablewsbyname(const Arg *arg);

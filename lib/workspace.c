@@ -485,6 +485,14 @@ getwsbyname(const Arg *arg)
 }
 
 Workspace *
+getwsbyindex(int index)
+{
+	Workspace *ws;
+	for (ws = workspaces; ws && ws->num != index; ws = ws->next);
+	return ws;
+}
+
+Workspace *
 nextmonws(Monitor *mon, Workspace *ws)
 {
 	Workspace *w;
