@@ -462,8 +462,8 @@ static void mappingnotify(XEvent *e);
 static void maprequest(XEvent *e);
 static void motionnotify(XEvent *e);
 static void movemouse(const Arg *arg);
-static void moveplace(const Arg *arg);
 static Client *nexttiled(Client *c);
+static void placemouse(const Arg *arg);
 static Client *prevtiled(Client *c);
 static void propertynotify(XEvent *e);
 static void quit(const Arg *arg);
@@ -2235,9 +2235,9 @@ movemouse(const Arg *arg)
 }
 
 void
-moveplace(const Arg *arg)
+placemouse(const Arg *arg)
 {
-	int x, y, ocx, ocy, nx = -9999, ny = -9999, freemove = 0;
+	int x, y, px, py, ocx, ocy, nx = -9999, ny = -9999, freemove = 0;
 	Client *c, *r = NULL, *prevr;
 	Workspace *w, *ws = selws;
 	XEvent ev;
@@ -2246,7 +2246,7 @@ moveplace(const Arg *arg)
 	unsigned long attachmode, prevattachmode;
 	attachmode = prevattachmode = AttachMaster;
 
-	if (!(c = ws->sel) || !ws->layout->arrange) /* no support for moveplace when floating layout is used */
+	if (!(c = ws->sel) || !ws->layout->arrange) /* no support for placemouse when floating layout is used */
 		return;
 	if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c)) /* no support placing fullscreen windows by mouse */
 		return;
@@ -2255,14 +2255,19 @@ moveplace(const Arg *arg)
 	if (XGrabPointer(dpy, root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
 		None, cursor[CurMove]->cursor, CurrentTime) != GrabSuccess)
 		return;
-	if (!getrootptr(&x, &y))
-		return;
+
 	addflag(c, MovePlace);
 	removeflag(c, Floating);
 
 	XGetWindowAttributes(dpy, c->win, &wa);
 	ocx = wa.x;
 	ocy = wa.y;
+
+	if (arg->i == 2) // warp cursor to client center
+		XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, WIDTH(c) / 2, HEIGHT(c) / 2);
+
+	if (!getrootptr(&x, &y))
+		return;
 
 	do {
 		XMaskEvent(dpy, MOUSEMASK|ExposureMask|SubstructureRedirectMask, &ev);
@@ -2291,17 +2296,24 @@ moveplace(const Arg *arg)
 				selmon = w->mon;
 			}
 
-			r = recttoclient(ev.xmotion.x, ev.xmotion.y, 1, 1, 0);
+			if (arg->i == 1) { // tiled position is relative to the client window center point
+				px = nx + wa.width / 2;
+				py = ny + wa.height / 2;
+			} else { // tiled position is relative to the mouse cursor
+				px = ev.xmotion.x;
+				py = ev.xmotion.y;
+			}
+
+			r = recttoclient(px, py, 1, 1, 0);
 
 			if (!r || r == c)
 				break;
 
-			attachmode = AttachBelow;
-			if (((float)(r->y + r->h - ev.xmotion.y) / r->h) > ((float)(r->x + r->w - ev.xmotion.x) / r->w)) {
-				if (abs(r->y - ev.xmotion.y) < r->h / 2)
-					attachmode = AttachAbove;
-			} else if (abs(r->x - ev.xmotion.x) < r->w / 2)
-					attachmode = AttachAbove;
+			if ((((float)(r->y + r->h - py) / r->h) > ((float)(r->x + r->w - px) / r->w)
+			    	&& (abs(r->y - py) < r->h / 2)) || (abs(r->x - px) < r->w / 2))
+				attachmode = AttachAbove;
+			else
+				attachmode = AttachBelow;
 
 			if ((r && r != prevr) || (attachmode != prevattachmode)) {
 				detachstack(c);
