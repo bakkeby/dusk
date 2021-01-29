@@ -2485,29 +2485,21 @@ recttoclient(int x, int y, int w, int h, int include_floating)
 }
 
 void
-resize(Client *c, int x, int y, int w, int h, int interact)
+resize(Client *c, int tx, int ty, int tw, int th, int interact)
 {
-	int xh = x, yh = y, wh = w, hh = h, xpad = 0, ypad = 0, a;
-
-	a = applysizehints(c, &xh, &yh, &wh, &hh, interact);
-
-	if (enabled(CenterSizeHintsClients)) {
-		xpad = (w - wh) / 2;
-		ypad = (h - hh) / 2;
-	}
-
-	if (a || xpad || ypad)
-		resizeclientpad(c, xh, yh, wh, hh, xpad, ypad);
+	int wh = tw, hh = th;
+	if (applysizehints(c, &tx, &ty, &wh, &hh, interact))
+		resizeclientpad(c, tx, ty, wh, hh, tw, th);
 }
 
 void
 resizeclient(Client *c, int x, int y, int w, int h)
 {
-	resizeclientpad(c, x, y, w, h, 0, 0);
+	resizeclientpad(c, x, y, w, h, w, h);
 }
 
 void
-resizeclientpad(Client *c, int x, int y, int w, int h, int xpad, int ypad)
+resizeclientpad(Client *c, int x, int y, int w, int h, int tw, int th)
 {
 	XWindowChanges wc;
 
@@ -2523,9 +2515,15 @@ resizeclientpad(Client *c, int x, int y, int w, int h, int xpad, int ypad)
 	c->w = wc.width = w;
 	c->h = wc.height = h;
 
-	if (!ISFLOATING(c)) {
-		wc.x += xpad;
-		wc.y += ypad;
+	if (enabled(CenterSizeHintsClients) && !ISFLOATING(c)) {
+		if (w != tw) {
+			wc.x += (tw - w) / 2;
+			c->w = tw;
+		}
+		if (h != th) {
+			wc.y += (th - h) / 2;
+			c->h = th;
+		}
 	}
 
 	if (!c->ws->visible || MOVEPLACE(c)) {
