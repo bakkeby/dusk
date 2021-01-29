@@ -2034,11 +2034,11 @@ manage(Window w, XWindowAttributes *wa)
 	XChangeProperty(dpy, c->win, netatom[NetWMAllowedActions], XA_ATOM, 32,
 		PropModeReplace, (unsigned char *) allowed, NetWMActionLast);
 
+	/* Do not attach client if it is being swallowed */
 	if (term && swallow(term, c)) {
 		/* Do not let swallowed client steal focus unless the terminal has focus */
 		focusclient = (term == selws->sel);
 	} else {
-		/* Do not attach client if it is being swallowed */
 		attachx(c, 0, NULL);
 
 		if (focusclient || !c->ws->sel || !c->ws->stack)
@@ -2059,11 +2059,14 @@ manage(Window w, XWindowAttributes *wa)
 		hide(c);
 	if (!HIDDEN(c))
 		setclientstate(c, NormalState);
-	if (c->ws == selws)
-		unfocus(selws->sel, 0, c);
 
-	if (focusclient)
+
+	if (focusclient) {
+		if (c->ws == selws)
+			unfocus(selws->sel, 0, c);
+
 		c->ws->sel = c; // needed for the XRaiseWindow that takes place in restack
+	}
 
 	if (!c->swallowing) {
 		if (SWITCHWORKSPACE(c))
@@ -2610,7 +2613,7 @@ resizemouse(const Arg *arg)
 					togglefloating(NULL);
 			}
 			if (!ws->layout->arrange || ISFLOATING(c)) {
-				resizeclient(c, nx, ny, nw, nh);
+				resize(c, nx, ny, nw, nh, 1);
 				if (enabled(AutoSaveFloats))
 					savefloats(NULL);
 			}
