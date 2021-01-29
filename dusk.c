@@ -981,16 +981,8 @@ clientmessage(XEvent *e)
 	}
 
 	c = wintoclient(cme->window);
-	if (!c) {
-		fprintf(stderr, "Couldn't find client for window %lu\n", cme->window);
-		if (enabled(Debug)) {
-			fprintf(stderr, "clientmessage: received message type of %s (%ld)\n", XGetAtomName(dpy, cme->message_type), cme->message_type);
-			fprintf(stderr, "    - data 0 = %s (%ld)\n", (cme->data.l[0] == 0 ? "_NET_WM_STATE_REMOVE" : cme->data.l[0] == 1 ? "_NET_WM_STATE_ADD" : cme->data.l[0] == 2 ? "_NET_WM_STATE_TOGGLE" : "?"), cme->data.l[0]);
-			fprintf(stderr, "    - data 1 = %s (%ld)\n", XGetAtomName(dpy, cme->data.l[1]), cme->data.l[1]);
-			fprintf(stderr, "    - data 2 = %s (%ld)\n", XGetAtomName(dpy, cme->data.l[2]), cme->data.l[2]);
-		}
+	if (!c)
 		return;
-	}
 
 	if (enabled(Debug)) {
 		fprintf(stderr, "clientmessage: received message type of %s (%ld) for client %s\n", XGetAtomName(dpy, cme->message_type), cme->message_type, c->name);
@@ -1037,6 +1029,9 @@ clientmessage(XEvent *e)
 		maximize_horz = (cme->data.l[1] == netatom[NetWMMaximizedHorz] || cme->data.l[2] == netatom[NetWMMaximizedHorz]);
 		if (maximize_vert || maximize_horz)
 			togglemaximize(c, maximize_vert, maximize_horz);
+	} else if (cme->message_type == netatom[NetWMDesktop]) {
+		if ((ws = getwsbyindex(cme->data.l[0])))
+			movetows(c, ws);
 	} else if (cme->message_type == netatom[NetActiveWindow]) {
 		if (enabled(FocusOnNetActive)) {
 			if (c->ws->visible)
@@ -1045,9 +1040,6 @@ clientmessage(XEvent *e)
 				viewwsonmon(c->ws, c->ws->mon, 0);
 		} else if (c != selws->sel && !ISURGENT(c))
 			seturgent(c, 1);
-	} else if (cme->message_type == netatom[NetWMDesktop]) {
-		if ((ws = getwsbyindex(cme->data.l[0])))
-			movetows(c, ws);
 	} else if (cme->message_type == wmatom[WMChangeState]) {
 		if (cme->data.l[0] == IconicState && !HIDDEN(c))
 			hide(c);
