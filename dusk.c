@@ -1954,6 +1954,7 @@ manage(Window w, XWindowAttributes *wa)
 	getclientflags(c);
 	getclientfields(c);
 	getclientopacity(c);
+
 	if (!c->ws) {
 		if (XGetTransientForHint(dpy, w, &trans) && (t = wintoclient(trans))) {
 			addflag(c, Transient);
@@ -2010,8 +2011,8 @@ manage(Window w, XWindowAttributes *wa)
 			c->x = t->x + WIDTH(t) / 2 - WIDTH(c) / 2;
 			c->y = t->y + HEIGHT(t) / 2 - HEIGHT(c) / 2;
 		} else {
-			c->x = c->ws->mon->wx + (c->ws->mon->ww - WIDTH(c)) / 2;
-			c->y = c->ws->mon->wy + (c->ws->mon->wh - HEIGHT(c)) / 2;
+			c->x = m->wx + (m->ww - WIDTH(c)) / 2;
+			c->y = m->wy + (m->wh - HEIGHT(c)) / 2;
 		}
 	}
 

@@ -54,7 +54,7 @@ replaceclient(Client *old, Client *new)
 
 	XMoveWindow(dpy, old->win, WIDTH(old) * -2, old->y);
 
-	if (ws->visible) {
+	if (ISVISIBLE(new)) {
 		if (ISFLOATING(new))
 			resize(new, old->x, old->y, new->w - 2*new->bw, new->h - 2*new->bw, 0);
 		else
