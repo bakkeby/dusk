@@ -2406,7 +2406,7 @@ propertynotify(XEvent *e)
 			break;
 		case XA_WM_NORMAL_HINTS:
 			updatesizehints(c);
-			resize(c, c->x, c->y, c->w, c->h, 0);
+			arrangews(c->ws);
 			break;
 		case XA_WM_HINTS:
 			updatewmhints(c);
