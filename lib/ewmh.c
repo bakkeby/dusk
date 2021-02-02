@@ -141,3 +141,10 @@ updatecurrentdesktop(void)
 	long data[] = { selws->num };
 	XChangeProperty(dpy, root, netatom[NetCurrentDesktop], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
 }
+
+void
+updateclientdesktop(Client *c)
+{
+	long data[] = { c->ws->num };
+	XChangeProperty(dpy, c->win, netatom[NetWMDesktop], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
+}

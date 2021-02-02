@@ -1582,8 +1582,10 @@ enternotify(XEvent *e)
 	if (m != selmon) {
 		sel = ws->sel;
 		selmon = m;
-		if (m->selws)
+		if (m->selws) {
 			selws = m->selws;
+			updatecurrentdesktop();
+		}
 		if (sel)
 			unfocus(sel, 1, c);
 	} else if (selws == m->selws && (!c || (m->selws && c == m->selws->sel)))
@@ -1621,6 +1623,7 @@ focus(Client *c)
 			selws = c->ws;
 			c->ws->mon->selws = c->ws;
 			drawbar(ws->mon);
+			updatecurrentdesktop();
 		}
 		if (ISURGENT(c))
 			seturgent(c, 0);
@@ -2002,6 +2005,7 @@ manage(Window w, XWindowAttributes *wa)
 	XConfigureWindow(dpy, w, CWBorderWidth, &wc);
 	configure(c); /* propagates border_width, if size doesn't change */
 	updatesizehints(c);
+	updateclientdesktop(c);
 
 	/* If the client indicates that it is in fullscreen, or if the FullScreen flag has been
 	 * explictly set via client rules, then enable fullscreen now. */
@@ -2161,6 +2165,7 @@ motionnotify(XEvent *e)
 		unfocus(sel, 1, NULL);
 		focus(NULL);
 		drawbar(selmon);
+		updatecurrentdesktop();
 	} else if ((m = recttomon(ev->x_root, ev->y_root, 1, 1)) != selmon) {
 		sel = selws->sel;
 		selmon = m;
@@ -2168,6 +2173,7 @@ motionnotify(XEvent *e)
 			selws = m->selws;
 		unfocus(sel, 1, NULL);
 		focus(NULL);
+		updatecurrentdesktop();
 	}
 }
 

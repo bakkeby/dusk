@@ -29,6 +29,7 @@ attachx(Client *c, unsigned long mode, Workspace *ws)
 		for (at = c; at; at = at->next) {
 			at->ws = ws;
 			at->revertws = NULL;
+			updateclientdesktop(at);
 		}
 	}
 

@@ -9,3 +9,4 @@ static void setclientfields(Client *c);
 static void setnumdesktops(void);
 static void setviewport(void);
 static void updatecurrentdesktop(void);
+static void updateclientdesktop(Client *c);
