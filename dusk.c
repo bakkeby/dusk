@@ -135,6 +135,7 @@ enum {
 	NetActiveWindow,
 	NetClientList,
 	NetClientListStacking,
+	NetCloseWindow,
 	NetCurrentDesktop,
 	NetDesktopNames,
 	NetDesktopViewport,
@@ -1029,6 +1030,8 @@ clientmessage(XEvent *e)
 		maximize_horz = (cme->data.l[1] == netatom[NetWMMaximizedHorz] || cme->data.l[2] == netatom[NetWMMaximizedHorz]);
 		if (maximize_vert || maximize_horz)
 			togglemaximize(c, maximize_vert, maximize_horz);
+	} else if (cme->message_type == netatom[NetCloseWindow]) {
+		killclient(&((Arg) { .v = c }));
 	} else if (cme->message_type == netatom[NetWMDesktop]) {
 		if ((ws = getwsbyindex(cme->data.l[0])))
 			movetows(c, ws);
@@ -1912,7 +1915,11 @@ keyrelease(XEvent *e)
 void
 killclient(const Arg *arg)
 {
-	Client *c = selws->sel;
+	Client *c;
+	if (!arg || !arg->v)
+		c = selws->sel;
+	else
+		c = (Client*)arg->v;
 	if (!c || ISPERMANENT(c))
 		return;
 	if (!sendevent(c->win, wmatom[WMDelete], NoEventMask, wmatom[WMDelete], CurrentTime, 0, 0, 0)) {
@@ -2001,6 +2008,15 @@ manage(Window w, XWindowAttributes *wa)
 	if (getatomprop(c, netatom[NetWMState], XA_ATOM) == netatom[NetWMFullscreen] || ISFULLSCREEN(c)) {
 		setflag(c, FullScreen, 0);
 		setfullscreen(c, 1, 0);
+	}
+
+	XClassHint ch = { NULL, NULL };
+	XGetClassHint(dpy, c->win, &ch);
+
+	if (strcmp(ch.res_class, "dmenu") == 0) {
+		SETFLOATING(c);
+		c->x = c->ws->mon->mx;
+		c->y = c->ws->mon->wy;
 	}
 
 	updatewmhints(c);
@@ -2981,6 +2997,7 @@ setup(void)
 	netatom[NetActiveWindow] = XInternAtom(dpy, "_NET_ACTIVE_WINDOW", False);
 	netatom[NetClientList] = XInternAtom(dpy, "_NET_CLIENT_LIST", False);
 	netatom[NetClientListStacking] = XInternAtom(dpy, "_NET_CLIENT_LIST_STACKING", False);
+	netatom[NetCloseWindow] = XInternAtom(dpy, "_NET_CLOSE_WINDOW", False);
 	netatom[NetCurrentDesktop] = XInternAtom(dpy, "_NET_CURRENT_DESKTOP", False);
 	netatom[NetDesktopNames] = XInternAtom(dpy, "_NET_DESKTOP_NAMES", False);
 	netatom[NetDesktopViewport] = XInternAtom(dpy, "_NET_DESKTOP_VIEWPORT", False);
