@@ -2,7 +2,6 @@ static void getclientflags(Client *c);
 static void getclientfields(Client *c);
 static void getworkspacestate(Workspace *ws);
 static void persistworkspacestate(Workspace *ws);
-static void setcurrentdesktop(void);
 static void setdesktopnames(void);
 static void setfloatinghint(Client *c);
 static void setclientflags(Client *c);
