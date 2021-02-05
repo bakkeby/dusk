@@ -246,7 +246,9 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 
 	int pad = lrpad / 2;
 	int clientscheme = (
-		c->scratchkey != 0 && c == ws->sel
+		ISMARKED(c)
+		? SchemeMarked
+		: c->scratchkey != 0 && c == ws->sel
 		? SchemeScratchSel
 		: c->scratchkey != 0
 		? SchemeScratchNorm

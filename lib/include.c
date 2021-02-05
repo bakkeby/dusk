@@ -42,6 +42,7 @@
 #include "ipc/util.c"
 #endif
 #include "killunsel.c"
+#include "mark.c"
 #include "nomodbuttons.c"
 #include "push.c"
 #include "renamed_scratchpads.c"

@@ -68,6 +68,7 @@
 #define WTYPE                   "_NET_WM_WINDOW_TYPE_"
 #define TEXTWM(X)               (drw_fontset_getwidth(drw, (X), True) + lrpad)
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X), False) + lrpad)
+#define CLIENT                  (arg && arg->v ? (Client*)arg->v : selws->sel)
 
 /* enums */
 enum {
@@ -96,6 +97,7 @@ enum {
 	SchemeScratchNorm,
 	SchemeHid,
 	SchemeUrg,
+	SchemeMarked,
 	SchemeFlexActTTB,
 	SchemeFlexActLTR,
 	SchemeFlexActMONO,
@@ -1918,22 +1920,22 @@ keyrelease(XEvent *e)
 void
 killclient(const Arg *arg)
 {
-	Client *c;
-	if (!arg || !arg->v)
-		c = selws->sel;
-	else
-		c = (Client*)arg->v;
-	if (!c || ISPERMANENT(c))
-		return;
-	if (!sendevent(c->win, wmatom[WMDelete], NoEventMask, wmatom[WMDelete], CurrentTime, 0, 0, 0)) {
-		XGrabServer(dpy);
-		XSetErrorHandler(xerrordummy);
-		XSetCloseDownMode(dpy, DestroyAll);
-		XKillClient(dpy, c->win);
-		XSync(dpy, False);
-		XSetErrorHandler(xerror);
-		XUngrabServer(dpy);
-		force_warp = 1;
+	Client *c = CLIENT, *next;
+
+	for (c = nextmarked(NULL, c); c; c = nextmarked(next, NULL)) {
+		next = c->next;
+		if (ISPERMANENT(c))
+			continue;
+		if (!sendevent(c->win, wmatom[WMDelete], NoEventMask, wmatom[WMDelete], CurrentTime, 0, 0, 0)) {
+			XGrabServer(dpy);
+			XSetErrorHandler(xerrordummy);
+			XSetCloseDownMode(dpy, DestroyAll);
+			XKillClient(dpy, c->win);
+			XSync(dpy, False);
+			XSetErrorHandler(xerror);
+			XUngrabServer(dpy);
+			force_warp = 1;
+		}
 	}
 }
 
@@ -3226,26 +3228,37 @@ togglebar(const Arg *arg)
 void
 togglefloating(const Arg *arg)
 {
-	Client *c = selws->sel;
-	if (arg && arg->v)
-		c = (Client*)arg->v;
-	if (!c)
-		return;
-	if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c)) /* no support for fullscreen windows */
-		return;
-	setflag(c, Floating, !ISFLOATING(c) || ISFIXED(c));
-	if (ISFLOATING(c) && !MOVERESIZE(c)) {
-		if (c->sfx != -9999)
-			/* restore last known float dimensions */
-			resize(c, c->sfx, c->sfy, c->sfw, c->sfh, 0);
-		else {
-			setfloatpos(c, toggle_float_pos);
-			resizeclient(c, c->x, c->y, c->w, c->h);
+	Client *c = CLIENT;
+	Workspace *ws = NULL;
+	XWindowChanges wc;
+	wc.stack_mode = Above;
+
+	for (c = nextmarked(NULL, c); c; c = nextmarked(c->next, NULL)) {
+		if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c)) /* no support for fullscreen windows */
+			continue;
+		if (ws && c->ws != ws) {
+			drawbar(ws->mon);
+			arrange(ws);
 		}
+		setflag(c, Floating, !ISFLOATING(c) || ISFIXED(c));
+		if (ISFLOATING(c) && !MOVERESIZE(c)) {
+			if (c->sfx != -9999)
+				/* restore last known float dimensions */
+				resize(c, c->sfx, c->sfy, c->sfw, c->sfh, 0);
+			else {
+				setfloatpos(c, toggle_float_pos);
+				resizeclient(c, c->x, c->y, c->w, c->h);
+			}
+			wc.sibling = c->ws->mon->bar->win;
+			XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
+		}
+		setfloatinghint(c);
+		ws = c->ws;
 	}
-	drawbar(c->ws->mon);
-	arrange(c->ws);
-	setfloatinghint(c);
+	XSync(dpy, False);
+	drawbar(ws->mon);
+	arrange(ws);
+
 }
 
 void
@@ -3713,9 +3726,7 @@ xerrorstart(Display *dpy, XErrorEvent *ee)
 void
 zoom(const Arg *arg)
 {
-	Client *c = selws->sel, *at = NULL, *cold, *cprevious = NULL, *p;;
-	if (arg && arg->v)
-		c = (Client*)arg->v;
+	Client *c = CLIENT, *at = NULL, *cold, *cprevious = NULL, *p;
 	if (!c)
 		return;
 

@@ -5,7 +5,8 @@ removescratch(const Arg *arg)
 	if (!c)
 		return;
 
-	c->scratchkey = 0;
+	for (c = nextmarked(NULL, c); c; c = nextmarked(c->next, NULL))
+		c->scratchkey = 0;
 }
 
 void
@@ -15,7 +16,8 @@ setscratch(const Arg *arg)
 	if (!c)
 		return;
 
-	c->scratchkey = ((char**)arg->v)[0][0];
+	for (c = nextmarked(NULL, c); c; c = nextmarked(c->next, NULL))
+		c->scratchkey = ((char**)arg->v)[0][0];
 }
 
 void spawnscratch(const Arg *arg)

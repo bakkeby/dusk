@@ -68,9 +68,7 @@ prevvisible(Client *c)
 void
 showhideclient(const Arg *arg)
 {
-	Client *c = (Client*)arg->v;
-	if (!c)
-		c = selws->sel;
+	Client *c = CLIENT;
 	if (!c)
 		return;
 

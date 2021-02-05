@@ -207,24 +207,39 @@ movetows(Client *c, Workspace *ws)
 	if (!c)
 		return;
 
-	int hadfocus = (c == selws->sel);
+	Client *next;
+	Client *hadfocus = NULL;
+	Workspace *prevws = NULL;
 
-	clientmonresize(c, c->ws->mon, ws->mon);
+	for (c = nextmarked(NULL, c); c; c = nextmarked(next, NULL)) {
+		next = c->next;
+		if (c == selws->sel)
+			hadfocus = c;
+		clientmonresize(c, c->ws->mon, ws->mon);
 
-	unfocus(c, 1, NULL);
-	detach(c);
-	detachstack(c);
+		unfocus(c, 1, NULL);
+		detach(c);
+		detachstack(c);
 
-	if (c->ws->visible)
-		arrange(c->ws);
+		if (prevws && prevws != c->ws && prevws != ws && prevws->visible)
+			arrange(prevws);
 
-	attachx(c, AttachBottom, ws);
-	attachstack(c);
+		prevws = c->ws;
 
-	clientsfsrestore(c);
+		attachx(c, AttachBottom, ws);
+		attachstack(c);
+
+		clientsfsrestore(c);
+
+		if (!enabled(ViewOnWs) && !ws->visible)
+			XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
+	}
+
+	if (prevws->visible && prevws != ws)
+		arrange(prevws);
 
 	if (hadfocus && ws->visible)
-		focus(c);
+		focus(hadfocus);
 	else
 		focus(NULL);
 
@@ -233,9 +248,8 @@ movetows(Client *c, Workspace *ws)
 	else if (ws->visible) {
 		arrange(ws);
 		if (enabled(ViewOnWs) && hadfocus)
-			warp(c);
-	} else
-		XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
+			warp(hadfocus);
+	}
 }
 
 void
