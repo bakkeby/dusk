@@ -110,6 +110,10 @@ static char urgfgcolor[]                 = "#bbbbbb";
 static char urgbgcolor[]                 = "#222222";
 static char urgbordercolor[]             = "#d10f3f";
 
+static char markedfgcolor[]              = "#615656";
+static char markedbgcolor[]              = "#ECB820";
+static char markedbordercolor[]          = "#ECB820";
+
 static char scratchnormcolor[]           = "#C6BDBD";
 static char scratchnormbgcolor[]         = "#180A13";
 static char scratchnormbordercolor[]     = "#77547E";
@@ -165,6 +169,7 @@ static const unsigned int alphas[][3] = {
 	[SchemeWsSel]        = { OPAQUE, baralpha, borderalpha },
 	[SchemeHid]          = { OPAQUE, baralpha, borderalpha },
 	[SchemeUrg]          = { OPAQUE, baralpha, borderalpha },
+	[SchemeMarked]       = { OPAQUE, baralpha, borderalpha },
 	[SchemeScratchSel]   = { OPAQUE, baralpha, borderalpha },
 	[SchemeScratchNorm]  = { OPAQUE, baralpha, borderalpha },
 	[SchemeFlexActTTB]   = { OPAQUE, baralpha, borderalpha },
@@ -213,6 +218,7 @@ static char *colors[][ColCount] = {
 	[SchemeWsSel]        = { wsselfgcolor,     wsselbgcolor,                               },
 	[SchemeHid]          = { hidfgcolor,       hidbgcolor,         hidbordercolor,         },
 	[SchemeUrg]          = { urgfgcolor,       urgbgcolor,         urgbordercolor,         },
+	[SchemeMarked]       = { markedfgcolor,    markedbgcolor,      markedbordercolor,      },
 	[SchemeScratchNorm]  = { scratchnormcolor, scratchnormbgcolor, scratchnormbordercolor, },
 	[SchemeScratchSel]   = { scratchselcolor,  scratchselbgcolor,  scratchselbordercolor,  },
 	[SchemeFlexActTTB]   = { titleselfgcolor,  actTTBbgcolor,      actTTBbgcolor,          },
@@ -468,7 +474,9 @@ static Key keys[] = {
 	{ MODKEY,                       XK_q,            killclient,             {0} }, // close the currently focused window
 	{ MODKEY|Shift,                 XK_q,            quit,                   {1} }, // restart dusk
 	{ MODKEY|Ctrl|Alt,              XK_q,            quit,                   {0} }, // exit dusk
-	{ MODKEY,                       XK_m,            zoom,                   {0} }, // moves the currently focused window to/from the master area (for tiled layouts)
+	{ MODKEY,                       XK_m,            togglemark,             {0} }, // marks or unmarks the selected client for group action
+	{ MODKEY|Shift,                 XK_m,            unmarkall,              {0} }, // unmarks all clients
+	{ MODKEY|Alt,                   XK_m,            zoom,                   {0} }, // moves the currently focused window to/from the master area (for tiled layouts)
 
 	{ MODKEY,                       XK_bracketleft,  rotatelayoutaxis,       {.i = -1 } }, // cycle through the available layout splits (horizontal, vertical, centered, no split, etc.)
 	{ MODKEY,                       XK_bracketright, rotatelayoutaxis,       {.i = +1 } }, // cycle through the available layout splits (horizontal, vertical, centered, no split, etc.)
@@ -582,6 +590,8 @@ static Button buttons[] = {
 	{ ClkStatusText,             Shift,                   Button1,        sigdwmblocks,   {.i = 10 } },
 	{ ClkStatusText,             Shift,                   Button2,        sigdwmblocks,   {.i = 11 } },
 	{ ClkStatusText,             Shift,                   Button3,        sigdwmblocks,   {.i = 12 } },
+	{ ClkClientWin,              MODKEY,                  Button9,        togglemark,     {0} }, // marks or unmarks the selected client for group action
+	{ ClkClientWin,              MODKEY,                  Button8,        markmouse,      {0} }, // marks clients under the mouse cursor for group action
 	{ ClkClientWin,              MODKEY,                  Button1,        movemouse,      {0} }, // moves a client window into a floating position
 	{ ClkClientWin,              MODKEY|Ctrl,             Button1,        placemouse,     {1} }, // moves a client window between tiled positions (0 = relative to mouse cursor, 1 = relative to window center, 2 = mouse cursor warps to window center)
 	{ ClkClientWin,              MODKEY|Alt,              Button2,        togglefloating, {0} }, // toggles between tiled and floating arrangement for given client
