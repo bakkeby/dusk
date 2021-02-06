@@ -2016,15 +2016,6 @@ manage(Window w, XWindowAttributes *wa)
 		setfullscreen(c, 1, 0);
 	}
 
-	XClassHint ch = { NULL, NULL };
-	XGetClassHint(dpy, c->win, &ch);
-
-	if (strcmp(ch.res_class, "dmenu") == 0) {
-		SETFLOATING(c);
-		c->x = c->ws->mon->mx;
-		c->y = c->ws->mon->wy;
-	}
-
 	updatewmhints(c);
 	updatemotifhints(c);
 	if (ISCENTERED(c)) {
