@@ -570,47 +570,48 @@ static Key keys[] = {
 /* button definitions */
 /* click can be ClkButton, ClkWorkspaceBar, ClkLtSymbol, ClkStatusText, ClkWinTitle, ClkClientWin, or ClkRootWin */
 static Button buttons[] = {
-	/* click                     event mask               button          function        argument */
-	{ ClkButton,                 0,                       Button1,        spawn,          {.v = termcmd } }, // spawns a terminal
-	{ ClkLtSymbol,               0,                       Button1,        setlayout,      {0} }, // toggles between current and previous layout
-	{ ClkLtSymbol,               0,                       Button4,        cyclelayout,    {.i = +1 } }, // cycle through the available layouts
-	{ ClkLtSymbol,               0,                       Button5,        cyclelayout,    {.i = -1 } }, // cycle through the available layouts (in reverse)
-	{ ClkWinTitle,               0,                       Button1,        focuswin,       {0} }, // focus on the given client
-	{ ClkWinTitle,               0,                       Button3,        showhideclient, {0} }, // hide the currently selected client (or show if hidden)
-	{ ClkWinTitle,               0,                       Button2,        zoom,           {0} }, // moves the currently focused window to/from the master area (for tiled layouts)
-	{ ClkStatusText,             0,                       Button1,        sigdwmblocks,   {.i = 1 } }, // sends mouse button presses to dwmblocks when clicking on the status
-	{ ClkStatusText,             0,                       Button2,        sigdwmblocks,   {.i = 2 } },
-	{ ClkStatusText,             0,                       Button3,        sigdwmblocks,   {.i = 3 } },
-	{ ClkStatusText,             0,                       Button4,        sigdwmblocks,   {.i = 4 } },
-	{ ClkStatusText,             0,                       Button5,        sigdwmblocks,   {.i = 5 } },
-	{ ClkStatusText,             0,                       Button6,        sigdwmblocks,   {.i = 6 } },
-	{ ClkStatusText,             0,                       Button7,        sigdwmblocks,   {.i = 7 } },
-	{ ClkStatusText,             0,                       Button8,        sigdwmblocks,   {.i = 8 } },
-	{ ClkStatusText,             0,                       Button9,        sigdwmblocks,   {.i = 9 } },
-	{ ClkStatusText,             Shift,                   Button1,        sigdwmblocks,   {.i = 10 } },
-	{ ClkStatusText,             Shift,                   Button2,        sigdwmblocks,   {.i = 11 } },
-	{ ClkStatusText,             Shift,                   Button3,        sigdwmblocks,   {.i = 12 } },
-	{ ClkClientWin,              MODKEY,                  Button9,        togglemark,     {0} }, // marks or unmarks the selected client for group action
-	{ ClkClientWin,              MODKEY,                  Button8,        markmouse,      {0} }, // marks clients under the mouse cursor for group action
-	{ ClkClientWin,              MODKEY,                  Button1,        movemouse,      {0} }, // moves a client window into a floating position
-	{ ClkClientWin,              MODKEY|Ctrl,             Button1,        placemouse,     {1} }, // moves a client window between tiled positions (0 = relative to mouse cursor, 1 = relative to window center, 2 = mouse cursor warps to window center)
-	{ ClkClientWin,              MODKEY|Alt,              Button2,        togglefloating, {0} }, // toggles between tiled and floating arrangement for given client
-	{ ClkClientWin,              MODKEY,                  Button3,        resizemouse,    {0} }, // change the size of a floating client window
-	{ ClkClientWin,              0,                       Button8,        movemouse,      {0} }, // move a client window using extra mouse buttons (previous)
-	{ ClkClientWin,              0,                       Button9,        resizemouse,    {0} }, // resize a client window using extra mouse buttons (next)
-	{ ClkClientWin,              MODKEY,                  Button2,        zoom,           {0} }, // moves the currently focused window to/from the master area (for tiled layouts)
-	{ ClkClientWin,              MODKEY|Shift,            Button3,        dragcfact,      {0} }, // dynamically change a client's size respective to other windows within the same area
-	{ ClkClientWin,              MODKEY|Shift,            Button1,        dragmfact,      {0} }, // dynamically change the size of the master area compared to the stack area(s)
-	{ ClkRootWin,                MODKEY|Shift,            Button1,        dragmfact,      {0} }, // dynamically change the size of the master area compared to the stack area(s)
-	{ ClkClientWin,              MODKEY,                  Button4,        inplacerotate,  {.i = +1 } }, // rotate clients within the respective area (master, primary stack, secondary stack) clockwise
-	{ ClkClientWin,              MODKEY,                  Button5,        inplacerotate,  {.i = -1 } }, // rotate clients within the respective area (master, primary stack, secondary stack) counter-clockwise
-	{ ClkClientWin,              MODKEY|Shift,            Button4,        rotatestack,    {.i = +1 } }, // rotate all clients (clockwise)
-	{ ClkClientWin,              MODKEY|Shift,            Button5,        rotatestack,    {.i = -1 } }, // rotate all clients (counter-clockwise)
-	{ ClkWorkspaceBar,           0,                       Button1,        viewws,         {0} }, // view the workspace by clicking on workspace icon
-	{ ClkWorkspaceBar,           MODKEY,                  Button1,        movews,         {0} }, // sends (moves) the currently focused client to given workspace
-	{ ClkWorkspaceBar,           MODKEY|Shift|Ctrl,       Button1,        swapws,         {0} }, // swaps all clients on current workspace with that of the given workspace
-	{ ClkWorkspaceBar,           MODKEY|Shift,            Button1,        enablews,       {0} }, // enables the workspace in addition to other workspaces
-	{ ClkWorkspaceBar,           MODKEY,                  Button2,        togglepinnedws, {0} }, // toggles the pinning of a workspace to the current monitor
+	/* click                     event mask               button          function          argument */
+	{ ClkButton,                 0,                       Button1,        spawn,            {.v = termcmd } }, // spawns a terminal
+	{ ClkLtSymbol,               0,                       Button1,        setlayout,        {0} }, // toggles between current and previous layout
+	{ ClkLtSymbol,               0,                       Button4,        cyclelayout,      {.i = +1 } }, // cycle through the available layouts
+	{ ClkLtSymbol,               0,                       Button5,        cyclelayout,      {.i = -1 } }, // cycle through the available layouts (in reverse)
+	{ ClkWinTitle,               0,                       Button1,        focuswin,         {0} }, // focus on the given client
+	{ ClkWinTitle,               0,                       Button3,        showhideclient,   {0} }, // hide the currently selected client (or show if hidden)
+	{ ClkWinTitle,               0,                       Button2,        zoom,             {0} }, // moves the currently focused window to/from the master area (for tiled layouts)
+	{ ClkStatusText,             0,                       Button1,        sigdwmblocks,     {.i = 1 } }, // sends mouse button presses to dwmblocks when clicking on the status
+	{ ClkStatusText,             0,                       Button2,        sigdwmblocks,     {.i = 2 } },
+	{ ClkStatusText,             0,                       Button3,        sigdwmblocks,     {.i = 3 } },
+	{ ClkStatusText,             0,                       Button4,        sigdwmblocks,     {.i = 4 } },
+	{ ClkStatusText,             0,                       Button5,        sigdwmblocks,     {.i = 5 } },
+	{ ClkStatusText,             0,                       Button6,        sigdwmblocks,     {.i = 6 } },
+	{ ClkStatusText,             0,                       Button7,        sigdwmblocks,     {.i = 7 } },
+	{ ClkStatusText,             0,                       Button8,        sigdwmblocks,     {.i = 8 } },
+	{ ClkStatusText,             0,                       Button9,        sigdwmblocks,     {.i = 9 } },
+	{ ClkStatusText,             Shift,                   Button1,        sigdwmblocks,     {.i = 10 } },
+	{ ClkStatusText,             Shift,                   Button2,        sigdwmblocks,     {.i = 11 } },
+	{ ClkStatusText,             Shift,                   Button3,        sigdwmblocks,     {.i = 12 } },
+	{ ClkClientWin,              MODKEY,                  Button8,        markmouse,        {1} }, // marks clients under the mouse cursor for group action
+	{ ClkClientWin,              MODKEY|Shift,            Button8,        markmouse,        {0} }, // unmarks clients under the mouse cursor for group action
+	{ ClkClientWin,              MODKEY,                  Button9,        markmouse,        {2} }, // toggles marking of clients under the mouse cursor for group action
+	{ ClkClientWin,              MODKEY,                  Button1,        movemouse,        {0} }, // moves a client window into a floating position
+	{ ClkClientWin,              MODKEY|Ctrl,             Button1,        placemouse,       {1} }, // moves a client window between tiled positions (0 = relative to mouse cursor, 1 = relative to window center, 2 = mouse cursor warps to window center)
+	{ ClkClientWin,              MODKEY|Alt,              Button2,        togglefloating,   {0} }, // toggles between tiled and floating arrangement for given client
+	{ ClkClientWin,              MODKEY,                  Button3,        resizemouse,      {0} }, // change the size of a floating client window
+	{ ClkClientWin,              0,                       Button8,        movemouse,        {0} }, // move a client window using extra mouse buttons (previous)
+	{ ClkClientWin,              0,                       Button9,        resizemouse,      {0} }, // resize a client window using extra mouse buttons (next)
+	{ ClkClientWin,              MODKEY,                  Button2,        zoom,             {0} }, // moves the currently focused window to/from the master area (for tiled layouts)
+	{ ClkClientWin,              MODKEY|Shift,            Button3,        dragcfact,        {0} }, // dynamically change a client's size respective to other windows within the same area
+	{ ClkClientWin,              MODKEY|Shift,            Button1,        dragmfact,        {0} }, // dynamically change the size of the master area compared to the stack area(s)
+	{ ClkRootWin,                MODKEY|Shift,            Button1,        dragmfact,        {0} }, // dynamically change the size of the master area compared to the stack area(s)
+	{ ClkClientWin,              MODKEY,                  Button4,        inplacerotate,    {.i = +1 } }, // rotate clients within the respective area (master, primary stack, secondary stack) clockwise
+	{ ClkClientWin,              MODKEY,                  Button5,        inplacerotate,    {.i = -1 } }, // rotate clients within the respective area (master, primary stack, secondary stack) counter-clockwise
+	{ ClkClientWin,              MODKEY|Shift,            Button4,        rotatestack,      {.i = +1 } }, // rotate all clients (clockwise)
+	{ ClkClientWin,              MODKEY|Shift,            Button5,        rotatestack,      {.i = -1 } }, // rotate all clients (counter-clockwise)
+	{ ClkWorkspaceBar,           0,                       Button1,        viewws,           {0} }, // view the workspace by clicking on workspace icon
+	{ ClkWorkspaceBar,           MODKEY,                  Button1,        movews,           {0} }, // sends (moves) the currently focused client to given workspace
+	{ ClkWorkspaceBar,           MODKEY|Shift|Ctrl,       Button1,        swapws,           {0} }, // swaps all clients on current workspace with that of the given workspace
+	{ ClkWorkspaceBar,           MODKEY|Shift,            Button1,        enablews,         {0} }, // enables the workspace in addition to other workspaces
+	{ ClkWorkspaceBar,           MODKEY,                  Button2,        togglepinnedws,   {0} }, // toggles the pinning of a workspace to the current monitor
 };
 
 static const char *ipcsockpath = "/tmp/dusk.sock";

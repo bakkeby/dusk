@@ -67,8 +67,10 @@ getclientflags(Client *c)
 	unsigned long flags1 = getatomprop(c, clientatom[DuskClientFlags1], AnyPropertyType) & 0xFFFFFFFF;
 	unsigned long flags2 = getatomprop(c, clientatom[DuskClientFlags2], AnyPropertyType);
 
-	if (flags1 || flags2)
+	if (flags1 || flags2) {
 		c->flags = flags1 | (flags2 << 32);
+		removeflag(c, Marked);
+	}
 }
 
 void

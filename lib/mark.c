@@ -3,11 +3,8 @@ static int num_marked = 0;
 Client *
 nextmarked(Client *prev, Client *def)
 {
-	fprintf(stderr, "nextmarked: received previous client %s\n", prev ? prev->name : "NULL");
-	if (!num_marked) {
-		fprintf(stderr, "nextmarked: returning default client %s because num_marked = %d\n", def ? def->name : "NULL", num_marked);
+	if (!num_marked)
 		return def;
-	}
 
 	Client *c = NULL;
 	Workspace *ws;
@@ -17,7 +14,6 @@ nextmarked(Client *prev, Client *def)
 
 	if (c && ISMARKED(c))
 		unmark(&((Arg) { .v = c }));
-	fprintf(stderr, "nextmarked: returning client %s, num_marked = %d\n", c ? c->name : "NULL", num_marked);
 	return c;
 }
 
@@ -30,16 +26,20 @@ mark(const Arg *arg)
 	addflag(c, Marked);
 	++num_marked;
 	drawbar(c->ws->mon);
-	fprintf(stderr, "mark: marked client %s, num_marked = %d\n", c->name, num_marked);
 }
 
 void
 markmouse(const Arg *arg)
 {
-	Client *r = NULL;
+	Client *r = selws->sel;
+	Client *prevr = r;
 	Workspace *w;
 	XEvent ev;
 	Time lasttime = 0;
+	unsigned long mark = (arg->i == 1 ? Marked : arg->i);
+
+	if (r && mark != ISMARKED(r))
+		togglemark(&((Arg) { .v = r }));
 
 	if (XGrabPointer(dpy, root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
 		None, cursor[CurMove]->cursor, CurrentTime) != GrabSuccess)
@@ -64,10 +64,10 @@ markmouse(const Arg *arg)
 			}
 
 			r = recttoclient(ev.xmotion.x, ev.xmotion.y, 1, 1, 0);
+			if (r != prevr && r && mark != ISMARKED(r))
+				togglemark(&((Arg) { .v = r }));
 
-			if (r && !ISMARKED(r))
-				mark(&((Arg) { .v = r }));
-
+			prevr = r;
 			break;
 		}
 	} while (ev.type != ButtonRelease);
@@ -83,7 +83,6 @@ unmark(const Arg *arg)
 	removeflag(c, Marked);
 	--num_marked;
 	drawbar(c->ws->mon);
-	fprintf(stderr, "unmark: unmarked client %s, num_marked = %d\n", c->name, num_marked);
 }
 
 void
