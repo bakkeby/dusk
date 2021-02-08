@@ -2178,11 +2178,16 @@ movemouse(const Arg *arg)
 	Workspace *w, *ws = selws;
 	XEvent ev;
 	Time lasttime = 0;
+	double prevopacity;
 
 	if (!(c = ws->sel))
 		return;
 	if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c)) /* no support moving fullscreen windows by mouse */
 		return;
+	if (moveresizeopacity) {
+		prevopacity = c->opacity;
+		opacity(c, moveresizeopacity);
+	}
 	restack(ws);
 	ocx = c->x;
 	ocy = c->y;
@@ -2243,6 +2248,8 @@ movemouse(const Arg *arg)
 	}
 
 	removeflag(c, MoveResize);
+	if (moveresizeopacity)
+		opacity(c, prevopacity);
 }
 
 void
@@ -2253,6 +2260,7 @@ placemouse(const Arg *arg)
 	Workspace *w, *ws = selws;
 	XEvent ev;
 	XWindowAttributes wa;
+	double prevopacity;
 	Time lasttime = 0;
 	unsigned long attachmode, prevattachmode;
 	attachmode = prevattachmode = AttachMaster;
@@ -2269,6 +2277,10 @@ placemouse(const Arg *arg)
 
 	addflag(c, MovePlace);
 	removeflag(c, Floating);
+	if (moveresizeopacity) {
+		prevopacity = c->opacity;
+		opacity(c, moveresizeopacity);
+	}
 
 	XGetWindowAttributes(dpy, c->win, &wa);
 	ocx = wa.x;
@@ -2359,6 +2371,8 @@ placemouse(const Arg *arg)
 	if (nx != -9999)
 		resize(c, nx, ny, c->w, c->h, 0);
 	arrangews(c->ws);
+	if (moveresizeopacity)
+		opacity(c, prevopacity);
 }
 
 Client *
@@ -2585,11 +2599,17 @@ resizemouse(const Arg *arg)
 	Workspace *w, *ws = selws;
 	XEvent ev;
 	Time lasttime = 0;
+	double prevopacity;
 
 	if (!(c = ws->sel))
 		return;
 	if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c)) /* no support resizing fullscreen windows by mouse */
 		return;
+
+	if (moveresizeopacity) {
+		prevopacity = c->opacity;
+		opacity(c, moveresizeopacity);
+	}
 	restack(selws);
 	ocx = c->x;
 	ocy = c->y;
@@ -2650,6 +2670,8 @@ resizemouse(const Arg *arg)
 		focus(c);
 	}
 	removeflag(c, MoveResize);
+	if (moveresizeopacity)
+		opacity(c, prevopacity);
 }
 
 void
