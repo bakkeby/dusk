@@ -3527,6 +3527,7 @@ updategeom(void)
 					m->mw = m->ww = unique[m->num].width;
 					m->mh = m->wh = unique[m->num].height;
 					updatebarpos(m);
+					setworkspaceareasformon(mons);
 				}
 			}
 		} else { /* less monitors available nn < n */
@@ -3548,6 +3549,7 @@ updategeom(void)
 			mons->mw = mons->ww = sw;
 			mons->mh = mons->wh = sh;
 			updatebarpos(mons);
+			setworkspaceareasformon(mons);
 		}
 	}
 	if (dirty) {
