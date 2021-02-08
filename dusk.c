@@ -3131,15 +3131,12 @@ seturgent(Client *c, int urg)
 void
 showhide(Client *c)
 {
-	XWindowAttributes xwa;
 	if (!c)
 		return;
 	if (ISVISIBLE(c)) {
 		/* show clients top down */
 		if (!c->ws->layout->arrange && c->sfx != -9999 && !ISFULLSCREEN(c)) {
-			XGetWindowAttributes(dpy, c->win, &xwa);
-			if (xwa.x != c->x)
-				XMoveWindow(dpy, c->win, c->sfx, c->sfy);
+			XMoveWindow(dpy, c->win, c->sfx, c->sfy);
 			resize(c, c->sfx, c->sfy, c->sfw, c->sfh, 0);
 			showhide(c->snext);
 			return;
@@ -3148,9 +3145,7 @@ showhide(Client *c)
 			removeflag(c, NeedResize);
 			XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
 		} else {
-			XGetWindowAttributes(dpy, c->win, &xwa);
-			if (xwa.x != c->x)
-				XMoveWindow(dpy, c->win, c->x, c->y);
+			XMoveWindow(dpy, c->win, c->x, c->y);
 		}
 		if ((!c->ws->layout->arrange || ISFLOATING(c)) && !ISFULLSCREEN(c))
 			resize(c, c->x, c->y, c->w, c->h, 0);
