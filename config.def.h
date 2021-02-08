@@ -475,8 +475,10 @@ static Key keys[] = {
 	{ MODKEY,                       XK_q,            killclient,             {0} }, // close the currently focused window
 	{ MODKEY|Shift,                 XK_q,            quit,                   {1} }, // restart dusk
 	{ MODKEY|Ctrl|Alt,              XK_q,            quit,                   {0} }, // exit dusk
+
+	{ MODKEY,                       XK_a,            markall,                {0} }, // marks all clients on the selected workspace
+	{ MODKEY|Shift,                 XK_a,            unmarkall,              {0} }, // unmarks all clients
 	{ MODKEY,                       XK_m,            togglemark,             {0} }, // marks or unmarks the selected client for group action
-	{ MODKEY|Shift,                 XK_m,            unmarkall,              {0} }, // unmarks all clients
 	{ MODKEY|Alt,                   XK_m,            zoom,                   {0} }, // moves the currently focused window to/from the master area (for tiled layouts)
 
 	{ MODKEY,                       XK_bracketleft,  rotatelayoutaxis,       {.i = -1 } }, // cycle through the available layout splits (horizontal, vertical, centered, no split, etc.)

@@ -29,6 +29,15 @@ mark(const Arg *arg)
 }
 
 void
+markall(const Arg *arg)
+{
+	Client *c;
+	for (c = selws->clients; c; c = c->next)
+		if (!ISMARKED(c) && !HIDDEN(c) && ISVISIBLE(c))
+			mark(&((Arg) { .v = c }));
+}
+
+void
 markmouse(const Arg *arg)
 {
 	Client *r = selws->sel;
@@ -75,6 +84,15 @@ markmouse(const Arg *arg)
 }
 
 void
+togglemark(const Arg *arg)
+{
+	if (ISMARKED(CLIENT))
+		unmark(arg);
+	else
+		mark(arg);
+}
+
+void
 unmark(const Arg *arg)
 {
 	Client *c = CLIENT;
@@ -83,15 +101,6 @@ unmark(const Arg *arg)
 	removeflag(c, Marked);
 	--num_marked;
 	drawbar(c->ws->mon);
-}
-
-void
-togglemark(const Arg *arg)
-{
-	if (ISMARKED(CLIENT))
-		unmark(arg);
-	else
-		mark(arg);
 }
 
 void
