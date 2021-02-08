@@ -395,6 +395,7 @@ void
 viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 {
 	int do_warp = 0;
+	int arrangeall = 0;
 
 	if (m == NULL)
 		m = selmon;
@@ -455,6 +456,7 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 			showws(ws);
 			clientsfsrestore(ows->clients);
 			clientsfsrestore(ws->clients);
+			arrangeall = 1;
 		}
 	} else {
 		/* Workspace is not visible, just grab it */
@@ -480,7 +482,10 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 	}
 
 	setworkspaceareas();
-	arrange(NULL);
+	if (arrangeall)
+		arrange(NULL);
+	else
+		arrangemon(ws->mon);
 	drawbars();
 	updatecurrentdesktop();
 	focus(NULL);

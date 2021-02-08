@@ -1590,6 +1590,7 @@ enternotify(XEvent *e)
 		}
 		if (sel)
 			unfocus(sel, 1, c);
+		drawbars();
 	} else if (selws == m->selws && (!c || (m->selws && c == m->selws->sel)))
 		return;
 
@@ -1980,13 +1981,15 @@ manage(Window w, XWindowAttributes *wa)
 		if (c->x == c->ws->mon->wx && c->y == c->ws->mon->wy)
 			addflag(c, Centered);
 
-		if (!ISTRANSIENT(c)) {
+		if (!ISTRANSIENT(c))
 			applyrules(c);
-			term = termforwin(c);
-			if (term)
-				c->ws = term->ws;
-		}
 	}
+
+	if (!ISTRANSIENT(c))
+		term = termforwin(c);
+
+	if (term)
+		c->ws = term->ws;
 
 	c->bw = (NOBORDER(c) ? 0 : c->ws->mon->borderpx);
 
@@ -2549,14 +2552,10 @@ resizeclientpad(Client *c, int x, int y, int w, int h, int tw, int th)
 	c->h = wc.height = h;
 
 	if (enabled(CenterSizeHintsClients) && !ISFLOATING(c)) {
-		if (w != tw) {
-			wc.x += (tw - w) / 2;
-			c->w = tw;
-		}
-		if (h != th) {
-			wc.y += (th - h) / 2;
-			c->h = th;
-		}
+		if (w != tw)
+			c->x = wc.x += (tw - w) / 2;
+		if (h != th)
+			c->y = wc.y += (th - h) / 2;
 	}
 
 	if (!c->ws->visible || MOVEPLACE(c)) {
@@ -3132,12 +3131,15 @@ seturgent(Client *c, int urg)
 void
 showhide(Client *c)
 {
+	XWindowAttributes xwa;
 	if (!c)
 		return;
 	if (ISVISIBLE(c)) {
 		/* show clients top down */
 		if (!c->ws->layout->arrange && c->sfx != -9999 && !ISFULLSCREEN(c)) {
-			XMoveWindow(dpy, c->win, c->sfx, c->sfy);
+			XGetWindowAttributes(dpy, c->win, &xwa);
+			if (xwa.x != c->x)
+				XMoveWindow(dpy, c->win, c->sfx, c->sfy);
 			resize(c, c->sfx, c->sfy, c->sfw, c->sfh, 0);
 			showhide(c->snext);
 			return;
@@ -3146,7 +3148,9 @@ showhide(Client *c)
 			removeflag(c, NeedResize);
 			XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
 		} else {
-			XMoveWindow(dpy, c->win, c->x, c->y);
+			XGetWindowAttributes(dpy, c->win, &xwa);
+			if (xwa.x != c->x)
+				XMoveWindow(dpy, c->win, c->x, c->y);
 		}
 		if ((!c->ws->layout->arrange || ISFLOATING(c)) && !ISFULLSCREEN(c))
 			resize(c, c->x, c->y, c->w, c->h, 0);
