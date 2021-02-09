@@ -477,6 +477,7 @@ static Key keys[] = {
 	{ MODKEY|Ctrl|Alt,              XK_q,            quit,                   {0} }, // exit dusk
 
 	{ MODKEY,                       XK_a,            markall,                {0} }, // marks all clients on the selected workspace
+	{ MODKEY|Ctrl,                  XK_a,            markall,                {1} }, // marks all floating clients on the selected workspace
 	{ MODKEY|Shift,                 XK_a,            unmarkall,              {0} }, // unmarks all clients
 	{ MODKEY,                       XK_m,            togglemark,             {0} }, // marks or unmarks the selected client for group action
 	{ MODKEY|Alt,                   XK_m,            zoom,                   {0} }, // moves the currently focused window to/from the master area (for tiled layouts)
@@ -549,6 +550,8 @@ static Key keys[] = {
 //	{ MODKEY,                       XK_,             incrohgaps,             {.i = -1 } }, // decrease outer horizontal gaps
 //	{ MODKEY,                       XK_,             incrovgaps,             {.i = +1 } }, // increase outer vertical gaps
 //	{ MODKEY,                       XK_,             incrovgaps,             {.i = -1 } }, // decrease outer vertical gaps
+//	{ MODKEY,                       XK_,             mark,                   {0} }, // marks the currently selected client
+//	{ MODKEY,                       XK_,             unmark,                 {0} }, // unmarks the currently selected client
 //	{ MODKEY,                       XK_,             togglegaps,             {0} }, // enables and disables the rendering of gaps in tiled layouts
 //	{ MODKEY,                       XK_,             defaultgaps,            {0} }, // revert gaps to the default settings
 //	{ MODKEY,                       XK_,             cyclelayout,            {.i = -1 } }, // cycle through the available layouts
@@ -645,6 +648,8 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( inplacerotate, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( killclient, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( killunsel, 1, {ARG_TYPE_NONE} ),
+	IPCCOMMAND( mark, 1, {ARG_TYPE_PTR} ),
+	IPCCOMMAND( markall, 1, {ARG_TYPE_SINT} ), // 0 = mark all, 1 = mark all floating
 	IPCCOMMAND( mirrorlayout, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( rotatelayoutaxis, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( rotatestack, 1, {ARG_TYPE_SINT} ),
@@ -670,12 +675,15 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( togglefloating, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( togglefullscreen, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( togglegaps, 1, {ARG_TYPE_NONE} ),
+	IPCCOMMAND( togglemark, 1, {ARG_TYPE_PTR} ),
 	IPCCOMMAND( togglenomodbuttons, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( togglescratch, 1, {ARG_TYPE_UINT} ),
 	IPCCOMMAND( togglesticky, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( transfer, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( transferall, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( unfloatvisible, 1, {ARG_TYPE_NONE} ),
+	IPCCOMMAND( unmark, 1, {ARG_TYPE_PTR} ),
+	IPCCOMMAND( unmarkall, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( viewwsdir, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( xrdb, 1, {ARG_TYPE_NONE} ), // reload xrdb / Xresources
 	IPCCOMMAND( zoom, 1, {ARG_TYPE_NONE} ),

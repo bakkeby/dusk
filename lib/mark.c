@@ -13,7 +13,7 @@ nextmarked(Client *prev, Client *def)
 		for (c = (prev ? prev : ws->clients); c && !ISMARKED(c); c = c->next, prev = NULL);
 
 	if (c && ISMARKED(c))
-		unmark(&((Arg) { .v = c }));
+		unmarkclient(c);
 	return c;
 }
 
@@ -21,11 +21,19 @@ void
 mark(const Arg *arg)
 {
 	Client *c = CLIENT;
-	if (!c)
+	if (!c || ISMARKED(c))
 		return;
-	addflag(c, Marked);
-	++num_marked;
+	markclient(c);
 	drawbar(c->ws->mon);
+}
+
+void
+markclient(Client *c)
+{
+	if (!ISMARKED(c)) {
+		addflag(c, Marked);
+		++num_marked;
+	}
 }
 
 void
@@ -33,8 +41,9 @@ markall(const Arg *arg)
 {
 	Client *c;
 	for (c = selws->clients; c; c = c->next)
-		if (!ISMARKED(c) && !HIDDEN(c) && ISVISIBLE(c))
-			mark(&((Arg) { .v = c }));
+		if (!ISMARKED(c) && !HIDDEN(c) && ISVISIBLE(c) && (!arg->i || ISFLOATING(c)))
+			markclient(c);
+	drawbar(selws->mon);
 }
 
 void
@@ -88,25 +97,36 @@ markmouse(const Arg *arg)
 void
 togglemark(const Arg *arg)
 {
-	if (ISMARKED(CLIENT))
-		unmark(arg);
+	Client *c = CLIENT;
+	if (ISMARKED(c))
+		unmarkclient(c);
 	else
-		mark(arg);
+		markclient(c);
+	drawbar(c->ws->mon);
 }
 
 void
 unmark(const Arg *arg)
 {
 	Client *c = CLIENT;
-	if (!c)
+	if (!c || !ISMARKED(c))
 		return;
-	removeflag(c, Marked);
-	--num_marked;
+	unmarkclient(c);
 	drawbar(c->ws->mon);
+}
+
+void
+unmarkclient(Client *c)
+{
+	if (ISMARKED(c)) {
+		removeflag(c, Marked);
+		--num_marked;
+	}
 }
 
 void
 unmarkall(const Arg *arg)
 {
 	for (Client *c = nextmarked(NULL, NULL); c; c = nextmarked(c->next, NULL));
+	drawbars();
 }
