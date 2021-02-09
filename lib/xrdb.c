@@ -43,6 +43,15 @@ loadxrdb()
 				XRDB_LOAD_COLOR("dusk.urgfgcolor", urgfgcolor);
 				XRDB_LOAD_COLOR("dusk.urgbgcolor", urgbgcolor);
 				XRDB_LOAD_COLOR("dusk.urgbordercolor", urgbordercolor);
+				XRDB_LOAD_COLOR("dusk.markedfgcolor", markedfgcolor);
+				XRDB_LOAD_COLOR("dusk.markedbgcolor", markedbgcolor);
+				XRDB_LOAD_COLOR("dusk.markedbordercolor", markedbordercolor);
+				XRDB_LOAD_COLOR("dusk.scratchnormcolor", scratchnormcolor);
+				XRDB_LOAD_COLOR("dusk.scratchnormbgcolor", scratchnormbgcolor);
+				XRDB_LOAD_COLOR("dusk.scratchnormbordercolor", scratchnormbordercolor);
+				XRDB_LOAD_COLOR("dusk.scratchselcolor", scratchselcolor);
+				XRDB_LOAD_COLOR("dusk.scratchselbgcolor", scratchselbgcolor);
+				XRDB_LOAD_COLOR("dusk.scratchselbordercolor", scratchselbordercolor);
 				XRDB_LOAD_COLOR("dusk.normTTBbgcolor", normTTBbgcolor);
 				XRDB_LOAD_COLOR("dusk.normLTRbgcolor", normLTRbgcolor);
 				XRDB_LOAD_COLOR("dusk.normMONObgcolor", normMONObgcolor);

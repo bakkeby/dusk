@@ -2494,6 +2494,23 @@ readclientstackingorder(void)
 	}
 }
 
+Client *
+recttoclient(int x, int y, int w, int h, int include_floating)
+{
+	Client *c, *r = NULL;
+	int a, area = 1;
+
+	for (c = selws->stack; c; c = c->snext) {
+		if (!ISVISIBLE(c) || HIDDEN(c) || (ISFLOATING(c) && !include_floating))
+			continue;
+		if ((a = INTERSECTC(x, y, w, h, c)) >= area && (!r || r->idx < c->idx)) {
+			area = a;
+			r = c;
+		}
+	}
+	return r;
+}
+
 Monitor *
 recttomon(int x, int y, int w, int h)
 {
@@ -2519,23 +2536,6 @@ recttows(int x, int y, int w, int h)
 			area = a;
 			r = ws;
 		}
-	return r;
-}
-
-Client *
-recttoclient(int x, int y, int w, int h, int include_floating)
-{
-	Client *c, *r = NULL;
-	int a, area = 1;
-
-	for (c = selws->stack; c; c = c->snext) {
-		if (!ISVISIBLE(c) || HIDDEN(c) || (ISFLOATING(c) && !include_floating))
-			continue;
-		if ((a = INTERSECTC(x, y, w, h, c)) >= area && (!r || r->idx < c->idx)) {
-			area = a;
-			r = c;
-		}
-	}
 	return r;
 }
 
