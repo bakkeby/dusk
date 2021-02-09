@@ -15,6 +15,7 @@ persistworkspacestate(Workspace *ws)
 		setclientflags(c);
 		setclientfields(c);
 		if (c->swallowing) {
+			c->swallowing->idx = i;
 			setclientflags(c->swallowing);
 			setclientfields(c->swallowing);
 		}

@@ -70,10 +70,8 @@ togglescratch(const Arg *arg)
 			if (c->scratchkey != ((char**)arg->v)[0][0])
 				continue;
 
-			if (HIDDEN(c)) {
-				XMapWindow(dpy, c->win);
-				setclientstate(c, NormalState);
-			}
+			if (HIDDEN(c))
+				show(c);
 
 			/* Record the first found scratchpad client for focus purposes, but prioritise the
 			   scratchpad on the current monitor if one exists */
@@ -96,7 +94,6 @@ togglescratch(const Arg *arg)
 					last = monclients = c;
 			} else if (scratchvisible == numscratchpads) {
 				addflag(c, Invisible);
-				// XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
 			} else {
 				XSetWindowBorder(dpy, c->win, scheme[SchemeScratchNorm][ColBorder].pixel);
 				removeflag(c, Invisible);

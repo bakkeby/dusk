@@ -40,9 +40,18 @@ void
 markall(const Arg *arg)
 {
 	Client *c;
-	for (c = selws->clients; c; c = c->next)
-		if (!ISMARKED(c) && !HIDDEN(c) && ISVISIBLE(c) && (!arg->i || ISFLOATING(c)))
-			markclient(c);
+	for (c = selws->clients; c; c = c->next) {
+		if (ISMARKED(c) || !ISVISIBLE(c))
+			continue;
+
+		if ((arg->i == 2 && !HIDDEN(c)) || (arg->i != 2 && HIDDEN(c)))
+			continue;
+
+		if (arg->i == 1 && !ISFLOATING(c))
+			continue;
+
+		markclient(c);
+	}
 	drawbar(selws->mon);
 }
 

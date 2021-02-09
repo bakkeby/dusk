@@ -13,7 +13,7 @@ static const unsigned long
 	RestoreFakeFullScreen = 0x80, // internal flag that indicates that fake fullscreen should be restored when exiting actual fullscreen
 	Centered = 0x100, // indicates that the client, if floating, should be centered on the screen on launch
 	Permanent = 0x200, // if a client is permanent, then the client can't be killed
-	Hidden = 0x400, // indicates that the client should be hidden (iconic state) on launch
+	Hidden = 0x400, // indicates that the client is hidden
 	Sticky = 0x800, // TODO remove? yajl dumps dependency
 	Terminal = 0x1000, // indicates that the client is a terminal, used by swallow
 	NoSwallow = 0x2000, // indicates that the client should never be swallowed if launched by a terminal
@@ -74,6 +74,7 @@ static const unsigned long
 	FlagPlaceholder0x8000000000000000 = 0x8000000000000000;
 
 #define ALWAYSONTOP(C) (C->flags & AlwaysOnTop)
+#define HIDDEN(C) (C->flags & Hidden)
 #define ISFLOATING(C) (C->flags & Floating)
 #define ISFIXED(C) (C->flags & Fixed)
 #define ISLOCKED(C) (C->flags & Locked)
@@ -118,4 +119,3 @@ static const unsigned long
 
 #define LOCK(C) (addflag(C, Locked))
 #define UNLOCK(C) (removeflag(C, Locked))
-#define HIDDEN(C) ((getstate(C->win) == IconicState))

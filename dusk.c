@@ -1051,6 +1051,7 @@ clientmessage(XEvent *e)
 			hide(c);
 		else if (cme->data.l[0] == NormalState && HIDDEN(c))
 			show(c);
+		arrange(c->ws);
 	} else if (cme->message_type == netatom[NetWMMoveResize]) {
 		resizemouse(&((Arg) { .v = c }));
 	}
@@ -2073,11 +2074,7 @@ manage(Window w, XWindowAttributes *wa)
 		(unsigned char *) &(c->win), 1);
 	XMoveResizeWindow(dpy, c->win, c->x + 2 * sw, c->y, c->w, c->h); /* some windows require this */
 
-	if ((c->flags & Hidden) && !HIDDEN(c))
-		hide(c);
-	if (!HIDDEN(c))
-		setclientstate(c, NormalState);
-
+	setclientstate(c, NormalState);
 
 	if (focusclient) {
 		if (c->ws == selws)
@@ -2094,9 +2091,7 @@ manage(Window w, XWindowAttributes *wa)
 	}
 
 	arrange(c->ws);
-	if (!HIDDEN(c)) {
-		XMapWindow(dpy, c->win);
-	}
+	XMapWindow(dpy, c->win);
 
 	if (focusclient)
 		focus(c);
@@ -3157,7 +3152,7 @@ showhide(Client *c)
 {
 	if (!c)
 		return;
-	if (ISVISIBLE(c)) {
+	if (ISVISIBLE(c) && !HIDDEN(c)) {
 		/* show clients top down */
 		if (!c->ws->layout->arrange && c->sfx != -9999 && !ISFULLSCREEN(c)) {
 			XMoveWindow(dpy, c->win, c->sfx, c->sfy);
