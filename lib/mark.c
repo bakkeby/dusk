@@ -10,7 +10,7 @@ nextmarked(Client *prev, Client *def)
 	Workspace *ws;
 
 	for (ws = (prev ? prev->ws : workspaces); ws && !c; ws = ws->next)
-		for (c = (prev ? prev : ws->clients); c && !ISMARKED(c); c = c->next);
+		for (c = (prev ? prev : ws->clients); c && !ISMARKED(c); c = c->next, prev = NULL);
 
 	if (c && ISMARKED(c))
 		unmark(&((Arg) { .v = c }));
@@ -54,6 +54,8 @@ markmouse(const Arg *arg)
 		None, cursor[CurMove]->cursor, CurrentTime) != GrabSuccess)
 		return;
 
+	readclientstackingorder();
+
 	do {
 		XMaskEvent(dpy, MOUSEMASK|ExposureMask|SubstructureRedirectMask, &ev);
 		switch (ev.type) {
@@ -72,7 +74,7 @@ markmouse(const Arg *arg)
 				selmon = w->mon;
 			}
 
-			r = recttoclient(ev.xmotion.x, ev.xmotion.y, 1, 1, 0);
+			r = recttoclient(ev.xmotion.x, ev.xmotion.y, 1, 1, 1);
 			if (r != prevr && r && mark != ISMARKED(r))
 				togglemark(&((Arg) { .v = r }));
 

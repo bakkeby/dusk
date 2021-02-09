@@ -57,10 +57,10 @@
 #define BARRULES                20
 #define BUTTONMASK              (ButtonPressMask|ButtonReleaseMask)
 #define CLEANMASK(mask)         (mask & ~(numlockmask|LockMask) & (ShiftMask|ControlMask|Mod1Mask|Mod2Mask|Mod3Mask|Mod4Mask|Mod5Mask))
-#define INTERSECT(x,y,w,h,z)    (MAX(0, MIN((x)+(w),(z)->wx+(z)->ww) - MAX((x),(z)->wx)) \
-                               * MAX(0, MIN((y)+(h),(z)->wy+(z)->wh) - MAX((y),(z)->wy)))
-#define INTERSECTC(x,y,w,h,z)   (MAX(0, MIN((x)+(w),(z)->x+(z)->w) - MAX((x),(z)->x)) \
-                               * MAX(0, MIN((y)+(h),(z)->y+(z)->h) - MAX((y),(z)->y)))
+#define INTERSECT(X,Y,W,H,Z)    (MAX(0, MIN((X)+(W),(Z)->wx+(Z)->ww) - MAX((X),(Z)->wx)) \
+                               * MAX(0, MIN((Y)+(H),(Z)->wy+(Z)->wh) - MAX((Y),(Z)->wy)))
+#define INTERSECTC(X,Y,W,H,Z)   (MAX(0, MIN((X)+(W),(Z)->x+(Z)->w) - MAX((X),(Z)->x)) \
+                               * MAX(0, MIN((Y)+(H),(Z)->y+(Z)->h) - MAX((Y),(Z)->y)))
 #define LENGTH(X)               (sizeof X / sizeof X[0])
 #define MOUSEMASK               (BUTTONMASK|PointerMotionMask)
 #define WIDTH(X)                ((X)->w + 2 * (X)->bw)
@@ -305,7 +305,7 @@ struct Client {
 	int basew, baseh, incw, inch, maxw, maxh, minw, minh;
 	int bw, oldbw;
 	char scratchkey;
-	unsigned int id;
+	unsigned int idx;
 	double opacity;
 	pid_t pid;
 	Client *next;
@@ -470,6 +470,7 @@ static void placemouse(const Arg *arg);
 static Client *prevtiled(Client *c);
 static void propertynotify(XEvent *e);
 static void quit(const Arg *arg);
+static void readclientstackingorder(void);
 static Monitor *recttomon(int x, int y, int w, int h);
 static Workspace *recttows(int x, int y, int w, int h);
 static Client *recttoclient(int x, int y, int w, int h, int include_floating);
@@ -1358,7 +1359,7 @@ void
 detach(Client *c)
 {
 	Client **tc;
-	c->id = 0;
+	c->idx = 0;
 	for (tc = &c->ws->clients; *tc && *tc != c; tc = &(*tc)->next);
 	*tc = c->next;
 	c->next = NULL;
@@ -2477,6 +2478,27 @@ quit(const Arg *arg)
 		persistworkspacestate(ws);
 }
 
+/* This reads the stacking order on the X server side and updates the client
+ * index (idx) value accordingly. This information can later be used to determine
+ * whether one window is on top of another, for example in recttoclient.
+ */
+void
+readclientstackingorder(void)
+{
+	unsigned int i, num;
+	Window d1, d2, *wins = NULL;
+	Client *c;
+
+	if (XQueryTree(dpy, root, &d1, &d2, &wins, &num)) {
+		for (i = 0; i < num; i++) {
+			if ((c = wintoclient(wins[i])))
+				c->idx = i + 1;
+		}
+
+		XFree(wins);
+	}
+}
+
 Monitor *
 recttomon(int x, int y, int w, int h)
 {
@@ -2509,10 +2531,12 @@ Client *
 recttoclient(int x, int y, int w, int h, int include_floating)
 {
 	Client *c, *r = NULL;
-	int a, area = 0;
+	int a, area = 1;
 
-	for (c = selws->clients; c; c = c->next) {
-		if (ISVISIBLE(c) && (include_floating || !ISFLOATING(c)) && (a = INTERSECTC(x, y, w, h, c)) > area) {
+	for (c = selws->stack; c; c = c->snext) {
+		if (!ISVISIBLE(c) || HIDDEN(c) || (ISFLOATING(c) && !include_floating))
+			continue;
+		if ((a = INTERSECTC(x, y, w, h, c)) >= area && (!r || r->idx < c->idx)) {
 			area = a;
 			r = c;
 		}

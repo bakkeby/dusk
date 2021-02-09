@@ -33,13 +33,13 @@ attachx(Client *c, unsigned long mode, Workspace *ws)
 		}
 	}
 
-	if (c->id > 0) { /* then the client has a designated position in the client list */
+	if (c->idx > 0) { /* then the client has a designated position in the client list */
 		for (at = ws->clients; at; at = at->next)
-			if (c->id < at->id) {
+			if (c->idx < at->idx) {
 				last->next = at;
 				ws->clients = c;
 				return;
-			} else if (at->id <= c->id && (!at->next || c->id <= at->next->id)) {
+			} else if (at->idx <= c->idx && (!at->next || c->idx <= at->next->idx)) {
 				last->next = at->next;
 				at->next = c;
 				return;

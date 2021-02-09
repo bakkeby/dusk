@@ -11,7 +11,7 @@ persistworkspacestate(Workspace *ws)
 
 	/* set dusk client atoms */
 	for (i = 1, c = ws->clients; c; c = c->next, ++i) {
-		c->id = i;
+		c->idx = i;
 		setclientflags(c);
 		setclientfields(c);
 		if (c->swallowing) {
@@ -57,7 +57,7 @@ setclientflags(Client *c)
 void
 setclientfields(Client *c)
 {
-	unsigned long data[] = { c->ws->num | (c->id << 6) | (c->scratchkey << 14)};
+	unsigned long data[] = { c->ws->num | (c->idx << 6) | (c->scratchkey << 14)};
 	XChangeProperty(dpy, c->win, clientatom[DuskClientFields], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
 }
 
@@ -80,7 +80,7 @@ getclientfields(Client *c)
 	Atom fields = getatomprop(c, clientatom[DuskClientFields], AnyPropertyType);
 	if (fields) {
 		c->scratchkey = (fields >> 14);
-		c->id = (fields & 0x3FC0) >> 6;
+		c->idx = (fields & 0x3FC0) >> 6;
 		for (ws = workspaces; ws; ws = ws->next)
 			if (ws->num == (fields & 0x3F)) {
 				c->ws = ws;
