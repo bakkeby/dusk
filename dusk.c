@@ -1929,16 +1929,17 @@ killclient(const Arg *arg)
 		next = c->next;
 		if (ISPERMANENT(c))
 			continue;
-		if (!sendevent(c->win, wmatom[WMDelete], NoEventMask, wmatom[WMDelete], CurrentTime, 0, 0, 0)) {
-			XGrabServer(dpy);
-			XSetErrorHandler(xerrordummy);
-			XSetCloseDownMode(dpy, DestroyAll);
-			XKillClient(dpy, c->win);
-			XSync(dpy, False);
-			XSetErrorHandler(xerror);
-			XUngrabServer(dpy);
-			force_warp = 1;
-		}
+		if (sendevent(c->win, wmatom[WMDelete], NoEventMask, wmatom[WMDelete], CurrentTime, 0, 0, 0))
+			continue;
+
+		XGrabServer(dpy);
+		XSetErrorHandler(xerrordummy);
+		XSetCloseDownMode(dpy, DestroyAll);
+		XKillClient(dpy, c->win);
+		XSync(dpy, False);
+		XSetErrorHandler(xerror);
+		XUngrabServer(dpy);
+		force_warp = 1;
 	}
 }
 
@@ -3382,6 +3383,7 @@ unmanage(Client *c, int destroyed)
 	focus(NULL);
 	updateclientlist();
 	arrange(ws);
+	drawbar(ws->mon);
 
 	if (revertws && !revertws->visible)
 		viewwsonmon(revertws, revertws->mon, 0);

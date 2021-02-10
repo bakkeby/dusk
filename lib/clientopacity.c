@@ -24,8 +24,7 @@ opacity(Client *c, double opacity)
 	if (opacity > 0 && opacity <= 1) {
 		unsigned long real_opacity[] = { opacity * 0xffffffff };
 		XChangeProperty(dpy, c->win, netatom[NetWMWindowOpacity], XA_CARDINAL,
-				32, PropModeReplace, (unsigned char *)real_opacity,
-				1);
+				32, PropModeReplace, (unsigned char *)real_opacity,	1);
 	} else
 		XDeleteProperty(dpy, c->win, netatom[NetWMWindowOpacity]);
 }
