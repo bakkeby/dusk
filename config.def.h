@@ -263,10 +263,6 @@ static const char *const autostart[] = {
 	NULL /* terminate */
 };
 
-static const char *spcmd1[] = {"w", "st", "-n", "spterm (w)", "-g", "120x34", NULL };
-static const char *spcmd2[] = {"e", "st", "-n", "spterm (e)", "-g", "120x34", NULL };
-static const char *spcmd3[] = {"r", "st", "-n", "spfm (r)", "-g", "144x41", "-e", "ranger", NULL };
-
 /* There are two options when it comes to per-client rules:
  *  - a traditional struct table or
  *  - using the RULE macro
@@ -431,8 +427,10 @@ static const Layout layouts[] = {
 	{ MOD, XK_a, ACTION, {.i = 2 } }, \
 	{ MOD, XK_z, ACTION, {.i = -1 } },
 
-/* commands */
+/* Scratch/Spawn commands:        NULL (scratchkey), command, argument, argument, ..., NULL */
+static const char *termcmd[]  = { NULL, "st", NULL };
 static const char *dmenucmd[] = {
+	NULL,
 	"dmenu_run",
 	"-fn", dmenufont,
 	"-nb", normbgcolor,
@@ -442,7 +440,9 @@ static const char *dmenucmd[] = {
 	topbar ? NULL : "-b",
 	NULL
 };
-static const char *termcmd[]  = { "st", NULL };
+static const char *spcmd1[] = {"w", "st", "-n", "spterm (w)", "-g", "120x34", NULL };
+static const char *spcmd2[] = {"e", "st", "-n", "spterm (e)", "-g", "120x34", NULL };
+static const char *spcmd3[] = {"r", "st", "-n", "spfm (r)", "-g", "144x41", "-e", "ranger", NULL };
 
 static Key keys[] = {
 	/* modifier                     key              function                argument */

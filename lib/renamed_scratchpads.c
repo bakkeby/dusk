@@ -20,19 +20,6 @@ setscratch(const Arg *arg)
 		c->scratchkey = ((char**)arg->v)[0][0];
 }
 
-void spawnscratch(const Arg *arg)
-{
-	if (fork() == 0) {
-		if (dpy)
-			close(ConnectionNumber(dpy));
-		setsid();
-		execvp(((char **)arg->v)[1], ((char **)arg->v)+1);
-		fprintf(stderr, "dusk: execvp %s", ((char **)arg->v)[1]);
-		perror(" failed");
-		exit(EXIT_SUCCESS);
-	}
-}
-
 void
 togglescratch(const Arg *arg)
 {
@@ -142,6 +129,6 @@ togglescratch(const Arg *arg)
 		if (ISFLOATING(found))
 			XRaiseWindow(dpy, found->win);
 	} else {
-		spawnscratch(arg);
+		spawn(arg);
 	}
 }
