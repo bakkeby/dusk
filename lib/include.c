@@ -47,6 +47,7 @@
 #include "push.c"
 #include "renamed_scratchpads.c"
 #include "restartsig.c"
+#include "riodraw.c"
 #include "rotatestack.c"
 #include "savefloats.c"
 #include "setborderpx.c"

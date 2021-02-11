@@ -24,6 +24,7 @@ static int floatposgrid_y                = 5;   /* float grid rows */
 static const int horizpadbar             = 2;   /* horizontal (inner) padding for statusbar (increases lrpad) */
 static const int vertpadbar              = 0;   /* vertical (inner) padding for statusbar (increases bh, overridden by bar_height) */
 
+static const char slopstyle[]            = "-t 0 -c 0.92,0.85,0.69,0.3"; /* do NOT define -f (format) here */
 static const char buttonbar[]            = "⛶";
 static const unsigned int systrayspacing = 2;   /* systray spacing */
 static char *toggle_float_pos            = "50% 50% 80% 80%"; // default floating position when triggering togglefloatpos
@@ -567,6 +568,7 @@ static Key keys[] = {
 //	{ MODKEY,                       XK_,             inplacerotate,          {.i = -1} }, // rotate clients within the respective area (master, primary stack, secondary stack) counter-clockwise
 //	{ MODKEY,                       XK_,             rotatestack,            {.i = +1 } }, // rotate all clients (clockwise)
 //	{ MODKEY,                       XK_,             rotatestack,            {.i = -1 } }, // rotate all clients (counter-clockwise)
+//	{ MODKEY,                       XK_,             riodraw,                {0} }, // use slop to resize the currently selected client
 //	{ MODKEY,                       XK_,             unfloatvisible,         {0} }, // makes all floating clients on the currently selected workspace tiled
 //	{ MODKEY,                       XK_,             switchcol,              {0} }, // changes focus between the master and the primary stack area
 //	{ MODKEY,                       XK_,             setlayout,              {.v = &layouts[0]} }, // sets a specific layout, see the layouts array for indices
@@ -657,6 +659,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( pushup, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( quit, 1, {ARG_TYPE_SINT} ), // 0 = quit, 1 = restart
 	IPCCOMMAND( removescratch, 1, {ARG_TYPE_SINT} ),
+	IPCCOMMAND( riodraw, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( setborderpx, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( setlayoutaxisex, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( setlayoutex, 1, {ARG_TYPE_SINT} ),
