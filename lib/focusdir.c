@@ -1,17 +1,16 @@
 void
 focusdir(const Arg *arg)
 {
-	Workspace *ws = selws;
-	Client *s = ws->sel, *f = NULL, *c, *next;
+	Client *s = selws->sel, *f = NULL, *c, *next;
+
+	if (!s)
+		return;
 
 	unsigned int score = -1;
 	unsigned int client_score;
 	int dist;
 	int dirweight = 20;
 	int isfloating = ISFLOATING(s);
-
-	if (!s)
-		return;
 
 	next = s->next;
 	if (!next)
@@ -59,7 +58,7 @@ focusdir(const Arg *arg)
 		}
 	}
 
-	if (f != s) {
+	if (f && f != s) {
 		focus(f);
 		restack(f->ws);
 	}
