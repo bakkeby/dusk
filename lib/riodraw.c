@@ -51,7 +51,7 @@ void
 rioposition(Client *c, int x, int y, int w, int h)
 {
 	Workspace *ws;
-	if (w > 50 && h > 50 && x > -40 && y > -40 && w < c->ws->mon->mw + 40 && h < c->ws->mon->mh + 40 &&
+	if (w > 50 && h > 50 && x > -40 && y > -40 &&
 			(abs(c->w - w) > 20 || abs(c->h - h) > 20 || abs(c->x - x) > 20 || abs(c->y - y) > 20)) {
 		if ((ws = recttows(x, y, w, h)) && ws != c->ws) {
 			detach(c);
@@ -71,7 +71,7 @@ rioposition(Client *c, int x, int y, int w, int h)
 		drawbar(c->ws->mon);
 		arrange(c->ws);
 	} else
-		fprintf(stderr, "rioposition: refusing to position client %s at x (%d), y (%d), w (%d), h (%d)", c->name, x, y, w, h);
+		fprintf(stderr, "rioposition: refusing to position client %s at x (%d), y (%d), w (%d), h (%d)\n", c->name, x, y, w, h);
 
 	riodimensions[3] = -1;
 	rioclient = NULL;

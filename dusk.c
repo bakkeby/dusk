@@ -492,7 +492,7 @@ static void seturgent(Client *c, int urg);
 static void showhide(Client *c);
 static void sigchld(int unused);
 static void spawn(const Arg *arg);
-static int spawncmd(const Arg *arg);
+static pid_t spawncmd(const Arg *arg);
 static void togglebar(const Arg *arg);
 static void togglefloating(const Arg *arg);
 static void togglemaximize(Client *c, int maximize_vert, int maximize_horz);
@@ -2086,7 +2086,7 @@ manage(Window w, XWindowAttributes *wa)
 	}
 
 	if (!c->swallowing) {
-		if (riopid && isdescprocess(riopid, c->pid)) {
+		if (riopid && (RIODRAWNOMATCHPID(c) || isdescprocess(riopid, c->pid))) {
 			if (riodimensions[3] == -1) {
 				SETFLOATING(c);
 				rioclient = c;
@@ -3215,10 +3215,10 @@ spawn(const Arg *arg)
 	spawncmd(arg);
 }
 
-int
+pid_t
 spawncmd(const Arg *arg)
 {
-	pid_t  pid;
+	pid_t pid;
 	if ((pid = fork()) == 0) {
 		if (dpy)
 			close(ConnectionNumber(dpy));
