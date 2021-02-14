@@ -24,7 +24,8 @@ static int floatposgrid_y                = 5;   /* float grid rows */
 static const int horizpadbar             = 2;   /* horizontal (inner) padding for statusbar (increases lrpad) */
 static const int vertpadbar              = 0;   /* vertical (inner) padding for statusbar (increases bh, overridden by bar_height) */
 
-static const char slopstyle[]            = "-t 0 -c 0.92,0.85,0.69,0.3"; /* do NOT define -f (format) here */
+static const char slopspawnstyle[]       = "-t 0 -c 0.92,0.85,0.69,0.3 -o"; /* do NOT define -f (format) here */
+static const char slopresizestyle[]      = "-t 0 -c 0.92,0.85,0.69,0.3"; /* do NOT define -f (format) here */
 static const char buttonbar[]            = "⛶";
 static const unsigned int systrayspacing = 2;   /* systray spacing */
 static char *toggle_float_pos            = "50% 50% 80% 80%"; // default floating position when triggering togglefloatpos
@@ -69,6 +70,7 @@ static unsigned long functionality = 0
 //	|GreedyMonitor // when viewing a workspace the monitor is greedy and gives nothing in return (i.e. disables swap of workspaces)
 	|SmartLayoutConvertion // when moving a workspace from one monitor to another, automatically adjust layout based on monitor orientation (i.e. vertical vs horizontal)
 //	|AutoHideScratchpads // automatically hide open scratchpads when moving to another workspace
+//	|RioDrawIncludeBorders // indicates whether the area drawn using slop includes the window borders
 ;
 
 static const char statussep              = ';'; /* separator between status bars */
@@ -448,6 +450,7 @@ static Key keys[] = {
 	/* modifier                     key              function                argument */
 	{ MODKEY,                       XK_d,            spawn,                  {.v = dmenucmd } }, // spawn dmenu for launching other programs
 	{ MODKEY,                       XK_Return,       spawn,                  {.v = termcmd } }, // spawn a terminal
+	{ MODKEY|Shift,                 XK_Return,       riospawn,               {.v = termcmd } }, // draw/spawn a terminal
 	{ MODKEY,                       XK_b,            togglebar,              {0} }, // toggles the display of the bar(s) on the current monitor
 
 	{ MODKEY,                       XK_j,            focusstack,             {.i = +1 } }, // focus on the next client in the stack
@@ -651,7 +654,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( killclient, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( killunsel, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( mark, 1, {ARG_TYPE_PTR} ),
-	IPCCOMMAND( markall, 1, {ARG_TYPE_SINT} ), // 0 = mark all, 1 = mark all floating
+	IPCCOMMAND( markall, 1, {ARG_TYPE_SINT} ), // 0 = mark all, 1 = mark floating, 2 = mark hidden
 	IPCCOMMAND( mirrorlayout, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( rotatelayoutaxis, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( rotatestack, 1, {ARG_TYPE_SINT} ),
@@ -659,7 +662,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( pushup, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( quit, 1, {ARG_TYPE_SINT} ), // 0 = quit, 1 = restart
 	IPCCOMMAND( removescratch, 1, {ARG_TYPE_SINT} ),
-	IPCCOMMAND( riodraw, 1, {ARG_TYPE_NONE} ),
+	IPCCOMMAND( rioresize, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( setborderpx, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( setlayoutaxisex, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( setlayoutex, 1, {ARG_TYPE_SINT} ),

@@ -492,6 +492,7 @@ static void seturgent(Client *c, int urg);
 static void showhide(Client *c);
 static void sigchld(int unused);
 static void spawn(const Arg *arg);
+static int spawncmd(const Arg *arg);
 static void togglebar(const Arg *arg);
 static void togglefloating(const Arg *arg);
 static void togglemaximize(Client *c, int maximize_vert, int maximize_horz);
@@ -2085,7 +2086,16 @@ manage(Window w, XWindowAttributes *wa)
 	}
 
 	if (!c->swallowing) {
-		if (SWITCHWORKSPACE(c))
+		if (riopid && isdescprocess(riopid, c->pid)) {
+			if (riodimensions[3] == -1) {
+				SETFLOATING(c);
+				rioclient = c;
+				c->x = WIDTH(c) * -2;
+			}
+			else
+				rioposition(c, riodimensions[0], riodimensions[1], riodimensions[2], riodimensions[3]);
+		}
+		else if (SWITCHWORKSPACE(c))
 			viewwsonmon(c->ws, c->ws->mon, 0);
 		else if (ENABLEWORKSPACE(c))
 			viewwsonmon(c->ws, c->ws->mon, 1);
@@ -3202,7 +3212,14 @@ sigchld(int unused)
 void
 spawn(const Arg *arg)
 {
-	if (fork() == 0) {
+	spawncmd(arg);
+}
+
+int
+spawncmd(const Arg *arg)
+{
+	pid_t  pid;
+	if ((pid = fork()) == 0) {
 		if (dpy)
 			close(ConnectionNumber(dpy));
 		if (enabled(SpawnCwd) && selws->sel) {
@@ -3243,6 +3260,7 @@ spawn(const Arg *arg)
 		perror(" failed");
 		exit(EXIT_SUCCESS);
 	}
+	return pid;
 }
 
 void
@@ -3358,6 +3376,9 @@ unmanage(Client *c, int destroyed)
 
 	if (c->swallowing)
 		unswallow(c);
+
+	if (c == rioclient)
+		rioclient = NULL;
 
 	s = swallowingclient(c->win);
 	if (s) {
