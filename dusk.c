@@ -2090,6 +2090,7 @@ manage(Window w, XWindowAttributes *wa)
 			if (riodimensions[3] != -1)
 				rioposition(c, riodimensions[0], riodimensions[1], riodimensions[2], riodimensions[3]);
 			else {
+				unmarkall(NULL);
 				killclient(&((Arg) { .v = c }));
 				return;
 			}
