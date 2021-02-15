@@ -2026,21 +2026,6 @@ manage(Window w, XWindowAttributes *wa)
 
 	updatewmhints(c);
 	updatemotifhints(c);
-	if (ISCENTERED(c)) {
-		if (ISTRANSIENT(c) && t) {
-			/* Transient windows are centered within the geometry of the parent window */
-			c->x = t->x + WIDTH(t) / 2 - WIDTH(c) / 2;
-			c->y = t->y + HEIGHT(t) / 2 - HEIGHT(c) / 2;
-		} else {
-			c->x = m->wx + (m->ww - WIDTH(c)) / 2;
-			c->y = m->wy + (m->wh - HEIGHT(c)) / 2;
-		}
-	}
-
-	c->sfx = -9999;
-	c->sfy = -9999;
-	c->sfw = c->w;
-	c->sfh = c->h;
 
 	XSelectInput(dpy, w, EnterWindowMask|FocusChangeMask|PropertyChangeMask|StructureNotifyMask);
 	grabbuttons(c, 0);
@@ -2070,6 +2055,26 @@ manage(Window w, XWindowAttributes *wa)
 			c->ws->sel->snext = c;
 		}
 	}
+
+	if (ISCENTERED(c)) {
+		/* Transient windows are centered within the geometry of the parent window */
+		if (t) {
+			c->x = t->x + WIDTH(t) / 2 - WIDTH(c) / 2;
+			c->y = t->y + HEIGHT(t) / 2 - HEIGHT(c) / 2;
+		/* Non-swallowed windows raised via terminal are centered within the geometry of terminal if it fits */
+		} else if (term && !c->swallowing && term->w >= c->w && term->h >= c->h) {
+			c->x = term->x + WIDTH(term) / 2 - WIDTH(c) / 2;
+			c->y = term->y + HEIGHT(term) / 2 - HEIGHT(c) / 2;
+		} else {
+			c->x = m->wx + (m->ww - WIDTH(c)) / 2;
+			c->y = m->wy + (m->wh - HEIGHT(c)) / 2;
+		}
+	}
+
+	c->sfx = -9999;
+	c->sfy = -9999;
+	c->sfw = c->w;
+	c->sfh = c->h;
 
 	XChangeProperty(dpy, root, netatom[NetClientList], XA_WINDOW, 32, PropModeAppend,
 		(unsigned char *) &(c->win), 1);
