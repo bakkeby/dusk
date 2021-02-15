@@ -1035,6 +1035,7 @@ clientmessage(XEvent *e)
 		if (maximize_vert || maximize_horz)
 			togglemaximize(c, maximize_vert, maximize_horz);
 	} else if (cme->message_type == netatom[NetCloseWindow]) {
+		unmarkall(NULL);
 		killclient(&((Arg) { .v = c }));
 	} else if (cme->message_type == netatom[NetWMDesktop]) {
 		if ((ws = getwsbyindex(cme->data.l[0])))
