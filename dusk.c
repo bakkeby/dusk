@@ -2087,13 +2087,12 @@ manage(Window w, XWindowAttributes *wa)
 
 	if (!c->swallowing) {
 		if (riopid && (RIODRAWNOMATCHPID(c) || isdescprocess(riopid, c->pid))) {
-			if (riodimensions[3] == -1) {
-				SETFLOATING(c);
-				rioclient = c;
-				c->x = WIDTH(c) * -2;
-			}
-			else
+			if (riodimensions[3] != -1)
 				rioposition(c, riodimensions[0], riodimensions[1], riodimensions[2], riodimensions[3]);
+			else {
+				killclient(&((Arg) { .v = c }));
+				return;
+			}
 		}
 		else if (SWITCHWORKSPACE(c))
 			viewwsonmon(c->ws, c->ws->mon, 0);
@@ -3376,9 +3375,6 @@ unmanage(Client *c, int destroyed)
 
 	if (c->swallowing)
 		unswallow(c);
-
-	if (c == rioclient)
-		rioclient = NULL;
 
 	s = swallowingclient(c->win);
 	if (s) {

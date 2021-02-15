@@ -71,6 +71,7 @@ static unsigned long functionality = 0
 	|SmartLayoutConvertion // when moving a workspace from one monitor to another, automatically adjust layout based on monitor orientation (i.e. vertical vs horizontal)
 //	|AutoHideScratchpads // automatically hide open scratchpads when moving to another workspace
 //	|RioDrawIncludeBorders // indicates whether the area drawn using slop includes the window borders
+//	|RioDrawSpawnAsync // indicates whether to spawn the application alongside or after drawing area using slop
 ;
 
 static const char statussep              = ';'; /* separator between status bars */

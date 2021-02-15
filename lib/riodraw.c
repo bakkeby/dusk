@@ -1,9 +1,8 @@
 static int riodimensions[4] = { -1, -1, -1, -1 };
-static Client *rioclient = NULL;
 static pid_t riopid = 0;
 
-void
-riodraw(const char slopstyle[])
+int
+riodraw(Client *c, const char slopstyle[])
 {
 	int i;
 	char str[100];
@@ -12,9 +11,6 @@ riodraw(const char slopstyle[])
 	char slopcmd[100] = "slop -f x%xx%yx%wx%hx ";
 	int firstchar = 0;
 	int counter = 0;
-
-	if (!riopid && !rioclient)
-		return;
 
 	strcat(slopcmd, slopstyle);
 	FILE *fp = popen(slopcmd, "r");
@@ -25,7 +21,7 @@ riodraw(const char slopstyle[])
 	pclose(fp);
 
 	if (strlen(strout) < 6)
-		return;
+		return 0;
 
 	for (i = 0; i < strlen(strout); i++){
 		if (!firstchar) {
@@ -43,38 +39,42 @@ riodraw(const char slopstyle[])
 		}
 	}
 
-	if (rioclient)
-		rioposition(rioclient, riodimensions[0], riodimensions[1], riodimensions[2], riodimensions[3]);
+	if (riodimensions[0] <= -40 || riodimensions[1] <= -40 || riodimensions[2] <= 50 || riodimensions[3] <= 50) {
+		riodimensions[3] = -1;
+		return 0;
+	}
+
+	if (c) {
+		rioposition(c, riodimensions[0], riodimensions[1], riodimensions[2], riodimensions[3]);
+		return 0;
+	}
+
+	return 1;
 }
 
 void
 rioposition(Client *c, int x, int y, int w, int h)
 {
 	Workspace *ws;
-	if (w > 50 && h > 50 && x > -40 && y > -40 &&
-			(abs(c->w - w) > 20 || abs(c->h - h) > 20 || abs(c->x - x) > 20 || abs(c->y - y) > 20)) {
-		if ((ws = recttows(x, y, w, h)) && ws != c->ws) {
-			detach(c);
-			detachstack(c);
-			attachx(c, AttachBottom, ws);
-			attachstack(c);
-			selws = ws;
-			selmon = ws->mon;
-			focus(c);
-		}
+	if ((ws = recttows(x, y, w, h)) && ws != c->ws) {
+		detach(c);
+		detachstack(c);
+		attachx(c, AttachBottom, ws);
+		attachstack(c);
+		selws = ws;
+		selmon = ws->mon;
+		focus(c);
+	}
 
-		SETFLOATING(c);
-		if (enabled(RioDrawIncludeBorders))
-			resizeclient(c, x, y, w - (c->bw * 2), h - (c->bw * 2));
-		else
-			resizeclient(c, x - c->bw, y - c->bw, w, h);
-		drawbar(c->ws->mon);
-		arrange(c->ws);
-	} else
-		fprintf(stderr, "rioposition: refusing to position client %s at x (%d), y (%d), w (%d), h (%d)\n", c->name, x, y, w, h);
+	SETFLOATING(c);
+	if (enabled(RioDrawIncludeBorders))
+		resizeclient(c, x, y, w - (c->bw * 2), h - (c->bw * 2));
+	else
+		resizeclient(c, x - c->bw, y - c->bw, w, h);
+	drawbar(c->ws->mon);
+	arrange(c->ws);
 
 	riodimensions[3] = -1;
-	rioclient = NULL;
 	riopid = 0;
 }
 
@@ -82,14 +82,18 @@ rioposition(Client *c, int x, int y, int w, int h)
 void
 rioresize(const Arg *arg)
 {
-	rioclient = CLIENT;
-	riodraw(slopresizestyle);
+	Client *c = CLIENT;
+	if (c)
+		riodraw(c, slopresizestyle);
 }
 
 /* spawn a new window and drag out an area using slop to postiion it */
 void
 riospawn(const Arg *arg)
 {
-	riopid = spawncmd(arg);;
-	riodraw(slopspawnstyle);
+	if (enabled(RioDrawSpawnAsync)) {
+		riopid = spawncmd(arg);
+		riodraw(NULL, slopspawnstyle);
+	} else if (riodraw(NULL, slopspawnstyle))
+		riopid = spawncmd(arg);
 }
