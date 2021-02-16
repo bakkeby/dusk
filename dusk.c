@@ -465,6 +465,7 @@ static void mappingnotify(XEvent *e);
 static void maprequest(XEvent *e);
 static void motionnotify(XEvent *e);
 static void movemouse(const Arg *arg);
+static void moveorplace(const Arg *arg);
 static Client *nexttiled(Client *c);
 static void placemouse(const Arg *arg);
 static Client *prevtiled(Client *c);
@@ -1948,8 +1949,7 @@ killclient(const Arg *arg)
 void
 manage(Window w, XWindowAttributes *wa)
 {
-	Client *c, *t = NULL;
-	Client *term = NULL;
+	Client *c, *t = NULL, *term = NULL;
 	Monitor *m;
 	Window trans = None;
 	XWindowChanges wc;
@@ -2187,6 +2187,15 @@ motionnotify(XEvent *e)
 }
 
 void
+moveorplace(const Arg *arg) {
+	Client *c = CLIENT;
+    if (!c->ws->layout || ISFLOATING(c))
+        movemouse(arg);
+    else
+        placemouse(arg);
+}
+
+void
 movemouse(const Arg *arg)
 {
 	int x, y, ocx, ocy, nx, ny;
@@ -2380,9 +2389,9 @@ placemouse(const Arg *arg)
 		attachstack(c);
 		selws = w;
 		selmon = w->mon;
-		focus(c);
 	}
 
+	focus(c);
 	removeflag(c, MovePlace);
 	if (nx != -9999)
 		resize(c, nx, ny, c->w, c->h, 0);
