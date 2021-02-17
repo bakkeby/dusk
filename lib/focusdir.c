@@ -21,7 +21,7 @@ focusdir(const Arg *arg)
 		if (!next)
 			next = s->ws->clients;
 
-		if (!ISVISIBLE(c) || HIDDEN(c) || ISFLOATING(c) != isfloating)
+		if (!ISVISIBLE(c) || ISFLOATING(c) != isfloating)
 			continue;
 
 		switch (arg->i) {

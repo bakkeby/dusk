@@ -35,7 +35,7 @@ calc_wintitle_hidden(
 	int groupactive = GRP_HIDDEN;
 
 	for (c = ws->clients; c; c = c->next) {
-		if (!ISVISIBLE(c))
+		if (!ISINVISIBLE(c))
 			continue;
 		if (HIDDEN(c))
 			clientsnhidden++;

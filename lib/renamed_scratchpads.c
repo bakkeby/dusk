@@ -38,7 +38,7 @@ togglescratch(const Arg *arg)
 				continue;
 			if (scratchmon != -1 && scratchmon != ws->mon->num)
 				multimonscratch = 1;
-			if (ISVISIBLE(c) && !HIDDEN(c))
+			if (ISVISIBLE(c))
 				++scratchvisible;
 			scratchmon = ws->mon->num;
 			++numscratchpads;

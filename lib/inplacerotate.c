@@ -40,7 +40,7 @@ inplacerotate(const Arg *arg)
 
 	// Shift client
 	for (c = ws->clients; c; c = c->next) {
-		if (ISVISIBLE(c) && !ISFLOATING(c) && !HIDDEN(c)) {
+		if (ISVISIBLE(c) && !ISFLOATING(c)) {
 			if (ws->sel == c)
 				selidx = i;
 			if (i == ws->nmaster - 1)

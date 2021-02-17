@@ -93,8 +93,8 @@ hasclients(Workspace *ws)
 {
 	Client *c;
 	/* Check if the workspace has visible clients on it, intentionally not taking HIDDEN(c)
-	 * into account so that workspaces with client windows in iconic state are still marked
-	 * as having clients from a UI point of view */
+	 * into account so that workspaces with hidden client windows are still marked as
+	 * having clients from a UI point of view */
 	for (c = ws->clients; c && (c->flags & Invisible); c = c->next);
 	return c != NULL;
 }

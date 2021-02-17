@@ -31,7 +31,7 @@ prevvisible(Client *c)
 {
 	Client *p, *i;
 	for (p = NULL, i = c->ws->clients; c && i != c; i = i->next)
-		if (ISVISIBLE(i) && !HIDDEN(i))
+		if (ISVISIBLE(i))
 			p = i;
 	return p;
 }
@@ -64,9 +64,9 @@ showhideclient(const Arg *arg)
 		restack(last_shown->ws);
 	} else if (last_hidden) {
 		if (ISFLOATING(last_hidden) || !last_hidden->ws->layout->arrange) {
-			for (n = last_hidden->snext; n && (!ISVISIBLE(n) || HIDDEN(n)); n = n->snext);
+			for (n = last_hidden->snext; n && !ISVISIBLE(n); n = n->snext);
 			if (!n)
-				for (n = last_hidden->ws->stack; n && (!ISVISIBLE(n) || HIDDEN(n)); n = n->snext);
+				for (n = last_hidden->ws->stack; n && !ISVISIBLE(n); n = n->snext);
 		} else {
 			n = nexttiled(last_hidden);
 			if (!n)

@@ -39,7 +39,7 @@ markall(const Arg *arg)
 {
 	Client *c;
 	for (c = selws->clients; c; c = c->next) {
-		if (ISMARKED(c) || !ISVISIBLE(c))
+		if (ISMARKED(c) || ISINVISIBLE(c))
 			continue;
 
 		if ((arg->i == 2 && !HIDDEN(c)) || (arg->i != 2 && HIDDEN(c)))

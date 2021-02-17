@@ -35,7 +35,7 @@ calc_wintitle_floating(
 	int groupactive = GRP_FLOAT;
 
 	for (c = ws->clients; c; c = c->next) {
-		if (!ISVISIBLE(c) || HIDDEN(c))
+		if (!ISVISIBLE(c))
 			continue;
 		if (ISFLOATING(c))
 			clientsnfloating++;

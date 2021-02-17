@@ -1717,16 +1717,16 @@ focusstack(const Arg *arg)
 	if (!ws->sel)
 		return;
 	if (arg->i > 0) {
-		for (c = ws->sel->next; c && (!ISVISIBLE(c) || (arg->i == 1 && HIDDEN(c))); c = c->next);
+		for (c = ws->sel->next; c && (ISINVISIBLE(c) || (arg->i == 1 && HIDDEN(c))); c = c->next);
 		if (!c)
-			for (c = ws->clients; c && (!ISVISIBLE(c) || (arg->i == 1 && HIDDEN(c))); c = c->next);
+			for (c = ws->clients; c && (ISINVISIBLE(c) || (arg->i == 1 && HIDDEN(c))); c = c->next);
 	} else {
 		for (i = ws->clients; i != ws->sel; i = i->next)
-			if (ISVISIBLE(i) && !(arg->i == -1 && HIDDEN(i)))
+			if (!ISINVISIBLE(i) && !(arg->i == -1 && HIDDEN(i)))
 				c = i;
 		if (!c)
 			for (; i; i = i->next)
-				if (ISVISIBLE(i) && !(arg->i == -1 && HIDDEN(i)))
+				if (!ISINVISIBLE(i) && !(arg->i == -1 && HIDDEN(i)))
 					c = i;
 	}
 	if (c) {
@@ -2403,7 +2403,7 @@ placemouse(const Arg *arg)
 Client *
 nexttiled(Client *c)
 {
-	for (; c && (ISFLOATING(c) || !ISVISIBLE(c) || HIDDEN(c)); c = c->next);
+	for (; c && (ISFLOATING(c) || !ISVISIBLE(c)); c = c->next);
 	return c;
 }
 
@@ -2527,7 +2527,7 @@ recttoclient(int x, int y, int w, int h, int include_floating)
 	int a, area = 1;
 
 	for (c = selws->stack; c; c = c->snext) {
-		if (!ISVISIBLE(c) || HIDDEN(c) || (ISFLOATING(c) && !include_floating))
+		if (!ISVISIBLE(c) || (ISFLOATING(c) && !include_floating))
 			continue;
 		if ((a = INTERSECTC(x, y, w, h, c)) >= area && (!r || r->idx < c->idx)) {
 			area = a;
@@ -3178,7 +3178,7 @@ showhide(Client *c)
 {
 	if (!c)
 		return;
-	if (ISVISIBLE(c) && !HIDDEN(c)) {
+	if (ISVISIBLE(c)) {
 		/* show clients top down */
 		if (!c->ws->layout->arrange && c->sfx != -9999 && !ISFULLSCREEN(c)) {
 			XMoveWindow(dpy, c->win, c->sfx, c->sfy);
