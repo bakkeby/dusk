@@ -235,7 +235,7 @@ movetows(Client *c, Workspace *ws)
 			XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
 	}
 
-	if (prevws->visible && prevws != ws)
+	if (prevws && prevws->visible && prevws != ws)
 		arrange(prevws);
 
 	if (hadfocus && ws->visible)

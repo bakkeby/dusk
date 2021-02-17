@@ -1036,7 +1036,6 @@ clientmessage(XEvent *e)
 		if (maximize_vert || maximize_horz)
 			togglemaximize(c, maximize_vert, maximize_horz);
 	} else if (cme->message_type == netatom[NetCloseWindow]) {
-		unmarkall(NULL);
 		killclient(&((Arg) { .v = c }));
 	} else if (cme->message_type == netatom[NetWMDesktop]) {
 		if ((ws = getwsbyindex(cme->data.l[0])))
@@ -1908,6 +1907,7 @@ keypress(XEvent *e)
 	XKeyEvent *ev;
 
 	ev = &e->xkey;
+	ignore_marked = 0;
 	keysym = XGetKeyboardMapping(dpy, (KeyCode)ev->keycode, 1, &keysyms_return);
 	for (i = 0; i < LENGTH(keys); i++)
 		if (*keysym == keys[i].keysym
@@ -1915,6 +1915,7 @@ keypress(XEvent *e)
 				&& keys[i].func)
 			keys[i].func(&(keys[i].arg));
 	XFree(keysym);
+	ignore_marked = 1;
 }
 
 void
@@ -2096,7 +2097,6 @@ manage(Window w, XWindowAttributes *wa)
 			if (riodimensions[3] != -1)
 				rioposition(c, riodimensions[0], riodimensions[1], riodimensions[2], riodimensions[3]);
 			else {
-				unmarkall(NULL);
 				killclient(&((Arg) { .v = c }));
 				return;
 			}
@@ -3397,6 +3397,9 @@ unmanage(Client *c, int destroyed)
 		s->swallowing = NULL;
 		revertws = NULL;
 	}
+
+	if (ISMARKED(c))
+		unmarkclient(c);
 
 	detach(c);
 	detachstack(c);

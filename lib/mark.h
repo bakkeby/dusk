@@ -1,3 +1,6 @@
+static int num_marked = 0;
+static int ignore_marked = 1; /* used to avoid marked clients when key functions are used internally */
+
 static Client *nextmarked(Client *prev, Client *def);
 static void mark(const Arg *arg);
 static void markall(const Arg *arg);
