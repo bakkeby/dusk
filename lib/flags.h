@@ -88,7 +88,7 @@ static const unsigned long
 #define ISURGENT(C) (C->flags & Urgent)
 #define ISMARKED(C) (C->flags & Marked)
 #define ISVISIBLE(C) (C->ws->visible && !(C->flags & (Invisible|Hidden)))
-#define ISINVISIBLE(C) (C->ws->visible && (C->flags & Invisible))
+#define ISINVISIBLE(C) (C->flags & Invisible)
 #define IGNORECFGREQ(C) (C->flags & IgnoreCfgReq)
 #define IGNORECFGREQPOS(C) (C->flags & IgnoreCfgReqPos)
 #define IGNORECFGREQSIZE(C) (C->flags & IgnoreCfgReqSize)
