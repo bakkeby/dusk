@@ -653,7 +653,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( incnmaster, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( incnstack, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( inplacerotate, 1, {ARG_TYPE_SINT} ),
-	IPCCOMMAND( killclient, 1, {ARG_TYPE_SINT} ),
+	IPCCOMMAND( killclient, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( killunsel, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( mark, 1, {ARG_TYPE_PTR} ),
 	IPCCOMMAND( markall, 1, {ARG_TYPE_SINT} ), // 0 = mark all, 1 = mark floating, 2 = mark hidden
@@ -680,6 +680,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( toggle, 1, {ARG_TYPE_UINT} ), // toggle functionality on and off
 	IPCCOMMAND( togglebar, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( togglefakefullscreen, 1, {ARG_TYPE_NONE} ),
+	IPCCOMMAND( toggleflagex, 1, {ARG_TYPE_STR} ),
 	IPCCOMMAND( togglefloating, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( togglefullscreen, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( togglegaps, 1, {ARG_TYPE_NONE} ),

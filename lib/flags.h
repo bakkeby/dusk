@@ -1,6 +1,9 @@
 static void addflag(Client *c, const unsigned long flag);
 static void setflag(Client *c, const unsigned long flag, const int value);
 static void removeflag(Client *c, const unsigned long flag);
+static void toggleflag(Client *c, const unsigned long flag);
+static void toggleflagex(const Arg *arg);
+static const unsigned long getflagbyname(const char *name);
 
 static const unsigned long
 	AlwaysOnTop = 0x1, // client window is intended to always display on top (even above floating windows)
