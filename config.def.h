@@ -634,8 +634,8 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( clientstomon, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( cyclelayout, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( defaultgaps, 1, {ARG_TYPE_NONE} ),
-	IPCCOMMAND( enable, 1, {ARG_TYPE_UINT} ),
-	IPCCOMMAND( disable, 1, {ARG_TYPE_UINT} ),
+	IPCCOMMAND( enable, 1, {ARG_TYPE_STR} ),
+	IPCCOMMAND( disable, 1, {ARG_TYPE_STR} ),
 	IPCCOMMAND( floatpos, 1, {ARG_TYPE_STR} ),
 	IPCCOMMAND( focusdir, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( focusmaster, 1, {ARG_TYPE_NONE} ),
@@ -677,7 +677,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( stackpush, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( stackfocus, 1, {ARG_TYPE_SINT} ),
 	IPCCOMMAND( switchcol, 1, {ARG_TYPE_NONE} ),
-	IPCCOMMAND( toggle, 1, {ARG_TYPE_UINT} ), // toggle functionality on and off
+	IPCCOMMAND( toggle, 1, {ARG_TYPE_STR} ), // toggle functionality on and off
 	IPCCOMMAND( togglebar, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( togglefakefullscreen, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( toggleflagex, 1, {ARG_TYPE_STR} ),
@@ -688,7 +688,6 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( togglenomodbuttons, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( togglescratch, 1, {ARG_TYPE_UINT} ),
 	IPCCOMMAND( togglesticky, 1, {ARG_TYPE_NONE} ),
-	IPCCOMMAND( toggleflagex, 1, {ARG_TYPE_STR} ),
 	IPCCOMMAND( transfer, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( transferall, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( unfloatvisible, 1, {ARG_TYPE_NONE} ),
