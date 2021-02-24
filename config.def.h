@@ -688,6 +688,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( togglenomodbuttons, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( togglescratch, 1, {ARG_TYPE_UINT} ),
 	IPCCOMMAND( togglesticky, 1, {ARG_TYPE_NONE} ),
+	IPCCOMMAND( toggleflagex, 1, {ARG_TYPE_STR} ),
 	IPCCOMMAND( transfer, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( transferall, 1, {ARG_TYPE_NONE} ),
 	IPCCOMMAND( unfloatvisible, 1, {ARG_TYPE_NONE} ),
