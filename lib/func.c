@@ -1,22 +1,21 @@
 void
 enable(const Arg *arg)
 {
-	// settings |= arg->ui;
-	enablefunc(arg->ui);
+	enablefunc(getfuncbyname(arg->v));
 	reload();
 }
 
 void
 disable(const Arg *arg)
 {
-	disablefunc(arg->ui);
+	disablefunc(getfuncbyname(arg->v));
 	reload();
 }
 
 void
 toggle(const Arg *arg)
 {
-	togglefunc(arg->ui);
+	togglefunc(getfuncbyname(arg->v));
 	reload();
 }
 

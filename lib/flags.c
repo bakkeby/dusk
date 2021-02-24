@@ -21,12 +21,7 @@ removeflag(Client *c, const unsigned long flag)
 void
 toggleflag(Client *c, const unsigned long flag)
 {
-	if (!c || !flag)
-		return;
-	if (c->flags & flag)
-		removeflag(c, flag);
-	else
-		addflag(c, flag);
+	c->flags ^= flag;
 }
 
 const unsigned long
