@@ -217,8 +217,8 @@ static char *colors[][ColCount] = {
 	/*                       fg                bg                  border                  */
 	[SchemeNorm]         = { normfgcolor,      normbgcolor,        normbordercolor,        },
 	[SchemeSel]          = { selfgcolor,       selbgcolor,         selbordercolor,         },
-	[SchemeTitleNorm]    = { titlenormfgcolor, titlenormbgcolor,                           },
-	[SchemeTitleSel]     = { titleselfgcolor,  titleselbgcolor,                            },
+	[SchemeTitleNorm]    = { titlenormfgcolor, titlenormbgcolor,   selbordercolor,         },
+	[SchemeTitleSel]     = { titleselfgcolor,  titleselbgcolor,    selbordercolor,         },
 	[SchemeWsNorm]       = { wsnormfgcolor,    wsnormbgcolor,                              },
 	[SchemeWsVisible]    = { wsvisfgcolor,     wsvisbgcolor,                               },
 	[SchemeWsSel]        = { wsselfgcolor,     wsselbgcolor,                               },
