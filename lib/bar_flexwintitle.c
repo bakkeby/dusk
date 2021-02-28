@@ -1,23 +1,3 @@
-/* Flexwintitle properties, you can override these in your config.h if you want. */
-#ifndef FLEXWINTITLE_BORDERS
-#define FLEXWINTITLE_BORDERS 2       // 0 = off, otherwise width of border / client separator
-#endif
-#ifndef FLEXWINTITLE_SHOWFLOATING
-#define FLEXWINTITLE_SHOWFLOATING 0  // whether to show titles for floating windows, hidden clients are always shown
-#endif
-#ifndef FLEXWINTITLE_MASTERWEIGHT
-#define FLEXWINTITLE_MASTERWEIGHT 9  // master weight compared to stack, hidden and floating window titles
-#endif
-#ifndef FLEXWINTITLE_STACKWEIGHT
-#define FLEXWINTITLE_STACKWEIGHT 3   // stack weight compared to master, hidden and floating window titles
-#endif
-#ifndef FLEXWINTITLE_HIDDENWEIGHT
-#define FLEXWINTITLE_HIDDENWEIGHT 1  // hidden window title weight
-#endif
-#ifndef FLEXWINTITLE_FLOATWEIGHT
-#define FLEXWINTITLE_FLOATWEIGHT 1   // floating window title weight, set to 0 to not show floating windows
-#endif
-
 #define SCHEMEFOR(c) getschemefor(ws, c, groupactive == c)
 
 enum { GRP_NOSELECTION, GRP_MASTER, GRP_STACK1, GRP_STACK2, GRP_FLOAT, GRP_HIDDEN };
@@ -35,7 +15,6 @@ draw_flexwintitle(Bar *bar, BarArg *a)
 {
 	if (!bar->mon->selws)
 		return 0;
-	drw_rect(drw, a->x, a->y, a->w, a->h, 1, 1);
 	return flextitlecalculate(bar, a->x, a->w, -1, flextitledraw, NULL, a);
 }
 
@@ -49,11 +28,13 @@ click_flexwintitle(Bar *bar, Arg *arg, BarArg *a)
 }
 
 Client *
-flextitledrawarea(Workspace *ws, Client *c, int x, int r, int w, int max_clients, int scheme, int draw_tiled, int draw_hidden, int draw_floating,
+flextitledrawarea(Workspace *ws, Client *c, int x, int w, int num_clients, int scheme, int draw_tiled, int draw_hidden, int draw_floating,
 	int passx, void(*tabfn)(Workspace *, Client *, int, int, int, int, Arg *arg, BarArg *barg), Arg *arg, BarArg *barg)
 {
-	int i;
-	for (i = 0; c && i < max_clients; c = c->next) {
+	int i, rw, cw;
+	cw = (w - flexwintitle_separator * (num_clients - 1)) / num_clients;
+	rw = (w - flexwintitle_separator * (num_clients - 1)) % num_clients;
+	for (i = 0; c && i < num_clients; c = c->next) {
 		if (
 			!ISINVISIBLE(c) &&
 			(
@@ -62,8 +43,8 @@ flextitledrawarea(Workspace *ws, Client *c, int x, int r, int w, int max_clients
 				(draw_hidden && HIDDEN(c))
 			)
 		) {
-			tabfn(ws, c, passx, x, w + (i < r ? 1 : 0), scheme, arg, barg);
-			x += w + (i < r ? 1 : 0);
+			tabfn(ws, c, passx, x, cw + (i < rw ? 1 : 0), scheme, arg, barg);
+			x += cw + (i < rw ? 1 : 0) + flexwintitle_separator;
 			i++;
 		}
 	}
@@ -110,13 +91,13 @@ getclientcounts(Workspace *ws, int *groupactive, int *n, int *clientsnmaster, in
 		if (ISINVISIBLE(c))
 			continue;
 		if (HIDDEN(c)) {
-			if (FLEXWINTITLE_HIDDENWEIGHT)
+			if (flexwintitle_hiddenweight)
 				ch++;
 			continue;
 		}
 
 		if (ISFLOATING(c)) {
-			if (FLEXWINTITLE_FLOATWEIGHT)
+			if (flexwintitle_floatweight)
 				cf++;
 			continue;
 		}
@@ -124,18 +105,22 @@ getclientcounts(Workspace *ws, int *groupactive, int *n, int *clientsnmaster, in
 		if (ws->sel == c)
 			selidx = i;
 
-		if (!ws->nmaster || i < ws->nmaster || ws->ltaxis[LAYOUT] == NO_SPLIT)
-			cm++;
+		if (!ws->nmaster || i < ws->nmaster || ws->ltaxis[LAYOUT] == NO_SPLIT) {
+			if (flexwintitle_masterweight)
+				++cm;
+		}
+		else if (!flexwintitle_stackweight)
+			continue;
 		else if (ws->nstack) {
 			if (cs1 < ws->nstack)
-				cs1++;
+				++cs1;
 			else
-				cs2++;
+				++cs2;
 		}
 		else if ((i - ws->nmaster) % 2)
-			cs2++;
+			++cs2;
 		else
-			cs1++;
+			++cs1;
 		i++;
 	}
 	*n = cm + cs1 + cs2 + cf + ch;
@@ -271,12 +256,6 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 
 	drw_text(drw, x, barg->y, w, barg->h, pad, c->name, 0, False);
 	drawstateindicator(ws, c, 1, x + 2, barg->y, w, barg->h, 0, 0);
-
-	if (FLEXWINTITLE_BORDERS) {
-		XSetForeground(drw->dpy, drw->gc, scheme[SchemeSel][ColBorder].pixel);
-		XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, barg->y, FLEXWINTITLE_BORDERS, barg->h);
-		XFillRectangle(drw->dpy, drw->drawable, drw->gc, x + w - (x + w >= barg->w ? 1 : 0), barg->y, FLEXWINTITLE_BORDERS, barg->h);
-	}
 }
 
 void
@@ -290,17 +269,31 @@ int
 flextitlecalculate(
 	Bar *bar, int offx, int tabw, int passx,
 	void(*tabfn)(Workspace *, Client *, int, int, int, int, Arg *arg, BarArg *barg),
-	Arg *arg, BarArg *barg
+	Arg *arg, BarArg *a
 ) {
 	Client *c;
 	Workspace *ws = bar->mon->selws;
 	int n, center = 0, mirror = 0, fixed = 0; // layout configuration
 	int groupactive = 0, clientsnmaster = 0, clientsnstack = 0, clientsnstack2 = 0, clientsnfloating = 0, clientsnhidden = 0;
-	int w, r, num = 0, den, fulllayout = 0;
+	int w, r, den, fulllayout = 0;
 	int rw, rr;
 
-	int mas_x = offx, st1_x = offx, st2_x = offx, hid_x = offx, flt_x = offx;
-	int mas_w, st1_w, st2_w, hid_w;
+	int mas_x, st1_x, st2_x, hid_x, flt_x;
+	int mas_w = 0, st1_w = 0, st2_w = 0, hid_w = 0, flt_w = 0;
+
+	/* This avoids drawing a separator on the left hand side of the wintitle section if
+	 * there is a border and the wintitle module rests at the left border. */
+	if (bar->borderpx && a->x > bar->bx + bar->borderpx) {
+		offx += flexwintitle_separator;
+		tabw -= flexwintitle_separator;
+	}
+
+	/* This avoids drawing a separator on the right hand side of the wintitle section if
+	 * there is a border and the wintitle module rests at the right border. */
+	if (bar->borderpx && a->x + a->w < bar->bx + bar->bw - 2 * bar->borderpx)
+		tabw -= flexwintitle_separator;
+
+	mas_x = st1_x = st2_x = hid_x = flt_x = offx;
 
 	getclientcounts(ws, &groupactive, &n, &clientsnmaster, &clientsnstack, &clientsnstack2, &clientsnfloating, &clientsnhidden);
 
@@ -312,6 +305,9 @@ flextitlecalculate(
 		center = iscenteredlayout(ws, n);
 	}
 
+	XSetForeground(drw->dpy, drw->gc, scheme[bar->scheme][ColBorder].pixel);
+	XFillRectangle(drw->dpy, drw->drawable, drw->gc, a->x, a->y, a->w, a->h);
+
 	/* Certain layouts have no master / stack areas */
 	if (!ws->layout->arrange                            // floating layout
 		|| (!n || (!fixed && ws->nmaster && n <= ws->nmaster)) // no master
@@ -319,79 +315,84 @@ flextitlecalculate(
 	)
 		fulllayout = 1;
 
-	num = tabw;
 	c = ws->clients;
 
 	/* floating mode */
-	if ((fulllayout && FLEXWINTITLE_FLOATWEIGHT > 0) || clientsnmaster + clientsnstack == 0 || !ws->layout->arrange) {
+	if ((fulllayout && flexwintitle_floatweight > 0) || clientsnmaster + clientsnstack == 0 || !ws->layout->arrange) {
 		den = clientsnmaster + clientsnstack + clientsnstack2 + clientsnfloating + clientsnhidden;
-		w = num / den;
-		r = num % den; // rest
-		c = flextitledrawarea(ws, c, mas_x, r, w, den, !ws->layout->arrange ? SchemeFlexActFloat : SCHEMEFOR(GRP_MASTER), 1, FLEXWINTITLE_HIDDENWEIGHT, FLEXWINTITLE_FLOATWEIGHT, passx, tabfn, arg, barg); // floating
+		c = flextitledrawarea(ws, c, mas_x, tabw, den, !ws->layout->arrange ? SchemeFlexActFloat : SCHEMEFOR(GRP_MASTER), 1, flexwintitle_hiddenweight, flexwintitle_floatweight, passx, tabfn, arg, a); // floating
 	/* no master and stack mode, e.g. monocole, grid layouts, fibonacci */
 	} else if (fulllayout) {
 		den = clientsnmaster + clientsnstack + clientsnstack2 + clientsnhidden;
-		w = num / den;
-		r = num % den; // rest
-		c = flextitledrawarea(ws, c, mas_x, r, w, den, SCHEMEFOR(GRP_MASTER), 1, FLEXWINTITLE_HIDDENWEIGHT, 0, passx, tabfn, arg, barg); // full
+		c = flextitledrawarea(ws, c, mas_x, tabw, den, SCHEMEFOR(GRP_MASTER), 1, flexwintitle_hiddenweight, 0, passx, tabfn, arg, a); // full
 	/* tiled mode */
 	} else {
-		den = clientsnmaster * FLEXWINTITLE_MASTERWEIGHT + (clientsnstack + clientsnstack2) * FLEXWINTITLE_STACKWEIGHT + clientsnfloating * FLEXWINTITLE_FLOATWEIGHT + clientsnhidden * FLEXWINTITLE_HIDDENWEIGHT;
-		w = num / den; // weight width per client
-		r = num % den; // weight rest width
+		den = clientsnmaster * flexwintitle_masterweight
+		    + (clientsnstack + clientsnstack2) * flexwintitle_stackweight
+		    + clientsnhidden * flexwintitle_hiddenweight
+		    + clientsnfloating * flexwintitle_floatweight;
+		w = (tabw - (n - 1) * flexwintitle_separator) / den;
+		r = (tabw - (n - 1) * flexwintitle_separator) % den;
+
 		rw = r / n; // rest incr per client
 		rr = r % n; // rest rest
 
-		mas_w = clientsnmaster * rw + w * clientsnmaster * FLEXWINTITLE_MASTERWEIGHT + (rr > 0 ? MIN(rr, clientsnmaster) : 0);
+		if (clientsnmaster && flexwintitle_masterweight)
+			mas_w = clientsnmaster * rw + w * clientsnmaster * flexwintitle_masterweight + (rr > 0 ? MIN(rr, clientsnmaster) : 0) + (clientsnmaster - 1) * flexwintitle_separator;
 		rr -= clientsnmaster;
-		st1_w = clientsnstack * (rw + w * FLEXWINTITLE_STACKWEIGHT) + (rr > 0 ? MIN(rr, clientsnstack) : 0);
+		if (clientsnstack && flexwintitle_stackweight)
+			st1_w = clientsnstack * (rw + w * flexwintitle_stackweight) + (rr > 0 ? MIN(rr, clientsnstack) : 0) + (clientsnstack - 1) * flexwintitle_separator;
 		rr -= clientsnstack;
-		st2_w = clientsnstack2 * (rw + w * FLEXWINTITLE_STACKWEIGHT) + (rr > 0 ? MIN(rr, clientsnstack2) : 0);
+		if (clientsnstack2 && flexwintitle_stackweight)
+			st2_w = clientsnstack2 * (rw + w * flexwintitle_stackweight) + (rr > 0 ? MIN(rr, clientsnstack2) : 0) + (clientsnstack2 - 1) * flexwintitle_separator;
 		rr -= clientsnstack2;
-		hid_w = clientsnhidden * (rw + w * FLEXWINTITLE_HIDDENWEIGHT) + (rr > 0 ? MIN(rr, clientsnhidden) : 0);
+		if (clientsnhidden && flexwintitle_hiddenweight)
+			hid_w = clientsnhidden * (rw + w * flexwintitle_hiddenweight) + (rr > 0 ? MIN(rr, clientsnhidden) : 0) + (clientsnhidden - 1) * flexwintitle_separator;
 		rr -= clientsnhidden;
-		rr = r % n;
+		if (clientsnfloating && flexwintitle_floatweight)
+			flt_w = clientsnfloating * (rw + w * flexwintitle_floatweight) + (rr > 0 ? MIN(rr, clientsnfloating) : 0) + (clientsnfloating - 1) * flexwintitle_separator;
+		if (rr > 0)
+			mas_w += rr;
 
 		if (mirror) {
 			if (center && clientsnstack2) {
-				mas_x = st1_x + st1_w;
-				st2_x = mas_x + mas_w;
-				hid_x = st2_x + st2_w;
+				mas_x = st1_x + (st1_w ? st1_w + flexwintitle_separator : 0);
+				st2_x = mas_x + (mas_w ? mas_w + flexwintitle_separator : 0);
+				hid_x = st2_x + (st2_w ? st2_w + flexwintitle_separator : 0);
 			} else {
 				if (clientsnstack2) {
-					st2_x = st1_x + st1_w;
-					mas_x = st2_x + st2_w;
+					st2_x = st1_x + (st1_w ? st1_w + flexwintitle_separator : 0);
+					mas_x = st2_x + (st2_w ? st2_w + flexwintitle_separator : 0);
 				} else
-					mas_x = st1_x + st1_w;
-				hid_x = mas_x + mas_w;
+					mas_x = st1_x + (st1_w ? st1_w + flexwintitle_separator : 0);
+				hid_x = mas_x + (mas_w ? mas_w + flexwintitle_separator : 0);
 			}
 		} else {
 			if (center && clientsnstack2) {
-				mas_x = st2_x + st2_w;
-				st1_x = mas_x + mas_w;
-				hid_x = st1_x + st1_w;
+				mas_x = st2_x + (st2_w ? st2_w + flexwintitle_separator : 0);
+				st1_x = mas_x + (mas_w ? mas_w + flexwintitle_separator : 0);
+				hid_x = st1_x + (st1_w ? st1_w + flexwintitle_separator : 0);
 			} else {
-				st1_x = mas_x + mas_w;
+				st1_x = mas_x + (mas_w ? mas_w + flexwintitle_separator : 0);
 				if (clientsnstack2) {
-					st2_x = st1_x + st1_w;
-					hid_x = st2_x + st2_w;
+					st2_x = st1_x + (st1_w ? st1_w + flexwintitle_separator : 0);
+					hid_x = st2_x + (st2_w ? st2_w + flexwintitle_separator : 0);
 				} else
-					hid_x = st1_x + st1_w;
+					hid_x = st1_x + (st1_w ? st1_w + flexwintitle_separator : 0);
 			}
 		}
+		flt_x = hid_x + (hid_w ? hid_w + flexwintitle_separator : 0);
 
-		flt_x = hid_x + hid_w;
-		c = flextitledrawarea(ws, c, mas_x, rr, w * FLEXWINTITLE_MASTERWEIGHT + rw, clientsnmaster, SCHEMEFOR(GRP_MASTER), 1, 0, 0, passx, tabfn, arg, barg); // master
-		rr -= clientsnmaster;
-		c = flextitledrawarea(ws, c, st1_x, rr, w * FLEXWINTITLE_STACKWEIGHT + rw, clientsnstack, SCHEMEFOR(GRP_STACK1), 1, 0, 0, passx, tabfn, arg, barg); // stack1
-		rr -= clientsnstack;
-		if (clientsnstack2) {
-			c = flextitledrawarea(ws, c, st2_x, rr, w * FLEXWINTITLE_STACKWEIGHT + rw, clientsnstack2, SCHEMEFOR(GRP_STACK2), 1, 0, 0, passx, tabfn, arg, barg); // stack2
-			rr -= clientsnstack2;
-		}
-		c = flextitledrawarea(ws, ws->clients, hid_x, rr, w * FLEXWINTITLE_HIDDENWEIGHT + rw, clientsnhidden, SCHEMEFOR(GRP_HIDDEN), 0, 1, 0, passx, tabfn, arg, barg); // hidden
-		rr -= clientsnhidden;
-		c = flextitledrawarea(ws, ws->clients, flt_x, rr, w * FLEXWINTITLE_FLOATWEIGHT + rw, clientsnfloating, SCHEMEFOR(GRP_FLOAT), 0, 0, 1, passx, tabfn, arg, barg); // floating
+		if (clientsnmaster)
+			c = flextitledrawarea(ws, c, mas_x, mas_w, clientsnmaster, SCHEMEFOR(GRP_MASTER), 1, 0, 0, passx, tabfn, arg, a); // master1
+		if (clientsnstack)
+			c = flextitledrawarea(ws, c, st1_x, st1_w, clientsnstack, SCHEMEFOR(GRP_STACK1), 1, 0, 0, passx, tabfn, arg, a); // stack1
+		if (clientsnstack2)
+			c = flextitledrawarea(ws, c, st2_x, st2_w, clientsnstack2, SCHEMEFOR(GRP_STACK2), 1, 0, 0, passx, tabfn, arg, a); // stack2
+		if (clientsnhidden)
+			c = flextitledrawarea(ws, ws->clients, hid_x, hid_w, clientsnhidden, SCHEMEFOR(GRP_HIDDEN), 0, 1, 0, passx, tabfn, arg, a); // hidden
+		if (clientsnfloating)
+			c = flextitledrawarea(ws, ws->clients, flt_x, flt_w, clientsnfloating, SCHEMEFOR(GRP_FLOAT), 0, 0, 1, passx, tabfn, arg, a); // floating
 	}
 	return 1;
 }

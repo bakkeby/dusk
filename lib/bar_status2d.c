@@ -65,6 +65,8 @@ drawstatusbar(BarArg *a, char* stext)
 	copyvalidchars(text, stext);
 
 	x += lrpad / 2;
+	drw_setscheme(drw, scheme[SchemeNorm]);
+	drw_rect(drw, a->x, a->y, a->w, a->h, 1, 1);
 	drw_setscheme(drw, scheme[LENGTH(colors)]);
 	drw->scheme[ColFg] = scheme[SchemeNorm][ColFg];
 	drw->scheme[ColBg] = scheme[SchemeNorm][ColBg];

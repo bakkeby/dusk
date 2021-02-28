@@ -24,6 +24,13 @@ toggleflag(Client *c, const unsigned long flag)
 	c->flags ^= flag;
 }
 
+void
+toggleflagex(const Arg *arg)
+{
+	toggleflag(selws->sel, getflagbyname(arg->v));
+	arrangews(selws);
+}
+
 const unsigned long
 getflagbyname(const char *name)
 {
@@ -157,11 +164,4 @@ getflagbyname(const char *name)
 		return FlagPlaceholder0x8000000000000000;
 
 	return 0;
-}
-
-void
-toggleflagex(const Arg *arg)
-{
-	toggleflag(selws->sel, getflagbyname(arg->v));
-	arrangews(selws);
 }

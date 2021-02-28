@@ -11,8 +11,7 @@ draw_wintitle_hidden(Bar *bar, BarArg *a)
 {
 	if (!bar->mon->selws)
 		return 0;
-	drw_rect(drw, a->x, a->y, a->w, a->h, 1, 1);
-	return calc_wintitle_hidden(bar->mon->selws, a->x, a->w, -1, flextitledraw, NULL, a);
+	return calc_wintitle_hidden(bar, bar->mon->selws, a->x, a->w, -1, flextitledraw, NULL, a);
 }
 
 int
@@ -20,18 +19,19 @@ click_wintitle_hidden(Bar *bar, Arg *arg, BarArg *a)
 {
 	if (!bar->mon->selws)
 		return 0;
-	calc_wintitle_hidden(bar->mon->selws, 0, a->w, a->x, flextitleclick, arg, a);
-	return ClkWinTitle;
+	if (calc_wintitle_hidden(bar, bar->mon->selws, 0, a->w, a->x, flextitleclick, arg, a))
+		return ClkWinTitle;
+	return -1;
 }
 
 int
 calc_wintitle_hidden(
-	Workspace *ws, int offx, int tabw, int passx,
+	Bar *bar, Workspace *ws, int offx, int tabw, int passx,
 	void(*tabfn)(Workspace *, Client *, int, int, int, int, Arg *arg, BarArg *barg),
-	Arg *arg, BarArg *barg
+	Arg *arg, BarArg *a
 ) {
 	Client *c;
-	int clientsnhidden = 0, w, r;
+	int clientsnhidden = 0;
 	int groupactive = GRP_HIDDEN;
 
 	for (c = ws->clients; c; c = c->next) {
@@ -44,8 +44,23 @@ calc_wintitle_hidden(
 	if (!clientsnhidden)
 		return 0;
 
-	w = tabw / clientsnhidden;
-	r = tabw % clientsnhidden;
-	c = flextitledrawarea(ws, ws->clients, offx, r, w, clientsnhidden, SCHEMEFOR(GRP_HIDDEN), 0, 1, 0, passx, tabfn, arg, barg);
+	/* This avoids drawing a separator on the left hand side of the wintitle section if
+	 * there is a border and the wintitle module rests at the left border. */
+	if (bar->borderpx && a->x > bar->bx + bar->borderpx) {
+		offx += flexwintitle_separator;
+		tabw -= flexwintitle_separator;
+	}
+
+	/* This avoids drawing a separator on the right hand side of the wintitle section if
+	 * there is a border and the wintitle module rests at the right border. */
+	if (bar->borderpx && a->x + a->w < bar->bx + bar->bw - 2 * bar->borderpx)
+		tabw -= flexwintitle_separator;
+
+	if (bar->borderpx) {
+		XSetForeground(drw->dpy, drw->gc, scheme[bar->scheme][ColBorder].pixel);
+		XFillRectangle(drw->dpy, drw->drawable, drw->gc, a->x, a->y, a->w, a->h);
+	}
+
+	c = flextitledrawarea(ws, ws->clients, offx, tabw, clientsnhidden, SCHEMEFOR(GRP_HIDDEN), 0, 1, 0, passx, tabfn, arg, a);
 	return 1;
 }

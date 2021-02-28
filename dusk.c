@@ -261,6 +261,7 @@ struct Bar {
 	int topbar;
 	int external;
 	int borderpx;
+	int scheme;
 	int groupactive;
 	int bx, by, bw, bh; /* bar geometry */
 	int w[BARRULES]; // width, array length == barrules, then use r index for lookup purposes
@@ -277,6 +278,7 @@ typedef struct {
 typedef struct {
 	int monitor;
 	int bar;
+	int scheme;
 	int alignment; // see bar alignment enum
 	int (*widthfunc)(Bar *bar, BarArg *a);
 	int (*drawfunc)(Bar *bar, BarArg *a);
@@ -1451,12 +1453,13 @@ drawbarwin(Bar *bar)
 	const BarRule *br;
 	Monitor *lastmon;
 
+	if (enabled(BarActiveGroupBorderColor))
+		getclientcounts(bar->mon->selws, &groupactive, &ignored, &ignored, &ignored, &ignored, &ignored, &ignored);
+	else
+		groupactive = GRP_MASTER;
+	bar->scheme = getschemefor(bar->mon->selws, groupactive, bar->mon == selmon);
 	if (bar->borderpx) {
-		if (enabled(BarActiveGroupBorderColor))
-			getclientcounts(bar->mon->selws, &groupactive, &ignored, &ignored, &ignored, &ignored, &ignored, &ignored);
-		else
-			groupactive = GRP_MASTER;
-		XSetForeground(drw->dpy, drw->gc, scheme[getschemefor(bar->mon->selws, groupactive, bar->mon == selmon)][ColBorder].pixel);
+		XSetForeground(drw->dpy, drw->gc, scheme[bar->scheme][ColBorder].pixel);
 		XFillRectangle(drw->dpy, drw->drawable, drw->gc, 0, 0, bar->bw, bar->bh);
 	}
 
@@ -1478,7 +1481,8 @@ drawbarwin(Bar *bar)
 		if (br->monitor != 'A' && br->monitor != -1 && br->monitor != bar->mon->num &&
 				!(br->drawfunc == draw_systray && br->monitor > lastmon->num && bar->mon->num == 0)) // hack: draw systray on first monitor if the designated one is not available
 			continue;
-		drw_setscheme(drw, scheme[SchemeNorm]);
+		if (br->scheme != -1)
+			drw_setscheme(drw, scheme[br->scheme]);
 		warg.w = (br->alignment < BAR_ALIGN_RIGHT_LEFT ? lw : rw);
 		w = br->widthfunc(bar, &warg);
 		w = MIN(warg.w, w);
@@ -2994,8 +2998,7 @@ setlayout(const Arg *arg)
 		else
 			arrangews(ws);
 	}
-	else
-		drawbar(selmon);
+	drawbar(selmon);
 }
 
 /* arg > 1.0 will set mfact absolutely */

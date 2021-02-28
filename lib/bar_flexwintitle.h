@@ -13,4 +13,4 @@ static int iscenteredlayout(Workspace *ws, int n);
 static int isfixedlayout(Workspace *ws);
 static int ismirroredlayout(Workspace *ws);
 
-static Client *flextitledrawarea(Workspace *ws, Client *c, int x, int r, int w, int max_clients, int tabscheme, int draw_tiled, int draw_hidden, int draw_floating, int passx, void(*tabfn)(Workspace *, Client *, int, int, int, int, Arg *arg, BarArg *barg), Arg *arg, BarArg *barg);
+static Client *flextitledrawarea(Workspace *ws, Client *c, int x, int w, int num_clients, int tabscheme, int draw_tiled, int draw_hidden, int draw_floating, int passx, void(*tabfn)(Workspace *, Client *, int, int, int, int, Arg *arg, BarArg *barg), Arg *arg, BarArg *barg);
