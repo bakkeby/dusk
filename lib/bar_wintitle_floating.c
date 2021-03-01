@@ -19,8 +19,9 @@ click_wintitle_floating(Bar *bar, Arg *arg, BarArg *a)
 {
 	if (!bar->mon->selws)
 		return 0;
-	calc_wintitle_floating(bar, bar->mon->selws, 0, a->w, a->x, flextitleclick, arg, a);
-	return ClkWinTitle;
+	if (calc_wintitle_floating(bar, bar->mon->selws, 0, a->w, a->x, flextitleclick, arg, a))
+		return ClkWinTitle;
+	return -1;
 }
 
 int

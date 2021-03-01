@@ -23,8 +23,9 @@ click_flexwintitle(Bar *bar, Arg *arg, BarArg *a)
 {
 	if (!bar->mon->selws)
 		return 0;
-	flextitlecalculate(bar, 0, a->w, a->x, flextitleclick, arg, a);
-	return ClkWinTitle;
+	if (flextitlecalculate(bar, 0, a->w, a->x, flextitleclick, arg, a))
+		return ClkWinTitle;
+	return -1;
 }
 
 Client *
