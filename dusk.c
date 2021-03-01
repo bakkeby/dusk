@@ -1458,7 +1458,7 @@ drawbarwin(Bar *bar)
 	else
 		groupactive = GRP_MASTER;
 	bar->scheme = getschemefor(bar->mon->selws, groupactive, bar->mon == selmon);
-	fprintf(stderr, "drawbarwin: mon = %d, y = %d, scheme = %d\n", bar->mon->num, bar->by, bar->scheme);
+
 	if (bar->borderpx) {
 		XSetForeground(drw->dpy, drw->gc, scheme[bar->scheme][ColBorder].pixel);
 		XFillRectangle(drw->dpy, drw->drawable, drw->gc, 0, 0, bar->bw, bar->bh);
