@@ -559,9 +559,9 @@ setworkspaceareasformon(Monitor *mon)
 
 	/* window geoms (cell height/width) */
 	ch = mon->wh / rows;
-	rrest = mon->wh - ch * rows;
+	rrest = mon->wh % rows;
 	cw = mon->ww / cols;
-	crest = mon->wh - cw * cols;
+	crest = mon->ww % cols;
 	x = mon->wx;
 	y = mon->wy;
 
