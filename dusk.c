@@ -481,6 +481,7 @@ static void resize(Client *c, int x, int y, int w, int h, int interact);
 static void resizeclient(Client *c, int x, int y, int w, int h);
 static void resizeclientpad(Client *c, int x, int y, int w, int h, int xpad, int ypad);
 static void resizemouse(const Arg *arg);
+static void resizeorcfacts(const Arg *arg);
 static void restack(Workspace *ws);
 static void run(void);
 static void scan(void);
@@ -2721,6 +2722,15 @@ resizemouse(const Arg *arg)
 	removeflag(c, MoveResize);
 	if (moveresizeopacity)
 		opacity(c, prevopacity);
+}
+
+void
+resizeorcfacts(const Arg *arg)
+{
+	if (!selws->layout || ISFLOATING(selws->sel))
+		resizemouse(arg);
+	else
+		dragcfact(arg);
 }
 
 void
