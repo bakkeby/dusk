@@ -4,11 +4,12 @@ floatpos(const Arg *arg)
 	Workspace *ws = selws;
 	Client *c = ws->sel;
 
-	if (!c || (ws->layout->arrange && !ISFLOATING(c)))
+	if (!c)
 		return;
 
 	setfloatpos(c, (char *)arg->v);
 	resizeclient(c, c->x, c->y, c->w, c->h);
+	savefloats(c);
 
 	XRaiseWindow(dpy, c->win);
 	XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w/2, c->h/2);
@@ -21,12 +22,15 @@ setfloatpos(Client *c, const char *floatpos)
 	int x, y, w, h, wx, ww, wy, wh;
 	int oh, ov, ih, iv;
 	unsigned int n;
-	Workspace *ws = selws;
 
 	if (!c || !floatpos)
 		return;
-	if (ws->layout->arrange && !ISFLOATING(c))
-		return;
+
+	if (c->ws->layout->arrange && !ISFLOATING(c)) {
+		addflag(c, MoveResize);
+		togglefloating(&((Arg) { .v = c }));
+		removeflag(c, MoveResize);
+	}
 
 	switch (sscanf(floatpos, "%d%c %d%c %d%c %d%c", &x, &xCh, &y, &yCh, &w, &wCh, &h, &hCh)) {
 		case 4:
@@ -56,10 +60,12 @@ setfloatpos(Client *c, const char *floatpos)
 	}
 
 	getgaps(c->ws, &oh, &ov, &ih, &iv, &n);
-	wx = c->ws->mon->wx + ov;
-	wy = c->ws->mon->wy + oh;
-	ww = c->ws->mon->ww - 2*ov;
-	wh = c->ws->mon->wh - 2*oh;
+
+	wx = c->ws->wx + ov;
+	wy = c->ws->wy + oh;
+	ww = c->ws->ww - 2*ov;
+	wh = c->ws->wh - 2*oh;
+
 	addflag(c, IgnoreSizeHints);
 
 	getfloatpos(x, xCh, w, wCh, wx, ww, c->x, c->w, c->bw, floatposgrid_x, &c->x, &c->w);

@@ -1,21 +1,40 @@
-void savefloats(const Arg *arg)
+void savefloats(Client *c)
 {
-	Client *c = CLIENT;
-	for (c = nextmarked(NULL, c); c; c = nextmarked(c->next, NULL)) {
-		/* save last known float dimensions */
-		c->sfx = c->x;
-		c->sfy = c->y;
-		c->sfw = c->w;
-		c->sfh = c->h;
-	}
+	Workspace *ws = c->ws;
+	Monitor *m = ws->mon;
+
+	/* save last known workspace float dimensions relative to monitor */
+	c->sfx = ws->wx + (c->x - m->wx) * m->ww / ws->ww;
+	c->sfy = ws->wy + (c->y - m->wy) * m->wh / ws->wh;
+	c->sfw = c->w * m->ww / ws->ww;
+	c->sfh = c->h * m->wh / ws->wh;
 }
 
 void
-restorefloats(Workspace *ws)
+restorefloats(Client *c)
+{
+	if (!ISVISIBLE(c))
+		return;
+	if (c->sfx == -9999)
+		savefloats(c);
+
+	Workspace *ws = c->ws;
+	Monitor *m = ws->mon;
+
+	int x = ws->wx + (c->sfx - m->wx) * ws->ww / m->ww;
+	int y = ws->wy + (c->sfy - m->wy) * ws->wh / m->wh;
+	int w = c->sfw * ws->ww / m->ww;
+	int h = c->sfh * ws->wh / m->wh;
+
+	XMoveResizeWindow(dpy, c->win, x, y, w, h);
+	resize(c, x, y, w, h, 0);
+}
+
+void
+restorewsfloats(Workspace *ws)
 {
 	Client *c;
 	/* restore last known float dimensions for all visible clients */
 	for (c = ws->clients; c; c = c->next)
-		if (ISVISIBLE(c) && c->sfx != -9999)
-			resize(c, c->sfx, c->sfy, c->sfw, c->sfh, 0);
+		restorefloats(c);
 }

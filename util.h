@@ -37,7 +37,7 @@ static const unsigned long
 	SortScreens = 0x80000, // only applies on startup
 	ViewOnWs = 0x100000, // follow a window to the workspace it is being moved to
 	Xresources = 0x200000, // xrdb patch
-	AutoSaveFloats = 0x400000, // auto save float posistion when using movemouse or resizemouse
+	FuncPlaceholder0x400000 = 0x400000,
 	Debug = 0x800000,
 	AltWorkspaceIcons = 0x1000000, // show the workspace name instead of the icons
 	GreedyMonitor = 0x2000000, // when viewing a workspace the monitor is greedy and gives nothing in return (i.e. disables swap of workspaces)

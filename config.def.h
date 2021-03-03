@@ -64,7 +64,6 @@ static unsigned long functionality = 0
 //	|SortScreens // only applies on startup
 //	|ViewOnWs // follow a window to the workspace it is being moved to
 //	|Xresources // xrdb patch
-//	|AutoSaveFloats // auto save float posistion when using movemouse or resizemouse
 //	|Debug
 //	|AltWorkspaceIcons // show the workspace name instead of the icons
 //	|GreedyMonitor // when viewing a workspace the monitor is greedy and gives nothing in return (i.e. disables swap of workspaces)
@@ -486,6 +485,7 @@ static Key keys[] = {
 
 	{ MODKEY,                       XK_a,            markall,                {0} }, // marks all clients on the selected workspace
 	{ MODKEY|Ctrl,                  XK_a,            markall,                {1} }, // marks all floating clients on the selected workspace
+	{ MODKEY|Alt,                   XK_a,            markall,                {2} }, // marks all hidden clients on the selected workspace
 	{ MODKEY|Shift,                 XK_a,            unmarkall,              {0} }, // unmarks all clients
 	{ MODKEY,                       XK_m,            togglemark,             {0} }, // marks or unmarks the selected client for group action
 	{ MODKEY|Alt,                   XK_m,            zoom,                   {0} }, // moves the currently focused window to/from the master area (for tiled layouts)
@@ -501,7 +501,7 @@ static Key keys[] = {
 	{ MODKEY|Ctrl,                  XK_m,            mirrorlayout,           {0} }, // flip the master and stack areas
 	{ MODKEY,                       XK_space,        setlayout,              {0} }, // toggles between current and previous layout
 
-	{ MODKEY|Shift,                 XK_g,            savefloats,             {0} }, // pins a client's floating position and size
+	{ MODKEY|Ctrl,                  XK_g,            floatpos,               {.v = "50% 50% 80% 80%" } }, // center client and take up 80% of the screen
 	{ MODKEY,                       XK_g,            togglefloating,         {0} }, // toggles between tiled and floating arrangement for the currently focused client
 	{ MODKEY,                       XK_f,            togglefullscreen,       {0} }, // toggles fullscreen for the currently selected client
 	{ MODKEY|Shift,                 XK_f,            togglefakefullscreen,   {0} }, // toggles "fake" fullscreen for the selected window
@@ -609,15 +609,15 @@ static Button buttons[] = {
 	{ ClkClientWin,              MODKEY|Shift,            Button8,        markmouse,        {0} }, // unmarks clients under the mouse cursor for group action
 	{ ClkClientWin,              MODKEY,                  Button9,        markmouse,        {2} }, // toggles marking of clients under the mouse cursor for group action
 	{ ClkClientWin,              MODKEY,                  Button1,        moveorplace,      {1} }, // moves a client window into a floating or tiled position depending on floating state
-	{ ClkClientWin,              MODKEY|Ctrl,             Button1,        movemouse,        {1} }, // moves a client window between tiled positions (0 = relative to mouse cursor, 1 = relative to window center, 2 = mouse cursor warps to window center)
+	{ ClkClientWin,              MODKEY|Shift,            Button1,        movemouse,        {0} }, // moves a client window between tiled positions (0 = relative to mouse cursor, 1 = relative to window center, 2 = mouse cursor warps to window center)
 	{ ClkClientWin,              MODKEY|Alt,              Button2,        togglefloating,   {0} }, // toggles between tiled and floating arrangement for given client
 	{ ClkClientWin,              MODKEY,                  Button3,        resizeorcfacts,   {0} }, // change the size of a floating client window or adjust cfacts (dragcfact) when tiled
-	{ ClkClientWin,              MODKEY|Ctrl,             Button3,        resizemouse,      {0} }, // change the size of a floating client window
+	{ ClkClientWin,              MODKEY|Shift,            Button3,        resizemouse,      {0} }, // change the size of a floating client window
 	{ ClkClientWin,              0,                       Button8,        movemouse,        {0} }, // move a client window using extra mouse buttons (previous)
 	{ ClkClientWin,              0,                       Button9,        resizemouse,      {0} }, // resize a client window using extra mouse buttons (next)
 	{ ClkClientWin,              MODKEY,                  Button2,        zoom,             {0} }, // moves the currently focused window to/from the master area (for tiled layouts)
-	{ ClkClientWin,              MODKEY|Shift,            Button1,        dragmfact,        {0} }, // dynamically change the size of the master area compared to the stack area(s)
-	{ ClkRootWin,                MODKEY|Shift,            Button1,        dragmfact,        {0} }, // dynamically change the size of the master area compared to the stack area(s)
+	{ ClkClientWin,              MODKEY|Ctrl,             Button1,        dragmfact,        {0} }, // dynamically change the size of the master area compared to the stack area(s)
+	{ ClkRootWin,                MODKEY|Ctrl,             Button1,        dragmfact,        {0} }, // dynamically change the size of the master area compared to the stack area(s)
 	{ ClkClientWin,              MODKEY,                  Button4,        inplacerotate,    {.i = +1 } }, // rotate clients within the respective area (master, primary stack, secondary stack) clockwise
 	{ ClkClientWin,              MODKEY,                  Button5,        inplacerotate,    {.i = -1 } }, // rotate clients within the respective area (master, primary stack, secondary stack) counter-clockwise
 	{ ClkClientWin,              MODKEY|Shift,            Button4,        rotatestack,      {.i = +1 } }, // rotate all clients (clockwise)

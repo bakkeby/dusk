@@ -124,8 +124,7 @@ showws(Workspace *ws)
 	if (!ws)
 		return;
 	ws->visible = 1;
-	ws->mon->selws = ws;
-	selws = ws;
+	selws = ws->mon->selws = ws;
 	showwsclients(ws);
 }
 
@@ -412,6 +411,8 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 			do_warp = 1;
 		if (!ws->visible)
 			showws(ws);
+		else
+			selws = ws->mon->selws = ws;
 	} else if (ws->mon == m) {
 		/* The workspace is already present on the current monitor, just show it */
 		showws(ws);

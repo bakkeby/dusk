@@ -30,7 +30,6 @@ dump_settings(yajl_gen gen)
       YSTR("SortScreens"); YBOOL(enabled(SortScreens));
       YSTR("ViewOnWs"); YBOOL(enabled(ViewOnWs));
       YSTR("Xresources"); YBOOL(enabled(Xresources));
-      YSTR("AutoSaveFloats"); YBOOL(enabled(AutoSaveFloats));
       YSTR("Debug"); YBOOL(enabled(Debug));
       YSTR("AltWorkspaceIcons"); YBOOL(enabled(AltWorkspaceIcons));
       YSTR("GreedyMonitor"); YBOOL(enabled(GreedyMonitor));
