@@ -24,7 +24,7 @@ void
 togglescratch(const Arg *arg)
 {
 	Client *c, *next, *last = NULL, *found = NULL, *monclients = NULL;
-	Workspace *ws, *ows;
+	Workspace *ws;
 	int scratchvisible = 0; // whether the scratchpads are currently visible or not
 	int multimonscratch = 0; // whether we have scratchpads that are placed on multiple monitors
 	int scratchmon = -1; // the monitor where the scratchpads exist
@@ -71,6 +71,8 @@ togglescratch(const Arg *arg)
 			   this we detach them and add them to a temporary list (monclients) which is to be
 			   processed later. */
 			if (!multimonscratch && c->ws != selws) {
+				if (ISFLOATING(c))
+					savefloats(c);
 				detach(c);
 				detachstack(c);
 				/* Note that we are adding clients at the end of the list, this is to preserve the
@@ -93,7 +95,7 @@ togglescratch(const Arg *arg)
 	/* Attach moved scratchpad clients on the selected monitor */
 	for (c = monclients; c; c = next) {
 		next = c->next;
-		ows = c->ws;
+		clientmonresize(c, c->ws->mon, selws->mon);
 		c->ws = selws;
 		/* Attach scratchpad clients from other monitors at the bottom of the stack */
 		if (selws->clients) {
@@ -105,20 +107,13 @@ togglescratch(const Arg *arg)
 		attachstack(c);
 		removeflag(c, Invisible);
 
-		/* Center floating scratchpad windows when moved from one monitor to another */
+		/* Center floating scratchpad windows when moved from one workspace to another */
 		if (ISFLOATING(c)) {
-			if (c->w > selws->mon->ww)
-				c->w = selws->mon->ww - c->bw * 2;
-			if (c->h > selws->mon->wh)
-				c->h = selws->mon->wh - c->bw * 2;
+			if (c->w > selws->ww)
+				c->w = selws->ww - c->bw * 2;
+			if (c->h > selws->wh)
+				c->h = selws->wh - c->bw * 2;
 
-			if (numscratchpads > 1) {
-				clientmonresize(c, ows->mon, selws->mon);
-			} else {
-				setfloatpos(c, "50% 50%");
-				resizeclient(c, c->x, c->y, c->w, c->h);
-			}
-			resizeclient(c, c->x, c->y, c->w, c->h);
 			XRaiseWindow(dpy, c->win);
 		}
 	}

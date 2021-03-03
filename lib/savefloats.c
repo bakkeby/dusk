@@ -4,8 +4,8 @@ void savefloats(Client *c)
 	Monitor *m = ws->mon;
 
 	/* save last known workspace float dimensions relative to monitor */
-	c->sfx = ws->wx + (c->x - m->wx) * m->ww / ws->ww;
-	c->sfy = ws->wy + (c->y - m->wy) * m->wh / ws->wh;
+	c->sfx = m->wx + (c->x - ws->wx) * m->ww / ws->ww;
+	c->sfy = m->wy + (c->y - ws->wy) * m->wh / ws->wh;
 	c->sfw = c->w * m->ww / ws->ww;
 	c->sfh = c->h * m->wh / ws->wh;
 }
@@ -26,6 +26,10 @@ restorefloats(Client *c)
 	int w = c->sfw * ws->ww / m->ww;
 	int h = c->sfh * ws->wh / m->wh;
 
+	if (w <= 0 || h <= 0) {
+		fprintf(stderr, "restorefloats: bad float values x = %d, y = %d, w = %d, h = %d for client = %s\n", x, y, w, h, c->name);
+		return;
+	}
 	XMoveResizeWindow(dpy, c->win, x, y, w, h);
 	resize(c, x, y, w, h, 0);
 }

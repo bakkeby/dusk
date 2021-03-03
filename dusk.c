@@ -1070,13 +1070,17 @@ clientmonresize(Client *c, Monitor *from, Monitor *to)
 	if (!c || from == to)
 		return;
 
+	if (c->sfx == -9999)
+		savefloats(c);
+
+	savewindowfloatposition(c, from);
+	if (!restorewindowfloatposition(c, to))
+		clientrelposmon(c, from, to, &c->sfx, &c->sfy, &c->sfw, &c->sfh);
+
 	if (ISFLOATING(c) && (!ISFULLSCREEN(c) || ISFAKEFULLSCREEN(c)))
 		clientrelposmon(c, from, to, &c->x, &c->y, &c->w, &c->h);
 	else
 		clientrelposmon(c, from, to, &c->oldx, &c->oldy, &c->oldw, &c->oldh);
-
-	if (c->sfx != -9999)
-		clientrelposmon(c, from, to, &c->sfx, &c->sfy, &c->sfw, &c->sfh);
 }
 
 void
@@ -1976,6 +1980,8 @@ manage(Window w, XWindowAttributes *wa)
 	c->oldbw = wa->border_width;
 	c->cfact = 1.0;
 	c->ws = NULL;
+	c->sfx = -9999;
+	c->sfy = -9999;
 
 	updatetitle(c);
 	getclientflags(c);
@@ -1990,6 +1996,8 @@ manage(Window w, XWindowAttributes *wa)
 		} else
 			c->ws = selws;
 	}
+
+	restorewindowfloatposition(c, c->ws->mon);
 
 	if (!RULED(c)) {
 		if (c->x == c->ws->mon->wx && c->y == c->ws->mon->wy)
@@ -2080,8 +2088,6 @@ manage(Window w, XWindowAttributes *wa)
 		}
 	}
 
-	c->sfx = -9999;
-	c->sfy = -9999;
 	c->sfw = c->w;
 	c->sfh = c->h;
 

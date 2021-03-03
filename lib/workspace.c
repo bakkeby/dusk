@@ -25,6 +25,7 @@ createworkspaces()
 		}
 		m = (m->next == NULL ? mons : m->next);
 	}
+	setworkspaceareas();
 }
 
 Workspace *

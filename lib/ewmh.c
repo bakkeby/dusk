@@ -14,14 +14,80 @@ persistworkspacestate(Workspace *ws)
 		c->idx = i;
 		setclientflags(c);
 		setclientfields(c);
+		savewindowfloatposition(c, c->ws->mon);
 		if (c->swallowing) {
 			c->swallowing->idx = i;
 			setclientflags(c->swallowing);
 			setclientfields(c->swallowing);
+			savewindowfloatposition(c->swallowing, c->swallowing->ws->mon);
 		}
 	}
 
 	XSync(dpy, False);
+}
+
+void
+savewindowfloatposition(Client *c, Monitor *m)
+{
+	char atom[22];
+	if (c->sfx == -9999)
+		return;
+
+	sprintf(atom, "_DUSK_FLOATPOS_%u", m->num);
+	unsigned long pos[] = { (MAX(c->sfx, 0) & 0xffff) | ((MAX(c->sfy, 0) & 0xffff) << 16) };
+	XChangeProperty(dpy, c->win, XInternAtom(dpy, atom, False), XA_CARDINAL, 32, PropModeReplace, (unsigned char *)pos, 1);
+
+	sprintf(atom, "_DUSK_FLOATSIZE_%u", m->num);
+	unsigned long size[] = { (c->sfw & 0xffff) | ((c->sfh & 0xffff) << 16) };
+	XChangeProperty(dpy, c->win, XInternAtom(dpy, atom, False), XA_CARDINAL, 32, PropModeReplace, (unsigned char *)size, 1);
+
+	XSync(dpy, False);
+}
+
+int
+restorewindowfloatposition(Client *c, Monitor *m)
+{
+	char atom[22];
+	Atom key, value;
+	int x, y, w, h;
+
+	sprintf(atom, "_DUSK_FLOATPOS_%u", m->num);
+
+	key = XInternAtom(dpy, atom, False);
+	if (!key)
+		return 0;
+
+	value = getatomprop(c, key, AnyPropertyType);
+	if (!value)
+		return 0;
+
+	x = value & 0xffff;
+	y = value >> 16;
+
+	sprintf(atom, "_DUSK_FLOATSIZE_%u", m->num);
+
+	key = XInternAtom(dpy, atom, False);
+	if (!key)
+		return 0;
+
+	value = getatomprop(c, key, AnyPropertyType);
+	if (!value)
+		return 0;
+
+	w = value & 0xffff;
+	h = value >> 16;
+
+	if (w <= 0 || h <= 0) {
+		fprintf(stderr, "restorewindowfloatposition: bad float values x = %d, y = %d, w = %d, h = %d for client = %s\n", x, y, w, h, c->name);
+		return 0;
+	}
+
+	c->sfx = x;
+	c->sfy = y;
+	c->sfw = w;
+	c->sfh = h;
+
+	return 1;
 }
 
 void
