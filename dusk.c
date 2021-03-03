@@ -755,6 +755,8 @@ arrangews(Workspace *ws)
 	strncpy(ws->ltsymbol, ws->layout->symbol, sizeof ws->ltsymbol);
 	if (ws->layout->arrange)
 		ws->layout->arrange(ws);
+	else
+		restorefloats(ws);
 }
 
 void
@@ -2195,7 +2197,7 @@ motionnotify(XEvent *e)
 void
 moveorplace(const Arg *arg)
 {
-	if (!selws->layout || ISFLOATING(selws->sel))
+	if (!selws->layout->arrange || ISFLOATING(selws->sel))
 		movemouse(arg);
 	else
 		placemouse(arg);
@@ -2260,7 +2262,7 @@ movemouse(const Arg *arg)
 				togglefloating(NULL);
 			if (!ws->layout->arrange || ISFLOATING(c)) {
 				resize(c, nx, ny, c->w, c->h, 1);
-				if (enabled(AutoSaveFloats))
+				if (enabled(AutoSaveFloats) || !ws->layout->arrange)
 					savefloats(NULL);
 			}
 			break;
@@ -2700,7 +2702,7 @@ resizemouse(const Arg *arg)
 			}
 			if (!ws->layout->arrange || ISFLOATING(c)) {
 				resize(c, nx, ny, nw, nh, 1);
-				if (enabled(AutoSaveFloats))
+				if (enabled(AutoSaveFloats) || !ws->layout->arrange)
 					savefloats(NULL);
 			}
 			break;
@@ -2727,7 +2729,7 @@ resizemouse(const Arg *arg)
 void
 resizeorcfacts(const Arg *arg)
 {
-	if (!selws->layout || ISFLOATING(selws->sel))
+	if (!selws->layout->arrange || ISFLOATING(selws->sel))
 		resizemouse(arg);
 	else
 		dragcfact(arg);

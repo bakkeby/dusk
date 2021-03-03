@@ -9,3 +9,13 @@ void savefloats(const Arg *arg)
 		c->sfh = c->h;
 	}
 }
+
+void
+restorefloats(Workspace *ws)
+{
+	Client *c;
+	/* restore last known float dimensions for all visible clients */
+	for (c = ws->clients; c; c = c->next)
+		if (ISVISIBLE(c) && c->sfx != -9999)
+			resize(c, c->sfx, c->sfy, c->sfw, c->sfh, 0);
+}
