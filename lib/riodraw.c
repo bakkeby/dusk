@@ -67,10 +67,19 @@ rioposition(Client *c, int x, int y, int w, int h)
 	}
 
 	SETFLOATING(c);
-	if (enabled(RioDrawIncludeBorders))
-		resizeclient(c, x, y, w - (c->bw * 2), h - (c->bw * 2));
-	else
-		resizeclient(c, x - c->bw, y - c->bw, w, h);
+	if (enabled(RioDrawIncludeBorders)) {
+		c->x = x;
+		c->y = y;
+		c->w = w - (c->bw * 2);
+		c->h = h - (c->bw * 2);
+	} else {
+		c->x = x - c->bw;
+		c->y = y - c->bw;
+		c->w = w;
+		c->h = h;
+	}
+
+	savefloats(c);
 	drawbar(c->ws->mon);
 	arrange(c->ws);
 
