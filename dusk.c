@@ -1982,6 +1982,8 @@ manage(Window w, XWindowAttributes *wa)
 	c->ws = NULL;
 	c->sfx = -9999;
 	c->sfy = -9999;
+	c->sfw = c->w;
+	c->sfh = c->h;
 
 	updatetitle(c);
 	getclientflags(c);
@@ -2087,9 +2089,6 @@ manage(Window w, XWindowAttributes *wa)
 			c->y = m->wy + (m->wh - HEIGHT(c)) / 2;
 		}
 	}
-
-	c->sfw = c->w;
-	c->sfh = c->h;
 
 	XChangeProperty(dpy, root, netatom[NetClientList], XA_WINDOW, 32, PropModeAppend,
 		(unsigned char *) &(c->win), 1);
