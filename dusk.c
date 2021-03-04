@@ -3325,26 +3325,24 @@ togglefloating(const Arg *arg)
 			arrange(ws);
 		}
 		setflag(c, Floating, !ISFLOATING(c) || ISFIXED(c));
-		if (!MOVERESIZE(c)) {
-			if (ISFLOATING(c)) {
-				if (c->sfx != -9999)
-					/* restore last known float dimensions */
-					restorefloats(c);
-				else {
-					setfloatpos(c, toggle_float_pos);
-					resizeclient(c, c->x, c->y, c->w, c->h);
-				}
-				wc.sibling = c->ws->mon->bar->win;
-				XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
+		if (!MOVERESIZE(c) && ISFLOATING(c)) {
+			if (c->sfx == -9999) {
+				setfloatpos(c, toggle_float_pos);
+				addflag(c, NeedResize);
 			}
+			wc.sibling = c->ws->mon->bar->win;
+			XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
 		}
+
 		setfloatinghint(c);
 		ws = c->ws;
 	}
-	XSync(dpy, False);
-	drawbar(ws->mon);
-	arrange(ws);
 
+	if (ws) {
+		XSync(dpy, False);
+		drawbar(ws->mon);
+		arrange(ws);
+	}
 }
 
 void
