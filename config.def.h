@@ -119,12 +119,12 @@ static char markedfgcolor[]              = "#615656";
 static char markedbgcolor[]              = "#ECB820";
 static char markedbordercolor[]          = "#ECB820";
 
-static char scratchnormcolor[]           = "#C6BDBD";
-static char scratchnormbgcolor[]         = "#180A13";
+static char scratchnormcolor[]           = "#FFF7D4";
+static char scratchnormbgcolor[]         = "#664C67";
 static char scratchnormbordercolor[]     = "#77547E";
 
 static char scratchselcolor[]            = "#FFF7D4";
-static char scratchselbgcolor[]          = "#440000";
+static char scratchselbgcolor[]          = "#77547E";
 static char scratchselbordercolor[]      = "#894B9F";
 
 static char normTTBbgcolor[]             = "#330000";
