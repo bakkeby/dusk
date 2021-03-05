@@ -46,6 +46,8 @@ riodraw(Client *c, const char slopstyle[])
 
 	if (c) {
 		rioposition(c, riodimensions[0], riodimensions[1], riodimensions[2], riodimensions[3]);
+		drawbar(c->ws->mon);
+		arrange(c->ws);
 		return 0;
 	}
 
@@ -80,9 +82,6 @@ rioposition(Client *c, int x, int y, int w, int h)
 	}
 
 	savefloats(c);
-	drawbar(c->ws->mon);
-	arrange(c->ws);
-
 	riodimensions[3] = -1;
 	riopid = 0;
 }

@@ -3204,14 +3204,13 @@ showhide(Client *c)
 			showhide(c->snext);
 			return;
 		}
+
 		if (NEEDRESIZE(c)) {
 			removeflag(c, NeedResize);
 			XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
-		} else {
+		} else
 			XMoveWindow(dpy, c->win, c->x, c->y);
-		}
-		if ((!c->ws->layout->arrange || ISFLOATING(c)) && (!ISFULLSCREEN(c) || ISFAKEFULLSCREEN(c)))
-			resize(c, c->x, c->y, c->w, c->h, 0);
+
 		showhide(c->snext);
 	} else {
 		/* hide clients bottom up */
