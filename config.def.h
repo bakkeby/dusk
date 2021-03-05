@@ -30,7 +30,9 @@ static const char buttonbar[]            = "⛶";
 static const unsigned int systrayspacing = 2;   /* systray spacing */
 static char *toggle_float_pos            = "50% 50% 80% 80%"; // default floating position when triggering togglefloatpos
 static const double defaultopacity       = 0;   /* client default opacity, e.g. 0.75. 0 means don't apply opacity. */
-static const double moveresizeopacity    = 0;   /* client opacity when being moved or resized, 0 means don't apply opacity */
+static const double moveopacity          = 0;   /* client opacity when being moved, 0 means don't apply opacity */
+static const double resizeopacity        = 0;   /* client opacity when being resized, 0 means don't apply opacity */
+static const double placeopacity         = 0;   /* client opacity when being placed, 0 means don't apply opacity */
 
 /* Indicators: see lib/bar_indicators.h for options */
 static int wsindicatortype               = INDICATOR_BOTTOM_BAR_SLIM;
