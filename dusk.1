@@ -57,8 +57,10 @@ currently displayed workspaces.
 .B Mod\-Button1
 Click on a workspace label moves the focused window to that workspace.
 .TP
-.B Mod\-Shift\-Button1
-Click on a workspace label view of that workspace in additon to the currently selected workspaces.
+.B Scrollwheel
+Scroll on the layout symbol to cycle through layouts.
+.br
+Scroll on the workspace symbols to cycle through occupied workspaces.
 .SS Keyboard commands
 The default Mod key in dusk is the Super key (a.k.a. the Windows key).
 .TP
@@ -90,10 +92,10 @@ Focus previous screen, if any.
 .B Mod\-Shift\-.
 Focus next screen, if any.
 .TP
-.B Mod\-,
+.B Mod\-Shift\-Tab
 Move to the previous workspace (on the current monitor) that has windows on it.
 .TP
-.B Mod\-.
+.B Mod\-Tab
 Move to the next workspace (on the current monitor) that has windows on it.
 .TP
 .B Mod\-Alt\-,
@@ -173,11 +175,8 @@ within the dimensions currently given to it).
 .B Mod\-g
 Toggle focused window between tiled and floating state.
 .TP
-.B Mod\-Shift\-g
-Saves a client\'s floating postion and size (restored when toggling floating
-state using
-.B Mod\-g
-).
+.B Mod\-Ctrl\-g
+Make a client floating, centered, and take up 80% of the screen.
 .TP
 .B Ctrl\-Alt\-Tab
 Disables or enables keybindings that are not accompanied by any modifier keys
@@ -204,7 +203,7 @@ View all workspaces on the current monitor that has clients.
 View all workspaces on the current monitor.
 .TP
 .B Mod\-o
-View the selected workspace (only relevant when viewing multiple workspaces).
+View the selected client's workspace (only relevant when viewing multiple workspaces).
 .TP
 .B Mod\-backslash
 Toggle pinning of the current workspace.
@@ -275,6 +274,7 @@ dusk is customized by creating a custom config.h and (re)compiling the source
 code. This keeps it fast, secure and simple.
 
 There are additional functionality that do not have preconfigured keybindings.
+.br
 These can be set up on a per need basis, but are otherwise accessible via the
 .B duskc
 (dusk client) command.
