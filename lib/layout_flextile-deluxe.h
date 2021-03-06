@@ -43,6 +43,7 @@ static void arrange_horizgrid(Workspace *ws, int ax, int ay, int ah, int aw, int
 static void arrange_dwindle(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
 static void arrange_spiral(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
 static void arrange_tatami(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
+static void arrange_tatami_cfacts(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
 
 /* Layout arrangements */
 enum {
@@ -96,6 +97,7 @@ enum {
 	DWINDLE,             // clients are arranged in fibonacci dwindle mode
 	SPIRAL,              // clients are arranged in fibonacci spiral mode
 	TATAMI,              // clients are arranged as tatami mats
+	TATAMI_CFACTS,       // clients are arranged as tatami mats that takes cfacts into account
 	AXIS_LAST,
 };
 
