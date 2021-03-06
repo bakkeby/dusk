@@ -29,6 +29,7 @@ static const TileArranger flextiles[] = {
 	{ arrange_left_to_right },
 	{ arrange_monocle },
 	{ arrange_gapplessgrid },
+	{ arrange_gapplessgrid_cfacts },
 	{ arrange_gapplessgrid_alt1 },
 	{ arrange_gapplessgrid_alt2 },
 	{ arrange_gridmode },
@@ -560,6 +561,92 @@ arrange_gapplessgrid(Workspace *ws, int x, int y, int h, int w, int ih, int iv, 
 		}
 	}
 }
+
+static void
+arrange_gapplessgrid_cfacts(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n, int an, int ai)
+{
+	int i, cols, rows, ch, cw, cy, cn, rn, cc, crest, colw; // counters
+	float cfacts_total = 0;
+	Client *c;
+
+	/* grid dimensions */
+	for (cols = 1; cols <= an/2; cols++)
+		if (cols*cols >= an)
+			break;
+	if (an == 5) /* set layout against the general calculation: not 1:2:2, but 2:3 */
+		cols = 2;
+	rows = an/cols;
+
+	crest = colw = w - iv * (cols - 1);
+
+	float cfacts[cols];
+	int rrests[cols];
+	for (i = 0; i < cols; i++) {
+		cfacts[i] = 0;
+		rrests[i] = 0;
+	}
+
+	/* Sum cfacts for columns */
+	for (i = cn = rn = cc = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), ++i) {
+		if (i >= ai && i < (ai + an)) {
+			if (cc/rows + 1 > cols - an%cols)
+				rows = an/cols + 1;
+			cfacts[cn] += c->cfact;
+			cfacts_total += c->cfact;
+			rn++;
+			cc++;
+			if (rn >= rows) {
+				rn = 0;
+				cn++;
+			}
+		}
+	}
+
+	/* Work out cfact remainders */
+	for (i = cn = rn = cc = 0, rows = an/cols, c = nexttiled(ws->clients); c; c = nexttiled(c->next), ++i) {
+		if (i >= ai && i < (ai + an)) {
+			if (cc/rows + 1 > cols - an%cols)
+				rows = an/cols + 1;
+			rrests[cn] += (h - ih * (rows - 1)) * (c->cfact / cfacts[cn]) + (rn == 0 ? 0 : ih);
+			rn++;
+			cc++;
+			if (rn >= rows) {
+				rn = 0;
+				cn++;
+			}
+		}
+	}
+
+	for (i = 0; i < cols; i++) {
+		crest -= (int)(colw * (cfacts[i] / cfacts_total));
+		rrests[i] = h - rrests[i];
+	}
+
+	for (i = cn = rn = cc = 0, cy = y, rows = an/cols, c = nexttiled(ws->clients); c; c = nexttiled(c->next), ++i) {
+		if (i >= ai && i < (ai + an)) {
+			if (cc/rows + 1 > cols - an%cols)
+				rows = an/cols + 1;
+			cw = (int)(colw * (cfacts[cn] / cfacts_total)) + (cn < crest ? 1 : 0);
+			ch = (h - ih * (rows - 1)) * ((double)c->cfact / (double)cfacts[cn]) + (rn < rrests[cn] ? 1 : 0);
+			resize(c,
+				x,
+				cy,
+				cw - 2 * c->bw,
+				ch - 2 * c->bw,
+				0);
+			rn++;
+			cc++;
+			cy += ch + ih;
+			if (rn >= rows) {
+				rn = 0;
+				x += cw + ih;
+				cn++;
+				cy = y;
+			}
+		}
+	}
+}
+
 
 /* This version of gappless grid fills rows first */
 static void

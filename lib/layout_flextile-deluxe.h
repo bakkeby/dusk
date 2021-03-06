@@ -35,6 +35,7 @@ static void arrange_left_to_right(Workspace *ws, int ax, int ay, int ah, int aw,
 static void arrange_top_to_bottom(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
 static void arrange_monocle(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
 static void arrange_gapplessgrid(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
+static void arrange_gapplessgrid_cfacts(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
 static void arrange_gapplessgrid_alt1(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
 static void arrange_gapplessgrid_alt2(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
 static void arrange_gridmode(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
@@ -83,17 +84,18 @@ static char layoutsymb[] = {
 
 /* Tile arrangements */
 enum {
-	TOP_TO_BOTTOM,     // clients are arranged vertically
-	LEFT_TO_RIGHT,     // clients are arranged horizontally
-	MONOCLE,           // clients are arranged in deck / monocle mode
-	GAPPLESSGRID,      // clients are arranged in a gappless grid (original formula)
-	GAPPLESSGRID_ALT1, // clients are arranged in a gappless grid (alt. 1, fills rows first)
-	GAPPLESSGRID_ALT2, // clients are arranged in a gappless grid (alt. 2, fills columns first)
-	GRIDMODE,          // clients are arranged in a grid
-	HORIZGRID,         // clients are arranged in a horizontal grid
-	DWINDLE,           // clients are arranged in fibonacci dwindle mode
-	SPIRAL,            // clients are arranged in fibonacci spiral mode
-	TATAMI,            // clients are arranged as tatami mats
+	TOP_TO_BOTTOM,       // clients are arranged vertically
+	LEFT_TO_RIGHT,       // clients are arranged horizontally
+	MONOCLE,             // clients are arranged in deck / monocle mode
+	GAPPLESSGRID,        // clients are arranged in a gappless grid (original formula)
+	GAPPLESSGRID_CFACTS, // clients are arranged in a gappless grid that takes cfacts into account
+	GAPPLESSGRID_ALT1,   // clients are arranged in a gappless grid (alt. 1, fills rows first, cfacts for rows)
+	GAPPLESSGRID_ALT2,   // clients are arranged in a gappless grid (alt. 2, fills columns first, cfacts for columns)
+	GRIDMODE,            // clients are arranged in a grid
+	HORIZGRID,           // clients are arranged in a horizontal grid
+	DWINDLE,             // clients are arranged in fibonacci dwindle mode
+	SPIRAL,              // clients are arranged in fibonacci spiral mode
+	TATAMI,              // clients are arranged as tatami mats
 	AXIS_LAST,
 };
 
