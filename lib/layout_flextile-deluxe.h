@@ -41,7 +41,9 @@ static void arrange_gapplessgrid_alt2(Workspace *ws, int ax, int ay, int ah, int
 static void arrange_gridmode(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
 static void arrange_horizgrid(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
 static void arrange_dwindle(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
+static void arrange_dwindle_cfacts(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
 static void arrange_spiral(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
+static void arrange_spiral_cfacts(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
 static void arrange_tatami(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
 static void arrange_tatami_cfacts(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
 
@@ -95,7 +97,9 @@ enum {
 	GRIDMODE,            // clients are arranged in a grid
 	HORIZGRID,           // clients are arranged in a horizontal grid
 	DWINDLE,             // clients are arranged in fibonacci dwindle mode
+	DWINDLE_CFACTS,      // clients are arranged in fibonacci dwindle mode and takes cfacts into account
 	SPIRAL,              // clients are arranged in fibonacci spiral mode
+	SPIRAL_CFACTS,       // clients are arranged in fibonacci spiral mode and takes cfacts into account
 	TATAMI,              // clients are arranged as tatami mats
 	TATAMI_CFACTS,       // clients are arranged as tatami mats that takes cfacts into account
 	AXIS_LAST,
@@ -106,11 +110,15 @@ static char tilesymb[] = {
 	124, // "|",
 	68,  // "D",
 	71,  // "G",
+	71,  // "G",
 	49,  // "1",
 	50,  // "2"
 	35,  // "#",
 	126, // "~",
 	92,  // "\\",
+	92,  // "\\",
 	64,  // "@",
+	64,  // "@",
+	84,  // "T",
 	84,  // "T",
 };

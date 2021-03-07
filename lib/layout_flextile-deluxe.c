@@ -35,7 +35,9 @@ static const TileArranger flextiles[] = {
 	{ arrange_gridmode },
 	{ arrange_horizgrid },
 	{ arrange_dwindle },
+	{ arrange_dwindle_cfacts },
 	{ arrange_spiral },
+	{ arrange_spiral_cfacts },
 	{ arrange_tatami },
 	{ arrange_tatami_cfacts },
 };
@@ -760,15 +762,118 @@ arrange_fibonacci(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int
 }
 
 static void
+arrange_fibonacci_cfacts(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n, int an, int ai, int s)
+{
+	Client *clients[4] = { NULL, NULL, NULL, NULL };
+	int i, j, q, nx, ny, nw, nh, tnw, tnh;
+	Client *t, *a, *b, *c, *d;
+
+	nx = x;
+	ny = y;
+	nw = w;
+	nh = h;
+
+	for (i = 0, j = 0, q = 0, t = nexttiled(ws->clients); t; t = nexttiled(t->next), j++) {
+		if (j >= ai && j < (ai + an)) {
+			clients[q] = t;
+			++q;
+
+			if (q < 4 && (j + 1 < ai + an) && j - ai < 7) // magic number 7 limits to 9 tiled clients
+				continue;
+
+			a = clients[0];
+			b = clients[1];
+			c = clients[2];
+			d = clients[3];
+
+			switch (q) {
+			case 1:
+				resize(a, nx, ny, nw - 2 * a->bw, nh - 2 * a->bw, False);
+				q = 0;
+				break;
+			case 2:
+				tnw = (nw - iv) * (a->cfact / (a->cfact + b->cfact));
+				resize(a, nx, ny, tnw - 2 * a->bw, nh - 2 * a->bw, False);
+				resize(b, nx + tnw + iv, ny, nw - iv - tnw - 2 * b->bw, nh - 2 * b->bw, False);
+				nx += tnw + iv;
+				q = 0;
+				break;
+			case 3:
+				tnw = (nw - iv) * (a->cfact / (a->cfact + b->cfact));
+				tnh = (nh - ih) * (b->cfact / (b->cfact + c->cfact));
+				if (!s && i % 2) {
+					resize(a, nx + nw - tnw, ny, tnw - 2 * a->bw, nh - 2 * a->bw, False);
+					resize(b, nx, ny + nh - tnh, nw - iv - tnw - 2 * b->bw, tnh - 2 * b->bw, False);
+					resize(c, nx, ny, nw - iv - tnw - 2 * c->bw, nh - ih - tnh - 2 * c->bw, False);
+
+				} else {
+					resize(a, nx, ny, tnw - 2 * a->bw, nh - 2 * a->bw, False);
+					resize(b, nx + tnw + iv, ny, nw - iv - tnw - 2 * b->bw, tnh - 2 * b->bw, False);
+					resize(c, nx + tnw + iv, ny + tnh + ih, nw - iv - tnw - 2 * c->bw, nh - ih - tnh - 2 * c->bw, False);
+					nx += tnw + iv;
+					ny += tnh + ih;
+				}
+				nw -= tnw + iv;
+				nh -= tnh + ih;
+				q = 0;
+				break;
+			case 4:
+				if (!s && i % 2) {
+					tnw = (nw - iv) * (a->cfact / (a->cfact + b->cfact));
+					tnh = (nh - ih) * (b->cfact / (b->cfact + c->cfact));
+					resize(a, nx + nw - tnw, ny, tnw - 2 * a->bw, nh - 2 * a->bw, False);
+					resize(b, nx, ny + nh - tnh, nw - iv - tnw - 2 * b->bw, tnh - 2 * b->bw, False);
+				} else {
+					tnw = (nw - iv) * (a->cfact / (a->cfact + b->cfact));
+					tnh = (nh - ih) * (b->cfact / (b->cfact + c->cfact));
+					resize(a, nx, ny, tnw - 2 * a->bw, nh - 2 * a->bw, False);
+					resize(b, nx + tnw + iv, ny, nw - iv - tnw - 2 * b->bw, tnh - 2 * b->bw, False);
+					nx += tnw + iv;
+					ny += tnh + ih;
+				}
+				nw -= tnw + iv;
+				nh -= tnh + ih;
+
+				if (j + 1 == ai + an) {
+					tnw = (nw - iv) * (c->cfact / (c->cfact + d->cfact));
+					resize(c, nx, ny, tnw - 2 * c->bw, nh - 2 * c->bw, False);
+					resize(d, nx + tnw + iv, ny, nw - iv - tnw - 2 * d->bw, nh - 2 * d->bw, False);
+					q = 0;
+					break;
+				}
+
+				clients[0] = c;
+				clients[1] = d;
+				q = 2;
+				break;
+			}
+			i++;
+		}
+	}
+}
+
+static void
 arrange_dwindle(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n, int an, int ai)
 {
 	arrange_fibonacci(ws, x, y, h, w, ih, iv, n, an, ai, 1);
 }
 
 static void
+arrange_dwindle_cfacts(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n, int an, int ai)
+{
+	arrange_fibonacci_cfacts(ws, x, y, h, w, ih, iv, n, an, ai, 1);
+}
+
+static void
 arrange_spiral(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n, int an, int ai)
 {
 	arrange_fibonacci(ws, x, y, h, w, ih, iv, n, an, ai, 0);
+}
+
+static void
+arrange_spiral_cfacts(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n, int an, int ai)
+{
+	arrange_fibonacci_cfacts(ws, x, y, h, w, ih, iv, n, an, ai, 0);
 }
 
 static void
@@ -901,7 +1006,6 @@ arrange_tatami_cfacts(Workspace *ws, int x, int y, int h, int w, int ih, int iv,
 	Client *clients[5] = { NULL, NULL, NULL, NULL, NULL };
 	unsigned int j, s, nx, ny, nw, nh, tnw, tmw, tnh, tmh, areas, mats, cats, nhrest;
 	Client *t, *a, *b, *c, *d, *e;
-
 
 	nx = x;
 	ny = y;
