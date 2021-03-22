@@ -16,8 +16,11 @@ width_systray(Bar *bar, BarArg *a)
 int
 draw_systray(Bar *bar, BarArg *a)
 {
-	if (disabled(Systray))
+	if (disabled(Systray)) {
+		if (systray)
+			XMoveWindow(dpy, systray->win, -500, bar->by);
 		return 0;
+	}
 
 	XSetWindowAttributes wa;
 	XWindowChanges wc;
