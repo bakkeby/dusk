@@ -2996,9 +2996,9 @@ setlayout(const Arg *arg)
 	if (arg && arg->v)
 		ws->layout = (Layout *)arg->v;
 
-	if (ws->layout->preset.nmaster && ws->layout->preset.nmaster != -1)
+	if (ws->layout->preset.nmaster != -1)
 		ws->nmaster = ws->layout->preset.nmaster;
-	if (ws->layout->preset.nstack && ws->layout->preset.nstack != -1)
+	if (ws->layout->preset.nstack != -1)
 		ws->nstack = ws->layout->preset.nstack;
 
 	ws->ltaxis[LAYOUT] = ws->layout->preset.layout;
