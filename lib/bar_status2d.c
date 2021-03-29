@@ -22,17 +22,13 @@ static char *termcolor[] = {
 int
 width_status2d(Bar *bar, BarArg *a)
 {
-	int width;
-	width = status2dtextlength(rawstext);
-	return width ? width + lrpad : 0;
+	return status2dtextlength(rawstext);
 }
 
 int
 width_status2d_es(Bar *bar, BarArg *a)
 {
-	int width;
-	width = status2dtextlength(rawestext);
-	return width ? width + lrpad : 0;
+	return status2dtextlength(rawestext);
 }
 
 int
@@ -64,7 +60,6 @@ drawstatusbar(BarArg *a, char* stext)
 
 	copyvalidchars(text, stext);
 
-	x += lrpad / 2;
 	drw_setscheme(drw, scheme[SchemeNorm]);
 	drw_rect(drw, a->x, a->y, a->w, a->h, 1, 1);
 	drw_setscheme(drw, scheme[LENGTH(colors)]);
@@ -78,7 +73,7 @@ drawstatusbar(BarArg *a, char* stext)
 			isCode = 1;
 
 			text[i] = '\0';
-			w = TEXTWM(text) - lrpad;
+			w = TEXTWM(text);
 			drw_text(drw, x, y, w, bh, 0, text, 0, True);
 
 			x += w;
@@ -151,7 +146,7 @@ drawstatusbar(BarArg *a, char* stext)
 		}
 	}
 	if (!isCode) {
-		w = TEXTWM(text) - lrpad;
+		w = TEXTWM(text);
 		drw_text(drw, x, y, w, bh, 0, text, 0, True);
 		x += w;
 	}
@@ -184,7 +179,7 @@ status2dtextlength(char* stext)
 			if (!isCode) {
 				isCode = 1;
 				text[i] = '\0';
-				w += TEXTWM(text) - lrpad;
+				w += TEXTWM(text);
 				text[i] = '^';
 				if (text[++i] == 'f')
 					w += atoi(text + ++i);
@@ -196,7 +191,7 @@ status2dtextlength(char* stext)
 		}
 	}
 	if (!isCode)
-		w += TEXTWM(text) - lrpad;
+		w += TEXTWM(text);
 	free(p);
 	return w;
 }

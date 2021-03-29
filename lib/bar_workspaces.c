@@ -6,7 +6,7 @@ width_workspaces(Bar *bar, BarArg *a)
 	for (ws = workspaces; ws; ws = ws->next) {
 		if (ws->mon != bar->mon)
 			continue;
-		tw = TEXTW(wsicon(ws));
+		tw = TEXTW(wsicon(ws)) + lrpad;
 		if (tw <= lrpad)
 			continue;
 		w += tw;
@@ -28,7 +28,7 @@ draw_workspaces(Bar *bar, BarArg *a)
 			continue;
 
 		icon = wsicon(ws);
-		w = TEXTW(icon);
+		w = TEXTW(icon) + lrpad;
 		if (w <= lrpad)
 			continue;
 
@@ -59,7 +59,7 @@ int
 click_workspaces(Bar *bar, Arg *arg, BarArg *a)
 {
 	Workspace *ws = workspaces;
-	int w, x = lrpad / 2;
+	int w, x = 0;
 
 	for (ws = workspaces; ws && ws->mon != bar->mon; ws = ws->next); // find first workspace for mon
 	if (!ws)
@@ -68,11 +68,15 @@ click_workspaces(Bar *bar, Arg *arg, BarArg *a)
 	do {
 		if (ws->mon != bar->mon)
 			continue;
-		w = TEXTW(wsicon(ws));
+		w = TEXTW(wsicon(ws)) + lrpad;
 		if (w <= lrpad)
 			continue;
 		x += w;
 	} while (a->x >= x && (ws = ws->next));
+
+	if (!ws)
+		return -1;
+
 	arg->v = ws;
 
 	return ClkWorkspaceBar;

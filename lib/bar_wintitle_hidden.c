@@ -46,14 +46,14 @@ calc_wintitle_hidden(
 
 	/* This avoids drawing a separator on the left hand side of the wintitle section if
 	 * there is a border and the wintitle module rests at the left border. */
-	if (bar->borderpx && a->x > bar->bx + bar->borderpx) {
+	if (a->x > bar->borderpx) {
 		offx += flexwintitle_separator;
 		tabw -= flexwintitle_separator;
 	}
 
 	/* This avoids drawing a separator on the right hand side of the wintitle section if
 	 * there is a border and the wintitle module rests at the right border. */
-	if (bar->borderpx && a->x + a->w < bar->bx + bar->bw - 2 * bar->borderpx)
+	if (a->x + a->w < bar->bw - bar->borderpx)
 		tabw -= flexwintitle_separator;
 
 	if (bar->borderpx) {

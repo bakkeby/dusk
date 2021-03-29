@@ -66,8 +66,8 @@
 #define WIDTH(X)                ((X)->w + 2 * (X)->bw)
 #define HEIGHT(X)               ((X)->h + 2 * (X)->bw)
 #define WTYPE                   "_NET_WM_WINDOW_TYPE_"
-#define TEXTWM(X)               (drw_fontset_getwidth(drw, (X), True) + lrpad)
-#define TEXTW(X)                (drw_fontset_getwidth(drw, (X), False) + lrpad)
+#define TEXTWM(X)               (drw_fontset_getwidth(drw, (X), True))
+#define TEXTW(X)                (drw_fontset_getwidth(drw, (X), False))
 #define CLIENT                  (arg && arg->v ? (Client*)arg->v : selws->sel)
 
 /* enums */
@@ -273,12 +273,18 @@ typedef struct {
 	int y;
 	int h;
 	int w;
+	int lpad;
+	int rpad;
+	int value;
 } BarArg;
 
 typedef struct {
 	int monitor;
 	int bar;
 	int scheme;
+	int lpad;
+	int rpad;
+	int value;
 	int alignment; // see bar alignment enum
 	int (*widthfunc)(Bar *bar, BarArg *a);
 	int (*drawfunc)(Bar *bar, BarArg *a);
@@ -784,7 +790,7 @@ buttonpress(XEvent *e)
 	Bar *bar;
 	XButtonPressedEvent *ev = &e->xbutton;
 	const BarRule *br;
-	BarArg carg = { 0, 0, 0, 0 };
+	BarArg barg = { 0, 0, 0, 0 };
 	click = ClkRootWin;
 	/* focus monitor if necessary */
 	if ((m = wintomon(ev->window)) && m != selmon) {
@@ -806,11 +812,14 @@ buttonpress(XEvent *e)
 				if (br->monitor != 'A' && br->monitor != -1 && br->monitor != bar->mon->num)
 					continue;
 				if (bar->x[r] <= ev->x && ev->x <= bar->x[r] + bar->w[r]) {
-					carg.x = ev->x - bar->x[r];
-					carg.y = ev->y - bar->borderpx;
-					carg.w = bar->w[r];
-					carg.h = bar->bh - 2 * bar->borderpx;
-					click = br->clickfunc(bar, &arg, &carg);
+					barg.x = ev->x - (bar->x[r] + br->lpad);
+					barg.y = ev->y - bar->borderpx;
+					barg.w = bar->w[r];
+					barg.h = bar->bh - 2 * bar->borderpx;
+					barg.lpad = br->lpad;
+					barg.rpad = br->rpad;
+					barg.value = br->value;
+					click = br->clickfunc(bar, &arg, &barg);
 					if (click < 0)
 						return;
 					break;
@@ -1471,9 +1480,8 @@ drawbarwin(Bar *bar)
 		XFillRectangle(drw->dpy, drw->drawable, drw->gc, 0, 0, bar->bw, bar->bh);
 	}
 
-	BarArg warg = { 0 };
-	BarArg darg  = { 0 };
-	warg.h = bar->bh - 2 * bar->borderpx;
+	BarArg barg = { 0 };
+	barg.h = bar->bh - 2 * bar->borderpx;
 
 	rw = lw = bar->bw - 2 * bar->borderpx;
 	rx = lx = bar->borderpx;
@@ -1482,6 +1490,7 @@ drawbarwin(Bar *bar)
 
 	drw_setscheme(drw, scheme[SchemeNorm]);
 	drw_rect(drw, lx, bar->borderpx, lw, bar->bh - 2 * bar->borderpx, 1, 1);
+
 	for (r = 0; r < LENGTH(barrules); r++) {
 		br = &barrules[r];
 		if (br->bar != bar->idx || !br->widthfunc || (br->monitor == 'A' && bar->mon != selmon))
@@ -1491,9 +1500,12 @@ drawbarwin(Bar *bar)
 			continue;
 		if (br->scheme != -1)
 			drw_setscheme(drw, scheme[br->scheme]);
-		warg.w = (br->alignment < BAR_ALIGN_RIGHT_LEFT ? lw : rw);
-		w = br->widthfunc(bar, &warg);
-		w = MIN(warg.w, w);
+		barg.lpad = br->lpad;
+		barg.rpad = br->rpad;
+		barg.value = br->value;
+		barg.w = (br->alignment < BAR_ALIGN_RIGHT_LEFT ? lw : rw);
+		w = br->widthfunc(bar, &barg) + br->lpad + br->rpad;
+		w = MIN(barg.w, w);
 
 		if (lw <= 0) { // if left is exhausted then switch to right side, and vice versa
 			lw = rw;
@@ -1557,13 +1569,13 @@ drawbarwin(Bar *bar)
 			break;
 		}
 		bar->w[r] = w;
-		darg.x = bar->x[r];
-		darg.y = bar->borderpx;
-		darg.h = bar->bh - 2 * bar->borderpx;
-		darg.w = bar->w[r];
+		barg.x = bar->x[r] + br->lpad;
+		barg.y = bar->borderpx;
+		barg.h = bar->bh - 2 * bar->borderpx;
+		barg.w = w - br->lpad - br->rpad;
 
 		if (br->drawfunc)
-			total_drawn += br->drawfunc(bar, &darg);
+			total_drawn += br->drawfunc(bar, &barg);
 	}
 
 	if (total_drawn == 0 && bar->showbar) {

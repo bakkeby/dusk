@@ -79,7 +79,7 @@ wsicon(Workspace *ws)
 		? ws->name
 		: hasclients(ws)
 		? ws->iconocc
-		: ws->visible && TEXTW(ws->icondef) <= lrpad
+		: ws->visible && TEXTW(ws->icondef) == 0
 		? ws->iconvac
 		: ws->icondef;
 

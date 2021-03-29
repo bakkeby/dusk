@@ -330,16 +330,16 @@ static const Rule clientrules[] = {
  *    name - does nothing, intended for visual clue and for logging / debugging
  */
 static const BarRule barrules[] = {
-	/* monitor  bar    scheme   alignment               widthfunc                 drawfunc                 clickfunc                 name */
-	{ -1,       0,     0,       BAR_ALIGN_LEFT,         width_stbutton,           draw_stbutton,           click_stbutton,           "statusbutton" },
-	{ -1,       0,     0,       BAR_ALIGN_LEFT,         width_workspaces,         draw_workspaces,         click_workspaces,         "workspaces" },
-	{ 'A',      0,     0,       BAR_ALIGN_RIGHT,        width_systray,            draw_systray,            click_systray,            "systray" },
-	{ -1,       0,     0,       BAR_ALIGN_LEFT,         width_ltsymbol,           draw_ltsymbol,           click_ltsymbol,           "layout" },
-	{ 'A',      0,     0,       BAR_ALIGN_RIGHT,        width_status2d,           draw_status2d,           click_statuscmd,          "status2d" },
-	{ -1,       0,     0,       BAR_ALIGN_NONE,         width_flexwintitle,       draw_flexwintitle,       click_flexwintitle,       "flexwintitle" },
-	{ 'A',      1,     0,       BAR_ALIGN_CENTER,       width_status2d_es,        draw_status2d_es,        click_statuscmd_es,       "status2d_es" },
-	{ -1,       1,     0,       BAR_ALIGN_RIGHT_RIGHT,  width_wintitle_hidden,    draw_wintitle_hidden,    click_wintitle_hidden,    "wintitle_hidden" },
-	{ -1,       1,     0,       BAR_ALIGN_LEFT,         width_wintitle_floating,  draw_wintitle_floating,  click_wintitle_floating,  "wintitle_floating" },
+	/* monitor  bar    scheme   lpad rpad value  alignment               widthfunc                 drawfunc                 clickfunc                 name */
+	{ -1,       0,     0,       5,   5,   0,     BAR_ALIGN_LEFT,         width_stbutton,           draw_stbutton,           click_stbutton,           "statusbutton" },
+	{ -1,       0,     0,       0,   5,   0,     BAR_ALIGN_LEFT,         width_workspaces,         draw_workspaces,         click_workspaces,         "workspaces" },
+	{ 'A',      0,     0,       5,   5,   0,     BAR_ALIGN_RIGHT,        width_systray,            draw_systray,            click_systray,            "systray" },
+	{ -1,       0,     0,       0,   0,   0,     BAR_ALIGN_LEFT,         width_ltsymbol,           draw_ltsymbol,           click_ltsymbol,           "layout" },
+	{ 'A',      0,     0,       10,  10,  0,     BAR_ALIGN_RIGHT,        width_status2d,           draw_status2d,           click_statuscmd,          "status2d" },
+	{ -1,       0,     0,       5,   0,   0,     BAR_ALIGN_NONE,         width_flexwintitle,       draw_flexwintitle,       click_flexwintitle,       "flexwintitle" },
+	{ 'A',      1,     0,       0,   0,   0,     BAR_ALIGN_CENTER,       width_status2d_es,        draw_status2d_es,        click_statuscmd_es,       "status2d_es" },
+	{ -1,       1,     0,       0,   0,   0,     BAR_ALIGN_RIGHT_RIGHT,  width_wintitle_hidden,    draw_wintitle_hidden,    click_wintitle_hidden,    "wintitle_hidden" },
+	{ -1,       1,     0,       0,   0,   0,     BAR_ALIGN_LEFT,         width_wintitle_floating,  draw_wintitle_floating,  click_wintitle_floating,  "wintitle_floating" },
 };
 
 /* Workspace rules define what workspaces are available and their properties.
