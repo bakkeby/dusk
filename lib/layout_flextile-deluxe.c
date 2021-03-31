@@ -42,6 +42,65 @@ static const TileArranger flextiles[] = {
 	{ arrange_tatami_cfacts },
 };
 
+/* workspace  symbol     nmaster, nstack, split, master axis, stack axis, secondary stack axis  */
+static void
+customlayout(const Arg args[], int num_args)
+{
+	Workspace *ws;
+	int fullarrange;
+
+	if (num_args < 8) {
+		fprintf(stderr, "customlayout: num_args < 7 : %d\n", num_args);
+		return;
+	}
+
+	/* 0) Workspace */
+	for (ws = workspaces; ws && ws->num != args[0].i; ws = ws->next);
+	if (!ws)
+		ws = selws;
+	ws->prevlayout = ws->layout;
+
+	fullarrange = (
+		ws->ltaxis[MASTER] == MONOCLE ||
+		ws->ltaxis[STACK] == MONOCLE ||
+		ws->ltaxis[STACK2] == MONOCLE
+	);
+
+	/* 1) Layout symbol */
+	if (args[1].v)
+		strncpy(ws->ltsymbol, args[1].v, sizeof ws->ltsymbol);
+
+	/* 2) nmaster */
+	if (args[2].i > -1)
+		ws->nmaster = args[2].i;
+
+	/* 3) nstack */
+	if (args[3].i > -1)
+		ws->nstack = args[3].i;
+
+	/* 4) split (layout), negative means mirror layout */
+	if (abs(args[4].i) < LAYOUT_LAST)
+		ws->ltaxis[LAYOUT] = args[4].i;
+
+	/* 5) master axis */
+	if (args[5].i > -1 && args[5].i < AXIS_LAST)
+		ws->ltaxis[MASTER] = args[5].i;
+
+	/* 6) stack 1 axis */
+	if (args[6].i > -1 && args[6].i < AXIS_LAST)
+		ws->ltaxis[STACK] = args[6].i;
+
+	/* 7) stack 2 axis */
+	if (args[7].i > -1 && args[7].i < AXIS_LAST)
+		ws->ltaxis[STACK2] = args[7].i;
+
+	if (fullarrange)
+		arrange(ws);
+	else
+		arrangews(ws);
+	drawbar(ws->mon);
+}
+
 static void
 getfactsforrange(Workspace *ws, int an, int ai, int size, int *rest, float *fact)
 {

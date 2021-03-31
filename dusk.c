@@ -55,6 +55,7 @@
 #define Button8                 8
 #define Button9                 9
 #define BARRULES                20
+#define NUM_STATUSES            10
 #define BUTTONMASK              (ButtonPressMask|ButtonReleaseMask)
 #define CLEANMASK(mask)         (mask & ~(numlockmask|LockMask) & (ShiftMask|ControlMask|Mod1Mask|Mod2Mask|Mod3Mask|Mod4Mask|Mod5Mask))
 #define INTERSECT(X,Y,W,H,Z)    (MAX(0, MIN((X)+(W),(Z)->wx+(Z)->ww) - MAX((X),(Z)->wx)) \
@@ -502,7 +503,7 @@ static void seturgent(Client *c, int urg);
 static void showhide(Client *c);
 static void sigchld(int unused);
 static void spawn(const Arg *arg);
-static pid_t spawncmd(const Arg *arg);
+static pid_t spawncmd(const Arg *arg, int buttonclick);
 static void togglebar(const Arg *arg);
 static void togglefloating(const Arg *arg);
 static void togglemaximize(Client *c, int maximize_vert, int maximize_horz);
@@ -515,7 +516,6 @@ static void updateclientlist(void);
 static int updategeom(void);
 static void updatenumlockmask(void);
 static void updatesizehints(Client *c);
-static void updatestatus(void);
 static void updatetitle(Client *c);
 static void updatewmhints(Client *c);
 
@@ -527,15 +527,11 @@ static int xerrorstart(Display *dpy, XErrorEvent *ee);
 static void zoom(const Arg *arg);
 
 /* bar functions */
-
 #include "lib/include.h"
 
 /* variables */
 static const char broken[] = "fubar";
-static char stext[1024];
-static char rawstext[1024];
-static char estext[1024];
-static char rawestext[1024];
+static char rawstatustext[NUM_STATUSES][512];
 
 static int screen;
 static int sw, sh;             /* X display screen geometry width, height */
@@ -1464,7 +1460,7 @@ drawbarwin(Bar *bar)
 	if (!bar || !bar->win || bar->external)
 		return;
 
-	int r, w, total_drawn = 0, groupactive, ignored;
+	int r, w, mw, total_drawn = 0, groupactive, ignored;
 	int rx, lx, rw, lw; // bar size, split between left and right if a center module is added
 	const BarRule *br;
 	Monitor *lastmon;
@@ -1503,9 +1499,17 @@ drawbarwin(Bar *bar)
 		barg.lpad = br->lpad;
 		barg.rpad = br->rpad;
 		barg.value = br->value;
-		barg.w = (br->alignment < BAR_ALIGN_RIGHT_LEFT ? lw : rw);
-		w = br->widthfunc(bar, &barg) + br->lpad + br->rpad;
-		w = MIN(barg.w, w);
+
+		barg.w = mw = (br->alignment < BAR_ALIGN_RIGHT_LEFT ? lw : rw);
+		w = br->widthfunc(bar, &barg);
+		barg.w = w = MIN(barg.w, w);
+		if (w) {
+			if (w + br->lpad <= mw)
+				w += br->lpad;
+			if (w + br->rpad <= mw)
+				w += br->rpad;
+		}
+		bar->w[r] = w;
 
 		if (lw <= 0) { // if left is exhausted then switch to right side, and vice versa
 			lw = rw;
@@ -1568,11 +1572,9 @@ drawbarwin(Bar *bar)
 			rw = bar->x[r] - rx;
 			break;
 		}
-		bar->w[r] = w;
 		barg.x = bar->x[r] + br->lpad;
 		barg.y = bar->borderpx;
 		barg.h = bar->bh - 2 * bar->borderpx;
-		barg.w = w - br->lpad - br->rpad;
 
 		if (br->drawfunc)
 			total_drawn += br->drawfunc(bar, &barg);
@@ -2456,9 +2458,7 @@ propertynotify(XEvent *e)
 		drawbarwin(systray->bar);
 	}
 
-	if ((ev->window == root) && (ev->atom == XA_WM_NAME)) {
-		updatestatus();
-	} else if (ev->state == PropertyDelete) {
+	if (ev->state == PropertyDelete) {
 		if (enabled(Debug)) {
 			if ((c = wintoclient(ev->window))) {
 				fprintf(stderr, "propertynotify: ignored property delete event %s (%ld) for client %s\n", XGetAtomName(dpy, ev->atom), ev->atom, c->name);
@@ -2818,7 +2818,6 @@ run(void)
 				event_fd, events[i].data.ptr, events[i].data.u32,
 				events[i].data.u64);
 				fprintf(stderr, " with events %d\n", events[i].events);
-				return;
 			}
 		}
 	}
@@ -3155,7 +3154,6 @@ setup(void)
 		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], ColCount);
 
 	updatebars();
-	updatestatus();
 
 	/* supporting window for NetWMCheck */
 	wmcheckwin = XCreateSimpleWindow(dpy, root, 0, 0, 1, 1, 0, 0, 0);
@@ -3256,11 +3254,11 @@ sigchld(int unused)
 void
 spawn(const Arg *arg)
 {
-	spawncmd(arg);
+	spawncmd(arg, 0);
 }
 
 pid_t
-spawncmd(const Arg *arg)
+spawncmd(const Arg *arg, int buttonclick)
 {
 	pid_t pid;
 	if ((pid = fork()) == 0) {
@@ -3298,6 +3296,18 @@ spawncmd(const Arg *arg)
 
 			free(pathbuf);
 		}
+
+		if (buttonclick) {
+			char button[2] = {'0' + (buttonclick & 0xff), '\0'};
+			setenv("BLOCK_BUTTON", button, 1);
+		}
+
+		if (statusclicked > -1) {
+			char status[2] = {'0' + (statusclicked & 0xff), '\0'};
+			setenv("BLOCK_STATUS", status, 1);
+			statusclicked = -1;
+		}
+
 		setsid();
 		execvp(((char **)arg->v)[1], ((char **)arg->v)+1);
 		fprintf(stderr, "dusk: execvp %s", ((char **)arg->v)[1]);
@@ -3713,28 +3723,6 @@ updatesizehints(Client *c)
 	} else
 		c->maxa = c->mina = 0.0;
 	setflag(c, Fixed, (c->maxw && c->maxh && c->maxw == c->minw && c->maxh == c->minh));
-}
-
-void
-updatestatus(void)
-{
-	Monitor *m;
-	if (!gettextprop(root, XA_WM_NAME, rawstext, sizeof(rawstext))) {
-		strcpy(stext, "dusk-"VERSION);
-		estext[0] = '\0';
-	} else {
-		char *e = strchr(rawstext, statussep);
-		if (e) {
-			*e = '\0'; e++;
-			strncpy(rawestext, e, sizeof(estext) - 1);
-			copyvalidchars(estext, rawestext);
-		} else {
-			estext[0] = '\0';
-		}
-		copyvalidchars(stext, rawstext);
-	}
-	for (m = mons; m; m = m->next)
-		drawbar(m);
 }
 
 void

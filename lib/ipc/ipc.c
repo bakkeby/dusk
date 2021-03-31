@@ -396,7 +396,8 @@ ipc_free_parsed_command_members(IPCParsedCommand *command)
 static int
 ipc_validate_run_command(IPCParsedCommand *parsed, const IPCCommand actual)
 {
-	if (actual.argc != parsed->argc) return -1;
+	if (actual.argc != parsed->argc)
+		return -1;
 
 	for (int i = 0; i < parsed->argc; i++) {
 		ArgType ptype = parsed->arg_types[i];
@@ -409,6 +410,8 @@ ipc_validate_run_command(IPCParsedCommand *parsed, const IPCCommand actual)
 			else if (ptype == ARG_TYPE_UINT && atype == ARG_TYPE_SINT)
 				// If this argument is supposed to be a signed int, cast it
 				parsed->args[i].i = parsed->args[i].ui;
+			else if (ptype == ARG_TYPE_UINT && atype == ARG_TYPE_STR)
+				parsed->args[i].v = "";
 			else
 				return -2;
 		}
@@ -938,7 +941,7 @@ ipc_handle_socket_epoll_event(struct epoll_event *ev)
 		return -1;
 
 	// EPOLLIN means incoming client connection request
-	fputs("Received EPOLLIN event on socket\n", stderr);
+	DEBUG("Received EPOLLIN event on socket\n");
 	int new_fd = ipc_accept_client();
 
 	return new_fd;

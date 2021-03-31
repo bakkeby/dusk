@@ -250,10 +250,10 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 	drw_setscheme(drw, scheme[clientscheme]);
 	XSetWindowBorder(dpy, c->win, scheme[clientscheme][ColBorder].pixel);
 
-	if (w <= TEXTW("A") - lrpad + pad) // reduce text padding if wintitle is too small
-		pad = (w - TEXTW("A") + lrpad < 0 ? 0 : (w - TEXTW("A") + lrpad) / 2);
+	if (w <= TEXTW("A") + pad) // reduce text padding if wintitle is too small
+		pad = (w - TEXTW("A") < 0 ? 0 : (w - TEXTW("A")) / 2);
 	else if (enabled(CenteredWindowName) && TEXTW(c->name) < w)
-		pad = (w - TEXTW(c->name) + lrpad) / 2;
+		pad = (w - TEXTW(c->name)) / 2;
 
 	drw_text(drw, x, barg->y, w, barg->h, pad, c->name, 0, False);
 	drawstateindicator(ws, c, 1, x + 2, barg->y, w, barg->h, 0, 0);
@@ -284,14 +284,14 @@ flextitlecalculate(
 
 	/* This avoids drawing a separator on the left hand side of the wintitle section if
 	 * there is a border and the wintitle module rests at the left border. */
-	if (bar->borderpx && a->x > bar->bx + bar->borderpx) {
+	if (a->x > bar->borderpx) {
 		offx += flexwintitle_separator;
 		tabw -= flexwintitle_separator;
 	}
 
 	/* This avoids drawing a separator on the right hand side of the wintitle section if
 	 * there is a border and the wintitle module rests at the right border. */
-	if (bar->borderpx && a->x + a->w < bar->bx + bar->bw - 2 * bar->borderpx)
+	if (a->x + a->w < bar->bw - bar->borderpx)
 		tabw -= flexwintitle_separator;
 
 	mas_x = st1_x = st2_x = hid_x = flt_x = offx;

@@ -6,11 +6,9 @@
 #include "workspace.h"
 
 #include "bar_alpha.h"
-#include "bar_dwmblocks.h"
 #include "bar_ltsymbol.h"
 #include "bar_status2d.h"
 #include "bar_statusbutton.h"
-#include "bar_statuscmd.h"
 #include "bar_flexwintitle.h"
 #include "bar_wintitle_floating.h"
 #include "bar_wintitle_hidden.h"

@@ -12,8 +12,11 @@
 #define IPC_MAGIC_ARR { 'D', 'U', 'S', 'K', '-', 'I', 'P', 'C'}
 #define IPC_MAGIC_LEN 8 // Not including null char
 
-#define IPCCOMMAND(FUNC, ARGC, TYPES)                                          \
-  { #FUNC, {FUNC }, ARGC, (ArgType[ARGC])TYPES }
+#define IPCCOMMAND(FUNC, TYPE)                                                \
+  { #FUNC, {.single_param=FUNC }, 1, (ArgType[1]){TYPE} }
+
+#define IPCCOMMANDS(FUNC, ARGC, ...)                                          \
+  { #FUNC, {.array_param=FUNC }, ARGC, (ArgType[ARGC]){__VA_ARGS__} }
 // clang-format on
 
 typedef enum IPCMessageType {

@@ -18,29 +18,25 @@ static char *termcolor[] = {
 	termcol0, termcol1, termcol2, termcol3, termcol4, termcol5, termcol6, termcol7,
 	termcol8, termcol9, termcol10, termcol11, termcol12, termcol13, termcol14, termcol15,
 };
+static int statusclicked = -1;
 
 int
-width_status2d(Bar *bar, BarArg *a)
+width_status(Bar *bar, BarArg *a)
 {
-	return status2dtextlength(rawstext);
+	return status2dtextlength(rawstatustext[a->value]);
 }
 
 int
-width_status2d_es(Bar *bar, BarArg *a)
+click_status(Bar *bar, Arg *arg, BarArg *a)
 {
-	return status2dtextlength(rawestext);
+	statusclicked = a->value;
+	return ClkStatusText;
 }
 
 int
-draw_status2d(Bar *bar, BarArg *a)
+draw_status(Bar *bar, BarArg *a)
 {
-	return drawstatusbar(a, rawstext);
-}
-
-int
-draw_status2d_es(Bar *bar, BarArg *a)
-{
-	return drawstatusbar(a, rawestext);
+	return drawstatusbar(a, rawstatustext[a->value]);
 }
 
 int
@@ -53,12 +49,12 @@ drawstatusbar(BarArg *a, char* stext)
 	char *text;
 	char *p;
 	Clr oldbg, oldfg;
-	len = strlen(stext) + 1;
-	if (!(text = (char*) malloc(sizeof(char)*len)))
+	len = strlen(stext);
+	if (!(text = (char*) malloc(sizeof(char)*(len + 1))))
 		die("malloc");
 	p = text;
 
-	copyvalidchars(text, stext);
+	strcpy(text, stext);
 
 	drw_setscheme(drw, scheme[SchemeNorm]);
 	drw_rect(drw, a->x, a->y, a->w, a->h, 1, 1);
@@ -77,7 +73,6 @@ drawstatusbar(BarArg *a, char* stext)
 			drw_text(drw, x, y, w, bh, 0, text, 0, True);
 
 			x += w;
-
 			/* process code */
 			while (text[++i] != '^') {
 				if (text[i] == 'c') {
@@ -141,7 +136,8 @@ drawstatusbar(BarArg *a, char* stext)
 			}
 
 			text = text + i + 1;
-			i=-1;
+			len -= i + 1;
+			i = -1;
 			isCode = 0;
 		}
 	}
@@ -154,6 +150,35 @@ drawstatusbar(BarArg *a, char* stext)
 
 	drw_setscheme(drw, scheme[SchemeNorm]);
 	return len - 1;
+}
+
+void
+setstatus(const Arg args[], int num_args)
+{
+	Monitor *m;
+	const BarRule *br;
+	Bar *bar;
+
+	int sid = args[0].i;
+	if (sid < 0 || sid > NUM_STATUSES)
+		return;
+
+	strcpy(rawstatustext[sid], args[1].v);
+
+	for (int r = 0; r < LENGTH(barrules); r++) {
+		br = &barrules[r];
+		if (br->value == sid && br->drawfunc == draw_status) {
+			for (m = mons; m; m = m->next) {
+				if (br->monitor > -1 && br->monitor != m->num)
+					continue;
+				for (bar = m->bar; bar; bar = bar->next) {
+					if (br->bar > -1 && br->bar != bar->idx)
+						continue;
+					drawbarwin(bar);
+				}
+			}
+		}
+	}
 }
 
 int
@@ -169,7 +194,7 @@ status2dtextlength(char* stext)
 		die("malloc");
 	p = text;
 
-	copyvalidchars(text, stext);
+	strcpy(text, stext);
 
 	/* compute width of the status text */
 	w = 0;
@@ -194,4 +219,10 @@ status2dtextlength(char* stext)
 		w += TEXTWM(text);
 	free(p);
 	return w;
+}
+
+void
+statusclick(const Arg *arg)
+{
+	spawncmd(&((Arg) { .v = statusclickcmd }), arg->i);
 }

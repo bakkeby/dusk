@@ -57,26 +57,3 @@ setupepoll(void)
 	if (ipc_init(ipcsockpath, epoll_fd, ipccommands, LENGTH(ipccommands)) < 0)
 		fputs("Failed to initialize IPC\n", stderr);
 }
-
-void
-setstatus(const Arg *arg)
-{
-	Monitor *m;
-	if (arg->v == NULL) {
-		strcpy(stext, "dusk-"VERSION);
-		estext[0] = '\0';
-	} else {
-		strcpy(rawstext, arg->v);
-		char *e = strchr(rawstext, statussep);
-		if (e) {
-			*e = '\0'; e++;
-			strncpy(rawestext, e, sizeof(estext) - 1);
-			copyvalidchars(estext, rawestext);
-		} else {
-			estext[0] = '\0';
-		}
-		copyvalidchars(stext, rawstext);
-	}
-	for (m = mons; m; m = m->next)
-		drawbar(m);
-}

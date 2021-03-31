@@ -100,8 +100,8 @@ void
 riospawn(const Arg *arg)
 {
 	if (enabled(RioDrawSpawnAsync)) {
-		riopid = spawncmd(arg);
+		riopid = spawncmd(arg, 0);
 		riodraw(NULL, slopspawnstyle);
 	} else if (riodraw(NULL, slopspawnstyle))
-		riopid = spawncmd(arg);
+		riopid = spawncmd(arg, 0);
 }
