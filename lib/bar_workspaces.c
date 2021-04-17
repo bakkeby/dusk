@@ -1,24 +1,27 @@
 int
-width_workspaces(Bar *bar, BarArg *a)
+size_workspaces(Bar *bar, BarArg *a)
 {
 	Workspace *ws;
-	int w = 0, tw;
+	int s = 0, tw;
 	for (ws = workspaces; ws; ws = ws->next) {
 		if (ws->mon != bar->mon)
 			continue;
 		tw = TEXTW(wsicon(ws)) + lrpad;
 		if (tw <= lrpad)
 			continue;
-		w += tw;
+		if (bar->vert)
+			s += bh;
+		else
+			s += tw;
 	}
-	return w;
+	return s;
 }
 
 int
 draw_workspaces(Bar *bar, BarArg *a)
 {
 	Workspace *ws;
-	int w, x = a->x;
+	int w, x = a->x, y = a->y, h = (bar->vert ? bh : a->h);
 	unsigned int inv, occ, urg;
 	char *icon;
 	Client *c;
@@ -47,10 +50,14 @@ draw_workspaces(Bar *bar, BarArg *a)
 			? SchemeUrg
 			: SchemeWsNorm
 		]);
-		drw_text(drw, x, a->y, w, a->h, lrpad / 2, icon, inv, False);
-		drawindicator(ws, NULL, hasclients(ws), x, a->y, w, a->h, -1, 0, wsindicatortype);
-		drawindicator(ws, NULL, ws->pinned, x, a->y, w, a->h, -1, 0, wspinnedindicatortype);
-		x += w;
+		drw_text(drw, x, y, w, h, lrpad / 2, icon, inv, False);
+		drawindicator(ws, NULL, hasclients(ws), x, y, w, h, -1, 0, wsindicatortype);
+		drawindicator(ws, NULL, ws->pinned, x, y, w, h, -1, 0, wspinnedindicatortype);
+		if (bar->vert) {
+			y += bh;
+		} else {
+			x += w;
+		}
 	}
 	return 1;
 }
@@ -59,7 +66,7 @@ int
 click_workspaces(Bar *bar, Arg *arg, BarArg *a)
 {
 	Workspace *ws = workspaces;
-	int w, x = 0;
+	int w, s = 0, t = (bar->vert ? a->y : a->x);
 
 	for (ws = workspaces; ws && ws->mon != bar->mon; ws = ws->next); // find first workspace for mon
 	if (!ws)
@@ -71,8 +78,11 @@ click_workspaces(Bar *bar, Arg *arg, BarArg *a)
 		w = TEXTW(wsicon(ws)) + lrpad;
 		if (w <= lrpad)
 			continue;
-		x += w;
-	} while (a->x >= x && (ws = ws->next));
+		if (bar->vert)
+			s += bh;
+		else
+			s += w;
+	} while (t >= s && (ws = ws->next));
 
 	if (!ws)
 		return -1;

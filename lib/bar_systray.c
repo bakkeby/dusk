@@ -2,7 +2,7 @@ static SystrayWin *systray = NULL;
 static unsigned long systrayorientation = _NET_SYSTEM_TRAY_ORIENTATION_HORZ;
 
 int
-width_systray(Bar *bar, BarArg *a)
+size_systray(Bar *bar, BarArg *a)
 {
 	unsigned int w = 0;
 	Client *i;
@@ -40,7 +40,7 @@ draw_systray(Bar *bar, BarArg *a)
 		systray->h = MIN(a->h, drw->fonts->h);
 		systray->win = XCreateWindow(dpy, root, bar->bx + a->x, bar->by + a->y + (a->h - systray->h) / 2, MAX(a->w + 40, 1), systray->h, 0, depth,
 						InputOutput, visual,
-						CWOverrideRedirect|CWBorderPixel|CWBackPixel|CWColormap|CWEventMask, &wa); // CWBackPixmap
+						CWOverrideRedirect|CWBorderPixel|CWBackPixel|CWColormap|CWEventMask, &wa);
 
 		XSelectInput(dpy, systray->win, SubstructureNotifyMask);
 		XChangeProperty(dpy, systray->win, netatom[NetSystemTrayOrientation], XA_CARDINAL, 32,
@@ -97,13 +97,14 @@ removesystrayicon(Client *i)
 {
 	Client **ii;
 
-	if (disabled(Systray) || !i)
+	if (!i)
 		return;
 	for (ii = &systray->icons; *ii && *ii != i; ii = &(*ii)->next);
 	if (ii)
 		*ii = i->next;
 	free(i);
-	drawbarwin(systray->bar);
+	if (enabled(Systray))
+		drawbarwin(systray->bar);
 }
 
 void
@@ -153,6 +154,9 @@ updatesystrayiconstate(Client *i, XPropertyEvent *ev)
 	long flags;
 	int code = 0;
 
+	if (enabled(Debug))
+		fprintf(stderr, "updatesystrayiconstate: ev->atom = %ld (%s), xatom[XembedInfo] = %ld\n", ev->atom, XGetAtomName(dpy, ev->atom), xatom[XembedInfo]);
+
 	if (disabled(Systray) || !systray || !i || ev->atom != xatom[XembedInfo] ||
 			!(flags = getatomprop(i, xatom[XembedInfo], xatom[XembedInfo])))
 		return;
@@ -171,6 +175,7 @@ updatesystrayiconstate(Client *i, XPropertyEvent *ev)
 	}
 	else
 		return;
+
 	sendevent(i->win, xatom[Xembed], StructureNotifyMask, CurrentTime, code, 0,
 			systray->win, XEMBED_EMBEDDED_VERSION);
 }

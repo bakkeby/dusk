@@ -1,5 +1,5 @@
 int
-width_wintitle_hidden(Bar *bar, BarArg *a)
+size_wintitle_hidden(Bar *bar, BarArg *a)
 {
 	if (!bar->mon->selws)
 		return 0;

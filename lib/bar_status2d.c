@@ -21,9 +21,9 @@ static char *termcolor[] = {
 static int statusclicked = -1;
 
 int
-width_status(Bar *bar, BarArg *a)
+size_status(Bar *bar, BarArg *a)
 {
-	return status2dtextlength(rawstatustext[a->value]);
+	return (bar->vert ? bh : status2dtextlength(rawstatustext[a->value]));
 }
 
 int
@@ -149,7 +149,7 @@ drawstatusbar(BarArg *a, char* stext)
 	free(p);
 
 	drw_setscheme(drw, scheme[SchemeNorm]);
-	return len - 1;
+	return 1;
 }
 
 void

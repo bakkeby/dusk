@@ -1,7 +1,7 @@
 int
-width_stbutton(Bar *bar, BarArg *a)
+size_stbutton(Bar *bar, BarArg *a)
 {
-	return TEXTW(buttonbar);
+	return (bar->vert ? bh : TEXTW(buttonbar));
 }
 
 int

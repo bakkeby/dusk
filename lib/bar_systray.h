@@ -27,7 +27,7 @@ struct SystrayWin {
 };
 
 /* bar integration */
-static int width_systray(Bar *bar, BarArg *a);
+static int size_systray(Bar *bar, BarArg *a);
 static int draw_systray(Bar *bar, BarArg *a);
 static int click_systray(Bar *bar, Arg *arg, BarArg *a);
 

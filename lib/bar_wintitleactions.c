@@ -12,7 +12,10 @@ show(Client *c)
 {
 	if (HIDDEN(c)) {
 		removeflag(c, Hidden);
-		XMoveWindow(dpy, c->win, c->x, c->y);
+		if (ISFULLSCREEN(c))
+			setfullscreen(c, 1, 0);
+		else
+			XMoveWindow(dpy, c->win, c->x, c->y);
 	}
 }
 

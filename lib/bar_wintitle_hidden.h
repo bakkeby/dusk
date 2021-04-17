@@ -1,4 +1,4 @@
-static int width_wintitle_hidden(Bar *bar, BarArg *a);
+static int size_wintitle_hidden(Bar *bar, BarArg *a);
 static int draw_wintitle_hidden(Bar *bar, BarArg *a);
 static int click_wintitle_hidden(Bar *bar, Arg *arg, BarArg *a);
 static int calc_wintitle_hidden(

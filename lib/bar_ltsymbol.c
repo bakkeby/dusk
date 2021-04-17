@@ -1,9 +1,9 @@
 int
-width_ltsymbol(Bar *bar, BarArg *a)
+size_ltsymbol(Bar *bar, BarArg *a)
 {
 	if (!bar->mon->selws)
 		return 0;
-	return TEXTW(bar->mon->selws->ltsymbol);
+	return (bar->vert ? bh : TEXTW(bar->mon->selws->ltsymbol));
 }
 
 int

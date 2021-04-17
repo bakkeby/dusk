@@ -1,9 +1,7 @@
 #define SCHEMEFOR(c) getschemefor(ws, c, groupactive == c)
 
-enum { GRP_NOSELECTION, GRP_MASTER, GRP_STACK1, GRP_STACK2, GRP_FLOAT, GRP_HIDDEN };
-
 int
-width_flexwintitle(Bar *bar, BarArg *a)
+size_flexwintitle(Bar *bar, BarArg *a)
 {
 	if (!bar->mon->selws)
 		return 0;

@@ -203,7 +203,7 @@ dump_monitor(yajl_gen gen, Monitor *mon, int is_selected)
       YSTR("bar"); YMAP(
         YSTR("y"); YINT(mon->bar->by);
         YSTR("is_shown"); YBOOL(mon->showbar);
-        YSTR("is_top"); YBOOL(mon->bar->topbar);
+        YSTR("is_vert"); YBOOL(mon->bar->vert);
         YSTR("window_id"); YINT(mon->bar->win);
       )
     )
@@ -261,7 +261,7 @@ dump_monitor(yajl_gen gen, Monitor *mon, int is_selected)
     YSTR("bar"); YMAP(
       YSTR("y"); YINT(mon->bar->by);
       YSTR("is_shown"); YBOOL(mon->showbar);
-      YSTR("is_top"); YBOOL(mon->bar->topbar);
+      YSTR("is_vert"); YBOOL(mon->bar->vert);
       YSTR("window_id"); YINT(mon->bar->win);
     )
   )

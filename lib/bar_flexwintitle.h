@@ -1,4 +1,4 @@
-static int width_flexwintitle(Bar *bar, BarArg *a);
+static int size_flexwintitle(Bar *bar, BarArg *a);
 static int draw_flexwintitle(Bar *bar, BarArg *a);
 static int click_flexwintitle(Bar *bar, Arg *arg, BarArg *a);
 

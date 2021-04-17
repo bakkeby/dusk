@@ -1,4 +1,4 @@
-static int width_wintitle_floating(Bar *bar, BarArg *a);
+static int size_wintitle_floating(Bar *bar, BarArg *a);
 static int draw_wintitle_floating(Bar *bar, BarArg *a);
 static int click_wintitle_floating(Bar *bar, Arg *arg, BarArg *a);
 static int calc_wintitle_floating(

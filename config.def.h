@@ -12,7 +12,6 @@ static const unsigned int smartgaps_fact = 0;   /* smartgaps factor when there i
 static unsigned int attachdefault        = AttachAside; // AttachMaster, AttachAbove, AttachSide, AttachBelow, AttachBottom
 
 static const int showbar                 = 1;   /* 0 means no bar */
-static const int topbar                  = 1;   /* 0 means bottom bar */
 
 static const int bar_height              = 0;   /* 0 means derive from font, >= 1 explicit height */
 static const int vertpad                 = borderpx;  /* vertical (outer) padding of bar */
@@ -55,6 +54,7 @@ static unsigned long functionality = 0
 	|ColorEmoji
 //	|Status2DNoAlpha // option to not use alpha when drawing status2d status
 	|BarBorder // draw a border around the bar
+	|BarPadding // add vertical and side padding as per vertpad and sidepad variables above
 //	|NoBorders // as per the noborder patch, show no border when only one client in tiled mode
 //	|Warp // warp patch
 //	|FocusedOnTop
@@ -361,6 +361,60 @@ static const Rule clientrules[] = {
 	RULE(.title = "Event Tester", .flags = NoSwallow)
 };
 
+/* Bar settings, this defines what bars exists, their position, and what attributes they have.
+ *
+ *    monitor - the exact monitor number the bar should be created on
+ *              (0 - primary, 1 - secondary)
+ *    idx     - the bar index, used in relation to bar rules below
+ *              (bar indexes can be reused across monitors)
+ *    vert    - whether the bar is horizontal (0) or vertical (1), not
+ *              all bar modules will have support for being displayed
+ *              in a vertical bar
+ *    name    - this is just a reference that can be used for logging
+ *              purposes
+ *
+ *    Bar positioning consists of four values, x, y, w and h which,
+ *    similarly to floatpos, can have different meaning depending on
+ *    the characters used. Absolute positioning (as in cross-monitor)
+ *    is not supported, but exact positions relative to the monitor
+ *    can be used. Percentage values are recommended for portability.
+ *
+ *    All values can be a percentage relative to the space available
+ *    on the monitor or they can be exact values, here are some example
+ *    values:
+ *       x
+ *                  0% - left aligned (default)
+ *                100% - right aligned
+ *                 50% - bar is centered on the screen
+ *                  0x - exact position relative to the monitor
+ *                 -1x - value < 0 means use default
+ *       y
+ *                  0% - top bar (default)
+ *                100% - bottom bar
+ *                  0y - exact position relative to the monitor
+ *                 -1y - value < 0 means use default
+ *       w
+ *                100% - bar takes up the full width of the screen (default)
+ *                 20% - small bar taking a fifth of the width of the screen
+ *                500w - the bar is 500 pixels wide (including border)
+ *                 -1w - value <= 0 means use default
+ *       h
+ *                100% - bar takes up the full height of the screen
+ *                 20% - small bar taking a fifth of the height of screen
+ *                 30h - the bar is 30 pixels high (including border)
+ *                 -1h - value <= 0 means use the default (deduced by font size)
+ *
+ *    Note that vertical and horizontal side padding are controlled by the
+ *    vertpad and sidepad variables towards the top of this configuration file.
+ */
+static const BarDef bars[] = {
+	/* monitor idx  vert   x     y      w     h     name  */
+	{  0,      0,   0,    "0%    0%     100% -1h ", "Primary top" },
+	{  0,      1,   0,    "0%    100%   100% -1h ", "Primary bottom" },
+	{  1,      0,   0,    "0%    0%     100% -1h ", "Side top" },
+	{  1,      1,   0,    "0%    100%   100% -1h ", "Side bottom" },
+};
+
 /* Bar rules allow you to configure what is shown where on the bar, as well as
  * introducing your own bar modules.
  *
@@ -376,23 +430,23 @@ static const Rule clientrules[] = {
  */
 static const BarRule barrules[] = {
 	/* monitor  bar    scheme   lpad rpad value  alignment               widthfunc                 drawfunc                 clickfunc                 name */
-	{ -1,       0,     0,       5,   5,   0,     BAR_ALIGN_LEFT,         width_stbutton,           draw_stbutton,           click_stbutton,           "statusbutton" },
-	{ -1,       0,     0,       0,   5,   0,     BAR_ALIGN_LEFT,         width_workspaces,         draw_workspaces,         click_workspaces,         "workspaces" },
-	{ 'A',      0,     0,       5,   5,   0,     BAR_ALIGN_RIGHT,        width_systray,            draw_systray,            click_systray,            "systray" },
-	{ -1,       0,     0,       0,   0,   0,     BAR_ALIGN_LEFT,         width_ltsymbol,           draw_ltsymbol,           click_ltsymbol,           "layout" },
-	{  0,       0,     0,       10,  0,   0,     BAR_ALIGN_RIGHT,        width_status,             draw_status,             click_status,             "status0" },
-	{  0,       0,     0,       10,  0,   1,     BAR_ALIGN_RIGHT,        width_status,             draw_status,             click_status,             "status1" },
-	{  0,       0,     0,       10,  0,   2,     BAR_ALIGN_RIGHT,        width_status,             draw_status,             click_status,             "status2" },
-	{  0,       0,     0,       10,  0,   3,     BAR_ALIGN_RIGHT,        width_status,             draw_status,             click_status,             "status3" },
-	{  0,       0,     0,       10,  0,   4,     BAR_ALIGN_RIGHT,        width_status,             draw_status,             click_status,             "status4" },
-	{  0,       0,     0,       10,  0,   5,     BAR_ALIGN_RIGHT,        width_status,             draw_status,             click_status,             "status5" },
-	{  0,       0,     0,       10,  0,   6,     BAR_ALIGN_RIGHT,        width_status,             draw_status,             click_status,             "status6" },
-	{  0,       0,     0,       10,  0,   7,     BAR_ALIGN_RIGHT,        width_status,             draw_status,             click_status,             "status7" },
-	{  0,       0,     0,       10,  0,   8,     BAR_ALIGN_RIGHT,        width_status,             draw_status,             click_status,             "status8" },
-	{ -1,       0,     0,       5,   0,   0,     BAR_ALIGN_NONE,         width_flexwintitle,       draw_flexwintitle,       click_flexwintitle,       "flexwintitle" },
-	{ 'A',      1,     0,       10,  10,  9,     BAR_ALIGN_RIGHT,        width_status,             draw_status,             click_status,             "status9" },
-	{ -1,       1,     0,       0,   0,   0,     BAR_ALIGN_RIGHT_RIGHT,  width_wintitle_hidden,    draw_wintitle_hidden,    click_wintitle_hidden,    "wintitle_hidden" },
-	{ -1,       1,     0,       0,   0,   0,     BAR_ALIGN_LEFT,         width_wintitle_floating,  draw_wintitle_floating,  click_wintitle_floating,  "wintitle_floating" },
+	{ -1,       0,     0,       5,   5,   0,     BAR_ALIGN_LEFT,         size_stbutton,            draw_stbutton,           click_stbutton,           "statusbutton" },
+	{ -1,       0,     0,       0,   5,   0,     BAR_ALIGN_LEFT,         size_workspaces,          draw_workspaces,         click_workspaces,         "workspaces" },
+	{ 'A',      0,     0,       5,   5,   0,     BAR_ALIGN_RIGHT,        size_systray,             draw_systray,            click_systray,            "systray" },
+	{ -1,       0,     0,       0,   0,   0,     BAR_ALIGN_LEFT,         size_ltsymbol,            draw_ltsymbol,           click_ltsymbol,           "layout" },
+	{  0,       0,     0,       10,  0,   0,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             "status0" },
+	{  0,       0,     0,       10,  0,   1,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             "status1" },
+	{  0,       0,     0,       10,  0,   2,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             "status2" },
+	{  0,       0,     0,       10,  0,   3,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             "status3" },
+	{  0,       0,     0,       10,  0,   4,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             "status4" },
+	{  0,       0,     0,       10,  0,   5,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             "status5" },
+	{  0,       0,     0,       10,  0,   6,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             "status6" },
+	{  0,       0,     0,       10,  0,   7,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             "status7" },
+	{  0,       0,     0,       10,  0,   8,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             "status8" },
+	{ -1,       0,     0,       5,   0,   0,     BAR_ALIGN_NONE,         size_flexwintitle,        draw_flexwintitle,       click_flexwintitle,       "flexwintitle" },
+	{ 'A',      1,     0,       10,  10,  9,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             "status9" },
+	{ -1,       1,     0,       0,   0,   0,     BAR_ALIGN_RIGHT_RIGHT,  size_wintitle_hidden,     draw_wintitle_hidden,    click_wintitle_hidden,    "wintitle_hidden" },
+	{ -1,       1,     0,       0,   0,   0,     BAR_ALIGN_LEFT,         size_wintitle_floating,   draw_wintitle_floating,  click_wintitle_floating,  "wintitle_floating" },
 };
 
 /* Workspace rules define what workspaces are available and their properties.
@@ -497,7 +551,6 @@ static const char *dmenucmd[] = {
 	"-nf", normfgcolor,
 	"-sb", selbgcolor,
 	"-sf", selfgcolor,
-	topbar ? NULL : "-b",
 	NULL
 };
 static const char *spcmd1[] = {"w", "st", "-n", "spterm (w)", "-g", "120x34", NULL };
@@ -742,6 +795,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( switchcol, ARG_TYPE_NONE ),
 	IPCCOMMAND( toggle, ARG_TYPE_STR ), // toggle functionality on and off
 	IPCCOMMAND( togglebar, ARG_TYPE_NONE ),
+	IPCCOMMAND( togglebarpadding, ARG_TYPE_NONE ),
 	IPCCOMMAND( togglefakefullscreen, ARG_TYPE_NONE ),
 	IPCCOMMAND( toggleflagex, ARG_TYPE_STR ),
 	IPCCOMMAND( togglefloating, ARG_TYPE_NONE ),

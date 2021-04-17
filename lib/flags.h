@@ -39,13 +39,13 @@ static const unsigned long
 	IgnoreSizeHints = 0x40000000, // ignore size hints for clients (floating and tiled), see floatpos
 	IgnoreMinimumSizeHints = 0x80000000, // while respecting size hints in general ignore the minimum size restrictions to avoid overlapping windows
 	IgnoreDecorationHints = 0x100000000, // ignore decoration hints for client
-	NoBorder = 0x200000000, // indicates that the client should not be drawn with a border around it
+	FlagPlaceholder0x200000000 = 0x200000000,
 	FlagPlaceholder0x400000000 = 0x400000000,
 	FlagPlaceholder0x800000000 = 0x800000000,
 	RespectSizeHints = 0x1000000000, // respect size hints for this client when ResizeHints is globally disabled
 	RioDrawNoMatchPID = 0x2000000000, // do not match PID for this client when spawning via riospawn
-	FlagPlaceholder0x4000000000 = 0x4000000000,
-	FlagPlaceholder0x8000000000 = 0x8000000000,
+	NoBorder = 0x4000000000, // indicates that the client should not be drawn with a border around it
+	SteamGame = 0x8000000000,
 	FlagPlaceholder0x10000000000 = 0x10000000000,
 	FlagPlaceholder0x20000000000 = 0x20000000000,
 	FlagPlaceholder0x40000000000 = 0x40000000000,
@@ -95,10 +95,10 @@ static const unsigned long
 #define IGNORECFGREQ(C) (C->flags & IgnoreCfgReq)
 #define IGNORECFGREQPOS(C) (C->flags & IgnoreCfgReqPos)
 #define IGNORECFGREQSIZE(C) (C->flags & IgnoreCfgReqSize)
+#define IGNOREDECORATIONHINTS(C) (C->flags & IgnoreDecorationHints)
 #define IGNOREPROPTRANSIENTFOR(C) (C->flags & IgnorePropTransientFor)
 #define IGNORESIZEHINTS(C) (C->flags & IgnoreSizeHints)
 #define IGNOREMINIMUMSIZEHINTS(C) (C->flags & IgnoreMinimumSizeHints)
-#define IGNOREDECORATIONHINTS(C) (C->flags & IgnoreDecorationHints)
 #define NEEDRESIZE(C) (C->flags & NeedResize)
 #define NEVERFOCUS(C) (C->flags & NeverFocus)
 #define NOBORDER(C) (C->flags & NoBorder)
@@ -108,6 +108,7 @@ static const unsigned long
 #define RESTOREFAKEFULLSCREEN(C) (C->flags & RestoreFakeFullScreen)
 #define RIODRAWNOMATCHPID(C) (C->flags & RioDrawNoMatchPID)
 #define RULED(C) (C->flags & Ruled)
+#define STEAMGAME(C) (C->flags & SteamGame)
 #define SWITCHWORKSPACE(C) (C->flags & SwitchWorkspace)
 #define ENABLEWORKSPACE(C) (C->flags & EnableWorkspace)
 #define REVERTWORKSPACE(C) (C->flags & RevertWorkspace)

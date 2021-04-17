@@ -110,10 +110,10 @@ getflagbyname(const char *name)
 		return RespectSizeHints;
 	else if (strcmp(name, "RioDrawNoMatchPID") == 0)
 		return RioDrawNoMatchPID;
-	else if (strcmp(name, "FlagPlaceholder0x4000000000") == 0)
-		return FlagPlaceholder0x4000000000;
-	else if (strcmp(name, "FlagPlaceholder0x8000000000") == 0)
-		return FlagPlaceholder0x8000000000;
+	else if (strcmp(name, "FlagPlaceholder0x200000000") == 0)
+		return FlagPlaceholder0x200000000;
+	else if (strcmp(name, "SteamGame") == 0)
+		return SteamGame;
 	else if (strcmp(name, "FlagPlaceholder0x10000000000") == 0)
 		return FlagPlaceholder0x10000000000;
 	else if (strcmp(name, "FlagPlaceholder0x20000000000") == 0)

@@ -45,7 +45,7 @@ static const unsigned long
 	AutoHideScratchpads = 0x8000000, // automatically hide open scratchpads when moving to another workspace
 	RioDrawIncludeBorders = 0x10000000, // indicates whether the area drawn using slop includes the window borders
 	RioDrawSpawnAsync = 0x20000000, // indicates whether to spawn the application alongside or after drawing area using slop
-	FuncPlaceholder0x40000000 = 0x40000000,
+	BarPadding = 0x40000000, // enables bar padding
 	FuncPlaceholder0x80000000 = 0x80000000,
 	FuncPlaceholder4294967296 = 0x100000000,
 	FuncPlaceholder8589934592 = 0x200000000,
