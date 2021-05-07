@@ -6,6 +6,7 @@
 #include "workspace.c"
 
 #include "bar_alpha.c"
+#include "bar.c"
 #include "bar_ltsymbol.c"
 #include "bar_status2d.c"
 #include "bar_statusbutton.c"
@@ -15,7 +16,6 @@
 #include "bar_systray.c"
 #include "bar_wintitleactions.c"
 #include "bar_workspaces.c"
-#include "bar.c"
 
 /* Other patches */
 #include "attachx.c"
