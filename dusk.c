@@ -1710,6 +1710,12 @@ killclient(const Arg *arg)
 		next = c->next;
 		if (ISPERMANENT(c))
 			continue;
+
+		detachstack(c);
+		detach(c);
+		arrange(c->ws);
+		drawbar(c->ws->mon);
+
 		if (sendevent(c->win, wmatom[WMDelete], NoEventMask, wmatom[WMDelete], CurrentTime, 0, 0, 0))
 			continue;
 
@@ -3191,6 +3197,7 @@ unmanage(Client *c, int destroyed)
 
 	detach(c);
 	detachstack(c);
+
 	if (!destroyed) {
 		wc.border_width = c->oldbw;
 		XGrabServer(dpy); /* avoid race conditions */
@@ -3205,9 +3212,9 @@ unmanage(Client *c, int destroyed)
 	free(c);
 
 	focus(NULL);
-	updateclientlist();
 	arrange(ws);
 	drawbar(ws->mon);
+	updateclientlist();
 
 	if (revertws && !revertws->visible)
 		viewwsonmon(revertws, revertws->mon, 0);
