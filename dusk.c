@@ -2405,16 +2405,7 @@ resizeclientpad(Client *c, int x, int y, int w, int h, int tw, int th)
 	}
 	XConfigureWindow(dpy, c->win, CWX|CWY|CWWidth|CWHeight|CWBorderWidth, &wc);
 	configure(c);
-
-	if (ISFAKEFULLSCREEN(c) && WASFULLSCREEN(c)) {
-		/* Exception: if the client was in actual fullscreen and we exit out to fake fullscreen
-		 * mode, then the focus would drift to whichever window is under the mouse cursor at the
-		 * time. To avoid this we pass True to XSync which will make the X server disregard any
-		 * other events in the queue thus cancelling the EnterNotify event that would otherwise
-		 * have changed focus. */
-		XSync(dpy, True);
-	} else
-		XSync(dpy, False);
+	XSync(dpy, False);
 }
 
 void
@@ -2681,6 +2672,7 @@ setfocus(Client *c)
 void
 setfullscreen(Client *c, int fullscreen, int restorefakefullscreen)
 {
+	XEvent ev;
 	Monitor *m = c->ws->mon;
 	int savestate = 0, restorestate = 0;
 
@@ -2751,6 +2743,13 @@ setfullscreen(Client *c, int fullscreen, int restorefakefullscreen)
 		}
 	} else
 		resizeclient(c, c->x, c->y, c->w, c->h);
+
+	/* Exception: if the client was in actual fullscreen and we exit out to fake fullscreen
+	 * mode, then the focus would sometimes drift to whichever window is under the mouse cursor
+	 * at the time. To avoid this we ask X for all EnterNotify events and just ignore them.
+	 */
+	if (!ISFULLSCREEN(c))
+		while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
 }
 
 void
