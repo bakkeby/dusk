@@ -1705,21 +1705,11 @@ void
 killclient(const Arg *arg)
 {
 	Client *c = CLIENT, *next;
-	Workspace *ws = NULL;
 
 	for (c = nextmarked(NULL, c); c; c = nextmarked(next, NULL)) {
 		next = c->next;
 		if (ISPERMANENT(c))
 			continue;
-
-		detachstack(c);
-		detach(c);
-		if (ws && ws != c->ws) {
-			arrange(ws);
-			drawbar(ws->mon);
-		}
-		ws = c->ws;
-
 		if (sendevent(c->win, wmatom[WMDelete], NoEventMask, wmatom[WMDelete], CurrentTime, 0, 0, 0))
 			continue;
 
@@ -1731,11 +1721,6 @@ killclient(const Arg *arg)
 		XSetErrorHandler(xerror);
 		XUngrabServer(dpy);
 		force_warp = 1;
-	}
-
-	if (ws) {
-		arrange(ws);
-		drawbar(ws->mon);
 	}
 }
 
