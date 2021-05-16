@@ -6,6 +6,7 @@ static void rotatelayoutaxis(const Arg *arg);
 static void setlayoutaxisex(const Arg *arg);
 static void setlayoutex(const Arg *arg);
 static void layoutmonconvert(Workspace *ws, Monitor *from, Monitor *to);
+static void layoutconvert(const Arg *arg);
 static int convert_arrange(int arrange);
 static int convert_split(int split);
 

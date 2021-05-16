@@ -157,10 +157,20 @@ layoutmonconvert(Workspace *ws, Monitor *from, Monitor *to)
 	if (ws->layout->arrange != flextile)
 		return;
 
+	layoutconvert(&((Arg) { .v = ws }));
+}
+
+static void
+layoutconvert(const Arg *arg)
+{
+	Workspace *ws = (arg && arg->v ? (Workspace *)arg->v : selws);
 	ws->ltaxis[LAYOUT] = convert_split(ws->ltaxis[LAYOUT]);
 	ws->ltaxis[MASTER] = convert_arrange(ws->ltaxis[MASTER]);
 	ws->ltaxis[STACK] = convert_arrange(ws->ltaxis[STACK]);
 	ws->ltaxis[STACK2] = convert_arrange(ws->ltaxis[STACK2]);
+
+	if (!arg || !arg->v)
+		arrangews(ws);
 }
 
 static int

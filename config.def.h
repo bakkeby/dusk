@@ -608,6 +608,7 @@ static Key keys[] = {
 	{ MODKEY|Ctrl,                  XK_bracketleft,  rotatelayoutaxis,       {.i = -4 } }, // cycle through the available tiling arrangements for the secondary stack area
 	{ MODKEY|Ctrl,                  XK_bracketright, rotatelayoutaxis,       {.i = +4 } }, // cycle through the available tiling arrangements for the secondary stack area
 	{ MODKEY|Ctrl,                  XK_m,            mirrorlayout,           {0} }, // flip the master and stack areas
+	{ MODKEY|Ctrl|Shift,            XK_m,            layoutconvert,          {0} }, // flip between horizontal and vertical layout
 	{ MODKEY,                       XK_space,        setlayout,              {0} }, // toggles between current and previous layout
 
 	{ MODKEY|Ctrl,                  XK_g,            floatpos,               {.v = "50% 50% 80% 80%" } }, // center client and take up 80% of the screen
