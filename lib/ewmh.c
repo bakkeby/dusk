@@ -6,7 +6,36 @@ persistworkspacestate(Workspace *ws)
 	char atom[22];
 
 	sprintf(atom, "_DUSK_WORKSPACE_%u", ws->num);
-	unsigned long data[] = { ws->visible | ws->pinned << 1 | ws->mon->num << 2 }; // potentially enablegaps, nmaster, nstack, mfact
+
+	/* Perists workspace information in 32 bits laid out like this:
+	 *
+	 * 000|1|0|0000|0000|0001|0001|000|000|001|0|1
+	 *    | | |    |    |    |    |   |   |   | |-- ws->visible
+	 *    | | |    |    |    |    |   |   |   |-- ws->pinned
+	 *    | | |    |    |    |    |   |   |-- ws->nmaster
+	 *    | | |    |    |    |    |   |-- ws->nstack
+	 *    | | |    |    |    |    |-- ws->mon
+	 *    | | |    |    |    |-- ws->ltaxis[LAYOUT] (i.e. split)
+	 *    | | |    |    |-- ws->ltaxis[MASTER]
+	 *    | | |    |-- ws->ltaxis[STACK]
+	 *    | | |-- ws->ltaxis[STACK2]
+	 *    | |-- mirror layout (indicated by negative ws->ltaxis[LAYOUT])
+	 *    |-- ws->enablegaps
+	 */
+	unsigned long data[] = {
+		(ws->visible & 0x1) |
+		(ws->pinned & 0x1) << 1 |
+		(ws->nmaster & 0x7) << 2 |
+		(ws->nstack & 0x7 ) << 5 |
+		(ws->mon->num & 0x7) << 8 |
+		(abs(ws->ltaxis[LAYOUT]) & 0xF) << 11 |
+		(ws->ltaxis[MASTER] & 0xF) << 15 |
+		(ws->ltaxis[STACK] & 0xF) << 19 |
+		(ws->ltaxis[STACK2] & 0xF) << 23 |
+		(ws->ltaxis[LAYOUT] < 0 ? 1 : 0) << 27 |
+		(ws->enablegaps & 0x1) << 28
+	};
+
 	XChangeProperty(dpy, root, XInternAtom(dpy, atom, False), XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
 
 	/* set dusk client atoms */
@@ -178,13 +207,22 @@ getworkspacestate(Workspace *ws)
 		settings = *(Atom *)p;
 		XFree(p);
 
-		mon = settings >> 2;
+		/* See bit layout in the persistworkspacestate function */
+		mon = (settings >> 8) & 0x7;
 		for (m = mons; m && m->num != mon; m = m->next);
 		if (m) {
 			ws->mon = m;
-			ws->visible = settings & 1;
-			ws->pinned = (settings & 0x2) >> 1;
-
+			ws->visible = settings & 0x1;
+			ws->pinned = (settings >> 1) & 0x1;
+			ws->nmaster = (settings >> 2) & 0x7;
+			ws->nstack = (settings >> 5) & 0x7;
+			ws->ltaxis[LAYOUT] = (settings >> 11) & 0xF;
+			if (settings & (1 << 27)) // mirror layout
+				ws->ltaxis[LAYOUT] *= -1;
+			ws->ltaxis[MASTER] = (settings >> 15) & 0xF;
+			ws->ltaxis[STACK] = (settings >> 19) & 0xF;
+			ws->ltaxis[STACK2] = (settings >> 23) & 0xF;
+			ws->enablegaps = (settings >> 28) & 0x1;
 			if (ws->visible)
 				ws->mon->selws = ws;
 		}
