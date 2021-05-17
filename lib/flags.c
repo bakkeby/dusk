@@ -160,8 +160,8 @@ getflagbyname(const char *name)
 		return Ruled;
 	else if (strcmp(name, "Marked") == 0)
 		return Marked;
-	else if (strcmp(name, "FlagPlaceholder0x8000000000000000") == 0)
-		return FlagPlaceholder0x8000000000000000;
+	else if (strcmp(name, "Unmanaged") == 0)
+		return Unmanaged;
 
 	return 0;
 }

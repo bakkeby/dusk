@@ -1802,6 +1802,13 @@ manage(Window w, XWindowAttributes *wa)
 			applyrules(c);
 	}
 
+	if (ISUNMANAGED(c)) {
+		XMapWindow(dpy, c->win);
+		XLowerWindow(dpy, c->win);
+		free(c);
+		return;
+	}
+
 	if (!ISTRANSIENT(c))
 		term = termforwin(c);
 

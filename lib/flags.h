@@ -74,7 +74,7 @@ static const unsigned long
 	NeedResize = 0x1000000000000000, // internal flag indicating that the client needs to be resized later
 	Ruled = 0x2000000000000000, // indicates whether client was subject to client rules (used internally to determine default behaviour)
 	Marked = 0x4000000000000000, // indicates that the client has been marked for group action
-	FlagPlaceholder0x8000000000000000 = 0x8000000000000000;
+	Unmanaged = 0x8000000000000000; // indicates that the client is not to be managed by the window manager
 
 #define ALWAYSONTOP(C) (C->flags & AlwaysOnTop)
 #define HIDDEN(C) (C->flags & Hidden)
@@ -90,6 +90,7 @@ static const unsigned long
 #define ISTRANSIENT(C) (C->flags & Transient)
 #define ISURGENT(C) (C->flags & Urgent)
 #define ISMARKED(C) (C->flags & Marked)
+#define ISUNMANAGED(C) (C->flags & Unmanaged)
 #define ISVISIBLE(C) (C->ws->visible && !(C->flags & (Invisible|Hidden)))
 #define ISINVISIBLE(C) (C->flags & Invisible)
 #define IGNORECFGREQ(C) (C->flags & IgnoreCfgReq)

@@ -337,6 +337,7 @@ static const Rule clientrules[] = {
 	 *	WM_WINDOW_ROLE(STRING) = role
 	 *	_NET_WM_WINDOW_TYPE(ATOM) = wintype
 	 */
+	RULE(.wintype = WTYPE "DESKTOP", .flags = Unmanaged)
 	RULE(.wintype = WTYPE "DIALOG", .flags = AlwaysOnTop|Centered|Floating)
 	RULE(.wintype = WTYPE "UTILITY", .flags = AlwaysOnTop|Centered|Floating)
 	RULE(.wintype = WTYPE "TOOLBAR", .flags = AlwaysOnTop|Centered|Floating)
