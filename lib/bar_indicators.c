@@ -26,6 +26,9 @@ drawindicator(Workspace *ws, Client *c, unsigned int occ, int x, int y, int w, i
 	case INDICATOR_TOP_RIGHT_PIN:
 		drw_rect(drw, x + w - 2 * boxs, y + boxs, boxs, boxs, 1, invert);
 		break;
+	case INDICATOR_TOP_CENTERED_DOT:
+		drw_rect(drw, x + w/2, y, 1, 2, 0, 0);
+		break;
 	case INDICATOR_TOP_BAR:
 		drw_rect(drw, x + boxw, y, w - ( 2 * boxw + 1), boxw/2, filled, invert);
 		break;
@@ -33,10 +36,17 @@ drawindicator(Workspace *ws, Client *c, unsigned int occ, int x, int y, int w, i
 		drw_rect(drw, x + boxw, y, w - ( 2 * boxw + 1), 1, 0, invert);
 		break;
 	case INDICATOR_BOTTOM_BAR:
-		drw_rect(drw, x + boxw, y + h - boxw/2, w - ( 2 * boxw + 1), boxw/2, filled, invert);
+		drw_rect(drw, x + boxw, y + h - boxw/2, w - ( 2 * boxw ), boxw/2, filled, invert);
 		break;
 	case INDICATOR_BOTTOM_BAR_SLIM:
-		drw_rect(drw, x + boxw, y + h - 1, w - ( 2 * boxw + 1), 1, 0, invert);
+		drw_rect(drw, x + boxw, y + h - 1, w - ( 2 * boxw ) + 1, 1, 0, invert);
+		break;
+	case INDICATOR_BOTTOM_BAR_SLIM_DOTS:
+		drw_rect(drw, x + boxw, y + h - 2, 1, 2, 0, 0);
+		drw_rect(drw, x + w - boxw, y + h - 2, 1, 2, 0, 0);
+		break;
+	case INDICATOR_BOTTOM_CENTERED_DOT:
+		drw_rect(drw, x + w/2, y + h - 1, 2, 1, 0, 0);
 		break;
 	case INDICATOR_BOX:
 		drw_rect(drw, x + boxw, y, w - 2 * boxw, h, 0, invert);
