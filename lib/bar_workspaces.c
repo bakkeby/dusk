@@ -48,6 +48,10 @@ draw_workspaces(Bar *bar, BarArg *a)
 			? SchemeWsVisible
 			: urg
 			? SchemeUrg
+			: occ
+			? SchemeWsOcc
+			: ws->pinned
+			? SchemeWsPin
 			: SchemeWsNorm
 		]);
 		drw_text(drw, x, y, w, h, lrpad / 2, icon, inv, False);
