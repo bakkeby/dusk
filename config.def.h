@@ -109,9 +109,13 @@ static char wsvisbgcolor[]               = "#440000";
 static char wsselfgcolor[]               = "#FFF7D4";
 static char wsselbgcolor[]               = "#550000";
 
-static char hidfgcolor[]                 = "#c278b6";
-static char hidbgcolor[]                 = "#222222";
-static char hidbordercolor[]             = "#440000";
+static char hidnormfgcolor[]             = "#c278b6";
+static char hidnormbgcolor[]             = "#222222";
+static char hidnormbordercolor[]         = "#440000";
+
+static char hidselfgcolor[]              = "#D288C6";
+static char hidselbgcolor[]              = "#222222";
+static char hidselbordercolor[]          = "#440000";
 
 static char urgfgcolor[]                 = "#bbbbbb";
 static char urgbgcolor[]                 = "#222222";
@@ -189,7 +193,8 @@ static const unsigned int alphas[][3] = {
 	[SchemeWsNorm]       = { OPAQUE, baralpha, borderalpha },
 	[SchemeWsVisible]    = { OPAQUE, baralpha, borderalpha },
 	[SchemeWsSel]        = { OPAQUE, baralpha, borderalpha },
-	[SchemeHid]          = { OPAQUE, baralpha, borderalpha },
+	[SchemeHidNorm]      = { OPAQUE, baralpha, borderalpha },
+	[SchemeHidSel]       = { OPAQUE, baralpha, borderalpha },
 	[SchemeUrg]          = { OPAQUE, baralpha, borderalpha },
 	[SchemeMarked]       = { OPAQUE, baralpha, borderalpha },
 	[SchemeScratchSel]   = { OPAQUE, baralpha, borderalpha },
@@ -253,7 +258,8 @@ static char *colors[][ColCount] = {
 	[SchemeWsNorm]       = { wsnormfgcolor,    wsnormbgcolor,                              },
 	[SchemeWsVisible]    = { wsvisfgcolor,     wsvisbgcolor,                               },
 	[SchemeWsSel]        = { wsselfgcolor,     wsselbgcolor,                               },
-	[SchemeHid]          = { hidfgcolor,       hidbgcolor,         hidbordercolor,         },
+	[SchemeHidNorm]      = { hidnormfgcolor,   hidnormbgcolor,     hidnormbordercolor,     },
+	[SchemeHidSel]       = { hidselfgcolor,    hidselbgcolor,      hidselbordercolor,      },
 	[SchemeUrg]          = { urgfgcolor,       urgbgcolor,         urgbordercolor,         },
 	[SchemeMarked]       = { markedfgcolor,    markedbgcolor,      markedbordercolor,      },
 	[SchemeScratchNorm]  = { scratchnormcolor, scratchnormbgcolor, scratchnormbordercolor, },

@@ -96,7 +96,8 @@ enum {
 	SchemeWsSel,
 	SchemeScratchSel,
 	SchemeScratchNorm,
-	SchemeHid,
+	SchemeHidSel,
+	SchemeHidNorm,
 	SchemeUrg,
 	SchemeMarked,
 	SchemeFlexActTTB,
@@ -538,7 +539,7 @@ applyrules(Client *c)
 {
 	const char *class, *instance;
 	Atom wintype, game_id;
-	char role[64];
+	char role[64] = {0};
 	unsigned int i;
 	const Rule *r;
 	Workspace *ws = NULL;
@@ -1755,10 +1756,10 @@ killclient(const Arg *arg)
 void
 manage(Window w, XWindowAttributes *wa)
 {
-	Client *c, *t = NULL, *term = NULL;
-	Monitor *m;
+	Client *c = NULL, *t = NULL, *term = NULL;
+	Monitor *m = NULL;
 	Window trans = None;
-	XWindowChanges wc;
+	XWindowChanges wc = { 0 };
 	int focusclient = 1;
 
 	c = ecalloc(1, sizeof(Client));
@@ -1779,6 +1780,7 @@ manage(Window w, XWindowAttributes *wa)
 	c->sfh = c->h;
 
 	updatetitle(c);
+	fprintf(stderr, "manage --> client %s\n", c->name);
 	getclientflags(c);
 	getclientfields(c);
 	getclientopacity(c);
@@ -1806,6 +1808,7 @@ manage(Window w, XWindowAttributes *wa)
 		XMapWindow(dpy, c->win);
 		XLowerWindow(dpy, c->win);
 		free(c);
+		fprintf(stderr, "manage <-- unmanaged (%s)\n", c->name);
 		return;
 	}
 
@@ -1926,6 +1929,7 @@ manage(Window w, XWindowAttributes *wa)
 	if (focusclient)
 		focus(c);
 	setfloatinghint(c);
+	fprintf(stderr, "manage <-- (%s)\n", c->name);
 }
 
 void
@@ -2600,7 +2604,7 @@ void
 scan(void)
 {
 	scanner = 1;
-	char swin[256];
+	char swin[256] = {0};
 	unsigned int i, num;
 	Window d1, d2, *wins = NULL;
 	XWindowAttributes wa;

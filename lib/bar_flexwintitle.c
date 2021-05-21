@@ -63,7 +63,7 @@ getschemefor(Workspace *ws, int group, int activegroup)
 			return (activegroup ? SchemeFlexActTTB + ws->ltaxis[group] : SchemeFlexInaTTB + ws->ltaxis[group]);
 		return SchemeTitleNorm;
 	case GRP_HIDDEN:
-		return SchemeHid;
+		return SchemeHidNorm;
 	case GRP_FLOAT:
 		return (activegroup ? SchemeFlexActFloat : SchemeFlexInaFloat);
 	}
@@ -232,14 +232,16 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 	int clientscheme = (
 		ISMARKED(c)
 		? SchemeMarked
+		: c == ws->sel && HIDDEN(c)
+		? SchemeHidSel
+		: HIDDEN(c)
+		? SchemeHidNorm
 		: c->scratchkey != 0 && c == ws->sel
 		? SchemeScratchSel
 		: c->scratchkey != 0
 		? SchemeScratchNorm
 		: c == ws->sel
 		? getselschemefor(tabscheme)
-		: HIDDEN(c)
-		? SchemeHid
 		: ISURGENT(c)
 		? SchemeUrg
 		: tabscheme
