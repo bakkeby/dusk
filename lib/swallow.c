@@ -127,7 +127,7 @@ getparentprocess(pid_t p)
 
 #ifdef __linux__
 	FILE *f;
-	char buf[256];
+	char buf[256] = {0};
 	snprintf(buf, sizeof(buf) - 1, "/proc/%u/stat", (unsigned)p);
 
 	if (!(f = fopen(buf, "r")))

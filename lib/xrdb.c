@@ -37,9 +37,12 @@ loadxrdb()
 				XRDB_LOAD_COLOR("dusk.wsvisbgcolor", wsvisbgcolor);
 				XRDB_LOAD_COLOR("dusk.wsselfgcolor", wsselfgcolor);
 				XRDB_LOAD_COLOR("dusk.wsselbgcolor", wsselbgcolor);
-				XRDB_LOAD_COLOR("dusk.hidfgcolor", hidfgcolor);
-				XRDB_LOAD_COLOR("dusk.hidbgcolor", hidbgcolor);
-				XRDB_LOAD_COLOR("dusk.hidbordercolor", hidbordercolor);
+				XRDB_LOAD_COLOR("dusk.hidnormfgcolor", hidnormfgcolor);
+				XRDB_LOAD_COLOR("dusk.hidnormbgcolor", hidnormbgcolor);
+				XRDB_LOAD_COLOR("dusk.hidnormbordercolor", hidnormbordercolor);
+				XRDB_LOAD_COLOR("dusk.hidselfgcolor", hidselfgcolor);
+				XRDB_LOAD_COLOR("dusk.hidselbgcolor", hidselbgcolor);
+				XRDB_LOAD_COLOR("dusk.hidselbordercolor", hidselbordercolor);
 				XRDB_LOAD_COLOR("dusk.urgfgcolor", urgfgcolor);
 				XRDB_LOAD_COLOR("dusk.urgbgcolor", urgbgcolor);
 				XRDB_LOAD_COLOR("dusk.urgbordercolor", urgbordercolor);

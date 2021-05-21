@@ -3,7 +3,7 @@ persistworkspacestate(Workspace *ws)
 {
 	Client *c;
 	unsigned int i;
-	char atom[22];
+	char atom[22] = {0};
 
 	sprintf(atom, "_DUSK_WORKSPACE_%u", ws->num);
 
@@ -58,7 +58,7 @@ persistworkspacestate(Workspace *ws)
 void
 savewindowfloatposition(Client *c, Monitor *m)
 {
-	char atom[22];
+	char atom[22] = {0};
 	if (c->sfx == -9999)
 		return;
 
@@ -76,7 +76,7 @@ savewindowfloatposition(Client *c, Monitor *m)
 int
 restorewindowfloatposition(Client *c, Monitor *m)
 {
-	char atom[22];
+	char atom[22] = {0};
 	Atom key, value;
 	int x, y, w, h;
 
@@ -190,7 +190,7 @@ void
 getworkspacestate(Workspace *ws)
 {
 	Monitor *m;
-	char atom[22];
+	char atom[22] = {0};
 	int di, mon;
 	unsigned long dl;
 	unsigned char *p = NULL;

@@ -5,8 +5,8 @@ int
 riodraw(Client *c, const char slopstyle[])
 {
 	int i;
-	char str[100];
-	char strout[100];
+	char str[100] = {0};
+	char strout[100] = {0};
 	char tmpstring[30] = {0};
 	char slopcmd[100] = "slop -f x%xx%yx%wx%hx ";
 	int firstchar = 0;
