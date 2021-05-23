@@ -581,8 +581,8 @@ applyrules(Client *c)
 				for (ws = workspaces; ws && strcmp(ws->name, r->workspace) != 0; ws = ws->next);
 			c->ws = ws ? ws : selws;
 
-			if (ISFLOATING(c))
-				setfloatpos(c, r->floatpos ? r->floatpos : "50% 50%");
+			if (ISFLOATING(c) && r->floatpos)
+				setfloatpos(c, r->floatpos);
 
 			if (REVERTWORKSPACE(c))
 				c->revertws = selws;
