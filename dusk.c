@@ -1880,7 +1880,7 @@ manage(Window w, XWindowAttributes *wa)
 		}
 	}
 
-	if (ISCENTERED(c)) {
+	if (ISCENTERED(c) || (c->x == m->mx && c->y == m->my)) {
 		/* Transient windows are centered within the geometry of the parent window */
 		if (t) {
 			c->x = t->x + WIDTH(t) / 2 - WIDTH(c) / 2;
@@ -3117,11 +3117,13 @@ togglefloating(const Arg *arg)
 	for (c = nextmarked(NULL, c); c; c = nextmarked(c->next, NULL)) {
 		if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c)) /* no support for fullscreen windows */
 			continue;
+		if (ISFIXED(c))
+			continue;
 		if (ws && c->ws != ws) {
 			drawbar(ws->mon);
 			arrange(ws);
 		}
-		setflag(c, Floating, !ISFLOATING(c) || ISFIXED(c));
+		setflag(c, Floating, !ISFLOATING(c));
 		if (!MOVERESIZE(c) && ISFLOATING(c)) {
 			if (c->sfx == -9999) {
 				setfloatpos(c, toggle_float_pos);
