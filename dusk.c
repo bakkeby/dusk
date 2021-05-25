@@ -1397,7 +1397,7 @@ focus(Client *c)
 	Workspace *ws = c ? c->ws : selws;
 	Client *f;
 	XWindowChanges wc;
-	if (!c || !ISVISIBLE(c))
+	if (!c || ISINVISIBLE(c))
 		for (c = ws->stack; c && !ISVISIBLE(c); c = c->snext);
 	if (ws->sel && ws->sel != c)
 		unfocus(ws->sel, 0, c);
