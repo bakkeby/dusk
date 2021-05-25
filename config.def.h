@@ -118,7 +118,7 @@ static char hidnormbgcolor[]             = "#222222";
 static char hidnormbordercolor[]         = "#440000";
 
 static char hidselfgcolor[]              = "#D288C6";
-static char hidselbgcolor[]              = "#222222";
+static char hidselbgcolor[]              = "#111111";
 static char hidselbordercolor[]          = "#440000";
 
 static char urgfgcolor[]                 = "#bbbbbb";
