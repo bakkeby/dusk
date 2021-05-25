@@ -95,7 +95,6 @@ enum {
 	SchemeWsVisible,
 	SchemeWsSel,
 	SchemeWsOcc,
-	SchemeWsPin,
 	SchemeScratchSel,
 	SchemeScratchNorm,
 	SchemeHidSel,
