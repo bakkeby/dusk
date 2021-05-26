@@ -1490,23 +1490,37 @@ void
 focusstack(const Arg *arg)
 {
 	Client *c = NULL, *i;
-	Workspace *ws = selws;
-	int n;
+	Workspace *ws = selws, *prevws = NULL, *w = NULL;
+	int n = (selws->sel == NULL);
 
-	if (!ws->sel)
+	if (!ws)
 		return;
 	if (arg->i > 0) {
-		for (c = ws->sel->next; c && (ISINVISIBLE(c) || (arg->i == 1 && HIDDEN(c))); c = c->next);
-		if (!c)
-			for (c = ws->clients; c && (ISINVISIBLE(c) || (arg->i == 1 && HIDDEN(c))); c = c->next);
+		for (; ws && !c; ws = (ws->next ? ws->next : workspaces)) {
+			if (!ws->visible || ws->mon != selws->mon)
+				continue;
+			for (c = (n == 0 && ws->sel ? ws->sel->next : ws->clients); c && (ISINVISIBLE(c) || (arg->i == 1 && HIDDEN(c))); c = c->next);
+			if (n++ > LENGTH(wsrules))
+				break;
+		}
 	} else {
-		for (i = ws->clients; i != ws->sel; i = i->next)
-			if (!ISINVISIBLE(i) && !(arg->i == -1 && HIDDEN(i)))
-				c = i;
-		if (!c)
-			for (; i; i = i->next)
+		do {
+			for (i = ws->clients; i && (n != 0 || i != ws->sel); i = i->next)
 				if (!ISINVISIBLE(i) && !(arg->i == -1 && HIDDEN(i)))
 					c = i;
+			if (!c) {
+				prevws = ws;
+				ws = NULL;
+				for (w = workspaces; w; w = w->next) {
+					if (w->visible && w->mon == prevws->mon)
+						ws = w;
+					if (ws && w->next == prevws)
+						break;
+				}
+				if (n++ > LENGTH(wsrules))
+					break;
+			}
+		} while (!c && ws);
 	}
 	if (c) {
 		focus(c);
