@@ -1497,7 +1497,7 @@ focusstack(const Arg *arg)
 		return;
 	if (arg->i > 0) {
 		for (; ws && !c; ws = (ws->next ? ws->next : workspaces)) {
-			if (!ws->visible || ws->mon != selws->mon)
+			if (!ws->visible || (enabled(RestrictFocusstackToMonitor) && ws->mon != selws->mon))
 				continue;
 			for (c = (n == 0 && ws->sel ? ws->sel->next : ws->clients); c && (ISINVISIBLE(c) || (arg->i == 1 && HIDDEN(c))); c = c->next);
 			if (n++ > LENGTH(wsrules))
@@ -1512,7 +1512,7 @@ focusstack(const Arg *arg)
 				prevws = ws;
 				ws = NULL;
 				for (w = workspaces; w; w = w->next) {
-					if (w->visible && w->mon == prevws->mon)
+					if (w->visible && (disabled(RestrictFocusstackToMonitor) || w->mon == prevws->mon))
 						ws = w;
 					if (ws && w->next == prevws)
 						break;

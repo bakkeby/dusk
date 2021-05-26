@@ -129,8 +129,8 @@ getfuncbyname(const char *name)
 		return RioDrawSpawnAsync;
 	else if (strcmp(name, "BarPadding") == 0)
 		return BarPadding;
-	else if (strcmp(name, "FuncPlaceholder0x80000000") == 0)
-		return FuncPlaceholder0x80000000;
+	else if (strcmp(name, "RestrictFocusstackToMonitor") == 0)
+		return RestrictFocusstackToMonitor;
 	else if (strcmp(name, "FuncPlaceholder4294967296") == 0)
 		return FuncPlaceholder4294967296;
 	else if (strcmp(name, "FuncPlaceholder8589934592") == 0)

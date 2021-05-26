@@ -73,6 +73,7 @@ static unsigned long functionality = 0
 //	|AutoHideScratchpads // automatically hide open scratchpads when moving to another workspace
 //	|RioDrawIncludeBorders // indicates whether the area drawn using slop includes the window borders
 //	|RioDrawSpawnAsync // indicates whether to spawn the application alongside or after drawing area using slop
+//	|RestrictFocusstackToMonitor // restrict focusstack to only operate within the monitor, otherwise focus can drift between monitors
 ;
 
 static const char statussep              = ';'; /* separator between status bars */

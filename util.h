@@ -46,7 +46,7 @@ static const unsigned long
 	RioDrawIncludeBorders = 0x10000000, // indicates whether the area drawn using slop includes the window borders
 	RioDrawSpawnAsync = 0x20000000, // indicates whether to spawn the application alongside or after drawing area using slop
 	BarPadding = 0x40000000, // enables bar padding
-	FuncPlaceholder0x80000000 = 0x80000000,
+	RestrictFocusstackToMonitor = 0x80000000, // option to restrict focusstack to only operate within the monitor
 	FuncPlaceholder4294967296 = 0x100000000,
 	FuncPlaceholder8589934592 = 0x200000000,
 	FuncPlaceholder17179869184 = 0x400000000,
