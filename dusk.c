@@ -1720,29 +1720,11 @@ keyrelease(XEvent *e)
 void
 killclient(const Arg *arg)
 {
-	Client *c = CLIENT, *next, *tmp = NULL, *t = NULL;
-	Workspace *ws = NULL;
+	Client *c = CLIENT;
 
-	for (c = nextmarked(NULL, c); c; c = nextmarked(next, NULL)) {
-		next = c->next;
+	for (c = nextmarked(NULL, c); c; c = nextmarked(c->next, NULL)) {
 		if (ISPERMANENT(c))
 			continue;
-
-		detachstack(c);
-		detach(c);
-		if (tmp)
-			c->next = tmp;
-		tmp = c;
-		if (ws && ws != c->ws) {
-			arrange(ws);
-			drawbar(ws->mon);
-			for (t = tmp; t; t = tmp) {
-				tmp = t->next;
-				attach(t);
-				attachstack(t);
-			}
-		}
-		ws = c->ws;
 
 		if (sendevent(c->win, wmatom[WMDelete], NoEventMask, wmatom[WMDelete], CurrentTime, 0, 0, 0))
 			continue;
@@ -1755,16 +1737,6 @@ killclient(const Arg *arg)
 		XSetErrorHandler(xerror);
 		XUngrabServer(dpy);
 		force_warp = 1;
-	}
-
-	if (ws) {
-		arrange(ws);
-		drawbar(ws->mon);
-		for (t = tmp; t; t = tmp) {
-			tmp = t->next;
-			attach(t);
-			attachstack(t);
-		}
 	}
 }
 
