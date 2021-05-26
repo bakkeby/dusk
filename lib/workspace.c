@@ -429,8 +429,18 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 
 			omon = ws->mon;
 
-			/* Find the next available workspace on said monitor */
-			for (ows = ws->next; ows && ows->mon != ws->mon; ows = ows->next);
+			/* First check if there are more than one visible workspace on the other monitor,
+			 * in which case we just leave the remaining workspaces selected. */
+			for (ows = workspaces; ows; ows = ows->next) {
+				if (ows->mon != ws->mon || ows == ws)
+					continue;
+				if (ows->visible)
+					break;
+			}
+
+			/* Otherwise find the next available workspace on said monitor and enable that */
+			if (!ows)
+				for (ows = ws->next; ows && ows->mon != ws->mon; ows = ows->next);
 			if (!ows)
 				for (ows = workspaces; ows && ows != ws && ows->mon != ws->mon; ows = ows->next);
 			if (ows == ws)
@@ -444,7 +454,8 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 			showws(ws);
 			clientsfsrestore(ws->clients);
 			if (ows)
-				showws(ows);
+				ows->visible = 1;
+			arrangeall = 1;
 		} else {
 			/* Swap the selected workspace on this monitor with the visible desired workspace
 			 * on the other monitor. */
@@ -488,6 +499,7 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 		arrange(NULL);
 	else
 		arrangemon(ws->mon);
+
 	drawbars();
 	updatecurrentdesktop();
 	focus(NULL);
