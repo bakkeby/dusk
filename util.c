@@ -39,7 +39,7 @@ die(const char *fmt, ...) {
 int
 enabled(const long functionality)
 {
-	return settings & functionality;
+	return (settings & functionality) > 0;
 }
 
 int
@@ -131,8 +131,8 @@ getfuncbyname(const char *name)
 		return BarPadding;
 	else if (strcmp(name, "RestrictFocusstackToMonitor") == 0)
 		return RestrictFocusstackToMonitor;
-	else if (strcmp(name, "FuncPlaceholder4294967296") == 0)
-		return FuncPlaceholder4294967296;
+	else if (strcmp(name, "AutoReduceNmaster") == 0)
+		return AutoReduceNmaster;
 	else if (strcmp(name, "FuncPlaceholder8589934592") == 0)
 		return FuncPlaceholder8589934592;
 	else if (strcmp(name, "FuncPlaceholder17179869184") == 0)

@@ -9,7 +9,6 @@
 #include "bar.c"
 #include "bar_ltsymbol.c"
 #include "bar_status2d.c"
-#include "bar_statusbutton.c"
 #include "bar_flexwintitle.c"
 #include "bar_wintitle_floating.c"
 #include "bar_wintitle_hidden.c"

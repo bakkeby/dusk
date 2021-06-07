@@ -255,7 +255,7 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 	else if (enabled(CenteredWindowName) && TEXTW(c->name) < w)
 		pad = (w - TEXTW(c->name)) / 2;
 
-	drw_text(drw, x, barg->y, w, barg->h, pad, c->name, 0, False);
+	drw_text(drw, x, barg->y, w, barg->h, pad, c->name, 0, False, 1);
 	drawstateindicator(ws, c, 1, x + 2, barg->y, w, barg->h, 0, 0);
 }
 

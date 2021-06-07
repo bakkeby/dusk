@@ -6,7 +6,7 @@ size_workspaces(Bar *bar, BarArg *a)
 	for (ws = workspaces; ws; ws = ws->next) {
 		if (ws->mon != bar->mon)
 			continue;
-		tw = TEXTW(wsicon(ws)) + lrpad;
+		tw = TEXT2DW(wsicon(ws)) + lrpad;
 		if (tw <= lrpad)
 			continue;
 		if (bar->vert)
@@ -31,7 +31,7 @@ draw_workspaces(Bar *bar, BarArg *a)
 			continue;
 
 		icon = wsicon(ws);
-		w = TEXTW(icon) + lrpad;
+		w = TEXT2DW(icon) + lrpad;
 		if (w <= lrpad)
 			continue;
 
@@ -41,7 +41,7 @@ draw_workspaces(Bar *bar, BarArg *a)
 				break;
 			}
 
-		drw_setscheme(drw, scheme[
+		int defscheme =
 			ws == ws->mon->selws
 			? SchemeWsSel
 			: ws->visible
@@ -50,9 +50,9 @@ draw_workspaces(Bar *bar, BarArg *a)
 			? SchemeUrg
 			: occ
 			? SchemeWsOcc
-			: SchemeWsNorm
-		]);
-		drw_text(drw, x, y, w, h, lrpad / 2, icon, inv, False);
+			: SchemeWsNorm;
+
+		drw_2dtext(drw, x, y, w, h, lrpad / 2, icon, inv, False, defscheme);
 		drawindicator(ws, NULL, hasclients(ws), x, y, w, h, -1, 0, wsindicatortype);
 		drawindicator(ws, NULL, ws->pinned, x, y, w, h, -1, 0, wspinnedindicatortype);
 		if (bar->vert) {
@@ -77,7 +77,7 @@ click_workspaces(Bar *bar, Arg *arg, BarArg *a)
 	do {
 		if (ws->mon != bar->mon)
 			continue;
-		w = TEXTW(wsicon(ws)) + lrpad;
+		w = TEXT2DW(wsicon(ws)) + lrpad;
 		if (w <= lrpad)
 			continue;
 		if (bar->vert)

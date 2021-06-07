@@ -394,10 +394,28 @@ updatebars(void)
 }
 
 void
+showbar(const Arg *arg)
+{
+	if (!selmon->showbar) {
+		togglebar(arg);
+		selmon->showbar = 2;
+	}
+}
+
+void
+hidebar(const Arg *arg)
+{
+	if (selmon->showbar == 2) {
+		selmon->showbar = 1;
+		togglebar(arg);
+	}
+}
+
+void
 togglebar(const Arg *arg)
 {
 	Bar *bar;
-	selmon->showbar = !selmon->showbar;
+	selmon->showbar = (selmon->showbar == 2 ? 1 : !selmon->showbar);
 	updatebarpos(selmon);
 	for (bar = selmon->bar; bar; bar = bar->next)
 		XMoveResizeWindow(dpy, bar->win, bar->bx, bar->by, bar->bw, bar->bh);

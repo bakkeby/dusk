@@ -84,5 +84,7 @@ static void updatebarpos(Monitor *m);
 static void updatebars(void);
 static void reducewindowarea(Monitor *m);
 static void setbarpos(Bar *bar);
+static void showbar(const Arg *arg);
+static void hidebar(const Arg *arg);
 static void togglebar(const Arg *arg);
 static void togglebarpadding(const Arg *arg);

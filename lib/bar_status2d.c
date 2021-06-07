@@ -36,31 +36,34 @@ click_status(Bar *bar, Arg *arg, BarArg *a)
 int
 draw_status(Bar *bar, BarArg *a)
 {
-	return drawstatusbar(a, rawstatustext[a->value]);
+	return drw_2dtext(drw, a->x, a->y, a->w, a->h, 0, rawstatustext[a->value], 0, 0, SchemeNorm);
 }
 
 int
-drawstatusbar(BarArg *a, char* stext)
+drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lpad, const char *text2d, int invert, Bool markup, int defscheme)
 {
-	int i, w, len;
-	int x = a->x;
-	int y = a->y;
+	if (!w)
+		return 0;
+
+	int i, tw, dx = x, len;
+	int rx, ry, rw, rh;
 	short isCode = 0;
-	char *text;
-	char *p;
-	Clr oldbg, oldfg;
-	len = strlen(stext);
-	if (!(text = (char*) malloc(sizeof(char)*(len + 1))))
+	char *text = {0};
+	char *p = {0};
+	Clr oldbg = scheme[defscheme][ColFg];
+	Clr oldfg = scheme[defscheme][ColBg];
+	len = strlen(text2d) + 1;
+	if (!(text = (char*) malloc(sizeof(char)*(len))))
 		die("malloc");
 	p = text;
 
-	strcpy(text, stext);
+	strcpy(text, text2d);
 
-	drw_setscheme(drw, scheme[SchemeNorm]);
-	drw_rect(drw, a->x, a->y, a->w, a->h, 1, 1);
+	drw_setscheme(drw, scheme[defscheme]);
+	drw_rect(drw, x, y, w, h, 1, 1);
 	drw_setscheme(drw, scheme[LENGTH(colors)]);
-	drw->scheme[ColFg] = scheme[SchemeNorm][ColFg];
-	drw->scheme[ColBg] = scheme[SchemeNorm][ColBg];
+	drw->scheme[ColFg] = scheme[defscheme][ColFg];
+	drw->scheme[ColBg] = scheme[defscheme][ColBg];
 
 	/* process status text */
 	i = -1;
@@ -69,10 +72,10 @@ drawstatusbar(BarArg *a, char* stext)
 			isCode = 1;
 
 			text[i] = '\0';
-			w = TEXTWM(text);
-			drw_text(drw, x, y, w, bh, 0, text, 0, True);
+			tw = TEXTWM(text);
+			drw_text(drw, dx, y, tw, bh, lpad, text, invert, markup, 0);
+			dx += tw;
 
-			x += w;
 			/* process code */
 			while (text[++i] != '^') {
 				if (text[i] == 'c') {
@@ -83,7 +86,7 @@ drawstatusbar(BarArg *a, char* stext)
 					}
 					memcpy(buf, (char*)text+i+1, 7);
 					buf[7] = '\0';
-					drw_clr_create(drw, &drw->scheme[ColFg], buf, enabled(Status2DNoAlpha) ? 0xff : alphas[SchemeNorm][ColFg]);
+					drw_clr_create(drw, &drw->scheme[ColFg], buf, enabled(Status2DNoAlpha) ? 0xff : alphas[defscheme][ColFg]);
 					i += 7;
 				} else if (text[i] == 'b') {
 					char buf[8];
@@ -93,17 +96,17 @@ drawstatusbar(BarArg *a, char* stext)
 					}
 					memcpy(buf, (char*)text+i+1, 7);
 					buf[7] = '\0';
-					drw_clr_create(drw, &drw->scheme[ColBg], buf, enabled(Status2DNoAlpha) ? 0xff : alphas[SchemeNorm][ColFg]);
+					drw_clr_create(drw, &drw->scheme[ColBg], buf, enabled(Status2DNoAlpha) ? 0xff : alphas[defscheme][ColBg]);
 					i += 7;
 				} else if (text[i] == 'C') {
 					int c = atoi(text + ++i) % 16;
-					drw_clr_create(drw, &drw->scheme[ColFg], termcolor[c], enabled(Status2DNoAlpha) ? 0xff : alphas[SchemeNorm][ColFg]);
+					drw_clr_create(drw, &drw->scheme[ColFg], termcolor[c], enabled(Status2DNoAlpha) ? 0xff : alphas[defscheme][ColFg]);
 				} else if (text[i] == 'B') {
 					int c = atoi(text + ++i) % 16;
-					drw_clr_create(drw, &drw->scheme[ColBg], termcolor[c], enabled(Status2DNoAlpha) ? 0xff : alphas[SchemeNorm][ColFg]);
+					drw_clr_create(drw, &drw->scheme[ColBg], termcolor[c], enabled(Status2DNoAlpha) ? 0xff : alphas[defscheme][ColBg]);
 				} else if (text[i] == 'd') {
-					drw->scheme[ColFg] = scheme[SchemeNorm][ColFg];
-					drw->scheme[ColBg] = scheme[SchemeNorm][ColBg];
+					drw->scheme[ColFg] = scheme[defscheme][ColFg];
+					drw->scheme[ColBg] = scheme[defscheme][ColBg];
 				} else if (text[i] == 'w') {
 					Clr swp;
 					swp = drw->scheme[ColFg];
@@ -116,39 +119,56 @@ drawstatusbar(BarArg *a, char* stext)
 					drw->scheme[ColFg] = oldfg;
 					drw->scheme[ColBg] = oldbg;
 				} else if (text[i] == 'r') {
-					int rx = atoi(text + ++i);
-					while (text[++i] != ',');
-					int ry = atoi(text + ++i);
-					while (text[++i] != ',');
-					int rw = atoi(text + ++i);
-					while (text[++i] != ',');
-					int rh = atoi(text + ++i);
+					if (++i >= len)
+						break;
+					rx = (strncmp(text + i, "w", 1) == 0 ? w : atoi(text + i));
+					while (i < len && text[++i] != ',');
+					if (++i >= len)
+						break;
+					ry = (strncmp(text + i, "h", 1) == 0 ? h : atoi(text + i));
+					while (i < len && text[++i] != ',');
+					if (++i >= len)
+						break;
+					rw = (strncmp(text + i, "w", 1) == 0 ? w : atoi(text + i));
+					while (i < len && text[++i] != ',');
+					if (++i >= len)
+						break;
+					rh = (strncmp(text + i, "h", 1) == 0 ? h : atoi(text + i));
 
 					if (ry < 0)
 						ry = 0;
 					if (rx < 0)
 						rx = 0;
+					if (rw <= 0)
+						rw = 1;
+					if (rh <= 0)
+						rh = 1;
 
-					drw_rect(drw, rx + x, y + ry, rw, rh, 1, 0);
+					drw_rect(drw, dx + rx, y + ry, rw, rh, 1, 0);
 				} else if (text[i] == 'f') {
-					x += atoi(text + ++i);
+					if (strncmp(text + ++i, "p", 1) == 0)
+						dx += lpad;
+					else
+						dx += atoi(text + i);
 				}
 			}
 
-			text = text + i + 1;
-			len -= i + 1;
-			i = -1;
 			isCode = 0;
+			len -= i + 1;
+			if (len <= 0)
+				break;
+
+			text = text + i + 1;
+			i = -1;
 		}
 	}
-	if (!isCode) {
-		w = TEXTWM(text);
-		drw_text(drw, x, y, w, bh, 0, text, 0, True);
-		x += w;
+	if (!isCode && len > 0) {
+		tw = TEXTWM(text);
+		drw_text(drw, dx, y, tw, bh, lpad, text, invert, markup, 0);
+		dx += tw;
 	}
 	free(p);
 
-	drw_setscheme(drw, scheme[SchemeNorm]);
 	return 1;
 }
 
@@ -182,19 +202,19 @@ setstatus(const Arg args[], int num_args)
 }
 
 int
-status2dtextlength(char* stext)
+status2dtextlength(char* text2d)
 {
 	int i, w, len;
 	short isCode = 0;
-	char *text;
-	char *p;
+	char *text = {0};
+	char *p = {0};
 
-	len = strlen(stext) + 1;
+	len = strlen(text2d) + 1;
 	if (!(text = (char*) malloc(sizeof(char)*len)))
 		die("malloc");
 	p = text;
 
-	strcpy(text, stext);
+	strcpy(text, text2d);
 
 	/* compute width of the status text */
 	w = 0;

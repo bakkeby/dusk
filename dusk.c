@@ -69,6 +69,7 @@
 #define WTYPE                   "_NET_WM_WINDOW_TYPE_"
 #define TEXTWM(X)               (drw_fontset_getwidth(drw, (X), True))
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X), False))
+#define TEXT2DW(X)              (status2dtextlength((X)))
 #define CLIENT                  (arg && arg->v ? (Client*)arg->v : selws->sel)
 
 /* enums */
@@ -223,7 +224,6 @@ enum {
 /* https://specifications.freedesktop.org/wm-spec/latest/ar01s05.html - Application Window Properties */
 
 enum {
-	ClkButton,
 	ClkLtSymbol,
 	ClkStatusText,
 	ClkWinTitle,
@@ -291,6 +291,7 @@ struct Client {
 };
 
 typedef struct {
+	int type;
 	unsigned int mod;
 	KeySym keysym;
 	void (*func)(const Arg *);
@@ -345,7 +346,7 @@ typedef struct {
 
 struct Workspace {
 	int wx, wy, ww, wh; /* workspace area */
-	char ltsymbol[16];
+	char ltsymbol[64];
 	char name[16];
 	float mfact;
 	int ltaxis[4];
@@ -426,6 +427,7 @@ static void grabbuttons(Client *c, int focused);
 static void grabkeys(const Arg *arg);
 static void incnmaster(const Arg *arg);
 static void incnstack(const Arg *arg);
+static int ismasterclient(Client *c);
 static void keypress(XEvent *e);
 static void keyrelease(XEvent *e);
 static void killclient(const Arg *arg);
@@ -511,7 +513,7 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 	[Expose] = expose,
 	[FocusIn] = focusin,
 	[KeyPress] = keypress,
-	[KeyRelease] = keyrelease,
+	[KeyRelease] = keypress,
 	[MappingNotify] = mappingnotify,
 	[MapRequest] = maprequest,
 	[MotionNotify] = motionnotify,
@@ -1246,7 +1248,7 @@ createmon(int num)
 {
 	Monitor *m;
 	m = ecalloc(1, sizeof(Monitor));
-	m->showbar = showbar;
+	m->showbar = initshowbar;
 	m->borderpx = borderpx;
 	m->gappih = gappih;
 	m->gappiv = gappiv;
@@ -1702,13 +1704,30 @@ keypress(XEvent *e)
 	ev = &e->xkey;
 	ignore_marked = 0;
 	keysym = XGetKeyboardMapping(dpy, (KeyCode)ev->keycode, 1, &keysyms_return);
-	for (i = 0; i < LENGTH(keys); i++)
+	for (i = 0; i < LENGTH(keys); i++) {
 		if (*keysym == keys[i].keysym
+				&& ev->type == keys[i].type
 				&& CLEANMASK(keys[i].mod) == CLEANMASK(ev->state)
 				&& keys[i].func)
 			keys[i].func(&(keys[i].arg));
+	}
 	XFree(keysym);
 	ignore_marked = 1;
+
+	if (ev->type == KeyRelease)
+		combo = 0;
+}
+
+int
+ismasterclient(Client *c)
+{
+	Client *i;
+	int n;
+	for (n = 0, i = nexttiled(c->ws->clients); i && n < c->ws->nmaster; i = nexttiled(i->next), ++n)
+		if (i == c)
+			return 1;
+
+	return 0;
 }
 
 void
@@ -3215,6 +3234,9 @@ unmanage(Client *c, int destroyed)
 
 	if (ISMARKED(c))
 		unmarkclient(c);
+
+	if (enabled(AutoReduceNmaster) && ws->nmaster > 1 && ismasterclient(c))
+		ws->nmaster--;
 
 	detach(c);
 	detachstack(c);
