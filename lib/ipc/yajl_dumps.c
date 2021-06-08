@@ -34,6 +34,11 @@ dump_settings(yajl_gen gen)
       YSTR("AltWorkspaceIcons"); YBOOL(enabled(AltWorkspaceIcons));
       YSTR("GreedyMonitor"); YBOOL(enabled(GreedyMonitor));
       YSTR("AutoHideScratchpads"); YBOOL(enabled(AutoHideScratchpads));
+      YSTR("SmartLayoutConvertion"); YBOOL(enabled(SmartLayoutConvertion));
+      YSTR("RioDrawIncludeBorders"); YBOOL(enabled(RioDrawIncludeBorders));
+      YSTR("RioDrawSpawnAsync"); YBOOL(enabled(RioDrawSpawnAsync));
+      YSTR("RestrictFocusstackToMonitor"); YBOOL(enabled(RestrictFocusstackToMonitor));
+      YSTR("AutoReduceNmaster"); YBOOL(enabled(AutoReduceNmaster));
     )
   )
   // clang-format on
