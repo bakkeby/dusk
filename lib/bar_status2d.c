@@ -136,23 +136,23 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 					if (++i >= len)
 						break;
 					rw = (strncmp(text + i, "w", 1) == 0 ? w : atoi(text + i));
-					if (rw <= 0)
+					if (rw < 0)
 						rw += w;
 					while (i < len && text[++i] != ',');
 					if (++i >= len)
 						break;
 					rh = (strncmp(text + i, "h", 1) == 0 ? h : atoi(text + i));
-					if (rh <= 0)
+					if (rh < 0)
 						rh += h;
 
 					if (ry < 0)
 						ry = 0;
 					if (rx < 0)
 						rx = 0;
-					if (rw <= 0)
-						rw = 1;
-					if (rh <= 0)
-						rh = 1;
+					if (rw < 0)
+						rw = 0;
+					if (rh < 0)
+						rh = 0;
 
 					drw_rect(drw, dx + rx, y + ry, rw, rh, 1, 0);
 				} else if (text[i] == 'f') {
