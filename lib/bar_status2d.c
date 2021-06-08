@@ -36,13 +36,13 @@ click_status(Bar *bar, Arg *arg, BarArg *a)
 int
 draw_status(Bar *bar, BarArg *a)
 {
-	return drw_2dtext(drw, a->x, a->y, a->w, a->h, 0, rawstatustext[a->value], 0, 0, SchemeNorm);
+	return drw_2dtext(drw, a->x, a->y, a->w, a->h, 0, rawstatustext[a->value], 0, 0, 1, SchemeNorm);
 }
 
 int
-drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lpad, const char *text2d, int invert, Bool markup, int defscheme)
+drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lpad, const char *text2d, int invert, Bool markup, int drawbg, int defscheme)
 {
-	if (!w)
+	if (!w && drawbg)
 		return 0;
 
 	int i, tw, dx = x, len;
@@ -59,8 +59,10 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 
 	strcpy(text, text2d);
 
-	drw_setscheme(drw, scheme[defscheme]);
-	drw_rect(drw, x, y, w, h, 1, 1);
+	if (drawbg) {
+		drw_setscheme(drw, scheme[defscheme]);
+		drw_rect(drw, x, y, w, h, 1, 1);
+	}
 	drw_setscheme(drw, scheme[LENGTH(colors)]);
 	drw->scheme[ColFg] = scheme[defscheme][ColFg];
 	drw->scheme[ColBg] = scheme[defscheme][ColBg];
@@ -121,19 +123,27 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 				} else if (text[i] == 'r') {
 					if (++i >= len)
 						break;
-					rx = (strncmp(text + i, "w", 1) == 0 ? w : atoi(text + i));
+					rx = (strncmp(text + i, "w", 1) == 0 ? w - 1: atoi(text + i));
+					if (rx < 0)
+						rx += w - 1;
 					while (i < len && text[++i] != ',');
 					if (++i >= len)
 						break;
 					ry = (strncmp(text + i, "h", 1) == 0 ? h : atoi(text + i));
+					if (ry < 0)
+						ry += h;
 					while (i < len && text[++i] != ',');
 					if (++i >= len)
 						break;
 					rw = (strncmp(text + i, "w", 1) == 0 ? w : atoi(text + i));
+					if (rw <= 0)
+						rw += w;
 					while (i < len && text[++i] != ',');
 					if (++i >= len)
 						break;
 					rh = (strncmp(text + i, "h", 1) == 0 ? h : atoi(text + i));
+					if (rh <= 0)
+						rh += h;
 
 					if (ry < 0)
 						ry = 0;
@@ -146,10 +156,12 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 
 					drw_rect(drw, dx + rx, y + ry, rw, rh, 1, 0);
 				} else if (text[i] == 'f') {
-					if (strncmp(text + ++i, "p", 1) == 0)
-						dx += lpad;
-					else
-						dx += atoi(text + i);
+					if (++i >= len)
+						break;
+					rx = (strncmp(text + i, "p", 1) == 0 ? lpad : atoi(text + i));
+					if (rx < 0)
+						rx += w;
+					dx += rx;
 				}
 			}
 

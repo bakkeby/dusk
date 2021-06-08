@@ -40,6 +40,14 @@ static int floatfakefsindicatortype      = INDICATOR_PLUS_AND_LARGER_SQUARE;
 static int floatindicatortype            = INDICATOR_TOP_LEFT_LARGER_SQUARE;
 static int tiledindicatortype            = INDICATOR_NONE;
 
+/* Custom indicators using status2d markup, e.g. enabled via INDICATOR_CUSTOM_3 */
+static char *custom_2d_indicator_1 = "^c#00A523^^r0,h,w,2^"; // green underline
+static char *custom_2d_indicator_2 = "^c#55cdfc^^r3,3,4,4^^c#E72608^^r4,4,2,2^"; // blue rectangle
+static char *custom_2d_indicator_3 = "^f-10^^c#E72608^𐄛"; // example using a character as an indicator
+static char *custom_2d_indicator_4 = "^c#E26F0B^^r0,h,w,1^^r0,0,1,h^^r0,0,w,1^^rw,0,1,h^"; // orange box
+static char *custom_2d_indicator_5 = "^c#CB9700^^r0,h,w,1^^r0,0,w,1^"; // top and bottom lines
+static char *custom_2d_indicator_6 = "^c#F0A523^^r6,2,1,-4^^r-6,2,1,-4^"; // orange vertical bars
+
 /* See util.h for options */
 static unsigned long functionality = 0
 //	|AutoReduceNmaster // automatically reduce nmaster if there are multiple master clients and one is killed

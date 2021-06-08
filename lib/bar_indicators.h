@@ -18,6 +18,12 @@ enum {
 	INDICATOR_PLUS,
 	INDICATOR_PLUS_AND_SQUARE,
 	INDICATOR_PLUS_AND_LARGER_SQUARE,
+	INDICATOR_CUSTOM_1,
+	INDICATOR_CUSTOM_2,
+	INDICATOR_CUSTOM_3,
+	INDICATOR_CUSTOM_4,
+	INDICATOR_CUSTOM_5,
+	INDICATOR_CUSTOM_6,
 };
 
 static void drawindicator(Workspace *ws, Client *c, unsigned int occ, int x, int y, int w, int h, int filled, int invert, int type);

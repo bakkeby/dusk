@@ -5,7 +5,6 @@ drawindicator(Workspace *ws, Client *c, unsigned int occ, int x, int y, int w, i
 	int boxw, boxs, indn = 0, i;
 	if (!occ || type == INDICATOR_NONE)
 		return;
-
 	boxs = drw->fonts->h / 9;
 	boxw = drw->fonts->h / 6 + 2;
 	if (filled == -1)
@@ -81,6 +80,24 @@ drawindicator(Workspace *ws, Client *c, unsigned int occ, int x, int y, int w, i
 			boxw += 1;
 		drw_rect(drw, x + boxs + boxw / 2, y + boxs, 1, boxw, filled, invert); // |
 		drw_rect(drw, x + boxs, y + boxs + boxw / 2, boxw + 1, 1, filled, invert); // ‒
+		break;
+	case INDICATOR_CUSTOM_1:
+		drw_2dtext(drw, x, y, w, h, 0, custom_2d_indicator_1, invert, 0, 0, SchemeNorm);
+		break;
+	case INDICATOR_CUSTOM_2:
+		drw_2dtext(drw, x, y, w, h, 0, custom_2d_indicator_2, invert, 0, 0, SchemeNorm);
+		break;
+	case INDICATOR_CUSTOM_3:
+		drw_2dtext(drw, x, y, w, h, 0, custom_2d_indicator_3, invert, 0, 0, SchemeNorm);
+		break;
+	case INDICATOR_CUSTOM_4:
+		drw_2dtext(drw, x, y, w, h, 0, custom_2d_indicator_4, invert, 0, 0, SchemeNorm);
+		break;
+	case INDICATOR_CUSTOM_5:
+		drw_2dtext(drw, x, y, w, h, 0, custom_2d_indicator_5, invert, 0, 0, SchemeNorm);
+		break;
+	case INDICATOR_CUSTOM_6:
+		drw_2dtext(drw, x, y, w, h, 0, custom_2d_indicator_6, invert, 0, 0, SchemeNorm);
 		break;
 	}
 }
