@@ -328,6 +328,30 @@ setbarpos(Bar *bar)
 }
 
 void
+recreatebar(Bar *bar)
+{
+	const BarDef *def;
+	Monitor *m = bar->mon;
+	int idx = bar->idx;
+	int setsystraybar = (systray && bar == systray->bar);
+	removebar(bar);
+
+	for (int i = 0; i < LENGTH(bars); i++) {
+		def = &bars[i];
+		if (def->idx == idx && def->monitor == m->num) {
+			createbar(def, m);
+			break;
+		}
+	}
+
+	if (setsystraybar)
+		systray->bar = m->bar;
+
+	updatebarpos(m);
+	updatebars();
+}
+
+void
 reducewindowarea(Monitor *m)
 {
 	Bar *bar;
@@ -361,6 +385,31 @@ reducewindowarea(Monitor *m)
 				}
 			}
 		}
+	}
+}
+
+void
+removebar(Bar *bar)
+{
+	Bar *b;
+	Monitor *m = bar->mon;
+
+	for (b = m->bar; b; b = bar->next) {
+		if (b == bar)
+			m->bar = bar->next;
+		else if (b->next == bar)
+			b->next = bar->next;
+		else
+			continue;
+
+		if (!bar->external) {
+			XUnmapWindow(dpy, bar->win);
+			XDestroyWindow(dpy, bar->win);
+		}
+		if (systray && bar == systray->bar)
+			systray->bar = NULL;
+		free(bar);
+		break;
 	}
 }
 
@@ -436,4 +485,16 @@ togglebarpadding(const Arg *arg)
 		drawbar(m);
 		arrangemon(m);
 	}
+}
+
+Bar *
+wintobar(Window win)
+{
+	Monitor *m;
+	Bar *bar;
+	for (m = mons; m; m = m->next)
+		for (bar = m->bar; bar; bar = bar->next)
+			if (bar->win == win)
+				return bar;
+	return NULL;
 }

@@ -1,4 +1,3 @@
-static SystrayWin *systray = NULL;
 static unsigned long systrayorientation = _NET_SYSTEM_TRAY_ORIENTATION_HORZ;
 
 int

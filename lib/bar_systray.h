@@ -26,6 +26,8 @@ struct SystrayWin {
 	int h;
 };
 
+static SystrayWin *systray = NULL;
+
 /* bar integration */
 static int size_systray(Bar *bar, BarArg *a);
 static int draw_systray(Bar *bar, BarArg *a);

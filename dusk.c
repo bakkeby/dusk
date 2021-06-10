@@ -1266,6 +1266,7 @@ void
 destroynotify(XEvent *e)
 {
 	Client *c;
+	Bar *bar;
 	XDestroyWindowEvent *ev = &e->xdestroywindow;
 
 	if ((c = wintoclient(ev->window))) {
@@ -1283,6 +1284,11 @@ destroynotify(XEvent *e)
 			fprintf(stderr, "destroynotify: removing systray icon for client %s\n", c->name);
 		removesystrayicon(c);
 		drawbarwin(systray->bar);
+	}
+	else if ((bar = wintobar(ev->window))) {
+		if (enabled(Debug))
+			fprintf(stderr, "destroynotify: received event for bar %s\n", bar->name);
+		recreatebar(bar);
 	}
 }
 
