@@ -179,6 +179,7 @@ enum {
 	NetWMMaximizedVert,
 	NetWMMaximizedHorz,
 	NetWMStaysOnTop,
+	NetWMSticky,
 	NetWMWindowOpacity,
 	NetWMWindowType,
 	NetWMWindowTypeDock,
@@ -428,6 +429,7 @@ static void grabbuttons(Client *c, int focused);
 static void grabkeys(const Arg *arg);
 static void incnmaster(const Arg *arg);
 static void incnstack(const Arg *arg);
+static int isatomstate(XClientMessageEvent *cme, int atom);
 static int ismasterclient(Client *c);
 static void keypress(XEvent *e);
 static void keyrelease(XEvent *e);
@@ -960,32 +962,28 @@ clientmessage(XEvent *e)
 	 * https://specifications.freedesktop.org/wm-spec/wm-spec-1.3.html#idm45805407959456
 	 */
 	if (cme->message_type == netatom[NetWMState]) {
-		if (cme->data.l[1] == netatom[NetWMFullscreen]
-		 || cme->data.l[2] == netatom[NetWMFullscreen]) {
+		if (isatomstate(cme, netatom[NetWMFullscreen])) {
 			if (c != c->ws->sel || c->ws != selws)
 				return;
 
 			if (RESTOREFAKEFULLSCREEN(c) && ISFULLSCREEN(c))
 				setfakefullscreen = 1;
-			setfullscreen(c, (cme->data.l[0] == 1 /* _NET_WM_STATE_ADD    */
+			setfullscreen(c, (cme->data.l[0] == 1 /* _NET_WM_STATE_ADD */
 				|| (cme->data.l[0] == 2 /* _NET_WM_STATE_TOGGLE */
 				&& !ISFULLSCREEN(c)
 			)), setfakefullscreen);
-		} else if (cme->data.l[1] == netatom[NetWMDemandsAttention]) {
+		} else if (isatomstate(cme, netatom[NetWMDemandsAttention])) {
 			if (cme->data.l[0] == 1 || (cme->data.l[0] == 2 && !ISURGENT(c))) {
 				setflag(c, Urgent, 1);
 				drawbar(c->ws->mon);
 			}
-		} else if (cme->data.l[1] == netatom[NetWMStaysOnTop]) {
-			if (cme->data.l[0] == 1) /* _NET_WM_STATE_ADD    */
-				addflag(c, AlwaysOnTop);
-			else if (cme->data.l[0] == 2) /* _NET_WM_STATE_TOGGLE */
-				toggleflag(c, AlwaysOnTop);
-			else
-				removeflag(c, AlwaysOnTop);
+		} else if (isatomstate(cme, netatom[NetWMStaysOnTop])) {
+			toggleflagop(c, AlwaysOnTop, cme->data.l[0]);
+		} else if (isatomstate(cme, netatom[NetWMSticky])) {
+			toggleflagop(c, Sticky, cme->data.l[0]);
 		} else {
-			maximize_vert = (cme->data.l[1] == netatom[NetWMMaximizedVert] || cme->data.l[2] == netatom[NetWMMaximizedVert]);
-			maximize_horz = (cme->data.l[1] == netatom[NetWMMaximizedHorz] || cme->data.l[2] == netatom[NetWMMaximizedHorz]);
+			maximize_vert = isatomstate(cme, netatom[NetWMMaximizedVert]);
+			maximize_horz = isatomstate(cme, netatom[NetWMMaximizedHorz]);
 			if (maximize_vert || maximize_horz)
 				togglemaximize(c, maximize_vert, maximize_horz);
 		}
@@ -1730,6 +1728,12 @@ keypress(XEvent *e)
 
 	if (ev->type == KeyRelease)
 		combo = 0;
+}
+
+int
+isatomstate(XClientMessageEvent *cme, int atom)
+{
+	return (cme->data.l[1] == atom || cme->data.l[2] == atom);
 }
 
 int
@@ -2919,6 +2923,7 @@ setup(void)
 	netatom[NetWMMaximizedVert] = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False);
 	netatom[NetWMMaximizedHorz] = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
 	netatom[NetWMStaysOnTop] = XInternAtom(dpy, "_NET_WM_STATE_STAYS_ON_TOP", False);
+	netatom[NetWMSticky] = XInternAtom(dpy, "_NET_WM_STATE_STICKY", False);
 	netatom[NetWMMoveResize] = XInternAtom(dpy, "_NET_WM_MOVERESIZE", False);
 	netatom[NetWMUserTime] = XInternAtom(dpy, "_NET_WM_USER_TIME", False);
 	netatom[NetWMName] = XInternAtom(dpy, "_NET_WM_NAME", False);

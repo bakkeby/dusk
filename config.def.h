@@ -826,7 +826,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( togglebar, ARG_TYPE_NONE ),
 	IPCCOMMAND( togglebarpadding, ARG_TYPE_NONE ),
 	IPCCOMMAND( togglefakefullscreen, ARG_TYPE_NONE ),
-	IPCCOMMAND( toggleflagex, ARG_TYPE_STR ),
+	IPCCOMMAND( toggleflag, ARG_TYPE_STR ),
 	IPCCOMMAND( togglefloating, ARG_TYPE_NONE ),
 	IPCCOMMAND( togglefullscreen, ARG_TYPE_NONE ),
 	IPCCOMMAND( togglegaps, ARG_TYPE_NONE ),

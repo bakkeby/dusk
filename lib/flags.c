@@ -19,15 +19,26 @@ removeflag(Client *c, const unsigned long flag)
 }
 
 void
-toggleflag(Client *c, const unsigned long flag)
+toggleflagop(Client *c, const unsigned long flag, int op)
 {
-	c->flags ^= flag;
+	switch (op) {
+	default:
+	case 0: /* _NET_WM_STATE_REMOVE */
+		removeflag(c, flag);
+		break;
+	case 1: /* _NET_WM_STATE_ADD */
+		addflag(c, flag);
+		break;
+	case 2: /* _NET_WM_STATE_TOGGLE */
+		c->flags ^= flag;
+		break;
+	}
 }
 
 void
-toggleflagex(const Arg *arg)
+toggleflag(const Arg *arg)
 {
-	toggleflag(selws->sel, getflagbyname(arg->v));
+	toggleflagop(selws->sel, getflagbyname(arg->v), 2);
 	arrangews(selws);
 }
 
