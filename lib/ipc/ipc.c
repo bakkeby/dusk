@@ -507,10 +507,12 @@ ipc_run_command(IPCClient *ipc_client, char *msg)
 		return -1;
 	}
 
+	ignore_marked = 0;
 	if (parsed_command.argc == 1)
 		ipc_command.func.single_param(parsed_command.args);
 	else if (parsed_command.argc > 1)
 		ipc_command.func.array_param(parsed_command.args, parsed_command.argc);
+	ignore_marked = 1;
 
 	DEBUG("Called function for command %s\n", parsed_command.name);
 

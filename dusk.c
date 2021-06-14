@@ -178,6 +178,7 @@ enum {
 	NetWMStateAbove,
 	NetWMMaximizedVert,
 	NetWMMaximizedHorz,
+	NetWMStaysOnTop,
 	NetWMWindowOpacity,
 	NetWMWindowType,
 	NetWMWindowTypeDock,
@@ -975,12 +976,19 @@ clientmessage(XEvent *e)
 				setflag(c, Urgent, 1);
 				drawbar(c->ws->mon);
 			}
+		} else if (cme->data.l[1] == netatom[NetWMStaysOnTop]) {
+			if (cme->data.l[0] == 1) /* _NET_WM_STATE_ADD    */
+				addflag(c, AlwaysOnTop);
+			else if (cme->data.l[0] == 2) /* _NET_WM_STATE_TOGGLE */
+				toggleflag(c, AlwaysOnTop);
+			else
+				removeflag(c, AlwaysOnTop);
+		} else {
+			maximize_vert = (cme->data.l[1] == netatom[NetWMMaximizedVert] || cme->data.l[2] == netatom[NetWMMaximizedVert]);
+			maximize_horz = (cme->data.l[1] == netatom[NetWMMaximizedHorz] || cme->data.l[2] == netatom[NetWMMaximizedHorz]);
+			if (maximize_vert || maximize_horz)
+				togglemaximize(c, maximize_vert, maximize_horz);
 		}
-
-		maximize_vert = (cme->data.l[1] == netatom[NetWMMaximizedVert] || cme->data.l[2] == netatom[NetWMMaximizedVert]);
-		maximize_horz = (cme->data.l[1] == netatom[NetWMMaximizedHorz] || cme->data.l[2] == netatom[NetWMMaximizedHorz]);
-		if (maximize_vert || maximize_horz)
-			togglemaximize(c, maximize_vert, maximize_horz);
 	} else if (cme->message_type == netatom[NetCloseWindow]) {
 		killclient(&((Arg) { .v = c }));
 	} else if (cme->message_type == netatom[NetWMDesktop]) {
@@ -2910,6 +2918,7 @@ setup(void)
 	netatom[NetWMFullscreen] = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
 	netatom[NetWMMaximizedVert] = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False);
 	netatom[NetWMMaximizedHorz] = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+	netatom[NetWMStaysOnTop] = XInternAtom(dpy, "_NET_WM_STATE_STAYS_ON_TOP", False);
 	netatom[NetWMMoveResize] = XInternAtom(dpy, "_NET_WM_MOVERESIZE", False);
 	netatom[NetWMUserTime] = XInternAtom(dpy, "_NET_WM_USER_TIME", False);
 	netatom[NetWMName] = XInternAtom(dpy, "_NET_WM_NAME", False);

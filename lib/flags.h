@@ -21,10 +21,10 @@ static const unsigned long
 	Terminal = 0x1000, // indicates that the client is a terminal, used by swallow
 	NoSwallow = 0x2000, // indicates that the client should never be swallowed if launched by a terminal
 	Locked = 0x4000, // used by setfullscreen, prevents state change
-	Transient = 0x8000, // whether the client has the transient or hint
+	Transient = 0x8000, // whether the client has the transient for hint
 	OnlyModButtons = 0x10000, // if enabled, allows buttons without modifiers to be used
 	FlagPlaceholder0x20000 = 0x20000,
-	AttachMaster = 0x40000, // attach the client as the first client in the list
+	AttachMaster = 0x40000, // attach at the top of the master area
 	AttachAbove = 0x80000, // attach the client before the currently selected client
 	AttachBelow = 0x100000, // attach the client after the currently selected client
 	AttachAside = 0x200000, // attach the client as the first client in the stack area

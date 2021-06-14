@@ -592,6 +592,10 @@ static Key keys[] = {
 	{ KeyPress,   MODKEY,                       XK_Right,        focusdir,               {.i = 1 } }, // focus on the client right of the currently focused client
 	{ KeyPress,   MODKEY,                       XK_Up,           focusdir,               {.i = 2 } }, // focus on the client above the currently focused client
 	{ KeyPress,   MODKEY,                       XK_Down,         focusdir,               {.i = 3 } }, // focus on the client below the currently focused client
+	{ KeyPress,   MODKEY|ControlMask,           XK_Left,         placedir,               {.i = 0 } }, // swap places with the client window on the immediate left of the current client
+	{ KeyPress,   MODKEY|ControlMask,           XK_Right,        placedir,               {.i = 1 } }, // swap places with the client window on the immediate right of the current client
+	{ KeyPress,   MODKEY|ControlMask,           XK_Up,           placedir,               {.i = 2 } }, // swap places with the client window on the immediate up of the current client
+	{ KeyPress,   MODKEY|ControlMask,           XK_Down,         placedir,               {.i = 3 } }, // swap places with the client window on the immediate down of the current client
 
 	{ KeyPress,   MODKEY|Ctrl,                  XK_j,            pushdown,               {0} }, // move the selected client down the stack
 	{ KeyPress,   MODKEY|Ctrl,                  XK_k,            pushup,                 {0} }, // move the selected client up the stack
@@ -798,11 +802,13 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( mirrorlayout, ARG_TYPE_NONE ),
 	IPCCOMMAND( rotatelayoutaxis, ARG_TYPE_SINT ),
 	IPCCOMMAND( rotatestack, ARG_TYPE_SINT ),
+	IPCCOMMAND( placedir, ARG_TYPE_SINT ),
 	IPCCOMMAND( pushdown, ARG_TYPE_NONE ),
 	IPCCOMMAND( pushup, ARG_TYPE_NONE ),
 	IPCCOMMAND( quit, ARG_TYPE_SINT ), // 0 = quit, 1 = restart
 	IPCCOMMAND( removescratch, ARG_TYPE_SINT ),
 	IPCCOMMAND( rioresize, ARG_TYPE_NONE ),
+	IPCCOMMAND( setattachdefault, ARG_TYPE_STR),
 	IPCCOMMAND( setborderpx, ARG_TYPE_SINT ),
 	IPCCOMMAND( setlayoutaxisex, ARG_TYPE_SINT ),
 	IPCCOMMAND( setlayoutex, ARG_TYPE_SINT ),

@@ -29,6 +29,7 @@
 #include "fakefullscreenclient.h"
 #include "floatpos.h"
 #include "focusdir.h"
+#include "placedir.h"
 #include "focusmaster.h"
 #include "focusurgent.h"
 #include "inplacerotate.h"

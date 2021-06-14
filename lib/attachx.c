@@ -149,3 +149,18 @@ attachstackx(Client *c, unsigned long mode, Workspace *ws)
 	last->snext = ws->stack;
 	ws->stack = c;
 }
+
+void
+setattachdefault(const Arg *arg)
+{
+	if (strcmp(arg->v, "AttachMaster") == 0)
+		attachdefault = AttachMaster;
+	else if (strcmp(arg->v, "AttachAbove") == 0)
+		attachdefault = AttachAbove;
+	else if (strcmp(arg->v, "AttachBelow") == 0)
+		attachdefault = AttachBelow;
+	else if (strcmp(arg->v, "AttachAside") == 0)
+		attachdefault = AttachAside;
+	else if (strcmp(arg->v, "AttachBottom") == 0)
+		attachdefault = AttachBottom;
+}
