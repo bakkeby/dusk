@@ -79,7 +79,7 @@ customlayout(const Arg args[], int num_args)
 		ws->nstack = args[3].i;
 
 	/* 4) split (layout), negative means mirror layout */
-	if (abs(args[4].i) < LAYOUT_LAST)
+	if (labs(args[4].i) < LAYOUT_LAST)
 		ws->ltaxis[LAYOUT] = args[4].i;
 
 	/* 5) master axis */
@@ -131,7 +131,7 @@ setlayoutaxisex(const Arg *arg)
 	axis = arg->i & 0x3; // lower two bits indicates layout, master or stack1-2
 	arr = arg->i >> 2;   // remaining upper bits indicate arrangement
 
-	if ((axis == 0 && abs(arr) > LAYOUT_LAST)
+	if ((axis == 0 && labs(arr) > LAYOUT_LAST)
 			|| (axis > 0 && (arr > AXIS_LAST || arr < 0)))
 		arr = 0;
 
@@ -1262,7 +1262,7 @@ void
 rotatelayoutaxis(const Arg *arg)
 {
 	int incr = (arg->i > 0 ? 1 : -1);
-	int axis = abs(arg->i) - 1;
+	int axis = labs(arg->i) - 1;
 	Workspace *ws = selws;
 
 	if (!ws->layout->arrange)
