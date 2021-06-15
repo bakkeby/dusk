@@ -2030,6 +2030,9 @@ motionnotify(XEvent *e)
 void
 moveorplace(const Arg *arg)
 {
+	if (!selws || !selws->sel)
+		return;
+
 	if (!selws->layout->arrange || ISFLOATING(selws->sel))
 		movemouse(arg);
 	else
@@ -2545,6 +2548,9 @@ resizemouse(const Arg *arg)
 void
 resizeorcfacts(const Arg *arg)
 {
+	if (!selws || !selws->sel)
+		return;
+
 	if (!selws->layout->arrange || ISFLOATING(selws->sel))
 		resizemouse(arg);
 	else
@@ -2708,10 +2714,11 @@ setfocus(Client *c)
 		XChangeProperty(dpy, root, netatom[NetActiveWindow],
 			XA_WINDOW, 32, PropModeReplace,
 			(unsigned char *) &(c->win), 1);
-		selws->sel = c;
-		if (selws != c->ws)
-			c->ws->sel = c;
 	}
+	selws->sel = c;
+	if (selws != c->ws)
+		c->ws->sel = c;
+
 	if (STEAMGAME(c))
 		setclientstate(c, NormalState);
 	sendevent(c->win, wmatom[WMTakeFocus], NoEventMask, wmatom[WMTakeFocus], CurrentTime, 0, 0, 0);
