@@ -586,8 +586,8 @@ static Key keys[] = {
 
 	{ KeyPress,   MODKEY,                       XK_j,            focusstack,             {.i = +1 } }, // focus on the next client in the stack
 	{ KeyPress,   MODKEY,                       XK_k,            focusstack,             {.i = -1 } }, // focus on the previous client in the stack
-	{ KeyPress,   MODKEY|Alt|Shift,             XK_e,            focusstack,             {.i = +2 } }, // allows focusing on hidden clients
-	{ KeyPress,   MODKEY|Alt|Shift,             XK_r,            focusstack,             {.i = -2 } }, // allows focusing on hidden clients
+	{ KeyPress,   MODKEY|Alt|Shift,             XK_j,            focusstack,             {.i = +2 } }, // allows focusing on hidden clients
+	{ KeyPress,   MODKEY|Alt|Shift,             XK_k,            focusstack,             {.i = -2 } }, // allows focusing on hidden clients
 	{ KeyPress,   MODKEY,                       XK_Left,         focusdir,               {.i = 0 } }, // focus on the client left of the currently focused client
 	{ KeyPress,   MODKEY,                       XK_Right,        focusdir,               {.i = 1 } }, // focus on the client right of the currently focused client
 	{ KeyPress,   MODKEY,                       XK_Up,           focusdir,               {.i = 2 } }, // focus on the client above the currently focused client
