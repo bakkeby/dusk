@@ -590,7 +590,7 @@ applyrules(Client *c)
 				setfloatpos(c, r->floatpos);
 
 			if (REVERTWORKSPACE(c))
-				c->revertws = selws;
+				c->revertws = c->ws->mon->selws;
 
 			if (enabled(Debug))
 				fprintf(stderr, "applyrules: client rule %d matched:\n    class: %s\n    role: %s\n    instance: %s\n    title: %s\n    wintype: %s\n    flags: %ld\n    floatpos: %s\n    workspace: %s\n",
