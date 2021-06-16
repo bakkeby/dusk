@@ -444,6 +444,7 @@ static Client *nexttiled(Client *c);
 static void placemouse(const Arg *arg);
 static Client *prevtiled(Client *c);
 static void propertynotify(XEvent *e);
+static void restart(const Arg *arg);
 static void quit(const Arg *arg);
 static void readclientstackingorder(void);
 static Monitor *recttomon(int x, int y, int w, int h);
@@ -2316,12 +2317,18 @@ propertynotify(XEvent *e)
 }
 
 void
+restart(const Arg *arg)
+{
+	restartsig = 1;
+	quit(arg);
+}
+
+
+void
 quit(const Arg *arg)
 {
 	Workspace *ws;
 	size_t i;
-	if (arg->i)
-		restart = 1;
 	running = 0;
 
 	/* kill child processes */
@@ -3286,8 +3293,12 @@ unmanage(Client *c, int destroyed)
 	drawbar(ws->mon);
 	updateclientlist();
 
-	if (revertws && !revertws->visible)
-		viewwsonmon(revertws, revertws->mon, 0);
+	if (revertws) {
+		if (!revertws->visible)
+			viewwsonmon(revertws, revertws->mon, 0);
+		else if (ws->visible)
+			viewwsonmon(ws, ws->mon, 1);
+	}
 }
 
 void
@@ -3650,7 +3661,7 @@ main(int argc, char *argv[])
 #endif /* __OpenBSD__ */
 	scan();
 	run();
-	if (restart)
+	if (restartsig)
 		execvp(argv[0], argv);
 	cleanup();
 	XCloseDisplay(dpy);

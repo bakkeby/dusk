@@ -22,7 +22,7 @@ static const unsigned long
 	NoSwallow = 0x2000, // indicates that the client should never be swallowed if launched by a terminal
 	Locked = 0x4000, // used by setfullscreen, prevents state change
 	Transient = 0x8000, // whether the client has the transient for hint
-	OnlyModButtons = 0x10000, // if enabled, allows buttons without modifiers to be used
+	OnlyModButtons = 0x10000, // restricts button keybindings to those that involve modifiers
 	FlagPlaceholder0x20000 = 0x20000,
 	AttachMaster = 0x40000, // attach at the top of the master area
 	AttachAbove = 0x80000, // attach the client before the currently selected client

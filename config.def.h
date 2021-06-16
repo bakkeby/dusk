@@ -612,7 +612,7 @@ static Key keys[] = {
 	{ KeyPress,   MODKEY,                       XK_backslash,    togglepinnedws,         {0} }, // toggle pinning of currently selected workspace on the current monitor
 	{ KeyPress,   MODKEY,                       XK_z,            showhideclient,         {0} }, // hide the currently selected client (or show if hidden)
 	{ KeyPress,   MODKEY,                       XK_q,            killclient,             {0} }, // close the currently focused window
-	{ KeyPress,   MODKEY|Shift,                 XK_q,            quit,                   {1} }, // restart dusk
+	{ KeyPress,   MODKEY|Shift,                 XK_q,            restart,                {0} }, // restart dusk
 	{ KeyPress,   MODKEY|Ctrl|Alt,              XK_q,            quit,                   {0} }, // exit dusk
 
 	{ KeyPress,   MODKEY,                       XK_a,            markall,                {0} }, // marks all clients on the selected workspace
@@ -805,8 +805,9 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( placedir, ARG_TYPE_SINT ),
 	IPCCOMMAND( pushdown, ARG_TYPE_NONE ),
 	IPCCOMMAND( pushup, ARG_TYPE_NONE ),
-	IPCCOMMAND( quit, ARG_TYPE_SINT ), // 0 = quit, 1 = restart
+	IPCCOMMAND( quit, ARG_TYPE_NONE ),
 	IPCCOMMAND( removescratch, ARG_TYPE_SINT ),
+	IPCCOMMAND( restart, ARG_TYPE_NONE ),
 	IPCCOMMAND( rioresize, ARG_TYPE_NONE ),
 	IPCCOMMAND( setattachdefault, ARG_TYPE_STR),
 	IPCCOMMAND( setborderpx, ARG_TYPE_SINT ),

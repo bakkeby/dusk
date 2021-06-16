@@ -1,15 +1,13 @@
-static int restart = 0;
+static int restartsig = 0;
 
 void
 sighup(int unused)
 {
-	Arg a = {.i = 1};
-	quit(&a);
+	restart(NULL);
 }
 
 void
 sigterm(int unused)
 {
-	Arg a = {.i = 0};
-	quit(&a);
+	quit(NULL);
 }

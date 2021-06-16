@@ -115,8 +115,33 @@ adjustwsformonitor(Workspace *ws, Monitor *m)
 void
 hidews(Workspace *ws)
 {
+	Workspace *w;
+
 	ws->visible = 0;
 	hidewsclients(ws);
+
+	/* If the workspace being hidden was the selected workspace, then try to find another
+	 * visible workspace on the same monitor that can become the selected workspace. */
+	if (ws != selws)
+		return;
+
+	/* Find the first available workspace to the right */
+	for (w = ws->next; w; w = w->next) {
+		if (w->mon != ws->mon)
+			continue;
+		if (w->visible) {
+			selws = ws->mon->selws = w;
+			return;
+		}
+	}
+
+	/* Otherwise find first available workspace to the left */
+	for (w = workspaces; w && w != ws; w = w->next) {
+		if (w->mon != ws->mon)
+			continue;
+		if (w->visible)
+			selws = ws->mon->selws = w;
+	}
 }
 
 void
