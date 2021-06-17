@@ -1195,7 +1195,7 @@ configurerequest(XEvent *e)
 			fprintf(stderr, "    - x = %d, y = %d, w = %d, h = %d\n", ev->x, ev->y, ev->width, ev->height);
 		}
 
-		if (IGNORECFGREQ(c) || MOVERESIZE(c))
+		if (IGNORECFGREQ(c))
 			return;
 		if (ev->value_mask & CWBorderWidth)
 			c->bw = ev->border_width;
