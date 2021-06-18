@@ -368,7 +368,7 @@ static const Rule clientrules[] = {
 	RULE(.class = "Gimp", .workspace = "5", .flags = Floating|SwitchWorkspace)
 	RULE(.class = "firefox", .workspace = "8", .flags = AttachMaster|SwitchWorkspace)
 	RULE(.class = "Steam", .flags = IgnoreCfgReqPos|Floating|Centered)
-	RULE(.class = "steam_app_", .flags = IgnoreCfgReqPos|Floating|Centered)
+	RULE(.class = "steam_app_", .flags = SteamGame|IgnoreCfgReqPos|Floating|Centered)
 	RULE(.class = "Google-chrome", .role = "GtkFileChooserDialog", .floatpos = "50% 50%", .flags = AlwaysOnTop|Floating)
 	RULE(.role = "pop-up", .flags = AlwaysOnTop|Floating|Centered)
 	RULE(.role = "browser", .workspace = "8", .flags = AttachBelow|OnlyModButtons|SwitchWorkspace)
