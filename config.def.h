@@ -66,7 +66,7 @@ static unsigned long functionality = 0
 //	|NoBorders // as per the noborder patch, show no border when only one client in tiled mode
 //	|Warp // warp patch
 //	|FocusedOnTop
-//	|DecorationHints // used by setfullscreen, prevents state change
+//	|DecorationHints
 	|FocusOnNetActive
 	|AllowNoModifierButtons
 	|CenterSizeHintsClients // center tiled clients subject to size hints within their tiled area
@@ -375,7 +375,7 @@ static const Rule clientrules[] = {
 	RULE(.class = "Gnome-terminal", .role = "gnome-terminal-preferences", .flags = Centered)
 	RULE(.class = "Diffuse", .workspace = "4", .flags = NoSwallow|SwitchWorkspace|RevertWorkspace)
 	RULE(.class = "File-roller", .workspace = "9", .flags = Centered|Floating|SwitchWorkspace|RevertWorkspace)
-	RULE(.class = "Alacritty", .flags = Terminal|IgnoreCfgReqPos|IgnoreCfgReqSize)
+	RULE(.class = "Alacritty", .flags = Terminal)
 	RULE(.class = "st-256color", .flags = Terminal|AttachBottom)
 	RULE(.class = "XTerm", .flags = Terminal)
 	RULE(.class = "Xephyr", .flags = NoSwallow|Floating|Centered)
