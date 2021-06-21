@@ -996,7 +996,7 @@ clientmessage(XEvent *e)
 	} else if (cme->message_type == netatom[NetActiveWindow]) {
 		if (HIDDEN(c))
 			show(c);
-		if (enabled(FocusOnNetActive)) {
+		if (enabled(FocusOnNetActive) && !NOFOCUSONNETACTIVE(c)) {
 			if (c->ws->visible)
 				focus(c);
 			else

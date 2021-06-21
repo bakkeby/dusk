@@ -125,8 +125,8 @@ getflagbyname(const char *name)
 		return FlagPlaceholder0x200000000;
 	else if (strcmp(name, "SteamGame") == 0)
 		return SteamGame;
-	else if (strcmp(name, "FlagPlaceholder0x10000000000") == 0)
-		return FlagPlaceholder0x10000000000;
+	else if (strcmp(name, "NoFocusOnNetActive") == 0)
+		return NoFocusOnNetActive;
 	else if (strcmp(name, "FlagPlaceholder0x20000000000") == 0)
 		return FlagPlaceholder0x20000000000;
 	else if (strcmp(name, "FlagPlaceholder0x40000000000") == 0)

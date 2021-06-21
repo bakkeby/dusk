@@ -46,7 +46,7 @@ static const unsigned long
 	RioDrawNoMatchPID = 0x2000000000, // do not match PID for this client when spawning via riospawn
 	NoBorder = 0x4000000000, // indicates that the client should not be drawn with a border around it
 	SteamGame = 0x8000000000,
-	FlagPlaceholder0x10000000000 = 0x10000000000,
+	NoFocusOnNetActive = 0x10000000000, // do not allow focus on net active for this client
 	FlagPlaceholder0x20000000000 = 0x20000000000,
 	FlagPlaceholder0x40000000000 = 0x40000000000,
 	FlagPlaceholder0x80000000000 = 0x80000000000,
@@ -104,6 +104,7 @@ static const unsigned long
 #define NEVERFOCUS(C) (C && C->flags & NeverFocus)
 #define NOBORDER(C) (C && C->flags & NoBorder)
 #define NOSWALLOW(C) (C && C->flags & NoSwallow)
+#define NOFOCUSONNETACTIVE(C) (C && C->flags & NoFocusOnNetActive)
 #define ONLYMODBUTTONS(C) (C && C->flags & OnlyModButtons)
 #define RESPECTSIZEHINTS(C) (C && C->flags & RespectSizeHints)
 #define RESTOREFAKEFULLSCREEN(C) (C && C->flags & RestoreFakeFullScreen)
