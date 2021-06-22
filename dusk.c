@@ -1412,6 +1412,8 @@ focus(Client *c)
 	Workspace *ws = c ? c->ws : selws;
 	Client *f;
 	XWindowChanges wc;
+	XEvent ev;
+
 	if (!c || ISINVISIBLE(c))
 		for (c = ws->stack; c && !ISVISIBLE(c); c = c->snext);
 	if (ws->sel && ws->sel != c)
@@ -1455,6 +1457,8 @@ focus(Client *c)
 					XConfigureWindow(dpy, f->win, CWSibling|CWStackMode, &wc);
 					wc.sibling = f->win;
 				}
+			XSync(dpy, False);
+			while (XCheckMaskEvent(dpy, EnterWindowMask, &ev)); // skip any new EnterNotify events
 		}
 	} else {
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
@@ -1547,7 +1551,7 @@ focusstack(const Arg *arg)
 					warp(c);
 			}
 		} else
-			restack(ws);
+			restack(c->ws);
 	}
 }
 
