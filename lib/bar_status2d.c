@@ -47,6 +47,7 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 
 	int i, tw, dx = x, len;
 	int rx, ry, rw, rh;
+	int fillbg = drawbg;
 	short isCode = 0;
 	char *text = {0};
 	char *p = {0};
@@ -75,7 +76,7 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 
 			text[i] = '\0';
 			tw = TEXTWM(text);
-			drw_text(drw, dx, y, tw, bh, lpad, text, invert, markup, 0);
+			drw_text(drw, dx, y, tw, bh, lpad, text, invert, markup, fillbg);
 			dx += tw;
 
 			/* process code */
@@ -117,6 +118,8 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 				} else if (text[i] == 'v') {
 					oldfg = drw->scheme[ColFg];
 					oldbg = drw->scheme[ColBg];
+				} else if (text[i] == '.') {
+					fillbg = !fillbg;
 				} else if (text[i] == 't') {
 					drw->scheme[ColFg] = oldfg;
 					drw->scheme[ColBg] = oldbg;
@@ -176,7 +179,7 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 	}
 	if (!isCode && len > 0) {
 		tw = TEXTWM(text);
-		drw_text(drw, dx, y, tw, bh, lpad, text, invert, markup, 0);
+		drw_text(drw, dx, y, tw, bh, lpad, text, invert, markup, fillbg);
 		dx += tw;
 	}
 	free(p);
