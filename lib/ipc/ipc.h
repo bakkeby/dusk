@@ -24,7 +24,7 @@ typedef enum IPCMessageType {
   IPC_TYPE_GET_MONITORS = 1,
   IPC_TYPE_GET_WORKSPACES = 2,
   IPC_TYPE_GET_LAYOUTS = 3,
-  IPC_TYPE_GET_DUSK_CLIENT = 4,
+  IPC_TYPE_GET_CLIENT = 4,
   IPC_TYPE_GET_SETTINGS = 5,
   IPC_TYPE_EVENT = 6
 } IPCMessageType;
@@ -103,7 +103,7 @@ int ipc_get_sock_fd();
  *
  * @return Address to IPCClient with specified file descriptor, -1 otherwise
  */
-IPCClient *ipc_get_client(int fd);
+IPCClient *ipc_get_ipc_client(int fd);
 
 /**
  * Check if an IPC client exists with the specified file descriptor
