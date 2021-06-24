@@ -24,6 +24,7 @@ void
 togglescratch(const Arg *arg)
 {
 	Client *c, *next, *last = NULL, *found = NULL, *monclients = NULL;
+	int x, y;
 	Workspace *ws;
 	int scratchvisible = 0; // whether the scratchpads are currently visible or not
 	int multimonscratch = 0; // whether we have scratchpads that are placed on multiple monitors
@@ -119,7 +120,21 @@ togglescratch(const Arg *arg)
 	}
 
 	if (found) {
-		focus(ISVISIBLE(found) ? found : NULL);
+		if (ISVISIBLE(found))
+			focus(found);
+		else {
+			/* If the scratchpad toggled away is set to not move between
+			 * monitors then move focus back to the monitor where the mouse
+			 * cursor is. This is not an ideal solution as one can change
+			 * monitors using keybindings in which case the below can lead
+			 * to the wrong monitor receiving focus. */
+			if (SCRATCHPADSTAYONMON(found) && getrootptr(&x, &y)) {
+				selmon = recttomon(x, y, 1, 1);
+				selws = selmon->selws;
+			}
+			focus(NULL);
+		}
+
 		arrange(NULL);
 		if (ISFLOATING(found))
 			XRaiseWindow(dpy, found->win);

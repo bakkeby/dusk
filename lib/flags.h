@@ -47,7 +47,7 @@ static const unsigned long
 	NoBorder = 0x4000000000, // indicates that the client should not be drawn with a border around it
 	SteamGame = 0x8000000000,
 	NoFocusOnNetActive = 0x10000000000, // do not allow focus on net active for this client
-	ScratchpadStayOnMon = 0x20000000000, // prevents the scratchpad from to the active monitor when toggled
+	ScratchpadStayOnMon = 0x20000000000, // prevents the scratchpad from being moved to the active monitor when toggled
 	FlagPlaceholder0x40000000000 = 0x40000000000,
 	FlagPlaceholder0x80000000000 = 0x80000000000,
 	FlagPlaceholder0x100000000000 = 0x100000000000,
