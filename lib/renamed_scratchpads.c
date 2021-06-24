@@ -129,8 +129,8 @@ togglescratch(const Arg *arg)
 			 * monitors using keybindings in which case the below can lead
 			 * to the wrong monitor receiving focus. */
 			if (SCRATCHPADSTAYONMON(found) && getrootptr(&x, &y)) {
-				selmon = recttomon(x, y, 1, 1);
-				selws = selmon->selws;
+				selws = recttows(x, y, 1, 1);
+				selmon = selws->mon;
 			}
 			focus(NULL);
 		}

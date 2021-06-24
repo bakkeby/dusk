@@ -589,7 +589,7 @@ applyrules(Client *c)
 			if (ISFLOATING(c) && r->floatpos)
 				setfloatpos(c, r->floatpos);
 
-			if (REVERTWORKSPACE(c))
+			if (REVERTWORKSPACE(c) && !c->ws->visible)
 				c->revertws = c->ws->mon->selws;
 
 			if (enabled(Debug))
@@ -1946,9 +1946,9 @@ manage(Window w, XWindowAttributes *wa)
 				return;
 			}
 		}
-		else if (SWITCHWORKSPACE(c))
+		else if (SWITCHWORKSPACE(c) && !c->ws->visible)
 			viewwsonmon(c->ws, c->ws->mon, 0);
-		else if (ENABLEWORKSPACE(c))
+		else if (ENABLEWORKSPACE(c) && !c->ws->visible)
 			viewwsonmon(c->ws, c->ws->mon, 1);
 	}
 
