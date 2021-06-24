@@ -50,37 +50,37 @@ static char *custom_2d_indicator_6 = "^c#F0A523^^r6,2,1,-4^^r-6,2,1,-4^"; // ora
 
 /* See util.h for options */
 static unsigned long functionality = 0
-//	|AutoReduceNmaster // automatically reduce nmaster if there are multiple master clients and one is killed
-//	|SmartGaps // enables no gaps if there is only one visible window
-//	|SmartGapsMonocle // enforces no (outer) gaps in monocle layout
-	|Systray // enables systray
+//	|AutoReduceNmaster // automatically reduce nmaster if there are multiple master clients and one is closed
+//	|SmartGaps // enables no or increased gaps if there is only one visible window
+//	|SmartGapsMonocle // enforces no gaps in monocle layout
+	|Systray // enables a systray in the bar
 	|Swallow // allows terminals to swallow X applications started from the command line
 	|SwallowFloating // means swallow floating windows by default
-	|CenteredWindowName
+	|CenteredWindowName // center the window titles on the bar
 //	|BarActiveGroupBorderColor // use border color of active group, otherwise color for master group is used
 	|SpawnCwd // spawn applications in the currently selected client's working directory
-	|ColorEmoji
+	|ColorEmoji // enables color emoji support (removes Xft workaround)
 //	|Status2DNoAlpha // option to not use alpha when drawing status2d status
 	|BarBorder // draw a border around the bar
 	|BarPadding // add vertical and side padding as per vertpad and sidepad variables above
 //	|NoBorders // as per the noborder patch, show no border when only one client in tiled mode
-//	|Warp // warp patch
-//	|FocusedOnTop
-//	|DecorationHints
-	|FocusOnNetActive
-	|AllowNoModifierButtons
+//	|Warp // warp cursor to currently focused window
+//	|FocusedOnTop // allows focused window to stay on top of other windows
+//	|DecorationHints // omit drawing the window border if the applications asks not to
+	|FocusOnNetActive //  allow windows demanding attention to receive focus automatically
+	|AllowNoModifierButtons // allow some window operations, like move and resize, to work without having to hold down a modifier key
 	|CenterSizeHintsClients // center tiled clients subject to size hints within their tiled area
-//	|ResizeHints // if enabled then dusk will respect size hints in tiled resizals
-//	|SortScreens // only applies on startup
+//	|ResizeHints // respect size hints also when windows are tiled
+//	|SortScreens // monitors are numbered from left to right
 //	|ViewOnWs // follow a window to the workspace it is being moved to
-//	|Xresources // xrdb patch
-//	|Debug
+//	|Xresources // add support for changing colours via Xresources
+//	|Debug // enables additional debug output
 //	|AltWorkspaceIcons // show the workspace name instead of the icons
-//	|GreedyMonitor // when viewing a workspace the monitor is greedy and gives nothing in return (i.e. disables swap of workspaces)
-	|SmartLayoutConvertion // when moving a workspace from one monitor to another, automatically adjust layout based on monitor orientation (i.e. vertical vs horizontal)
+//	|GreedyMonitor // disables swap of workspaces between monitors
+	|SmartLayoutConvertion // automatically adjust layout based on monitor orientation when moving a workspace from one monitor to another
 //	|AutoHideScratchpads // automatically hide open scratchpads when moving to another workspace
 //	|RioDrawIncludeBorders // indicates whether the area drawn using slop includes the window borders
-//	|RioDrawSpawnAsync // indicates whether to spawn the application alongside or after drawing area using slop
+//	|RioDrawSpawnAsync // spawn the application alongside rather than after drawing area using slop
 //	|RestrictFocusstackToMonitor // restrict focusstack to only operate within the monitor, otherwise focus can drift between monitors
 ;
 
