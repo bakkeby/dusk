@@ -70,7 +70,7 @@ togglescratch(const Arg *arg)
 			   not been processed yet, hence we could be processing a scratchpad twice. To avoid
 			   this we detach them and add them to a temporary list (monclients) which is to be
 			   processed later. */
-			if (!multimonscratch && c->ws != selws) {
+			if (!SCRATCHPADSTAYONMON(c) && !multimonscratch && c->ws != selws) {
 				if (ISFLOATING(c))
 					savefloats(c);
 				detach(c);

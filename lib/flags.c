@@ -127,8 +127,8 @@ getflagbyname(const char *name)
 		return SteamGame;
 	else if (strcmp(name, "NoFocusOnNetActive") == 0)
 		return NoFocusOnNetActive;
-	else if (strcmp(name, "FlagPlaceholder0x20000000000") == 0)
-		return FlagPlaceholder0x20000000000;
+	else if (strcmp(name, "ScratchpadStayOnMon") == 0)
+		return ScratchpadStayOnMon;
 	else if (strcmp(name, "FlagPlaceholder0x40000000000") == 0)
 		return FlagPlaceholder0x40000000000;
 	else if (strcmp(name, "FlagPlaceholder0x80000000000") == 0)
