@@ -142,7 +142,7 @@ setlayoutaxisex(const Arg *arg)
 static void
 setlayoutex(const Arg *arg)
 {
-	setlayout(&((Arg) { .v = &layouts[arg->i] }));
+	setlayout(&((Arg) { .v = &layouts[arg->i % LENGTH(layouts)] }));
 }
 
 static void
@@ -1255,6 +1255,7 @@ mirrorlayout(const Arg *arg)
 		return;
 	ws->ltaxis[LAYOUT] *= -1;
 	arrangews(ws);
+	drawbar(ws->mon);
 }
 
 /* Rotate layout axis for flextile */
