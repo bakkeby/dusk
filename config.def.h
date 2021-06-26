@@ -50,7 +50,7 @@ static char *custom_2d_indicator_6 = "^c#F0A523^^r6,2,1,-4^^r-6,2,1,-4^"; // ora
 
 /* See util.h for options */
 static unsigned long functionality = 0
-//	|AutoReduceNmaster // automatically reduce nmaster if there are multiple master clients and one is closed
+//	|AutoReduceNmaster // automatically reduce the number of master clients if one is closed
 //	|SmartGaps // enables no or increased gaps if there is only one visible window
 //	|SmartGapsMonocle // enforces no gaps in monocle layout
 	|Systray // enables a systray in the bar
@@ -798,6 +798,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( inplacerotate, ARG_TYPE_SINT ),
 	IPCCOMMAND( killclient, ARG_TYPE_NONE ),
 	IPCCOMMAND( killunsel, ARG_TYPE_NONE ),
+	IPCCOMMAND( layoutconvert, ARG_TYPE_NONE ),
 	IPCCOMMAND( mark, ARG_TYPE_PTR ),
 	IPCCOMMAND( markall, ARG_TYPE_SINT ), // 0 = mark all, 1 = mark floating, 2 = mark hidden
 	IPCCOMMAND( mirrorlayout, ARG_TYPE_NONE ),
