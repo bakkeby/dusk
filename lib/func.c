@@ -23,5 +23,5 @@ void
 reload()
 {
 	arrange(NULL);
-	grabkeys(NULL);
+	grabkeys();
 }

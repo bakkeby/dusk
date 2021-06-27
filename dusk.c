@@ -426,7 +426,7 @@ static int getrootptr(int *x, int *y);
 static long getstate(Window w);
 static int gettextprop(Window w, Atom atom, char *text, unsigned int size);
 static void grabbuttons(Client *c, int focused);
-static void grabkeys(const Arg *arg);
+static void grabkeys(void);
 static void incnmaster(const Arg *arg);
 static void incnstack(const Arg *arg);
 static int isatomstate(XClientMessageEvent *cme, int atom);
@@ -1652,7 +1652,7 @@ grabbuttons(Client *c, int focused)
 }
 
 void
-grabkeys(const Arg *arg)
+grabkeys(void)
 {
 	updatenumlockmask();
 	{
@@ -1968,7 +1968,7 @@ mappingnotify(XEvent *e)
 
 	XRefreshKeyboardMapping(ev);
 	if (ev->request == MappingKeyboard)
-		grabkeys(NULL);
+		grabkeys();
 }
 
 void
@@ -3010,7 +3010,7 @@ setup(void)
 		|LeaveWindowMask|StructureNotifyMask|PropertyChangeMask;
 	XChangeWindowAttributes(dpy, root, CWEventMask|CWCursor, &wa);
 	XSelectInput(dpy, root, wa.event_mask);
-	grabkeys(NULL);
+	grabkeys();
 	focus(NULL);
 	setupepoll();
 
