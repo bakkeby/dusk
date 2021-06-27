@@ -3345,18 +3345,18 @@ void
 updateclientlist()
 {
 	Client *c;
-	Monitor *m;
+	Workspace *ws;
 
 	XDeleteProperty(dpy, root, netatom[NetClientList]);
-	for (m = mons; m; m = m->next)
-		for (c = (m->selws ? m->selws->clients : NULL); c; c = c->next)
+	for (ws = workspaces; ws; ws = ws->next)
+		for (c = ws->clients; c; c = c->next)
 			XChangeProperty(dpy, root, netatom[NetClientList],
 				XA_WINDOW, 32, PropModeAppend,
 				(unsigned char *) &(c->win), 1);
 
 	XDeleteProperty(dpy, root, netatom[NetClientListStacking]);
-	for (m = mons; m; m = m->next)
-		for (c = (m->selws ? m->selws->stack : NULL); c; c = c->snext)
+	for (ws = workspaces; ws; ws = ws->next)
+		for (c = ws->stack; c; c = c->snext)
 			XChangeProperty(dpy, root, netatom[NetClientListStacking],
 				XA_WINDOW, 32, PropModeAppend,
 				(unsigned char *) &(c->win), 1);
