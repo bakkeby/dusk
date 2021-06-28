@@ -48,8 +48,8 @@ static const unsigned long
 	SteamGame = 0x8000000000,
 	NoFocusOnNetActive = 0x10000000000, // do not allow focus on net active for this client
 	ScratchpadStayOnMon = 0x20000000000, // prevents the scratchpad from being moved to the active monitor when toggled
-	FlagPlaceholder0x40000000000 = 0x40000000000,
-	FlagPlaceholder0x80000000000 = 0x80000000000,
+	Lower = 0x40000000000, // place this window below all other windows, used when window is unmanaged
+	Raise = 0x80000000000, // place this window above all other windows, used when window is unmanaged
 	FlagPlaceholder0x100000000000 = 0x100000000000,
 	FlagPlaceholder0x200000000000 = 0x200000000000,
 	FlagPlaceholder0x400000000000 = 0x400000000000,
@@ -117,6 +117,8 @@ static const unsigned long
 #define REVERTWORKSPACE(C) (C && C->flags & RevertWorkspace)
 #define MOVERESIZE(C) (C && C->flags & MoveResize)
 #define MOVEPLACE(C) (C && C->flags & MovePlace)
+#define LOWER(C) (C && C->flags & Lower)
+#define RAISE(C) (C && C->flags & Raise)
 
 #define WASFLOATING(C) (C && C->prevflags & Floating)
 #define WASFAKEFULLSCREEN(C) (C && C->prevflags & FakeFullScreen)

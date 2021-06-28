@@ -129,10 +129,10 @@ getflagbyname(const char *name)
 		return NoFocusOnNetActive;
 	else if (strcmp(name, "ScratchpadStayOnMon") == 0)
 		return ScratchpadStayOnMon;
-	else if (strcmp(name, "FlagPlaceholder0x40000000000") == 0)
-		return FlagPlaceholder0x40000000000;
-	else if (strcmp(name, "FlagPlaceholder0x80000000000") == 0)
-		return FlagPlaceholder0x80000000000;
+	else if (strcmp(name, "Lower") == 0)
+		return Lower;
+	else if (strcmp(name, "Raise") == 0)
+		return Raise;
 	else if (strcmp(name, "FlagPlaceholder0x100000000000") == 0)
 		return FlagPlaceholder0x100000000000;
 	else if (strcmp(name, "FlagPlaceholder0x200000000000") == 0)
