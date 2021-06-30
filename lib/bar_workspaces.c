@@ -52,7 +52,12 @@ draw_workspaces(Bar *bar, BarArg *a)
 			? SchemeWsOcc
 			: SchemeWsNorm;
 
-		drw_2dtext(drw, x, y, w, h, lrpad / 2, icon, inv, False, 1, defscheme);
+		if (0) {
+			drw_2dtext(drw, x, y, w, h, lrpad / 2, icon, inv, False, 1, defscheme);
+		} else {
+			drw_setscheme(drw, scheme[defscheme]);
+			drw_text(drw, x, y, w, h, lrpad / 2, icon, inv, False, 1);
+		}
 		drawindicator(ws, NULL, hasclients(ws), x, y, w, h, -1, 0, wsindicatortype);
 		drawindicator(ws, NULL, ws->pinned, x, y, w, h, -1, 0, wspinnedindicatortype);
 		if (bar->vert) {
