@@ -470,6 +470,7 @@ togglebar(const Arg *arg)
 		XMoveResizeWindow(dpy, bar->win, bar->bx, bar->by, bar->bw, bar->bh);
 	setworkspaceareasformon(selmon);
 	arrangemon(selmon);
+	drawbars();
 }
 
 void
