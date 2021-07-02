@@ -821,6 +821,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( setscratch, ARG_TYPE_SINT ),
 	IPCCOMMANDS( setstatus, 2, ARG_TYPE_UINT, ARG_TYPE_STR ),
 	IPCCOMMAND( showbar, ARG_TYPE_NONE ),
+	IPCCOMMAND( showhideclient, ARG_TYPE_NONE ),
 	IPCCOMMAND( stackpush, ARG_TYPE_SINT ),
 	IPCCOMMAND( stackfocus, ARG_TYPE_SINT ),
 	IPCCOMMAND( switchcol, ARG_TYPE_NONE ),

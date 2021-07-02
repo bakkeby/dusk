@@ -3132,12 +3132,14 @@ spawncmd(const Arg *arg, int buttonclick)
 		}
 
 		if (buttonclick) {
-			char button[2] = {'0' + (buttonclick & 0xff), '\0'};
+			char button[11];
+			sprintf(button, "%d", buttonclick);
 			setenv("BLOCK_BUTTON", button, 1);
 		}
 
 		if (statusclicked > -1) {
-			char status[2] = {'0' + (statusclicked & 0xff), '\0'};
+			char status[11];
+			sprintf(status, "%d", statusclicked);
 			setenv("BLOCK_STATUS", status, 1);
 			statusclicked = -1;
 		}
