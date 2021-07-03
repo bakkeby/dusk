@@ -847,6 +847,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( viewallwsonmon, ARG_TYPE_NONE ),
 	IPCCOMMAND( viewalloccwsonmon, ARG_TYPE_NONE ),
 	IPCCOMMAND( viewselws, ARG_TYPE_NONE ),
+	IPCCOMMAND( viewwsbyname, ARG_TYPE_STR ),
 	IPCCOMMAND( viewwsdir, ARG_TYPE_SINT ),
 	IPCCOMMAND( xrdb, ARG_TYPE_NONE ), // reload xrdb / Xresources
 	IPCCOMMAND( zoom, ARG_TYPE_NONE ),
