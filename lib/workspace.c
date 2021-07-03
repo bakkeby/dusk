@@ -297,6 +297,11 @@ moveallclientstows(Workspace *from, Workspace *to)
 
 	if (enabled(ViewOnWs) && !to->visible)
 		viewwsonmon(to, to->mon, 0);
+
+	if (from->visible)
+		arrangews(from);
+	if (to->visible)
+		arrangews(to);
 }
 
 void
