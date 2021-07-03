@@ -2326,15 +2326,18 @@ propertynotify(XEvent *e)
 void
 restart(const Arg *arg)
 {
+	Workspace *ws;
 	restartsig = 1;
 	quit(arg);
+
+	for (ws = workspaces; ws; ws = ws->next)
+		persistworkspacestate(ws);
 }
 
 
 void
 quit(const Arg *arg)
 {
-	Workspace *ws;
 	size_t i;
 	running = 0;
 
@@ -2345,9 +2348,6 @@ quit(const Arg *arg)
 			waitpid(autostart_pids[i], NULL, 0);
 		}
 	}
-
-	for (ws = workspaces; ws; ws = ws->next)
-		persistworkspacestate(ws);
 }
 
 /* This reads the stacking order on the X server side and updates the client
