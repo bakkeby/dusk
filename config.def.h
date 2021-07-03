@@ -775,8 +775,9 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( clienttomon, ARG_TYPE_SINT ),
 	IPCCOMMAND( clientstomon, ARG_TYPE_SINT ),
 	IPCCOMMAND( cyclelayout, ARG_TYPE_SINT ),
-	IPCCOMMAND( defaultgaps, ARG_TYPE_NONE ),
 	IPCCOMMAND( enable, ARG_TYPE_STR ),
+	IPCCOMMAND( enablewsbyname, ARG_TYPE_STR ),
+	IPCCOMMAND( defaultgaps, ARG_TYPE_NONE ),
 	IPCCOMMAND( disable, ARG_TYPE_STR ),
 	IPCCOMMAND( floatpos, ARG_TYPE_STR ),
 	IPCCOMMAND( focusdir, ARG_TYPE_SINT ),
@@ -827,6 +828,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( stackpush, ARG_TYPE_SINT ),
 	IPCCOMMAND( stackfocus, ARG_TYPE_SINT ),
 	IPCCOMMAND( switchcol, ARG_TYPE_NONE ),
+	IPCCOMMAND( swapwsbyname, ARG_TYPE_STR ),
 	IPCCOMMAND( toggle, ARG_TYPE_STR ), // toggle functionality on and off
 	IPCCOMMAND( togglebar, ARG_TYPE_NONE ),
 	IPCCOMMAND( togglebarpadding, ARG_TYPE_NONE ),
