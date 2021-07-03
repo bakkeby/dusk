@@ -198,7 +198,7 @@ swapwsclients(Workspace *ws1, Workspace *ws2)
 {
 	Client *c1, *c2;
 
-	if (ws1 == ws2)
+	if (!ws1 || !ws2 || ws1 == ws2)
 		return;
 
 	clientsmonresize(ws1->clients, ws1->mon, ws2->mon);
@@ -229,7 +229,7 @@ swapwsclients(Workspace *ws1, Workspace *ws2)
 void
 movetows(Client *c, Workspace *ws)
 {
-	if (!c)
+	if (!c || !ws)
 		return;
 
 	Client *next;
@@ -282,7 +282,7 @@ moveallclientstows(Workspace *from, Workspace *to)
 {
 	Client *clients = from->clients;
 
-	if (!clients || from == to)
+	if (!clients || !from || !to || from == to)
 		return;
 
 	clientsmonresize(clients, from->mon, to->mon);
@@ -307,33 +307,20 @@ moveallclientstows(Workspace *from, Workspace *to)
 void
 movetowsbyname(const Arg *arg)
 {
-	Workspace *ws = getwsbyname(arg);
-	if (!ws)
-		return;
-
-	movetows(selws->sel, ws);
+	movetows(selws->sel, getwsbyname(arg));
 }
 
 void
 movealltowsbyname(const Arg *arg)
 {
-	Workspace *ws = getwsbyname(arg);
-	if (!ws)
-		return;
-
-	moveallclientstows(selws, ws);
+	moveallclientstows(selws, getwsbyname(arg));
 }
 
 /* Send client to an adjacent workspace on the current monitor */
 void
 movewsdir(const Arg *arg)
 {
-	Workspace *nws = dirtows(arg->i);
-
-	if (!nws)
-		return;
-
-	movetows(selws->sel, nws);
+	movetows(selws->sel, dirtows(arg->i));
 }
 
 /* View an adjacent workspace on the current monitor */
@@ -341,7 +328,6 @@ void
 viewwsdir(const Arg *arg)
 {
 	Workspace *nws = dirtows(arg->i);
-
 	if (!nws)
 		return;
 
@@ -426,6 +412,9 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 {
 	int do_warp = 0;
 	int arrangeall = 0;
+
+	if (!ws)
+		return;
 
 	if (m == NULL)
 		m = selmon;
