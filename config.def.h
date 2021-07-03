@@ -840,6 +840,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( togglegaps, ARG_TYPE_NONE ),
 	IPCCOMMAND( togglemark, ARG_TYPE_PTR ),
 	IPCCOMMAND( togglenomodbuttons, ARG_TYPE_NONE ),
+	IPCCOMMAND( togglepinnedws, ARG_TYPE_NONE ),
 	IPCCOMMAND( togglescratch, ARG_TYPE_UINT ),
 	IPCCOMMAND( togglesticky, ARG_TYPE_NONE ),
 	IPCCOMMAND( transfer, ARG_TYPE_NONE ),
