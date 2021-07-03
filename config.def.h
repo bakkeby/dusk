@@ -801,6 +801,8 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( mark, ARG_TYPE_PTR ),
 	IPCCOMMAND( markall, ARG_TYPE_SINT ), // 0 = mark all, 1 = mark floating, 2 = mark hidden
 	IPCCOMMAND( mirrorlayout, ARG_TYPE_NONE ),
+	IPCCOMMAND( movetowsbyname, ARG_TYPE_STR ),
+	IPCCOMMAND( movealltowsbyname, ARG_TYPE_STR ),
 	IPCCOMMAND( rotatelayoutaxis, ARG_TYPE_SINT ),
 	IPCCOMMAND( rotatestack, ARG_TYPE_SINT ),
 	IPCCOMMAND( placedir, ARG_TYPE_SINT ),

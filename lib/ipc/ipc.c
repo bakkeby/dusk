@@ -26,6 +26,7 @@ static unsigned int ipc_commands_len;
 // Max size is 1 MB
 static const uint32_t MAX_MESSAGE_SIZE = 1000000;
 static const int IPC_SOCKET_BACKLOG = 5;
+static char numtext[11] = {0};
 
 /**
  * Create IPC socket at specified path and return file descriptor to socket.
@@ -410,8 +411,15 @@ ipc_validate_run_command(IPCParsedCommand *parsed, const IPCCommand actual)
 			else if (ptype == ARG_TYPE_UINT && atype == ARG_TYPE_SINT)
 				// If this argument is supposed to be a signed int, cast it
 				parsed->args[i].i = parsed->args[i].ui;
-			else if (ptype == ARG_TYPE_UINT && atype == ARG_TYPE_STR)
-				parsed->args[i].v = "";
+			else if (ptype == ARG_TYPE_UINT && atype == ARG_TYPE_STR) {
+				if (parsed->args[i].ui == 0) {
+					/* Empty strings come through as a 0, treat as empty string */
+					parsed->args[i].v = "";
+				} else {
+					sprintf(numtext, "%ld", parsed->args[i].ui);
+					parsed->args[i].v = numtext;
+				}
+			}
 			else
 				return -2;
 		}
