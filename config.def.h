@@ -772,7 +772,7 @@ static const char *ipcsockpath = "/tmp/dusk.sock";
 static IPCCommand ipccommands[] = {
 	IPCCOMMANDS( customlayout, 8, ARG_TYPE_SINT, ARG_TYPE_STR, ARG_TYPE_SINT, ARG_TYPE_SINT, ARG_TYPE_SINT, ARG_TYPE_SINT, ARG_TYPE_SINT, ARG_TYPE_SINT ),
 	IPCCOMMAND( changeopacity, ARG_TYPE_FLOAT ),
-	IPCCOMMAND( clienttomon, ARG_TYPE_UINT ),
+	IPCCOMMAND( clienttomon, ARG_TYPE_SINT ),
 	IPCCOMMAND( clientstomon, ARG_TYPE_SINT ),
 	IPCCOMMAND( cyclelayout, ARG_TYPE_SINT ),
 	IPCCOMMAND( defaultgaps, ARG_TYPE_NONE ),
