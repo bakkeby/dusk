@@ -1,4 +1,11 @@
 void
+comboviewwsbyname(const Arg *arg)
+{
+	viewwsonmon(getwsbyname(arg), NULL, combo);
+	combo = 1;
+}
+
+void
 createworkspaces()
 {
 	Workspace *pws, *ws;
@@ -403,8 +410,7 @@ viewselws(const Arg *arg)
 void
 viewwsbyname(const Arg *arg)
 {
-	viewwsonmon(getwsbyname(arg), NULL, combo);
-	combo = 1;
+	viewwsonmon(getwsbyname(arg), NULL, 0);
 }
 
 void
@@ -412,6 +418,8 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 {
 	int do_warp = 0;
 	int arrangeall = 0;
+	int x, y;
+	Workspace *mousepointerws;
 
 	if (!ws)
 		return;
@@ -514,6 +522,15 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 	}
 
 	setworkspaceareas();
+
+	/* When enabling new workspaces into view let the focus remain with the one
+	 * that has the mouse cursor on it. */
+	if (enablews && getrootptr(&x, &y)) {
+		mousepointerws = recttows(x, y, 1, 1);
+		if (mousepointerws && mousepointerws->mon == m)
+			selws = m->selws = mousepointerws;
+	}
+
 	if (arrangeall)
 		arrange(NULL);
 	else

@@ -546,7 +546,7 @@ static const Layout layouts[] = {
 	{ KeyPress,   MODKEY|Ctrl|Shift,           KEY,      removescratch,     {.v = CMD } }, \
 
 #define WSKEYS(KEY,NAME) \
-	{ KeyPress,   MODKEY,                      KEY,      viewwsbyname,      {.v = NAME} }, \
+	{ KeyPress,   MODKEY,                      KEY,      comboviewwsbyname, {.v = NAME} }, \
 	{ KeyPress,   MODKEY|Shift,                KEY,      movetowsbyname,    {.v = NAME} }, \
 	{ KeyPress,   MODKEY|Ctrl|Shift,           KEY,      movealltowsbyname, {.v = NAME} }, \
 	{ KeyPress,   MODKEY|Ctrl,                 KEY,      swapwsbyname,      {.v = NAME} }, \
