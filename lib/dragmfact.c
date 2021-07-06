@@ -136,5 +136,5 @@ dragmfact(const Arg *arg)
 
 	ignore_warp = 0;
 	XUngrabPointer(dpy, CurrentTime);
-	while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
+	skipfocusevents();
 }

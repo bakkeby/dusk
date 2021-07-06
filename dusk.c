@@ -468,6 +468,7 @@ static void setup(void);
 static void seturgent(Client *c, int urg);
 static void showhide(Client *c);
 static void sigchld(int unused);
+static void skipfocusevents(void);
 static void spawn(const Arg *arg);
 static pid_t spawncmd(const Arg *arg, int buttonclick);
 static void togglefloating(const Arg *arg);
@@ -994,8 +995,11 @@ clientmessage(XEvent *e)
 		if ((ws = getwsbyindex(cme->data.l[0])))
 			movetows(c, ws);
 	} else if (cme->message_type == netatom[NetActiveWindow]) {
-		if (HIDDEN(c))
+		if (HIDDEN(c)) {
 			show(c);
+			arrange(c->ws);
+			drawbar(c->ws->mon);
+		}
 		if (enabled(FocusOnNetActive) && !NOFOCUSONNETACTIVE(c)) {
 			if (c->ws->visible)
 				focus(c);
@@ -1004,11 +1008,27 @@ clientmessage(XEvent *e)
 		} else if (c != selws->sel && !ISURGENT(c))
 			seturgent(c, 1);
 	} else if (cme->message_type == wmatom[WMChangeState]) {
-		if (cme->data.l[0] == IconicState && !HIDDEN(c))
-			hide(c);
-		else if (cme->data.l[0] == NormalState && HIDDEN(c))
-			show(c);
+		if (cme->data.l[0] == IconicState) {
+			/* Some applications assume that setting the IconicState a second
+			 * time will toggle the state. */
+			if ((getstate(c->win) == IconicState)) {
+				setclientstate(c, NormalState);
+				show(c);
+			} else if (!HIDDEN(c)) {
+				setclientstate(c, IconicState);
+				hide(c);
+			}
+		} else if (cme->data.l[0] == NormalState ) {
+			if (HIDDEN(c))
+				show(c);
+			else {
+				setclientstate(c, NormalState);
+				XMoveWindow(dpy, c->win, c->x, c->y);
+			}
+		} else if (cme->data.l[0] == WithdrawnState)
+			setclientstate(c, WithdrawnState);
 		arrange(c->ws);
+		drawbar(c->ws->mon);
 	} else if (cme->message_type == netatom[NetWMMoveResize]) {
 		resizemouse(&((Arg) { .v = c }));
 	}
@@ -1412,7 +1432,6 @@ focus(Client *c)
 	Workspace *ws = c ? c->ws : selws;
 	Client *f;
 	XWindowChanges wc;
-	XEvent ev;
 
 	if (!c || ISINVISIBLE(c))
 		for (c = ws->stack; c && !ISVISIBLE(c); c = c->snext);
@@ -1458,7 +1477,7 @@ focus(Client *c)
 					wc.sibling = f->win;
 				}
 			XSync(dpy, False);
-			while (XCheckMaskEvent(dpy, EnterWindowMask, &ev)); // skip any new EnterNotify events
+			skipfocusevents();
 		}
 	} else {
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
@@ -2482,8 +2501,8 @@ resizemouse(const Arg *arg)
 	unsigned int dui;
 	Window dummy;
 	Client *c;
-	Workspace *w, *ws = selws;
 	XEvent ev;
+	Workspace *w, *ws = selws;
 	Time lasttime = 0;
 	double prevopacity;
 
@@ -2543,7 +2562,7 @@ resizemouse(const Arg *arg)
 	} while (ev.type != ButtonRelease);
 
 	XUngrabPointer(dpy, CurrentTime);
-	while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
+	skipfocusevents();
 
 	if ((w = recttows(c->x, c->y, c->w, c->h)) && w != selws) {
 		detach(c);
@@ -2575,7 +2594,6 @@ void
 restack(Workspace *ws)
 {
 	Client *c;
-	XEvent ev;
 	XWindowChanges wc;
 	int n = 0;
 
@@ -2593,7 +2611,7 @@ restack(Workspace *ws)
 			}
 	}
 	XSync(dpy, False);
-	while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
+	skipfocusevents();
 
 	if (enabled(Warp)) {
 		if (ws->nmaster)
@@ -2741,7 +2759,6 @@ setfocus(Client *c)
 void
 setfullscreen(Client *c, int fullscreen, int restorefakefullscreen)
 {
-	XEvent ev;
 	Monitor *m = c->ws->mon;
 	int savestate = 0, restorestate = 0;
 
@@ -2808,6 +2825,7 @@ setfullscreen(Client *c, int fullscreen, int restorefakefullscreen)
 			restack(c->ws);
 		} else {
 			arrangews(c->ws);
+			drawbar(c->ws->mon);
 			restack(c->ws);
 		}
 	} else
@@ -2818,7 +2836,7 @@ setfullscreen(Client *c, int fullscreen, int restorefakefullscreen)
 	 * at the time. To avoid this we ask X for all EnterNotify events and just ignore them.
 	 */
 	if (!ISFULLSCREEN(c))
-		while (XCheckMaskEvent(dpy, EnterWindowMask, &ev));
+		skipfocusevents();
 }
 
 void
@@ -3083,6 +3101,13 @@ sigchld(int unused)
 			}
 		}
 	}
+}
+
+void
+skipfocusevents(void)
+{
+	XEvent ev;
+	while (XCheckMaskEvent(dpy, EnterWindowMask, &ev)); // skip any new EnterNotify events
 }
 
 void

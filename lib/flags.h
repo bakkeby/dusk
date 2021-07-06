@@ -77,7 +77,7 @@ static const unsigned long
 	Unmanaged = 0x8000000000000000; // indicates that the client is not to be managed by the window manager
 
 #define ALWAYSONTOP(C) (C && C->flags & AlwaysOnTop)
-#define HIDDEN(C) (C && C->flags & Hidden)
+#define HIDDEN(C) (C && ((C->flags & Hidden) || (getstate(C->win) == IconicState)))
 #define ISFLOATING(C) (C && C->flags & Floating)
 #define ISFIXED(C) (C && C->flags & Fixed)
 #define ISLOCKED(C) (C && C->flags & Locked)

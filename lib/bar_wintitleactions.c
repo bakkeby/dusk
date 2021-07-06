@@ -1,22 +1,21 @@
 void
 hide(Client *c)
 {
-	if (!HIDDEN(c)) {
-		addflag(c, Hidden);
-		XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
-	}
+	addflag(c, Hidden);
+	XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
 }
 
 void
 show(Client *c)
 {
-	if (HIDDEN(c)) {
-		removeflag(c, Hidden);
-		if (ISFULLSCREEN(c))
-			setfullscreen(c, 1, 0);
-		else
-			XMoveWindow(dpy, c->win, c->x, c->y);
-	}
+	if (getstate(c->win) == IconicState)
+		setclientstate(c, NormalState);
+
+	removeflag(c, Hidden);
+	if (ISFULLSCREEN(c))
+		setfullscreen(c, 1, 0);
+	else
+		XMoveWindow(dpy, c->win, c->x, c->y);
 }
 
 void

@@ -742,9 +742,8 @@ static Button buttons[] = {
 	{ ClkStatusText,             Shift,                   Button1,        statusclick,      {.i = 10 } },
 	{ ClkStatusText,             Shift,                   Button2,        statusclick,      {.i = 11 } },
 	{ ClkStatusText,             Shift,                   Button3,        statusclick,      {.i = 12 } },
-	{ ClkClientWin,              MODKEY,                  Button8,        markmouse,        {1} }, // marks clients under the mouse cursor for group action
-	{ ClkClientWin,              MODKEY|Shift,            Button8,        markmouse,        {0} }, // unmarks clients under the mouse cursor for group action
-	{ ClkClientWin,              MODKEY,                  Button9,        markmouse,        {2} }, // toggles marking of clients under the mouse cursor for group action
+	{ ClkClientWin,              MODKEY,                  Button8,        markmouse,        {1} }, // toggles marking of clients under the mouse cursor for group action
+	{ ClkClientWin,              MODKEY,                  Button9,        markmouse,        {0} }, // unmarks clients under the mouse cursor
 	{ ClkClientWin,              MODKEY,                  Button1,        moveorplace,      {1} }, // moves a client window into a floating or tiled position depending on floating state
 	{ ClkClientWin,              MODKEY|Shift,            Button1,        movemouse,        {0} }, // moves a floating window, if the window is tiled then it will snap out to become floating
 	{ ClkClientWin,              MODKEY|Alt,              Button2,        togglefloating,   {0} }, // toggles between tiled and floating arrangement for given client
@@ -799,7 +798,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( killclient, ARG_TYPE_NONE ),
 	IPCCOMMAND( killunsel, ARG_TYPE_NONE ),
 	IPCCOMMAND( layoutconvert, ARG_TYPE_NONE ),
-	IPCCOMMAND( mark, ARG_TYPE_PTR ),
+	IPCCOMMAND( mark, ARG_TYPE_NONE ),
 	IPCCOMMAND( markall, ARG_TYPE_SINT ), // 0 = mark all, 1 = mark floating, 2 = mark hidden
 	IPCCOMMAND( mirrorlayout, ARG_TYPE_NONE ),
 	IPCCOMMAND( movetowsbyname, ARG_TYPE_STR ),
@@ -836,14 +835,14 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( togglefloating, ARG_TYPE_NONE ),
 	IPCCOMMAND( togglefullscreen, ARG_TYPE_NONE ),
 	IPCCOMMAND( togglegaps, ARG_TYPE_NONE ),
-	IPCCOMMAND( togglemark, ARG_TYPE_PTR ),
+	IPCCOMMAND( togglemark, ARG_TYPE_NONE ),
 	IPCCOMMAND( togglenomodbuttons, ARG_TYPE_NONE ),
 	IPCCOMMAND( togglepinnedws, ARG_TYPE_NONE ),
 	IPCCOMMAND( togglesticky, ARG_TYPE_NONE ),
 	IPCCOMMAND( transfer, ARG_TYPE_NONE ),
 	IPCCOMMAND( transferall, ARG_TYPE_NONE ),
 	IPCCOMMAND( unfloatvisible, ARG_TYPE_NONE ),
-	IPCCOMMAND( unmark, ARG_TYPE_PTR ),
+	IPCCOMMAND( unmark, ARG_TYPE_NONE ),
 	IPCCOMMAND( unmarkall, ARG_TYPE_NONE ),
 	IPCCOMMAND( viewallwsonmon, ARG_TYPE_NONE ),
 	IPCCOMMAND( viewalloccwsonmon, ARG_TYPE_NONE ),

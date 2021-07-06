@@ -26,6 +26,9 @@ pushup(const Arg *arg)
 	}
 	focus(sel);
 	arrangews(ws);
+	skipfocusevents();
+	if (enabled(Warp))
+		warp(sel);
 }
 
 void
@@ -49,4 +52,7 @@ pushdown(const Arg *arg)
 	}
 	focus(sel);
 	arrangews(ws);
+	skipfocusevents();
+	if (enabled(Warp))
+		warp(sel);
 }
