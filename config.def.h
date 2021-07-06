@@ -662,8 +662,8 @@ static Key keys[] = {
 	{ KeyPress,   MODKEY|Ctrl|Alt,              XK_period,       movewsdir,              {.i = +1 } }, // move client to workspace on the immediate right of current workspace (on the current monitor)
 
 
-	STACKKEYS(AltGr|Ctrl,                            stackfocus)                           // focus on the nth client in the stack, see the STACKKEYS macro for keybindings
-	STACKKEYS(AltGr|Ctrl|Shift,                      stackpush)                            // move the currently focused client to the nth place in the stack
+//	STACKKEYS(AltGr|Ctrl,                            stackfocus)                           // focus on the nth client in the stack, see the STACKKEYS macro for keybindings
+//	STACKKEYS(AltGr|Ctrl|Shift,                      stackpush)                            // move the currently focused client to the nth place in the stack
 
 	SCRATCHKEYS(                    XK_w,                                    spcmd1)
 	SCRATCHKEYS(                    XK_e,                                    spcmd2)
