@@ -13,6 +13,9 @@ stackfocus(const Arg *arg)
 	focus(c ? c : p);
 	restack(ws);
 	arrangews(ws);
+	skipfocusevents();
+	if (enabled(Warp))
+		warp(ws->sel);
 }
 
 void
@@ -38,6 +41,9 @@ stackpush(const Arg *arg)
 		c->next = sel;
 	}
 	arrangews(ws);
+	skipfocusevents();
+	if (enabled(Warp))
+		warp(ws->sel);
 }
 
 int
