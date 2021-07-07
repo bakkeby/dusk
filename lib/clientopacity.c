@@ -6,7 +6,11 @@ changeopacity(const Arg *arg)
 		return;
 
 	for (c = nextmarked(NULL, c); c; c = nextmarked(c->next, NULL)) {
-		c->opacity += (c->opacity == 0 ? 1.0 + arg->f : arg->f);
+
+		if (arg->f > 1.0)
+			c->opacity = arg->f - 1.0;
+		else
+			c->opacity += (c->opacity == 0 ? 1.0 + arg->f : arg->f);
 
 		if (c->opacity > 1.0)
 			c->opacity = 1.0;
