@@ -31,6 +31,7 @@ markclient(Client *c)
 	if (!ISMARKED(c)) {
 		addflag(c, Marked);
 		++num_marked;
+		XSetWindowBorder(dpy, c->win, scheme[SchemeMarked][ColBorder].pixel);
 	}
 }
 
