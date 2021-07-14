@@ -84,8 +84,6 @@ static unsigned long functionality = 0
 //	|RestrictFocusstackToMonitor // restrict focusstack to only operate within the monitor, otherwise focus can drift between monitors
 ;
 
-static const char statussep              = ';'; /* separator between status bars */
-
 static int flexwintitle_masterweight     = 15; // master weight compared to hidden and floating window titles
 static int flexwintitle_stackweight      = 4;  // stack weight compared to hidden and floating window titles
 static int flexwintitle_hiddenweight     = 0;  // hidden window title weight
