@@ -1266,7 +1266,7 @@ rotatelayoutaxis(const Arg *arg)
 	int axis = labs(arg->i) - 1;
 	Workspace *ws = selws;
 
-	if (!ws->layout->arrange)
+	if (!ws->layout->arrange || arg->i == 0)
 		return;
 	if (axis == LAYOUT) {
 		if (ws->ltaxis[LAYOUT] >= 0) {
@@ -1290,5 +1290,6 @@ rotatelayoutaxis(const Arg *arg)
 			ws->ltaxis[axis] = AXIS_LAST - 1;
 	}
 	arrangews(ws);
+	drawbar(ws->mon);
 	setflexsymbols(ws, 0);
 }
