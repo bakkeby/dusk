@@ -2281,6 +2281,21 @@ prevtiled(Client *c)
 	return r;
 }
 
+/* The structure for PropertyNotify events contains:
+ *
+ * typedef struct {
+ *     int type;              // PropertyNotify
+ *     unsigned long serial;  // # of last request processed by server
+ *     Bool send_event;       // true if this came from a SendEvent request
+ *     Display *display;      // Display the event was read from
+ *     Window window;
+ *     Atom atom;
+ *     Time time;
+ *     int state;             // PropertyNewValue or PropertyDelete
+ * } XPropertyEvent;
+ *
+ * https://www.x.org/releases/current/doc/man/man3/XPropertyEvent.3.xhtml
+ */
 void
 propertynotify(XEvent *e)
 {
@@ -3335,22 +3350,25 @@ unmanage(Client *c, int destroyed)
 	}
 }
 
+/* The structure for XUnmapEvent events contains:
+ *
+ * typedef struct {
+ *     int type;             // UnmapNotify
+ *     unsigned long serial; // # of last request processed by server
+ *     Bool send_event;      // true if this came from a SendEvent request
+ *     Display *display;     // the display the event was read from
+ *     Window event;         // the window the notification originates from
+ *     Window window;        // the window the notification is for
+ *     Bool from_configure;  // true if the event was generated as a result of a resizing of the
+ *                           // window's parent when the window itself had a win_gravity of
+ *                           // UnmapGravity
+ * } XUnmapEvent;
+ *
+ * https://tronche.com/gui/x/xlib/events/window-state-change/unmap.html
+ */
 void
 unmapnotify(XEvent *e)
 {
-	/* https://tronche.com/gui/x/xlib/events/window-state-change/unmap.html
-	typedef struct {
-	    int type;             // UnmapNotify
-	    unsigned long serial; // # of last request processed by server
-	    Bool send_event;      // true if this came from a SendEvent request
-	    Display *display;     // the display the event was read from
-	    Window event;         // the window the notification originates from
-	    Window window;        // the window the notification is for
-	    Bool from_configure;  // true if the event was generated as a result of a resizing of the
-	                          // window's parent when the window itself had a win_gravity of
-	                          // UnmapGravity
-	} XUnmapEvent; */
-
 	Client *c;
 	XUnmapEvent *ev = &e->xunmap;
 	if (enabled(Debug))
@@ -3358,7 +3376,7 @@ unmapnotify(XEvent *e)
 
 	if ((c = wintoclient(ev->window))) {
 		if (enabled(Debug))
-			fprintf(stderr, "unmapnotify: window %ld --> client %s\n", ev->window, c->name);
+			fprintf(stderr, "unmapnotify: window %ld --> client %s (%s)\n", ev->window, c->name, ev->send_event ? "WithdrawnState" : "unmanage");
 		if (ev->send_event)
 			setclientstate(c, WithdrawnState);
 		else
