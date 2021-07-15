@@ -430,8 +430,10 @@ static const BarDef bars[] = {
 	/* monitor idx  vert   x     y      w     h     name  */
 	{  0,      0,   0,    "0%    0%     100% -1h ", "Primary top" },
 	{  0,      1,   0,    "0%    100%   100% -1h ", "Primary bottom" },
-	{  1,      0,   0,    "0%    0%     100% -1h ", "Side top" },
-	{  1,      1,   0,    "0%    100%   100% -1h ", "Side bottom" },
+	{  1,      0,   0,    "0%    0%     100% -1h ", "Secondary top" },
+	{  1,      1,   0,    "0%    100%   100% -1h ", "Secondary bottom" },
+	{  2,      0,   0,    "0%    0%     100% -1h ", "Ternary top" },
+	{  2,      1,   0,    "0%    100%   100% -1h ", "Ternary bottom" },
 };
 
 /* Bar rules allow you to configure what is shown where on the bar, as well as
