@@ -383,7 +383,7 @@ static const Rule clientrules[] = {
 /* Bar settings, this defines what bars exists, their position, and what attributes they have.
  *
  *    monitor - the exact monitor number the bar should be created on
- *              (0 - primary, 1 - secondary)
+ *              (0 - primary, 1 - secondary, 2 - tertiary)
  *    idx     - the bar index, used in relation to bar rules below
  *              (bar indexes can be reused across monitors)
  *    vert    - whether the bar is horizontal (0) or vertical (1), not
@@ -432,8 +432,8 @@ static const BarDef bars[] = {
 	{  0,      1,   0,    "0%    100%   100% -1h ", "Primary bottom" },
 	{  1,      0,   0,    "0%    0%     100% -1h ", "Secondary top" },
 	{  1,      1,   0,    "0%    100%   100% -1h ", "Secondary bottom" },
-	{  2,      0,   0,    "0%    0%     100% -1h ", "Ternary top" },
-	{  2,      1,   0,    "0%    100%   100% -1h ", "Ternary bottom" },
+	{  2,      0,   0,    "0%    0%     100% -1h ", "Tertiary top" },
+	{  2,      1,   0,    "0%    100%   100% -1h ", "Tertiary bottom" },
 };
 
 /* Bar rules allow you to configure what is shown where on the bar, as well as

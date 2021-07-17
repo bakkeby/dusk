@@ -36,7 +36,7 @@ click_status(Bar *bar, Arg *arg, BarArg *a)
 int
 draw_status(Bar *bar, BarArg *a)
 {
-	return drw_2dtext(drw, a->x, a->y, a->w, a->h, 0, rawstatustext[a->value], 0, 0, 1, SchemeNorm);
+	return drw_2dtext(drw, a->x, a->y, a->w, a->h, 0, rawstatustext[a->value], 0, 0, 1, a->scheme);
 }
 
 int

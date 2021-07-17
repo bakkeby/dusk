@@ -50,7 +50,7 @@ draw_workspaces(Bar *bar, BarArg *a)
 			? SchemeUrg
 			: occ
 			? SchemeWsOcc
-			: SchemeWsNorm;
+			: a->scheme;
 
 		if (0) {
 			drw_2dtext(drw, x, y, w, h, lrpad / 2, icon, inv, False, 1, defscheme);

@@ -59,6 +59,7 @@ typedef struct {
 	int lpad;
 	int rpad;
 	int value;
+	int scheme;
 } BarArg;
 
 typedef struct {

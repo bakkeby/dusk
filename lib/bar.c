@@ -132,11 +132,13 @@ drawbarwin(Bar *bar)
 		if (br->monitor != 'A' && br->monitor != -1 && br->monitor != bar->mon->num &&
 				!(br->drawfunc == draw_systray && br->monitor > lastmon->num && bar->mon->num == 0)) // hack: draw systray on first monitor if the designated one is not available
 			continue;
-		if (br->scheme != -1)
-			drw_setscheme(drw, scheme[br->scheme]);
+
 		barg.lpad = br->lpad;
 		barg.rpad = br->rpad;
 		barg.value = br->value;
+		barg.scheme = (br->scheme > -1 ? br->scheme : SchemeNorm);
+
+		drw_setscheme(drw, scheme[br->scheme]);
 
 		mw = (br->alignment < BAR_ALIGN_RIGHT_LEFT ? lw : rw);
 		barg.w = MAX(0, mw - br->lpad);

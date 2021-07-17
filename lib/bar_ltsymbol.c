@@ -11,7 +11,7 @@ draw_ltsymbol(Bar *bar, BarArg *a)
 {
 	if (!bar->mon->selws)
 		return 0;
-	return drw_2dtext(drw, a->x, a->y, a->w, a->h, 0, bar->mon->selws->ltsymbol, 0, False, 1, SchemeNorm);
+	return drw_2dtext(drw, a->x, a->y, a->w, a->h, 0, bar->mon->selws->ltsymbol, 0, False, 1, a->scheme);
 }
 
 int
