@@ -445,6 +445,9 @@ static const BarDef bars[] = {
  *      'A' show on active monitor (i.e. focused / selected) (or just -1 for active?)
  *    bar - bar index, 0 is default, 1 is extrabar
  *    scheme - defines the default scheme for the bar module
+ *    lpad - adds artificial spacing on the left hand side of the module
+ *    rpad - adds artificial spacing on the right hand side of the module
+ *    value - arbitrary value where the interpretation is module specific
  *    alignment - how the module is aligned compared to other modules
  *    widthfunc, drawfunc, clickfunc - providing bar module width, draw and click functions
  *    name - does nothing, intended for visual clue and for logging / debugging
