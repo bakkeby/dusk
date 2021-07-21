@@ -564,6 +564,10 @@ static const Layout layouts[] = {
 	{ KeyPress,   MOD, XK_a, ACTION, {.i = 2 } }, \
 	{ KeyPress,   MOD, XK_z, ACTION, {.i = -1 } },
 
+/* Helper macros for spawning commands */
+#define SHCMD(cmd) { .v = (const char*[]){ NULL, "/bin/sh", "-c", cmd, NULL } }
+#define CMD(...)   { .v = (const char*[]){ NULL, __VA_ARGS__, NULL } }
+
 /* Scratch/Spawn commands:        NULL (scratchkey), command, argument, argument, ..., NULL */
 static const char *termcmd[]  = { NULL, "st", NULL };
 static const char *dmenucmd[] = {
