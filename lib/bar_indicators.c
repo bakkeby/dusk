@@ -29,10 +29,10 @@ drawindicator(Workspace *ws, Client *c, unsigned int occ, int x, int y, int w, i
 		drw_rect(drw, x + w/2, y, 1, 2, 0, 0);
 		break;
 	case INDICATOR_TOP_BAR:
-		drw_rect(drw, x + boxw, y, w - ( 2 * boxw + 1), boxw/2, filled, invert);
+		drw_rect(drw, x + boxw, y, w - ( 2 * boxw ), boxw/2, filled, invert);
 		break;
 	case INDICATOR_TOP_BAR_SLIM:
-		drw_rect(drw, x + boxw, y, w - ( 2 * boxw + 1), 1, 0, invert);
+		drw_rect(drw, x + boxw, y, w - ( 2 * boxw ) + 1, 1, 0, invert);
 		break;
 	case INDICATOR_BOTTOM_BAR:
 		drw_rect(drw, x + boxw, y + h - boxw/2, w - ( 2 * boxw ), boxw/2, filled, invert);
@@ -54,13 +54,13 @@ drawindicator(Workspace *ws, Client *c, unsigned int occ, int x, int y, int w, i
 		drw_rect(drw, x + boxw/2, y, w - boxw, h, 0, invert);
 		break;
 	case INDICATOR_BOX_FULL:
-		drw_rect(drw, x, y, w - 2, h, 0, invert);
+		drw_rect(drw, x, y, w, h, 0, invert);
 		break;
 	case INDICATOR_CLIENT_DOTS:
 		for (c = ws->clients; c; c = c->next) {
 			if (c->flags & Invisible)
 				continue;
-			drw_rect(drw, x, 1 + (indn * 2), ws->sel == c ? 6 : 1, 1, 1, invert);
+			drw_rect(drw, x, y + 1 + (indn * 2), ws->sel == c ? 6 : 1, 1, 1, invert);
 			indn++;
 			if (h <= 1 + (indn * 2)) {
 				indn = 0;

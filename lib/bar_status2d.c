@@ -128,23 +128,23 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 						break;
 					rx = (strncmp(text + i, "w", 1) == 0 ? w - 1: atoi(text + i));
 					if (rx < 0)
-						rx += w - 1;
+						rx += w;
 					while (i < len && text[++i] != ',');
 					if (++i >= len)
 						break;
-					ry = (strncmp(text + i, "h", 1) == 0 ? h : atoi(text + i));
+					ry = (strncmp(text + i, "h", 1) == 0 ? h - 1: atoi(text + i));
 					if (ry < 0)
 						ry += h;
 					while (i < len && text[++i] != ',');
 					if (++i >= len)
 						break;
-					rw = (strncmp(text + i, "w", 1) == 0 ? w : atoi(text + i));
+					rw = (strncmp(text + i, "w", 1) == 0 ? w: atoi(text + i));
 					if (rw < 0)
 						rw += w;
 					while (i < len && text[++i] != ',');
 					if (++i >= len)
 						break;
-					rh = (strncmp(text + i, "h", 1) == 0 ? h : atoi(text + i));
+					rh = (strncmp(text + i, "h", 1) == 0 ? h: atoi(text + i));
 					if (rh < 0)
 						rh += h;
 
