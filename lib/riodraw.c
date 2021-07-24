@@ -61,6 +61,8 @@ rioposition(Client *c, int x, int y, int w, int h)
 	if ((ws = recttows(x, y, w, h)) && ws != c->ws) {
 		detach(c);
 		detachstack(c);
+		arrangews(c->ws);
+		drawbar(c->ws->mon);
 		attachx(c, AttachBottom, ws);
 		attachstack(c);
 		selws = ws;
