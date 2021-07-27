@@ -62,6 +62,7 @@
 #include "transferall.c"
 #include "unfloatvisible.c"
 #include "vanitygaps.c"
+#include "winicon.c"
 #include "zoomswap.c"
 #include "xrdb.c"
 

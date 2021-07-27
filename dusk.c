@@ -173,6 +173,7 @@ enum {
 	NetWMDesktop,
 	NetWMFullPlacement,
 	NetWMFullscreen,
+	NetWMIcon,
 	NetWMName,
 	NetWMState,
 	NetWMStateAbove,
@@ -288,6 +289,7 @@ struct Client {
 	Workspace *ws;
 	Workspace *revertws; /* holds the original workspace info from when the client was opened */
 	Window win;
+	XImage *icon;
 	unsigned long flags;
 	unsigned long prevflags;
 };
@@ -1826,7 +1828,9 @@ manage(Window w, XWindowAttributes *wa)
 	c->sfy = -9999;
 	c->sfw = c->w;
 	c->sfh = c->h;
+	c->icon = NULL;
 
+	updateicon(c);
 	updatetitle(c);
 	fprintf(stderr, "manage --> client %s\n", c->name);
 	getclientflags(c);
@@ -2354,6 +2358,11 @@ propertynotify(XEvent *e)
 		}
 		else if (ev->atom == motifatom)
 			updatemotifhints(c);
+		else if (ev->atom == netatom[NetWMIcon]) {
+			updateicon(c);
+			if (c == selws->sel)
+				drawbar(selws->mon);
+		}
 	}
 }
 
@@ -2974,6 +2983,7 @@ setup(void)
 	netatom[NetWMDesktop] = XInternAtom(dpy, "_NET_WM_DESKTOP", False);
 	netatom[NetWMFullPlacement] = XInternAtom(dpy, "_NET_WM_FULL_PLACEMENT", False); /* https://specifications.freedesktop.org/wm-spec/latest/ar01s07.html */
 	netatom[NetWMFullscreen] = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
+	netatom[NetWMIcon] = XInternAtom(dpy, "_NET_WM_ICON", False);
 	netatom[NetWMMaximizedVert] = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False);
 	netatom[NetWMMaximizedHorz] = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
 	netatom[NetWMStaysOnTop] = XInternAtom(dpy, "_NET_WM_STATE_STAYS_ON_TOP", False);
@@ -3323,6 +3333,7 @@ unmanage(Client *c, int destroyed)
 
 	detach(c);
 	detachstack(c);
+	freeicon(c);
 
 	if (!destroyed) {
 		wc.border_width = c->oldbw;
@@ -3683,6 +3694,7 @@ zoom(const Arg *arg)
 	}
 
 	arrangews(c->ws);
+	drawbar(c->ws->mon);
 }
 
 int

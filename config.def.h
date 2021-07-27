@@ -17,6 +17,9 @@ static const int bar_height              = 0;   /* 0 means derive from font, >= 
 static const int vertpad                 = borderpx;  /* vertical (outer) padding of bar */
 static const int sidepad                 = borderpx;  /* horizontal (outer) padding of bar */
 
+#define ICONSIZE 20    /* icon size */
+#define ICONSPACING 5  /* space between icon and title */
+
 static int floatposgrid_x                = 5;   /* float grid columns */
 static int floatposgrid_y                = 5;   /* float grid rows */
 

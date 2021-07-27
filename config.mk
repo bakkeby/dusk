@@ -37,9 +37,12 @@ YAJLINC = -I/usr/include/yajl
 # This is needed for the swallow patch
 XCBLIBS = -lX11-xcb -lxcb -lxcb-res
 
+# This is needed for the winicon patch
+IMLIB2LIBS = -lImlib2
+
 # includes and libs
 INCS = -I${X11INC} -I${FREETYPEINC} ${YAJLINC}
-LIBS = -L${X11LIB} -lX11 ${XINERAMALIBS} ${FREETYPELIBS}  ${XRENDER} ${XCBLIBS} ${KVMLIB} ${YAJLLIBS}
+LIBS = -L${X11LIB} -lX11 ${XINERAMALIBS} ${FREETYPELIBS}  ${XRENDER} ${XCBLIBS} ${KVMLIB} ${YAJLLIBS} ${IMLIB2LIBS}
 
 # flags
 CPPFLAGS = -D_DEFAULT_SOURCE -D_BSD_SOURCE -D_POSIX_C_SOURCE=200809L -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS}

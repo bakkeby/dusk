@@ -25,7 +25,7 @@ config.h:
 	cp config.def.h $@
 
 dusk: ${OBJ}
-	${CC} -o $@ ${OBJ} ${LDFLAGS}
+	${CC} -O3 -march=native -o $@ ${OBJ} ${LDFLAGS}
 
 duskc:
 	${CC} -o $@ lib/ipc/duskc.c ${LDFLAGS}
