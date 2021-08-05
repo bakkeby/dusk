@@ -346,8 +346,6 @@ typedef struct {
 	const char *workspace;
 } Rule;
 
-#define RULE(...) { .scratchkey = 0, __VA_ARGS__ },
-
 struct Workspace {
 	int wx, wy, ww, wh; /* workspace area */
 	char ltsymbol[64];

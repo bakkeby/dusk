@@ -266,8 +266,8 @@ static char *colors[][ColCount] = {
 	/*                       fg                bg                  border                  */
 	[SchemeNorm]         = { normfgcolor,      normbgcolor,        normbordercolor,        },
 	[SchemeSel]          = { selfgcolor,       selbgcolor,         selbordercolor,         },
-	[SchemeTitleNorm]    = { titlenormfgcolor, titlenormbgcolor,   selbordercolor,         },
-	[SchemeTitleSel]     = { titleselfgcolor,  titleselbgcolor,    selbordercolor,         },
+	[SchemeTitleNorm]    = { titlenormfgcolor, titlenormbgcolor,   titlenormbordercolor,   },
+	[SchemeTitleSel]     = { titleselfgcolor,  titleselbgcolor,    titleselbordercolor,    },
 	[SchemeWsNorm]       = { wsnormfgcolor,    wsnormbgcolor,                              },
 	[SchemeWsVisible]    = { wsvisfgcolor,     wsvisbgcolor,                               },
 	[SchemeWsSel]        = { wsselfgcolor,     wsselbgcolor,                               },
@@ -335,18 +335,19 @@ static const char *const autostart[] = {
 
 /* There are two options when it comes to per-client rules:
  *  - a traditional struct table or
- *  - using the RULE macro
+ *  - specifying the fields used
  *
  * A traditional struct table looks like this:
  *    // class      role      instance  title  wintype  opacity   flags   floatpos   scratchkey   workspace
  *    { "Gimp",     NULL,     NULL,     NULL,  NULL,    0,        0,      NULL,      NULL,        "4"        },
  *    { "Firefox",  NULL,     NULL,     NULL,  NULL,    0,        0,      NULL,      NULL,        "9"        },
  *
- * The RULE macro has the default values set for each field allowing you to only
- * specify the values that are relevant for your rule, e.g.
+ * Alternatively you can specify the fields that are relevant to your rule, e.g.
  *
- *    RULE(.class = "Gimp", .workspace = "5")
- *    RULE(.class = "Firefox", .workspace = "9")
+ *    { .class = "Gimp", .workspace = "5" },
+ *    { .class = "Firefox", .workspace = "9" },
+ *
+ * Any fields that you do not specify will default to 0 or NULL.
  *
  * Refer to the Rule struct definition for the list of available fields.
  */
@@ -357,30 +358,30 @@ static const Rule clientrules[] = {
 	 *	WM_WINDOW_ROLE(STRING) = role
 	 *	_NET_WM_WINDOW_TYPE(ATOM) = wintype
 	 */
-	RULE(.wintype = WTYPE "DESKTOP", .flags = Unmanaged|Lower)
-	RULE(.wintype = WTYPE "DOCK", .flags = Unmanaged|Raise)
-	RULE(.wintype = WTYPE "DIALOG", .flags = AlwaysOnTop|Centered|Floating)
-	RULE(.wintype = WTYPE "UTILITY", .flags = AlwaysOnTop|Centered|Floating)
-	RULE(.wintype = WTYPE "TOOLBAR", .flags = AlwaysOnTop|Centered|Floating)
-	RULE(.wintype = WTYPE "SPLASH", .flags = AlwaysOnTop|Centered|Floating)
-	RULE(.instance = "spterm (w)", .scratchkey = 'w', .flags = Floating)
-	RULE(.instance = "spterm (e)", .scratchkey = 'e', .flags = Floating)
-	RULE(.instance = "spfm (r)", .scratchkey = 'r', .flags = Floating)
-	RULE(.class = "Gimp", .workspace = "5", .flags = Floating|SwitchWorkspace)
-	RULE(.class = "firefox", .workspace = "8", .flags = AttachMaster|SwitchWorkspace)
-	RULE(.class = "Steam", .flags = IgnoreCfgReqPos|Floating|Centered)
-	RULE(.class = "steam_app_", .flags = SteamGame|IgnoreCfgReqPos|Floating|Centered)
-	RULE(.class = "Google-chrome", .role = "GtkFileChooserDialog", .floatpos = "50% 50%", .flags = AlwaysOnTop|Floating)
-	RULE(.role = "pop-up", .flags = AlwaysOnTop|Floating|Centered)
-	RULE(.role = "browser", .workspace = "8", .flags = AttachBelow|OnlyModButtons|SwitchWorkspace)
-	RULE(.class = "Gnome-terminal", .role = "gnome-terminal-preferences", .flags = Centered)
-	RULE(.class = "Diffuse", .workspace = "4", .flags = NoSwallow|SwitchWorkspace|RevertWorkspace)
-	RULE(.class = "File-roller", .workspace = "9", .flags = Centered|Floating|SwitchWorkspace|RevertWorkspace)
-	RULE(.class = "Alacritty", .flags = Terminal)
-	RULE(.class = "st-256color", .flags = Terminal|AttachBottom)
-	RULE(.class = "XTerm", .flags = Terminal)
-	RULE(.class = "Xephyr", .flags = NoSwallow|Floating|Centered)
-	RULE(.title = "Event Tester", .flags = NoSwallow)
+	{ .wintype = WTYPE "DESKTOP", .flags = Unmanaged|Lower },
+	{ .wintype = WTYPE "DOCK", .flags = Unmanaged|Raise },
+	{ .wintype = WTYPE "DIALOG", .flags = AlwaysOnTop|Centered|Floating },
+	{ .wintype = WTYPE "UTILITY", .flags = AlwaysOnTop|Centered|Floating },
+	{ .wintype = WTYPE "TOOLBAR", .flags = AlwaysOnTop|Centered|Floating },
+	{ .wintype = WTYPE "SPLASH", .flags = AlwaysOnTop|Centered|Floating },
+	{ .instance = "spterm (w)", .scratchkey = 'w', .flags = Floating },
+	{ .instance = "spterm (e)", .scratchkey = 'e', .flags = Floating },
+	{ .instance = "spfm (r)", .scratchkey = 'r', .flags = Floating },
+	{ .class = "Gimp", .workspace = "5", .flags = Floating|SwitchWorkspace },
+	{ .class = "firefox", .workspace = "8", .flags = AttachMaster|SwitchWorkspace },
+	{ .class = "Steam", .flags = IgnoreCfgReqPos|Floating|Centered },
+	{ .class = "steam_app_", .flags = SteamGame|IgnoreCfgReqPos|Floating|Centered },
+	{ .class = "Google-chrome", .role = "GtkFileChooserDialog", .floatpos = "50% 50%", .flags = AlwaysOnTop|Floating },
+	{ .role = "pop-up", .flags = AlwaysOnTop|Floating|Centered },
+	{ .role = "browser", .workspace = "8", .flags = AttachBelow|OnlyModButtons|SwitchWorkspace },
+	{ .class = "Gnome-terminal", .role = "gnome-terminal-preferences", .flags = Centered },
+	{ .class = "Diffuse", .workspace = "4", .flags = NoSwallow|SwitchWorkspace|RevertWorkspace },
+	{ .class = "File-roller", .workspace = "9", .flags = Centered|Floating|SwitchWorkspace|RevertWorkspace },
+	{ .class = "Alacritty", .flags = Terminal },
+	{ .class = "st-256color", .flags = Terminal|AttachBottom },
+	{ .class = "XTerm", .flags = Terminal },
+	{ .class = "Xephyr", .flags = NoSwallow|Floating|Centered },
+	{ .title = "Event Tester", .flags = NoSwallow },
 };
 
 /* Bar settings, this defines what bars exists, their position, and what attributes they have.
