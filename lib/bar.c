@@ -138,7 +138,7 @@ drawbarwin(Bar *bar)
 		barg.value = br->value;
 		barg.scheme = (br->scheme > -1 ? br->scheme : SchemeNorm);
 
-		drw_setscheme(drw, scheme[br->scheme]);
+		drw_setscheme(drw, scheme[barg.scheme]);
 
 		mw = (br->alignment < BAR_ALIGN_RIGHT_LEFT ? lw : rw);
 		barg.w = MAX(0, mw - br->lpad);
