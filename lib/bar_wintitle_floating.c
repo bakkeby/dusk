@@ -53,7 +53,6 @@ calc_wintitle_floating(
 
 	/* This avoids drawing a separator on the right hand side of the wintitle section if
 	 * there is a border and the wintitle module rests at the right border. */
-	// if (bar->borderpx && a->x + a->w < bar->bx + bar->bw - 2 * bar->borderpx)
 	if (a->x + a->w < bar->bw - bar->borderpx)
 		tabw -= flexwintitle_separator;
 

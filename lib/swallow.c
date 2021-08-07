@@ -16,6 +16,9 @@ swallow(Client *t, Client *c)
 	if (!RULED(c) && disabled(SwallowFloating) && ISFLOATING(c))
 		return 0;
 
+	if (ISFULLSCREEN(t))
+		setfullscreen(c, 1, ISFAKEFULLSCREEN(t));
+
 	replaceclient(t, c);
 	addflag(c, IgnoreCfgReqPos);
 	c->swallowing = t;
@@ -54,7 +57,7 @@ replaceclient(Client *old, Client *new)
 
 	XMoveWindow(dpy, old->win, WIDTH(old) * -2, old->y);
 
-	if (ISVISIBLE(new)) {
+	if (ISVISIBLE(new) && !ISFULLSCREEN(new)) {
 		if (ISFLOATING(new))
 			resize(new, old->x, old->y, new->w - 2*new->bw, new->h - 2*new->bw, 0);
 		else

@@ -26,7 +26,7 @@ barpress(XButtonPressedEvent *ev, Monitor *m, Arg *arg, int *click)
 					barg.x = ev->y - bar->borderpx;
 					barg.y = ev->x - (bar->p[r] + br->lpad);
 					barg.w = bar->bw - 2 * bar->borderpx;
-					barg.h = bar->s[r];;
+					barg.h = bar->s[r];
 				} else {
 					barg.x = ev->x - (bar->p[r] + br->lpad);
 					barg.y = ev->y - bar->borderpx;
@@ -141,7 +141,7 @@ drawbarwin(Bar *bar)
 		drw_setscheme(drw, scheme[barg.scheme]);
 
 		mw = (br->alignment < BAR_ALIGN_RIGHT_LEFT ? lw : rw);
-		barg.w = MAX(0, mw - br->lpad);
+		barg.w = MAX(0, mw - br->lpad - br->rpad);
 		w = br->sizefunc(bar, &barg);
 		barg.w = w = MIN(barg.w, w);
 
