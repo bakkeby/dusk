@@ -327,6 +327,7 @@ struct Monitor {
 	int gappoh;           /* horizontal outer gaps */
 	int gappov;           /* vertical outer gaps */
 	int showbar;
+	unsigned int wsmask;
 	unsigned int borderpx;
 	Monitor *next;
 	Workspace *selws;

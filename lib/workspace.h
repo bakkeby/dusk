@@ -7,6 +7,8 @@ static int hasclients(Workspace *ws);
 static void adjustwsformonitor(Workspace *ws, Monitor *m);
 static Workspace * getwsbyname(const Arg *arg);
 static Workspace * getwsbyindex(int index);
+static unsigned int getwsmask(Monitor *m);
+static void viewwsmask(Monitor *m, unsigned int wsmask);
 
 static void enablews(const Arg *arg);
 static void enablewsbyname(const Arg *arg);
@@ -14,6 +16,7 @@ static void hidews(Workspace *ws);
 static void hidewsclients(Workspace *ws);
 static void showws(Workspace *ws);
 static void showwsclients(Workspace *ws);
+static void drawws(Workspace *ws, Monitor *m, int enablews, int arrangeall, int do_warp);
 
 static void movews(const Arg *arg);
 static void movewsdir(const Arg *arg);

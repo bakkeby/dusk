@@ -96,6 +96,36 @@ wsicon(Workspace *ws)
 	return icon;
 }
 
+unsigned int
+getwsmask(Monitor *m)
+{
+	unsigned int wsmask = 0;
+	Workspace *ws;
+
+	for (ws = workspaces; ws; ws = ws->next) {
+		if (ws->mon != m)
+			continue;
+		if (ws->visible)
+			wsmask |= (1 << ws->num);
+	}
+
+	return wsmask;
+}
+
+void
+viewwsmask(Monitor *m, unsigned int wsmask)
+{
+	Workspace *ws;
+
+	for (ws = workspaces; ws; ws = ws->next) {
+		if (ws->mon != m)
+			continue;
+		ws->visible = (wsmask & (1 << ws->num));
+	}
+
+	drawws(NULL, m, 1, 0, 0);
+}
+
 int
 hasclients(Workspace *ws)
 {
@@ -418,14 +448,22 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 {
 	int do_warp = 0;
 	int arrangeall = 0;
-	int x, y;
-	Workspace *mousepointerws;
+	unsigned int wsmask;
 
 	if (!ws)
 		return;
 
 	if (m == NULL)
 		m = selmon;
+
+	if (!combo) {
+		wsmask = getwsmask(m);
+		if (wsmask == (1 << ws->num) && m->wsmask) {
+			viewwsmask(m, m->wsmask);
+			return;
+		} else
+			m->wsmask = wsmask;
+	}
 
 	Monitor *mon, *omon = NULL;
 	Workspace *w, *ows = NULL;
@@ -521,6 +559,15 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 			mon->selws = NULL;
 	}
 
+	drawws(ws, m, enablews, arrangeall, do_warp);
+}
+
+void
+drawws(Workspace *ws, Monitor *m, int enablews, int arrangeall, int do_warp)
+{
+	int x, y;
+	Workspace *mousepointerws;
+
 	setworkspaceareas();
 
 	/* When enabling new workspaces into view let the focus remain with the one
@@ -534,13 +581,13 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 	if (arrangeall)
 		arrange(NULL);
 	else
-		arrangemon(ws->mon);
+		arrangemon(ws ? ws->mon : m);
 
 	drawbars();
 	updatecurrentdesktop();
 	focus(NULL);
 
-	if (do_warp && ws->sel)
+	if (do_warp && ws && ws->sel)
 		warp(ws->sel);
 }
 
