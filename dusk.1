@@ -11,7 +11,7 @@ optimising the environment for the application in use and the task performed.
 .P
 In tiled layouts windows are generally managed in a master and one or two
 stacking areas. The master area contains, by default, one window while the
-stacking area(s) contain the remaining windows. The number of windows in the
+stacking areas contain the remaining windows. The number of windows in the
 master area can be changed dynamically during runtime. In a monocle layout all
 windows are maximised to the screen size. In floating layout windows can be
 resized and moved freely. Dialog windows are always managed floating, regardless
@@ -41,10 +41,12 @@ prints version information to stderr, then exits.
 .SH USAGE
 .SS Status bar
 .TP
-.B X root window name
-is read and displayed in the status text area. It can be set with the
-.BR xsetroot (1)
-command.
+.B Statuses
+Multiple statuses are supported and they can be set with the following command:
+.br
+$ duskc run_command setstatus 7 "$(date +%T)"
+.br
+where 7 is the status to set followed by the status text.
 .TP
 .B Button1
 Click on a workspace label to move windows to that workspace, click on the
@@ -191,7 +193,7 @@ Move focused window to the nth workspace.
 Swap all clients on the current workspace with all clients on the nth workspace.
 .TP
 .B Mod\-Alt\-[1..n]
-Toggle the nth workspace into view in addition to the currently viewed workspace(s).
+Toggle the nth workspace into view in addition to the currently viewed workspaces.
 .TP
 .B Mod\-[1..n]
 View the nth workspace.
@@ -222,7 +224,7 @@ Cycle through the available tiling arrangements for the primary stack area.
 Cycle through the available tiling arrangements for the secondary stack area.
 .TP
 .B Mod\-Ctrl\-m
-The master and stack area(s) swap places (mirror layout).
+The master and stack areas swap places (mirror layout).
 .TP
 .B Mod\-space
 Toggles between current and previous layout.
@@ -257,7 +259,7 @@ For mice with extra keys use the next button to resize windows while dragging.
 Tiled windows will be toggled to floating state.
 .TP
 .B Mod\-Shift\-Button1
-Dynamically change the size of the master area compared to the stack area(s).
+Dynamically change the size of the master area compared to the stack areas.
 .TP
 .B Mod\-Shift\-Button3
 Dynamically change a client's size respective to other windows within the same
