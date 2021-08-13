@@ -7,8 +7,8 @@ static int hasclients(Workspace *ws);
 static void adjustwsformonitor(Workspace *ws, Monitor *m);
 static Workspace * getwsbyname(const Arg *arg);
 static Workspace * getwsbyindex(int index);
-static unsigned int getwsmask(Monitor *m);
-static void viewwsmask(Monitor *m, unsigned int wsmask);
+static unsigned long getwsmask(Monitor *m);
+static void viewwsmask(Monitor *m, unsigned long wsmask);
 
 static void enablews(const Arg *arg);
 static void enablewsbyname(const Arg *arg);

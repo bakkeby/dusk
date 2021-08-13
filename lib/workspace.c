@@ -96,31 +96,31 @@ wsicon(Workspace *ws)
 	return icon;
 }
 
-unsigned int
+unsigned long
 getwsmask(Monitor *m)
 {
-	unsigned int wsmask = 0;
+	unsigned long wsmask = 0;
 	Workspace *ws;
 
 	for (ws = workspaces; ws; ws = ws->next) {
 		if (ws->mon != m)
 			continue;
 		if (ws->visible)
-			wsmask |= (1 << ws->num);
+			wsmask |= (1L << ws->num);
 	}
 
 	return wsmask;
 }
 
 void
-viewwsmask(Monitor *m, unsigned int wsmask)
+viewwsmask(Monitor *m, unsigned long wsmask)
 {
 	Workspace *ws;
 
 	for (ws = workspaces; ws; ws = ws->next) {
 		if (ws->mon != m)
 			continue;
-		ws->visible = (wsmask & (1 << ws->num));
+		ws->visible = (wsmask & (1L << ws->num));
 	}
 
 	drawws(NULL, m, 1, 0, 0);
@@ -403,32 +403,44 @@ void
 viewallwsonmon(const Arg *arg)
 {
 	Workspace *ws;
+	Monitor *m = selmon;
+	unsigned long wsmask = 0, currmask;
+
 	for (ws = workspaces; ws; ws = ws->next) {
-		if (ws->mon != selmon)
+		if (ws->mon != m)
 			continue;
-		ws->visible = 1;
+		wsmask |= (1L << ws->num);
 	}
-	setworkspaceareas();
-	arrange(NULL);
-	drawbars();
-	updatecurrentdesktop();
-	focus(NULL);
+
+	currmask = getwsmask(m);
+	if (wsmask == currmask)
+		wsmask = m->wsmask;
+
+	viewwsmask(m, wsmask);
+	m->wsmask = currmask;
 }
 
 void
 viewalloccwsonmon(const Arg *arg)
 {
 	Workspace *ws;
+	Monitor *m = selmon;
+	unsigned long wsmask = 0, currmask;
+
 	for (ws = workspaces; ws; ws = ws->next) {
-		if (ws->mon != selmon)
+		if (ws->mon != m)
 			continue;
-		ws->visible = (ws->clients ? 1 : 0);
+
+		if (ws->clients)
+			wsmask |= (1L << ws->num);
 	}
-	setworkspaceareas();
-	arrange(NULL);
-	drawbars();
-	updatecurrentdesktop();
-	focus(NULL);
+
+	currmask = getwsmask(m);
+	if (wsmask == currmask)
+		wsmask = m->wsmask;
+
+	viewwsmask(m, wsmask);
+	m->wsmask = currmask;
 }
 
 void
@@ -448,7 +460,7 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 {
 	int do_warp = 0;
 	int arrangeall = 0;
-	unsigned int wsmask;
+	unsigned long wsmask;
 
 	if (!ws)
 		return;
@@ -458,7 +470,7 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 
 	if (!combo) {
 		wsmask = getwsmask(m);
-		if (wsmask == (1 << ws->num) && m->wsmask) {
+		if (wsmask == (1L << ws->num) && m->wsmask) {
 			viewwsmask(m, m->wsmask);
 			return;
 		} else
