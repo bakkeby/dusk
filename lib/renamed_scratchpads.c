@@ -136,6 +136,8 @@ togglescratch(const Arg *arg)
 		}
 
 		arrange(NULL);
+		if (monclients)
+			drawbars();
 		if (ISFLOATING(found))
 			XRaiseWindow(dpy, found->win);
 	} else {
