@@ -249,6 +249,8 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 
 	drw_setscheme(drw, scheme[clientscheme]);
 	XSetWindowBorder(dpy, c->win, scheme[clientscheme][ColBorder].pixel);
+	if (clientscheme != SchemeMarked && c != ws->sel)
+		c->scheme = clientscheme;
 
 	if (w <= TEXTW("A") + pad) // reduce text padding if wintitle is too small
 		pad = (w - TEXTW("A") < 0 ? 0 : (w - TEXTW("A")) / 2);

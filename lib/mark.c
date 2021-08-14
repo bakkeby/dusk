@@ -130,6 +130,7 @@ unmarkclient(Client *c)
 {
 	if (ISMARKED(c)) {
 		removeflag(c, Marked);
+		XSetWindowBorder(dpy, c->win, scheme[c->scheme][ColBorder].pixel);
 		--num_marked;
 	}
 }

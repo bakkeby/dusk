@@ -279,6 +279,7 @@ struct Client {
 	int oldx, oldy, oldw, oldh;
 	int basew, baseh, incw, inch, maxw, maxh, minw, minh;
 	int bw, oldbw;
+	int scheme;
 	char scratchkey;
 	unsigned int idx;
 	double opacity;
@@ -1436,8 +1437,8 @@ focus(Client *c)
 
 	if (!c || ISINVISIBLE(c))
 		for (c = ws->stack; c && !ISVISIBLE(c); c = c->snext);
-	if (ws->sel && ws->sel != c)
-		unfocus(ws->sel, 0, c);
+	if (selws->sel && selws->sel != c)
+		unfocus(selws->sel, 0, c);
 	if (c) {
 		if (c->ws != selws) {
 			if (c->ws->mon != selmon)
@@ -1487,12 +1488,13 @@ focus(Client *c)
 	}
 
 	if (ws->layout->arrange == flextile && (
-			ws->ltaxis[MASTER] == MONOCLE ||
-			ws->ltaxis[STACK] == MONOCLE ||
-			ws->ltaxis[STACK2] == MONOCLE))
+		ws->ltaxis[MASTER] == MONOCLE ||
+		ws->ltaxis[STACK]  == MONOCLE ||
+		ws->ltaxis[STACK2] == MONOCLE
+	)) {
 		arrangews(ws);
-	else
-		drawbar(ws->mon);
+	}
+	drawbar(ws->mon);
 }
 
 /* there are some broken focus acquiring clients needing extra handling */
@@ -3304,6 +3306,7 @@ unfocus(Client *c, int setfocus, Client *nextfocus)
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
 		XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
 	}
+	XSetWindowBorder(dpy, c->win, scheme[c->scheme][ColBorder].pixel);
 	c->ws->sel = NULL;
 }
 
