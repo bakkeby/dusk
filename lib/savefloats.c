@@ -1,13 +1,27 @@
 void savefloats(Client *c)
 {
+	int x, y, w, h;
 	Workspace *ws = c->ws;
 	Monitor *m = ws->mon;
 
-	/* save last known workspace float dimensions relative to monitor */
-	c->sfx = m->wx + (c->x - ws->wx) * m->ww / ws->ww;
-	c->sfy = m->wy + (c->y - ws->wy) * m->wh / ws->wh;
-	c->sfw = c->w * m->ww / ws->ww;
-	c->sfh = c->h * m->wh / ws->wh;
+	/* Save last known workspace float dimensions relative to monitor */
+	x = m->wx + (c->x - ws->wx) * m->ww / ws->ww;
+	y = m->wy + (c->y - ws->wy) * m->wh / ws->wh;
+	w = c->w * m->ww / ws->ww;
+	h = c->h * m->wh / ws->wh;
+
+	/* If the client is outside of / larger than the workspace then use absolute monitor position */
+	if (x < 0 || y < 0 || w > ws->ww || h > ws->wh) {
+		x = m->wx + c->x - ws->wx;
+		y = m->wy + c->y - ws->wy;
+		w = c->w;
+		h = c->h;
+	}
+
+	c->sfx = x;
+	c->sfy = y;
+	c->sfw = w;
+	c->sfh = h;
 }
 
 void
@@ -30,6 +44,7 @@ restorefloats(Client *c)
 		fprintf(stderr, "restorefloats: bad float values x = %d, y = %d, w = %d, h = %d for client = %s\n", x, y, w, h, c->name);
 		return;
 	}
+
 	XMoveResizeWindow(dpy, c->win, x, y, w, h);
 	resize(c, x, y, w, h, 0);
 }
