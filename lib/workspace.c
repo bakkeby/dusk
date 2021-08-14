@@ -116,6 +116,12 @@ void
 viewwsmask(Monitor *m, unsigned long wsmask)
 {
 	Workspace *ws;
+	long unsigned int currmask = getwsmask(m);
+
+	currmask = getwsmask(m);
+	if (wsmask == currmask)
+		wsmask = m->wsmask;
+	m->wsmask = currmask;
 
 	for (ws = workspaces; ws; ws = ws->next) {
 		if (ws->mon != m)
@@ -404,7 +410,7 @@ viewallwsonmon(const Arg *arg)
 {
 	Workspace *ws;
 	Monitor *m = selmon;
-	unsigned long wsmask = 0, currmask;
+	unsigned long wsmask = 0;
 
 	for (ws = workspaces; ws; ws = ws->next) {
 		if (ws->mon != m)
@@ -412,12 +418,7 @@ viewallwsonmon(const Arg *arg)
 		wsmask |= (1L << ws->num);
 	}
 
-	currmask = getwsmask(m);
-	if (wsmask == currmask)
-		wsmask = m->wsmask;
-
 	viewwsmask(m, wsmask);
-	m->wsmask = currmask;
 }
 
 void
@@ -425,7 +426,7 @@ viewalloccwsonmon(const Arg *arg)
 {
 	Workspace *ws;
 	Monitor *m = selmon;
-	unsigned long wsmask = 0, currmask;
+	unsigned long wsmask = 0;
 
 	for (ws = workspaces; ws; ws = ws->next) {
 		if (ws->mon != m)
@@ -435,12 +436,7 @@ viewalloccwsonmon(const Arg *arg)
 			wsmask |= (1L << ws->num);
 	}
 
-	currmask = getwsmask(m);
-	if (wsmask == currmask)
-		wsmask = m->wsmask;
-
 	viewwsmask(m, wsmask);
-	m->wsmask = currmask;
 }
 
 void
