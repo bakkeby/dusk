@@ -22,6 +22,7 @@ swallow(Client *t, Client *c)
 	replaceclient(t, c);
 	addflag(c, IgnoreCfgReqPos);
 	c->swallowing = t;
+	c->revertws = NULL;
 
 	return 1;
 }
