@@ -2,6 +2,46 @@
 struct NumBarRules { char TooManyBarRules__Increase_BARRULES_macro_to_fix_this[LENGTH(barrules) > BARRULES ? -1 : 1]; };
 
 void
+barhover(XEvent *e, Bar *bar)
+{
+	const BarRule *br;
+	Monitor *m = bar->mon;
+	XMotionEvent *ev = &e->xmotion;
+	BarArg barg = { 0, 0, 0, 0 };
+	int r;
+
+	for (r = 0; r < LENGTH(barrules); r++) {
+		br = &barrules[r];
+		if (br->bar != bar->idx || (br->monitor == 'A' && m != selmon) || br->hoverfunc == NULL)
+			continue;
+		if (br->monitor != 'A' && br->monitor != -1 && br->monitor != bar->mon->num)
+			continue;
+		if (bar->vert && (bar->p[r] > ev->y || ev->y > bar->p[r] + bar->s[r]))
+			continue;
+		if (!bar->vert && (bar->p[r] > ev->x || ev->x > bar->p[r] + bar->s[r]))
+			continue;
+
+		if (bar->vert) {
+			barg.x = ev->y - bar->borderpx;
+			barg.y = ev->x - (bar->p[r] + br->lpad);
+			barg.w = bar->bw - 2 * bar->borderpx;
+			barg.h = bar->s[r];
+		} else {
+			barg.x = ev->x - (bar->p[r] + br->lpad);
+			barg.y = ev->y - bar->borderpx;
+			barg.w = bar->s[r];
+			barg.h = bar->bh - 2 * bar->borderpx;
+		}
+		barg.lpad = br->lpad;
+		barg.rpad = br->rpad;
+		barg.value = br->value;
+
+		br->hoverfunc(bar, &barg);
+		break;
+	}
+}
+
+void
 barpress(XButtonPressedEvent *ev, Monitor *m, Arg *arg, int *click)
 {
 	Bar *bar;
@@ -425,7 +465,7 @@ updatebars(void)
 		.background_pixel = 0,
 		.border_pixel = 0,
 		.colormap = cmap,
-		.event_mask = ButtonPressMask|ExposureMask
+		.event_mask = ButtonPressMask|ExposureMask|PointerMotionMask
 	};
 	XClassHint ch = {"dusk", "dusk"};
 	for (m = mons; m; m = m->next) {

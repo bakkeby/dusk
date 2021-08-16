@@ -2021,6 +2021,7 @@ maprequest(XEvent *e)
 void
 motionnotify(XEvent *e)
 {
+	Bar *bar;
 	Monitor *m;
 	Workspace *ws;
 	Client *sel;
@@ -2037,8 +2038,18 @@ motionnotify(XEvent *e)
 	// 	}
 	// }
 
+	/* Mouse cursor moves over a bar, trigger bar hover mechanisms */
+	for (bar = selmon->bar; bar; bar = bar->next) {
+		if (ev->window == bar->win) {
+			barhover(e, bar);
+			return;
+		}
+	}
+
 	if (ev->window != root)
 		return;
+
+	/* Mouse cursor moves from one workspace to another */
 	if ((ws = recttows(ev->x_root, ev->y_root, 1, 1)) && ws != selws) {
 		sel = selws->sel;
 		selws = ws;
@@ -2048,7 +2059,11 @@ motionnotify(XEvent *e)
 		focus(NULL);
 		drawbar(selmon);
 		updatecurrentdesktop();
-	} else if ((m = recttomon(ev->x_root, ev->y_root, 1, 1)) != selmon) {
+		return;
+	}
+
+	/* Mouse cursor moves from one monitor to another */
+	if ((m = recttomon(ev->x_root, ev->y_root, 1, 1)) != selmon) {
 		sel = selws->sel;
 		selmon = m;
 		if (m->selws)

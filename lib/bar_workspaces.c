@@ -72,7 +72,7 @@ draw_workspaces(Bar *bar, BarArg *a)
 int
 click_workspaces(Bar *bar, Arg *arg, BarArg *a)
 {
-	Workspace *ws = workspaces;
+	Workspace *ws;
 	int w, s = 0, t = (bar->vert ? a->y : a->x);
 
 	for (ws = workspaces; ws && ws->mon != bar->mon; ws = ws->next); // find first workspace for mon
@@ -97,4 +97,31 @@ click_workspaces(Bar *bar, Arg *arg, BarArg *a)
 	arg->v = ws;
 
 	return ClkWorkspaceBar;
+}
+
+int
+hover_workspaces(Bar *bar, BarArg *a)
+{
+	Workspace *ws = workspaces;
+	int w, s = 0, t = (bar->vert ? a->y : a->x);
+
+	do {
+		if (ws->mon != bar->mon)
+			continue;
+		w = TEXT2DW(wsicon(ws)) + lrpad;
+		if (w <= lrpad)
+			continue;
+		if (bar->vert)
+			s += bh;
+		else
+			s += w;
+	} while (t >= s && (ws = ws->next));
+
+	if (!ws)
+		return 0;
+
+
+	fprintf(stderr, "hover ws = %s\n", ws->name);
+
+	return 1;
 }

@@ -135,8 +135,8 @@ getfuncbyname(const char *name)
 		return AutoReduceNmaster;
 	else if (strcmp(name, "WinTitleIcons") == 0)
 		return WinTitleIcons;
-	else if (strcmp(name, "FuncPlaceholder17179869184") == 0)
-		return FuncPlaceholder17179869184;
+	else if (strcmp(name, "WorkspacePreview") == 0)
+		return WorkspacePreview;
 	else if (strcmp(name, "FuncPlaceholder34359738368") == 0)
 		return FuncPlaceholder34359738368;
 	else if (strcmp(name, "FuncPlaceholder68719476736") == 0)

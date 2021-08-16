@@ -73,9 +73,12 @@ typedef struct {
 	int (*sizefunc)(Bar *bar, BarArg *a);
 	int (*drawfunc)(Bar *bar, BarArg *a);
 	int (*clickfunc)(Bar *bar, Arg *arg, BarArg *a);
+	int (*hoverfunc)(Bar *bar, BarArg *a);
 	char *name; // for debugging
 } BarRule;
 
+static void barhover(XEvent *e, Bar *bar);
+static void barpress(XButtonPressedEvent *ev, Monitor *m, Arg *arg, int *click);
 static void createbars(Monitor *m);
 static void createbar(const BarDef *def, Monitor *m);
 static void drawbar(Monitor *m);
