@@ -319,6 +319,7 @@ typedef struct {
 	LayoutPreset preset;
 } Layout;
 
+typedef struct Preview Preview;
 struct Monitor {
 	int num;              /* monitor index */
 	int mx, my, mw, mh;   /* screen size */
@@ -333,6 +334,7 @@ struct Monitor {
 	Monitor *next;
 	Workspace *selws;
 	Bar *bar;
+	Preview *preview;
 };
 
 typedef struct {
@@ -366,6 +368,7 @@ struct Workspace {
 	Client *prevzoom;
 	Workspace *next;
 	Monitor *mon;
+	Pixmap preview;
 	const Layout *layout;
 	const Layout *prevlayout;
 	char *icondef; // default icon
@@ -793,7 +796,7 @@ void
 cleanup(void)
 {
 	Layout foo = { "", NULL };
-	Workspace *ws;
+	Workspace *ws, *next;
 	size_t i;
 	selws->layout = &foo;
 	for (ws = workspaces; ws; ws = ws->next)
@@ -811,6 +814,12 @@ cleanup(void)
 		}
 		free(systray);
 	}
+
+	for (ws = workspaces; ws; ws = next) {
+		next = ws->next;
+		free(ws);
+	}
+
 	for (i = 0; i < CurLast; i++)
 		drw_cur_free(drw, cursor[i]);
 	for (i = 0; i < LENGTH(colors) + 1; i++)
@@ -856,6 +865,12 @@ cleanupmon(Monitor *mon)
 			systray->bar = NULL;
 		free(bar);
 	}
+	if (mon->preview) {
+		XUnmapWindow(dpy, mon->preview->win);
+		XDestroyWindow(dpy, mon->preview->win);
+		free(mon->preview);
+	}
+
 	free(mon);
 }
 
@@ -2027,23 +2042,29 @@ motionnotify(XEvent *e)
 	Client *sel;
 	XMotionEvent *ev = &e->xmotion;
 
+	bar = wintobar(ev->window);
+
 	// if (enabled(Debug)) {
-	// 	sel = wintoclient(ev->window);
-	// 	if (sel) {
-	// 		fprintf(stderr, "motionnotify: received event x = %d, y = %d for client %s\n", ev->x_root, ev->y_root, sel->name);
-	// 	} else if (ev->window == root) {
+	// 	if (ev->window == root) {
 	// 		fprintf(stderr, "motionnotify: received event x = %d, y = %d for root window\n", ev->x_root, ev->y_root);
+	// 	} else if (bar) {
+	// 		fprintf(stderr, "motionnotify: received event x = %d, y = %d for bar %s\n", ev->x_root, ev->y_root, bar->name);
+	// 	} else if ((sel = wintoclient(ev->window))) {
+	// 		fprintf(stderr, "motionnotify: received event x = %d, y = %d for client %s\n", ev->x_root, ev->y_root, sel->name);
 	// 	} else {
 	// 		fprintf(stderr, "motionnotify: received event x = %d, y = %d for no window?\n", ev->x_root, ev->y_root);
 	// 	}
 	// }
 
 	/* Mouse cursor moves over a bar, trigger bar hover mechanisms */
-	for (bar = selmon->bar; bar; bar = bar->next) {
-		if (ev->window == bar->win) {
-			barhover(e, bar);
-			return;
-		}
+	if (bar) {
+		barhover(e, bar);
+		return;
+	}
+
+	if (selmon->preview->show) {
+		selmon->preview->show = 0;
+		hidewspreview(selmon);
 	}
 
 	if (ev->window != root)
@@ -3479,6 +3500,7 @@ updategeom(void)
 					m->mh = m->wh = unique[m->num].height;
 					updatebarpos(m);
 					setworkspaceareasformon(mons);
+					createpreview(m);
 				}
 			}
 		} else { /* less monitors available nn < n */
@@ -3501,6 +3523,7 @@ updategeom(void)
 			mons->mh = mons->wh = sh;
 			updatebarpos(mons);
 			setworkspaceareasformon(mons);
+			createpreview(mons);
 		}
 	}
 	if (dirty) {

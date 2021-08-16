@@ -476,6 +476,12 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 	Monitor *mon, *omon = NULL;
 	Workspace *w, *ows = NULL;
 
+	if (enabled(WorkspacePreview)) {
+		storepreview(ws->mon->selws);
+		if (ws->mon != m)
+			storepreview(m->selws);
+	}
+
 	if (enablews && ws->visible && ws->mon == m) {
 		/* Toggle workspace if it is already shown */
 		hidews(ws);

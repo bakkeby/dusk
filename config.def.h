@@ -20,6 +20,8 @@ static const int sidepad                 = borderpx;  /* horizontal (outer) padd
 #define ICONSIZE 20    /* icon size */
 #define ICONSPACING 5  /* space between icon and title */
 
+static const int scalepreview            = 4;   /* size of workspace previews compared to monitor size */
+
 static int floatposgrid_x                = 5;   /* float grid columns */
 static int floatposgrid_y                = 5;   /* float grid rows */
 

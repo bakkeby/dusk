@@ -16,6 +16,7 @@
 #include "bar_systray.h"
 #include "bar_wintitleactions.h"
 #include "bar_workspaces.h"
+#include "bar_wspreview.h"
 
 /* Other patches */
 #include "attachx.h"

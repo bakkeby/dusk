@@ -75,6 +75,8 @@ click_workspaces(Bar *bar, Arg *arg, BarArg *a)
 	Workspace *ws;
 	int w, s = 0, t = (bar->vert ? a->y : a->x);
 
+	/* This avoids clicks to the immediate left of the leftmost workspace (e.g. 2) to evaluate
+	 * as workspace 1 (which can be on a different monitor). */
 	for (ws = workspaces; ws && ws->mon != bar->mon; ws = ws->next); // find first workspace for mon
 	if (!ws)
 		return ClkWorkspaceBar;
@@ -102,11 +104,18 @@ click_workspaces(Bar *bar, Arg *arg, BarArg *a)
 int
 hover_workspaces(Bar *bar, BarArg *a)
 {
-	Workspace *ws = workspaces;
+	Workspace *ws;
+	Monitor *m = bar->mon;
 	int w, s = 0, t = (bar->vert ? a->y : a->x);
 
+	/* This avoids clicks to the immediate left of the leftmost workspace (e.g. 2) to evaluate
+	 * as workspace 1 (which can be on a different monitor). */
+	for (ws = workspaces; ws && ws->mon != m; ws = ws->next); // find first workspace for mon
+	if (!ws)
+		return 0;
+
 	do {
-		if (ws->mon != bar->mon)
+		if (ws->mon != m)
 			continue;
 		w = TEXT2DW(wsicon(ws)) + lrpad;
 		if (w <= lrpad)
@@ -117,11 +126,16 @@ hover_workspaces(Bar *bar, BarArg *a)
 			s += w;
 	} while (t >= s && (ws = ws->next));
 
-	if (!ws)
+	if (!ws) {
+		hidewspreview(m);
 		return 0;
+	}
 
-
-	fprintf(stderr, "hover ws = %s\n", ws->name);
+	if (m->preview->show != (ws->num + 1) && m->selws != ws) {
+		m->preview->show = ws->num + 1;
+		showwspreview(ws, bar->bx + a->x, bar->by > m->my + m->mh / 2 ? bar->by - m->mh / scalepreview : bar->by + bar->bh);
+	} else if (m->selws == ws)
+		hidewspreview(m);
 
 	return 1;
 }
