@@ -259,7 +259,7 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 
 	drw_text(drw, x, barg->y, w, barg->h, pad + (c->icon ? c->icon->width + ICONSPACING : 0), c->name, 0, False, 1);
 
- 	if (c->icon) {
+ 	if (enabled(WinTitleIcons) && c->icon) {
 		static uint32_t tmp[ICONSIZE * ICONSIZE];
 		drw_img(drw, x + pad, barg->y + (barg->h - c->icon->height) / 2, c->icon, tmp);
 	}

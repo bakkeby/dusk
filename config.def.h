@@ -85,6 +85,7 @@ static unsigned long functionality = 0
 //	|RioDrawIncludeBorders // indicates whether the area drawn using slop includes the window borders
 //	|RioDrawSpawnAsync // spawn the application alongside rather than after drawing area using slop
 //	|RestrictFocusstackToMonitor // restrict focusstack to only operate within the monitor, otherwise focus can drift between monitors
+//	|WinTitleIcons // adds application icons to window titles in the bar
 ;
 
 static int flexwintitle_masterweight     = 15; // master weight compared to hidden and floating window titles

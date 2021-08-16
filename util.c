@@ -133,8 +133,8 @@ getfuncbyname(const char *name)
 		return RestrictFocusstackToMonitor;
 	else if (strcmp(name, "AutoReduceNmaster") == 0)
 		return AutoReduceNmaster;
-	else if (strcmp(name, "FuncPlaceholder8589934592") == 0)
-		return FuncPlaceholder8589934592;
+	else if (strcmp(name, "WinTitleIcons") == 0)
+		return WinTitleIcons;
 	else if (strcmp(name, "FuncPlaceholder17179869184") == 0)
 		return FuncPlaceholder17179869184;
 	else if (strcmp(name, "FuncPlaceholder34359738368") == 0)

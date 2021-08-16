@@ -48,7 +48,7 @@ static const unsigned long
 	BarPadding = 0x40000000, // enables bar padding
 	RestrictFocusstackToMonitor = 0x80000000, // option to restrict focusstack to only operate within the monitor
 	AutoReduceNmaster = 0x100000000, // automatically reduce nmaster if there are multiple master clients and one is killed
-	FuncPlaceholder8589934592 = 0x200000000,
+	WinTitleIcons = 0x200000000, // adds application icons to window titles in the bar
 	FuncPlaceholder17179869184 = 0x400000000,
 	FuncPlaceholder34359738368 = 0x800000000,
 	FuncPlaceholder68719476736 = 0x1000000000,

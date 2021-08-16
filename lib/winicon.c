@@ -114,5 +114,6 @@ void
 updateicon(Client *c)
 {
 	freeicon(c);
-	c->icon = geticonprop(c->win);
+	if (enabled(WinTitleIcons))
+		c->icon = geticonprop(c->win);
 }
