@@ -81,6 +81,7 @@ storepreview(Workspace *ws)
 	image = imlib_create_image(sw, sh);
 	imlib_context_set_image(image);
 	imlib_image_set_has_alpha(1);
+	imlib_context_set_blend(0);
 	imlib_context_set_display(dpy);
 	imlib_context_set_visual(visual);
 	imlib_context_set_drawable(root);
