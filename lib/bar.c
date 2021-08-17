@@ -22,8 +22,8 @@ barhover(XEvent *e, Bar *bar)
 			continue;
 
 		if (bar->vert) {
-			barg.x = ev->y - bar->borderpx;
-			barg.y = ev->x - (bar->p[r] + br->lpad);
+			barg.x = ev->x - bar->borderpx;
+			barg.y = ev->y - (bar->p[r] + br->lpad);
 			barg.w = bar->bw - 2 * bar->borderpx;
 			barg.h = bar->s[r];
 		} else {
@@ -36,7 +36,7 @@ barhover(XEvent *e, Bar *bar)
 		barg.rpad = br->rpad;
 		barg.value = br->value;
 
-		br->hoverfunc(bar, &barg);
+		br->hoverfunc(bar, &barg, ev);
 		break;
 	}
 }
@@ -63,8 +63,8 @@ barpress(XButtonPressedEvent *ev, Monitor *m, Arg *arg, int *click)
 					continue;
 
 				if (bar->vert) {
-					barg.x = ev->y - bar->borderpx;
-					barg.y = ev->x - (bar->p[r] + br->lpad);
+					barg.x = ev->x - bar->borderpx;
+					barg.y = ev->y - (bar->p[r] + br->lpad);
 					barg.w = bar->bw - 2 * bar->borderpx;
 					barg.h = bar->s[r];
 				} else {

@@ -102,11 +102,12 @@ click_workspaces(Bar *bar, Arg *arg, BarArg *a)
 }
 
 int
-hover_workspaces(Bar *bar, BarArg *a)
+hover_workspaces(Bar *bar, BarArg *a, XMotionEvent *ev)
 {
 	Workspace *ws;
 	Monitor *m = bar->mon;
 	int w, s = 0, t = (bar->vert ? a->y : a->x);
+	int x, y;
 
 	/* This avoids clicks to the immediate left of the leftmost workspace (e.g. 2) to evaluate
 	 * as workspace 1 (which can be on a different monitor). */
@@ -131,9 +132,31 @@ hover_workspaces(Bar *bar, BarArg *a)
 		return 0;
 	}
 
+	if (bar->vert) {
+		if (bar->bx > m->mx + m->mw / 2) // right bar
+			x = bar->bx - m->mw / scalepreview - gappov;
+		else // left bar
+			x = bar->bx + bar->bw + gappov;
+		y = bar->by + ev->y - m->mh / scalepreview / 2;
+		if (y + m->mh / scalepreview > m->wy + m->wh)
+			y = m->wy + m->wh - m->mh / scalepreview - gappoh;
+		else if (y < bar->by)
+			y = m->wy + gappoh;
+	} else {
+		if (bar->by > m->my + m->mh / 2) // bottom bar
+			y = bar->by - m->mh / scalepreview - gappoh;
+		else // top bar
+			y = bar->by + bar->bh + gappoh;
+		x = bar->bx + ev->x - m->mw / scalepreview / 2;
+		if (x + m->mw / scalepreview > m->mx + m->mw)
+			x = m->wx + m->ww - m->mw / scalepreview - gappov;
+		else if (x < bar->bx)
+			x = m->wx + gappov;
+	}
+
 	if (m->preview->show != (ws->num + 1) && m->selws != ws) {
 		m->preview->show = ws->num + 1;
-		showwspreview(ws, bar->bx + a->x, bar->by > m->my + m->mh / 2 ? bar->by - m->mh / scalepreview : bar->by + bar->bh);
+		showwspreview(ws, x, y);
 	} else if (m->selws == ws)
 		hidewspreview(m);
 

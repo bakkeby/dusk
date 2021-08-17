@@ -461,23 +461,23 @@ static const BarDef bars[] = {
  *    name - does nothing, intended for visual clue and for logging / debugging
  */
 static const BarRule barrules[] = {
-	/* monitor  bar    scheme   lpad rpad value  alignment               sizefunc                  drawfunc                 clickfunc                 hoverfunc     name */
-	{ -1,       0,     0,       0,   5,   0,     BAR_ALIGN_LEFT,         size_workspaces,          draw_workspaces,         click_workspaces,         NULL,         "workspaces" },
-	{ 'A',      0,     0,       5,   5,   0,     BAR_ALIGN_RIGHT,        size_systray,             draw_systray,            click_systray,            NULL,         "systray" },
-	{ -1,       0,     0,       0,   0,   0,     BAR_ALIGN_LEFT,         size_ltsymbol,            draw_ltsymbol,           click_ltsymbol,           NULL,         "layout" },
-	{  0,       0,     0,       10,  0,   0,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,         "status0" },
-	{  0,       0,     0,       10,  0,   1,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,         "status1" },
-	{  0,       0,     0,       10,  0,   2,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,         "status2" },
-	{  0,       0,     0,       10,  0,   3,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,         "status3" },
-	{  0,       0,     0,       10,  0,   4,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,         "status4" },
-	{  0,       0,     0,       10,  0,   5,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,         "status5" },
-	{  0,       0,     0,       10,  0,   6,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,         "status6" },
-	{  0,       0,     0,       10,  0,   7,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,         "status7" },
-	{  0,       0,     0,       10,  0,   8,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,         "status8" },
-	{ -1,       0,     0,       5,   0,   0,     BAR_ALIGN_NONE,         size_flexwintitle,        draw_flexwintitle,       click_flexwintitle,       NULL,         "flexwintitle" },
-	{ 'A',      1,     0,       10,  10,  9,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,         "status9" },
-	{ -1,       1,     0,       0,   0,   0,     BAR_ALIGN_RIGHT_RIGHT,  size_wintitle_hidden,     draw_wintitle_hidden,    click_wintitle_hidden,    NULL,         "wintitle_hidden" },
-	{ -1,       1,     0,       0,   0,   0,     BAR_ALIGN_LEFT,         size_wintitle_floating,   draw_wintitle_floating,  click_wintitle_floating,  NULL,         "wintitle_floating" },
+	/* monitor  bar    scheme   lpad rpad value  alignment               sizefunc                  drawfunc                 clickfunc                 hoverfunc                 name */
+	{ -1,       0,     0,       0,   5,   0,     BAR_ALIGN_LEFT,         size_workspaces,          draw_workspaces,         click_workspaces,         hover_workspaces,         "workspaces" },
+	{ 'A',      0,     0,       5,   5,   0,     BAR_ALIGN_RIGHT,        size_systray,             draw_systray,            click_systray,            NULL,                     "systray" },
+	{ -1,       0,     0,       0,   0,   0,     BAR_ALIGN_LEFT,         size_ltsymbol,            draw_ltsymbol,           click_ltsymbol,           NULL,                     "layout" },
+	{  0,       0,     0,       10,  0,   0,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,                     "status0" },
+	{  0,       0,     0,       10,  0,   1,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,                     "status1" },
+	{  0,       0,     0,       10,  0,   2,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,                     "status2" },
+	{  0,       0,     0,       10,  0,   3,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,                     "status3" },
+	{  0,       0,     0,       10,  0,   4,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,                     "status4" },
+	{  0,       0,     0,       10,  0,   5,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,                     "status5" },
+	{  0,       0,     0,       10,  0,   6,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,                     "status6" },
+	{  0,       0,     0,       10,  0,   7,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,                     "status7" },
+	{  0,       0,     0,       10,  0,   8,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,                     "status8" },
+	{ -1,       0,     0,       5,   0,   0,     BAR_ALIGN_NONE,         size_flexwintitle,        draw_flexwintitle,       click_flexwintitle,       NULL,                     "flexwintitle" },
+	{ 'A',      1,     0,       10,  10,  9,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,                     "status9" },
+	{ -1,       1,     0,       0,   0,   0,     BAR_ALIGN_RIGHT_RIGHT,  size_wintitle_hidden,     draw_wintitle_hidden,    click_wintitle_hidden,    NULL,                     "wintitle_hidden" },
+	{ -1,       1,     0,       0,   0,   0,     BAR_ALIGN_LEFT,         size_wintitle_floating,   draw_wintitle_floating,  click_wintitle_floating,  NULL,                     "wintitle_floating" },
 };
 
 /* Workspace rules define what workspaces are available and their properties.
