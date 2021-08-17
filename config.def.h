@@ -17,8 +17,8 @@ static const int bar_height              = 0;   /* 0 means derive from font, >= 
 static const int vertpad                 = borderpx;  /* vertical (outer) padding of bar */
 static const int sidepad                 = borderpx;  /* horizontal (outer) padding of bar */
 
-#define ICONSIZE 20    /* icon size */
-#define ICONSPACING 5  /* space between icon and title */
+static const int iconsize                = 16;  /* icon size */
+static const int iconspacing             = 5;   /* space between icon and title */
 
 static const int scalepreview            = 4;   /* size of workspace previews compared to monitor size */
 

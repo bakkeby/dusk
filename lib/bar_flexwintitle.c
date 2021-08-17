@@ -257,7 +257,7 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 	else if (enabled(CenteredWindowName) && TEXTW(c->name) < w)
 		pad = (w - TEXTW(c->name)) / 2;
 
-	drw_text(drw, x, barg->y, w, barg->h, pad + (c->icon ? c->icw + ICONSPACING : 0), c->name, 0, False, 1);
+	drw_text(drw, x, barg->y, w, barg->h, pad + (c->icon ? c->icw + iconspacing : 0), c->name, 0, False, 1);
 
  	if (enabled(WinTitleIcons) && c->icon)
 		drw_pic(drw, x + pad, barg->y + (barg->h - c->ich) / 2, c->icw, c->ich, c->icon);
