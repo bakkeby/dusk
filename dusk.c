@@ -290,7 +290,8 @@ struct Client {
 	Workspace *ws;
 	Workspace *revertws; /* holds the original workspace info from when the client was opened */
 	Window win;
-	XImage *icon;
+	unsigned int icw, ich;
+	Picture icon;
 	unsigned long flags;
 	unsigned long prevflags;
 };
@@ -1844,7 +1845,7 @@ manage(Window w, XWindowAttributes *wa)
 	c->sfy = -9999;
 	c->sfw = c->w;
 	c->sfh = c->h;
-	c->icon = NULL;
+	c->icon = 0;
 
 	updateicon(c);
 	updatetitle(c);
