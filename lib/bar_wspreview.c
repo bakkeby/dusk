@@ -11,7 +11,7 @@ createpreview(Monitor *m)
 		.colormap = cmap,
 		.event_mask = ButtonPressMask|ExposureMask
 	};
-	XClassHint ch = {"preview", "dusk"};
+	XClassHint ch = {"preview", "preview"};
 
 	m->preview = ecalloc(1, sizeof(Preview));
 	m->preview->win = XCreateWindow(dpy, root,
@@ -66,8 +66,10 @@ storepreview(Workspace *ws)
 	Imlib_Image image;
 	Monitor *m = ws->mon;
 
-	if (ws->preview)
+	if (ws->preview) {
 		XFreePixmap(dpy, ws->preview);
+		ws->preview = 0;
+	}
 
 	if (!ws->clients)
 		return;
@@ -77,6 +79,7 @@ storepreview(Workspace *ws)
 
 	image = imlib_create_image(sw, sh);
 	imlib_context_set_image(image);
+	imlib_image_set_has_alpha(1);
 	imlib_context_set_display(dpy);
 	imlib_context_set_visual(visual);
 	imlib_context_set_drawable(root);
