@@ -1,3 +1,7 @@
+![https://github.com/bakkeby/dusk/wiki/dusk.jpg](https://github.com/bakkeby/dusk/wiki/dusk.jpg)
+
+---
+
 Please ignore. This is just my personal build of what was once dwm.
 
 If you are looking for dwm then you may want to check out [dwm-flexipatch](https://github.com/bakkeby/dwm-flexipatch/) instead. Or just build your own [from scratch](https://dwm.suckless.org/).
@@ -6,7 +10,16 @@ If you are looking for dwm then you may want to check out [dwm-flexipatch](https
 
 ![https://raw.githubusercontent.com/wiki/bakkeby/dwm-vanitygaps/dawn_scr01.png](https://raw.githubusercontent.com/wiki/bakkeby/dwm-vanitygaps/dawn_scr01.png)
 
-![https://raw.githubusercontent.com/wiki/bakkeby/dwm-vanitygaps/dusk_scr01.gif](https://raw.githubusercontent.com/wiki/bakkeby/dwm-vanitygaps/dusk_scr01.gif)
+---
+
+That said if you do decide to try this build out then you may want to refer to the
+[wiki](https://github.com/bakkeby/dusk/wiki) for more information. One of the main
+differences with this build is that it uses workspaces instead of tags for managing
+clients.
+
+Familiarity with dwm or another tiling window manager is not strictly needed, but it
+would be highly recommended to at least have some basic understanding of how window
+managers work in general and what your desired workflow is.
 
 ### Target audience
 
