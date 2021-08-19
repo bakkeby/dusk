@@ -510,6 +510,7 @@ static int force_warp = 0;     /* force warp in some situations, e.g. killclient
 static int ignore_warp = 0;    /* force skip warp in some situations, e.g. dragmfact, dragcfact */
 static int num_workspaces = 0; /* the number of available workspaces */
 static int combo = 0;          /* used for combo keys */
+static int arrange_focus_on_monocle = 1; /* used in focus to arrange monocle layouts on focus */
 
 static int (*xerrorxlib)(Display *, XErrorEvent *);
 static unsigned int numlockmask = 0;
@@ -1503,12 +1504,14 @@ focus(Client *c)
 		ws->sel = ws->stack;
 	}
 
-	if (ws->layout->arrange == flextile && (
+	if (arrange_focus_on_monocle &&
+		ws->layout->arrange == flextile && (
 		ws->ltaxis[MASTER] == MONOCLE ||
 		ws->ltaxis[STACK]  == MONOCLE ||
 		ws->ltaxis[STACK2] == MONOCLE
 	)) {
 		arrangews(ws);
+		skipfocusevents();
 	}
 	drawbar(ws->mon);
 }

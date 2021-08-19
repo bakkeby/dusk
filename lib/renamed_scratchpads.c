@@ -120,6 +120,7 @@ togglescratch(const Arg *arg)
 	}
 
 	if (found) {
+		arrange_focus_on_monocle = 0;
 		if (ISVISIBLE(found))
 			focus(found);
 		else {
@@ -128,18 +129,23 @@ togglescratch(const Arg *arg)
 			 * cursor is. This is not an ideal solution as one can change
 			 * monitors using keybindings in which case the below can lead
 			 * to the wrong monitor receiving focus. */
+			XMoveWindow(dpy, found->win, WIDTH(found) * -2, found->y);
 			if (SCRATCHPADSTAYONMON(found) && getrootptr(&x, &y)) {
 				selws = recttows(x, y, 1, 1);
 				selmon = selws->mon;
 			}
 			focus(NULL);
 		}
+		arrange_focus_on_monocle = 1;
 
-		arrange(NULL);
-		if (monclients)
+		if (multimonscratch || monclients) {
+			arrange(NULL);
 			drawbars();
+		} else
+			arrangews(found->ws);
 		if (ISFLOATING(found))
 			XRaiseWindow(dpy, found->win);
+		skipfocusevents();
 	} else {
 		spawn(arg);
 	}

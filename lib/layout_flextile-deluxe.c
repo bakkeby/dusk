@@ -110,12 +110,12 @@ getfactsforrange(Workspace *ws, int an, int ai, int size, int *rest, float *fact
 	int total = 0;
 
 	facts = 0;
-	for (i = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), i++)
-		if (i >= ai && i < (ai + an))
+	for (i = 0, c = nexttiled(ws->clients); c && i < (ai + an); c = nexttiled(c->next), i++)
+		if (i >= ai)
 			facts += c->cfact;
 
-	for (i = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), i++)
-		if (i >= ai && i < (ai + an))
+	for (i = 0, c = nexttiled(ws->clients); c && i < (ai + an); c = nexttiled(c->next), i++)
+		if (i >= ai)
 			total += size * (c->cfact / facts);
 
 	*rest = size - total;
@@ -485,8 +485,8 @@ arrange_left_to_right(Workspace *ws, int x, int y, int h, int w, int ih, int iv,
 
 	w -= iv * (an - 1);
 	getfactsforrange(ws, an, ai, w, &rest, &facts);
-	for (i = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), i++) {
-		if (i >= ai && i < (ai + an)) {
+	for (i = 0, c = nexttiled(ws->clients); c && i < (ai + an); c = nexttiled(c->next), i++) {
+		if (i >= ai) {
 			fact = c->cfact;
 			cw = w * (fact / facts) + ((i - ai) < rest ? 1 : 0);
 			resize(c, x, y, cw - (2 * c->bw), h - (2 * c->bw), 0);
@@ -507,8 +507,8 @@ arrange_top_to_bottom(Workspace *ws, int x, int y, int h, int w, int ih, int iv,
 
 	h -= ih * (an - 1);
 	getfactsforrange(ws, an, ai, h, &rest, &facts);
-	for (i = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), i++) {
-		if (i >= ai && i < (ai + an)) {
+	for (i = 0, c = nexttiled(ws->clients); c && i < (ai + an); c = nexttiled(c->next), i++) {
+		if (i >= ai) {
 			fact = c->cfact;
 			ch = h * (fact / facts) + ((i - ai) < rest ? 1 : 0);
 			resize(c, x, y, w - (2 * c->bw), ch - (2 * c->bw), 0);
@@ -523,24 +523,30 @@ arrange_monocle(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n
 	int i, stackno, minstackno = 0xFFFFFF;
 	Client *c, *s, *f = NULL;
 
-	for (i = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), i++)
-		if (i >= ai && i < (ai + an)) {
-			for (stackno = 0, s = ws->stack; s && s != c; s = s->snext, ++stackno);
-			if (stackno < minstackno) {
-				f = s;
-				minstackno = stackno;
-			}
-		}
+	for (i = 0, c = nexttiled(ws->clients); c && i < (ai + an); c = nexttiled(c->next), i++) {
+		if (i < ai)
+			continue;
 
-	for (i = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), i++)
-		if (i >= ai && i < (ai + an)) {
-			if (c == f) {
-				XMoveWindow(dpy, c->win, x, y);
-				resize(c, x, y, w - (2 * c->bw), h - (2 * c->bw), 0);
-			} else {
-				XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
-			}
+		for (stackno = 0, s = ws->stack; s && s != c; s = s->snext, ++stackno);
+		if (stackno < minstackno) {
+			f = s;
+			minstackno = stackno;
 		}
+	}
+
+	for (i = 0, c = nexttiled(ws->clients); c && i < (ai + an); c = nexttiled(c->next), i++) {
+		if (i < ai)
+			continue;
+
+		if (c == f) {
+			XMoveWindow(dpy, c->win, x, y);
+			resize(c, x, y, w - (2 * c->bw), h - (2 * c->bw), 0);
+		} else {
+			XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
+		}
+	}
+
+	skipfocusevents();
 }
 
 static void
@@ -560,14 +566,14 @@ arrange_gridmode(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int 
 	cw = (w - iv * (cols - 1)) / (cols ? cols : 1);
 	chrest = h - ih * (rows - 1) - ch * rows;
 	cwrest = w - iv * (cols - 1) - cw * cols;
-	for (i = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), i++) {
-		if (i >= ai && i < (ai + an)) {
-			cc = ((i - ai) / rows); // client column number
-			cr = ((i - ai) % rows); // client row number
-			cx = x + cc * (cw + iv) + MIN(cc, cwrest);
-			cy = y + cr * (ch + ih) + MIN(cr, chrest);
-			resize(c, cx, cy, cw + (cc < cwrest ? 1 : 0) - 2 * c->bw, ch + (cr < chrest ? 1 : 0) - 2 * c->bw, False);
-		}
+	for (i = 0, c = nexttiled(ws->clients); c && i < (ai + an); c = nexttiled(c->next), i++) {
+		if (i < ai)
+			continue;
+		cc = ((i - ai) / rows); // client column number
+		cr = ((i - ai) % rows); // client row number
+		cx = x + cc * (cw + iv) + MIN(cc, cwrest);
+		cy = y + cr * (ch + ih) + MIN(cr, chrest);
+		resize(c, cx, cy, cw + (cc < cwrest ? 1 : 0) - 2 * c->bw, ch + (cr < chrest ? 1 : 0) - 2 * c->bw, False);
 	}
 }
 
@@ -610,26 +616,27 @@ arrange_gapplessgrid(Workspace *ws, int x, int y, int h, int w, int ih, int iv, 
 	cw = (w - iv * (cols - 1)) / cols;
 	crest = (w - iv * (cols - 1)) - cw * cols;
 
-	for (i = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), i++) {
-		if (i >= ai && i < (ai + an)) {
-			if (cc/rows + 1 > cols - an%cols) {
-				rows = an/cols + 1;
-				ch = (h - ih * (rows - 1)) / rows;
-				rrest = (h - ih * (rows - 1)) - ch * rows;
-			}
-			resize(c,
-				x,
-				y + rn*(ch + ih) + MIN(rn, rrest),
-				cw + (cn < crest ? 1 : 0) - 2 * c->bw,
-				ch + (rn < rrest ? 1 : 0) - 2 * c->bw,
-				0);
-			rn++;
-			cc++;
-			if (rn >= rows) {
-				rn = 0;
-				x += cw + ih + (cn < crest ? 1 : 0);
-				cn++;
-			}
+	for (i = 0, c = nexttiled(ws->clients); c && i < (ai + an); c = nexttiled(c->next), i++) {
+		if (i < ai)
+			continue;
+
+		if (cc/rows + 1 > cols - an%cols) {
+			rows = an/cols + 1;
+			ch = (h - ih * (rows - 1)) / rows;
+			rrest = (h - ih * (rows - 1)) - ch * rows;
+		}
+		resize(c,
+			x,
+			y + rn*(ch + ih) + MIN(rn, rrest),
+			cw + (cn < crest ? 1 : 0) - 2 * c->bw,
+			ch + (rn < rrest ? 1 : 0) - 2 * c->bw,
+			0);
+		rn++;
+		cc++;
+		if (rn >= rows) {
+			rn = 0;
+			x += cw + ih + (cn < crest ? 1 : 0);
+			cn++;
 		}
 	}
 }
@@ -659,33 +666,35 @@ arrange_gapplessgrid_cfacts(Workspace *ws, int x, int y, int h, int w, int ih, i
 	}
 
 	/* Sum cfacts for columns */
-	for (i = cn = rn = cc = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), ++i) {
-		if (i >= ai && i < (ai + an)) {
-			if (cc/rows + 1 > cols - an%cols)
-				rows = an/cols + 1;
-			cfacts[cn] += c->cfact;
-			cfacts_total += c->cfact;
-			rn++;
-			cc++;
-			if (rn >= rows) {
-				rn = 0;
-				cn++;
-			}
+	for (i = cn = rn = cc = 0, c = nexttiled(ws->clients); c && i < (ai + an); c = nexttiled(c->next), ++i) {
+		if (i < ai)
+			continue;
+
+		if (cc/rows + 1 > cols - an%cols)
+			rows = an/cols + 1;
+		cfacts[cn] += c->cfact;
+		cfacts_total += c->cfact;
+		rn++;
+		cc++;
+		if (rn >= rows) {
+			rn = 0;
+			cn++;
 		}
 	}
 
 	/* Work out cfact remainders */
-	for (i = cn = rn = cc = 0, rows = an/cols, c = nexttiled(ws->clients); c; c = nexttiled(c->next), ++i) {
-		if (i >= ai && i < (ai + an)) {
-			if (cc/rows + 1 > cols - an%cols)
-				rows = an/cols + 1;
-			rrests[cn] += (h - ih * (rows - 1)) * (c->cfact / cfacts[cn]) + (rn == 0 ? 0 : ih);
-			rn++;
-			cc++;
-			if (rn >= rows) {
-				rn = 0;
-				cn++;
-			}
+	for (i = cn = rn = cc = 0, rows = an/cols, c = nexttiled(ws->clients); c && i < (ai + an); c = nexttiled(c->next), ++i) {
+		if (i < ai)
+			continue;
+
+		if (cc/rows + 1 > cols - an%cols)
+			rows = an/cols + 1;
+		rrests[cn] += (h - ih * (rows - 1)) * (c->cfact / cfacts[cn]) + (rn == 0 ? 0 : ih);
+		rn++;
+		cc++;
+		if (rn >= rows) {
+			rn = 0;
+			cn++;
 		}
 	}
 
@@ -694,27 +703,28 @@ arrange_gapplessgrid_cfacts(Workspace *ws, int x, int y, int h, int w, int ih, i
 		rrests[i] = h - rrests[i];
 	}
 
-	for (i = cn = rn = cc = 0, cy = y, rows = an/cols, c = nexttiled(ws->clients); c; c = nexttiled(c->next), ++i) {
-		if (i >= ai && i < (ai + an)) {
-			if (cc/rows + 1 > cols - an%cols)
-				rows = an/cols + 1;
-			cw = (int)(colw * (cfacts[cn] / cfacts_total)) + (cn < crest ? 1 : 0);
-			ch = (h - ih * (rows - 1)) * ((double)c->cfact / (double)cfacts[cn]) + (rn < rrests[cn] ? 1 : 0);
-			resize(c,
-				x,
-				cy,
-				cw - 2 * c->bw,
-				ch - 2 * c->bw,
-				0);
-			rn++;
-			cc++;
-			cy += ch + ih;
-			if (rn >= rows) {
-				rn = 0;
-				x += cw + ih;
-				cn++;
-				cy = y;
-			}
+	for (i = cn = rn = cc = 0, cy = y, rows = an/cols, c = nexttiled(ws->clients); c && i < (ai + an); c = nexttiled(c->next), ++i) {
+		if (i < ai)
+			continue;
+
+		if (cc/rows + 1 > cols - an%cols)
+			rows = an/cols + 1;
+		cw = (int)(colw * (cfacts[cn] / cfacts_total)) + (cn < crest ? 1 : 0);
+		ch = (h - ih * (rows - 1)) * ((double)c->cfact / (double)cfacts[cn]) + (rn < rrests[cn] ? 1 : 0);
+		resize(c,
+			x,
+			cy,
+			cw - 2 * c->bw,
+			ch - 2 * c->bw,
+			0);
+		rn++;
+		cc++;
+		cy += ch + ih;
+		if (rn >= rows) {
+			rn = 0;
+			x += cw + ih;
+			cn++;
+			cy = y;
 		}
 	}
 }
@@ -766,67 +776,68 @@ arrange_fibonacci(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int
 	int i, j, nv, hrest = 0, wrest = 0, nx = x, ny = y, nw = w, nh = h, r = 1;
 	Client *c;
 
-	for (i = 0, j = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), j++) {
-		if (j >= ai && j < (ai + an)) {
-			if (r) {
-				if ((i % 2 && ((nh - ih) / 2) <= (bh + 2 * c->bw)) || (!(i % 2) && ((nw - iv) / 2) <= (bh + 2 * c->bw))) {
-					r = 0;
-				}
-				if (r && i < an - 1) {
-					if (i % 2) {
-						nv = (nh - ih) / 2;
-						hrest = nh - 2*nv - ih;
-						nh = nv;
-					} else {
-						nv = (nw - iv) / 2;
-						wrest = nw - 2*nv - iv;
-						nw = nv;
-					}
+	for (i = 0, j = 0, c = nexttiled(ws->clients); c && j < (ai + an); c = nexttiled(c->next), j++) {
+		if (j < ai)
+			continue;
 
-					if ((i % 4) == 2 && !s)
-						nx += nw + iv;
-					else if ((i % 4) == 3 && !s)
-						ny += nh + ih;
+		if (r) {
+			if ((i % 2 && ((nh - ih) / 2) <= (bh + 2 * c->bw)) || (!(i % 2) && ((nw - iv) / 2) <= (bh + 2 * c->bw))) {
+				r = 0;
+			}
+			if (r && i < an - 1) {
+				if (i % 2) {
+					nv = (nh - ih) / 2;
+					hrest = nh - 2*nv - ih;
+					nh = nv;
+				} else {
+					nv = (nw - iv) / 2;
+					wrest = nw - 2*nv - iv;
+					nw = nv;
 				}
-				if ((i % 4) == 0) {
-					if (s) {
-						ny += nh + ih;
-						nh += hrest;
-					} else {
-						nh -= hrest;
-						ny -= nh + ih;
-					}
-				} else if ((i % 4) == 1) {
+
+				if ((i % 4) == 2 && !s)
 					nx += nw + iv;
-					nw += wrest;
-				} else if ((i % 4) == 2) {
+				else if ((i % 4) == 3 && !s)
+					ny += nh + ih;
+			}
+			if ((i % 4) == 0) {
+				if (s) {
 					ny += nh + ih;
 					nh += hrest;
-					if (i < n - 1)
-						nw += wrest;
-				} else if ((i % 4) == 3) {
-					if (s) {
-						nx += nw + iv;
-						nw -= wrest;
-					} else {
-						nw -= wrest;
-						nx -= nw + iv;
-						nh += hrest;
-					}
+				} else {
+					nh -= hrest;
+					ny -= nh + ih;
 				}
-				if (i == 0)	{
-					if (an != 1) {
-						nw = (w - iv) - (w - iv) * (1 - ws->mfact);
-						wrest = 0;
-					}
-					ny = y;
-				} else if (i == 1)
-					nw = w - nw - iv;
-				i++;
+			} else if ((i % 4) == 1) {
+				nx += nw + iv;
+				nw += wrest;
+			} else if ((i % 4) == 2) {
+				ny += nh + ih;
+				nh += hrest;
+				if (i < n - 1)
+					nw += wrest;
+			} else if ((i % 4) == 3) {
+				if (s) {
+					nx += nw + iv;
+					nw -= wrest;
+				} else {
+					nw -= wrest;
+					nx -= nw + iv;
+					nh += hrest;
+				}
 			}
-
-			resize(c, nx, ny, nw - 2 * c->bw, nh - 2 * c->bw, False);
+			if (i == 0)	{
+				if (an != 1) {
+					nw = (w - iv) - (w - iv) * (1 - ws->mfact);
+					wrest = 0;
+				}
+				ny = y;
+			} else if (i == 1)
+				nw = w - nw - iv;
+			i++;
 		}
+
+		resize(c, nx, ny, nw - 2 * c->bw, nh - 2 * c->bw, False);
 	}
 }
 
@@ -842,82 +853,83 @@ arrange_fibonacci_cfacts(Workspace *ws, int x, int y, int h, int w, int ih, int 
 	nw = w;
 	nh = h;
 
-	for (i = 0, j = 0, q = 0, t = nexttiled(ws->clients); t; t = nexttiled(t->next), j++) {
-		if (j >= ai && j < (ai + an)) {
-			clients[q] = t;
-			++q;
+	for (i = 0, j = 0, q = 0, t = nexttiled(ws->clients); t && j < (ai + an); t = nexttiled(t->next), j++) {
+		if (j < ai)
+			continue;
 
-			if (q < 4 && (j + 1 < ai + an) && j - ai < 7) // magic number 7 limits to 9 tiled clients
-				continue;
+		clients[q] = t;
+		++q;
 
-			a = clients[0];
-			b = clients[1];
-			c = clients[2];
-			d = clients[3];
+		if (q < 4 && (j + 1 < ai + an) && j - ai < 7) // magic number 7 limits to 9 tiled clients
+			continue;
 
-			switch (q) {
-			case 1:
-				resize(a, nx, ny, nw - 2 * a->bw, nh - 2 * a->bw, False);
-				q = 0;
-				break;
-			case 2:
-				tnw = (nw - iv) * (a->cfact / (a->cfact + b->cfact));
+		a = clients[0];
+		b = clients[1];
+		c = clients[2];
+		d = clients[3];
+
+		switch (q) {
+		case 1:
+			resize(a, nx, ny, nw - 2 * a->bw, nh - 2 * a->bw, False);
+			q = 0;
+			break;
+		case 2:
+			tnw = (nw - iv) * (a->cfact / (a->cfact + b->cfact));
+			resize(a, nx, ny, tnw - 2 * a->bw, nh - 2 * a->bw, False);
+			resize(b, nx + tnw + iv, ny, nw - iv - tnw - 2 * b->bw, nh - 2 * b->bw, False);
+			nx += tnw + iv;
+			q = 0;
+			break;
+		case 3:
+			tnw = (nw - iv) * (a->cfact / (a->cfact + b->cfact));
+			tnh = (nh - ih) * (b->cfact / (b->cfact + c->cfact));
+			if (!s && i % 2) {
+				resize(a, nx + nw - tnw, ny, tnw - 2 * a->bw, nh - 2 * a->bw, False);
+				resize(b, nx, ny + nh - tnh, nw - iv - tnw - 2 * b->bw, tnh - 2 * b->bw, False);
+				resize(c, nx, ny, nw - iv - tnw - 2 * c->bw, nh - ih - tnh - 2 * c->bw, False);
+
+			} else {
 				resize(a, nx, ny, tnw - 2 * a->bw, nh - 2 * a->bw, False);
-				resize(b, nx + tnw + iv, ny, nw - iv - tnw - 2 * b->bw, nh - 2 * b->bw, False);
+				resize(b, nx + tnw + iv, ny, nw - iv - tnw - 2 * b->bw, tnh - 2 * b->bw, False);
+				resize(c, nx + tnw + iv, ny + tnh + ih, nw - iv - tnw - 2 * c->bw, nh - ih - tnh - 2 * c->bw, False);
 				nx += tnw + iv;
-				q = 0;
-				break;
-			case 3:
+				ny += tnh + ih;
+			}
+			nw -= tnw + iv;
+			nh -= tnh + ih;
+			q = 0;
+			break;
+		case 4:
+			if (!s && i % 2) {
 				tnw = (nw - iv) * (a->cfact / (a->cfact + b->cfact));
 				tnh = (nh - ih) * (b->cfact / (b->cfact + c->cfact));
-				if (!s && i % 2) {
-					resize(a, nx + nw - tnw, ny, tnw - 2 * a->bw, nh - 2 * a->bw, False);
-					resize(b, nx, ny + nh - tnh, nw - iv - tnw - 2 * b->bw, tnh - 2 * b->bw, False);
-					resize(c, nx, ny, nw - iv - tnw - 2 * c->bw, nh - ih - tnh - 2 * c->bw, False);
+				resize(a, nx + nw - tnw, ny, tnw - 2 * a->bw, nh - 2 * a->bw, False);
+				resize(b, nx, ny + nh - tnh, nw - iv - tnw - 2 * b->bw, tnh - 2 * b->bw, False);
+			} else {
+				tnw = (nw - iv) * (a->cfact / (a->cfact + b->cfact));
+				tnh = (nh - ih) * (b->cfact / (b->cfact + c->cfact));
+				resize(a, nx, ny, tnw - 2 * a->bw, nh - 2 * a->bw, False);
+				resize(b, nx + tnw + iv, ny, nw - iv - tnw - 2 * b->bw, tnh - 2 * b->bw, False);
+				nx += tnw + iv;
+				ny += tnh + ih;
+			}
+			nw -= tnw + iv;
+			nh -= tnh + ih;
 
-				} else {
-					resize(a, nx, ny, tnw - 2 * a->bw, nh - 2 * a->bw, False);
-					resize(b, nx + tnw + iv, ny, nw - iv - tnw - 2 * b->bw, tnh - 2 * b->bw, False);
-					resize(c, nx + tnw + iv, ny + tnh + ih, nw - iv - tnw - 2 * c->bw, nh - ih - tnh - 2 * c->bw, False);
-					nx += tnw + iv;
-					ny += tnh + ih;
-				}
-				nw -= tnw + iv;
-				nh -= tnh + ih;
+			if (j + 1 == ai + an) {
+				tnw = (nw - iv) * (c->cfact / (c->cfact + d->cfact));
+				resize(c, nx, ny, tnw - 2 * c->bw, nh - 2 * c->bw, False);
+				resize(d, nx + tnw + iv, ny, nw - iv - tnw - 2 * d->bw, nh - 2 * d->bw, False);
 				q = 0;
 				break;
-			case 4:
-				if (!s && i % 2) {
-					tnw = (nw - iv) * (a->cfact / (a->cfact + b->cfact));
-					tnh = (nh - ih) * (b->cfact / (b->cfact + c->cfact));
-					resize(a, nx + nw - tnw, ny, tnw - 2 * a->bw, nh - 2 * a->bw, False);
-					resize(b, nx, ny + nh - tnh, nw - iv - tnw - 2 * b->bw, tnh - 2 * b->bw, False);
-				} else {
-					tnw = (nw - iv) * (a->cfact / (a->cfact + b->cfact));
-					tnh = (nh - ih) * (b->cfact / (b->cfact + c->cfact));
-					resize(a, nx, ny, tnw - 2 * a->bw, nh - 2 * a->bw, False);
-					resize(b, nx + tnw + iv, ny, nw - iv - tnw - 2 * b->bw, tnh - 2 * b->bw, False);
-					nx += tnw + iv;
-					ny += tnh + ih;
-				}
-				nw -= tnw + iv;
-				nh -= tnh + ih;
-
-				if (j + 1 == ai + an) {
-					tnw = (nw - iv) * (c->cfact / (c->cfact + d->cfact));
-					resize(c, nx, ny, tnw - 2 * c->bw, nh - 2 * c->bw, False);
-					resize(d, nx + tnw + iv, ny, nw - iv - tnw - 2 * d->bw, nh - 2 * d->bw, False);
-					q = 0;
-					break;
-				}
-
-				clients[0] = c;
-				clients[1] = d;
-				q = 2;
-				break;
 			}
-			i++;
+
+			clients[0] = c;
+			clients[1] = d;
+			q = 2;
+			break;
 		}
+		i++;
 	}
 }
 
@@ -965,107 +977,107 @@ arrange_tatami(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n,
 	nh = (h - ih * (areas - 1)) / areas;
 	nhrest = (h - ih * (areas - 1)) % areas;
 
-	for (i = 0, j = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), j++) {
-		if (j >= ai && j < (ai + an)) {
+	for (i = 0, j = 0, c = nexttiled(ws->clients); c && j < (ai + an); c = nexttiled(c->next), j++) {
+		if (j < ai)
+			continue;
 
-			tnw = nw;
-			tnx = nx;
-			tnh = nh;
-			tny = ny;
+		tnw = nw;
+		tnx = nx;
+		tnh = nh;
+		tny = ny;
 
-			if (j < ai + cats) {
-				/* Arrange cats (all excess clients that can't be tiled as mats). Cats sleep on mats. */
+		if (j < ai + cats) {
+			/* Arrange cats (all excess clients that can't be tiled as mats). Cats sleep on mats. */
 
-	 			switch (cats) {
-				case 1: // fill
-					break;
-				case 2: // up and down
-					if ((i % 5) == 0) //up
-						tnh = (nh - ih) / 2 + (nh - ih) % 2;
-					else if ((i % 5) == 1) { //down
-						tny += (nh - ih) / 2 + (nh - ih) % 2 + ih;
-						tnh = (nh - ih) / 2;
-					}
-					break;
-				case 3: // bottom, up-left and up-right
-					if ((i % 5) == 0) { // up-left
-						tnw = (nw - iv) / 2 + (nw - iv) % 2;
-						tnh = (nh - ih) * 2 / 3 + (nh - ih) * 2 % 3;
-					} else if ((i % 5) == 1) { // up-right
-						tnx += (nw - iv) / 2 + (nw - iv) % 2 + iv;
-						tnw = (nw - iv) / 2;
-						tnh = (nh - ih) * 2 / 3 + (nh - ih) * 2 % 3;
-					} else if ((i % 5) == 2) { // bottom
-						tnh = (nh - ih) / 3;
-						tny += (nh - ih) * 2 / 3 + (nh - ih) * 2 % 3 + ih;
-					}
-					break;
-				case 4: // bottom, left, right and top
-					if ((i % 5) == 0) { // top
-						hrest = (nh - 2 * ih) % 4;
-						tnh = (nh - 2 * ih) / 4 + (hrest ? 1 : 0);
-					} else if ((i % 5) == 1) { // left
-						tnw = (nw - iv) / 2 + (nw - iv) % 2;
-						tny += (nh - 2 * ih) / 4 + (hrest ? 1 : 0) + ih;
-						tnh = (nh - 2 * ih) * 2 / 4 + (hrest > 1 ? 1 : 0);
-					} else if ((i % 5) == 2) { // right
-						tnx += (nw - iv) / 2 + (nw - iv) % 2 + iv;
-						tnw = (nw - iv) / 2;
-						tny += (nh - 2 * ih) / 4 + (hrest ? 1 : 0) + ih;
-						tnh = (nh - 2 * ih) * 2 / 4 + (hrest > 1 ? 1 : 0);
-					} else if ((i % 5) == 3) { // bottom
-						tny += (nh - 2 * ih) / 4 + (hrest ? 1 : 0) + (nh - 2 * ih) * 2 / 4 + (hrest > 1 ? 1 : 0) + 2 * ih;
-						tnh = (nh - 2 * ih) / 4 + (hrest > 2 ? 1 : 0);
-					}
-					break;
+ 			switch (cats) {
+			case 1: // fill
+				break;
+			case 2: // up and down
+				if ((i % 5) == 0) //up
+					tnh = (nh - ih) / 2 + (nh - ih) % 2;
+				else if ((i % 5) == 1) { //down
+					tny += (nh - ih) / 2 + (nh - ih) % 2 + ih;
+					tnh = (nh - ih) / 2;
 				}
-
-			} else {
-				/* Arrange mats. One mat is a collection of five clients arranged tatami style */
-
-				if (((i - cats) % 5) == 0) {
-					if ((cats > 0) || ((i - cats) >= 5)) {
-						tny = ny = ny + nh + (nhrest > 0 ? 1 : 0) + ih;
-						--nhrest;
-					}
+				break;
+			case 3: // bottom, up-left and up-right
+				if ((i % 5) == 0) { // up-left
+					tnw = (nw - iv) / 2 + (nw - iv) % 2;
+					tnh = (nh - ih) * 2 / 3 + (nh - ih) * 2 % 3;
+				} else if ((i % 5) == 1) { // up-right
+					tnx += (nw - iv) / 2 + (nw - iv) % 2 + iv;
+					tnw = (nw - iv) / 2;
+					tnh = (nh - ih) * 2 / 3 + (nh - ih) * 2 % 3;
+				} else if ((i % 5) == 2) { // bottom
+					tnh = (nh - ih) / 3;
+					tny += (nh - ih) * 2 / 3 + (nh - ih) * 2 % 3 + ih;
 				}
-
-				switch ((i - cats) % 5) {
-				case 0: // top-left-vert
-					wrest = (nw - 2 * iv) % 3;
-					hrest = (nh - 2 * ih) % 3;
-					tnw = (nw - 2 * iv) / 3 + (wrest ? 1 : 0);
-					tnh = (nh - 2 * ih) * 2 / 3 + hrest + iv;
-					break;
-				case 1: // top-right-hor
-					tnx += (nw - 2 * iv) / 3 + (wrest ? 1 : 0) + iv;
-					tnw = (nw - 2 * iv) * 2 / 3 + (wrest > 1 ? 1 : 0) + iv;
-					tnh = (nh - 2 * ih) / 3 + (hrest ? 1 : 0);
-					break;
-				case 2: // center
-					tnx += (nw - 2 * iv) / 3 + (wrest ? 1 : 0) + iv;
-					tnw = (nw - 2 * iv) / 3 + (wrest > 1 ? 1 : 0);
-					tny += (nh - 2 * ih) / 3 + (hrest ? 1 : 0) + ih;
-					tnh = (nh - 2 * ih) / 3 + (hrest > 1 ? 1 : 0);
-					break;
-				case 3: // bottom-right-vert
-					tnx += (nw - 2 * iv) * 2 / 3 + wrest + 2 * iv;
-					tnw = (nw - 2 * iv) / 3;
-					tny += (nh - 2 * ih) / 3 + (hrest ? 1 : 0) + ih;
-					tnh = (nh - 2 * ih) * 2 / 3 + hrest + iv;
-					break;
-				case 4: // (oldest) bottom-left-hor
-					tnw = (nw - 2 * iv) * 2 / 3 + wrest + iv;
-					tny += (nh - 2 * ih) * 2 / 3 + hrest + 2 * iv;
-					tnh = (nh - 2 * ih) / 3;
-					break;
+				break;
+			case 4: // bottom, left, right and top
+				if ((i % 5) == 0) { // top
+					hrest = (nh - 2 * ih) % 4;
+					tnh = (nh - 2 * ih) / 4 + (hrest ? 1 : 0);
+				} else if ((i % 5) == 1) { // left
+					tnw = (nw - iv) / 2 + (nw - iv) % 2;
+					tny += (nh - 2 * ih) / 4 + (hrest ? 1 : 0) + ih;
+					tnh = (nh - 2 * ih) * 2 / 4 + (hrest > 1 ? 1 : 0);
+				} else if ((i % 5) == 2) { // right
+					tnx += (nw - iv) / 2 + (nw - iv) % 2 + iv;
+					tnw = (nw - iv) / 2;
+					tny += (nh - 2 * ih) / 4 + (hrest ? 1 : 0) + ih;
+					tnh = (nh - 2 * ih) * 2 / 4 + (hrest > 1 ? 1 : 0);
+				} else if ((i % 5) == 3) { // bottom
+					tny += (nh - 2 * ih) / 4 + (hrest ? 1 : 0) + (nh - 2 * ih) * 2 / 4 + (hrest > 1 ? 1 : 0) + 2 * ih;
+					tnh = (nh - 2 * ih) / 4 + (hrest > 2 ? 1 : 0);
 				}
-
+				break;
 			}
 
-			resize(c, tnx, tny, tnw - 2 * c->bw, tnh - 2 * c->bw, False);
-			++i;
+		} else {
+			/* Arrange mats. One mat is a collection of five clients arranged tatami style */
+
+			if (((i - cats) % 5) == 0) {
+				if ((cats > 0) || ((i - cats) >= 5)) {
+					tny = ny = ny + nh + (nhrest > 0 ? 1 : 0) + ih;
+					--nhrest;
+				}
+			}
+
+			switch ((i - cats) % 5) {
+			case 0: // top-left-vert
+				wrest = (nw - 2 * iv) % 3;
+				hrest = (nh - 2 * ih) % 3;
+				tnw = (nw - 2 * iv) / 3 + (wrest ? 1 : 0);
+				tnh = (nh - 2 * ih) * 2 / 3 + hrest + iv;
+				break;
+			case 1: // top-right-hor
+				tnx += (nw - 2 * iv) / 3 + (wrest ? 1 : 0) + iv;
+				tnw = (nw - 2 * iv) * 2 / 3 + (wrest > 1 ? 1 : 0) + iv;
+				tnh = (nh - 2 * ih) / 3 + (hrest ? 1 : 0);
+				break;
+			case 2: // center
+				tnx += (nw - 2 * iv) / 3 + (wrest ? 1 : 0) + iv;
+				tnw = (nw - 2 * iv) / 3 + (wrest > 1 ? 1 : 0);
+				tny += (nh - 2 * ih) / 3 + (hrest ? 1 : 0) + ih;
+				tnh = (nh - 2 * ih) / 3 + (hrest > 1 ? 1 : 0);
+				break;
+			case 3: // bottom-right-vert
+				tnx += (nw - 2 * iv) * 2 / 3 + wrest + 2 * iv;
+				tnw = (nw - 2 * iv) / 3;
+				tny += (nh - 2 * ih) / 3 + (hrest ? 1 : 0) + ih;
+				tnh = (nh - 2 * ih) * 2 / 3 + hrest + iv;
+				break;
+			case 4: // (oldest) bottom-left-hor
+				tnw = (nw - 2 * iv) * 2 / 3 + wrest + iv;
+				tny += (nh - 2 * ih) * 2 / 3 + hrest + 2 * iv;
+				tnh = (nh - 2 * ih) / 3;
+				break;
+			}
+
 		}
+
+		resize(c, tnx, tny, tnw - 2 * c->bw, tnh - 2 * c->bw, False);
+		++i;
 	}
 }
 
@@ -1090,67 +1102,68 @@ arrange_tatami_cfacts(Workspace *ws, int x, int y, int h, int w, int ih, int iv,
 	nh = (h - ih * (areas - 1)) / areas;
 	nhrest = (h - ih * (areas - 1)) % areas;
 
-	for (j = 0, s = 0, t = nexttiled(ws->clients); t; t = nexttiled(t->next), j++) {
-		if (j >= ai && j < (ai + an)) {
-			clients[s] = t;
-			++s;
+	for (j = 0, s = 0, t = nexttiled(ws->clients); t && j < (ai + an); t = nexttiled(t->next), j++) {
+		if (j < ai)
+			continue;
 
-			if (s < cats)
-				continue;
+		clients[s] = t;
+		++s;
 
-			a = clients[0];
-			b = clients[1];
-			c = clients[2];
-			d = clients[3];
-			e = clients[4];
-			s = 0;
+		if (s < cats)
+			continue;
 
-			if (cats < 5) {
-				/* Arrange cats (all excess clients that can't be tiled as mats). Cats sleep on mats. */
-				switch (cats) {
-				case 1: // fill
-					resize(a, nx, ny, nw - 2 * a->bw, nh - 2 * a->bw, False);
-					break;
-				case 2: // up and down
-					tnh = (nh - ih) * (a->cfact / (a->cfact + b->cfact));
-					resize(a, nx, ny, nw - 2 * a->bw, tnh - 2 * a->bw, False);
-					resize(b, nx, ny + tnh + ih, nw - 2 * b->bw, (nh - tnh - ih) - 2 * b->bw, False);
-					break;
-				case 3: // bottom, up-left and up-right
-					tnw = (nw - iv) * (a->cfact / (a->cfact + b->cfact));
-					tnh = (nh - ih) * (c->cfact / (a->cfact + b->cfact + c->cfact));
-					resize(a, nx, ny, tnw - 2 * a->bw, nh - ih - tnh - 2 * a->bw, False);
-					resize(b, nx + tnw + iv, ny, nw - iv - tnw - 2 * b->bw, nh - ih - tnh - 2 * b->bw, False);
-					resize(c, nx, ny + nh - tnh, nw - 2 * c->bw, tnh - 2 * c->bw, False);
-					break;
-				case 4: // bottom, left, right and top
-					tnw = (nw - iv) * (b->cfact / (b->cfact + c->cfact));
-					tnh = (nh - 2 * ih) * (a->cfact / (a->cfact + b->cfact + c->cfact + d->cfact));
-					tmh = (nh - 2 * ih) * ((b->cfact + c->cfact) / (a->cfact + b->cfact + c->cfact + d->cfact));
-					resize(a, nx, ny, nw - 2 * a->bw, tnh - 2 * a->bw, False);
-					resize(b, nx, ny + tnh + iv, tnw - 2 * a->bw, tmh - 2 * a->bw, False);
-					resize(c, nx + iv + tnw, ny + tnh + iv, nw - iv - tnw - 2 * a->bw, tmh - 2 * a->bw, False);
-					resize(d, nx, ny + tnh + 2 * iv + tmh, nw - 2 * a->bw, nh - 2 * iv - tnh - tmh - 2 * a->bw, False);
-					break;
-				}
+		a = clients[0];
+		b = clients[1];
+		c = clients[2];
+		d = clients[3];
+		e = clients[4];
+		s = 0;
 
-				cats = 5;
-			} else {
-				/* Arrange mats. One mat is a collection of five clients arranged tatami style */
-				tnw = (nw - 2 * ih) * (a->cfact / (a->cfact + c->cfact + d->cfact));
-				tmw = (nw - 2 * ih) * (d->cfact / (a->cfact + c->cfact + d->cfact));
-				tnh = (nh - 2 * ih) * (e->cfact / (b->cfact + c->cfact + e->cfact));
-				tmh = (nh - 2 * ih) * (b->cfact / (b->cfact + c->cfact + e->cfact));
-				resize(a, nx, ny, tnw - 2 * a->bw, nh - tnh - ih - 2 * a->bw, False);
-				resize(b, nx + tnw + iv, ny, nw - iv - tnw - 2 * a->bw, tmh - 2 * a->bw, False);
-				resize(c, nx + tnw + iv, ny + tmh + ih, nw - tnw - tmw - 2 * iv - 2 * c->bw, nh - tnh - tmh - 2 * ih - 2 * c->bw, False);
-				resize(d, nx + nw - tmw, ny + tmh + ih, tmw - 2 * d->bw, nh - tmh - ih - 2 * d->bw, False);
-				resize(e, nx, ny + nh - tnh, nw - tmw - iv - 2 * e->bw, tnh - 2 * e->bw, False);
+		if (cats < 5) {
+			/* Arrange cats (all excess clients that can't be tiled as mats). Cats sleep on mats. */
+			switch (cats) {
+			case 1: // fill
+				resize(a, nx, ny, nw - 2 * a->bw, nh - 2 * a->bw, False);
+				break;
+			case 2: // up and down
+				tnh = (nh - ih) * (a->cfact / (a->cfact + b->cfact));
+				resize(a, nx, ny, nw - 2 * a->bw, tnh - 2 * a->bw, False);
+				resize(b, nx, ny + tnh + ih, nw - 2 * b->bw, (nh - tnh - ih) - 2 * b->bw, False);
+				break;
+			case 3: // bottom, up-left and up-right
+				tnw = (nw - iv) * (a->cfact / (a->cfact + b->cfact));
+				tnh = (nh - ih) * (c->cfact / (a->cfact + b->cfact + c->cfact));
+				resize(a, nx, ny, tnw - 2 * a->bw, nh - ih - tnh - 2 * a->bw, False);
+				resize(b, nx + tnw + iv, ny, nw - iv - tnw - 2 * b->bw, nh - ih - tnh - 2 * b->bw, False);
+				resize(c, nx, ny + nh - tnh, nw - 2 * c->bw, tnh - 2 * c->bw, False);
+				break;
+			case 4: // bottom, left, right and top
+				tnw = (nw - iv) * (b->cfact / (b->cfact + c->cfact));
+				tnh = (nh - 2 * ih) * (a->cfact / (a->cfact + b->cfact + c->cfact + d->cfact));
+				tmh = (nh - 2 * ih) * ((b->cfact + c->cfact) / (a->cfact + b->cfact + c->cfact + d->cfact));
+				resize(a, nx, ny, nw - 2 * a->bw, tnh - 2 * a->bw, False);
+				resize(b, nx, ny + tnh + iv, tnw - 2 * a->bw, tmh - 2 * a->bw, False);
+				resize(c, nx + iv + tnw, ny + tnh + iv, nw - iv - tnw - 2 * a->bw, tmh - 2 * a->bw, False);
+				resize(d, nx, ny + tnh + 2 * iv + tmh, nw - 2 * a->bw, nh - 2 * iv - tnh - tmh - 2 * a->bw, False);
+				break;
 			}
 
-			ny += nh + ih + (nhrest > 0 ? 1 : 0);
-			--nhrest;
+			cats = 5;
+		} else {
+			/* Arrange mats. One mat is a collection of five clients arranged tatami style */
+			tnw = (nw - 2 * ih) * (a->cfact / (a->cfact + c->cfact + d->cfact));
+			tmw = (nw - 2 * ih) * (d->cfact / (a->cfact + c->cfact + d->cfact));
+			tnh = (nh - 2 * ih) * (e->cfact / (b->cfact + c->cfact + e->cfact));
+			tmh = (nh - 2 * ih) * (b->cfact / (b->cfact + c->cfact + e->cfact));
+			resize(a, nx, ny, tnw - 2 * a->bw, nh - tnh - ih - 2 * a->bw, False);
+			resize(b, nx + tnw + iv, ny, nw - iv - tnw - 2 * a->bw, tmh - 2 * a->bw, False);
+			resize(c, nx + tnw + iv, ny + tmh + ih, nw - tnw - tmw - 2 * iv - 2 * c->bw, nh - tnh - tmh - 2 * ih - 2 * c->bw, False);
+			resize(d, nx + nw - tmw, ny + tmh + ih, tmw - 2 * d->bw, nh - tmh - ih - 2 * d->bw, False);
+			resize(e, nx, ny + nh - tnh, nw - tmw - iv - 2 * e->bw, tnh - 2 * e->bw, False);
 		}
+
+		ny += nh + ih + (nhrest > 0 ? 1 : 0);
+		--nhrest;
 	}
 }
 
