@@ -1773,7 +1773,7 @@ keypress(XEvent *e)
 	ignore_marked = 1;
 
 	if (ev->type == KeyRelease)
-		combo = 0;
+		keyrelease(e);
 }
 
 int
@@ -1797,6 +1797,17 @@ ismasterclient(Client *c)
 void
 keyrelease(XEvent *e)
 {
+	if (!combo)
+		return;
+
+	unsigned long wsmask;
+	Monitor *m = selmon;
+
+	wsmask = getwsmask(m);
+	if (prevwsmask == wsmask)
+		viewwsmask(m, m->wsmask);
+	else
+		m->wsmask = prevwsmask;
 	combo = 0;
 }
 

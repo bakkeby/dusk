@@ -1,3 +1,5 @@
+static unsigned long prevwsmask;
+
 void
 comboviewwsbyname(const Arg *arg)
 {
@@ -456,7 +458,6 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 {
 	int do_warp = 0;
 	int arrangeall = 0;
-	unsigned long wsmask;
 
 	if (!ws)
 		return;
@@ -464,17 +465,10 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 	if (m == NULL)
 		m = selmon;
 
-	if (!combo) {
-		wsmask = getwsmask(m);
-		if (wsmask == (1L << ws->num) && m->wsmask) {
-			viewwsmask(m, m->wsmask);
-			return;
-		} else
-			m->wsmask = wsmask;
-	}
-
 	Monitor *mon, *omon = NULL;
 	Workspace *w, *ows = NULL;
+
+	prevwsmask = getwsmask(m);
 
 	if (enabled(WorkspacePreview)) {
 		storepreview(ws->mon->selws);
