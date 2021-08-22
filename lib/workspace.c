@@ -105,7 +105,7 @@ getwsmask(Monitor *m)
 	Workspace *ws;
 
 	for (ws = workspaces; ws; ws = ws->next) {
-		if (ws->mon != m)
+		if (m && ws->mon != m)
 			continue;
 		if (ws->visible)
 			wsmask |= (1L << ws->num);
@@ -120,7 +120,6 @@ viewwsmask(Monitor *m, unsigned long wsmask)
 	Workspace *ws;
 	long unsigned int currmask = getwsmask(m);
 
-	currmask = getwsmask(m);
 	if (wsmask == currmask)
 		wsmask = m->wsmask;
 	m->wsmask = currmask;
@@ -163,7 +162,7 @@ hidews(Workspace *ws)
 	Workspace *w;
 
 	ws->visible = 0;
-	hidewsclients(ws);
+	hidewsclients(ws->stack);
 
 	/* If the workspace being hidden was the selected workspace, then try to find another
 	 * visible workspace on the same monitor that can become the selected workspace. */
@@ -192,30 +191,39 @@ hidews(Workspace *ws)
 void
 showws(Workspace *ws)
 {
-	if (!ws)
-		return;
 	ws->visible = 1;
 	selws = ws->mon->selws = ws;
-	showwsclients(ws);
+	showwsclients(ws->stack);
 }
 
 void
-hidewsclients(Workspace *ws)
+hidewsclients(Client *c)
 {
-	Client *c;
-	for (c = ws->stack; c; c = c->snext) {
-		XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
-		if (enabled(AutoHideScratchpads) && c->scratchkey != 0) {
-			/* auto-hide scratchpads when moving to other workspaces */
-			addflag(c, Invisible);
-		}
+	if (!c)
+		return;
+
+	/* hide clients bottom up */
+	hidewsclients(c->snext);
+	hide(c);
+	/* auto-hide scratchpads when moving to other workspaces */
+	if (enabled(AutoHideScratchpads) && c->scratchkey != 0)
+		addflag(c, Invisible);
+}
+
+void
+showwsclients(Client *c)
+{
+	if (!c)
+		return;
+
+	if (ISFLOATING(c) && ISVISIBLE(c)) {
+		if (NEEDRESIZE(c)) {
+			removeflag(c, NeedResize);
+			XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
+		} else
+			show(c);
 	}
-}
-
-void
-showwsclients(Workspace *ws)
-{
-	showhide(ws->stack);
+	showwsclients(c->snext);
 }
 
 void
@@ -302,7 +310,7 @@ movetows(Client *c, Workspace *ws)
 		clientsfsrestore(c);
 
 		if (!enabled(ViewOnWs) && !ws->visible)
-			XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
+			hide(c);
 	}
 
 	if (prevws && prevws->visible && prevws != ws)
@@ -347,6 +355,11 @@ moveallclientstows(Workspace *from, Workspace *to)
 		arrangews(from);
 	if (to->visible)
 		arrangews(to);
+
+	if (from->mon == to->mon)
+		drawbar(to->mon);
+	else
+		drawbars();
 }
 
 void
@@ -476,10 +489,10 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 			storepreview(m->selws);
 	}
 
-	if (enablews && ws->visible && ws->mon == m) {
+	if (enablews && ws->visible) {
 		/* Toggle workspace if it is already shown */
 		hidews(ws);
-	} else if (ws->pinned && !enablews) {
+	} else if (ws->pinned) {
 		/* The workspace is pinned, show it on the monitor it is assigned to */
 		if (selws->mon != ws->mon)
 			do_warp = 1;
@@ -556,7 +569,7 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 		/* Note that we hide workspaces after showing workspaces to avoid flickering when
 		 * changing workspace (i.e. seeing the wallpaper for a fraction of a second). */
 		for (w = workspaces; w; w = w->next)
-			if (w != ws && w->mon == ws->mon && ws->visible)
+			if (w != ws && w->mon == ws->mon && w->visible)
 				hidews(w);
 	}
 

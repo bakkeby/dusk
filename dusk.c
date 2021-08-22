@@ -349,6 +349,7 @@ typedef struct {
 	const char *floatpos;
 	const char scratchkey;
 	const char *workspace;
+	int resume;
 } Rule;
 
 struct Workspace {
@@ -433,6 +434,7 @@ static long getstate(Window w);
 static int gettextprop(Window w, Atom atom, char *text, unsigned int size);
 static void grabbuttons(Client *c, int focused);
 static void grabkeys(void);
+static void hide(Client *c);
 static void incnmaster(const Arg *arg);
 static void incnstack(const Arg *arg);
 static int isatomstate(XClientMessageEvent *cme, int atom);
@@ -472,7 +474,7 @@ static void setlayout(const Arg *arg);
 static void setmfact(const Arg *arg);
 static void setup(void);
 static void seturgent(Client *c, int urg);
-static void showhide(Client *c);
+static void show(Client *c);
 static void sigchld(int unused);
 static void skipfocusevents(void);
 static void spawn(const Arg *arg);
@@ -611,7 +613,8 @@ applyrules(Client *c)
 					r->flags,
 					r->floatpos ? r->floatpos : "NULL",
 					r->workspace);
-			break; // only allow one rule match
+			if (!r->resume)
+				break; // only allow one rule match
 		}
 	}
 
@@ -690,24 +693,18 @@ applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact)
 void
 arrange(Workspace *ws)
 {
-	if (ws && !ws->visible) {
-		hidewsclients(ws);
+	if (ws && !ws->visible)
 		return;
-	}
-
-	if (ws)
-		showhide(ws->stack);
-	else for (ws = workspaces; ws; ws = ws->next)
-		if (ws->visible)
-			showhide(ws->stack);
-		else
-			hidewsclients(ws);
 
 	if (ws) {
 		arrangews(ws);
 		restack(ws);
-	} else for (ws = workspaces; ws; ws = ws->next)
-		arrangews(ws);
+		drawbar(ws->mon);
+	} else {
+		for (ws = workspaces; ws; ws = ws->next)
+			arrangews(ws);
+		drawbars();
+	}
 }
 
 void
@@ -716,7 +713,7 @@ arrangemon(Monitor *m)
 	Workspace *ws;
 	for (ws = workspaces; ws; ws = ws->next)
 		if (ws->mon == m)
-			arrange(ws);
+			arrangews(ws);
 }
 void
 arrangews(Workspace *ws)
@@ -1015,7 +1012,7 @@ clientmessage(XEvent *e)
 			movetows(c, ws);
 	} else if (cme->message_type == netatom[NetActiveWindow]) {
 		if (HIDDEN(c)) {
-			show(c);
+			reveal(c);
 			arrange(c->ws);
 			drawbar(c->ws->mon);
 		}
@@ -1032,17 +1029,17 @@ clientmessage(XEvent *e)
 			 * time will toggle the state. */
 			if ((getstate(c->win) == IconicState)) {
 				setclientstate(c, NormalState);
-				show(c);
+				reveal(c);
 			} else if (!HIDDEN(c)) {
 				setclientstate(c, IconicState);
-				hide(c);
+				conceal(c);
 			}
 		} else if (cme->data.l[0] == NormalState ) {
 			if (HIDDEN(c))
-				show(c);
+				reveal(c);
 			else {
 				setclientstate(c, NormalState);
-				XMoveWindow(dpy, c->win, c->x, c->y);
+				show(c);
 			}
 		} else if (cme->data.l[0] == WithdrawnState)
 			setclientstate(c, WithdrawnState);
@@ -1711,17 +1708,17 @@ grabkeys(void)
 }
 
 void
+hide(Client *c)
+{
+	XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
+}
+
+void
 incnmaster(const Arg *arg)
 {
 	Workspace *ws = selws;
 	ws->nmaster = MAX(ws->nmaster + arg->i, 0);
-	if (ws->layout->arrange == flextile && (
-			ws->ltaxis[MASTER] == MONOCLE ||
-			ws->ltaxis[STACK] == MONOCLE ||
-			ws->ltaxis[STACK2] == MONOCLE))
-		arrange(ws);
-	else
-		arrangews(ws);
+	arrange(ws);
 }
 
 void
@@ -1729,13 +1726,7 @@ incnstack(const Arg *arg)
 {
 	Workspace *ws = selws;
 	ws->nstack = MAX(ws->nstack + arg->i, 0);
-	if (ws->layout->arrange == flextile && (
-			ws->ltaxis[MASTER] == MONOCLE ||
-			ws->ltaxis[STACK] == MONOCLE ||
-			ws->ltaxis[STACK2] == MONOCLE))
-		arrange(ws);
-	else
-		arrangews(ws);
+	arrange(ws);
 }
 
 
@@ -2010,10 +2001,15 @@ manage(Window w, XWindowAttributes *wa)
 	}
 
 	arrange(c->ws);
+	if (ISVISIBLE(c))
+		show(c);
+	else
+		hide(c);
 	XMapWindow(dpy, c->win);
 
 	if (focusclient)
 		focus(c);
+
 	setfloatinghint(c);
 	fprintf(stderr, "manage <-- (%s)\n", c->name);
 }
@@ -2395,7 +2391,7 @@ propertynotify(XEvent *e)
 			break;
 		case XA_WM_NORMAL_HINTS:
 			updatesizehints(c);
-			arrangews(c->ws);
+			arrange(c->ws);
 			break;
 		case XA_WM_HINTS:
 			updatewmhints(c);
@@ -2515,6 +2511,7 @@ void
 resize(Client *c, int tx, int ty, int tw, int th, int interact)
 {
 	int wh = tw, hh = th;
+	show(c);
 	if (applysizehints(c, &tx, &ty, &wh, &hh, interact))
 		resizeclientpad(c, tx, ty, wh, hh, tw, th);
 }
@@ -2899,11 +2896,8 @@ setfullscreen(Client *c, int fullscreen, int restorefakefullscreen)
 			c->h = MIN(m->wh - c->y + m->wy - 2*c->bw, c->oldh);
 			resizeclient(c, c->x, c->y, c->w, c->h);
 			restack(c->ws);
-		} else {
-			arrangews(c->ws);
-			drawbar(c->ws->mon);
-			restack(c->ws);
-		}
+		} else
+			arrange(c->ws);
 	} else
 		resizeclient(c, c->x, c->y, c->w, c->h);
 
@@ -2920,12 +2914,6 @@ setlayout(const Arg *arg)
 {
 	Workspace *ws = selws;
 	const Layout *tmp = ws->layout;
-
-	int fullarrange = (
-		ws->ltaxis[MASTER] == MONOCLE ||
-		ws->ltaxis[STACK] == MONOCLE ||
-		ws->ltaxis[STACK2] == MONOCLE
-	);
 
 	ws->layout = ws->prevlayout;
 	ws->prevlayout = tmp;
@@ -2945,13 +2933,7 @@ setlayout(const Arg *arg)
 
 	strncpy(ws->ltsymbol, ws->layout->symbol, sizeof ws->ltsymbol);
 
-	if (ws->sel) {
-		if (fullarrange)
-			arrange(ws);
-		else
-			arrangews(ws);
-	}
-	drawbar(selmon);
+	arrange(ws);
 }
 
 /* arg > 1.0 will set mfact absolutely */
@@ -3132,30 +3114,9 @@ seturgent(Client *c, int urg)
 }
 
 void
-showhide(Client *c)
+show(Client *c)
 {
-	if (!c)
-		return;
-	if (ISVISIBLE(c)) {
-		/* show clients top down */
-		if ((ISFLOATING(c) || !c->ws->layout->arrange) && c->sfx != -9999 && (!ISFULLSCREEN(c) || ISFAKEFULLSCREEN(c))) {
-			restorefloats(c);
-			showhide(c->snext);
-			return;
-		}
-
-		if (NEEDRESIZE(c)) {
-			removeflag(c, NeedResize);
-			XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
-		} else
-			XMoveWindow(dpy, c->win, c->x, c->y);
-
-		showhide(c->snext);
-	} else {
-		/* hide clients bottom up */
-		showhide(c->snext);
-		XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
-	}
+	XMoveWindow(dpy, c->win, c->x, c->y);
 }
 
 void
@@ -3748,8 +3709,7 @@ zoom(const Arg *arg)
 		}
 	}
 
-	arrangews(c->ws);
-	drawbar(c->ws->mon);
+	arrange(c->ws);
 }
 
 int

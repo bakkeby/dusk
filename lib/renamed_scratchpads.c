@@ -59,7 +59,7 @@ togglescratch(const Arg *arg)
 				continue;
 
 			if (HIDDEN(c))
-				show(c);
+				reveal(c);
 
 			/* Record the first found scratchpad client for focus purposes, but prioritise the
 			   scratchpad on the current monitor if one exists */
@@ -123,7 +123,7 @@ togglescratch(const Arg *arg)
 		c = found;
 		arrange_focus_on_monocle = 0;
 		if (ISVISIBLE(c)) {
-			XMoveWindow(dpy, c->win, c->x, c->y);
+			show(c);
 			focus(c);
 		} else {
 			/* If the scratchpad toggled away is set to not move between
@@ -131,7 +131,7 @@ togglescratch(const Arg *arg)
 			 * cursor is. This is not an ideal solution as one can change
 			 * monitors using keybindings in which case the below can lead
 			 * to the wrong monitor receiving focus. */
-			XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
+			hide(c);
 			if (SCRATCHPADSTAYONMON(c) && getrootptr(&x, &y)) {
 				selws = recttows(x, y, 1, 1);
 				selmon = selws->mon;
@@ -140,11 +140,10 @@ togglescratch(const Arg *arg)
 		}
 		arrange_focus_on_monocle = 1;
 
-		if (multimonscratch || monclients) {
+		if (multimonscratch || monclients)
 			arrange(NULL);
-			drawbars();
-		} else
-			arrangews(c->ws);
+		else
+			arrange(c->ws);
 		skipfocusevents();
 		if (ISFLOATING(c))
 			XRaiseWindow(dpy, c->win);

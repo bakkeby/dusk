@@ -47,7 +47,6 @@ static void
 customlayout(const Arg args[], int num_args)
 {
 	Workspace *ws;
-	int fullarrange;
 
 	if (num_args < 8) {
 		fprintf(stderr, "customlayout: num_args < 7 : %d\n", num_args);
@@ -59,12 +58,6 @@ customlayout(const Arg args[], int num_args)
 	if (!ws)
 		ws = selws;
 	ws->prevlayout = ws->layout;
-
-	fullarrange = (
-		ws->ltaxis[MASTER] == MONOCLE ||
-		ws->ltaxis[STACK] == MONOCLE ||
-		ws->ltaxis[STACK2] == MONOCLE
-	);
 
 	/* 1) Layout symbol */
 	if (args[1].v)
@@ -94,11 +87,7 @@ customlayout(const Arg args[], int num_args)
 	if (args[7].i > -1 && args[7].i < AXIS_LAST)
 		ws->ltaxis[STACK2] = args[7].i;
 
-	if (fullarrange)
-		arrange(ws);
-	else
-		arrangews(ws);
-	drawbar(ws->mon);
+	arrange(ws);
 }
 
 static void
@@ -136,7 +125,7 @@ setlayoutaxisex(const Arg *arg)
 		arr = 0;
 
 	ws->ltaxis[axis] = arr;
-	arrangews(ws);
+	arrange(ws);
 }
 
 static void
@@ -170,7 +159,7 @@ layoutconvert(const Arg *arg)
 	ws->ltaxis[STACK2] = convert_arrange(ws->ltaxis[STACK2]);
 
 	if (!arg || !arg->v)
-		arrangews(ws);
+		arrange(ws);
 }
 
 static int
@@ -542,7 +531,7 @@ arrange_monocle(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n
 			XMoveWindow(dpy, c->win, x, y);
 			resize(c, x, y, w - (2 * c->bw), h - (2 * c->bw), 0);
 		} else {
-			XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
+			hide(c);
 		}
 	}
 
@@ -1267,8 +1256,7 @@ mirrorlayout(const Arg *arg)
 	if (!ws->layout->arrange)
 		return;
 	ws->ltaxis[LAYOUT] *= -1;
-	arrangews(ws);
-	drawbar(ws->mon);
+	arrange(ws);
 }
 
 /* Rotate layout axis for flextile */
@@ -1302,7 +1290,6 @@ rotatelayoutaxis(const Arg *arg)
 		else if (ws->ltaxis[axis] < 0)
 			ws->ltaxis[axis] = AXIS_LAST - 1;
 	}
-	arrangews(ws);
-	drawbar(ws->mon);
+	arrange(ws);
 	setflexsymbols(ws, 0);
 }

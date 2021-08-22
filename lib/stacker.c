@@ -11,7 +11,6 @@ stackfocus(const Arg *arg)
 	for (p = NULL, c = ws->clients; c && (i || !ISVISIBLE(c));
 	    i -= ISVISIBLE(c) ? 1 : 0, p = c, c = c->next);
 	focus(c ? c : p);
-	restack(ws);
 	arrangews(ws);
 	skipfocusevents();
 	if (enabled(Warp))
@@ -40,7 +39,7 @@ stackpush(const Arg *arg)
 		sel->next = c->next;
 		c->next = sel;
 	}
-	arrangews(ws);
+	arrange(ws);
 	skipfocusevents();
 	if (enabled(Warp))
 		warp(ws->sel);

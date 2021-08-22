@@ -45,7 +45,6 @@ restorefloats(Client *c)
 		return;
 	}
 
-	XMoveResizeWindow(dpy, c->win, x, y, w, h);
 	resize(c, x, y, w, h, 0);
 }
 
@@ -54,6 +53,6 @@ restorewsfloats(Workspace *ws)
 {
 	Client *c;
 	/* restore last known float dimensions for all visible clients */
-	for (c = ws->clients; c; c = c->next)
+	for (c = ws->stack; c; c = c->snext)
 		restorefloats(c);
 }

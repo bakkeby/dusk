@@ -13,9 +13,9 @@ static void viewwsmask(Monitor *m, unsigned long wsmask);
 static void enablews(const Arg *arg);
 static void enablewsbyname(const Arg *arg);
 static void hidews(Workspace *ws);
-static void hidewsclients(Workspace *ws);
+static void hidewsclients(Client *c);
 static void showws(Workspace *ws);
-static void showwsclients(Workspace *ws);
+static void showwsclients(Client *c);
 static void drawws(Workspace *ws, Monitor *m, int enablews, int arrangeall, int do_warp);
 
 static void movews(const Arg *arg);

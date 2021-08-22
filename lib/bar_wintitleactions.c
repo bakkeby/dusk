@@ -1,12 +1,12 @@
 void
-hide(Client *c)
+conceal(Client *c)
 {
 	addflag(c, Hidden);
-	XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
+	hide(c);
 }
 
 void
-show(Client *c)
+reveal(Client *c)
 {
 	if (getstate(c->win) == IconicState)
 		setclientstate(c, NormalState);
@@ -15,7 +15,7 @@ show(Client *c)
 	if (ISFULLSCREEN(c))
 		setfullscreen(c, 1, 0);
 	else
-		XMoveWindow(dpy, c->win, c->x, c->y);
+		show(c);
 }
 
 void
@@ -51,10 +51,10 @@ showhideclient(const Arg *arg)
 
 	for (n = nextmarked(NULL, c); n; n = nextmarked(n->next, NULL)) {
 		if (HIDDEN(n)) {
-			show(n);
+			reveal(n);
 			last_shown = n;
 		} else {
-			hide(n);
+			conceal(n);
 			last_hidden = n;
 		}
 		if (n->ws != c->ws)
