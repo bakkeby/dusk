@@ -2038,6 +2038,10 @@ maprequest(XEvent *e)
 
 	if (!XGetWindowAttributes(dpy, ev->window, &wa))
 		return;
+	if (!wa.depth) {
+		fprintf(stderr, "maprequest: refusing to map window %ld with depth of 0\n", ev->window);
+		return;
+	}
 	if (wa.override_redirect)
 		return;
 	if (!wintoclient(ev->window))
