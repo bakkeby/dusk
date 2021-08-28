@@ -78,7 +78,7 @@ static const unsigned long
 
 #define ALWAYSONTOP(C) (C && C->flags & AlwaysOnTop)
 #define HIDDEN(C) (C && ((C->flags & Hidden) || (getstate(C->win) == IconicState)))
-#define ISFLOATING(C) (C && C->flags & Floating)
+#define ISFLOATING(C) (C && C->flags & (Floating|Sticky))
 #define ISFIXED(C) (C && C->flags & Fixed)
 #define ISLOCKED(C) (C && C->flags & Locked)
 #define ISSTICKY(C) (C && C->flags & Sticky)

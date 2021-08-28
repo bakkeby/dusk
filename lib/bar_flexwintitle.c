@@ -280,6 +280,8 @@ flextitlecalculate(
 ) {
 	Client *c;
 	Workspace *ws = bar->mon->selws;
+	if (ws == stickyws)
+		ws = stickyws->next;
 	int n, center = 0, mirror = 0, fixed = 0; // layout configuration
 	int groupactive = 0, clientsnmaster = 0, clientsnstack = 0, clientsnstack2 = 0, clientsnfloating = 0, clientsnhidden = 0;
 	int w, r, den, fulllayout = 0;

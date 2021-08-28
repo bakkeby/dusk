@@ -1,4 +1,5 @@
 static unsigned long prevwsmask;
+static Workspace *stickyws;
 
 void
 comboviewwsbyname(const Arg *arg)
@@ -14,9 +15,9 @@ createworkspaces()
 	Monitor *m;
 	int i;
 
-	pws = selws = workspaces = createworkspace(0);
+	pws = selws = workspaces = createworkspace(0, &wsrules[0]);
 	for (i = 1; i < LENGTH(wsrules); i++)
-		pws = pws->next = createworkspace(i);
+		pws = pws->next = createworkspace(i, &wsrules[i]);
 
 	num_workspaces = i;
 
@@ -35,14 +36,19 @@ createworkspaces()
 		m = (m->next == NULL ? mons : m->next);
 	}
 	setworkspaceareas();
+
+	const WorkspaceRule stickywsrule = { .name = "Sticky" };
+	stickyws = createworkspace(9999, &stickywsrule);
+	stickyws->visible = 1;
+	stickyws->next = workspaces;
+	stickyws->mon = mons; // not sure about how to handle mon
 }
 
 Workspace *
-createworkspace(int num)
+createworkspace(int num, const WorkspaceRule *r)
 {
 	Monitor *m = NULL;
 	Workspace *ws;
-	const WorkspaceRule *r = &wsrules[num];
 
 	ws = ecalloc(1, sizeof(Workspace));
 	ws->num = num;
@@ -119,6 +125,7 @@ viewwsmask(Monitor *m, unsigned long wsmask)
 {
 	Workspace *ws;
 	long unsigned int currmask = getwsmask(m);
+	int wasvisible;
 
 	if (wsmask == currmask)
 		wsmask = m->wsmask;
@@ -127,7 +134,10 @@ viewwsmask(Monitor *m, unsigned long wsmask)
 	for (ws = workspaces; ws; ws = ws->next) {
 		if (ws->mon != m)
 			continue;
-		ws->visible = (wsmask & (1L << ws->num));
+		wasvisible = ws->visible;
+		ws->visible = wsmask & (1L << ws->num);
+		if (wasvisible && !ws->visible)
+			hidews(ws);
 	}
 
 	drawws(NULL, m, 1, 0, 0);
@@ -160,6 +170,7 @@ void
 hidews(Workspace *ws)
 {
 	Workspace *w;
+	fprintf(stderr, "hidews called for ws %s\n", ws->name);
 
 	ws->visible = 0;
 	hidewsclients(ws->stack);

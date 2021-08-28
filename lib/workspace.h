@@ -1,6 +1,6 @@
 static void comboviewwsbyname(const Arg *arg);
 static void createworkspaces();
-static Workspace *createworkspace(int num);
+static Workspace *createworkspace(int num, const WorkspaceRule *r);
 
 static char * wsicon(Workspace *ws);
 static int hasclients(Workspace *ws);

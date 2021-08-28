@@ -998,7 +998,18 @@ clientmessage(XEvent *e)
 		} else if (isatomstate(cme, netatom[NetWMStaysOnTop])) {
 			toggleflagop(c, AlwaysOnTop, cme->data.l[0]);
 		} else if (isatomstate(cme, netatom[NetWMSticky])) {
-			toggleflagop(c, Sticky, cme->data.l[0]);
+			switch (cme->data.l[0]) {
+			default:
+			case 0: /* _NET_WM_STATE_REMOVE */
+				unsetsticky(c);
+				break;
+			case 1: /* _NET_WM_STATE_ADD */
+				setsticky(c);
+				break;
+			case 2: /* _NET_WM_STATE_TOGGLE */
+				togglesticky(&((Arg) { .v = c }));
+				break;
+			}
 		} else {
 			maximize_vert = isatomstate(cme, netatom[NetWMMaximizedVert]);
 			maximize_horz = isatomstate(cme, netatom[NetWMMaximizedHorz]);
@@ -1412,7 +1423,6 @@ enternotify(XEvent *e)
 	if ((ev->mode != NotifyNormal || ev->detail == NotifyInferior) && ev->window != root)
 		return;
 	c = wintoclient(ev->window);
-
 	m = c ? c->ws->mon : wintomon(ev->window);
 	if (m != selmon) {
 		sel = ws->sel;
@@ -1455,7 +1465,10 @@ focus(Client *c)
 		unfocus(selws->sel, 0, c);
 	if (c) {
 		if (c->ws != selws) {
-			if (c->ws->mon != selmon)
+			if (ISSTICKY(c)) {
+				stickyws->mon = selmon;
+				stickyws->next = selws;
+			} else if (c->ws->mon != selmon)
 				selmon = c->ws->mon;
 			selws = c->ws;
 			c->ws->mon->selws = c->ws;
@@ -1834,6 +1847,9 @@ manage(Window w, XWindowAttributes *wa)
 	XWindowChanges wc = { 0 };
 	int focusclient = 1;
 
+	if (selws == stickyws)
+		selws = stickyws->next;
+
 	c = ecalloc(1, sizeof(Client));
 	c->win = w;
 	c->pid = winpid(w);
@@ -2184,7 +2200,7 @@ movemouse(const Arg *arg)
 	} while (ev.type != ButtonRelease);
 	XUngrabPointer(dpy, CurrentTime);
 
-	if ((w = recttows(c->x, c->y, c->w, c->h)) && w != selws) {
+	if (!ISSTICKY(c) && (w = recttows(c->x, c->y, c->w, c->h)) && w != selws) {
 		detach(c);
 		detachstack(c);
 		attachx(c, AttachBottom, w);
@@ -2641,7 +2657,7 @@ resizemouse(const Arg *arg)
 	XUngrabPointer(dpy, CurrentTime);
 	skipfocusevents();
 
-	if ((w = recttows(c->x, c->y, c->w, c->h)) && w != selws) {
+	if (!ISSTICKY(c) && (w = recttows(c->x, c->y, c->w, c->h)) && w != selws) {
 		detach(c);
 		detachstack(c);
 		attachx(c, AttachBottom, w);
@@ -3611,6 +3627,9 @@ wintoclient(Window w)
 		for (c = ws->clients; c; c = c->next)
 			if (c->win == w)
 				return c;
+	for (c = stickyws->clients; c; c = c->next)
+		if (c->win == w)
+			return c;
 	return NULL;
 }
 
