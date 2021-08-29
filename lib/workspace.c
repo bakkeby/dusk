@@ -262,7 +262,7 @@ swapwsclients(Workspace *ws1, Workspace *ws2)
 {
 	Client *c1, *c2;
 
-	if (!ws1 || !ws2 || ws1 == ws2)
+	if (!ws1 || !ws2 || ws1 == ws2 || ws1 == stickyws)
 		return;
 
 	clientsmonresize(ws1->clients, ws1->mon, ws2->mon);
@@ -293,7 +293,7 @@ swapwsclients(Workspace *ws1, Workspace *ws2)
 void
 movetows(Client *c, Workspace *ws)
 {
-	if (!c || !ws)
+	if (!c || !ws || ISSTICKY(c))
 		return;
 
 	Client *next;
@@ -346,7 +346,7 @@ moveallclientstows(Workspace *from, Workspace *to)
 {
 	Client *clients = from->clients;
 
-	if (!clients || !from || !to || from == to)
+	if (!clients || !from || !to || from == to || from == stickyws)
 		return;
 
 	clientsmonresize(clients, from->mon, to->mon);

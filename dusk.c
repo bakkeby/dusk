@@ -1468,10 +1468,13 @@ focus(Client *c)
 			if (ISSTICKY(c)) {
 				stickyws->mon = selmon;
 				stickyws->next = selws;
-			} else if (c->ws->mon != selmon)
-				selmon = c->ws->mon;
+				XSetWindowBorder(dpy, c->win, scheme[SchemeFlexSelFloat][ColBorder].pixel);
+			} else {
+				if (c->ws->mon != selmon)
+					selmon = c->ws->mon;
+				c->ws->mon->selws = c->ws;
+			}
 			selws = c->ws;
-			c->ws->mon->selws = c->ws;
 			drawbar(ws->mon);
 			updatecurrentdesktop();
 		}
