@@ -217,7 +217,7 @@ hidewsclients(Client *c)
 	hidewsclients(c->snext);
 	hide(c);
 	/* auto-hide scratchpads when moving to other workspaces */
-	if (enabled(AutoHideScratchpads) && c->scratchkey != 0)
+	if (enabled(AutoHideScratchpads) && c->scratchkey != 0 && !ISSTICKY(c))
 		addflag(c, Invisible);
 }
 
@@ -231,6 +231,8 @@ showwsclients(Client *c)
 		if (NEEDRESIZE(c)) {
 			removeflag(c, NeedResize);
 			XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
+		} else if (c->sfx != -9999 && (!ISFULLSCREEN(c) || ISFAKEFULLSCREEN(c))) {
+			restorefloats(c);
 		} else
 			show(c);
 	}

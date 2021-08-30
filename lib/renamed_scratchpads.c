@@ -119,6 +119,16 @@ togglescratch(const Arg *arg)
 		}
 	}
 
+	if (!found) {
+		for (c = stickyws->stack; c; c = next) {
+			next = c->snext;
+			if (c->scratchkey != ((char**)arg->v)[0][0])
+				continue;
+			found = c;
+			break;
+		}
+	}
+
 	if (found) {
 		c = found;
 		arrange_focus_on_monocle = 0;

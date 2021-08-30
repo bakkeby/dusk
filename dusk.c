@@ -3263,12 +3263,13 @@ togglefloating(const Arg *arg)
 			drawbar(ws->mon);
 			arrange(ws);
 		}
-		setflag(c, Floating, !ISFLOATING(c));
+		toggleflag(c, Floating);
 		if (!MOVERESIZE(c) && ISFLOATING(c)) {
-			if (c->sfx == -9999) {
-				setfloatpos(c, toggle_float_pos);
-				addflag(c, NeedResize);
-			}
+			if (c->sfx == -9999)
+				floatpos(&((Arg) { .v = toggle_float_pos }));
+			else
+				restorefloats(c);
+
 			wc.sibling = c->ws->mon->bar->win;
 			XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
 		}

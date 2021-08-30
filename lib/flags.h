@@ -1,7 +1,8 @@
 static void addflag(Client *c, const unsigned long flag);
 static void setflag(Client *c, const unsigned long flag, const int value);
 static void removeflag(Client *c, const unsigned long flag);
-static void toggleflag(const Arg *arg);
+static void toggleflag(Client *c, const unsigned long flag);
+static void toggleclientflag(const Arg *arg);
 static void toggleflagop(Client *c, const unsigned long flag, int op);
 static const unsigned long getflagbyname(const char *name);
 

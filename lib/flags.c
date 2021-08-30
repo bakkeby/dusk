@@ -19,6 +19,12 @@ removeflag(Client *c, const unsigned long flag)
 }
 
 void
+toggleflag(Client *c, const unsigned long flag)
+{
+	c->flags ^= flag;
+}
+
+void
 toggleflagop(Client *c, const unsigned long flag, int op)
 {
 	switch (op) {
@@ -36,7 +42,7 @@ toggleflagop(Client *c, const unsigned long flag, int op)
 }
 
 void
-toggleflag(const Arg *arg)
+toggleclientflag(const Arg *arg)
 {
 	toggleflagop(selws->sel, getflagbyname(arg->v), 2);
 	arrangews(selws);

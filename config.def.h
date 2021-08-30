@@ -476,6 +476,7 @@ static const BarRule barrules[] = {
 	{  0,       0,     0,       10,  0,   8,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,                     "status8" },
 	{ -1,       0,     0,       5,   0,   0,     BAR_ALIGN_NONE,         size_flexwintitle,        draw_flexwintitle,       click_flexwintitle,       NULL,                     "flexwintitle" },
 	{ 'A',      1,     0,       10,  10,  9,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,                     "status9" },
+	{  0,       1,     0,       0,   0,   0,     BAR_ALIGN_RIGHT_RIGHT,  size_wintitle_sticky,     draw_wintitle_sticky,    click_wintitle_sticky,    NULL,                     "wintitle_sticky" },
 	{ -1,       1,     0,       0,   0,   0,     BAR_ALIGN_RIGHT_RIGHT,  size_wintitle_hidden,     draw_wintitle_hidden,    click_wintitle_hidden,    NULL,                     "wintitle_hidden" },
 	{ -1,       1,     0,       0,   0,   0,     BAR_ALIGN_LEFT,         size_wintitle_floating,   draw_wintitle_floating,  click_wintitle_floating,  NULL,                     "wintitle_floating" },
 };
@@ -845,8 +846,8 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( toggle, ARG_TYPE_STR ), // toggle functionality on and off
 	IPCCOMMAND( togglebar, ARG_TYPE_NONE ),
 	IPCCOMMAND( togglebarpadding, ARG_TYPE_NONE ),
+	IPCCOMMAND( toggleclientflag, ARG_TYPE_STR ),
 	IPCCOMMAND( togglefakefullscreen, ARG_TYPE_NONE ),
-	IPCCOMMAND( toggleflag, ARG_TYPE_STR ),
 	IPCCOMMAND( togglefloating, ARG_TYPE_NONE ),
 	IPCCOMMAND( togglefullscreen, ARG_TYPE_NONE ),
 	IPCCOMMAND( togglegaps, ARG_TYPE_NONE ),

@@ -34,7 +34,7 @@ replaceclient(Client *old, Client *new)
 	Workspace *ws = old->ws;
 
 	new->ws = ws;
-	setflag(new, Floating, ISFLOATING(old));
+	setflag(new, Floating, old->flags & Floating);
 
 	new->next = old->next;
 	new->snext = old->snext;

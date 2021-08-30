@@ -22,6 +22,7 @@ setsticky(Client *c)
 	attachx(c, AttachBottom, stickyws);
 	attachstack(c);
 	stickyws->sel = c;
+	restorewindowfloatposition(c, selws->mon);
 	XRaiseWindow(dpy, c->win);
 	arrange(stickyws->next);
 	selws = stickyws;

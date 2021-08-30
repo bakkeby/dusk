@@ -180,6 +180,8 @@ int
 dump_monitor(yajl_gen gen, Monitor *mon, int is_selected)
 {
   Workspace *ws = mon->selws;
+  if (selws->mon == mon && selws == stickyws)
+    ws = stickyws;
 
   // clang-format off
   if (!ws) {
