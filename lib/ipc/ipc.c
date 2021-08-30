@@ -572,24 +572,23 @@ static int
 ipc_get_client(IPCClient *ipc_client, const char *msg)
 {
 	Window win;
+	Client *c;
 
 	if (ipc_parse_get_client(msg, &win) < 0)
 		return -1;
 
 	// Find client with specified window XID
-	for (Workspace *ws = workspaces; ws; ws = ws->next)
-		for (Client *c = ws->clients; c; c = c->next)
-			if (c->win == win) {
-				yajl_gen gen;
-				ipc_reply_init_message(&gen);
-				dump_client(gen, c);
-				ipc_reply_prepare_send_message(gen, ipc_client, IPC_TYPE_GET_CLIENT);
-				return 0;
-			}
-
-	ipc_prepare_reply_failure(ipc_client, IPC_TYPE_GET_CLIENT,
+	if (!(c = wintoclient(win))) {
+		ipc_prepare_reply_failure(ipc_client, IPC_TYPE_GET_CLIENT,
 														"Client with window id %d not found", win);
-	return -1;
+		return -1;
+	}
+
+	yajl_gen gen;
+	ipc_reply_init_message(&gen);
+	dump_client(gen, c);
+	ipc_reply_prepare_send_message(gen, ipc_client, IPC_TYPE_GET_CLIENT);
+	return 0;
 }
 
 /**

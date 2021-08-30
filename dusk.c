@@ -1883,6 +1883,10 @@ manage(Window w, XWindowAttributes *wa)
 			addflag(c, Transient);
 			addflag(c, Centered);
 			c->ws = t->ws;
+		} else if (ISSTICKY(c)) {
+			c->ws = stickyws;
+			stickyws->next = selws;
+			stickyws->mon = selws->mon;
 		} else
 			c->ws = selws;
 	}
@@ -2235,6 +2239,8 @@ placemouse(const Arg *arg)
 		return;
 	if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c)) /* no support placing fullscreen windows by mouse */
 		return;
+	if (ISSTICKY(c))
+		return;
 	restack(ws);
 	prevr = c;
 	if (XGrabPointer(dpy, root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
@@ -2446,6 +2452,7 @@ restart(const Arg *arg)
 
 	for (ws = workspaces; ws; ws = ws->next)
 		persistworkspacestate(ws);
+	persistworkspacestate(stickyws);
 }
 
 

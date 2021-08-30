@@ -17,7 +17,7 @@ static const unsigned long
 	Centered = 0x100, // indicates that the client, if floating, should be centered on the screen on launch
 	Permanent = 0x200, // if a client is permanent, then the client can't be killed
 	Hidden = 0x400, // indicates that the client is hidden
-	Sticky = 0x800, // TODO remove? yajl dumps dependency
+	Sticky = 0x800, // indicates that the client is sticky (always shown)
 	Terminal = 0x1000, // indicates that the client is a terminal, used by swallow
 	NoSwallow = 0x2000, // indicates that the client should never be swallowed if launched by a terminal
 	Locked = 0x4000, // used by setfullscreen, prevents state change
