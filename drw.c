@@ -405,7 +405,7 @@ drw_map(Drw *drw, Window win, int x, int y, unsigned int w, unsigned int h)
 		return;
 
 	XCopyArea(drw->dpy, drw->drawable, win, drw->gc, x, y, w, h, x, y);
-	XSync(drw->dpy, False);
+	XFlush(drw->dpy);
 }
 
 unsigned int
