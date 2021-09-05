@@ -229,8 +229,7 @@ ipc_reply_init_message(yajl_gen *gen)
  * handle.
  */
 static void
-ipc_reply_prepare_send_message(yajl_gen gen, IPCClient *c,
-															 IPCMessageType msg_type)
+ipc_reply_prepare_send_message(yajl_gen gen, IPCClient *c, IPCMessageType msg_type)
 {
 	const unsigned char *buffer;
 	size_t len = 0;
@@ -379,7 +378,8 @@ static void
 ipc_free_parsed_command_members(IPCParsedCommand *command)
 {
 	for (int i = 0; i < command->argc; i++) {
-		if (command->arg_types[i] == ARG_TYPE_STR) free((void *)command->args[i].v);
+		if (command->arg_types[i] == ARG_TYPE_STR)
+			free((void *)command->args[i].v);
 	}
 	free(command->args);
 	free(command->arg_types);
@@ -527,6 +527,7 @@ ipc_run_command(IPCClient *ipc_client, char *msg)
 	ipc_free_parsed_command_members(&parsed_command);
 
 	ipc_prepare_reply_success(ipc_client, IPC_TYPE_RUN_COMMAND);
+
 	return 0;
 }
 
@@ -762,8 +763,7 @@ ipc_read_client(IPCClient *c, IPCMessageType *msg_type, uint32_t *msg_size,
 								char **msg)
 {
 	int fd = c->fd;
-	int ret =
-			ipc_recv_message(fd, (uint8_t *)msg_type, msg_size, (uint8_t **)msg);
+	int ret = ipc_recv_message(fd, (uint8_t *)msg_type, msg_size, (uint8_t **)msg);
 
 	if (ret < 0) {
 		// This will happen if these errors occur while reading header
@@ -800,7 +800,8 @@ ipc_write_client(IPCClient *c)
 {
 	const ssize_t n = ipc_write_message(c->fd, c->buffer, c->buffer_size);
 
-	if (n < 0) return n;
+	if (n < 0)
+		return n;
 
 	// TODO: Deal with client timeouts
 

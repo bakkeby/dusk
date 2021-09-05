@@ -10,7 +10,8 @@ ipc_client_new(int fd)
 {
   IPCClient *c = (IPCClient *)malloc(sizeof(IPCClient));
 
-  if (c == NULL) return NULL;
+  if (c == NULL)
+    return NULL;
 
   // Initialize struct
   memset(&c->event, 0, sizeof(struct epoll_event));
@@ -59,7 +60,8 @@ IPCClient *
 ipc_list_get_client(IPCClientList list, int fd)
 {
   for (IPCClient *c = list; c; c = c->next) {
-    if (c->fd == fd) return c;
+    if (c->fd == fd)
+      return c;
   }
 
   return NULL;
