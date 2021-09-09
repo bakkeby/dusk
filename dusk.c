@@ -596,8 +596,8 @@ applyrules(Client *c)
 				for (ws = workspaces; ws && strcmp(ws->name, r->workspace) != 0; ws = ws->next);
 			c->ws = ws ? ws : selws;
 
-			if (ISFLOATING(c) && r->floatpos)
-				setfloatpos(c, r->floatpos);
+			if (r->floatpos)
+				setfloatpos(c, r->floatpos, 0);
 
 			if (REVERTWORKSPACE(c) && !c->ws->visible)
 				c->revertws = c->ws->mon->selws;
@@ -1860,15 +1860,13 @@ manage(Window w, XWindowAttributes *wa)
 	/* geometry */
 	c->x = c->oldx = wa->x;
 	c->y = c->oldy = wa->y;
-	c->w = c->oldw = wa->width;
-	c->h = c->oldh = wa->height;
+	c->sfx = -9999;
+	c->sfy = -9999;
+	c->sfw = c->w = c->oldw = wa->width;
+	c->sfh = c->h = c->oldh = wa->height;
 	c->oldbw = wa->border_width;
 	c->cfact = 1.0;
 	c->ws = NULL;
-	c->sfx = -9999;
-	c->sfy = -9999;
-	c->sfw = c->w;
-	c->sfh = c->h;
 	c->icon = 0;
 
 	updateicon(c);
@@ -1981,15 +1979,15 @@ manage(Window w, XWindowAttributes *wa)
 	if (ISCENTERED(c) || (c->x == m->mx && c->y == m->my)) {
 		/* Transient windows are centered within the geometry of the parent window */
 		if (t) {
-			c->x = t->x + WIDTH(t) / 2 - WIDTH(c) / 2;
-			c->y = t->y + HEIGHT(t) / 2 - HEIGHT(c) / 2;
+			c->sfx = c->x = t->x + WIDTH(t) / 2 - WIDTH(c) / 2;
+			c->sfy = c->y = t->y + HEIGHT(t) / 2 - HEIGHT(c) / 2;
 		/* Non-swallowed windows raised via terminal are centered within the geometry of terminal if it fits */
 		} else if (term && !c->swallowing && term->w >= c->w && term->h >= c->h) {
-			c->x = term->x + WIDTH(term) / 2 - WIDTH(c) / 2;
-			c->y = term->y + HEIGHT(term) / 2 - HEIGHT(c) / 2;
+			c->sfx = c->x = term->x + WIDTH(term) / 2 - WIDTH(c) / 2;
+			c->sfy = c->y = term->y + HEIGHT(term) / 2 - HEIGHT(c) / 2;
 		} else {
-			c->x = m->wx + (m->ww - WIDTH(c)) / 2;
-			c->y = m->wy + (m->wh - HEIGHT(c)) / 2;
+			c->sfx = c->x = m->wx + (m->ww - WIDTH(c)) / 2;
+			c->sfy = c->y = m->wy + (m->wh - HEIGHT(c)) / 2;
 		}
 	}
 
@@ -3327,11 +3325,11 @@ togglemaximize(Client *c, int maximize_vert, int maximize_horz)
  	XRaiseWindow(dpy, c->win);
 
 	if (maximize_vert && maximize_horz)
-		setfloatpos(c, "0% 0% 100% 100%");
+		setfloatpos(c, "0% 0% 100% 100%", 1);
 	else if (maximize_vert)
-		setfloatpos(c, "-1x 0% -1w 100%");
+		setfloatpos(c, "-1x 0% -1w 100%", 1);
 	else
-		setfloatpos(c, "0% -1y 100% -1h");
+		setfloatpos(c, "0% -1y 100% -1h", 1);
 
 	resizeclient(c, c->x, c->y, c->w, c->h);
 }

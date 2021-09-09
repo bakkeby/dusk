@@ -7,7 +7,7 @@ floatpos(const Arg *arg)
 	if (!c)
 		return;
 
-	setfloatpos(c, (char *)arg->v);
+	setfloatpos(c, (char *)arg->v, 1);
 	resizeclient(c, c->x, c->y, c->w, c->h);
 	savefloats(c);
 
@@ -16,7 +16,7 @@ floatpos(const Arg *arg)
 }
 
 void
-setfloatpos(Client *c, const char *floatpos)
+setfloatpos(Client *c, const char *floatpos, const int auto_float)
 {
 	char xCh, yCh, wCh, hCh;
 	int x, y, w, h, wx, ww, wy, wh;
@@ -25,12 +25,6 @@ setfloatpos(Client *c, const char *floatpos)
 
 	if (!c || !floatpos)
 		return;
-
-	if (c->ws->layout->arrange && !ISFLOATING(c)) {
-		addflag(c, MoveResize);
-		togglefloating(&((Arg) { .v = c }));
-		removeflag(c, MoveResize);
-	}
 
 	switch (sscanf(floatpos, "%d%c %d%c %d%c %d%c", &x, &xCh, &y, &yCh, &w, &wCh, &h, &hCh)) {
 		case 4:
@@ -59,6 +53,12 @@ setfloatpos(Client *c, const char *floatpos)
 			return;
 	}
 
+	if (auto_float && c->ws->layout->arrange && !ISFLOATING(c)) {
+		addflag(c, MoveResize);
+		togglefloating(&((Arg) { .v = c }));
+		removeflag(c, MoveResize);
+	}
+
 	getgaps(c->ws, &oh, &ov, &ih, &iv, &n);
 
 	wx = c->ws->wx + ov;
@@ -68,8 +68,13 @@ setfloatpos(Client *c, const char *floatpos)
 
 	addflag(c, IgnoreSizeHints);
 
-	getfloatpos(x, xCh, w, wCh, wx, ww, c->x, c->w, c->bw, floatposgrid_x, &c->x, &c->w);
-	getfloatpos(y, yCh, h, hCh, wy, wh, c->y, c->h, c->bw, floatposgrid_y, &c->y, &c->h);
+	if (ISFLOATING(c) || !c->ws->layout->arrange) {
+		getfloatpos(x, xCh, w, wCh, wx, ww, c->x, c->w, c->bw, floatposgrid_x, &c->x, &c->w);
+		getfloatpos(y, yCh, h, hCh, wy, wh, c->y, c->h, c->bw, floatposgrid_y, &c->y, &c->h);
+	} else {
+		getfloatpos(x, xCh, w, wCh, wx, ww, c->x, c->w, c->bw, floatposgrid_x, &c->sfx, &c->sfw);
+		getfloatpos(y, yCh, h, hCh, wy, wh, c->y, c->h, c->bw, floatposgrid_y, &c->sfy, &c->sfh);
+	}
 }
 
 /* p - position, s - size, cp and cs represents current position and size */
