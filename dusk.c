@@ -816,6 +816,8 @@ cleanup(void)
 
 	for (ws = workspaces; ws; ws = next) {
 		next = ws->next;
+		if (ws->preview)
+			XFreePixmap(dpy, ws->preview);
 		free(ws);
 	}
 
