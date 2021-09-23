@@ -1098,7 +1098,8 @@ clientfsrestore(Client *c)
 	if (c && ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c)) {
 		resizeclient(c, c->ws->mon->mx, c->ws->mon->my, c->ws->mon->mw, c->ws->mon->mh);
 		XRaiseWindow(dpy, c->win);
-	}
+	} else if (c && ISFLOATING(c))
+		resizeclient(c, c->x, c->y, c->w, c->h);
 }
 
 void
