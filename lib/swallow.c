@@ -60,9 +60,9 @@ replaceclient(Client *old, Client *new)
 
 	if (ISVISIBLE(new) && !ISFULLSCREEN(new)) {
 		if (ISFLOATING(new))
-			resize(new, old->x, old->y, new->w - 2*new->bw, new->h - 2*new->bw, 0);
+			resize(new, old->x, old->y, new->w, new->h, 0);
 		else
-			resize(new, old->x, old->y, old->w - 2*new->bw, old->h - 2*new->bw, 0);
+			resize(new, old->x, old->y, old->w, old->h, 0);
 	}
 }
 
