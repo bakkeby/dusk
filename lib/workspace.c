@@ -204,7 +204,6 @@ showws(Workspace *ws)
 {
 	ws->visible = 1;
 	selws = ws->mon->selws = ws;
-	showwsclients(ws->stack);
 }
 
 void
@@ -600,9 +599,13 @@ void
 drawws(Workspace *ws, Monitor *m, int enablews, int arrangeall, int do_warp)
 {
 	int x, y;
-	Workspace *mousepointerws;
+	Workspace *mousepointerws, *w;
 
 	setworkspaceareas();
+
+	for (w = workspaces; w; w = w->next)
+		if (w->visible)
+			showwsclients(w->stack);
 
 	/* When enabling new workspaces into view let the focus remain with the one
 	 * that has the mouse cursor on it. */
