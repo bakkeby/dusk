@@ -1884,10 +1884,6 @@ manage(Window w, XWindowAttributes *wa)
 			addflag(c, Transient);
 			addflag(c, Centered);
 			c->ws = t->ws;
-		} else if (ISSTICKY(c)) {
-			c->ws = stickyws;
-			stickyws->next = selws;
-			stickyws->mon = selws->mon;
 		} else
 			c->ws = selws;
 	}
@@ -1918,6 +1914,14 @@ manage(Window w, XWindowAttributes *wa)
 
 	if (term)
 		c->ws = term->ws;
+
+	if (ISSTICKY(c)) {
+		stickyws->next = c->ws;
+		stickyws->mon = c->ws->mon;
+		c->ws = stickyws;
+		stickyws->sel = c;
+		selws = stickyws;
+	}
 
 	c->bw = (NOBORDER(c) ? 0 : c->ws->mon->borderpx);
 
@@ -2033,6 +2037,11 @@ manage(Window w, XWindowAttributes *wa)
 
 	if (focusclient)
 		focus(c);
+
+	if (LOWER(c))
+		XLowerWindow(dpy, c->win);
+	else if (RAISE(c))
+		XRaiseWindow(dpy, c->win);
 
 	setfloatinghint(c);
 	fprintf(stderr, "manage <-- (%s)\n", c->name);
