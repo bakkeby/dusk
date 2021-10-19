@@ -853,8 +853,11 @@ cleanupmon(Monitor *mon)
 	}
 	for (ws = workspaces; ws; ws = ws->next)
 		if (ws->mon == mon) {
+			adjustwsformonitor(ws, mons);
 			ws->mon = mons;
 			ws->visible = 0;
+			ws->pinned = 0;
+			hidewsclients(ws->stack);
 		}
 	for (bar = mon->bar; bar; bar = mon->bar) {
 		if (!bar->external) {
