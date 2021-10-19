@@ -202,6 +202,7 @@ hidews(Workspace *ws)
 void
 showws(Workspace *ws)
 {
+	fprintf(stderr, "showws called for ws %s\n", ws->name);
 	ws->visible = 1;
 	selws = ws->mon->selws = ws;
 }
