@@ -70,8 +70,8 @@ loadxrdb()
 				XRDB_LOAD_COLOR("dusk.normDWDLCbgcolor", normDWDLCbgcolor);
 				XRDB_LOAD_COLOR("dusk.normSPRLbgcolor", normSPRLbgcolor);
 				XRDB_LOAD_COLOR("dusk.normSPRLCbgcolor", normSPRLCbgcolor);
-				XRDB_LOAD_COLOR("dusk.normSTTMIbgcolor", normTTMIbgcolor);
-				XRDB_LOAD_COLOR("dusk.normSTTMICbgcolor", normTTMICbgcolor);
+				XRDB_LOAD_COLOR("dusk.normTTMIbgcolor", normTTMIbgcolor);
+				XRDB_LOAD_COLOR("dusk.normTTMICbgcolor", normTTMICbgcolor);
 				XRDB_LOAD_COLOR("dusk.normfloatbgcolor", normfloatbgcolor);
 				XRDB_LOAD_COLOR("dusk.actTTBbgcolor", actTTBbgcolor);
 				XRDB_LOAD_COLOR("dusk.actLTRbgcolor", actLTRbgcolor);
