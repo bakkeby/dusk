@@ -229,6 +229,7 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 		return;
 
 	int pad = lrpad / 2;
+	int ipad = enabled(WinTitleIcons) && c->icon ? c->icw + iconspacing : 0;
 	int clientscheme = (
 		ISMARKED(c)
 		? SchemeMarked
@@ -254,12 +255,12 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 
 	if (w <= TEXTW("A") + pad) // reduce text padding if wintitle is too small
 		pad = (w - TEXTW("A") < 0 ? 0 : (w - TEXTW("A")) / 2);
-	else if (enabled(CenteredWindowName) && TEXTW(c->name) < w)
-		pad = (w - TEXTW(c->name)) / 2;
+	else if (enabled(CenteredWindowName) && TEXTW(c->name) + ipad < w)
+		pad = (w - TEXTW(c->name) - ipad) / 2;
 
-	drw_text(drw, x, barg->y, w, barg->h, pad + (c->icon ? c->icw + iconspacing : 0), c->name, 0, False, 1);
+	drw_text(drw, x, barg->y, w, barg->h, pad + ipad, c->name, 0, False, 1);
 
- 	if (enabled(WinTitleIcons) && c->icon)
+ 	if (ipad)
 		drw_pic(drw, x + pad, barg->y + (barg->h - c->ich) / 2, c->icw, c->ich, c->icon);
 
 	drawstateindicator(ws, c, 1, x, barg->y, w, barg->h, 0, 0);
