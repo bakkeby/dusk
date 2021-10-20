@@ -3013,6 +3013,9 @@ setup(void)
 
 	enablefunc(functionality);
 
+	if (enabled(Xresources))
+		loadxrdb();
+
 	/* init screen */
 	screen = DefaultScreen(dpy);
 	sw = DisplayWidth(dpy, screen);
@@ -3778,9 +3781,6 @@ main(int argc, char *argv[])
 
 	checkotherwm();
 	XrmInitialize(); // needed for xrdb / Xresources
-	if (enabled(Xresources)) {
-		loadxrdb();
-	}
 	autostart_exec();
 	setup();
 #ifdef __OpenBSD__
