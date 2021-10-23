@@ -85,7 +85,6 @@ rioposition(Client *c, int x, int y, int w, int h)
 
 	savefloats(c);
 	riodimensions[3] = -1;
-	riopid = 0;
 }
 
 /* drag out an area using slop and resize the selected window to it */
@@ -97,13 +96,16 @@ rioresize(const Arg *arg)
 		riodraw(c, slopresizestyle);
 }
 
-/* spawn a new window and drag out an area using slop to postiion it */
+/* spawn a new window and drag out an area using slop to position it */
 void
 riospawn(const Arg *arg)
 {
-	if (enabled(RioDrawSpawnAsync)) {
+	if (enabled(RioDrawSpawnAsync) && arg->v != dmenucmd) {
 		riopid = spawncmd(arg, 0);
 		riodraw(NULL, slopspawnstyle);
 	} else if (riodraw(NULL, slopspawnstyle))
 		riopid = spawncmd(arg, 0);
+
+	if (riopid && arg->v == dmenucmd)
+		riopid = 1;
 }

@@ -2016,7 +2016,8 @@ manage(Window w, XWindowAttributes *wa)
 	}
 
 	if (!c->swallowing) {
-		if (riopid && (RIODRAWNOMATCHPID(c) || isdescprocess(riopid, c->pid))) {
+		if (riopid && (riopid == 1 || RIODRAWNOMATCHPID(c) || isdescprocess(riopid, c->pid))) {
+			riopid = 0;
 			if (riodimensions[3] != -1)
 				rioposition(c, riodimensions[0], riodimensions[1], riodimensions[2], riodimensions[3]);
 			else {
