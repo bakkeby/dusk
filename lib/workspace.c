@@ -37,7 +37,12 @@ createworkspaces()
 	}
 	setworkspaceareas();
 
-	const WorkspaceRule stickywsrule = { .name = "Sticky" };
+	/* find the floating layout for the sticky rule */
+	for (i = 0; i < LENGTH(layouts); i++)
+		if ((&layouts[i])->arrange == NULL)
+			break;
+
+	const WorkspaceRule stickywsrule = { .name = "Sticky", .layout = i };
 	stickyws = createworkspace(4096, &stickywsrule);
 	stickyws->visible = 1;
 	stickyws->next = workspaces;
