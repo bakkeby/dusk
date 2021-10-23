@@ -1883,6 +1883,9 @@ manage(Window w, XWindowAttributes *wa)
 	getclientfields(c);
 	getclientopacity(c);
 
+	if (ISSTICKY(c))
+		c->ws = recttows(c->x + c->w / 2, c->y + c->h / 2, 1, 1);
+
 	if (!c->ws) {
 		if (XGetTransientForHint(dpy, w, &trans) && (t = wintoclient(trans))) {
 			addflag(c, Transient);

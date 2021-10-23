@@ -38,7 +38,7 @@ createworkspaces()
 	setworkspaceareas();
 
 	const WorkspaceRule stickywsrule = { .name = "Sticky" };
-	stickyws = createworkspace(9999, &stickywsrule);
+	stickyws = createworkspace(4096, &stickywsrule);
 	stickyws->visible = 1;
 	stickyws->next = workspaces;
 	stickyws->mon = mons; // not sure about how to handle mon
