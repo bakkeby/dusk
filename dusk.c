@@ -1288,6 +1288,7 @@ configurerequest(XEvent *e)
 				XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
 			else
 				addflag(c, NeedResize);
+			savefloats(c);
 		} else
 			configure(c);
 	} else {
