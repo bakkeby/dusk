@@ -1219,6 +1219,7 @@ configurenotify(XEvent *e)
 		if (updategeom() || dirty) {
 			drw_resize(drw, sw, sh);
 			updatebars();
+			setviewport();
 			for (ws = workspaces; ws; ws = ws->next)
 				for (c = ws->clients; c; c = c->next)
 					if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c))
