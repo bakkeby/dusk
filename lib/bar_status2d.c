@@ -76,8 +76,11 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 
 			text[i] = '\0';
 			tw = TEXTWM(text);
-			drw_text(drw, dx, y, tw, bh, lpad, text, invert, markup, fillbg);
-			dx += tw;
+
+			if (tw) {
+				drw_text(drw, dx, y, tw + lpad * 2, bh, lpad, text, invert, markup, fillbg);
+				dx += tw + lpad;
+			}
 
 			/* process code */
 			while (text[++i] != '^') {
@@ -179,8 +182,10 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 	}
 	if (!isCode && len > 0) {
 		tw = TEXTWM(text);
-		drw_text(drw, dx, y, tw, bh, lpad, text, invert, markup, fillbg);
-		dx += tw;
+		if (tw) {
+			drw_text(drw, dx, y, tw + lpad * 2, bh, lpad, text, invert, markup, fillbg);
+			dx += tw + lpad;
+		}
 	}
 	free(p);
 
