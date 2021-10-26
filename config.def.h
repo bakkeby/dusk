@@ -78,7 +78,7 @@ static unsigned long functionality = 0
 //	|ResizeHints // respect size hints also when windows are tiled
 //	|SortScreens // monitors are numbered from left to right
 //	|ViewOnWs // follow a window to the workspace it is being moved to
-//	|Xresources // add support for changing colours via Xresources
+	|Xresources // add support for changing colours via Xresources
 //	|Debug // enables additional debug output
 //	|AltWorkspaceIcons // show the workspace name instead of the icons
 //	|GreedyMonitor // disables swap of workspaces between monitors
