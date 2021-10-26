@@ -145,8 +145,10 @@ drawbarwin(Bar *bar)
 
 	if (enabled(BarActiveGroupBorderColor))
 		getclientcounts(bar->mon->selws, &groupactive, &ignored, &ignored, &ignored, &ignored, &ignored, &ignored);
+	else if (enabled(BarMasterGroupBorderColor))
+		groupactive = GRP_MASTER;
 	else
-		groupactive = GRP_MASTER; // TOOO, hmm, dependency on flexwintitle?
+		groupactive = GRP_NOSELECTION;
 	bar->scheme = getschemefor(bar->mon->selws, groupactive, bar->mon == selmon);
 
 	if (bar->borderpx) {

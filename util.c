@@ -81,6 +81,8 @@ getfuncbyname(const char *name)
 		return CenteredWindowName;
 	else if (strcmp(name, "BarActiveGroupBorderColor") == 0)
 		return BarActiveGroupBorderColor;
+	else if (strcmp(name, "BarMasterGroupBorderColor") == 0)
+		return BarMasterGroupBorderColor;
 	else if (strcmp(name, "SpawnCwd") == 0)
 		return SpawnCwd;
 	else if (strcmp(name, "ColorEmoji") == 0)
@@ -137,8 +139,6 @@ getfuncbyname(const char *name)
 		return WinTitleIcons;
 	else if (strcmp(name, "WorkspacePreview") == 0)
 		return WorkspacePreview;
-	else if (strcmp(name, "FuncPlaceholder34359738368") == 0)
-		return FuncPlaceholder34359738368;
 	else if (strcmp(name, "FuncPlaceholder68719476736") == 0)
 		return FuncPlaceholder68719476736;
 	else if (strcmp(name, "FuncPlaceholder137438953472") == 0)

@@ -20,8 +20,8 @@ static const unsigned long
 	Swallow = 0x4, // enables swallowing of clients
 	SwallowFloating = 0x8, // means swallow floating windows by default
 	CenteredWindowName = 0x10,
-	BarActiveGroupBorderColor = 0x20, // use border color of active group, otherwise color for master group is used
-	SpawnCwd = 0x40, // spawn applications in the currently selected client's working directory
+	BarActiveGroupBorderColor = 0x20, // use border color of active group, otherwise title scheme is used
+	BarMasterGroupBorderColor = 0x40, // use border color of master group, otherwise title scheme is used
 	ColorEmoji = 0x80,
 	Status2DNoAlpha = 0x100, // option to not use alpha when drawing status2d status
 	Systray = 0x200, // enables systray
@@ -50,7 +50,7 @@ static const unsigned long
 	AutoReduceNmaster = 0x100000000, // automatically reduce nmaster if there are multiple master clients and one is killed
 	WinTitleIcons = 0x200000000, // adds application icons to window titles in the bar
 	WorkspacePreview = 0x400000000, // adds preview images when hovering workspace icons in the bar
-	FuncPlaceholder34359738368 = 0x800000000,
+	SpawnCwd = 0x800000000, // spawn applications in the currently selected client's working directory
 	FuncPlaceholder68719476736 = 0x1000000000,
 	FuncPlaceholder137438953472 = 0x2000000000,
 	FuncPlaceholder274877906944 = 0x4000000000,
