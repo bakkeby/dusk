@@ -74,7 +74,7 @@ loadxrdb()
 				XRDB_LOAD_COLOR("dusk.normSPRLCbgcolor", colors[SchemeFlexInaSPRLC][ColBg]);
 				XRDB_LOAD_COLOR("dusk.normTTMIbgcolor", colors[SchemeFlexInaTTMI][ColBg]);
 				XRDB_LOAD_COLOR("dusk.normTTMICbgcolor", colors[SchemeFlexInaTTMIC][ColBg]);
-				XRDB_LOAD_COLOR("dusk.normFloatbgcolor", colors[SchemeFlexInaFloat][ColBg]);
+				XRDB_LOAD_COLOR("dusk.normfloatbgcolor", colors[SchemeFlexInaFloat][ColBg]);
 				XRDB_LOAD_COLOR("dusk.actTTBbgcolor", colors[SchemeFlexActTTB][ColBg]);
 				XRDB_LOAD_COLOR("dusk.actLTRbgcolor", colors[SchemeFlexActLTR][ColBg]);
 				XRDB_LOAD_COLOR("dusk.actMONObgcolor", colors[SchemeFlexActMONO][ColBg]);
@@ -90,7 +90,7 @@ loadxrdb()
 				XRDB_LOAD_COLOR("dusk.actSPRLCbgcolor", colors[SchemeFlexActSPRLC][ColBg]);
 				XRDB_LOAD_COLOR("dusk.actTTMIbgcolor", colors[SchemeFlexActTTMI][ColBg]);
 				XRDB_LOAD_COLOR("dusk.actTTMICbgcolor", colors[SchemeFlexActTTMIC][ColBg]);
-				XRDB_LOAD_COLOR("dusk.actFloatbgcolor", colors[SchemeFlexActFloat][ColBg]);
+				XRDB_LOAD_COLOR("dusk.actfloatbgcolor", colors[SchemeFlexActFloat][ColBg]);
 				XRDB_LOAD_COLOR("dusk.selTTBbgcolor", colors[SchemeFlexSelTTB][ColBg]);
 				XRDB_LOAD_COLOR("dusk.selLTRbgcolor", colors[SchemeFlexSelLTR][ColBg]);
 				XRDB_LOAD_COLOR("dusk.selMONObgcolor", colors[SchemeFlexSelMONO][ColBg]);
@@ -106,7 +106,7 @@ loadxrdb()
 				XRDB_LOAD_COLOR("dusk.selSPRLCbgcolor", colors[SchemeFlexSelSPRLC][ColBg]);
 				XRDB_LOAD_COLOR("dusk.selTTMIbgcolor", colors[SchemeFlexSelTTMI][ColBg]);
 				XRDB_LOAD_COLOR("dusk.selTTMICbgcolor", colors[SchemeFlexSelTTMIC][ColBg]);
-				XRDB_LOAD_COLOR("dusk.selFloatbgcolor", colors[SchemeFlexSelFloat][ColBg]);
+				XRDB_LOAD_COLOR("dusk.selfloatbgcolor", colors[SchemeFlexSelFloat][ColBg]);
 
 				/* flexwintitle foreground colours */
 				XRDB_LOAD_COLOR("dusk.normTTBfgcolor", colors[SchemeFlexInaTTB][ColFg]);
@@ -124,7 +124,7 @@ loadxrdb()
 				XRDB_LOAD_COLOR("dusk.normSPRLCfgcolor", colors[SchemeFlexInaSPRLC][ColFg]);
 				XRDB_LOAD_COLOR("dusk.normTTMIfgcolor", colors[SchemeFlexInaTTMI][ColFg]);
 				XRDB_LOAD_COLOR("dusk.normTTMICfgcolor", colors[SchemeFlexInaTTMIC][ColFg]);
-				XRDB_LOAD_COLOR("dusk.normFloatfgcolor", colors[SchemeFlexInaFloat][ColFg]);
+				XRDB_LOAD_COLOR("dusk.normfloatfgcolor", colors[SchemeFlexInaFloat][ColFg]);
 				XRDB_LOAD_COLOR("dusk.actTTBfgcolor", colors[SchemeFlexActTTB][ColFg]);
 				XRDB_LOAD_COLOR("dusk.actLTRfgcolor", colors[SchemeFlexActLTR][ColFg]);
 				XRDB_LOAD_COLOR("dusk.actMONOfgcolor", colors[SchemeFlexActMONO][ColFg]);
@@ -140,7 +140,7 @@ loadxrdb()
 				XRDB_LOAD_COLOR("dusk.actSPRLCfgcolor", colors[SchemeFlexActSPRLC][ColFg]);
 				XRDB_LOAD_COLOR("dusk.actTTMIfgcolor", colors[SchemeFlexActTTMI][ColFg]);
 				XRDB_LOAD_COLOR("dusk.actTTMICfgcolor", colors[SchemeFlexActTTMIC][ColFg]);
-				XRDB_LOAD_COLOR("dusk.actFloatfgcolor", colors[SchemeFlexActFloat][ColFg]);
+				XRDB_LOAD_COLOR("dusk.actfloatfgcolor", colors[SchemeFlexActFloat][ColFg]);
 				XRDB_LOAD_COLOR("dusk.selTTBfgcolor", colors[SchemeFlexSelTTB][ColFg]);
 				XRDB_LOAD_COLOR("dusk.selLTRfgcolor", colors[SchemeFlexSelLTR][ColFg]);
 				XRDB_LOAD_COLOR("dusk.selMONOfgcolor", colors[SchemeFlexSelMONO][ColFg]);
@@ -156,7 +156,7 @@ loadxrdb()
 				XRDB_LOAD_COLOR("dusk.selSPRLCfgcolor", colors[SchemeFlexSelSPRLC][ColFg]);
 				XRDB_LOAD_COLOR("dusk.selTTMIfgcolor", colors[SchemeFlexSelTTMI][ColFg]);
 				XRDB_LOAD_COLOR("dusk.selTTMICfgcolor", colors[SchemeFlexSelTTMIC][ColFg]);
-				XRDB_LOAD_COLOR("dusk.selFloatfgcolor", colors[SchemeFlexSelFloat][ColFg]);
+				XRDB_LOAD_COLOR("dusk.selfloatfgcolor", colors[SchemeFlexSelFloat][ColFg]);
 
 				/* status2d terminal colours */
 				XRDB_LOAD_COLOR("color0", termcol0);
