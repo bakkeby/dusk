@@ -200,7 +200,7 @@ setstatus(const Arg args[], int num_args)
 	Bar *bar;
 
 	int sid = args[0].i;
-	if (sid < 0 || sid > NUM_STATUSES)
+	if (sid < 0 || sid >= NUM_STATUSES)
 		return;
 
 	strcpy(rawstatustext[sid], args[1].v);
