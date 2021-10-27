@@ -159,22 +159,22 @@ loadxrdb()
 				XRDB_LOAD_COLOR("dusk.selfloatfgcolor", colors[SchemeFlexSelFloat][ColFg]);
 
 				/* status2d terminal colours */
-				XRDB_LOAD_COLOR("color0", termcol0);
-				XRDB_LOAD_COLOR("color1", termcol1);
-				XRDB_LOAD_COLOR("color2", termcol2);
-				XRDB_LOAD_COLOR("color3", termcol3);
-				XRDB_LOAD_COLOR("color4", termcol4);
-				XRDB_LOAD_COLOR("color5", termcol5);
-				XRDB_LOAD_COLOR("color6", termcol6);
-				XRDB_LOAD_COLOR("color7", termcol7);
-				XRDB_LOAD_COLOR("color8", termcol8);
-				XRDB_LOAD_COLOR("color9", termcol9);
-				XRDB_LOAD_COLOR("color10", termcol10);
-				XRDB_LOAD_COLOR("color11", termcol11);
-				XRDB_LOAD_COLOR("color12", termcol12);
-				XRDB_LOAD_COLOR("color13", termcol13);
-				XRDB_LOAD_COLOR("color14", termcol14);
-				XRDB_LOAD_COLOR("color15", termcol15);
+				XRDB_LOAD_COLOR("dusk.color0", termcolor[0]);
+				XRDB_LOAD_COLOR("dusk.color1", termcolor[1]);
+				XRDB_LOAD_COLOR("dusk.color2", termcolor[2]);
+				XRDB_LOAD_COLOR("dusk.color3", termcolor[3]);
+				XRDB_LOAD_COLOR("dusk.color4", termcolor[4]);
+				XRDB_LOAD_COLOR("dusk.color5", termcolor[5]);
+				XRDB_LOAD_COLOR("dusk.color6", termcolor[6]);
+				XRDB_LOAD_COLOR("dusk.color7", termcolor[7]);
+				XRDB_LOAD_COLOR("dusk.color8", termcolor[8]);
+				XRDB_LOAD_COLOR("dusk.color9", termcolor[9]);
+				XRDB_LOAD_COLOR("dusk.color10", termcolor[10]);
+				XRDB_LOAD_COLOR("dusk.color11", termcolor[11]);
+				XRDB_LOAD_COLOR("dusk.color12", termcolor[12]);
+				XRDB_LOAD_COLOR("dusk.color13", termcolor[13]);
+				XRDB_LOAD_COLOR("dusk.color14", termcolor[14]);
+				XRDB_LOAD_COLOR("dusk.color15", termcolor[15]);
 			}
 		}
 	}
