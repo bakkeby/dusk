@@ -3373,7 +3373,8 @@ unfocus(Client *c, int setfocus, Client *nextfocus)
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
 		XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
 	}
-	XSetWindowBorder(dpy, c->win, scheme[c->scheme][ColBorder].pixel);
+	if (!ISMARKED(c))
+		XSetWindowBorder(dpy, c->win, scheme[c->scheme][ColBorder].pixel);
 	c->ws->sel = NULL;
 }
 
