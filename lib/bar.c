@@ -297,6 +297,47 @@ drawbarwin(Bar *bar)
 }
 
 void
+drawbarmodule(const BarRule *br, int r)
+{
+	Monitor *m;
+	Bar *bar;
+	BarArg barg = { 0 };
+	barg.lpad = br->lpad;
+	barg.rpad = br->rpad;
+	barg.value = br->value;
+	barg.scheme = (br->scheme > -1 ? br->scheme : SchemeNorm);
+
+	for (m = mons; m; m = m->next) {
+		if (br->monitor > -1 && br->monitor != m->num)
+			continue;
+		for (bar = m->bar; bar; bar = bar->next) {
+			if (br->bar > -1 && br->bar != bar->idx)
+				continue;
+
+			if (bar->vert) {
+				barg.x = bar->borderpx + 5;
+				barg.y = bar->p[r];
+				barg.w = bar->bw - 2 * bar->borderpx;
+				barg.h = bar->s[r];
+			} else {
+				barg.x = bar->p[r] + br->lpad;
+				barg.y = bar->borderpx;
+				barg.w = bar->s[r];
+				barg.h = bar->bh - 2 * bar->borderpx;
+			}
+			/* Optimisation, if the bar module size has not changed then we can just
+			   update the designated part of the bar rather than drawing the entire
+			   bar, otherwise only update the bars that have this module. */
+			if (bar->s[r] == br->sizefunc(bar, &barg) + barg.lpad + barg.rpad) {
+				br->drawfunc(bar, &barg);
+				drw_map(drw, bar->win, barg.x, barg.y, barg.w, barg.h);
+			} else
+				drawbarwin(bar);
+		}
+	}
+}
+
+void
 updatebarpos(Monitor *m)
 {
 	Bar *bar;

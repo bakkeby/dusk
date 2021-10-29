@@ -195,9 +195,7 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 void
 setstatus(const Arg args[], int num_args)
 {
-	Monitor *m;
 	const BarRule *br;
-	Bar *bar;
 
 	int sid = args[0].i;
 	if (sid < 0 || sid >= NUM_STATUSES)
@@ -207,17 +205,8 @@ setstatus(const Arg args[], int num_args)
 
 	for (int r = 0; r < LENGTH(barrules); r++) {
 		br = &barrules[r];
-		if (br->value == sid && br->drawfunc == draw_status) {
-			for (m = mons; m; m = m->next) {
-				if (br->monitor > -1 && br->monitor != m->num)
-					continue;
-				for (bar = m->bar; bar; bar = bar->next) {
-					if (br->bar > -1 && br->bar != bar->idx)
-						continue;
-					drawbarwin(bar);
-				}
-			}
-		}
+		if (br->value == sid && br->drawfunc == draw_status)
+			drawbarmodule(br, r);
 	}
 }
 

@@ -84,6 +84,7 @@ static void createbar(const BarDef *def, Monitor *m);
 static void drawbar(Monitor *m);
 static void drawbars(void);
 static void drawbarwin(Bar *bar);
+static void drawbarmodule(const BarRule *br, int r);
 static void updatebarpos(Monitor *m);
 static void updatebars(void);
 static void recreatebar(Bar *bar);
