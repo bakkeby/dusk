@@ -316,12 +316,12 @@ drawbarmodule(const BarRule *br, int r)
 
 			if (bar->vert) {
 				barg.x = bar->borderpx + 5;
-				barg.y = bar->p[r];
-				barg.w = bar->bw - 2 * bar->borderpx;
+				barg.y = bar->p[r] + br->lpad;
 				barg.h = bar->s[r];
+				barg.w = bar->bw - 2 * bar->borderpx;
 			} else {
-				barg.x = bar->p[r] + br->lpad;
 				barg.y = bar->borderpx;
+				barg.x = bar->p[r] + br->lpad;
 				barg.w = bar->s[r];
 				barg.h = bar->bh - 2 * bar->borderpx;
 			}
