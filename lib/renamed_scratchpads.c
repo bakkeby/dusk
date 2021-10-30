@@ -72,8 +72,6 @@ togglescratch(const Arg *arg)
 			   this we detach them and add them to a temporary list (monclients) which is to be
 			   processed later. */
 			if (!SCRATCHPADSTAYONMON(c) && !multimonscratch && c->ws != selws) {
-				if (ISFLOATING(c))
-					savefloats(c);
 				detach(c);
 				detachstack(c);
 				/* Note that we are adding clients at the end of the list, this is to preserve the
@@ -108,15 +106,8 @@ togglescratch(const Arg *arg)
 		attachstack(c);
 		removeflag(c, Invisible);
 
-		/* Center floating scratchpad windows when moved from one workspace to another */
-		if (ISFLOATING(c)) {
-			if (c->w > selws->ww)
-				c->w = selws->ww - c->bw * 2;
-			if (c->h > selws->wh)
-				c->h = selws->wh - c->bw * 2;
-
+		if (ISFLOATING(c))
 			XRaiseWindow(dpy, c->win);
-		}
 	}
 
 	if (!found) {
@@ -133,7 +124,9 @@ togglescratch(const Arg *arg)
 		c = found;
 		arrange_focus_on_monocle = 0;
 		if (ISVISIBLE(c)) {
-			show(c);
+			showwsclient(c);
+			if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c))
+				clientfsrestore(c);
 			focus(c);
 		} else {
 			/* If the scratchpad toggled away is set to not move between

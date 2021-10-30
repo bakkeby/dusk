@@ -1079,9 +1079,7 @@ clientmonresize(Client *c, Monitor *from, Monitor *to)
 	if (!restorewindowfloatposition(c, to))
 		clientrelposmon(c, from, to, &c->sfx, &c->sfy, &c->sfw, &c->sfh);
 
-	if (ISFLOATING(c) && (!ISFULLSCREEN(c) || ISFAKEFULLSCREEN(c)))
-		clientrelposmon(c, from, to, &c->x, &c->y, &c->w, &c->h);
-	else
+	if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c))
 		clientrelposmon(c, from, to, &c->oldx, &c->oldy, &c->oldw, &c->oldh);
 }
 

@@ -175,7 +175,8 @@ void
 hidews(Workspace *ws)
 {
 	Workspace *w;
-	fprintf(stderr, "hidews called for ws %s\n", ws->name);
+	if (enabled(Debug))
+		fprintf(stderr, "hidews called for ws %s\n", ws->name);
 
 	ws->visible = 0;
 	hidewsclients(ws->stack);
@@ -207,7 +208,8 @@ hidews(Workspace *ws)
 void
 showws(Workspace *ws)
 {
-	fprintf(stderr, "showws called for ws %s\n", ws->name);
+	if (enabled(Debug))
+		fprintf(stderr, "showws called for ws %s\n", ws->name);
 	ws->visible = 1;
 	selws = ws->mon->selws = ws;
 }
@@ -227,11 +229,8 @@ hidewsclients(Client *c)
 }
 
 void
-showwsclients(Client *c)
+showwsclient(Client *c)
 {
-	if (!c)
-		return;
-
 	if (ISFLOATING(c) && ISVISIBLE(c)) {
 		if (NEEDRESIZE(c)) {
 			removeflag(c, NeedResize);
@@ -241,6 +240,14 @@ showwsclients(Client *c)
 		} else
 			show(c);
 	}
+}
+
+void
+showwsclients(Client *c)
+{
+	if (!c)
+		return;
+	showwsclient(c);
 	showwsclients(c->snext);
 }
 

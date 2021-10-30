@@ -15,6 +15,7 @@ static void enablewsbyname(const Arg *arg);
 static void hidews(Workspace *ws);
 static void hidewsclients(Client *c);
 static void showws(Workspace *ws);
+static void showwsclient(Client *c);
 static void showwsclients(Client *c);
 static void drawws(Workspace *ws, Monitor *m, int enablews, int arrangeall, int do_warp);
 
