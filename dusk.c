@@ -173,6 +173,7 @@ enum {
 	NetWMDesktop,
 	NetWMFullPlacement,
 	NetWMFullscreen,
+	NetWMHidden,
 	NetWMIcon,
 	NetWMName,
 	NetWMState,
@@ -999,6 +1000,22 @@ clientmessage(XEvent *e)
 			if (cme->data.l[0] == 1 || (cme->data.l[0] == 2 && !ISURGENT(c))) {
 				setflag(c, Urgent, 1);
 				drawbar(c->ws->mon);
+			}
+		} else if (isatomstate(cme, netatom[NetWMHidden])) {
+			switch (cme->data.l[0]) {
+			default:
+			case 0: /* _NET_WM_STATE_REMOVE */
+				reveal(c);
+				break;
+			case 1: /* _NET_WM_STATE_ADD */
+				conceal(c);
+				break;
+			case 2: /* _NET_WM_STATE_TOGGLE */
+				if (HIDDEN(c))
+					reveal(c);
+				else
+					conceal(c);
+				break;
 			}
 		} else if (isatomstate(cme, netatom[NetWMStaysOnTop])) {
 			toggleflagop(c, AlwaysOnTop, cme->data.l[0]);
@@ -3069,6 +3086,7 @@ setup(void)
 	netatom[NetWMDesktop] = XInternAtom(dpy, "_NET_WM_DESKTOP", False);
 	netatom[NetWMFullPlacement] = XInternAtom(dpy, "_NET_WM_FULL_PLACEMENT", False); /* https://specifications.freedesktop.org/wm-spec/latest/ar01s07.html */
 	netatom[NetWMFullscreen] = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
+	netatom[NetWMHidden] = XInternAtom(dpy, "_NET_WM_STATE_HIDDEN", False);
 	netatom[NetWMIcon] = XInternAtom(dpy, "_NET_WM_ICON", False);
 	netatom[NetWMMaximizedVert] = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False);
 	netatom[NetWMMaximizedHorz] = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
