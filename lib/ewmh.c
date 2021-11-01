@@ -165,8 +165,8 @@ getclientflags(Client *c)
 
 	if (flags1 || flags2) {
 		c->flags = flags1 | (flags2 << 32);
-		removeflag(c, Marked);
-		removeflag(c, Centered);
+		/* Remove flags that should not survive a restart */
+		removeflag(c, Marked|Centered|SwitchWorkspace|EnableWorkspace|RevertWorkspace);
 	}
 }
 

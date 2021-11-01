@@ -2491,7 +2491,6 @@ restart(const Arg *arg)
 	persistworkspacestate(stickyws);
 }
 
-
 void
 quit(const Arg *arg)
 {
