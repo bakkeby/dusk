@@ -36,7 +36,12 @@ calc_wintitle_sticky(
 	int clientsnsticky = 0;
 	int groupactive = GRP_FLOAT;
 
-	for (c = ws->clients; c; c = c->next, clientsnsticky++);
+	for (c = ws->clients; c; c = c->next) {
+		if (SKIPTASKBAR(c))
+			continue;
+		clientsnsticky++;
+	}
+
 	if (!clientsnsticky)
 		return 0;
 

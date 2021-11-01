@@ -35,6 +35,7 @@ flextitledrawarea(Workspace *ws, Client *c, int x, int w, int num_clients, int s
 	rw = (w - flexwintitle_separator * (num_clients - 1)) % num_clients;
 	for (i = 0; c && i < num_clients; c = c->next) {
 		if (
+			!SKIPTASKBAR(c) &&
 			!ISINVISIBLE(c) &&
 			(
 				(draw_tiled && !ISFLOATING(c) && !HIDDEN(c)) ||
@@ -88,6 +89,8 @@ getclientcounts(Workspace *ws, int *groupactive, int *n, int *clientsnmaster, in
 
 	for (i = 0, c = (ws ? ws->clients : NULL); c; c = c->next) {
 		if (ISINVISIBLE(c))
+			continue;
+		if (SKIPTASKBAR(c))
 			continue;
 		if (HIDDEN(c)) {
 			if (flexwintitle_hiddenweight)

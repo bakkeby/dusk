@@ -37,6 +37,8 @@ calc_wintitle_floating(
 	for (c = ws->clients; c; c = c->next) {
 		if (!ISVISIBLE(c))
 			continue;
+		if (SKIPTASKBAR(c))
+			continue;
 		if (ISFLOATING(c))
 			clientsnfloating++;
 	}

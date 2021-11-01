@@ -37,6 +37,8 @@ calc_wintitle_hidden(
 	for (c = ws->clients; c; c = c->next) {
 		if (ISINVISIBLE(c))
 			continue;
+		if (SKIPTASKBAR(c))
+			continue;
 		if (HIDDEN(c))
 			clientsnhidden++;
 	}

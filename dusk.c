@@ -180,6 +180,7 @@ enum {
 	NetWMStateAbove,
 	NetWMMaximizedVert,
 	NetWMMaximizedHorz,
+	NetWMSkipTaskbar,
 	NetWMStaysOnTop,
 	NetWMSticky,
 	NetWMWindowOpacity,
@@ -1017,6 +1018,8 @@ clientmessage(XEvent *e)
 					conceal(c);
 				break;
 			}
+		} else if (isatomstate(cme, netatom[NetWMSkipTaskbar])) {
+			toggleflagop(c, SkipTaskbar, cme->data.l[0]);
 		} else if (isatomstate(cme, netatom[NetWMStaysOnTop])) {
 			toggleflagop(c, AlwaysOnTop, cme->data.l[0]);
 		} else if (isatomstate(cme, netatom[NetWMSticky])) {
@@ -3089,6 +3092,7 @@ setup(void)
 	netatom[NetWMIcon] = XInternAtom(dpy, "_NET_WM_ICON", False);
 	netatom[NetWMMaximizedVert] = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False);
 	netatom[NetWMMaximizedHorz] = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+	netatom[NetWMSkipTaskbar] = XInternAtom(dpy, "_NET_WM_STATE_SKIP_TASKBAR", False);
 	netatom[NetWMStaysOnTop] = XInternAtom(dpy, "_NET_WM_STATE_STAYS_ON_TOP", False);
 	netatom[NetWMSticky] = XInternAtom(dpy, "_NET_WM_STATE_STICKY", False);
 	netatom[NetWMMoveResize] = XInternAtom(dpy, "_NET_WM_MOVERESIZE", False);

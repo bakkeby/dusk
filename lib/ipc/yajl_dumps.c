@@ -137,6 +137,7 @@ dump_client(yajl_gen gen, Client *c)
       YSTR("AlwaysOnTop"); YBOOL(ALWAYSONTOP(c));
       YSTR("Floating"); YBOOL(ISFLOATING(c));
       YSTR("Fixed"); YBOOL(ISFIXED(c));
+      YSTR("Hidden"); YBOOL(HIDDEN(c));
       YSTR("Locked"); YBOOL(ISLOCKED(c));
       YSTR("Sticky"); YBOOL(ISSTICKY(c));
       YSTR("Centered"); YBOOL(ISCENTERED(c));
@@ -150,25 +151,33 @@ dump_client(yajl_gen gen, Client *c)
       YSTR("IgnoreCfgReq"); YBOOL(IGNORECFGREQ(c));
       YSTR("IgnoreCfgReqPos"); YBOOL(IGNORECFGREQPOS(c));
       YSTR("IgnoreCfgReqSize"); YBOOL(IGNORECFGREQSIZE(c));
+      YSTR("IgnoreDecorationHints"); YBOOL(IGNOREDECORATIONHINTS(c));
       YSTR("IgnorePropTransientFor"); YBOOL(IGNOREPROPTRANSIENTFOR(c));
       YSTR("IgnoreSizeHints"); YBOOL(IGNORESIZEHINTS(c));
-      YSTR("IgnoreDecorationHints"); YBOOL(IGNOREDECORATIONHINTS(c));
+      YSTR("IgnoreMinimumSizeHints"); YBOOL(IGNOREMINIMUMSIZEHINTS(c));
       YSTR("Marked"); YBOOL(ISMARKED(c));
       YSTR("NeedResize"); YBOOL(NEEDRESIZE(c));
       YSTR("NeverFocus"); YBOOL(NEVERFOCUS(c));
       YSTR("NoBorder"); YBOOL(NOBORDER(c));
       YSTR("NoSwallow"); YBOOL(NOSWALLOW(c));
+      YSTR("NoFocusOnNetActive"); YBOOL(NOFOCUSONNETACTIVE(c));
       YSTR("OnlyModButtons"); YBOOL(ONLYMODBUTTONS(c));
+      YSTR("RespectSizeHints"); YBOOL(RESPECTSIZEHINTS(c));
       YSTR("RestoreFakeFullScreen"); YBOOL(RESTOREFAKEFULLSCREEN(c));
+      YSTR("RioDrawNoMatchPID"); YBOOL(RIODRAWNOMATCHPID(c));
       YSTR("Ruled"); YBOOL(RULED(c));
+      YSTR("ScratchpadStayOnMon"); YBOOL(SCRATCHPADSTAYONMON(c));
+      YSTR("SkipTaskbar"); YBOOL(SKIPTASKBAR(c));
       YSTR("SwitchWorkspace"); YBOOL(SWITCHWORKSPACE(c));
       YSTR("EnableWorkspace"); YBOOL(ENABLEWORKSPACE(c));
       YSTR("RevertWorkspace"); YBOOL(REVERTWORKSPACE(c));
       YSTR("MoveResize"); YBOOL(MOVERESIZE(c));
+      YSTR("MovePlace"); YBOOL(MOVEPLACE(c));
       YSTR("WasFloating"); YBOOL(WASFLOATING(c));
       YSTR("WasFakeFullscreen"); YBOOL(WASFAKEFULLSCREEN(c));
       YSTR("WasFullscreen"); YBOOL(WASFULLSCREEN(c));
-      YSTR("WasFullscreen"); YBOOL(WASFULLSCREEN(c));
+      YSTR("Lower"); YBOOL(LOWER(c));
+      YSTR("Raise"); YBOOL(RAISE(c));
     )
   )
   // clang-format on

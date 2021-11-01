@@ -51,7 +51,7 @@ static const unsigned long
 	ScratchpadStayOnMon = 0x20000000000, // prevents the scratchpad from being moved to the active monitor when toggled
 	Lower = 0x40000000000, // place this window below all other windows, used when window is unmanaged
 	Raise = 0x80000000000, // place this window above all other windows, used when window is unmanaged
-	FlagPlaceholder0x100000000000 = 0x100000000000,
+	SkipTaskbar = 0x100000000000, // do not include the window title for this client on the bar
 	FlagPlaceholder0x200000000000 = 0x200000000000,
 	FlagPlaceholder0x400000000000 = 0x400000000000,
 	FlagPlaceholder0x800000000000 = 0x800000000000,
@@ -112,6 +112,7 @@ static const unsigned long
 #define RIODRAWNOMATCHPID(C) (C && C->flags & RioDrawNoMatchPID)
 #define RULED(C) (C && C->flags & Ruled)
 #define SCRATCHPADSTAYONMON(C) (C && C->flags & ScratchpadStayOnMon)
+#define SKIPTASKBAR(C) (C && C->flags & SkipTaskbar)
 #define STEAMGAME(C) (C && C->flags & SteamGame)
 #define SWITCHWORKSPACE(C) (C && C->flags & SwitchWorkspace)
 #define ENABLEWORKSPACE(C) (C && C->flags & EnableWorkspace)
