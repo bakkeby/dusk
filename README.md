@@ -21,6 +21,14 @@ Familiarity with dwm or another tiling window manager is not strictly needed, bu
 would be highly recommended to at least have some basic understanding of how window
 managers work in general and what your desired workflow is.
 
+### Support groups
+
+If dusk gave you a feeling of loneliness, distress, depression, anxiety or mental fatigue then you
+may want to seek help in one of these support groups:
+
+   - [r/duskwm](https://www.reddit.com/r/duskwm/)
+   - [Discord](https://discord.gg/DMA7BDc4RA)
+
 ### Target audience
 
 Me
