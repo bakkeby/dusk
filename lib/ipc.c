@@ -38,7 +38,7 @@ setupepoll(void)
 	dpy_fd = ConnectionNumber(dpy);
 	struct epoll_event dpy_event;
 
-	// Initialize struct to 0
+	/* Initialize struct to 0 */
 	memset(&dpy_event, 0, sizeof(dpy_event));
 
 	DEBUG("Display socket is fd %d\n", dpy_fd);
@@ -54,6 +54,13 @@ setupepoll(void)
 		exit(1);
 	}
 
-	if (ipc_init(ipcsockpath, epoll_fd, ipccommands, LENGTH(ipccommands)) < 0)
+	// Append the value of the display environment variable to the socket path
+	const char *display = getenv("DISPLAY");
+	char *ipcsockdisppath = malloc(strlen(ipcsockpath) + strlen(display) + 1);
+	strcpy(ipcsockdisppath, ipcsockpath);
+	strcat(ipcsockdisppath, display);
+
+	fprintf(stderr, "using ipc sock path of %s\n", ipcsockdisppath);
+	if (ipc_init(ipcsockdisppath, epoll_fd, ipccommands, LENGTH(ipccommands)) < 0)
 		fputs("Failed to initialize IPC\n", stderr);
 }

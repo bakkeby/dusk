@@ -185,7 +185,14 @@ connect_to_socket()
   memset(&addr, 0, sizeof(struct sockaddr_un));
 
   addr.sun_family = AF_UNIX;
-  strcpy(addr.sun_path, DEFAULT_SOCKET_PATH);
+
+  /* Append the value of the display environment variable to the socket path */
+  const char *display = getenv("DISPLAY");
+  char *ipcsockdisppath = malloc(strlen(DEFAULT_SOCKET_PATH) + strlen(display) + 1);
+  strcpy(ipcsockdisppath, DEFAULT_SOCKET_PATH);
+  strcat(ipcsockdisppath, display);
+
+  strcpy(addr.sun_path, ipcsockdisppath);
 
   connect(sock, (const struct sockaddr *)&addr, sizeof(struct sockaddr_un));
 
