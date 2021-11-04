@@ -78,7 +78,7 @@ getclientcounts(Workspace *ws, int *groupactive, int *n, int *clientsnmaster, in
 	int i, selidx = 0, cm = 0, cs1 = 0, cs2 = 0, cf = 0, ch = 0, center, dualstack;
 
 	if (!ws) {
-		*groupactive = GRP_NOSELECTION;
+		*groupactive = GRP_FLOAT;
 		*clientsnmaster = cm;
 		*clientsnstack = cs1;
 		*clientsnstack2 = cs2;
