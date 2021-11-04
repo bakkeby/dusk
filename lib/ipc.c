@@ -54,7 +54,7 @@ setupepoll(void)
 		exit(1);
 	}
 
-	// Append the value of the display environment variable to the socket path
+	/* Append the value of the display environment variable to the socket path */
 	const char *display = getenv("DISPLAY");
 	char *ipcsockdisppath = malloc(strlen(ipcsockpath) + strlen(display) + 1);
 	strcpy(ipcsockdisppath, ipcsockpath);
