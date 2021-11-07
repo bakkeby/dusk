@@ -9,16 +9,8 @@ attachx(Client *c, unsigned long mode, Workspace *ws)
 	unsigned long attachmode
 		= mode
 		? mode
-		: c->flags & AttachMaster
-		? AttachMaster
-		: c->flags & AttachAbove
-		? AttachAbove
-		: c->flags & AttachAside
-		? AttachAside
-		: c->flags & AttachBelow
-		? AttachBelow
-		: c->flags & AttachBottom
-		? AttachBottom
+		: c->flags & (7 << 18)
+		? c->flags & (7 << 18)
 		: attachdefault;
 
 	for (last = c; last && last->next; last = last->next);
@@ -95,16 +87,8 @@ attachstackx(Client *c, unsigned long mode, Workspace *ws)
 	unsigned long attachmode
 		= mode
 		? mode
-		: c->flags & AttachMaster
-		? AttachMaster
-		: c->flags & AttachAbove
-		? AttachAbove
-		: c->flags & AttachAside
-		? AttachAside
-		: c->flags & AttachBelow
-		? AttachBelow
-		: c->flags & AttachBottom
-		? AttachBottom
+		: c->flags & (7 << 18)
+		? c->flags & (7 << 18)
 		: attachdefault;
 
 	if (!ws)

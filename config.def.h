@@ -9,7 +9,7 @@ static const unsigned int gappoh         = 5;   /* horiz outer gap between windo
 static const unsigned int gappov         = 5;   /* vert outer gap between windows and screen edge */
 static const unsigned int smartgaps_fact = 0;   /* smartgaps factor when there is only one client; 0 = no gaps, 3 = 3x outer gaps */
 
-static unsigned int attachdefault        = AttachAside; // AttachMaster, AttachAbove, AttachSide, AttachBelow, AttachBottom
+static unsigned int attachdefault        = AttachAside; // AttachMaster, AttachAbove, AttachAside, AttachBelow, AttachBottom
 
 static const int initshowbar             = 1;   /* 0 means no bar */
 

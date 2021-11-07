@@ -25,11 +25,14 @@ static const unsigned long
 	Transient = 0x8000, // whether the client has the transient for hint
 	OnlyModButtons = 0x10000, // restricts button keybindings to those that involve modifiers
 	FlagPlaceholder0x20000 = 0x20000,
-	AttachMaster = 0x40000, // attach at the top of the master area
-	AttachAbove = 0x80000, // attach the client before the currently selected client
-	AttachBelow = 0x100000, // attach the client after the currently selected client
-	AttachAside = 0x200000, // attach the client as the first client in the stack area
-	AttachBottom = 0x400000, // attach the client at the end of the list
+	/* 0x40000, 0x80000, 0x100000 - three bits for attach modes as they are mutually exclusive, still room for two more up to 7 */
+	AttachMaster = 1 << 18, // attach at the top of the master area
+	AttachAbove = 2 << 18, // attach the client before the currently selected client
+	AttachBelow = 3 << 18, // attach the client after the currently selected client
+	AttachAside = 4 << 18, // attach the client as the first client in the stack area
+	AttachBottom = 5 << 18, // attach the client at the end of the list
+	FlagPlaceholder0x200000 = 0x200000,
+	FlagPlaceholder0x400000 = 0x400000,
 	SwitchWorkspace = 0x800000, // automatically moves you to the workspace of the newly opened application
 	EnableWorkspace = 0x1000000, // enables the workspace of the newly opened application in addition to your existing viewed workspaces
 	RevertWorkspace = 0x2000000, // if SwitchWorkspace or EnableWorkspace, closing that window reverts the view back to what it was previously
