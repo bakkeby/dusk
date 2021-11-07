@@ -424,6 +424,7 @@ static void detach(Client *c);
 static void detachstack(Client *c);
 static Monitor *dirtomon(int dir);
 static Workspace *dirtows(int dir);
+static void entermon(Monitor *m, Client *next);
 static void enternotify(XEvent *e);
 static void expose(XEvent *e);
 static void focus(Client *c);
@@ -1439,10 +1440,27 @@ dirtows(int dir)
 }
 
 void
+entermon(Monitor *m, Client *next)
+{
+	Client *sel = selws->sel;
+	selmon = m;
+	if (m->selws) {
+		if (!next)
+			next = m->selws->sel;
+		selws = m->selws;
+		updatecurrentdesktop();
+	}
+	if (sel) {
+		unfocus(sel, 1, next);
+		if (!next || sel->ws->mon != next->ws->mon)
+			drawbar(sel->ws->mon);
+	}
+}
+
+void
 enternotify(XEvent *e)
 {
-	Client *c, *sel;
-	Workspace *ws = selws;
+	Client *c;
 	Monitor *m;
 	XCrossingEvent *ev = &e->xcrossing;
 
@@ -1450,17 +1468,9 @@ enternotify(XEvent *e)
 		return;
 	c = wintoclient(ev->window);
 	m = c ? c->ws->mon : wintomon(ev->window);
-	if (m != selmon) {
-		sel = ws->sel;
-		selmon = m;
-		if (m->selws) {
-			selws = m->selws;
-			updatecurrentdesktop();
-		}
-		if (sel)
-			unfocus(sel, 1, c);
-		drawbars();
-	} else if (selws == m->selws && (!c || (m->selws && c == m->selws->sel)))
+	if (m != selmon)
+		entermon(m, c);
+	else if (selws == m->selws && (!c || (m->selws && c == m->selws->sel)))
 		return;
 
 	focus(c);
@@ -2135,6 +2145,8 @@ motionnotify(XEvent *e)
 
 	/* Mouse cursor moves over a bar, trigger bar hover mechanisms */
 	if (bar) {
+		if (bar->mon != selmon)
+			entermon(bar->mon, NULL);
 		barhover(e, bar);
 		return;
 	}
@@ -2149,26 +2161,24 @@ motionnotify(XEvent *e)
 
 	/* Mouse cursor moves from one workspace to another */
 	if ((ws = recttows(ev->x_root, ev->y_root, 1, 1)) && ws != selws) {
-		sel = selws->sel;
-		selws = ws;
-		selmon = ws->mon;
-		selmon->selws = ws;
-		unfocus(sel, 1, NULL);
-		focus(NULL);
-		drawbar(selmon);
-		updatecurrentdesktop();
+		if (selmon != ws->mon) {
+			entermon(ws->mon, NULL);
+		} else {
+			sel = selws->sel;
+			selws = ws;
+			selmon->selws = ws;
+			unfocus(sel, 1, NULL);
+			focus(NULL);
+			drawbar(selmon);
+			updatecurrentdesktop();
+		}
 		return;
 	}
 
 	/* Mouse cursor moves from one monitor to another */
 	if ((m = recttomon(ev->x_root, ev->y_root, 1, 1)) != selmon) {
-		sel = selws->sel;
-		selmon = m;
-		if (m->selws)
-			selws = m->selws;
-		unfocus(sel, 1, NULL);
+		entermon(m, NULL);
 		focus(NULL);
-		updatecurrentdesktop();
 	}
 }
 
@@ -3704,6 +3714,7 @@ wintomon(Window w)
 				return m;
 	if ((c = wintoclient(w)))
 		return c->ws->mon;
+
 	return selmon;
 }
 

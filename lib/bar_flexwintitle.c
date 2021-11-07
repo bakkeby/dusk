@@ -140,6 +140,8 @@ getclientcounts(Workspace *ws, int *groupactive, int *n, int *clientsnmaster, in
 		*groupactive = GRP_HIDDEN;
 	else if (ISFLOATING(ws->sel))
 		*groupactive = GRP_FLOAT;
+	else if (!ws->layout->arrange && ws == selws) // special case for floating layout
+		*groupactive = GRP_FLOAT;
 	else if (selidx < cm)
 		*groupactive = GRP_MASTER;
 	else if (selidx < cm + cs1)
@@ -286,7 +288,7 @@ flextitlecalculate(
 	Workspace *ws = bar->mon->selws;
 	int n, center = 0, mirror = 0, fixed = 0; // layout configuration
 	int groupactive = 0, clientsnmaster = 0, clientsnstack = 0, clientsnstack2 = 0, clientsnfloating = 0, clientsnhidden = 0;
-	int w, r, den, fulllayout = 0;
+	int w, r, den, fulllayout = 0, floatscheme;
 	int rw, rr;
 
 	int mas_x, st1_x, st2_x, hid_x, flt_x;
@@ -331,7 +333,8 @@ flextitlecalculate(
 	/* floating mode */
 	if ((fulllayout && flexwintitle_floatweight > 0) || clientsnmaster + clientsnstack == 0 || !ws->layout->arrange) {
 		den = clientsnmaster + clientsnstack + clientsnstack2 + clientsnfloating + clientsnhidden;
-		c = flextitledrawarea(ws, c, mas_x, tabw, den, !ws->layout->arrange ? SchemeFlexActFloat : SCHEMEFOR(GRP_MASTER), 1, flexwintitle_hiddenweight, flexwintitle_floatweight, passx, tabfn, arg, a); // floating
+		floatscheme = !ws->layout->arrange ? (groupactive == GRP_FLOAT ? SchemeFlexActFloat : SchemeFlexInaFloat) : SCHEMEFOR(GRP_MASTER);
+		c = flextitledrawarea(ws, c, mas_x, tabw, den, floatscheme, 1, flexwintitle_hiddenweight, flexwintitle_floatweight, passx, tabfn, arg, a); // floating
 	/* no master and stack mode, e.g. monocole, grid layouts, fibonacci */
 	} else if (fulllayout) {
 		den = clientsnmaster + clientsnstack + clientsnstack2 + clientsnhidden;

@@ -32,7 +32,7 @@ calc_wintitle_floating(
 ) {
 	Client *c;
 	int clientsnfloating = 0;
-	int groupactive = GRP_FLOAT;
+	int groupactive = ISFLOATING(ws->sel) ? GRP_FLOAT : 0;
 
 	for (c = ws->clients; c; c = c->next) {
 		if (!ISVISIBLE(c))
