@@ -121,8 +121,8 @@ getflagbyname(const char *name)
 		return NoBorder;
 	else if (strcmp(name, "FlagPlaceholder0x400000000") == 0)
 		return FlagPlaceholder0x400000000;
-	else if (strcmp(name, "FlagPlaceholder0x800000000") == 0)
-		return FlagPlaceholder0x800000000;
+	else if (strcmp(name, "SemiScratchpad") == 0)
+		return SemiScratchpad;
 	else if (strcmp(name, "RespectSizeHints") == 0)
 		return RespectSizeHints;
 	else if (strcmp(name, "RioDrawNoMatchPID") == 0)

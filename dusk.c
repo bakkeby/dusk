@@ -2083,6 +2083,17 @@ manage(Window w, XWindowAttributes *wa)
 		XRaiseWindow(dpy, c->win);
 
 	setfloatinghint(c);
+
+	if (SEMISCRATCHPAD(c)) {
+		removeflag(c, Terminal); // disallow semi scratchpad from swallowing clients
+		c->swallowing = cloneclient(c);
+		c->swallowing->scratchkey = 0;
+		updateicon(c->swallowing);
+		c->swallowing->icon = 0;
+		addflag(c->swallowing, Invisible);
+		attachx(c->swallowing, 0, NULL);
+		attachstack(c->swallowing);
+	}
 	fprintf(stderr, "manage <-- (%s)\n", c->name);
 }
 
@@ -3414,6 +3425,19 @@ unmanage(Client *c, int destroyed)
 	Workspace *ws = c->ws;
 	Workspace *revertws = c->revertws;
 	XWindowChanges wc;
+
+	if (SEMISCRATCHPAD(c)) {
+		if (c->swallowing) {
+			s = c->swallowing;
+			c->swallowing = NULL;
+		} else
+			s = semisscratchpadforclient(c);
+		if (s) {
+			s->swallowing = NULL;
+			removeflag(s, SemiScratchpad);
+			unmanage(s, 1);
+		}
+	}
 
 	if (c->swallowing)
 		unswallow(c);

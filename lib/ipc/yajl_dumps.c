@@ -166,6 +166,7 @@ dump_client(yajl_gen gen, Client *c)
       YSTR("RestoreFakeFullScreen"); YBOOL(RESTOREFAKEFULLSCREEN(c));
       YSTR("RioDrawNoMatchPID"); YBOOL(RIODRAWNOMATCHPID(c));
       YSTR("Ruled"); YBOOL(RULED(c));
+      YSTR("SemiScratchpad"); YBOOL(SEMISCRATCHPAD(c));
       YSTR("ScratchpadStayOnMon"); YBOOL(SCRATCHPADSTAYONMON(c));
       YSTR("SkipTaskbar"); YBOOL(SKIPTASKBAR(c));
       YSTR("SwitchWorkspace"); YBOOL(SWITCHWORKSPACE(c));

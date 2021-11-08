@@ -1,3 +1,79 @@
+Client *
+cloneclient(Client *c)
+{
+	Client *clone = ecalloc(1, sizeof(Client));
+
+	strcpy(clone->name, c->name);
+	clone->mina = c->mina;
+	clone->maxa = c->maxa;
+	clone->cfact = c->cfact;
+	clone->win = c->win;
+	clone->flags = c->flags;
+	clone->ws = c->ws;
+	clone->pid = c->pid;
+	clone->opacity = c->opacity;
+
+	clone->sfx = c->sfx;
+	clone->sfy = c->sfy;
+	clone->sfh = c->sfh;
+	clone->sfw = c->sfw;
+
+	clone->x = c->x;
+	clone->y = c->y;
+	clone->h = c->h;
+	clone->w = c->w;
+
+	clone->oldx = c->oldx;
+	clone->oldy = c->oldy;
+	clone->oldh = c->oldh;
+	clone->oldw = c->oldw;
+
+	clone->basew = c->basew;
+	clone->baseh = c->baseh;
+	clone->incw = c->incw;
+	clone->inch = c->inch;
+	clone->maxw = c->maxw;
+	clone->maxh = c->maxh;
+	clone->minw = c->minw;
+	clone->minh = c->minh;
+
+	clone->bw = c->bw;
+	clone->oldbw = c->oldbw;
+
+	return clone;
+}
+
+void
+swapsemiscratchpadclients(Client *o, Client *n)
+{
+	n->win = o->win;
+	o->win = 0;
+	addflag(o, Invisible);
+	removeflag(n, Invisible);
+
+	if (ISFLOATING(n)) {
+		addflag(n, NeedResize);
+		showwsclient(n);
+	} else if (ISVISIBLE(n))
+		XMoveResizeWindow(dpy, n->win, n->x, n->y, n->w, n->h);
+	else
+		XMoveResizeWindow(dpy, n->win, WIDTH(n) * -2, n->y, n->w, n->h);
+}
+
+Client *
+semisscratchpadforclient(Client *s)
+{
+	Workspace *ws;
+	Client *c;
+
+	for (ws = workspaces; ws; ws = ws->next)
+		for (c = ws->clients; c; c = c->next)
+			if (c->swallowing && c->swallowing == s)
+				return c;
+
+	return NULL;
+}
+
 void
 removescratch(const Arg *arg)
 {
@@ -72,6 +148,9 @@ togglescratch(const Arg *arg)
 			   this we detach them and add them to a temporary list (monclients) which is to be
 			   processed later. */
 			if (!SCRATCHPADSTAYONMON(c) && !multimonscratch && c->ws != selws) {
+
+				if (SEMISCRATCHPAD(c) && ISINVISIBLE(c) && c->swallowing && !c->win)
+					swapsemiscratchpadclients(c->swallowing, c);
 				detach(c);
 				detachstack(c);
 				/* Note that we are adding clients at the end of the list, this is to preserve the
@@ -82,11 +161,15 @@ togglescratch(const Arg *arg)
 					last = monclients = c;
 			} else if (scratchvisible == numscratchpads) {
 				addflag(c, Invisible);
+				if (SEMISCRATCHPAD(c) && c->swallowing)
+					swapsemiscratchpadclients(c, c->swallowing);
 			} else {
 				XSetWindowBorder(dpy, c->win, scheme[SchemeScratchNorm][ColBorder].pixel);
 				removeflag(c, Invisible);
 				if (ISFLOATING(c))
 					XRaiseWindow(dpy, c->win);
+				if (SEMISCRATCHPAD(c) && c->swallowing)
+					swapsemiscratchpadclients(c->swallowing, c);
 			}
 		}
 	}
@@ -134,7 +217,8 @@ togglescratch(const Arg *arg)
 			 * cursor is. This is not an ideal solution as one can change
 			 * monitors using keybindings in which case the below can lead
 			 * to the wrong monitor receiving focus. */
-			hide(c);
+			if (!SEMISCRATCHPAD(c))
+				hide(c);
 			if (SCRATCHPADSTAYONMON(c) && getrootptr(&x, &y)) {
 				selws = recttows(x, y, 1, 1);
 				selmon = selws->mon;
@@ -143,7 +227,7 @@ togglescratch(const Arg *arg)
 		}
 		arrange_focus_on_monocle = 1;
 
-		if (multimonscratch || monclients)
+		if (multimonscratch || monclients || SEMISCRATCHPAD(c))
 			arrange(NULL);
 		else
 			arrange(c->ws);

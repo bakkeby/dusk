@@ -40,11 +40,13 @@ persistworkspacestate(Workspace *ws)
 
 	/* set dusk client atoms */
 	for (i = 1, c = ws->clients; c; c = c->next, ++i) {
+		if (!c->win)
+			continue;
 		c->idx = i;
 		setclientflags(c);
 		setclientfields(c);
 		savewindowfloatposition(c, c->ws->mon);
-		if (c->swallowing) {
+		if (c->swallowing && c->swallowing->win) {
 			c->swallowing->idx = i;
 			setclientflags(c->swallowing);
 			setclientfields(c->swallowing);
