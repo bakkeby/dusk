@@ -44,12 +44,50 @@ cloneclient(Client *c)
 }
 
 void
+initsemiscratchpad(Client *c)
+{
+	if (!SEMISCRATCHPAD(c))
+		return;
+
+	removeflag(c, Terminal); // disallow semi scratchpad from swallowing clients
+	c->swallowing = cloneclient(c);
+	c->swallowing->scratchkey = 0; // the cloned client is normal, not a scratchpad
+	updateicon(c->swallowing);
+	attachx(c->swallowing, 0, NULL);
+	attachstack(c->swallowing);
+	swapsemiscratchpadclients(c, c->swallowing); // always start in "normal" mode
+}
+
+void
+unmanagesemiscratchpad(Client *c)
+{
+	if (!SEMISCRATCHPAD(c))
+		return;
+
+	Client *s;
+
+	if (c->swallowing) {
+		s = c->swallowing;
+		c->swallowing = NULL;
+	} else
+		s = semisscratchpadforclient(c);
+	if (s) {
+		s->swallowing = NULL;
+		removeflag(s, SemiScratchpad);
+		unmanage(s, 1);
+	}
+}
+
+void
 swapsemiscratchpadclients(Client *o, Client *n)
 {
+	if (!o->win)
+		return;
+
 	n->win = o->win;
 	o->win = 0;
-	addflag(o, Invisible);
-	removeflag(n, Invisible);
+
+	strcpy(n->name, o->name);
 
 	if (ISFLOATING(n)) {
 		addflag(n, NeedResize);
@@ -149,7 +187,7 @@ togglescratch(const Arg *arg)
 			   processed later. */
 			if (!SCRATCHPADSTAYONMON(c) && !multimonscratch && c->ws != selws) {
 
-				if (SEMISCRATCHPAD(c) && ISINVISIBLE(c) && c->swallowing && !c->win)
+				if (SEMISCRATCHPAD(c) && c->swallowing && !c->win)
 					swapsemiscratchpadclients(c->swallowing, c);
 				detach(c);
 				detachstack(c);
@@ -160,16 +198,18 @@ togglescratch(const Arg *arg)
 				else
 					last = monclients = c;
 			} else if (scratchvisible == numscratchpads) {
-				addflag(c, Invisible);
 				if (SEMISCRATCHPAD(c) && c->swallowing)
 					swapsemiscratchpadclients(c, c->swallowing);
+				else
+					addflag(c, Invisible);
 			} else {
 				XSetWindowBorder(dpy, c->win, scheme[SchemeScratchNorm][ColBorder].pixel);
-				removeflag(c, Invisible);
 				if (ISFLOATING(c))
 					XRaiseWindow(dpy, c->win);
 				if (SEMISCRATCHPAD(c) && c->swallowing)
 					swapsemiscratchpadclients(c->swallowing, c);
+				else
+					removeflag(c, Invisible);
 			}
 		}
 	}
