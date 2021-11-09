@@ -43,6 +43,7 @@
 #include "mark.h"
 #include "nomodbuttons.h"
 #include "push.h"
+#include "semi_scratchpads.h"
 #include "renamed_scratchpads.h"
 #include "restartsig.h"
 #include "riodraw.h"
