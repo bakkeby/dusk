@@ -52,7 +52,6 @@ initsemiscratchpad(Client *c)
 	removeflag(c, Terminal); // disallow semi scratchpad from swallowing clients
 	c->swallowing = cloneclient(c);
 	c->swallowing->scratchkey = 0; // the cloned client is normal, not a scratchpad
-	updateicon(c->swallowing);
 	attachx(c->swallowing, 0, NULL);
 	attachstack(c->swallowing);
 	swapsemiscratchpadclients(c, c->swallowing); // always start in "normal" mode
@@ -85,7 +84,10 @@ swapsemiscratchpadclients(Client *o, Client *n)
 		return;
 
 	n->win = o->win;
-	o->win = 0;
+	n->icon = o->icon;
+	n->icw = o->icw;
+	n->ich = o->ich;
+	o->win = o->icon = o->icw = o->ich = 0;
 
 	strcpy(n->name, o->name);
 
