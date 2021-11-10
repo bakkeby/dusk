@@ -1949,9 +1949,6 @@ manage(Window w, XWindowAttributes *wa)
 	if (!ISTRANSIENT(c))
 		term = termforwin(c);
 
-	if (term)
-		c->ws = term->ws;
-
 	if (ISSTICKY(c)) {
 		stickyws->next = c->ws;
 		stickyws->mon = c->ws->mon;
