@@ -1,12 +1,19 @@
 void
 removescratch(const Arg *arg)
 {
+	Client *n;
 	Client *c = selws->sel;
 	if (!c)
 		return;
 
-	for (c = nextmarked(NULL, c); c; c = nextmarked(c->next, NULL))
+	for (c = nextmarked(NULL, c); c; c = nextmarked(c->next, NULL)) {
+		if (SEMISCRATCHPAD(c) && c->linked) {
+			n = unmanagesemiscratchpad(c);
+			arrangews(n->ws);
+		}
+
 		c->scratchkey = 0;
+	}
 }
 
 void
@@ -16,8 +23,18 @@ setscratch(const Arg *arg)
 	if (!c)
 		return;
 
-	for (c = nextmarked(NULL, c); c; c = nextmarked(c->next, NULL))
-		c->scratchkey = ((char**)arg->v)[0][0];
+	char scratchkey = ((char**)arg->v)[0][0];
+
+	for (c = nextmarked(NULL, c); c; c = nextmarked(c->next, NULL)) {
+		if (SEMISCRATCHPAD(c)) {
+			initsemiscratchpad(c);
+			if (c->linked->scratchkey) {
+				c->linked->scratchkey = scratchkey;
+				continue;
+			}
+		}
+		c->scratchkey = scratchkey;
+	}
 }
 
 void
@@ -72,9 +89,8 @@ togglescratch(const Arg *arg)
 			   this we detach them and add them to a temporary list (monclients) which is to be
 			   processed later. */
 			if (!SCRATCHPADSTAYONMON(c) && !multimonscratch && c->ws != selws) {
-
-				if (SEMISCRATCHPAD(c) && c->swallowing && !c->win)
-					swapsemiscratchpadclients(c->swallowing, c);
+				if (SEMISCRATCHPAD(c) && c->linked && !c->win)
+					swapsemiscratchpadclients(c->linked, c);
 				detach(c);
 				detachstack(c);
 				/* Note that we are adding clients at the end of the list, this is to preserve the
@@ -84,16 +100,16 @@ togglescratch(const Arg *arg)
 				else
 					last = monclients = c;
 			} else if (scratchvisible == numscratchpads) {
-				if (SEMISCRATCHPAD(c) && c->swallowing)
-					swapsemiscratchpadclients(c, c->swallowing);
+				if (SEMISCRATCHPAD(c) && c->linked)
+					swapsemiscratchpadclients(c, c->linked);
 				else
 					addflag(c, Invisible);
 			} else {
 				XSetWindowBorder(dpy, c->win, scheme[SchemeScratchNorm][ColBorder].pixel);
 				if (ISFLOATING(c))
 					XRaiseWindow(dpy, c->win);
-				if (SEMISCRATCHPAD(c) && c->swallowing)
-					swapsemiscratchpadclients(c->swallowing, c);
+				if (SEMISCRATCHPAD(c) && c->linked)
+					swapsemiscratchpadclients(c->linked, c);
 				else
 					removeflag(c, Invisible);
 			}

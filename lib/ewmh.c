@@ -40,18 +40,18 @@ persistworkspacestate(Workspace *ws)
 
 	/* set dusk client atoms */
 	for (i = 1, c = ws->clients; c; c = c->next, ++i) {
-		if (SEMISCRATCHPAD(c)) {
-			if (!c->scratchkey)
+		if (SEMISCRATCHPAD(c) && c->linked) {
+			if (c->scratchkey)
 				continue;
 			if (!c->win)
-				swapsemiscratchpadclients(c->swallowing, c);
-			c->ws = c->swallowing->ws;
+				swapsemiscratchpadclients(c->linked, c);
+			c->scratchkey = c->linked->scratchkey;
 		}
 		c->idx = i;
 		setclientflags(c);
 		setclientfields(c);
 		savewindowfloatposition(c, c->ws->mon);
-		if (c->swallowing && c->swallowing->win) {
+		if (c->swallowing) {
 			c->swallowing->idx = i;
 			setclientflags(c->swallowing);
 			setclientfields(c->swallowing);

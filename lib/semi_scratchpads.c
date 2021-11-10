@@ -46,35 +46,44 @@ cloneclient(Client *c)
 void
 initsemiscratchpad(Client *c)
 {
+	Client *s;
 	if (!SEMISCRATCHPAD(c))
 		return;
 
-	removeflag(c, Terminal); // disallow semi scratchpad from swallowing clients
-	c->swallowing = cloneclient(c);
-	c->swallowing->scratchkey = 0; // the cloned client is normal, not a scratchpad
-	attachx(c->swallowing, 0, NULL);
-	attachstack(c->swallowing);
-	swapsemiscratchpadclients(c, c->swallowing); // always start in "normal" mode
+	/* If the semi scratchpad already has a clone, then keep that one. */
+	if (c->linked && SEMISCRATCHPAD(c->linked))
+		return;
+
+	s = cloneclient(c);
+	c->linked = s;
+	s->win = 0;
+	s->linked = c; // circular dependency, what could possibly go wrong?
+	c->scratchkey = 0; // the original client is normal, not a scratchpad
+	attachx(s, 0, NULL);
+	attachstack(s);
 }
 
-void
+Client *
 unmanagesemiscratchpad(Client *c)
 {
-	if (!SEMISCRATCHPAD(c))
-		return;
+	if (!SEMISCRATCHPAD(c) || !c->linked)
+		return c;
 
-	Client *s;
+	Client *s, *n;
 
-	if (c->swallowing) {
-		s = c->swallowing;
-		c->swallowing = NULL;
-	} else
-		s = semisscratchpadforclient(c);
-	if (s) {
-		s->swallowing = NULL;
-		removeflag(s, SemiScratchpad);
-		unmanage(s, 1);
-	}
+	s = (c->scratchkey ? c : c->linked); // scratch client
+	n = (c->scratchkey ? c->linked : c); // normal client
+
+	if (s->win)
+		swapsemiscratchpadclients(s, n);
+
+	s->linked = NULL;
+	n->linked = NULL;
+
+	removeflag(s, SemiScratchpad);
+	unmanage(s, 1);
+
+	return n;
 }
 
 void
@@ -98,18 +107,4 @@ swapsemiscratchpadclients(Client *o, Client *n)
 		XMoveResizeWindow(dpy, n->win, n->x, n->y, n->w, n->h);
 	else
 		XMoveResizeWindow(dpy, n->win, WIDTH(n) * -2, n->y, n->w, n->h);
-}
-
-Client *
-semisscratchpadforclient(Client *s)
-{
-	Workspace *ws;
-	Client *c;
-
-	for (ws = workspaces; ws; ws = ws->next)
-		for (c = ws->clients; c; c = c->next)
-			if (c->swallowing && c->swallowing == s)
-				return c;
-
-	return NULL;
 }
