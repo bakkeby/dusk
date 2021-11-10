@@ -45,7 +45,7 @@ static const unsigned long
 	IgnoreDecorationHints = 0x100000000, // ignore decoration hints for client
 	FlagPlaceholder0x200000000 = 0x200000000,
 	FlagPlaceholder0x400000000 = 0x400000000,
-	FlagPlaceholder0x800000000 = 0x800000000,
+	SemiScratchpad = 0x800000000, // a window that switches between being a normal window and a scratchpad window
 	RespectSizeHints = 0x1000000000, // respect size hints for this client when ResizeHints is globally disabled
 	RioDrawNoMatchPID = 0x2000000000, // do not match PID for this client when spawning via riospawn
 	NoBorder = 0x4000000000, // indicates that the client should not be drawn with a border around it
@@ -95,8 +95,8 @@ static const unsigned long
 #define ISURGENT(C) (C && C->flags & Urgent)
 #define ISMARKED(C) (C && C->flags & Marked)
 #define ISUNMANAGED(C) (C && C->flags & Unmanaged)
-#define ISVISIBLE(C) (C && C->ws->visible && !(C->flags & (Invisible|Hidden)))
-#define ISINVISIBLE(C) (C && C->flags & Invisible)
+#define ISVISIBLE(C) (C && C->ws->visible && C->win && !(C->flags & (Invisible|Hidden)))
+#define ISINVISIBLE(C) (C && (!C->win || C->flags & Invisible))
 #define IGNORECFGREQ(C) (C && C->flags & IgnoreCfgReq)
 #define IGNORECFGREQPOS(C) (C && C->flags & IgnoreCfgReqPos)
 #define IGNORECFGREQSIZE(C) (C && C->flags & IgnoreCfgReqSize)
@@ -115,6 +115,7 @@ static const unsigned long
 #define RIODRAWNOMATCHPID(C) (C && C->flags & RioDrawNoMatchPID)
 #define RULED(C) (C && C->flags & Ruled)
 #define SCRATCHPADSTAYONMON(C) (C && C->flags & ScratchpadStayOnMon)
+#define SEMISCRATCHPAD(C) (C && C->flags & SemiScratchpad)
 #define SKIPTASKBAR(C) (C && C->flags & SkipTaskbar)
 #define STEAMGAME(C) (C && C->flags & SteamGame)
 #define SWITCHWORKSPACE(C) (C && C->flags & SwitchWorkspace)

@@ -155,7 +155,7 @@ hasclients(Workspace *ws)
 	/* Check if the workspace has visible clients on it, intentionally not taking HIDDEN(c)
 	 * into account so that workspaces with hidden client windows are still marked as
 	 * having clients from a UI point of view */
-	for (c = ws->clients; c && (c->flags & Invisible); c = c->next);
+	for (c = ws->clients; c && ISINVISIBLE(c); c = c->next);
 	return c != NULL;
 }
 
@@ -223,9 +223,14 @@ hidewsclients(Client *c)
 	/* hide clients bottom up */
 	hidewsclients(c->snext);
 	hide(c);
+
 	/* auto-hide scratchpads when moving to other workspaces */
-	if (enabled(AutoHideScratchpads) && c->scratchkey != 0 && !ISSTICKY(c))
-		addflag(c, Invisible);
+	if (enabled(AutoHideScratchpads) && c->win && c->scratchkey != 0 && !ISSTICKY(c)) {
+		if (SEMISCRATCHPAD(c) && c->swallowing)
+			swapsemiscratchpadclients(c, c->swallowing);
+		else
+			addflag(c, Invisible);
+	}
 }
 
 void

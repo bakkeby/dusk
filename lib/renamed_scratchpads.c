@@ -1,12 +1,19 @@
 void
 removescratch(const Arg *arg)
 {
+	Client *n;
 	Client *c = selws->sel;
 	if (!c)
 		return;
 
-	for (c = nextmarked(NULL, c); c; c = nextmarked(c->next, NULL))
+	for (c = nextmarked(NULL, c); c; c = nextmarked(c->next, NULL)) {
+		if (SEMISCRATCHPAD(c) && c->linked) {
+			n = unmanagesemiscratchpad(c);
+			arrangews(n->ws);
+		}
+
 		c->scratchkey = 0;
+	}
 }
 
 void
@@ -16,8 +23,18 @@ setscratch(const Arg *arg)
 	if (!c)
 		return;
 
-	for (c = nextmarked(NULL, c); c; c = nextmarked(c->next, NULL))
-		c->scratchkey = ((char**)arg->v)[0][0];
+	char scratchkey = ((char**)arg->v)[0][0];
+
+	for (c = nextmarked(NULL, c); c; c = nextmarked(c->next, NULL)) {
+		if (SEMISCRATCHPAD(c)) {
+			initsemiscratchpad(c);
+			if (c->linked->scratchkey) {
+				c->linked->scratchkey = scratchkey;
+				continue;
+			}
+		}
+		c->scratchkey = scratchkey;
+	}
 }
 
 void
@@ -72,6 +89,8 @@ togglescratch(const Arg *arg)
 			   this we detach them and add them to a temporary list (monclients) which is to be
 			   processed later. */
 			if (!SCRATCHPADSTAYONMON(c) && !multimonscratch && c->ws != selws) {
+				if (SEMISCRATCHPAD(c) && c->linked && !c->win)
+					swapsemiscratchpadclients(c->linked, c);
 				detach(c);
 				detachstack(c);
 				/* Note that we are adding clients at the end of the list, this is to preserve the
@@ -81,12 +100,18 @@ togglescratch(const Arg *arg)
 				else
 					last = monclients = c;
 			} else if (scratchvisible == numscratchpads) {
-				addflag(c, Invisible);
+				if (SEMISCRATCHPAD(c) && c->linked)
+					swapsemiscratchpadclients(c, c->linked);
+				else
+					addflag(c, Invisible);
 			} else {
 				XSetWindowBorder(dpy, c->win, scheme[SchemeScratchNorm][ColBorder].pixel);
-				removeflag(c, Invisible);
 				if (ISFLOATING(c))
 					XRaiseWindow(dpy, c->win);
+				if (SEMISCRATCHPAD(c) && c->linked)
+					swapsemiscratchpadclients(c->linked, c);
+				else
+					removeflag(c, Invisible);
 			}
 		}
 	}
@@ -134,7 +159,8 @@ togglescratch(const Arg *arg)
 			 * cursor is. This is not an ideal solution as one can change
 			 * monitors using keybindings in which case the below can lead
 			 * to the wrong monitor receiving focus. */
-			hide(c);
+			if (!SEMISCRATCHPAD(c))
+				hide(c);
 			if (SCRATCHPADSTAYONMON(c) && getrootptr(&x, &y)) {
 				selws = recttows(x, y, 1, 1);
 				selmon = selws->mon;
@@ -143,7 +169,7 @@ togglescratch(const Arg *arg)
 		}
 		arrange_focus_on_monocle = 1;
 
-		if (multimonscratch || monclients)
+		if (multimonscratch || monclients || SEMISCRATCHPAD(c))
 			arrange(NULL);
 		else
 			arrange(c->ws);

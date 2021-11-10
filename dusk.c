@@ -289,6 +289,7 @@ struct Client {
 	Client *next;
 	Client *snext;
 	Client *swallowing;
+	Client *linked;
 	Workspace *ws;
 	Workspace *revertws; /* holds the original workspace info from when the client was opened */
 	Window win;
@@ -2083,7 +2084,13 @@ manage(Window w, XWindowAttributes *wa)
 		XRaiseWindow(dpy, c->win);
 
 	setfloatinghint(c);
-	fprintf(stderr, "manage <-- (%s)\n", c->name);
+	if (SEMISCRATCHPAD(c) && c->scratchkey)
+		initsemiscratchpad(c);
+
+	if (!c->ws->visible)
+		drawbar(c->ws->mon);
+
+	fprintf(stderr, "manage <-- (%s) on workspace %s\n", c->name, c->ws->name);
 }
 
 void
@@ -3411,9 +3418,14 @@ void
 unmanage(Client *c, int destroyed)
 {
 	Client *s;
-	Workspace *ws = c->ws;
-	Workspace *revertws = c->revertws;
+	Workspace *ws, *revertws;
 	XWindowChanges wc;
+
+	if (SEMISCRATCHPAD(c))
+		c = unmanagesemiscratchpad(c);
+
+	ws = c->ws;
+	revertws = c->revertws;
 
 	if (c->swallowing)
 		unswallow(c);

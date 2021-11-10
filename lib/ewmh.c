@@ -40,6 +40,13 @@ persistworkspacestate(Workspace *ws)
 
 	/* set dusk client atoms */
 	for (i = 1, c = ws->clients; c; c = c->next, ++i) {
+		if (SEMISCRATCHPAD(c) && c->linked) {
+			if (c->scratchkey)
+				continue;
+			if (!c->win)
+				swapsemiscratchpadclients(c->linked, c);
+			c->scratchkey = c->linked->scratchkey;
+		}
 		c->idx = i;
 		setclientflags(c);
 		setclientfields(c);
