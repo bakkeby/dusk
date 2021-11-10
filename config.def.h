@@ -641,9 +641,9 @@ static const char *dmenucmd[] = {
 	"-sf", selfgcolor,
 	NULL
 };
-static const char *spcmd1[] = {"w", "st", "-n", "spterm (w)", "-g", "120x34", NULL };
-static const char *spcmd2[] = {"e", "st", "-n", "spterm (e)", "-g", "120x34", NULL };
-static const char *spcmd3[] = {"r", "st", "-n", "spfm (r)", "-g", "144x41", "-e", "ranger", NULL };
+static const char *spcmd_w[] = {"w", "st", "-n", "spterm (w)", "-g", "120x34", NULL };
+static const char *spcmd_e[] = {"e", "st", "-n", "spterm (e)", "-g", "120x34", NULL };
+static const char *spcmd_r[] = {"r", "st", "-n", "spfm (r)", "-g", "144x41", "-e", "ranger", NULL };
 static const char *statusclickcmd[] = { NULL, "/path/to/statusclick", NULL };
 
 static Key keys[] = {
@@ -733,9 +733,9 @@ static Key keys[] = {
 //	STACKKEYS(AltGr|Ctrl,                            stackfocus)                           // focus on the nth client in the stack, see the STACKKEYS macro for keybindings
 //	STACKKEYS(AltGr|Ctrl|Shift,                      stackpush)                            // move the currently focused client to the nth place in the stack
 
-	SCRATCHKEYS(                    XK_w,                                    spcmd1)
-	SCRATCHKEYS(                    XK_e,                                    spcmd2)
-	SCRATCHKEYS(                    XK_r,                                    spcmd3)
+	SCRATCHKEYS(                    XK_w,                                    spcmd_w)
+	SCRATCHKEYS(                    XK_e,                                    spcmd_e)
+	SCRATCHKEYS(                    XK_r,                                    spcmd_r)
 
 	WSKEYS(                         XK_1,                                    "1")
 	WSKEYS(                         XK_2,                                    "2")
