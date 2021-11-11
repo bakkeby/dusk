@@ -613,7 +613,7 @@ static const Layout layouts[] = {
 	{ KeyPress,   MOD,                      KEY,      comboviewwsbyname,   {.v = NAME} }, \
 	{ KeyPress,   MOD|Shift,                KEY,      movetowsbyname,      {.v = NAME} }, \
 	{ KeyPress,   MOD|Ctrl|Shift,           KEY,      movealltowsbyname,   {.v = NAME} }, \
-	{ KeyPress,   MOD|Ctrl|Alt|Shift,       KEY,      moveallfromwsbyname, {.v = NAME} }, \
+	{ KeyPress,   MOD|Ctrl|Alt,             KEY,      moveallfromwsbyname, {.v = NAME} }, \
 	{ KeyPress,   MOD|Ctrl,                 KEY,      swapwsbyname,        {.v = NAME} }, \
 	{ KeyPress,   MOD|Alt,                  KEY,      enablewsbyname,      {.v = NAME} }, \
 
