@@ -306,7 +306,20 @@ swapwsclients(Workspace *ws1, Workspace *ws2)
 	attachstackx(c1, AttachBottom, ws2);
 	attachstackx(c2, AttachBottom, ws1);
 
-	arrange(NULL);
+	if (ws1->visible) {
+		showwsclients(c2);
+		arrangews(ws1);
+	} else
+		hidews(ws1);
+
+	if (ws2->visible) {
+		showwsclients(c1);
+		arrangews(ws2);
+	}
+	else
+		hidews(ws2);
+
+	drawbars();
 }
 
 void
@@ -383,8 +396,13 @@ moveallclientstows(Workspace *from, Workspace *to)
 
 	if (from->visible)
 		arrangews(from);
+	else
+		hidews(from);
+
 	if (to->visible)
 		arrangews(to);
+	else
+		hidews(to);
 
 	if (from->mon == to->mon)
 		drawbar(to->mon);
@@ -402,6 +420,12 @@ void
 movealltowsbyname(const Arg *arg)
 {
 	moveallclientstows(selws, getwsbyname(arg));
+}
+
+void
+moveallfromwsbyname(const Arg *arg)
+{
+	moveallclientstows(getwsbyname(arg), selws);
 }
 
 /* Send client to an adjacent workspace on the current monitor */

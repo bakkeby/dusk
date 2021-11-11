@@ -870,6 +870,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( mirrorlayout, ARG_TYPE_NONE ),
 	IPCCOMMAND( movetowsbyname, ARG_TYPE_STR ),
 	IPCCOMMAND( movealltowsbyname, ARG_TYPE_STR ),
+	IPCCOMMAND( moveallfromwsbyname, ARG_TYPE_STR ),
 	IPCCOMMAND( movewsdir, ARG_TYPE_SINT ),
 	IPCCOMMAND( rotatelayoutaxis, ARG_TYPE_SINT ),
 	IPCCOMMAND( rotatestack, ARG_TYPE_SINT ),
