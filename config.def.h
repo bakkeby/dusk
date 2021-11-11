@@ -605,16 +605,17 @@ static const Layout layouts[] = {
 #define MODKEY Super
 
 #define SCRATCHKEYS(MOD,KEY,CMD) \
-	{ KeyPress,   MOD,                      KEY,      togglescratch,     {.v = CMD } }, \
-	{ KeyPress,   MOD|Ctrl,                 KEY,      setscratch,        {.v = CMD } }, \
-	{ KeyPress,   MOD|Ctrl|Shift,           KEY,      removescratch,     {.v = CMD } }, \
+	{ KeyPress,   MOD,                      KEY,      togglescratch,       {.v = CMD } }, \
+	{ KeyPress,   MOD|Ctrl,                 KEY,      setscratch,          {.v = CMD } }, \
+	{ KeyPress,   MOD|Ctrl|Shift,           KEY,      removescratch,       {.v = CMD } }, \
 
 #define WSKEYS(MOD,KEY,NAME) \
-	{ KeyPress,   MOD,                      KEY,      comboviewwsbyname, {.v = NAME} }, \
-	{ KeyPress,   MOD|Shift,                KEY,      movetowsbyname,    {.v = NAME} }, \
-	{ KeyPress,   MOD|Ctrl|Shift,           KEY,      movealltowsbyname, {.v = NAME} }, \
-	{ KeyPress,   MOD|Ctrl,                 KEY,      swapwsbyname,      {.v = NAME} }, \
-	{ KeyPress,   MOD|Alt,                  KEY,      enablewsbyname,    {.v = NAME} }, \
+	{ KeyPress,   MOD,                      KEY,      comboviewwsbyname,   {.v = NAME} }, \
+	{ KeyPress,   MOD|Shift,                KEY,      movetowsbyname,      {.v = NAME} }, \
+	{ KeyPress,   MOD|Ctrl|Shift,           KEY,      movealltowsbyname,   {.v = NAME} }, \
+	{ KeyPress,   MOD|Ctrl|Alt|Shift,       KEY,      moveallfromwsbyname, {.v = NAME} }, \
+	{ KeyPress,   MOD|Ctrl,                 KEY,      swapwsbyname,        {.v = NAME} }, \
+	{ KeyPress,   MOD|Alt,                  KEY,      enablewsbyname,      {.v = NAME} }, \
 
 #define STACKKEYS(MOD,ACTION) \
 	{ KeyPress,   MOD, XK_j, ACTION, {.i = INC(+1) } }, \
