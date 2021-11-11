@@ -12,6 +12,7 @@ cloneclient(Client *c)
 	clone->ws = c->ws;
 	clone->pid = c->pid;
 	clone->opacity = c->opacity;
+	clone->scratchkey = c->scratchkey;
 
 	clone->sfx = c->sfx;
 	clone->sfy = c->sfy;
