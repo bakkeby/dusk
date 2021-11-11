@@ -101,10 +101,7 @@ swapsemiscratchpadclients(Client *o, Client *n)
 
 	strcpy(n->name, o->name);
 
-	if (ISFLOATING(n)) {
-		addflag(n, NeedResize);
-		showwsclient(n);
-	} else if (ISVISIBLE(n))
+	if (ISVISIBLE(n))
 		XMoveResizeWindow(dpy, n->win, n->x, n->y, n->w, n->h);
 	else
 		XMoveResizeWindow(dpy, n->win, WIDTH(n) * -2, n->y, n->w, n->h);
