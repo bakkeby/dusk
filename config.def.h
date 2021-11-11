@@ -604,17 +604,17 @@ static const Layout layouts[] = {
 /* key definitions */
 #define MODKEY Super
 
-#define SCRATCHKEYS(KEY,CMD) \
-	{ KeyPress,   MODKEY,                      KEY,      togglescratch,     {.v = CMD } }, \
-	{ KeyPress,   MODKEY|Ctrl,                 KEY,      setscratch,        {.v = CMD } }, \
-	{ KeyPress,   MODKEY|Ctrl|Shift,           KEY,      removescratch,     {.v = CMD } }, \
+#define SCRATCHKEYS(MOD,KEY,CMD) \
+	{ KeyPress,   MOD,                      KEY,      togglescratch,     {.v = CMD } }, \
+	{ KeyPress,   MOD|Ctrl,                 KEY,      setscratch,        {.v = CMD } }, \
+	{ KeyPress,   MOD|Ctrl|Shift,           KEY,      removescratch,     {.v = CMD } }, \
 
-#define WSKEYS(KEY,NAME) \
-	{ KeyPress,   MODKEY,                      KEY,      comboviewwsbyname, {.v = NAME} }, \
-	{ KeyPress,   MODKEY|Shift,                KEY,      movetowsbyname,    {.v = NAME} }, \
-	{ KeyPress,   MODKEY|Ctrl|Shift,           KEY,      movealltowsbyname, {.v = NAME} }, \
-	{ KeyPress,   MODKEY|Ctrl,                 KEY,      swapwsbyname,      {.v = NAME} }, \
-	{ KeyPress,   MODKEY|Alt,                  KEY,      enablewsbyname,    {.v = NAME} }, \
+#define WSKEYS(MOD,KEY,NAME) \
+	{ KeyPress,   MOD,                      KEY,      comboviewwsbyname, {.v = NAME} }, \
+	{ KeyPress,   MOD|Shift,                KEY,      movetowsbyname,    {.v = NAME} }, \
+	{ KeyPress,   MOD|Ctrl|Shift,           KEY,      movealltowsbyname, {.v = NAME} }, \
+	{ KeyPress,   MOD|Ctrl,                 KEY,      swapwsbyname,      {.v = NAME} }, \
+	{ KeyPress,   MOD|Alt,                  KEY,      enablewsbyname,    {.v = NAME} }, \
 
 #define STACKKEYS(MOD,ACTION) \
 	{ KeyPress,   MOD, XK_j, ACTION, {.i = INC(+1) } }, \
@@ -729,23 +729,22 @@ static Key keys[] = {
 	{ KeyPress,   MODKEY|Ctrl|Alt,              XK_comma,        movewsdir,              {.i = -1 } }, // move client to workspace on the immediate left of current workspace (on the current monitor)
 	{ KeyPress,   MODKEY|Ctrl|Alt,              XK_period,       movewsdir,              {.i = +1 } }, // move client to workspace on the immediate right of current workspace (on the current monitor)
 
+//	STACKKEYS(AltGr|Ctrl,                                        stackfocus)                           // focus on the nth client in the stack, see the STACKKEYS macro for keybindings
+//	STACKKEYS(AltGr|Ctrl|Shift,                                  stackpush)                            // move the currently focused client to the nth place in the stack
 
-//	STACKKEYS(AltGr|Ctrl,                            stackfocus)                           // focus on the nth client in the stack, see the STACKKEYS macro for keybindings
-//	STACKKEYS(AltGr|Ctrl|Shift,                      stackpush)                            // move the currently focused client to the nth place in the stack
+	SCRATCHKEYS(MODKEY,                         XK_w,            spcmd_w)
+	SCRATCHKEYS(MODKEY,                         XK_e,            spcmd_e)
+	SCRATCHKEYS(MODKEY,                         XK_r,            spcmd_r)
 
-	SCRATCHKEYS(                    XK_w,                                    spcmd_w)
-	SCRATCHKEYS(                    XK_e,                                    spcmd_e)
-	SCRATCHKEYS(                    XK_r,                                    spcmd_r)
-
-	WSKEYS(                         XK_1,                                    "1")
-	WSKEYS(                         XK_2,                                    "2")
-	WSKEYS(                         XK_3,                                    "3")
-	WSKEYS(                         XK_4,                                    "4")
-	WSKEYS(                         XK_5,                                    "5")
-	WSKEYS(                         XK_6,                                    "6")
-	WSKEYS(                         XK_7,                                    "7")
-	WSKEYS(                         XK_8,                                    "8")
-	WSKEYS(                         XK_9,                                    "9")
+	WSKEYS(MODKEY,                              XK_1,            "1")
+	WSKEYS(MODKEY,                              XK_2,            "2")
+	WSKEYS(MODKEY,                              XK_3,            "3")
+	WSKEYS(MODKEY,                              XK_4,            "4")
+	WSKEYS(MODKEY,                              XK_5,            "5")
+	WSKEYS(MODKEY,                              XK_6,            "6")
+	WSKEYS(MODKEY,                              XK_7,            "7")
+	WSKEYS(MODKEY,                              XK_8,            "8")
+	WSKEYS(MODKEY,                              XK_9,            "9")
 
 	/* Unassigned key bindings (available externally via the duskc command) */
 //	{ KeyPress,   MODKEY,                       XK_Control_R,    showbar,                {0} },
