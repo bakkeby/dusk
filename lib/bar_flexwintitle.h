@@ -10,7 +10,6 @@ static int getselschemefor(int scheme);
 static void getclientcounts(Workspace *ws, int *groupactive, int *n, int *clientsnmaster, int *clientsnstack, int *clientsnstack2, int *clientsnfloating, int *clientsnhidden);
 static int isdualstacklayout(Workspace *ws);
 static int iscenteredlayout(Workspace *ws, int n);
-static int isfixedlayout(Workspace *ws);
 static int ismirroredlayout(Workspace *ws);
 
 static Client *flextitledrawarea(Workspace *ws, Client *c, int x, int w, int num_clients, int tabscheme, int draw_tiled, int draw_hidden, int draw_floating, int passx, void(*tabfn)(Workspace *, Client *, int, int, int, int, Arg *arg, BarArg *barg), Arg *arg, BarArg *barg);
