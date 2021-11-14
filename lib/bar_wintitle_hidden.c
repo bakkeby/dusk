@@ -33,6 +33,7 @@ calc_wintitle_hidden(
 	Client *c;
 	int clientsnhidden = 0;
 	int groupactive = GRP_HIDDEN;
+	firstpwlwintitle = 1;
 
 	for (c = ws->clients; c; c = c->next) {
 		if (ISINVISIBLE(c))

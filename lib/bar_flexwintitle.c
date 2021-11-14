@@ -1,5 +1,7 @@
 #define SCHEMEFOR(c) getschemefor(ws, c, groupactive == c)
 
+int prevscheme = 0, nextscheme = 0, firstpwlwintitle = 0;
+
 int
 size_flexwintitle(Bar *bar, BarArg *a)
 {
@@ -24,31 +26,6 @@ click_flexwintitle(Bar *bar, Arg *arg, BarArg *a)
 	if (flextitlecalculate(bar, 0, a->w, a->x, flextitleclick, arg, a))
 		return ClkWinTitle;
 	return -1;
-}
-
-Client *
-flextitledrawarea(Workspace *ws, Client *c, int x, int w, int num_clients, int scheme, int draw_tiled, int draw_hidden, int draw_floating,
-	int passx, void(*tabfn)(Workspace *, Client *, int, int, int, int, Arg *arg, BarArg *barg), Arg *arg, BarArg *barg)
-{
-	int i, rw, cw;
-	cw = (w - flexwintitle_separator * (num_clients - 1)) / num_clients;
-	rw = (w - flexwintitle_separator * (num_clients - 1)) % num_clients;
-	for (i = 0; c && i < num_clients; c = c->next) {
-		if (
-			!SKIPTASKBAR(c) &&
-			!ISINVISIBLE(c) &&
-			(
-				(draw_tiled && !ISFLOATING(c) && !HIDDEN(c)) ||
-				(draw_floating && ISFLOATING(c) && !HIDDEN(c)) ||
-				(draw_hidden && HIDDEN(c))
-			)
-		) {
-			tabfn(ws, c, passx, x, cw + (i < rw ? 1 : 0), scheme, arg, barg);
-			x += cw + (i < rw ? 1 : 0) + flexwintitle_separator;
-			i++;
-		}
-	}
-	return c;
 }
 
 int
@@ -226,6 +203,37 @@ getselschemefor(int scheme)
 	return SchemeTitleSel;
 }
 
+
+Client *
+flextitledrawarea(Workspace *ws, Client *c, int x, int w, int num_clients, int titlescheme, int draw_tiled, int draw_hidden, int draw_floating,
+	int passx, void(*tabfn)(Workspace *, Client *, int, int, int, int, Arg *arg, BarArg *barg), Arg *arg, BarArg *barg)
+{
+	int i, rw, cw;
+	int plw = drw->fonts->h / 2 + 1;
+	cw = (w - flexwintitle_separator * (num_clients - 1)) / num_clients;
+	rw = (w - flexwintitle_separator * (num_clients - 1)) % num_clients;
+	for (i = 0; c && i < num_clients; c = c->next) {
+		if (
+			!SKIPTASKBAR(c) &&
+			!ISINVISIBLE(c) &&
+			(
+				(draw_tiled && !ISFLOATING(c) && !HIDDEN(c)) ||
+				(draw_floating && ISFLOATING(c) && !HIDDEN(c)) ||
+				(draw_hidden && HIDDEN(c))
+			)
+		) {
+			tabfn(ws, c, passx, x, cw + (i < rw ? 1 : 0), titlescheme, arg, barg);
+
+			if (tabfn == flextitledraw && barg->value && !firstpwlwintitle)
+				drw_arrow(drw, x - plw, barg->y, plw, barg->h, barg->value, scheme[prevscheme][ColBg], scheme[nextscheme][ColBg], scheme[SchemeNorm][ColBg]);
+			firstpwlwintitle = 0;
+			x += cw + (i < rw ? 1 : 0) + flexwintitle_separator;
+			i++;
+		}
+	}
+	return c;
+}
+
 void
 flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme, Arg *arg, BarArg *barg)
 {
@@ -234,7 +242,8 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 
 	int pad = lrpad / 2;
 	int ipad = enabled(WinTitleIcons) && c->icon ? c->icw + iconspacing : 0;
-	int clientscheme = (
+	prevscheme = nextscheme;
+	nextscheme = (
 		ISMARKED(c)
 		? SchemeMarked
 		: c == ws->sel && HIDDEN(c)
@@ -252,16 +261,16 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 		: tabscheme
 	);
 
-	drw_setscheme(drw, scheme[clientscheme]);
-	XSetWindowBorder(dpy, c->win, scheme[clientscheme][ColBorder].pixel);
-	if (clientscheme != SchemeMarked && c != ws->sel)
-		c->scheme = clientscheme;
+	drw_setscheme(drw, scheme[nextscheme]);
+	XSetWindowBorder(dpy, c->win, scheme[nextscheme][ColBorder].pixel);
+
+	if (nextscheme != SchemeMarked && c != ws->sel)
+		c->scheme = nextscheme;
 
 	if (w <= TEXTW("A") + pad) // reduce text padding if wintitle is too small
 		pad = (w - TEXTW("A") < 0 ? 0 : (w - TEXTW("A")) / 2);
 	else if (enabled(CenteredWindowName) && TEXTW(c->name) + ipad < w)
 		pad = (w - TEXTW(c->name) - ipad) / 2;
-
 	drw_text(drw, x, barg->y, w, barg->h, pad + ipad, c->name, 0, False, 1);
 
  	if (ipad)
@@ -320,6 +329,7 @@ flextitlecalculate(
 	XFillRectangle(drw->dpy, drw->drawable, drw->gc, a->x, a->y, a->w, a->h);
 
 	c = ws->clients;
+	firstpwlwintitle = 1;
 
 	/* floating mode */
 	if (!ws->layout->arrange) {

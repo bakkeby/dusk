@@ -399,6 +399,62 @@ drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lp
 }
 
 void
+drw_arrow(Drw *drw, int x, int y, unsigned int w, unsigned int h, int style, Clr prev, Clr next, Clr separator)
+{
+	if (!drw || !drw->scheme)
+		return;
+
+	int direction = 1;
+	int hh = 0, w1 = 0, w2 = 0;
+
+	switch (style) {
+	case 1: // > right arrow
+		hh = h / 2;
+		w1 = w;
+		break;
+	case 2: // < left arrow
+		hh = h / 2;
+		x += w;
+		w = -w;
+		w1 = w;
+		direction = 0;
+		break;
+	case 3: // forward slash
+		hh = 0;
+		w1 = w;
+		break;
+	case 4: // backslash
+		w2 = w;
+		hh = h;
+		break;
+	}
+
+	if (direction) {
+		Clr tmp = next;
+		next = prev;
+		prev = tmp;
+	}
+
+	XPoint points[] = {
+		{ x      , y      },
+		{ x + w1 , y + hh },
+		{ x + w2 , y + h  },
+	};
+
+	XPoint bg[] = {
+		{ x     , y     },
+		{ x + w , y     },
+		{ x + w , y + h },
+		{ x     , y + h },
+	};
+
+	XSetForeground(drw->dpy, drw->gc, prev.pixel);
+	XFillPolygon(drw->dpy, drw->drawable, drw->gc, bg, 4, Convex, CoordModeOrigin);
+	XSetForeground(drw->dpy, drw->gc, next.pixel);
+	XFillPolygon(drw->dpy, drw->drawable, drw->gc, points, 3, Nonconvex, CoordModeOrigin);
+}
+
+void
 drw_map(Drw *drw, Window win, int x, int y, unsigned int w, unsigned int h)
 {
 	if (!drw)
