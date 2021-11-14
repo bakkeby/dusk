@@ -12,6 +12,10 @@ reveal(Client *c)
 		setclientstate(c, NormalState);
 
 	removeflag(c, Hidden);
+
+	if (!ISVISIBLE(c))
+		return;
+
 	if (ISFULLSCREEN(c))
 		setfullscreen(c, 1, 0);
 	else
