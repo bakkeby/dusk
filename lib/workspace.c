@@ -22,13 +22,14 @@ createworkspaces()
 	num_workspaces = i;
 
 	for (m = mons, ws = workspaces; ws; ws = ws->next) {
-		if (ws->mon == NULL) {
+		if (ws->mon == NULL)
 			ws->mon = m;
-			ws->wx = m->wx;
-			ws->wy = m->wy;
-			ws->wh = m->wh;
-			ws->ww = m->ww;
-		}
+
+		ws->wx = ws->mon->wx;
+		ws->wy = ws->mon->wy;
+		ws->wh = ws->mon->wh;
+		ws->ww = ws->mon->ww;
+
 		if (m->selws == NULL) {
 			m->selws = ws;
 			m->selws->visible = 1;
@@ -47,6 +48,8 @@ createworkspaces()
 	stickyws->visible = 1;
 	stickyws->next = workspaces;
 	stickyws->mon = mons; // not sure about how to handle mon
+	stickyws->wh = 10000;
+	stickyws->ww = 10000;
 }
 
 Workspace *
