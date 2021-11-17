@@ -22,6 +22,8 @@ draw_workspaces(Bar *bar, BarArg *a)
 {
 	Workspace *ws;
 	int w, x = a->x, y = a->y, h = (bar->vert ? bh : a->h);
+	int firstpwlworkspace = 1;
+	int plw = (bar->vert ? 0 : a->value ? drw->fonts->h / 2 + 1 : 0);
 	unsigned int inv, occ, urg;
 	char *icon;
 	Client *c;
@@ -41,7 +43,8 @@ draw_workspaces(Bar *bar, BarArg *a)
 				break;
 			}
 
-		int defscheme =
+		prevscheme = nextscheme;
+		nextscheme =
 			ws == ws->mon->selws
 			? SchemeWsSel
 			: ws->visible
@@ -52,9 +55,37 @@ draw_workspaces(Bar *bar, BarArg *a)
 			? SchemeWsOcc
 			: a->scheme;
 
-		drw_2dtext(drw, x, y, w, h, lrpad / 2, icon, inv, False, 1, defscheme);
+		if (firstscheme == -1)
+			firstscheme = nextscheme;
+
+		drw_2dtext(drw, x, y, w, h, lrpad / 2, icon, inv, False, 1, nextscheme);
+
+		if (plw && !firstpwlworkspace)
+			drw_arrow(drw, x - plw / 2, y, plw, h, a->value, scheme[prevscheme][ColBg], scheme[nextscheme][ColBg], scheme[SchemeNorm][ColBg]);
+		firstpwlworkspace = 0;
+
+		if (bar->vert) {
+			y += bh;
+		} else {
+			x += w;
+		}
+	}
+
+	/* Draw indicators in a second round after text and powerline has been drawn */
+	x = a->x;
+	y = a->y;
+	for (ws = workspaces; ws; ws = ws->next) {
+		if (ws->mon != bar->mon)
+			continue;
+
+		icon = wsicon(ws);
+		w = TEXT2DW(icon) + lrpad;
+		if (w <= lrpad)
+			continue;
+
 		drawindicator(ws, NULL, hasclients(ws), x, y, w, h, -1, 0, wsindicatortype);
 		drawindicator(ws, NULL, ws->pinned, x, y, w, h, -1, 0, wspinnedindicatortype);
+
 		if (bar->vert) {
 			y += bh;
 		} else {
