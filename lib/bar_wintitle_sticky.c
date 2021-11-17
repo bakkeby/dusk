@@ -60,6 +60,6 @@ calc_wintitle_sticky(
 	XSetForeground(drw->dpy, drw->gc, scheme[bar->scheme][ColBorder].pixel);
 	XFillRectangle(drw->dpy, drw->drawable, drw->gc, a->x, a->y, a->w, a->h);
 
-	c = flextitledrawarea(ws, ws->clients, offx, tabw, clientsnsticky, SCHEMEFOR(GRP_FLOAT), 0, 1, 1, passx, tabfn, arg, a);
+	flextitledrawarea(ws, ws->clients, offx, tabw, clientsnsticky, SCHEMEFOR(GRP_FLOAT), 0, 1, 1, passx, tabfn, arg, a);
 	return 1;
 }

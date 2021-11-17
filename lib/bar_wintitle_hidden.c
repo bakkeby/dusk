@@ -64,6 +64,6 @@ calc_wintitle_hidden(
 		XFillRectangle(drw->dpy, drw->drawable, drw->gc, a->x, a->y, a->w, a->h);
 	}
 
-	c = flextitledrawarea(ws, ws->clients, offx, tabw, clientsnhidden, SCHEMEFOR(GRP_HIDDEN), 0, 1, 0, passx, tabfn, arg, a);
+	flextitledrawarea(ws, ws->clients, offx, tabw, clientsnhidden, SCHEMEFOR(GRP_HIDDEN), 0, 1, 0, passx, tabfn, arg, a);
 	return 1;
 }

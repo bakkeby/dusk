@@ -1,5 +1,6 @@
 /* Compile-time check to make sure that the number of bar rules do not exceed the limit */
 struct NumBarRules { char TooManyBarRules__Increase_BARRULES_macro_to_fix_this[LENGTH(barrules) > BARRULES ? -1 : 1]; };
+int firstscheme = 0, prevscheme = 0, nextscheme = 0;
 
 void
 barhover(XEvent *e, Bar *bar)
@@ -16,9 +17,9 @@ barhover(XEvent *e, Bar *bar)
 			continue;
 		if (br->monitor != 'A' && br->monitor != -1 && br->monitor != bar->mon->num)
 			continue;
-		if (bar->vert && (bar->p[r] > ev->y || ev->y > bar->p[r] + bar->s[r]))
+		if (bar->vert && (bar->p[r] > ev->y || ev->y > bar->p[r] + br->lpad + bar->s[r] + br->rpad))
 			continue;
-		if (!bar->vert && (bar->p[r] > ev->x || ev->x > bar->p[r] + bar->s[r]))
+		if (!bar->vert && (bar->p[r] > ev->x || ev->x > bar->p[r] + br->lpad + bar->s[r] + br->rpad))
 			continue;
 
 		if (bar->vert) {
@@ -57,9 +58,9 @@ barpress(XButtonPressedEvent *ev, Monitor *m, Arg *arg, int *click)
 					continue;
 				if (br->monitor != 'A' && br->monitor != -1 && br->monitor != bar->mon->num)
 					continue;
-				if (bar->vert && (bar->p[r] > ev->y || ev->y > bar->p[r] + bar->s[r]))
+				if (bar->vert && (bar->p[r] > ev->y || ev->y > bar->p[r] + br->lpad + bar->s[r] + br->rpad))
 					continue;
-				if (!bar->vert && (bar->p[r] > ev->x || ev->x > bar->p[r] + bar->s[r]))
+				if (!bar->vert && (bar->p[r] > ev->x || ev->x > bar->p[r] + br->lpad + bar->s[r] + br->rpad))
 					continue;
 
 				if (bar->vert) {
@@ -185,14 +186,13 @@ drawbarwin(Bar *bar)
 		mw = (br->alignment < BAR_ALIGN_RIGHT_LEFT ? lw : rw);
 		barg.w = MAX(0, mw - br->lpad - br->rpad);
 		w = br->sizefunc(bar, &barg);
-		barg.w = w = MIN(barg.w, w);
+		bar->s[r] = barg.w = w = MIN(barg.w, w);
 
 		if (w) {
 			w += br->lpad;
 			if (w + br->rpad <= mw)
 				w += br->rpad;
 		}
-		bar->s[r] = w;
 
 		if (lw <= 0) { // if left is exhausted then switch to right side, and vice versa
 			lw = rw;
@@ -263,6 +263,7 @@ drawbarwin(Bar *bar)
 			rw = bar->p[r] - rx;
 			break;
 		}
+
 		if (bar->vert) {
 			barg.x = bar->borderpx + 5;
 			barg.y = bar->p[r] + br->lpad;
@@ -274,8 +275,12 @@ drawbarwin(Bar *bar)
 			barg.h = bar->bh - 2 * bar->borderpx;
 		}
 
-		if (br->drawfunc)
+		if (br->drawfunc) {
+			firstscheme = nextscheme = -1;
 			total_drawn += br->drawfunc(bar, &barg);
+			bar->sscheme[r] = (firstscheme != -1 ? firstscheme : barg.scheme);
+			bar->escheme[r] = (nextscheme != -1 ? nextscheme : barg.scheme);
+		}
 	}
 
 	if (total_drawn == 0 && bar->showbar) {
@@ -328,7 +333,7 @@ drawbarmodule(const BarRule *br, int r)
 			/* Optimisation, if the bar module size has not changed then we can just
 			   update the designated part of the bar rather than drawing the entire
 			   bar, otherwise only update the bars that have this module. */
-			if (bar->s[r] == br->sizefunc(bar, &barg) + barg.lpad + barg.rpad) {
+			if (bar->s[r] == br->sizefunc(bar, &barg)) {
 				br->drawfunc(bar, &barg);
 				drw_map(drw, bar->win, barg.x, barg.y, barg.w, barg.h);
 			} else

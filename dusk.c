@@ -453,6 +453,7 @@ static void motionnotify(XEvent *e);
 static void movemouse(const Arg *arg);
 static void moveorplace(const Arg *arg);
 static Client *nexttiled(Client *c);
+static Client *nthtiled(Client *c, int n);
 static void placemouse(const Arg *arg);
 static Client *prevtiled(Client *c);
 static void propertynotify(XEvent *e);
@@ -2404,6 +2405,16 @@ Client *
 nexttiled(Client *c)
 {
 	for (; c && (ISFLOATING(c) || !ISVISIBLE(c)); c = c->next);
+	return c;
+}
+
+Client *
+nthtiled(Client *c, int n)
+{
+	int i;
+	for (i = 0; c && i < n; c = c->next)
+		if (!ISFLOATING(c) && ISVISIBLE(c))
+			i++;
 	return c;
 }
 
