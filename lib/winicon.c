@@ -27,7 +27,7 @@ geticonprop(Window win, unsigned int *picw, unsigned int *pich)
 		unsigned long *i; const unsigned long *end = p + n;
 		uint32_t bstd = UINT32_MAX, d, m;
 		for (i = p; i < end - 1; i += sz) {
-			if ((w = *i++) > UINT16_MAX || (h = *i++) > UINT16_MAX) {
+			if ((w = *i++) >= 16384 || (h = *i++) >= 16384) {
 				XFree(p);
 				return None;
 			}
@@ -40,7 +40,7 @@ geticonprop(Window win, unsigned int *picw, unsigned int *pich)
 		}
 		if (!bstp) {
 			for (i = p; i < end - 1; i += sz) {
-				if ((w = *i++) > UINT16_MAX || (h = *i++) > UINT16_MAX) {
+				if ((w = *i++) >= 16384 || (h = *i++) >= 16384) {
 					XFree(p);
 					return None;
 				}
