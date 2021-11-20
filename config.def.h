@@ -516,7 +516,7 @@ static const BarDef bars[] = {
 #define PWRL PwrlForwardSlash
 static const BarRule barrules[] = {
 	/* monitor  bar    scheme   lpad rpad value  alignment               sizefunc                  drawfunc                 clickfunc                 hoverfunc                 name */
-	{  0,       0,     0,       5,   5,   7,     BAR_ALIGN_LEFT,         size_status,              draw_status,             click_status,             NULL,                     "status7 (statubutton)" },
+	{  0,       0,     0,       5,   5,   7,     BAR_ALIGN_LEFT,         size_status,              draw_status,             click_status,             NULL,                     "status7" },
 	{  0,       0,     0,       0,   0,   PWRL,  BAR_ALIGN_LEFT,         size_powerline,           draw_powerline,          NULL,                     NULL,                     "powerline join" },
 	{ -1,       0,     4,       0,   0,   PWRL,  BAR_ALIGN_LEFT,         size_workspaces,          draw_workspaces,         click_workspaces,         hover_workspaces,         "workspaces" },
 	{  0,       0,     6,       5,   5,   0,     BAR_ALIGN_RIGHT,        size_systray,             draw_systray,            click_systray,            NULL,                     "systray" },
@@ -524,11 +524,11 @@ static const BarRule barrules[] = {
 	{ -1,       0,     0,       0,   0,   PWRL,  BAR_ALIGN_LEFT,         size_powerline,           draw_powerline,          NULL,                     NULL,                     "powerline join" },
 	{ -1,       0,     5,       0,   0,   0,     BAR_ALIGN_LEFT,         size_ltsymbol,            draw_ltsymbol,           click_ltsymbol,           NULL,                     "layout" },
 	{  0,       0,     0,       0,   0,   PWRL,  BAR_ALIGN_LEFT,         size_powerline,           draw_powerline,          NULL,                     NULL,                     "powerline join" },
-	{  0,       0,     5,       5,   5,   0,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,                     "status0 (clock)" },
+	{  0,       0,     5,       5,   5,   0,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,                     "status0" },
 	{  0,       0,     0,       0,   0,   PWRL,  BAR_ALIGN_RIGHT,        size_powerline,           draw_powerline,          NULL,                     NULL,                     "powerline join" },
-	{  0,       0,     0,       5,   5,   4,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,                     "status4 (paru)" },
+	{  0,       0,     0,       5,   5,   4,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,                     "status4" },
 	{  0,       0,     0,       0,   0,   PWRL,  BAR_ALIGN_RIGHT,        size_powerline,           draw_powerline,          NULL,                     NULL,                     "powerline join" },
-	{  0,       0,     0,       5,   5,   5,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,                     "status5 (mouse battery)" },
+	{  0,       0,     0,       5,   5,   5,     BAR_ALIGN_RIGHT,        size_status,              draw_status,             click_status,             NULL,                     "status5" },
 	{  0,       0,     0,       0,   0,   PWRL,  BAR_ALIGN_LEFT,         size_powerline,           draw_powerline,          NULL,                     NULL,                     "powerline join" },
 	{  0,       0,     0,       5,   5,   6,     BAR_ALIGN_LEFT,         size_status,              draw_status,             click_status,             NULL,                     "status6" },
 	{  0,       0,     0,       0,   0,   PWRL,  BAR_ALIGN_RIGHT,        size_powerline,           draw_powerline,          NULL,                     NULL,                     "powerline join" },
@@ -538,11 +538,11 @@ static const BarRule barrules[] = {
 	{ -1,       0,     0,       0,   0,   PWRL,  BAR_ALIGN_RIGHT,        size_powerline,           draw_powerline,          NULL,                     NULL,                     "powerline join" },
 	{ -1,       0,     0,       0,   0,   PWRL,  BAR_ALIGN_NONE,         size_flexwintitle,        draw_flexwintitle,       click_flexwintitle,       NULL,                     "flexwintitle" },
 
-	{  0,       1,     5,       5,   5,   2,     BAR_ALIGN_CENTER,       size_status,              draw_status,             click_status,             NULL,                     "status2 (mem)" },
+	{  0,       1,     5,       5,   5,   2,     BAR_ALIGN_CENTER,       size_status,              draw_status,             click_status,             NULL,                     "status2" },
 	{  0,       1,     0,       0,   0,   PWRL,  BAR_ALIGN_RIGHT_LEFT,   size_powerline,           draw_powerline,          NULL,                     NULL,                     "powerline join" },
-	{  0,       1,     0,       5,   5,   1,     BAR_ALIGN_RIGHT_LEFT,   size_status,              draw_status,             click_status,             NULL,                     "status1 (volume)" },
+	{  0,       1,     0,       5,   5,   1,     BAR_ALIGN_RIGHT_LEFT,   size_status,              draw_status,             click_status,             NULL,                     "status1" },
 	{  0,       1,     0,       0,   0,   PWRL,  BAR_ALIGN_LEFT_RIGHT,   size_powerline,           draw_powerline,          NULL,                     NULL,                     "powerline join" },
-	{  0,       1,     0,       5,   5,   3,     BAR_ALIGN_LEFT_RIGHT,   size_status,              draw_status,             click_status,             NULL,                     "status3 (cpu)" },
+	{  0,       1,     0,       5,   5,   3,     BAR_ALIGN_LEFT_RIGHT,   size_status,              draw_status,             click_status,             NULL,                     "status3" },
 	{  0,       1,     0,       0,   0,   PWRL,  BAR_ALIGN_RIGHT_LEFT,   size_powerline,           draw_powerline,          NULL,                     NULL,                     "powerline join" },
 	{  0,       1,     0,       0,   0,   PWRL,  BAR_ALIGN_RIGHT_RIGHT,  size_wintitle_sticky,     draw_wintitle_sticky,    click_wintitle_sticky,    NULL,                     "wintitle_sticky" },
 	{  0,       1,     0,       0,   0,   PWRL,  BAR_ALIGN_RIGHT_RIGHT,  size_powerline,           draw_powerline,          NULL,                     NULL,                     "powerline join" },
