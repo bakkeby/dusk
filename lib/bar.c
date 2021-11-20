@@ -1,6 +1,5 @@
 /* Compile-time check to make sure that the number of bar rules do not exceed the limit */
 struct NumBarRules { char TooManyBarRules__Increase_BARRULES_macro_to_fix_this[LENGTH(barrules) > BARRULES ? -1 : 1]; };
-int firstscheme = 0, prevscheme = 0, nextscheme = 0;
 
 void
 barhover(XEvent *e, Bar *bar)
@@ -170,6 +169,7 @@ drawbarwin(Bar *bar)
 
 	for (r = 0; r < LENGTH(barrules); r++) {
 		br = &barrules[r];
+		bar->s[r] = 0;
 		if (br->bar != bar->idx || !br->sizefunc || (br->monitor == 'A' && bar->mon != selmon))
 			continue;
 		if (br->monitor != 'A' && br->monitor != -1 && br->monitor != bar->mon->num &&
@@ -180,13 +180,15 @@ drawbarwin(Bar *bar)
 		barg.rpad = br->rpad;
 		barg.value = br->value;
 		barg.scheme = (br->scheme > -1 ? br->scheme : SchemeNorm);
+		barg.firstscheme = -1;
+		barg.lastscheme = -1;
 
 		drw_setscheme(drw, scheme[barg.scheme]);
 
 		mw = (br->alignment < BAR_ALIGN_RIGHT_LEFT ? lw : rw);
 		barg.w = MAX(0, mw - br->lpad - br->rpad);
 		w = br->sizefunc(bar, &barg);
-		bar->s[r] = barg.w = w = MIN(barg.w, w);
+		bar->s[r] = w = MIN(barg.w, w);
 
 		if (w) {
 			w += br->lpad;
@@ -194,7 +196,10 @@ drawbarwin(Bar *bar)
 				w += br->rpad;
 		}
 
-		if (lw <= 0) { // if left is exhausted then switch to right side, and vice versa
+		barg.w = w;
+
+		/* If left is exhausted then switch to right side, and vice versa */
+		if (lw <= 0) {
 			lw = rw;
 			lx = rx;
 		} else if (rw <= 0) {
@@ -210,6 +215,44 @@ drawbarwin(Bar *bar)
 		case BAR_ALIGN_TOP:
 		case BAR_ALIGN_LEFT:
 			bar->p[r] = lx;
+			break;
+		case BAR_ALIGN_TOP_BOTTOM:
+		case BAR_ALIGN_LEFT_RIGHT:
+		case BAR_ALIGN_BOTTOM:
+		case BAR_ALIGN_RIGHT:
+			bar->p[r] = lx + lw - w;
+			break;
+		case BAR_ALIGN_TOP_CENTER:
+		case BAR_ALIGN_LEFT_CENTER:
+		case BAR_ALIGN_CENTER:
+			bar->p[r] = lx + lw / 2 - w / 2;
+			break;
+		case BAR_ALIGN_BOTTOM_TOP:
+		case BAR_ALIGN_RIGHT_LEFT:
+			bar->p[r] = rx;
+			break;
+		case BAR_ALIGN_BOTTOM_BOTTOM:
+		case BAR_ALIGN_RIGHT_RIGHT:
+			bar->p[r] = rx + rw - w;
+			break;
+		case BAR_ALIGN_BOTTOM_CENTER:
+		case BAR_ALIGN_RIGHT_CENTER:
+			bar->p[r] = rx + rw / 2 - w / 2;
+			break;
+		}
+
+		if (br->drawfunc == draw_powerline && reducepowerline(bar, r)) {
+			bar->s[r] = 0;
+			continue;
+		}
+
+		switch (br->alignment) {
+		default:
+		case BAR_ALIGN_NONE:
+		case BAR_ALIGN_TOP_TOP:
+		case BAR_ALIGN_LEFT_LEFT:
+		case BAR_ALIGN_TOP:
+		case BAR_ALIGN_LEFT:
 			if (lx == rx) {
 				rx += w;
 				rw -= w;
@@ -221,7 +264,6 @@ drawbarwin(Bar *bar)
 		case BAR_ALIGN_LEFT_RIGHT:
 		case BAR_ALIGN_BOTTOM:
 		case BAR_ALIGN_RIGHT:
-			bar->p[r] = lx + lw - w;
 			if (lx == rx)
 				rw -= w;
 			lw -= w;
@@ -229,7 +271,6 @@ drawbarwin(Bar *bar)
 		case BAR_ALIGN_TOP_CENTER:
 		case BAR_ALIGN_LEFT_CENTER:
 		case BAR_ALIGN_CENTER:
-			bar->p[r] = lx + lw / 2 - w / 2;
 			if (lx == rx) {
 				rw = rx + rw - bar->p[r] - w;
 				rx = bar->p[r] + w;
@@ -238,7 +279,6 @@ drawbarwin(Bar *bar)
 			break;
 		case BAR_ALIGN_BOTTOM_TOP:
 		case BAR_ALIGN_RIGHT_LEFT:
-			bar->p[r] = rx;
 			if (lx == rx) {
 				lx += w;
 				lw -= w;
@@ -248,14 +288,12 @@ drawbarwin(Bar *bar)
 			break;
 		case BAR_ALIGN_BOTTOM_BOTTOM:
 		case BAR_ALIGN_RIGHT_RIGHT:
-			bar->p[r] = rx + rw - w;
 			if (lx == rx)
 				lw -= w;
 			rw -= w;
 			break;
 		case BAR_ALIGN_BOTTOM_CENTER:
 		case BAR_ALIGN_RIGHT_CENTER:
-			bar->p[r] = rx + rw / 2 - w / 2;
 			if (lx == rx) {
 				lw = lx + lw - bar->p[r] + w;
 				lx = bar->p[r] + w;
@@ -266,21 +304,40 @@ drawbarwin(Bar *bar)
 
 		if (bar->vert) {
 			barg.x = bar->borderpx + 5;
-			barg.y = bar->p[r] + br->lpad;
+			barg.y = bar->p[r];
 			barg.h = barg.w;
 			barg.w = bar->bw - 2 * bar->borderpx;
 		} else {
-			barg.x = bar->p[r] + br->lpad;
+			barg.x = bar->p[r];
 			barg.y = bar->borderpx;
 			barg.h = bar->bh - 2 * bar->borderpx;
 		}
 
-		if (br->drawfunc) {
-			firstscheme = nextscheme = -1;
+		if (br->drawfunc && br->drawfunc != draw_powerline) {
 			total_drawn += br->drawfunc(bar, &barg);
-			bar->sscheme[r] = (firstscheme != -1 ? firstscheme : barg.scheme);
-			bar->escheme[r] = (nextscheme != -1 ? nextscheme : barg.scheme);
+			bar->sscheme[r] = (barg.firstscheme != -1 ? barg.firstscheme : barg.scheme);
+			bar->escheme[r] = (barg.lastscheme != -1 ? barg.lastscheme : barg.scheme);
 		}
+	}
+
+	/* Draw powerline separators */
+	for (r = 0; r < LENGTH(barrules); r++) {
+		br = &barrules[r];
+		if (!bar->s[r] || br->drawfunc != draw_powerline)
+			continue;
+
+		barg.lpad = br->lpad;
+		barg.rpad = br->rpad;
+		barg.value = br->value;
+		barg.scheme = (br->scheme > -1 ? br->scheme : SchemeNorm);
+		barg.firstscheme = schemeleftof(bar, r);
+		barg.lastscheme = schemerightof(bar, r);
+		barg.x = bar->p[r] + br->lpad;
+		barg.y = bar->borderpx;
+		barg.h = bar->bh - 2 * bar->borderpx;
+		barg.w = bar->s[r];
+
+		total_drawn += br->drawfunc(bar, &barg);
 	}
 
 	if (total_drawn == 0 && bar->showbar) {
@@ -321,19 +378,22 @@ drawbarmodule(const BarRule *br, int r)
 
 			if (bar->vert) {
 				barg.x = bar->borderpx + 5;
-				barg.y = bar->p[r] + br->lpad;
-				barg.h = bar->s[r];
+				barg.y = bar->p[r];
+				barg.h = bar->s[r] + barg.lpad + barg.rpad;
 				barg.w = bar->bw - 2 * bar->borderpx;
 			} else {
 				barg.y = bar->borderpx;
-				barg.x = bar->p[r] + br->lpad;
-				barg.w = bar->s[r];
+				barg.x = bar->p[r];
+				barg.w = bar->s[r] + barg.lpad + barg.rpad;
 				barg.h = bar->bh - 2 * bar->borderpx;
 			}
+
 			/* Optimisation, if the bar module size has not changed then we can just
 			   update the designated part of the bar rather than drawing the entire
 			   bar, otherwise only update the bars that have this module. */
 			if (bar->s[r] == br->sizefunc(bar, &barg)) {
+				if (!bar->s[r])
+					continue;
 				br->drawfunc(bar, &barg);
 				drw_map(drw, bar->win, barg.x, barg.y, barg.w, barg.h);
 			} else

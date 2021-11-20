@@ -59,6 +59,7 @@ static unsigned long functionality = 0
 //	|SmartGaps // enables no or increased gaps if there is only one visible window
 //	|SmartGapsMonocle // enforces no gaps in monocle layout
 	|Systray // enables a systray in the bar
+//	|SystrayNoAlpha // disables the use of transparency for the systray, enable if you do not use a compositor
 	|Swallow // allows terminals to swallow X applications started from the command line
 	|SwallowFloating // means swallow floating windows by default
 	|CenteredWindowName // center the window titles on the bar

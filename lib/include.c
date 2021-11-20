@@ -17,6 +17,7 @@
 #include "bar_wintitleactions.c"
 #include "bar_workspaces.c"
 #include "bar_wspreview.c"
+#include "bar_powerline.c"
 
 /* Other patches */
 #include "attachx.c"

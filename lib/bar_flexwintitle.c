@@ -1,6 +1,7 @@
 #define SCHEMEFOR(c) getschemefor(ws, c, groupactive == c)
 
 int firstpwlwintitle = 0;
+int prevscheme = 0;
 
 int
 size_flexwintitle(Bar *bar, BarArg *a)
@@ -15,7 +16,7 @@ draw_flexwintitle(Bar *bar, BarArg *a)
 {
 	if (!bar->mon->selws)
 		return 0;
-	return flextitlecalculate(bar, a->x, a->w, -1, flextitledraw, NULL, a);
+	return flextitlecalculate(bar, a->x + a->lpad, a->w - a->lpad - a->rpad, -1, flextitledraw, NULL, a);
 }
 
 int
@@ -203,7 +204,6 @@ getselschemefor(int scheme)
 	return SchemeTitleSel;
 }
 
-
 void
 flextitledrawarea(Workspace *ws, Client *c, int x, int w, int num_clients, int titlescheme, int draw_tiled, int draw_hidden, int draw_floating,
 	int passx, void(*tabfn)(Workspace *, Client *, int, int, int, int, Arg *arg, BarArg *barg), Arg *arg, BarArg *barg)
@@ -225,7 +225,7 @@ flextitledrawarea(Workspace *ws, Client *c, int x, int w, int num_clients, int t
 			tabfn(ws, c, passx, x, cw + (i < rw ? 1 : 0), titlescheme, arg, barg);
 
 			if (tabfn == flextitledraw && barg->value && !firstpwlwintitle)
-				drw_arrow(drw, x - plw, barg->y, plw, barg->h, barg->value, scheme[prevscheme][ColBg], scheme[nextscheme][ColBg], scheme[SchemeNorm][ColBg]);
+				drw_arrow(drw, x - plw, barg->y, plw, barg->h, barg->value, scheme[prevscheme][ColBg], scheme[barg->lastscheme][ColBg], scheme[SchemeNorm][ColBg]);
 			firstpwlwintitle = 0;
 			x += cw + (i < rw ? 1 : 0) + flexwintitle_separator;
 			i++;
@@ -241,8 +241,8 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 
 	int pad = lrpad / 2;
 	int ipad = enabled(WinTitleIcons) && c->icon ? c->icw + iconspacing : 0;
-	prevscheme = nextscheme;
-	nextscheme = (
+	prevscheme = barg->lastscheme;
+	barg->lastscheme = (
 		ISMARKED(c)
 		? SchemeMarked
 		: c == ws->sel && HIDDEN(c)
@@ -260,14 +260,14 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 		: tabscheme
 	);
 
-	drw_setscheme(drw, scheme[nextscheme]);
-	XSetWindowBorder(dpy, c->win, scheme[nextscheme][ColBorder].pixel);
+	drw_setscheme(drw, scheme[barg->lastscheme]);
+	XSetWindowBorder(dpy, c->win, scheme[barg->lastscheme][ColBorder].pixel);
 
-	if (firstscheme == -1)
-		firstscheme = nextscheme;
+	if (barg->firstscheme == -1)
+		barg->firstscheme = barg->lastscheme;
 
-	if (nextscheme != SchemeMarked && c != ws->sel)
-		c->scheme = nextscheme;
+	if (barg->lastscheme != SchemeMarked && c != ws->sel)
+		c->scheme = barg->lastscheme;
 
 	if (w <= TEXTW("A") + pad) // reduce text padding if wintitle is too small
 		pad = (w - TEXTW("A") < 0 ? 0 : (w - TEXTW("A")) / 2);

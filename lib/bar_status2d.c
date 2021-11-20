@@ -36,7 +36,7 @@ click_status(Bar *bar, Arg *arg, BarArg *a)
 int
 draw_status(Bar *bar, BarArg *a)
 {
-	return drw_2dtext(drw, a->x, a->y, a->w, a->h, 0, rawstatustext[a->value], 0, 0, 1, a->scheme);
+	return drw_2dtext(drw, a->x, a->y, a->w, a->h, a->lpad, rawstatustext[a->value], 0, 0, 1, a->scheme);
 }
 
 int
@@ -64,6 +64,9 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 		drw_setscheme(drw, scheme[defscheme]);
 		drw_rect(drw, x, y, w, h, 1, 1);
 	}
+
+	dx += lpad;
+	lpad = 0;
 	drw_setscheme(drw, scheme[LENGTH(colors)]);
 	drw->scheme[ColFg] = scheme[defscheme][ColFg];
 	drw->scheme[ColBg] = scheme[defscheme][ColBg];

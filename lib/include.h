@@ -18,6 +18,7 @@
 #include "bar_wintitleactions.h"
 #include "bar_workspaces.h"
 #include "bar_wspreview.h"
+#include "bar_powerline.h"
 
 /* Other patches */
 #include "attachx.h"

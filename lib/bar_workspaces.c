@@ -2,96 +2,88 @@ int
 size_workspaces(Bar *bar, BarArg *a)
 {
 	Workspace *ws;
-	int s = 0, tw;
+	int s = 0, w;
+	int plw = (bar->vert ? 0 : a->value ? drw->fonts->h / 2 + 1 : 0);
+	int padding = lrpad - plw;
+
 	for (ws = workspaces; ws; ws = ws->next) {
 		if (ws->mon != bar->mon)
 			continue;
-		tw = TEXT2DW(wsicon(ws)) + lrpad;
-		if (tw <= lrpad)
+		w = TEXT2DW(wsicon(ws)) + padding;
+		if (w <= padding)
 			continue;
 		if (bar->vert)
 			s += bh;
 		else
-			s += tw;
+			s += w + plw;
 	}
-	return s;
+	return s - plw;
 }
 
 int
 draw_workspaces(Bar *bar, BarArg *a)
 {
-	Workspace *ws;
-	int w, x = a->x, y = a->y, h = (bar->vert ? bh : a->h);
-	int firstpwlworkspace = 1;
+	Workspace *ws = NULL, *nextws = NULL;
+	int w, nextw, x = a->x + a->lpad, y = a->y, h = (bar->vert ? bh : a->h);
 	int plw = (bar->vert ? 0 : a->value ? drw->fonts->h / 2 + 1 : 0);
+	int padding = lrpad - plw;
 	unsigned int inv, occ, urg;
-	char *icon;
+	char *icon, *nexticon;
+	int wsscheme = 0, nextscheme = 0;
 	Client *c;
 
-	for (ws = workspaces; ws; ws = ws->next) {
-		if (ws->mon != bar->mon)
-			continue;
+	nextwsicon(bar, workspaces, &nextws, &nexticon, &nextw);
 
-		icon = wsicon(ws);
-		w = TEXT2DW(icon) + lrpad;
-		if (w <= lrpad)
-			continue;
+	while (ws || nextws) {
 
-		for (inv = urg = occ = 0, c = ws->clients; c; c = c->next, occ++)
-			if (ISURGENT(c)) {
-				urg++;
-				break;
+		if (nextws) {
+			for (inv = urg = occ = 0, c = nextws->clients; c; c = c->next, occ++)
+				if (ISURGENT(c)) {
+					urg++;
+					break;
+				}
+
+			nextscheme =
+				nextws == nextws->mon->selws
+				? SchemeWsSel
+				: nextws->visible
+				? SchemeWsVisible
+				: urg
+				? SchemeUrg
+				: occ
+				? SchemeWsOcc
+				: a->scheme;
+
+			if (a->firstscheme == -1)
+				a->firstscheme = nextscheme;
+			a->lastscheme = nextscheme;
+		}
+
+		if (ws) {
+			drw_2dtext(drw, x, y, w, h, padding / 2, icon, inv, False, 1, wsscheme);
+
+			if (plw && nextws)
+				drw_arrow(drw, x + w, y, plw, h, a->value, scheme[wsscheme][ColBg], scheme[nextscheme][ColBg], scheme[SchemeNorm][ColBg]);
+
+			drawindicator(ws, NULL, hasclients(ws), x, y, w , h, -1, 0, wsindicatortype);
+			drawindicator(ws, NULL, ws->pinned, x, y, w, h, -1, 0, wspinnedindicatortype);
+
+			if (bar->vert) {
+				y += bh;
+			} else {
+				x += w + plw;
 			}
-
-		prevscheme = nextscheme;
-		nextscheme =
-			ws == ws->mon->selws
-			? SchemeWsSel
-			: ws->visible
-			? SchemeWsVisible
-			: urg
-			? SchemeUrg
-			: occ
-			? SchemeWsOcc
-			: a->scheme;
-
-		if (firstscheme == -1)
-			firstscheme = nextscheme;
-
-		drw_2dtext(drw, x, y, w, h, lrpad / 2, icon, inv, False, 1, nextscheme);
-
-		if (plw && !firstpwlworkspace)
-			drw_arrow(drw, x - plw / 2, y, plw, h, a->value, scheme[prevscheme][ColBg], scheme[nextscheme][ColBg], scheme[SchemeNorm][ColBg]);
-		firstpwlworkspace = 0;
-
-		if (bar->vert) {
-			y += bh;
-		} else {
-			x += w;
 		}
+
+		ws = nextws;
+		icon = nexticon;
+		wsscheme = nextscheme;
+		w = nextw + padding;
+
+		if (ws)
+			nextwsicon(bar, ws->next, &nextws, &nexticon, &nextw);
 	}
 
-	/* Draw indicators in a second round after text and powerline has been drawn */
-	x = a->x;
-	y = a->y;
-	for (ws = workspaces; ws; ws = ws->next) {
-		if (ws->mon != bar->mon)
-			continue;
-
-		icon = wsicon(ws);
-		w = TEXT2DW(icon) + lrpad;
-		if (w <= lrpad)
-			continue;
-
-		drawindicator(ws, NULL, hasclients(ws), x, y, w, h, -1, 0, wsindicatortype);
-		drawindicator(ws, NULL, ws->pinned, x, y, w, h, -1, 0, wspinnedindicatortype);
-
-		if (bar->vert) {
-			y += bh;
-		} else {
-			x += w;
-		}
-	}
 	return 1;
 }
 
@@ -100,6 +92,8 @@ click_workspaces(Bar *bar, Arg *arg, BarArg *a)
 {
 	Workspace *ws;
 	int w, s = 0, t = (bar->vert ? a->y : a->x);
+	int plw = (bar->vert ? 0 : a->value ? drw->fonts->h / 2 + 1 : 0);
+	int padding = lrpad - plw;
 
 	/* This avoids clicks to the immediate left of the leftmost workspace (e.g. 2) to evaluate
 	 * as workspace 1 (which can be on a different monitor). */
@@ -110,13 +104,13 @@ click_workspaces(Bar *bar, Arg *arg, BarArg *a)
 	do {
 		if (ws->mon != bar->mon)
 			continue;
-		w = TEXT2DW(wsicon(ws)) + lrpad;
-		if (w <= lrpad)
+		w = TEXT2DW(wsicon(ws)) + padding;
+		if (w <= padding)
 			continue;
 		if (bar->vert)
 			s += bh;
 		else
-			s += w;
+			s += w + plw;
 	} while (t >= s && (ws = ws->next));
 
 	if (!ws)
@@ -132,8 +126,9 @@ hover_workspaces(Bar *bar, BarArg *a, XMotionEvent *ev)
 {
 	Workspace *ws;
 	Monitor *m = bar->mon;
-	int w, s = 0, t = (bar->vert ? a->y : a->x);
-	int x, y;
+	int x, y, w, s = 0, t = (bar->vert ? a->y : a->x);
+	int plw = (bar->vert ? 0 : a->value ? drw->fonts->h / 2 + 1 : 0);
+	int padding = lrpad - plw;
 
 	/* This avoids clicks to the immediate left of the leftmost workspace (e.g. 2) to evaluate
 	 * as workspace 1 (which can be on a different monitor). */
@@ -144,13 +139,13 @@ hover_workspaces(Bar *bar, BarArg *a, XMotionEvent *ev)
 	do {
 		if (ws->mon != m)
 			continue;
-		w = TEXT2DW(wsicon(ws)) + lrpad;
-		if (w <= lrpad)
+		w = TEXT2DW(wsicon(ws)) + padding;
+		if (w <= padding)
 			continue;
 		if (bar->vert)
 			s += bh;
 		else
-			s += w;
+			s += w + plw;
 	} while (t >= s && (ws = ws->next));
 
 	if (!ws) {
@@ -187,4 +182,30 @@ hover_workspaces(Bar *bar, BarArg *a, XMotionEvent *ev)
 		hidewspreview(m);
 
 	return 1;
+}
+
+void
+nextwsicon(Bar *bar, Workspace *ws, Workspace **next, char **nexticon, int *nextw)
+{
+	char *icon;
+	int w;
+
+	*next = NULL;
+	*nexticon = NULL;
+	*nextw = 0;
+
+	for (; ws; ws = ws->next) {
+		if (ws->mon != bar->mon)
+			continue;
+
+		icon = wsicon(ws);
+		w = TEXT2DW(icon);
+		if (w <= 0)
+			continue;
+
+		*next = ws;
+		*nexticon = icon;
+		*nextw = w;
+		break;
+	}
 }

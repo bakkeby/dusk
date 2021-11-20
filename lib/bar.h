@@ -62,6 +62,8 @@ typedef struct {
 	int rpad;
 	int value;
 	int scheme;
+	int firstscheme;
+	int lastscheme;
 } BarArg;
 
 typedef struct {
