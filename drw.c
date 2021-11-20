@@ -408,22 +408,22 @@ drw_arrow(Drw *drw, int x, int y, unsigned int w, unsigned int h, int style, Clr
 	int hh = 0, w1 = 0, w2 = 0;
 
 	switch (style) {
-	case 1: // > right arrow
+	case PwrlRightArrow:
 		hh = h / 2;
 		w1 = w;
 		break;
-	case 2: // < left arrow
+	case PwrlLeftArrow:
 		hh = h / 2;
 		x += w;
 		w = -w;
 		w1 = w;
 		direction = 0;
 		break;
-	case 3: // forward slash
+	case PwrlForwardSlash:
 		hh = 0;
 		w1 = w;
 		break;
-	case 4: // backslash
+	case PwrlBackslash:
 		w2 = w;
 		hh = h;
 		break;

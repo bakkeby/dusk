@@ -327,7 +327,7 @@ flextitlecalculate(
 	}
 
 	XSetForeground(drw->dpy, drw->gc, scheme[bar->scheme][ColBorder].pixel);
-	XFillRectangle(drw->dpy, drw->drawable, drw->gc, a->x, a->y, a->w, a->h);
+	XFillRectangle(drw->dpy, drw->drawable, drw->gc, a->x + a->lpad, a->y, a->w - a->lpad - a->rpad, a->h);
 
 	/* floating mode */
 	if (!ws->layout->arrange) {
