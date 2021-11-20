@@ -51,7 +51,7 @@ static const unsigned long
 	WinTitleIcons = 0x200000000, // adds application icons to window titles in the bar
 	WorkspacePreview = 0x400000000, // adds preview images when hovering workspace icons in the bar
 	SpawnCwd = 0x800000000, // spawn applications in the currently selected client's working directory
-	FuncPlaceholder68719476736 = 0x1000000000,
+	SystrayNoAlpha = 0x1000000000, // option to not use alpha (transparency) for the systray
 	FuncPlaceholder137438953472 = 0x2000000000,
 	FuncPlaceholder274877906944 = 0x4000000000,
 	FuncPlaceholder549755813888 = 0x8000000000,

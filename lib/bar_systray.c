@@ -26,6 +26,9 @@ draw_systray(Bar *bar, BarArg *a)
 	Client *i;
 	unsigned int w;
 
+	drw_setscheme(drw, scheme[a->scheme]);
+	drw_rect(drw, a->x, a->y, a->w, a->h, 1, 1);
+
 	if (!systray) {
 		/* init systray */
 		if (!(systray = (SystrayWin *)calloc(1, sizeof(SystrayWin))))
@@ -34,18 +37,25 @@ draw_systray(Bar *bar, BarArg *a)
 		wa.override_redirect = True;
 		wa.event_mask = ButtonPressMask|ExposureMask;
 		wa.border_pixel = 0;
-		wa.background_pixel = 0;
-		wa.colormap = cmap;
+		wa.background_pixel = scheme[a->scheme][ColBg].pixel;
 		systray->h = MIN(a->h, drw->fonts->h);
-		systray->win = XCreateWindow(dpy, root, bar->bx + a->x, bar->by + a->y + (a->h - systray->h) / 2, MAX(a->w + 40, 1), systray->h, 0, depth,
-						InputOutput, visual,
-						CWOverrideRedirect|CWBorderPixel|CWBackPixel|CWColormap|CWEventMask, &wa);
+		if (!enabled(SystrayNoAlpha)) {
+			wa.colormap = cmap;
+			systray->win = XCreateWindow(dpy, root, bar->bx + a->x, bar->by + a->y + (a->h - systray->h) / 2, MAX(a->w + a->lpad + a->rpad + 40, 1), systray->h, 0, depth,
+							InputOutput, visual,
+							CWOverrideRedirect|CWBorderPixel|CWBackPixel|CWColormap|CWEventMask, &wa);
+		} else {
+			systray->win = XCreateSimpleWindow(dpy, root, bar->bx + a->x + a->lpad, bar->by + a->y + (a->h - systray->h) / 2, MIN(a->w + a->lpad + a->rpad + 40, 1), systray->h, 0, 0, scheme[a->scheme][ColBg].pixel);
+			XChangeWindowAttributes(dpy, systray->win, CWOverrideRedirect|CWBackPixel|CWBorderPixel|CWEventMask, &wa);
+		}
 
 		XSelectInput(dpy, systray->win, SubstructureNotifyMask);
 		XChangeProperty(dpy, systray->win, netatom[NetSystemTrayOrientation], XA_CARDINAL, 32,
 				PropModeReplace, (unsigned char *)&systrayorientation, 1);
-		XChangeProperty(dpy, systray->win, netatom[NetSystemTrayVisual], XA_VISUALID, 32,
-				PropModeReplace, (unsigned char *)&visual->visualid, 1);
+		if (!enabled(SystrayNoAlpha)) {
+			XChangeProperty(dpy, systray->win, netatom[NetSystemTrayVisual], XA_VISUALID, 32,
+					PropModeReplace, (unsigned char *)&visual->visualid, 1);
+		}
 		XChangeProperty(dpy, systray->win, netatom[NetWMWindowType], XA_ATOM, 32,
 				PropModeReplace, (unsigned char *)&netatom[NetWMWindowTypeDock], 1);
 		XMapRaised(dpy, systray->win);
@@ -67,9 +77,9 @@ draw_systray(Bar *bar, BarArg *a)
 	wc.sibling = bar->win;
 	XConfigureWindow(dpy, systray->win, CWSibling|CWStackMode, &wc);
 
-	drw_setscheme(drw, scheme[SchemeNorm]);
+	drw_setscheme(drw, scheme[a->scheme]);
 	for (w = 0, i = systray->icons; i; i = i->next) {
-		wa.background_pixel = 0;
+		wa.background_pixel = scheme[a->scheme][ColBg].pixel;
 		XChangeWindowAttributes(dpy, i->win, CWBackPixel, &wa);
 		XMapRaised(dpy, i->win);
 		i->x = w;
@@ -81,7 +91,7 @@ draw_systray(Bar *bar, BarArg *a)
 			i->ws = bar->mon->selws;
 	}
 
-	XMoveResizeWindow(dpy, systray->win, bar->bx + a->x, (w ? bar->by + a->y + (a->h - systray->h) / 2 : -bar->by - a->y), MAX(w, 1), systray->h);
+	XMoveResizeWindow(dpy, systray->win, bar->bx + a->x + a->lpad, (w ? bar->by + a->y + (a->h - systray->h) / 2 : -bar->by - a->y), MAX(w, 1), systray->h);
 	return w;
 }
 
