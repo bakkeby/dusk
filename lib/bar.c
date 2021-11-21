@@ -337,7 +337,7 @@ drawbarwin(Bar *bar)
 		barg.h = bar->bh - 2 * bar->borderpx;
 		barg.w = bar->s[r];
 
-		total_drawn += br->drawfunc(bar, &barg);
+		br->drawfunc(bar, &barg);
 	}
 
 	if (total_drawn == 0 && bar->showbar) {
