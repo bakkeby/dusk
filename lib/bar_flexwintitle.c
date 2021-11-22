@@ -212,6 +212,7 @@ flextitledrawarea(Workspace *ws, Client *c, int x, int w, int num_clients, int t
 	int plw = drw->fonts->h / 2 + 1;
 	cw = (w - flexwintitle_separator * (num_clients - 1)) / num_clients;
 	rw = (w - flexwintitle_separator * (num_clients - 1)) % num_clients;
+
 	for (i = 0; c && i < num_clients; c = c->next) {
 		if (
 			!SKIPTASKBAR(c) &&
@@ -224,7 +225,7 @@ flextitledrawarea(Workspace *ws, Client *c, int x, int w, int num_clients, int t
 		) {
 			tabfn(ws, c, passx, x, cw + (i < rw ? 1 : 0), titlescheme, arg, barg);
 
-			if (tabfn == flextitledraw && barg->value && !firstpwlwintitle)
+			if (tabfn == flextitledraw && barg->value && !firstpwlwintitle && prevscheme > -1 && barg->lastscheme > 1)
 				drw_arrow(drw, x - plw, barg->y, plw, barg->h, barg->value, scheme[prevscheme][ColBg], scheme[barg->lastscheme][ColBg], scheme[SchemeNorm][ColBg]);
 			firstpwlwintitle = 0;
 			x += cw + (i < rw ? 1 : 0) + flexwintitle_separator;
