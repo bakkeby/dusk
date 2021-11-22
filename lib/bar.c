@@ -513,7 +513,7 @@ reducewindowarea(Monitor *m)
 
 	for (bar = m->bar; bar; bar = bar->next) {
 		if (bar->vert) { // vertical bar
-			if (bar->bx < m->mw / 2) { // left aligned
+			if (bar->bx < m->mx + m->mw / 2) { // left aligned
 				if (m->wx < bar->bx + bar->bw) {
 					m->ww -= (bar->bx + bar->bw - m->wx);
 					m->wx = bar->bx + bar->bw;
@@ -524,7 +524,7 @@ reducewindowarea(Monitor *m)
 				}
 			}
 		} else { // horizontal bar
-			if (bar->by < m->mh / 2) { // top bar
+			if (bar->by < m->my + m->mh / 2) { // top bar
 				if (m->wy < bar->by + bar->bh) {
 					m->wh -= (bar->by + bar->bh - m->wy);
 					m->wy = bar->by + bar->bh;
