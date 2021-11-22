@@ -16,6 +16,16 @@ reducepowerline(Bar *bar, int r_idx)
 {
 	int r;
 	const BarRule *br;
+
+	/* If the powerline is at the far left of the bar, then get rid of it. */
+	if (bar->p[r_idx] == bar->borderpx)
+		return 1;
+
+	/* If the powerline is at the far right of the bar, then get rid of it. */
+	if (bar->bw - bar->p[r_idx] - bar->s[r_idx] <= bar->borderpx)
+		return 1;
+
+	/* If the powerline overlaps with another powerline, then get rid of it. */
 	for (r = 0; r < r_idx; r++) {
 		br = &barrules[r];
 		if (!bar->s[r] || br->drawfunc != draw_powerline)
