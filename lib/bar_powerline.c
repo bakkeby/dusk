@@ -31,8 +31,7 @@ reducepowerline(Bar *bar, int r_idx)
 			continue;
 		if (br->bar != bar->idx || !br->sizefunc || (br->monitor == 'A' && bar->mon != selmon))
 			continue;
-
-		if (bar->p[r] == bar->p[r_idx] - bar->s[r_idx] || bar->p[r_idx] == bar->p[r] - bar->s[r])
+		if (bar->p[r] + bar->s[r] == bar->p[r_idx] || bar->p[r_idx] + bar->s[r_idx] == bar->p[r])
 			return 1;
 	}
 
