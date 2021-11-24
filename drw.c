@@ -427,6 +427,11 @@ drw_arrow(Drw *drw, int x, int y, unsigned int w, unsigned int h, int style, Clr
 		w2 = w;
 		hh = h;
 		break;
+	case PwrlSolid:
+		break;
+	case PwrlSolidRev:
+		direction = 0;
+		break;
 	}
 
 	if (direction) {

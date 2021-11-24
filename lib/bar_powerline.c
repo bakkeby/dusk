@@ -7,7 +7,14 @@ size_powerline(Bar *bar, BarArg *a)
 int
 draw_powerline(Bar *bar, BarArg *a)
 {
-	drw_arrow(drw, a->x, a->y, a->w, a->h, a->value, scheme[a->firstscheme][ColBg], scheme[a->lastscheme][ColBg], scheme[SchemeNorm][ColBg]);
+	int style =
+		a->x == bar->borderpx
+		? PwrlSolid
+		: a->x + a->w + bar->borderpx == bar->bw
+		? PwrlSolidRev
+		: a->value;
+
+	drw_arrow(drw, a->x, a->y, a->w, a->h, style, scheme[a->firstscheme][ColBg], scheme[a->lastscheme][ColBg], scheme[SchemeNorm][ColBg]);
 	return a->w;
 }
 
@@ -16,14 +23,6 @@ reducepowerline(Bar *bar, int r_idx)
 {
 	int r;
 	const BarRule *br;
-
-	/* If the powerline is at the far left of the bar, then get rid of it. */
-	if (bar->p[r_idx] == bar->borderpx)
-		return 1;
-
-	/* If the powerline is at the far right of the bar, then get rid of it. */
-	if (bar->bw - bar->p[r_idx] - bar->s[r_idx] <= bar->borderpx)
-		return 1;
 
 	/* If the powerline overlaps with another powerline, then get rid of it. */
 	for (r = 0; r < r_idx; r++) {
@@ -56,7 +55,6 @@ schemeleftof(Bar *bar, int r_idx)
 			max_r = r;
 			max_x = bar->p[r];
 		}
-
 	}
 
 	return max_r == -1 ? SchemeNorm : bar->escheme[max_r];

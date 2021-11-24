@@ -190,6 +190,9 @@ drawbarwin(Bar *bar)
 		w = br->sizefunc(bar, &barg);
 		bar->s[r] = w = MIN(barg.w, w);
 
+		if (!bar->s[r])
+			continue;
+
 		if (w) {
 			w += br->lpad;
 			if (w + br->rpad <= mw)
@@ -241,9 +244,21 @@ drawbarwin(Bar *bar)
 			break;
 		}
 
-		if (br->drawfunc == draw_powerline && reducepowerline(bar, r)) {
-			bar->s[r] = 0;
-			continue;
+		if (br->drawfunc == draw_powerline) {
+			if (reducepowerline(bar, r)) {
+				bar->s[r] = 0;
+				continue;
+			}
+
+			/* If the powerline is at the start or end of the bar, then keep the powerline but
+			 * reduce the size by half. When drawn this will be made a solid block rather than
+			 * slashes or arrows. */
+			if (bar->p[r] == bar->borderpx)
+				barg.w = w = bar->s[r] = bar->s[r] / 2;
+			else if (bar->p[r] + bar->s[r] + bar->borderpx == bar->bw) {
+				bar->p[r] += bar->s[r] / 2;
+				barg.w = w = bar->s[r] = bar->s[r] / 2;
+			}
 		}
 
 		switch (br->alignment) {
