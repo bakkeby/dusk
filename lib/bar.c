@@ -53,7 +53,7 @@ barpress(XButtonPressedEvent *ev, Monitor *m, Arg *arg, int *click)
 		if (ev->window == bar->win) {
 			for (r = 0; r < LENGTH(barrules); r++) {
 				br = &barrules[r];
-				if (br->bar != bar->idx || (br->monitor == 'A' && m != selmon) || br->clickfunc == NULL)
+				if (br->bar != bar->idx || (br->monitor == 'A' && m != selmon) || br->clickfunc == NULL || !bar->s[r])
 					continue;
 				if (br->monitor != 'A' && br->monitor != -1 && br->monitor != bar->mon->num)
 					continue;
