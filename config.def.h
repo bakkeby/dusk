@@ -55,7 +55,7 @@ static char *custom_2d_indicator_6 = "^c#F0A523^^r6,2,1,-4^^r-6,2,1,-4^"; // ora
 
 /* The below are only used if the WorkspaceLabels functionality is enabled */
 static char *occupied_workspace_label_format = "%s: %s"; /* format of a workspace label */
-static char *empty_workspace_label_format = "%s";        /* format of an empty workspace */
+static char *vacant_workspace_label_format = "%s";       /* format of an empty / vacant workspace */
 static int lowercase_workspace_labels = 1;               /* whether to change workspace labels to lower case */
 
 /* See util.h for options */

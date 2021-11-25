@@ -1,6 +1,6 @@
 static const char *workspace_label_placeholder = "%s";
 static int occupied_workspace_label_format_length = 0;
-static int empty_workspace_label_format_length = 0;
+static int vacant_workspace_label_format_length = 0;
 
 int
 size_workspaces(Bar *bar, BarArg *a)
@@ -22,7 +22,7 @@ size_workspaces(Bar *bar, BarArg *a)
 			if (c)
 				w += occupied_workspace_label_format_length + TEXTW(c->label);
 			else
-				w += empty_workspace_label_format_length;
+				w += vacant_workspace_label_format_length;
 		}
 		if (bar->vert)
 			s += bh;
@@ -79,8 +79,8 @@ draw_workspaces(Bar *bar, BarArg *a)
 					w += occupied_workspace_label_format_length + TEXTW(c->label);
 					snprintf(label, 128, occupied_workspace_label_format, icon, c->label);
 				} else {
-					w += empty_workspace_label_format_length;
-					snprintf(label, 128, empty_workspace_label_format, icon);
+					w += vacant_workspace_label_format_length;
+					snprintf(label, 128, vacant_workspace_label_format, icon);
 				}
 				icon = label;
 			}
@@ -137,7 +137,7 @@ click_workspaces(Bar *bar, Arg *arg, BarArg *a)
 			if (c)
 				w += occupied_workspace_label_format_length + TEXTW(c->label);
 			else
-				w += empty_workspace_label_format_length;
+				w += vacant_workspace_label_format_length;
 		}
 		if (bar->vert)
 			s += bh;
@@ -180,7 +180,7 @@ hover_workspaces(Bar *bar, BarArg *a, XMotionEvent *ev)
 			if (c)
 				w += occupied_workspace_label_format_length + TEXTW(c->label);
 			else
-				w += empty_workspace_label_format_length;
+				w += vacant_workspace_label_format_length;
 		}
 		if (bar->vert)
 			s += bh;
