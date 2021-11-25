@@ -2506,8 +2506,10 @@ propertynotify(XEvent *e)
 			updateicon(c);
 			if (c == selws->sel)
 				drawbar(selws->mon);
-		} else if (ev->atom == wmatom[WMClass])
+		} else if (ev->atom == wmatom[WMClass]) {
 			saveclientclass(c);
+			drawbars();
+		}
 	}
 }
 
