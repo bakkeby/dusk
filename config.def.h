@@ -53,6 +53,11 @@ static char *custom_2d_indicator_4 = "^c#E26F0B^^r0,h,w,1^^r0,0,1,h^^r0,0,w,1^^r
 static char *custom_2d_indicator_5 = "^c#CB9700^^r0,h,w,1^^r0,0,w,1^"; // top and bottom lines
 static char *custom_2d_indicator_6 = "^c#F0A523^^r6,2,1,-4^^r-6,2,1,-4^"; // orange vertical bars
 
+/* The below are only used in the WorkspaceLabels functionality is enabled */
+static const char *occupied_workspace_label_format = "%s: %s"; /* format of a workspace label */
+static const char *empty_workspace_label_format = "%s";        /* format of an empty workspace */
+static const int lowercase_workspace_labels = 1;               /* whether to change workspace labels to lower case */
+
 /* See util.h for options */
 static unsigned long functionality = 0
 //	|AutoReduceNmaster // automatically reduce the number of master clients if one is closed
@@ -90,6 +95,7 @@ static unsigned long functionality = 0
 //	|RioDrawSpawnAsync // spawn the application alongside rather than after drawing area using slop
 //	|RestrictFocusstackToMonitor // restrict focusstack to only operate within the monitor, otherwise focus can drift between monitors
 //	|WinTitleIcons // adds application icons to window titles in the bar
+//	|WorkspaceLabels // adds the class of the master client next to the workspace icon
 //	|WorkspacePreview // adds preview images when hovering workspace icons in the bar
 ;
 

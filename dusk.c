@@ -209,6 +209,7 @@ enum {
 
 enum {
 	WMChangeState,
+	WMClass,
 	WMDelete,
 	WMProtocols,
 	WMState,
@@ -274,6 +275,7 @@ typedef struct Workspace Workspace;
 typedef struct Client Client;
 struct Client {
 	char name[256];
+	char label[32];
 	float mina, maxa;
 	float cfact;
 	int x, y, w, h;
@@ -1913,6 +1915,7 @@ manage(Window w, XWindowAttributes *wa)
 	getclientflags(c);
 	getclientfields(c);
 	getclientopacity(c);
+	saveclientclass(c);
 
 	if (ISSTICKY(c))
 		c->ws = recttows(c->x + c->w / 2, c->y + c->h / 2, 1, 1);
@@ -2503,7 +2506,8 @@ propertynotify(XEvent *e)
 			updateicon(c);
 			if (c == selws->sel)
 				drawbar(selws->mon);
-		}
+		} else if (ev->atom == wmatom[WMClass])
+			saveclientclass(c);
 	}
 }
 
@@ -3079,11 +3083,16 @@ setup(void)
 	lrpad = drw->fonts->h + horizpadbar;
 	bh = bar_height ? bar_height : drw->fonts->h + vertpadbar;
 
+	/* One off calculating workspace label widths, used by WorkspaceLabels functionality */
+	occupied_workspace_label_format_length = TEXTW(occupied_workspace_label_format) - TEXTW(workspace_label_placeholder) * 2;
+	empty_workspace_label_format_length = TEXTW(empty_workspace_label_format) - TEXTW(workspace_label_placeholder);
+
 	updategeom();
 	createworkspaces();
 
 	/* init atoms */
 	utf8string = XInternAtom(dpy, "UTF8_STRING", False);
+	wmatom[WMClass] = XInternAtom(dpy, "WM_CLASS", False);
 	wmatom[WMProtocols] = XInternAtom(dpy, "WM_PROTOCOLS", False);
 	wmatom[WMDelete] = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
 	wmatom[WMState] = XInternAtom(dpy, "WM_STATE", False);

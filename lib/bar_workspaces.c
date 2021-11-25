@@ -1,6 +1,11 @@
+static const char *workspace_label_placeholder = "%s";
+static int occupied_workspace_label_format_length = 0;
+static int empty_workspace_label_format_length = 0;
+
 int
 size_workspaces(Bar *bar, BarArg *a)
 {
+	Client *c;
 	Workspace *ws;
 	int s = 0, w;
 	int plw = (bar->vert ? 0 : a->value ? drw->fonts->h / 2 + 1 : 0);
@@ -9,13 +14,20 @@ size_workspaces(Bar *bar, BarArg *a)
 	for (ws = workspaces; ws; ws = ws->next) {
 		if (ws->mon != bar->mon)
 			continue;
-		w = TEXT2DW(wsicon(ws)) + padding;
-		if (w <= padding)
+		w = TEXT2DW(wsicon(ws));
+		if (!w)
 			continue;
+		if (enabled(WorkspaceLabels)) {
+			c = firsttiled(ws);
+			if (c)
+				w += occupied_workspace_label_format_length + TEXTW(c->label);
+			else
+				w += empty_workspace_label_format_length;
+		}
 		if (bar->vert)
 			s += bh;
 		else
-			s += w + plw;
+			s += w + plw + padding;
 	}
 	return s - plw;
 }
@@ -23,14 +35,15 @@ size_workspaces(Bar *bar, BarArg *a)
 int
 draw_workspaces(Bar *bar, BarArg *a)
 {
+	Client *c;
 	Workspace *ws = NULL, *nextws = NULL;
-	int w, nextw, x = a->x + a->lpad, y = a->y, h = (bar->vert ? bh : a->h);
+	int w = 0, nextw, x = a->x + a->lpad, y = a->y, h = (bar->vert ? bh : a->h);
 	int plw = (bar->vert ? 0 : a->value ? drw->fonts->h / 2 + 1 : 0);
 	int padding = lrpad - plw;
 	unsigned int inv, occ, urg;
 	char *icon, *nexticon;
+	char label[128] = {0};
 	int wsscheme = 0, nextscheme = 0;
-	Client *c;
 
 	nextwsicon(bar, workspaces, &nextws, &nexticon, &nextw);
 
@@ -60,6 +73,17 @@ draw_workspaces(Bar *bar, BarArg *a)
 		}
 
 		if (ws) {
+			if (enabled(WorkspaceLabels)) {
+				c = firsttiled(ws);
+				if (c) {
+					w += occupied_workspace_label_format_length + TEXTW(c->label);
+					snprintf(label, 128, occupied_workspace_label_format, icon, c->label);
+				} else {
+					w += empty_workspace_label_format_length;
+					snprintf(label, 128, empty_workspace_label_format, icon);
+				}
+				icon = label;
+			}
 			drw_2dtext(drw, x, y, w, h, padding / 2, icon, inv, False, 1, wsscheme);
 
 			if (plw && nextws)
@@ -90,6 +114,7 @@ draw_workspaces(Bar *bar, BarArg *a)
 int
 click_workspaces(Bar *bar, Arg *arg, BarArg *a)
 {
+	Client *c;
 	Workspace *ws;
 	int w, s = 0, t = (bar->vert ? a->y : a->x);
 	int plw = (bar->vert ? 0 : a->value ? drw->fonts->h / 2 + 1 : 0);
@@ -104,13 +129,20 @@ click_workspaces(Bar *bar, Arg *arg, BarArg *a)
 	do {
 		if (ws->mon != bar->mon)
 			continue;
-		w = TEXT2DW(wsicon(ws)) + padding;
-		if (w <= padding)
+		w = TEXT2DW(wsicon(ws));
+		if (!w)
 			continue;
+		if (enabled(WorkspaceLabels)) {
+			c = firsttiled(ws);
+			if (c)
+				w += occupied_workspace_label_format_length + TEXTW(c->label);
+			else
+				w += empty_workspace_label_format_length;
+		}
 		if (bar->vert)
 			s += bh;
 		else
-			s += w + plw;
+			s += w + plw + padding;
 	} while (t >= s && (ws = ws->next));
 
 	if (!ws)
@@ -124,6 +156,7 @@ click_workspaces(Bar *bar, Arg *arg, BarArg *a)
 int
 hover_workspaces(Bar *bar, BarArg *a, XMotionEvent *ev)
 {
+	Client *c;
 	Workspace *ws;
 	Monitor *m = bar->mon;
 	int x, y, w, s = 0, t = (bar->vert ? a->y : a->x);
@@ -139,13 +172,20 @@ hover_workspaces(Bar *bar, BarArg *a, XMotionEvent *ev)
 	do {
 		if (ws->mon != m)
 			continue;
-		w = TEXT2DW(wsicon(ws)) + padding;
-		if (w <= padding)
+		w = TEXT2DW(wsicon(ws));
+		if (!w)
 			continue;
+		if (enabled(WorkspaceLabels)) {
+			c = firsttiled(ws);
+			if (c)
+				w += occupied_workspace_label_format_length + TEXTW(c->label);
+			else
+				w += empty_workspace_label_format_length;
+		}
 		if (bar->vert)
 			s += bh;
 		else
-			s += w + plw;
+			s += w + plw + padding;
 	} while (t >= s && (ws = ws->next));
 
 	if (!ws) {
@@ -185,6 +225,16 @@ hover_workspaces(Bar *bar, BarArg *a, XMotionEvent *ev)
 }
 
 void
+saveclientclass(Client *c)
+{
+	XClassHint ch = { NULL, NULL };
+	XGetClassHint(dpy, c->win, &ch);
+	strcpy(c->label, ch.res_class ? ch.res_class : broken);
+	if (lowercase_workspace_labels)
+		c->label[0] = tolower(c->label[0]);
+}
+
+void
 nextwsicon(Bar *bar, Workspace *ws, Workspace **next, char **nexticon, int *nextw)
 {
 	char *icon;
@@ -208,4 +258,12 @@ nextwsicon(Bar *bar, Workspace *ws, Workspace **next, char **nexticon, int *next
 		*nextw = w;
 		break;
 	}
+}
+
+Client *
+firsttiled(Workspace *ws)
+{
+	Client *c;
+	for (c = ws->clients; c && (ISFLOATING(c) || ISINVISIBLE(c)); c = c->next);
+	return c;
 }
