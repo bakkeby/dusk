@@ -4,6 +4,8 @@ static Workspace *createworkspace(int num, const WorkspaceRule *r);
 
 static char * wsicon(Workspace *ws);
 static int hasclients(Workspace *ws);
+static int hashidden(Workspace *ws);
+static int hasfloating(Workspace *ws);
 static void adjustwsformonitor(Workspace *ws, Monitor *m);
 static Workspace * getwsbyname(const Arg *arg);
 static Workspace * getwsbyindex(int index);

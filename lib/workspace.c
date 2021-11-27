@@ -161,6 +161,21 @@ hasclients(Workspace *ws)
 	return c != NULL;
 }
 
+int hashidden(Workspace *ws)
+{
+	Client *c;
+	for (c = ws->clients; c && (ISINVISIBLE(c) || SKIPTASKBAR(c) || !HIDDEN(c)); c = c->next);
+	return c != NULL;
+}
+
+int
+hasfloating(Workspace *ws)
+{
+	Client *c;
+	for (c = ws->clients; c && (ISINVISIBLE(c) || SKIPTASKBAR(c) || HIDDEN(c) || !ISFLOATING(c)); c = c->next);
+	return c != NULL;
+}
+
 void
 adjustwsformonitor(Workspace *ws, Monitor *m)
 {

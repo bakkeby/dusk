@@ -4,6 +4,16 @@ size_powerline(Bar *bar, BarArg *a)
 	return (bar->vert ? 0 : a->value ? drw->fonts->h / 2 + 1 : 0);
 }
 
+/* Conditional powerline that only appears if the selected workspace has both floating and hidden
+   clients */
+int
+size_pwrl_ifhidfloat(Bar *bar, BarArg *a)
+{
+	if (hasfloating(bar->mon->selws) && hashidden(bar->mon->selws))
+		return size_powerline(bar, a);
+	return 0;
+}
+
 int
 draw_powerline(Bar *bar, BarArg *a)
 {

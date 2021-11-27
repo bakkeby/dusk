@@ -1,7 +1,7 @@
 int
 size_wintitle_floating(Bar *bar, BarArg *a)
 {
-	if (!bar->mon->selws)
+	if (!bar->mon->selws || !hasfloating(bar->mon->selws))
 		return 0;
 	return a->w;
 }

@@ -1,7 +1,7 @@
 int
 size_wintitle_hidden(Bar *bar, BarArg *a)
 {
-	if (!bar->mon->selws)
+	if (!bar->mon->selws || !hashidden(bar->mon->selws))
 		return 0;
 	return a->w;
 }

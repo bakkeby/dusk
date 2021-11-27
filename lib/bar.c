@@ -245,6 +245,7 @@ drawbarwin(Bar *bar)
 		}
 
 		if (br->drawfunc == draw_powerline) {
+
 			if (reducepowerline(bar, r)) {
 				bar->s[r] = 0;
 				continue;
@@ -256,7 +257,7 @@ drawbarwin(Bar *bar)
 			if (bar->p[r] == bar->borderpx)
 				barg.w = w = bar->s[r] = bar->s[r] / 2;
 			else if (bar->p[r] + bar->s[r] + bar->borderpx == bar->bw) {
-				bar->p[r] += bar->s[r] / 2;
+				bar->p[r] += bar->s[r] / 2 + bar->s[r] % 2;
 				barg.w = w = bar->s[r] = bar->s[r] / 2;
 			}
 		}
