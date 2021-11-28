@@ -1094,7 +1094,7 @@ clientmessage(XEvent *e)
 void
 clientmonresize(Client *c, Monitor *from, Monitor *to)
 {
-	if (!c || from == to)
+	if (!c || from == to || ISSTICKY(c))
 		return;
 
 	if (c->sfx == -9999)
@@ -1228,7 +1228,7 @@ configurenotify(XEvent *e)
 	Client *c;
 	XConfigureEvent *ev = &e->xconfigure;
 	int dirty;
-	/* TODO: updategeom handling sucks, needs to be simplified */
+
 	if (ev->window == root) {
 
 		if (enabled(Debug)) {
@@ -1237,8 +1237,9 @@ configurenotify(XEvent *e)
 		}
 
 		dirty = (sw != ev->width || sh != ev->height);
-		sw = ev->width;
-		sh = ev->height;
+		stickyws->ww = sw = ev->width;
+		stickyws->wh = sh = ev->height;
+
 		if (updategeom() || dirty) {
 			drw_resize(drw, sw, sh);
 			updatebars();
@@ -1467,7 +1468,6 @@ enternotify(XEvent *e)
 	Client *c;
 	Monitor *m;
 	XCrossingEvent *ev = &e->xcrossing;
-
 	if ((ev->mode != NotifyNormal || ev->detail == NotifyInferior) && ev->window != root)
 		return;
 	c = wintoclient(ev->window);
@@ -2168,7 +2168,7 @@ motionnotify(XEvent *e)
 		return;
 
 	/* Mouse cursor moves from one workspace to another */
-	if ((ws = recttows(ev->x_root, ev->y_root, 1, 1)) && ws != selws) {
+	if (!ISSTICKY(selws->sel) && (ws = recttows(ev->x_root, ev->y_root, 1, 1)) && ws != selws) {
 		if (selmon != ws->mon) {
 			entermon(ws->mon, NULL);
 		} else {
@@ -2184,7 +2184,7 @@ motionnotify(XEvent *e)
 	}
 
 	/* Mouse cursor moves from one monitor to another */
-	if ((m = recttomon(ev->x_root, ev->y_root, 1, 1)) != selmon) {
+	if (!ISSTICKY(selws->sel) && (m = recttomon(ev->x_root, ev->y_root, 1, 1)) != selmon) {
 		entermon(m, NULL);
 		focus(NULL);
 	}
@@ -2264,7 +2264,10 @@ movemouse(const Arg *arg)
 	} while (ev.type != ButtonRelease);
 	XUngrabPointer(dpy, CurrentTime);
 
-	if (!ISSTICKY(c) && (w = recttows(c->x, c->y, c->w, c->h)) && w != selws) {
+	w = recttows(c->x, c->y, c->w, c->h);
+	if (w && ISSTICKY(c)) {
+		stickyws->mon = w->mon;
+	} else if (w && w != selws) {
 		detach(c);
 		detachstack(c);
 		attachx(c, AttachBottom, w);

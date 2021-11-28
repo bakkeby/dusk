@@ -24,8 +24,8 @@ createworkspaces()
 	stickyws = createworkspace(4096, &stickywsrule);
 	stickyws->visible = 1;
 	stickyws->mon = mons; // not sure about how to handle mon
-	stickyws->wh = 10000;
-	stickyws->ww = 10000;
+	stickyws->wh = sh;
+	stickyws->ww = sw;
 
 	stickyws->next = pws = selws = workspaces = createworkspace(0, &wsrules[0]);
 	for (i = 1; i < LENGTH(wsrules); i++)

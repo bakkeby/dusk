@@ -1,5 +1,8 @@
 void savefloats(Client *c)
 {
+	if (ISSTICKY(c))
+		return;
+
 	int x, y, w, h;
 	Workspace *ws = c->ws;
 	Monitor *m = ws->mon;
@@ -27,7 +30,7 @@ void savefloats(Client *c)
 void
 restorefloats(Client *c)
 {
-	if (!ISVISIBLE(c))
+	if (!ISVISIBLE(c) || ISSTICKY(c))
 		return;
 	if (c->sfx == -9999)
 		savefloats(c);
