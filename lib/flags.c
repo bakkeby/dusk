@@ -85,8 +85,8 @@ getflagbyname(const char *name)
 		return Transient;
 	else if (strcmp(name, "OnlyModButtons") == 0)
 		return OnlyModButtons;
-	else if (strcmp(name, "FlagPlaceholder0x20000") == 0)
-		return FlagPlaceholder0x20000;
+	else if (strcmp(name, "Disallowed") == 0)
+		return Disallowed;
 	else if (strcmp(name, "AttachMaster") == 0)
 		return AttachMaster;
 	else if (strcmp(name, "AttachAbove") == 0)

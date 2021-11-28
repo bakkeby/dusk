@@ -1939,6 +1939,11 @@ manage(Window w, XWindowAttributes *wa)
 			applyrules(c);
 	}
 
+	if (DISALLOWED(c)) {
+		killclient(&((Arg) { .v = c }));
+		return;
+	}
+
 	if (ISUNMANAGED(c)) {
 		XMapWindow(dpy, c->win);
 		if (LOWER(c))

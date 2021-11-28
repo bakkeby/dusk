@@ -24,7 +24,7 @@ static const unsigned long
 	Locked = 0x4000, // used by setfullscreen, prevents state change
 	Transient = 0x8000, // whether the client has the transient for hint
 	OnlyModButtons = 0x10000, // restricts button keybindings to those that involve modifiers
-	FlagPlaceholder0x20000 = 0x20000,
+	Disallowed = 0x20000, // window is disallowed and will be forcibly killed
 	/* 0x40000, 0x80000, 0x100000 - three bits for attach modes as they are mutually exclusive, still room for two more up to 7 */
 	AttachMaster = 1 << 18, // attach at the top of the master area
 	AttachAbove = 2 << 18, // attach the client before the currently selected client
@@ -81,6 +81,7 @@ static const unsigned long
 	Unmanaged = 0x8000000000000000; // indicates that the client is not to be managed by the window manager
 
 #define ALWAYSONTOP(C) (C && C->flags & AlwaysOnTop)
+#define DISALLOWED(C) (C && C->flags & Disallowed)
 #define HIDDEN(C) (C && ((C->flags & Hidden) || (getstate(C->win) == IconicState)))
 #define ISFLOATING(C) (C && C->flags & (Floating|Sticky))
 #define ISFIXED(C) (C && C->flags & Fixed)
