@@ -154,6 +154,10 @@ int
 hasclients(Workspace *ws)
 {
 	Client *c;
+
+	if (!ws)
+		return 0;
+
 	/* Check if the workspace has visible clients on it, intentionally not taking HIDDEN(c)
 	 * into account so that workspaces with hidden client windows are still marked as
 	 * having clients from a UI point of view */
@@ -164,6 +168,10 @@ hasclients(Workspace *ws)
 int hashidden(Workspace *ws)
 {
 	Client *c;
+
+	if (!ws)
+		return 0;
+
 	for (c = ws->clients; c && (ISINVISIBLE(c) || SKIPTASKBAR(c) || !HIDDEN(c)); c = c->next);
 	return c != NULL;
 }
@@ -172,6 +180,10 @@ int
 hasfloating(Workspace *ws)
 {
 	Client *c;
+
+	if (!ws)
+		return 0;
+
 	for (c = ws->clients; c && (ISINVISIBLE(c) || SKIPTASKBAR(c) || HIDDEN(c) || !ISFLOATING(c)); c = c->next);
 	return c != NULL;
 }
@@ -193,7 +205,10 @@ hidews(Workspace *ws)
 {
 	Workspace *w;
 	if (enabled(Debug))
-		fprintf(stderr, "hidews called for ws %s\n", ws->name);
+		fprintf(stderr, "hidews called for ws %s\n", ws ? ws->name : "NULL");
+
+	if (!ws)
+		return;
 
 	ws->visible = 0;
 	hidewsclients(ws->stack);
@@ -513,16 +528,20 @@ viewalloccwsonmon(const Arg *arg)
 	Workspace *ws;
 	Monitor *m = selmon;
 	unsigned long wsmask = 0;
+	int wscount = 0;
 
 	for (ws = workspaces; ws; ws = ws->next) {
 		if (ws->mon != m)
 			continue;
 
-		if (ws->clients)
+		if (ws->clients) {
 			wsmask |= (1L << ws->num);
+			wscount++;
+		}
 	}
 
-	viewwsmask(m, wsmask);
+	if (wscount > 1 || !m->selws)
+		viewwsmask(m, wsmask);
 }
 
 void
