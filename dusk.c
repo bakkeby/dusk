@@ -2267,6 +2267,7 @@ movemouse(const Arg *arg)
 	w = recttows(c->x, c->y, c->w, c->h);
 	if (w && ISSTICKY(c)) {
 		stickyws->mon = w->mon;
+		drawbars();
 	} else if (w && w != selws) {
 		detach(c);
 		detachstack(c);
