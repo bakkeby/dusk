@@ -51,41 +51,35 @@ reducepowerline(Bar *bar, int r_idx)
 int
 schemeleftof(Bar *bar, int r_idx)
 {
-	int r, max_x = 0, max_r = -1;
 	const BarRule *br;
-	for (r = 0; r < LENGTH(barrules); r++) {
+	for (int r = 0; r < LENGTH(barrules); r++) {
 		br = &barrules[r];
 		if (!bar->s[r] || br->drawfunc == draw_powerline)
 			continue;
 		if (br->bar != bar->idx || !br->sizefunc || (br->monitor == 'A' && bar->mon != selmon))
 			continue;
 
-		if (bar->p[r] > max_x && bar->p[r] < bar->p[r_idx]) {
-			max_r = r;
-			max_x = bar->p[r];
-		}
+		if (bar->p[r] + bar->s[r] + br->lpad + br->rpad == bar->p[r_idx])
+			return bar->escheme[r];
 	}
 
-	return max_r == -1 ? SchemeNorm : bar->escheme[max_r];
+	return SchemeNorm;
 }
 
 int
 schemerightof(Bar *bar, int r_idx)
 {
-	int r, min_x = INT_MAX, min_r = -1;
 	const BarRule *br;
-	for (r = 0; r < LENGTH(barrules); r++) {
+	for (int r = 0; r < LENGTH(barrules); r++) {
 		br = &barrules[r];
 		if (!bar->s[r] || br->drawfunc == draw_powerline)
 			continue;
 		if (br->bar != bar->idx || !br->sizefunc || (br->monitor == 'A' && bar->mon != selmon))
 			continue;
 
-		if (bar->p[r] < min_x && bar->p[r] > bar->p[r_idx]) {
-			min_r = r;
-			min_x = bar->p[r];
-		}
+		if (bar->p[r_idx] + bar->s[r_idx] == bar->p[r])
+			return bar->sscheme[r];
 	}
 
-	return min_r == -1 ? SchemeNorm : bar->sscheme[min_r];
+	return SchemeNorm;
 }
