@@ -528,7 +528,7 @@ viewalloccwsonmon(const Arg *arg)
 	Workspace *ws;
 	Monitor *m = selmon;
 	unsigned long wsmask = 0;
-	int wscount = 0;
+	long unsigned int currmask = getwsmask(m);
 
 	for (ws = workspaces; ws; ws = ws->next) {
 		if (ws->mon != m)
@@ -536,11 +536,10 @@ viewalloccwsonmon(const Arg *arg)
 
 		if (ws->clients) {
 			wsmask |= (1L << ws->num);
-			wscount++;
 		}
 	}
 
-	if (wscount > 1 || !m->selws)
+	if (wsmask != currmask)
 		viewwsmask(m, wsmask);
 }
 
