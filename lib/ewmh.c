@@ -72,7 +72,7 @@ savewindowfloatposition(Client *c, Monitor *m)
 		return;
 
 	sprintf(atom, "_DUSK_FLOATPOS_%u", m->num);
-	unsigned long pos[] = { (MAX(c->sfx, 0) & 0xffff) | ((MAX(c->sfy, 0) & 0xffff) << 16) };
+	unsigned long pos[] = { (MAX(c->sfx - m->mx, 0) & 0xffff) | ((MAX(c->sfy - m->my, 0) & 0xffff) << 16) };
 	XChangeProperty(dpy, c->win, XInternAtom(dpy, atom, False), XA_CARDINAL, 32, PropModeReplace, (unsigned char *)pos, 1);
 
 	sprintf(atom, "_DUSK_FLOATSIZE_%u", m->num);
@@ -120,8 +120,8 @@ restorewindowfloatposition(Client *c, Monitor *m)
 		return 0;
 	}
 
-	c->sfx = x;
-	c->sfy = y;
+	c->sfx = m->mx + x;
+	c->sfy = m->my + y;
 	c->sfw = w;
 	c->sfh = h;
 

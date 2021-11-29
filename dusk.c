@@ -1247,16 +1247,32 @@ configurenotify(XEvent *e)
 		stickyws->wh = sh = ev->height;
 
 		if (updategeom() || dirty) {
+			for (ws = workspaces; ws; ws = ws->next) {
+				for (c = ws->clients; c; c = c->next) {
+					c->sfx = (c->sfx != -9999 ? c->sfx : c->x) - c->ws->wx;
+					c->sfy = (c->sfx != -9999 ? c->sfy : c->y) - c->ws->wy;
+				}
+			}
 			drw_resize(drw, sw, sh);
 			updatebars();
+			setworkspaceareas();
 			setviewport();
-			for (ws = workspaces; ws; ws = ws->next)
-				for (c = ws->clients; c; c = c->next)
-					if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c))
-						resizeclient(c, ws->mon->mx, ws->mon->my, ws->mon->mw, ws->mon->mh);
 			for (m = mons; m; m = m->next)
 				for (bar = m->bar; bar; bar = bar->next)
 					XMoveResizeWindow(dpy, bar->win, bar->bx, bar->by, bar->bw, bar->bh);
+			for (ws = workspaces; ws; ws = ws->next) {
+				for (c = ws->clients; c; c = c->next) {
+					c->sfx += c->ws->wx;
+					c->sfy += c->ws->wy;
+					if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c))
+						resizeclient(c, ws->mon->mx, ws->mon->my, ws->mon->mw, ws->mon->mh);
+					else if (ISFLOATING(c)) {
+						c->x = c->sfx;
+						c->y = c->sfy;
+						show(c);
+					}
+				}
+			}
 			focus(NULL);
 			arrange(NULL);
 		}
