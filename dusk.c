@@ -223,6 +223,7 @@ enum {
 	DuskClientFlags1,
 	DuskClientFlags2,
 	DuskClientFields,
+	DuskClientLabel,
 	SteamGameID,
 	ClientLast
 }; /* dusk client atoms */
@@ -354,6 +355,7 @@ typedef struct {
 	const char *floatpos;
 	const char scratchkey;
 	const char *workspace;
+	const char *label;
 	int resume;
 } Rule;
 
@@ -609,8 +611,11 @@ applyrules(Client *c)
 			if (REVERTWORKSPACE(c) && !c->ws->visible)
 				c->revertws = c->ws->mon->selws;
 
+			if (r->label)
+				strcpy(c->label, r->label);
+
 			if (enabled(Debug))
-				fprintf(stderr, "applyrules: client rule %d matched:\n    class: %s\n    role: %s\n    instance: %s\n    title: %s\n    wintype: %s\n    flags: %ld\n    floatpos: %s\n    workspace: %s\n",
+				fprintf(stderr, "applyrules: client rule %d matched:\n    class: %s\n    role: %s\n    instance: %s\n    title: %s\n    wintype: %s\n    flags: %ld\n    floatpos: %s\n    workspace: %s\n    label: %s\n",
 					i,
 					r->class ? r->class : "NULL",
 					r->role ? r->role : "NULL",
@@ -619,7 +624,8 @@ applyrules(Client *c)
 					r->wintype ? r->wintype : "NULL",
 					r->flags,
 					r->floatpos ? r->floatpos : "NULL",
-					r->workspace);
+					r->workspace,
+					r->label ? r->label : "NULL");
 			if (!r->resume)
 				break; // only allow one rule match
 		}
@@ -1915,7 +1921,7 @@ manage(Window w, XWindowAttributes *wa)
 	getclientflags(c);
 	getclientfields(c);
 	getclientopacity(c);
-	saveclientclass(c);
+	getclientlabel(c);
 
 	if (ISSTICKY(c))
 		c->ws = recttows(c->x + c->w / 2, c->y + c->h / 2, 1, 1);
@@ -1938,6 +1944,8 @@ manage(Window w, XWindowAttributes *wa)
 		if (!ISTRANSIENT(c))
 			applyrules(c);
 	}
+
+	saveclientclass(c);
 
 	if (DISALLOWED(c)) {
 		killclient(&((Arg) { .v = c }));
@@ -3114,6 +3122,7 @@ setup(void)
 	clientatom[DuskClientFlags1] = XInternAtom(dpy, "_DUSK_CLIENT_FLAGS1", False);
 	clientatom[DuskClientFlags2] = XInternAtom(dpy, "_DUSK_CLIENT_FLAGS2", False);
 	clientatom[DuskClientFields] = XInternAtom(dpy, "_DUSK_CLIENT_FIELDS", False);
+	clientatom[DuskClientLabel] = XInternAtom(dpy, "_DUSK_CLIENT_LABEL", False);
 	clientatom[SteamGameID] = XInternAtom(dpy, "STEAM_GAME", False);
 	netatom[NetActiveWindow] = XInternAtom(dpy, "_NET_ACTIVE_WINDOW", False);
 	netatom[NetClientList] = XInternAtom(dpy, "_NET_CLIENT_LIST", False);

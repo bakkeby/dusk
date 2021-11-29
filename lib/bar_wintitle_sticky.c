@@ -1,7 +1,7 @@
 int
 size_wintitle_sticky(Bar *bar, BarArg *a)
 {
-	return selws == stickyws && stickyws->mon == bar->mon ? a->w : 0;
+	return stickyws->clients && selws == stickyws && stickyws->mon == bar->mon ? a->w : 0;
 }
 
 int

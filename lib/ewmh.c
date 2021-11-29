@@ -50,11 +50,13 @@ persistworkspacestate(Workspace *ws)
 		c->idx = i;
 		setclientflags(c);
 		setclientfields(c);
+		setclientlabel(c);
 		savewindowfloatposition(c, c->ws->mon);
 		if (c->swallowing) {
 			c->swallowing->idx = i;
 			setclientflags(c->swallowing);
 			setclientfields(c->swallowing);
+			setclientlabel(c->swallowing);
 			savewindowfloatposition(c->swallowing, c->swallowing->ws->mon);
 		}
 	}
@@ -165,6 +167,12 @@ setclientfields(Client *c)
 }
 
 void
+setclientlabel(Client *c)
+{
+	XChangeProperty(dpy, c->win, clientatom[DuskClientLabel], XA_STRING, 8, PropModeReplace, (unsigned char *)c->label, strlen(c->label));
+}
+
+void
 getclientflags(Client *c)
 {
 	unsigned long flags1 = getatomprop(c, clientatom[DuskClientFlags1], AnyPropertyType) & 0xFFFFFFFF;
@@ -190,6 +198,28 @@ getclientfields(Client *c)
 				c->ws = ws;
 				break;
 			}
+	}
+}
+
+void
+getclientlabel(Client *c)
+{
+	Atom type;
+	int format;
+	unsigned int i;
+	unsigned long after;
+	unsigned char *data = 0;
+	long unsigned int size = LENGTH(c->label);
+
+	if (XGetWindowProperty(dpy, c->win, clientatom[DuskClientLabel], 0, 1024, 0, XA_STRING,
+				&type, &format, &size, &after, &data) == Success) {
+		if (data) {
+			if (type == XA_STRING) {
+				for (i = 0; i < size; ++i)
+					c->label[i] = data[i];
+			}
+			XFree(data);
+		}
 	}
 }
 

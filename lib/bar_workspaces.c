@@ -227,6 +227,8 @@ hover_workspaces(Bar *bar, BarArg *a, XMotionEvent *ev)
 void
 saveclientclass(Client *c)
 {
+	if (c->label[0])
+		return;
 	XClassHint ch = { NULL, NULL };
 	XGetClassHint(dpy, c->win, &ch);
 	strcpy(c->label, ch.res_class ? ch.res_class : broken);
