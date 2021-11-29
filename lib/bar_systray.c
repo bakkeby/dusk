@@ -7,8 +7,12 @@ size_systray(Bar *bar, BarArg *a)
 	Client *i;
 	if (!systray)
 		return 1;
-	if (enabled(Systray))
+	if (enabled(Systray)) {
 		for (i = systray->icons; i; w += i->w + systrayspacing, i = i->next);
+		if (!w)
+			XMoveWindow(dpy, systray->win, -500, bar->by);
+	}
+
 	return w ? w - systrayspacing : 0;
 }
 
@@ -37,14 +41,15 @@ draw_systray(Bar *bar, BarArg *a)
 		wa.override_redirect = True;
 		wa.event_mask = ButtonPressMask|ExposureMask;
 		wa.border_pixel = 0;
-		wa.background_pixel = scheme[a->scheme][ColBg].pixel;
 		systray->h = MIN(a->h, drw->fonts->h);
 		if (!enabled(SystrayNoAlpha)) {
+			wa.background_pixel = 0;
 			wa.colormap = cmap;
 			systray->win = XCreateWindow(dpy, root, bar->bx + a->x, bar->by + a->y + (a->h - systray->h) / 2, MAX(a->w + a->lpad + a->rpad + 40, 1), systray->h, 0, depth,
 							InputOutput, visual,
 							CWOverrideRedirect|CWBorderPixel|CWBackPixel|CWColormap|CWEventMask, &wa);
 		} else {
+			wa.background_pixel = scheme[a->scheme][ColBg].pixel;
 			systray->win = XCreateSimpleWindow(dpy, root, bar->bx + a->x + a->lpad, bar->by + a->y + (a->h - systray->h) / 2, MIN(a->w + a->lpad + a->rpad + 40, 1), systray->h, 0, 0, scheme[a->scheme][ColBg].pixel);
 			XChangeWindowAttributes(dpy, systray->win, CWOverrideRedirect|CWBackPixel|CWBorderPixel|CWEventMask, &wa);
 		}
@@ -79,7 +84,7 @@ draw_systray(Bar *bar, BarArg *a)
 
 	drw_setscheme(drw, scheme[a->scheme]);
 	for (w = 0, i = systray->icons; i; i = i->next) {
-		wa.background_pixel = scheme[a->scheme][ColBg].pixel;
+		wa.background_pixel = enabled(SystrayNoAlpha) ? scheme[a->scheme][ColBg].pixel : 0;
 		XChangeWindowAttributes(dpy, i->win, CWBackPixel, &wa);
 		XMapRaised(dpy, i->win);
 		i->x = w;
