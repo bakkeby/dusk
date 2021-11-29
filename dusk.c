@@ -613,6 +613,8 @@ applyrules(Client *c)
 
 			if (r->label)
 				strcpy(c->label, r->label);
+			else
+				saveclientclass(c);
 
 			if (enabled(Debug))
 				fprintf(stderr, "applyrules: client rule %d matched:\n    class: %s\n    role: %s\n    instance: %s\n    title: %s\n    wintype: %s\n    flags: %ld\n    floatpos: %s\n    workspace: %s\n    label: %s\n",
@@ -1960,8 +1962,6 @@ manage(Window w, XWindowAttributes *wa)
 		if (!ISTRANSIENT(c))
 			applyrules(c);
 	}
-
-	saveclientclass(c);
 
 	if (DISALLOWED(c)) {
 		killclient(&((Arg) { .v = c }));
