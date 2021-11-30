@@ -2234,14 +2234,15 @@ moveorplace(const Arg *arg)
 void
 movemouse(const Arg *arg)
 {
-	int x, y, ocx, ocy, nx, ny;
-	Client *c;
-	Workspace *w, *ws = selws;
+	int i, x, y, w, h, ocx, ocy, nx, ny, sx, sy, vsnap, hsnap;
+	Client *c, *s;
+	Workspace *ws;
+	Monitor *m;
 	XEvent ev;
 	Time lasttime = 0;
 	double prevopacity;
 
-	if (!(c = ws->sel))
+	if (!(c = selws->sel))
 		return;
 	if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c)) /* no support moving fullscreen windows by mouse */
 		return;
@@ -2249,9 +2250,56 @@ movemouse(const Arg *arg)
 		prevopacity = c->opacity;
 		opacity(c, moveopacity);
 	}
-	restack(ws);
+	restack(selws);
+
+	int gap = (gappoh + gappov + gappih + gappiv) / 4;
+	int ngirders = 0;
+	int lgirder[100] = {0};
+	int rgirder[100] = {0};
+	int tgirder[100] = {0};
+	int bgirder[100] = {0};
+
+	for (m = mons; m; m = m->next) {
+		lgirder[ngirders] = m->mx + gap;
+		rgirder[ngirders] = m->mx + m->mw - gap;
+		tgirder[ngirders] = m->my + gap;
+		bgirder[ngirders] = m->my + m->mh - gap;
+		ngirders++;
+	}
+
+	for (ws = workspaces; ws; ws = ws->next) {
+		if (!ws->visible)
+			continue;
+		lgirder[ngirders] = ws->wx + gap;
+		rgirder[ngirders] = ws->wx + ws->ww - gap;
+		tgirder[ngirders] = ws->wy + gap;
+		bgirder[ngirders] = ws->wy + ws->wh - gap;
+		ngirders++;
+		if (disabled(SnapToWindows) || arg->i == 11)
+			continue;
+		for (s = ws->stack; s; s = s->snext) {
+			if (!ISFLOATING(s) || !ISVISIBLE(s) || s == c)
+				continue;
+			h = HEIGHT(s);
+			w = WIDTH(s);
+			lgirder[ngirders] = s->x;
+			rgirder[ngirders] = s->x + w;
+			tgirder[ngirders] = s->y;
+			bgirder[ngirders] = s->y + h;
+			ngirders++;
+			lgirder[ngirders] = s->x + w + gap;
+			rgirder[ngirders] = s->x - gap;
+			tgirder[ngirders] = s->y + h + gap;
+			bgirder[ngirders] = s->y - gap;
+			ngirders++;
+		}
+	}
+
 	ocx = c->x;
 	ocy = c->y;
+	h = HEIGHT(c);
+	w = WIDTH(c);
+
 	if (XGrabPointer(dpy, root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
 		None, cursor[CurMove]->cursor, CurrentTime) != GrabSuccess)
 		return;
@@ -2271,39 +2319,54 @@ movemouse(const Arg *arg)
 				continue;
 			lasttime = ev.xmotion.time;
 
-			nx = ocx + (ev.xmotion.x - x);
-			ny = ocy + (ev.xmotion.y - y);
-			if (abs(selmon->wx - nx) < snap)
-				nx = selmon->wx;
-			else if (abs((selmon->wx + selmon->ww) - (nx + WIDTH(c))) < snap)
-				nx = selmon->wx + selmon->ww - WIDTH(c);
-			if (abs(selmon->wy - ny) < snap)
-				ny = selmon->wy;
-			else if (abs((selmon->wy + selmon->wh) - (ny + HEIGHT(c))) < snap)
-				ny = selmon->wy + selmon->wh - HEIGHT(c);
-			if (!ISFLOATING(c) && ws->layout->arrange
+			sx = nx = ocx + (ev.xmotion.x - x);
+			sy = ny = ocy + (ev.xmotion.y - y);
+			vsnap = hsnap = snap;
+
+			if (!ISFLOATING(c) && selws->layout->arrange
 					&& (abs(nx - c->x) > snap || abs(ny - c->y) > snap))
 				togglefloating(NULL);
-			if (!ws->layout->arrange || ISFLOATING(c)) {
-				resize(c, nx, ny, c->w, c->h, 1);
-				savefloats(c);
+
+			for (i = 0; i < ngirders; i++) {
+				if (abs(lgirder[i] - nx) < vsnap) {
+					sx = lgirder[i];
+					vsnap = abs(sx - nx);
+				}
+				if (abs(rgirder[i] - nx - w) < vsnap) {
+					sx = rgirder[i] - w;
+					vsnap = abs(sx - nx);
+				}
+				if (abs(tgirder[i] - ny) < hsnap) {
+					sy = tgirder[i];
+					hsnap = abs(sy - ny);
+				}
+				if (abs(bgirder[i] - ny - h) < hsnap) {
+					sy = bgirder[i] - h;
+					hsnap = abs(sy - ny);
+				}
 			}
+
+			nx = sx;
+			ny = sy;
+
+			resize(c, nx, ny, c->w, c->h, 1);
+			savefloats(c);
 			break;
 		}
 	} while (ev.type != ButtonRelease);
 	XUngrabPointer(dpy, CurrentTime);
 
-	w = recttows(c->x, c->y, c->w, c->h);
-	if (w && ISSTICKY(c)) {
-		stickyws->mon = w->mon;
+	ws = recttows(c->x, c->y, c->w, c->h);
+	if (ws && ISSTICKY(c)) {
+		stickyws->mon = ws->mon;
 		drawbars();
-	} else if (w && w != selws) {
+	} else if (ws && ws != selws) {
 		detach(c);
 		detachstack(c);
-		attachx(c, AttachBottom, w);
+		attachx(c, AttachBottom, ws);
 		attachstack(c);
-		selws = w;
-		selmon = w->mon;
+		selws = ws;
+		selmon = ws->mon;
 		focus(c);
 	}
 

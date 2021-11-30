@@ -143,6 +143,8 @@ getfuncbyname(const char *name)
 		return SystrayNoAlpha;
 	else if (strcmp(name, "WorkspaceLabels") == 0)
 		return WorkspaceLabels;
+	else if (strcmp(name, "SnapToWindows") == 0)
+		return SnapToWindows;
 	else if (strcmp(name, "FuncPlaceholder274877906944") == 0)
 		return FuncPlaceholder274877906944;
 	else if (strcmp(name, "FuncPlaceholder549755813888") == 0)

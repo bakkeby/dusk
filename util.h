@@ -37,7 +37,7 @@ static const unsigned long
 	SortScreens = 0x80000, // only applies on startup
 	ViewOnWs = 0x100000, // follow a window to the workspace it is being moved to
 	Xresources = 0x200000, // xrdb patch
-	FuncPlaceholder0x400000 = 0x400000,
+	SnapToWindows = 0x400000, // snap to windows when moving floating clients
 	Debug = 0x800000,
 	AltWorkspaceIcons = 0x1000000, // show the workspace name instead of the icons
 	GreedyMonitor = 0x2000000, // when viewing a workspace the monitor is greedy and gives nothing in return (i.e. disables swap of workspaces)

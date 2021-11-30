@@ -83,6 +83,7 @@ static unsigned long functionality = 0
 	|AllowNoModifierButtons // allow some window operations, like move and resize, to work without having to hold down a modifier key
 	|CenterSizeHintsClients // center tiled clients subject to size hints within their tiled area
 //	|ResizeHints // respect size hints also when windows are tiled
+	|SnapToWindows // snap to windows when moving floating clients
 //	|SortScreens // monitors are numbered from left to right
 //	|ViewOnWs // follow a window to the workspace it is being moved to
 	|Xresources // add support for changing colours via Xresources
