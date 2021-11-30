@@ -2252,7 +2252,7 @@ movemouse(const Arg *arg)
 	}
 	restack(selws);
 
-	int gap = (gappoh + gappov + gappih + gappiv) / 4;
+	int gap = (gappih + gappiv) / 2;
 	int ngirders = 0;
 	int lgirder[100] = {0};
 	int rgirder[100] = {0};
@@ -2260,20 +2260,20 @@ movemouse(const Arg *arg)
 	int bgirder[100] = {0};
 
 	for (m = mons; m; m = m->next) {
-		lgirder[ngirders] = m->mx + gap;
-		rgirder[ngirders] = m->mx + m->mw - gap;
-		tgirder[ngirders] = m->my + gap;
-		bgirder[ngirders] = m->my + m->mh - gap;
+		lgirder[ngirders] = m->mx + (enabled(BarPadding) ? sidepad : 0);
+		rgirder[ngirders] = m->mx + m->mw - (enabled(BarPadding) ? sidepad : 0);
+		tgirder[ngirders] = m->my + (enabled(BarPadding) ? vertpad : 0);
+		bgirder[ngirders] = m->my + m->mh - (enabled(BarPadding) ? vertpad : 0);
 		ngirders++;
 	}
 
 	for (ws = workspaces; ws; ws = ws->next) {
 		if (!ws->visible)
 			continue;
-		lgirder[ngirders] = ws->wx + gap;
-		rgirder[ngirders] = ws->wx + ws->ww - gap;
-		tgirder[ngirders] = ws->wy + gap;
-		bgirder[ngirders] = ws->wy + ws->wh - gap;
+		lgirder[ngirders] = ws->wx + gappov;
+		rgirder[ngirders] = ws->wx + ws->ww - gappov;
+		tgirder[ngirders] = ws->wy + gappoh;
+		bgirder[ngirders] = ws->wy + ws->wh - gappoh;
 		ngirders++;
 		if (disabled(SnapToWindows) || arg->i == 11)
 			continue;
