@@ -2,6 +2,7 @@
 
 int firstpwlwintitle = 0;
 int prevscheme = 0;
+int textw_single_char = 0;
 
 int
 size_flexwintitle(Bar *bar, BarArg *a)
@@ -270,8 +271,8 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 	if (barg->lastscheme != SchemeMarked && c != ws->sel)
 		c->scheme = barg->lastscheme;
 
-	if (w <= TEXTW("A") + pad) // reduce text padding if wintitle is too small
-		pad = (w - TEXTW("A") < 0 ? 0 : (w - TEXTW("A")) / 2);
+	if (w <= textw_single_char + pad) // reduce text padding if wintitle is too small
+		pad = (w - textw_single_char < 0 ? 0 : (w - textw_single_char) / 2);
 	else if (enabled(CenteredWindowName) && TEXTW(c->name) + ipad < w)
 		pad = (w - TEXTW(c->name) - ipad) / 2;
 	drw_text(drw, x, barg->y, w, barg->h, pad + ipad, c->name, 0, False, 1);

@@ -3121,6 +3121,8 @@ setup(void)
 	/* One off calculating workspace label widths, used by WorkspaceLabels functionality */
 	occupied_workspace_label_format_length = TEXT2DW(occupied_workspace_label_format) - TEXTW(workspace_label_placeholder) * 2;
 	vacant_workspace_label_format_length = TEXT2DW(vacant_workspace_label_format) - TEXTW(workspace_label_placeholder);
+	textw_single_char = TEXTW("A");
+
 
 	updategeom();
 	createworkspaces();
