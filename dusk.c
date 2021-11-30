@@ -2278,7 +2278,7 @@ movemouse(const Arg *arg)
 		if (disabled(SnapToWindows) || arg->i == 11)
 			continue;
 		for (s = ws->stack; s; s = s->snext) {
-			if (!ISFLOATING(s) || !ISVISIBLE(s) || s == c)
+			if ((!ISFLOATING(s) && ws->layout->arrange) || !ISVISIBLE(s) || s == c)
 				continue;
 			h = HEIGHT(s);
 			w = WIDTH(s);
