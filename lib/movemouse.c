@@ -34,7 +34,7 @@ movemouse(const Arg *arg)
 	}
 
 	/* Snap girders */
-	int gap = (gappih + gappiv) / 2;
+	int gap = gappfl;
 	int ngirders = 0;
 	int lgirder[100] = {0};
 	int rgirder[100] = {0};
