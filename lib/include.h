@@ -14,6 +14,7 @@
 #include "bar_wintitle_floating.h"
 #include "bar_wintitle_hidden.h"
 #include "bar_wintitle_sticky.h"
+#include "bar_wintitle_single.h"
 #include "bar_systray.h"
 #include "bar_wintitleactions.h"
 #include "bar_workspaces.h"
