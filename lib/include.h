@@ -20,7 +20,7 @@
 #include "bar_wspreview.h"
 #include "bar_powerline.h"
 
-/* Other patches */
+/* Other functionality */
 #include "attachx.h"
 #include "cfacts.h"
 #include "clientopacity.h"
@@ -30,6 +30,7 @@
 #include "dragcfact.h"
 #include "dragmfact.h"
 #include "ewmh.h"
+#include "group.h"
 #include "fakefullscreenclient.h"
 #include "floatpos.h"
 #include "focusdir.h"

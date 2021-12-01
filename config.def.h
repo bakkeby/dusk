@@ -710,6 +710,9 @@ static Key keys[] = {
 	{ KeyPress,   MODKEY|Shift,                 XK_q,            restart,                {0} }, // restart dusk
 	{ KeyPress,   MODKEY|Ctrl|Alt,              XK_q,            quit,                   {0} }, // exit dusk
 
+	{ KeyPress,   MODKEY,                       XK_v,            group,                  {0} }, // groups floating clients together
+	{ KeyPress,   MODKEY|Shift,                 XK_v,            ungroup,                {0} }, // ungroups floating clients
+
 	{ KeyPress,   MODKEY,                       XK_a,            markall,                {0} }, // marks all clients on the selected workspace
 	{ KeyPress,   MODKEY|Ctrl,                  XK_a,            markall,                {1} }, // marks all floating clients on the selected workspace
 	{ KeyPress,   MODKEY|Alt,                   XK_a,            markall,                {2} }, // marks all hidden clients on the selected workspace
