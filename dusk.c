@@ -607,7 +607,6 @@ applyrules(Client *c)
 
 			if (REVERTWORKSPACE(c) && !c->ws->visible)
 				c->revertws = c->ws->mon->selws;
-
 			if (r->label)
 				strcpy(c->label, r->label);
 			else
@@ -629,6 +628,9 @@ applyrules(Client *c)
 				break; // only allow one rule match
 		}
 	}
+
+	if (!RULED(c))
+		saveclientclass(c);
 
 	if (ch.res_class)
 		XFree(ch.res_class);
