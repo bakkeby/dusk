@@ -59,21 +59,17 @@ createworkspace(int num, const WorkspaceRule *r)
 
 	ws = ecalloc(1, sizeof(Workspace));
 	ws->num = num;
+	ws->pinned = 0;
 
 	if (r->monitor != -1) {
 		for (m = mons; m && m->num != r->monitor; m = m->next);
-		if (m) {
-			ws->mon = m;
-			ws->wx = m->wx;
-			ws->wy = m->wy;
-			ws->wh = m->wh;
-			ws->ww = m->ww;
-		}
+		ws->mon = m;
+		if (r->pinned > 0 && m && m->num == r->monitor)
+			ws->pinned = 1;
 	}
 
 	strcpy(ws->name, r->name);
 
-	ws->pinned = (r->pinned == 1 ? 1 : 0);
 	ws->layout = (r->layout == -1 ? &layouts[0] : &layouts[MIN(r->layout, LENGTH(layouts))]);
 	ws->prevlayout = &layouts[1 % LENGTH(layouts)];
 	ws->mfact = (r->mfact == -1 ? mfact : r->mfact);
