@@ -351,8 +351,9 @@ typedef struct {
 	const char *instance;
 	const char *title;
 	const char *wintype;
-	double opacity;
-	unsigned long flags;
+	const int transient;
+	const double opacity;
+	const unsigned long flags;
 	const char *floatpos;
 	const char scratchkey;
 	const char *workspace;
@@ -563,7 +564,7 @@ applyrules(Client *c)
 	const char *class, *instance;
 	Atom wintype, game_id;
 	char role[64] = {0};
-	unsigned int i;
+	unsigned int i, transient;
 	const Rule *r;
 	Workspace *ws = NULL;
 	XClassHint ch = { NULL, NULL };
@@ -575,6 +576,7 @@ applyrules(Client *c)
 	wintype  = getatomprop(c, netatom[NetWMWindowType], XA_ATOM);
 	gettextprop(c->win, wmatom[WMWindowRole], role, sizeof(role));
 	game_id = getatomprop(c, clientatom[SteamGameID], AnyPropertyType);
+	transient = ISTRANSIENT(c) ? 1 : 0;
 
 	/* Steam games may come through with custom class, instance and name making it hard to create
 	 * generic rules for them. Overriding the class with "steam_app_" to make this easier. */
@@ -590,7 +592,8 @@ applyrules(Client *c)
 		&& (!r->class || strstr(class, r->class))
 		&& (!r->role || strstr(role, r->role))
 		&& (!r->instance || strstr(instance, r->instance))
-		&& (!r->wintype || wintype == XInternAtom(dpy, r->wintype, False)))
+		&& (!r->wintype || wintype == XInternAtom(dpy, r->wintype, False))
+		&& (r->transient == transient))
 		{
 			c->flags |= Ruled | r->flags;
 			c->scratchkey = r->scratchkey;
@@ -629,8 +632,11 @@ applyrules(Client *c)
 		}
 	}
 
-	if (!RULED(c))
+	if (!RULED(c)) {
+		if (transient)
+			addflag(c, Centered);
 		saveclientclass(c);
+	}
 
 	if (ch.res_class)
 		XFree(ch.res_class);
@@ -1946,7 +1952,6 @@ manage(Window w, XWindowAttributes *wa)
 	if (!c->ws) {
 		if (XGetTransientForHint(dpy, w, &trans) && (t = wintoclient(trans))) {
 			addflag(c, Transient);
-			addflag(c, Centered);
 			c->ws = t->ws;
 		} else
 			c->ws = selws;
@@ -1955,11 +1960,10 @@ manage(Window w, XWindowAttributes *wa)
 	restorewindowfloatposition(c, c->ws->mon);
 
 	if (!RULED(c)) {
+		applyrules(c);
+
 		if (c->x == c->ws->mon->wx && c->y == c->ws->mon->wy)
 			addflag(c, Centered);
-
-		if (!ISTRANSIENT(c))
-			applyrules(c);
 	}
 
 	if (DISALLOWED(c)) {
