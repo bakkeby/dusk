@@ -113,12 +113,8 @@ getwsmask(Monitor *m)
 	unsigned long wsmask = 0;
 	Workspace *ws;
 
-	for (ws = workspaces; ws; ws = ws->next) {
-		if (m && ws->mon != m)
-			continue;
-		if (ws->visible)
-			wsmask |= (1L << ws->num);
-	}
+	for (ws = nextvismonws(m, workspaces); ws; ws = nextvismonws(m, ws->next))
+		wsmask |= (1L << ws->num);
 
 	return wsmask;
 }
@@ -134,9 +130,7 @@ viewwsmask(Monitor *m, unsigned long wsmask)
 		wsmask = m->wsmask;
 	m->wsmask = currmask;
 
-	for (ws = workspaces; ws; ws = ws->next) {
-		if (ws->mon != m)
-			continue;
+	for (ws = nextmonws(m, workspaces); ws; ws = nextmonws(m, ws->next)) {
 		wasvisible = ws->visible;
 		ws->visible = wsmask & (1L << ws->num);
 		if (wasvisible && !ws->visible)
@@ -214,23 +208,13 @@ hidews(Workspace *ws)
 	if (ws != selws)
 		return;
 
-	/* Find the first available workspace to the right */
-	for (w = ws->next; w; w = w->next) {
-		if (w->mon != ws->mon)
-			continue;
-		if (w->visible) {
-			selws = ws->mon->selws = w;
-			return;
-		}
-	}
-
-	/* Otherwise find first available workspace to the left */
-	for (w = workspaces; w && w != ws; w = w->next) {
-		if (w->mon != ws->mon)
-			continue;
-		if (w->visible)
-			selws = ws->mon->selws = w;
-	}
+	/* Find the first available workspace to the right, otherwise on the left */
+	w = nextvismonws(ws->mon, ws->next);
+	if (!w)
+		w = nextvismonws(ws->mon, workspaces);
+	if (w == ws)
+		w = NULL;
+	selws = ws->mon->selws = w;
 }
 
 void
@@ -509,11 +493,8 @@ viewallwsonmon(const Arg *arg)
 	Monitor *m = selmon;
 	unsigned long wsmask = 0;
 
-	for (ws = workspaces; ws; ws = ws->next) {
-		if (ws->mon != m)
-			continue;
+	for (ws = nextmonws(m, workspaces); ws; ws = nextmonws(m, ws->next))
 		wsmask |= (1L << ws->num);
-	}
 
 	viewwsmask(m, wsmask);
 }
@@ -527,10 +508,7 @@ viewalloccwsonmon(const Arg *arg)
 	long unsigned int currmask = getwsmask(m);
 	int wscount = 0;
 
-	for (ws = workspaces; ws; ws = ws->next) {
-		if (ws->mon != m)
-			continue;
-
+	for (ws = nextmonws(m, workspaces); ws; ws = nextmonws(m, ws->next)) {
 		if (ws->clients) {
 			wsmask |= (1L << ws->num);
 			wscount++;
@@ -604,18 +582,13 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 
 			/* First check if there are more than one visible workspace on the other monitor,
 			 * in which case we just leave the remaining workspaces selected. */
-			for (ows = workspaces; ows; ows = ows->next) {
-				if (ows->mon != ws->mon || ows == ws)
-					continue;
-				if (ows->visible)
-					break;
-			}
+			for (ows = nextvismonws(ws->mon, workspaces); ows && ows == ws; nextvismonws(ws->mon, ows->next));
 
 			/* Otherwise find the next available workspace on said monitor and enable that */
 			if (!ows)
-				for (ows = ws->next; ows && ows->mon != ws->mon; ows = ows->next);
+				ows = nextmonws(ws->mon, ws->next);
 			if (!ows)
-				for (ows = workspaces; ows && ows != ws && ows->mon != ws->mon; ows = ows->next);
+				ows = nextmonws(ws->mon, workspaces);
 			if (ows == ws)
 				ows = NULL;
 
@@ -655,14 +628,14 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 	if (!enablews) {
 		/* Note that we hide workspaces after showing workspaces to avoid flickering when
 		 * changing workspace (i.e. seeing the wallpaper for a fraction of a second). */
-		for (w = workspaces; w; w = w->next)
-			if (w != ws && w->mon == ws->mon && w->visible)
+		for (w = nextvismonws(ws->mon, workspaces); w; w = nextvismonws(ws->mon, w->next))
+			if (w != ws)
 				hidews(w);
 	}
 
 	/* Clear the selected workspace for a monitor if there are no visible workspaces */
 	for (mon = mons; mon; mon = mon->next) {
-		for (w = workspaces; w && !(w->mon == mon && w->visible); w = w->next);
+		w = nextvismonws(mon, workspaces);
 		if (!w)
 			mon->selws = NULL;
 	}
@@ -724,8 +697,74 @@ Workspace *
 nextmonws(Monitor *mon, Workspace *ws)
 {
 	Workspace *w;
+	for (w = ws; w && w->mon != mon; w = w->next);
+	return w;
+}
+
+Workspace *
+nextvismonws(Monitor *mon, Workspace *ws)
+{
+	Workspace *w;
 	for (w = ws; w && !(w->mon == mon && w->visible); w = w->next);
 	return w;
+}
+
+void
+assignworkspacetomonitor(Workspace *ws, Monitor *m)
+{
+	if (ws->mon == m)
+		return;
+
+	adjustwsformonitor(ws, m);
+	if (ws->mon && ws->mon->selws == ws)
+		ws->mon->selws = NULL;
+	ws->mon = m;
+
+	ws->wx = ws->mon->wx;
+	ws->wy = ws->mon->wy;
+	ws->wh = ws->mon->wh;
+	ws->ww = ws->mon->ww;
+}
+
+void
+redistributeworkspaces(Monitor *new)
+{
+	int i;
+	const WorkspaceRule *r;
+	Monitor *m = mons;
+	Workspace *ws;
+
+	for (i = 0, ws = workspaces; ws && i < LENGTH(wsrules); ws = ws->next, i++) {
+		r = &wsrules[i];
+
+		if (ws->pinned)
+			continue;
+
+		if (r->monitor == new->num) {
+			assignworkspacetomonitor(ws, new);
+			ws->pinned = r->pinned;
+			continue;
+		}
+
+		if (r->monitor > -1 && r->monitor < new->num)
+			continue;
+
+		assignworkspacetomonitor(ws, m);
+		m = (m->next == NULL ? mons : m->next);
+	}
+
+	/* Set selected workspaces for monitors, if not already set */
+	for (m = mons; m; m = m->next) {
+		if (m->selws)
+			continue;
+		ws = nextvismonws(m, workspaces);
+		if (!ws)
+			ws = nextmonws(m, workspaces);
+		if (ws) {
+			m->selws = ws;
+			m->selws->visible = 1;
+		}
+	}
 }
 
 void
@@ -743,7 +782,7 @@ setworkspaceareasformon(Monitor *mon)
 	int rrest, crest, cols, rows, cw, ch, cn, rn, cc, nw, x, y;
 
 	/* get a count of the number of visible workspaces for this monitor */
-	for (nw = 0, ws = nextmonws(mon, workspaces); ws; ws = nextmonws(mon, ws->next), ++nw);
+	for (nw = 0, ws = nextvismonws(mon, workspaces); ws; ws = nextvismonws(mon, ws->next), ++nw);
 	if (!nw)
 		return;
 
@@ -775,7 +814,7 @@ setworkspaceareasformon(Monitor *mon)
 	y = mon->wy;
 
 	cn = rn = cc = 0; // reset column no, row no, workspace count
-	for (ws = nextmonws(mon, workspaces); ws; ws = nextmonws(mon, ws->next)) {
+	for (ws = nextvismonws(mon, workspaces); ws; ws = nextvismonws(mon, ws->next)) {
 		if ((rows * cols) > nw && cc + 1 == nw) {
 			rows = 1;
 			ch = mon->wh;

@@ -43,6 +43,9 @@ static void viewwsbyname(const Arg *arg);
 static void viewwsdir(const Arg *arg);
 static void viewwsonmon(Workspace *ws, Monitor *m, int enablews);
 
+static void assignworkspacetomonitor(Workspace *ws, Monitor *m);
+static void redistributeworkspaces(Monitor *new);
 static void setworkspaceareas();
 static void setworkspaceareasformon(Monitor *mon);
 static Workspace * nextmonws(Monitor *mon, Workspace *ws);
+static Workspace * nextvismonws(Monitor *mon, Workspace *ws);

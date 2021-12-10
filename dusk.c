@@ -871,7 +871,7 @@ cleanupmon(Monitor *mon)
 		for (m = mons; m && m->next != mon; m = m->next);
 		m->next = mon->next;
 	}
-	for (ws = workspaces; ws; ws = ws->next)
+	for (ws = workspaces; ws; ws = ws->next) {
 		if (ws->mon == mon) {
 			adjustwsformonitor(ws, mons);
 			ws->mon = mons;
@@ -879,6 +879,7 @@ cleanupmon(Monitor *mon)
 			ws->pinned = 0;
 			hidewsclients(ws->stack);
 		}
+	}
 	for (bar = mon->bar; bar; bar = mon->bar) {
 		if (!bar->external) {
 			XUnmapWindow(dpy, bar->win);
@@ -3316,9 +3317,10 @@ updategeom(void)
 					m->mw = m->ww = unique[m->num].width;
 					m->mh = m->wh = unique[m->num].height;
 					updatebarpos(m);
-					setworkspaceareasformon(mons);
 					createpreview(m);
 				}
+				if (m->num >= n)
+					redistributeworkspaces(m);
 			}
 		} else { /* less monitors available nn < n */
 			for (i = nn; i < n; i++) {
@@ -3339,7 +3341,6 @@ updategeom(void)
 			mons->mw = mons->ww = sw;
 			mons->mh = mons->wh = sh;
 			updatebarpos(mons);
-			setworkspaceareasformon(mons);
 			createpreview(mons);
 		}
 	}
