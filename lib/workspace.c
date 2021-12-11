@@ -213,8 +213,9 @@ hidews(Workspace *ws)
 	if (!w)
 		w = nextvismonws(ws->mon, workspaces);
 	if (w == ws)
-		w = NULL;
-	selws = ws->mon->selws = w;
+		ws->mon->selws = NULL;
+	else
+		selws = ws->mon->selws = w;
 }
 
 void
@@ -559,7 +560,7 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 		hidews(ws);
 	} else if (ws->pinned) {
 		/* The workspace is pinned, show it on the monitor it is assigned to */
-		if (selws->mon != ws->mon)
+		if (selws && selws->mon != ws->mon)
 			do_warp = 1;
 		if (!ws->visible)
 			showws(ws);
@@ -582,7 +583,9 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 
 			/* First check if there are more than one visible workspace on the other monitor,
 			 * in which case we just leave the remaining workspaces selected. */
-			for (ows = nextvismonws(ws->mon, workspaces); ows && ows == ws; nextvismonws(ws->mon, ows->next));
+			ows = nextvismonws(ws->mon, workspaces);
+			if (ows == ws)
+				ows = nextvismonws(ws->mon, ws->next);
 
 			/* Otherwise find the next available workspace on said monitor and enable that */
 			if (!ows)
@@ -599,6 +602,7 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 			selws = ws;
 			showws(ws);
 			clientsfsrestore(ws->clients);
+
 			if (ows)
 				ows->visible = 1;
 			arrangeall = 1;
@@ -674,6 +678,8 @@ drawws(Workspace *ws, Monitor *m, int enablews, int arrangeall, int do_warp)
 
 	if (do_warp && ws && ws->sel)
 		warp(ws->sel);
+	if (!selws)
+		selws = workspaces;
 }
 
 Workspace *

@@ -297,7 +297,7 @@ setviewport(void)
 void
 updatecurrentdesktop(void)
 {
-	long data[] = { selws->num };
+	long data[] = { selws ? selws->num : 0 };
 	XChangeProperty(dpy, root, netatom[NetCurrentDesktop], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
 }
 

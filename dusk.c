@@ -1522,7 +1522,7 @@ expose(XEvent *e)
 void
 focus(Client *c)
 {
-	if (c && !c->ws->visible)
+	if ((c && !c->ws->visible) || !selws)
 		return;
 
 	Workspace *ws = c ? c->ws : selws;
