@@ -363,7 +363,7 @@ movetows(Client *c, Workspace *ws)
 		attachx(c, AttachBottom, ws);
 		attachstack(c);
 
-		clientsfsrestore(c);
+		clientfsrestore(c);
 
 		if (!enabled(ViewOnWs) && !ws->visible)
 			hide(c);
