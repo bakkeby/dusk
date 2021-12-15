@@ -1272,6 +1272,8 @@ configurenotify(XEvent *e)
 				for (c = ws->clients; c; c = c->next) {
 					c->sfx += c->ws->wx;
 					c->sfy += c->ws->wy;
+					if (!ISVISIBLE(c))
+						continue;
 					if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c))
 						resizeclient(c, ws->mon->mx, ws->mon->my, ws->mon->mw, ws->mon->mh);
 					else if (ISFLOATING(c)) {
