@@ -248,15 +248,6 @@ enum {
 	LTAXIS_LAST,
 }; /* named flextile constants */
 
-enum {
-	GRP_NOSELECTION,
-	GRP_MASTER,
-	GRP_STACK1,
-	GRP_STACK2,
-	GRP_FLOAT,
-	GRP_HIDDEN,
-}; /* arrange groups */
-
 typedef struct ClientState ClientState;
 struct ClientState {
 	int isfixed, isfloating, isurgent, neverfocus, oldstate, isfullscreen;

@@ -219,9 +219,9 @@ void
 layout_no_split(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n)
 {
 	if (ws->nmaster >= n)
-		(&flextiles[ws->ltaxis[MASTER]])->arrange(ws, x, y, h, w, ih, iv, n, n, 0, ws->ltaxis[MASTER], GRP_MASTER);
+		(&flextiles[ws->ltaxis[MASTER]])->arrange(ws, x, y, h, w, ih, iv, n, n, 0, ws->ltaxis[MASTER], MASTER);
 	else
-		(&flextiles[ws->ltaxis[STACK]])->arrange(ws, x, y, h, w, ih, iv, n, n, 0, ws->ltaxis[STACK], GRP_STACK1);
+		(&flextiles[ws->ltaxis[STACK]])->arrange(ws, x, y, h, w, ih, iv, n, n, 0, ws->ltaxis[STACK], STACK);
 }
 
 void
@@ -249,8 +249,8 @@ layout_split_vertical_fixed(Workspace *ws, int x, int y, int h, int w, int ih, i
 		sx = x + w + iv;
 	}
 
-	(&flextiles[ws->ltaxis[MASTER]])->arrange(ws, x, y, h, w, ih, iv, n, ws->nmaster, 0, ws->ltaxis[MASTER], GRP_MASTER);
-	(&flextiles[ws->ltaxis[STACK]])->arrange(ws, sx, y, h, sw, ih, iv, n, n - ws->nmaster, ws->nmaster, ws->ltaxis[STACK], GRP_STACK1);
+	(&flextiles[ws->ltaxis[MASTER]])->arrange(ws, x, y, h, w, ih, iv, n, ws->nmaster, 0, ws->ltaxis[MASTER], MASTER);
+	(&flextiles[ws->ltaxis[STACK]])->arrange(ws, sx, y, h, sw, ih, iv, n, n - ws->nmaster, ws->nmaster, ws->ltaxis[STACK], STACK);
 }
 
 void
@@ -287,9 +287,9 @@ layout_split_vertical_dual_stack_fixed(Workspace *ws, int x, int y, int h, int w
 		sx = x + w + iv;
 	}
 
-	(&flextiles[ws->ltaxis[MASTER]])->arrange(ws, x, y, h, w, ih, iv, n, ws->nmaster, 0, ws->ltaxis[MASTER], GRP_MASTER);
-	(&flextiles[ws->ltaxis[STACK]])->arrange(ws, sx, y, sh, sw, ih, iv, n, sc, ws->nmaster, ws->ltaxis[STACK], GRP_STACK1);
-	(&flextiles[ws->ltaxis[STACK2]])->arrange(ws, sx, oy, sh, sw, ih, iv, n, n - ws->nmaster - sc, ws->nmaster + sc, ws->ltaxis[STACK2], GRP_STACK2);
+	(&flextiles[ws->ltaxis[MASTER]])->arrange(ws, x, y, h, w, ih, iv, n, ws->nmaster, 0, ws->ltaxis[MASTER], MASTER);
+	(&flextiles[ws->ltaxis[STACK]])->arrange(ws, sx, y, sh, sw, ih, iv, n, sc, ws->nmaster, ws->ltaxis[STACK], STACK);
+	(&flextiles[ws->ltaxis[STACK2]])->arrange(ws, sx, oy, sh, sw, ih, iv, n, n - ws->nmaster - sc, ws->nmaster + sc, ws->ltaxis[STACK2], STACK2);
 }
 
 void
@@ -317,8 +317,8 @@ layout_split_horizontal_fixed(Workspace *ws, int x, int y, int h, int w, int ih,
 		sy = y + h + ih;
 	}
 
-	(&flextiles[ws->ltaxis[MASTER]])->arrange(ws, x, y, h, w, ih, iv, n, ws->nmaster, 0, ws->ltaxis[MASTER], GRP_MASTER);
-	(&flextiles[ws->ltaxis[STACK]])->arrange(ws, x, sy, sh, w, ih, iv, n, n - ws->nmaster, ws->nmaster, ws->ltaxis[STACK], GRP_STACK1);
+	(&flextiles[ws->ltaxis[MASTER]])->arrange(ws, x, y, h, w, ih, iv, n, ws->nmaster, 0, ws->ltaxis[MASTER], MASTER);
+	(&flextiles[ws->ltaxis[STACK]])->arrange(ws, x, sy, sh, w, ih, iv, n, n - ws->nmaster, ws->nmaster, ws->ltaxis[STACK], STACK);
 }
 
 void
@@ -355,9 +355,9 @@ layout_split_horizontal_dual_stack_fixed(Workspace *ws, int x, int y, int h, int
 		sy = y + h + ih;
 	}
 
-	(&flextiles[ws->ltaxis[MASTER]])->arrange(ws, x, y, h, w, ih, iv, n, ws->nmaster, 0, ws->ltaxis[MASTER], GRP_MASTER);
-	(&flextiles[ws->ltaxis[STACK]])->arrange(ws, x, sy, sh, sw, ih, iv, n, sc, ws->nmaster, ws->ltaxis[STACK], GRP_STACK1);
-	(&flextiles[ws->ltaxis[STACK2]])->arrange(ws, ox, sy, sh, sw, ih, iv, n, n - ws->nmaster - sc, ws->nmaster + sc, ws->ltaxis[STACK2], GRP_STACK2);
+	(&flextiles[ws->ltaxis[MASTER]])->arrange(ws, x, y, h, w, ih, iv, n, ws->nmaster, 0, ws->ltaxis[MASTER], MASTER);
+	(&flextiles[ws->ltaxis[STACK]])->arrange(ws, x, sy, sh, sw, ih, iv, n, sc, ws->nmaster, ws->ltaxis[STACK], STACK);
+	(&flextiles[ws->ltaxis[STACK2]])->arrange(ws, ox, sy, sh, sw, ih, iv, n, n - ws->nmaster - sc, ws->nmaster + sc, ws->ltaxis[STACK2], STACK2);
 }
 
 void
@@ -395,9 +395,9 @@ layout_split_centered_vertical_fixed(Workspace *ws, int x, int y, int h, int w, 
 		sx = x + w + iv;
 	}
 
-	(&flextiles[ws->ltaxis[MASTER]])->arrange(ws, x, y, h, w, ih, iv, n, ws->nmaster, 0, ws->ltaxis[MASTER], GRP_MASTER);
-	(&flextiles[ws->ltaxis[STACK]])->arrange(ws, sx, y, h, sw, ih, iv, n, sc, ws->nmaster, ws->ltaxis[STACK], GRP_STACK1);
-	(&flextiles[ws->ltaxis[STACK2]])->arrange(ws, ox, y, h, sw, ih, iv, n, n - ws->nmaster - sc, ws->nmaster + sc, ws->ltaxis[STACK2], GRP_STACK2);
+	(&flextiles[ws->ltaxis[MASTER]])->arrange(ws, x, y, h, w, ih, iv, n, ws->nmaster, 0, ws->ltaxis[MASTER], MASTER);
+	(&flextiles[ws->ltaxis[STACK]])->arrange(ws, sx, y, h, sw, ih, iv, n, sc, ws->nmaster, ws->ltaxis[STACK], STACK);
+	(&flextiles[ws->ltaxis[STACK2]])->arrange(ws, ox, y, h, sw, ih, iv, n, n - ws->nmaster - sc, ws->nmaster + sc, ws->ltaxis[STACK2], STACK2);
 }
 
 void
@@ -435,9 +435,9 @@ layout_split_centered_horizontal_fixed(Workspace *ws, int x, int y, int h, int w
 		sy = y + h + ih;
 	}
 
-	(&flextiles[ws->ltaxis[MASTER]])->arrange(ws, x, y, h, w, ih, iv, n, ws->nmaster, 0, ws->ltaxis[MASTER], GRP_MASTER);
-	(&flextiles[ws->ltaxis[STACK]])->arrange(ws, x, sy, sh, w, ih, iv, n, sc, ws->nmaster, ws->ltaxis[STACK], GRP_STACK1);
-	(&flextiles[ws->ltaxis[STACK2]])->arrange(ws, x, oy, sh, w, ih, iv, n, n - ws->nmaster - sc, ws->nmaster + sc, ws->ltaxis[STACK2], GRP_STACK2);
+	(&flextiles[ws->ltaxis[MASTER]])->arrange(ws, x, y, h, w, ih, iv, n, ws->nmaster, 0, ws->ltaxis[MASTER], MASTER);
+	(&flextiles[ws->ltaxis[STACK]])->arrange(ws, x, sy, sh, w, ih, iv, n, sc, ws->nmaster, ws->ltaxis[STACK], STACK);
+	(&flextiles[ws->ltaxis[STACK2]])->arrange(ws, x, oy, sh, w, ih, iv, n, n - ws->nmaster - sc, ws->nmaster + sc, ws->ltaxis[STACK2], STACK2);
 }
 
 void
@@ -457,7 +457,7 @@ layout_floating_master_fixed(Workspace *ws, int x, int y, int h, int w, int ih, 
 	int mh, mw;
 
 	/* Draw stack area first */
-	(&flextiles[ws->ltaxis[STACK]])->arrange(ws, x, y, h, w, ih, iv, n, n - ws->nmaster, ws->nmaster, ws->ltaxis[STACK], GRP_STACK1);
+	(&flextiles[ws->ltaxis[STACK]])->arrange(ws, x, y, h, w, ih, iv, n, n - ws->nmaster, ws->nmaster, ws->ltaxis[STACK], STACK);
 
 	if (w > h) {
 		mw = w * ws->mfact;
@@ -469,7 +469,7 @@ layout_floating_master_fixed(Workspace *ws, int x, int y, int h, int w, int ih, 
 	x = x + (w - mw) / 2;
 	y = y + (h - mh) / 2;
 
-	(&flextiles[ws->ltaxis[MASTER]])->arrange(ws, x, y, mh, mw, ih, iv, n, ws->nmaster, 0, ws->ltaxis[MASTER], GRP_MASTER);
+	(&flextiles[ws->ltaxis[MASTER]])->arrange(ws, x, y, mh, mw, ih, iv, n, ws->nmaster, 0, ws->ltaxis[MASTER], MASTER);
 }
 
 void

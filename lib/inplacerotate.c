@@ -69,8 +69,8 @@ inplacerotate(const Arg *arg)
 		if (arg->i < 0 && selidx >= tidx) insertclient(ttail, thead, 1);
 		if (arg->i > 0 && selidx >= tidx) insertclient(thead, ttail, 0);
 	}
-	if (arg->i < 0 && selidx < ws->nmaster)  insertclient(mtail, mhead, 1);
-	if (arg->i > 0 && selidx < ws->nmaster)  insertclient(mhead, mtail, 0);
+	if (arg->i < 0 && selidx < ws->nmaster) insertclient(mtail, mhead, 1);
+	if (arg->i > 0 && selidx < ws->nmaster) insertclient(mhead, mtail, 0);
 
 	// Restore focus position
 	i = 0;

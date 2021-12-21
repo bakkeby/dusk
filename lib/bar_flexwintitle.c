@@ -51,13 +51,13 @@ getclientcounts(Workspace *ws, int *n, int *clientsnmaster, int *clientsnstack, 
 		}
 
 		switch (c->area) {
-		case GRP_MASTER:
+		case MASTER:
 			++cm;
 			break;
-		case GRP_STACK1:
+		case STACK:
 			++cs1;
 			break;
-		case GRP_STACK2:
+		case STACK2:
 			++cs2;
 			break;
 		}
