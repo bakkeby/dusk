@@ -53,7 +53,7 @@ static const unsigned long
 	SpawnCwd = 0x800000000, // spawn applications in the currently selected client's working directory
 	SystrayNoAlpha = 0x1000000000, // option to not use alpha (transparency) for the systray
 	WorkspaceLabels = 0x2000000000, // adds the class of the master client next to the workspace icon
-	FuncPlaceholder274877906944 = 0x4000000000,
+	FlexWinBorders = 0x4000000000, // option to use the SchemeFlex* colour schemes, if disabled then SchemeTitle* is used instead
 	FuncPlaceholder549755813888 = 0x8000000000,
 	FuncPlaceholder1099511627776 = 0x10000000000,
 	FuncPlaceholder2199023255552 = 0x20000000000,

@@ -1,5 +1,4 @@
 
-enum { GRP_NOSELECTION, GRP_MASTER, GRP_STACK1, GRP_STACK2, GRP_FLOAT, GRP_HIDDEN };
 static int bh; /* bar geometry */
 
 enum {

@@ -120,8 +120,10 @@ void
 drawbar(Monitor *m)
 {
 	Bar *bar;
-	for (bar = m->bar; bar; bar = bar->next)
-		drawbarwin(bar);
+
+	if (m->showbar)
+		for (bar = m->bar; bar; bar = bar->next)
+			drawbarwin(bar);
 }
 
 void
@@ -138,18 +140,17 @@ drawbarwin(Bar *bar)
 	if (!bar || !bar->win || bar->external)
 		return;
 
-	int r, w, mw, total_drawn = 0, groupactive, ignored;
+	int r, w, mw, total_drawn = 0;
 	int rx, lx, rw, lw; // bar size, split between left and right if a center module is added
 	const BarRule *br;
 	Monitor *lastmon;
 
 	if (enabled(BarActiveGroupBorderColor))
-		getclientcounts(bar->mon->selws, &groupactive, &ignored, &ignored, &ignored, &ignored, &ignored, &ignored);
+		bar->scheme = clientscheme(bar->mon->selws->sel, bar->mon->selws->sel);
 	else if (enabled(BarMasterGroupBorderColor))
-		groupactive = GRP_MASTER;
+		bar->scheme = clientscheme(bar->mon->selws->clients, NULL);
 	else
-		groupactive = GRP_NOSELECTION;
-	bar->scheme = getschemefor(bar->mon->selws, groupactive, bar->mon == selmon);
+		bar->scheme = SchemeTitleNorm;
 
 	if (bar->borderpx) {
 		XSetForeground(drw->dpy, drw->gc, scheme[bar->scheme][ColBorder].pixel);
@@ -634,6 +635,8 @@ togglebar(const Arg *arg)
 	updatebarpos(selmon);
 	for (bar = selmon->bar; bar; bar = bar->next)
 		XMoveResizeWindow(dpy, bar->win, bar->bx, bar->by, bar->bw, bar->bh);
+	if (!selmon->showbar && systray)
+		XMoveWindow(dpy, systray->win, -32000, -32000);
 	setworkspaceareasformon(selmon);
 	arrangemon(selmon);
 	drawbars();

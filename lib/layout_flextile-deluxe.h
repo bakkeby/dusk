@@ -5,6 +5,7 @@ static void mirrorlayout(const Arg *arg);
 static void rotatelayoutaxis(const Arg *arg);
 static void setlayoutaxisex(const Arg *arg);
 static void setlayoutex(const Arg *arg);
+static void setwindowborders(Workspace *ws, Client *sel);
 static void layoutmonconvert(Workspace *ws, Monitor *from, Monitor *to);
 static void layoutconvert(const Arg *arg);
 static int convert_arrange(int arrange);
@@ -33,21 +34,21 @@ static void layout_split_centered_horizontal_fixed(Workspace *ws, int x, int y, 
 static void layout_floating_master_fixed(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n);
 
 /* Layout tile arrangements */
-static void arrange_left_to_right(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
-static void arrange_top_to_bottom(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
-static void arrange_monocle(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
-static void arrange_gapplessgrid(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
-static void arrange_gapplessgrid_cfacts(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
-static void arrange_gapplessgrid_alt1(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
-static void arrange_gapplessgrid_alt2(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
-static void arrange_gridmode(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
-static void arrange_horizgrid(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
-static void arrange_dwindle(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
-static void arrange_dwindle_cfacts(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
-static void arrange_spiral(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
-static void arrange_spiral_cfacts(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
-static void arrange_tatami(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
-static void arrange_tatami_cfacts(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai);
+static void arrange_left_to_right(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai, int arr, int grp);
+static void arrange_top_to_bottom(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai, int arr, int grp);
+static void arrange_monocle(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai, int arr, int grp);
+static void arrange_gapplessgrid(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai, int arr, int grp);
+static void arrange_gapplessgrid_cfacts(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai, int arr, int grp);
+static void arrange_gapplessgrid_alt1(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai, int arr, int grp);
+static void arrange_gapplessgrid_alt2(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai, int arr, int grp);
+static void arrange_gridmode(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai, int arr, int grp);
+static void arrange_horizgrid(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai, int arr, int grp);
+static void arrange_dwindle(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai, int arr, int grp);
+static void arrange_dwindle_cfacts(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai, int arr, int grp);
+static void arrange_spiral(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai, int arr, int grp);
+static void arrange_spiral_cfacts(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai, int arr, int grp);
+static void arrange_tatami(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai, int arr, int grp);
+static void arrange_tatami_cfacts(Workspace *ws, int ax, int ay, int ah, int aw, int ih, int iv, int n, int an, int ai, int arr, int grp);
 
 /* Layout arrangements */
 enum {

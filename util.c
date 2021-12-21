@@ -145,8 +145,8 @@ getfuncbyname(const char *name)
 		return WorkspaceLabels;
 	else if (strcmp(name, "SnapToWindows") == 0)
 		return SnapToWindows;
-	else if (strcmp(name, "FuncPlaceholder274877906944") == 0)
-		return FuncPlaceholder274877906944;
+	else if (strcmp(name, "FlexWinBorders") == 0)
+		return FlexWinBorders;
 	else if (strcmp(name, "FuncPlaceholder549755813888") == 0)
 		return FuncPlaceholder549755813888;
 	else if (strcmp(name, "FuncPlaceholder1099511627776") == 0)

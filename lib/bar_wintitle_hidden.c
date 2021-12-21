@@ -32,7 +32,6 @@ calc_wintitle_hidden(
 ) {
 	Client *c;
 	int clientsnhidden = 0;
-	int groupactive = GRP_HIDDEN;
 	firstpwlwintitle = 1;
 
 	for (c = ws->clients; c; c = c->next) {
@@ -64,6 +63,6 @@ calc_wintitle_hidden(
 		XFillRectangle(drw->dpy, drw->drawable, drw->gc, a->x, a->y, a->w, a->h);
 	}
 
-	flextitledrawarea(ws, ws->clients, offx, tabw, clientsnhidden, SCHEMEFOR(GRP_HIDDEN), 0, 1, 0, passx, tabfn, arg, a);
+	flextitledrawarea(ws, ws->clients, offx, tabw, clientsnhidden, 0, 0, 1, 0, passx, tabfn, arg, a);
 	return 1;
 }

@@ -71,6 +71,7 @@ static unsigned long functionality = 0
 	|CenteredWindowName // center the window titles on the bar
 //	|BarActiveGroupBorderColor // use border color of active group, otherwise title scheme is used
 	|BarMasterGroupBorderColor // use border color of master group, otherwise title scheme is used
+	|FlexWinBorders // use the SchemeFlex* color schemes, falls back to SchemeTitle* if disabled
 	|SpawnCwd // spawn applications in the currently selected client's working directory
 	|ColorEmoji // enables color emoji support (removes Xft workaround)
 //	|Status2DNoAlpha // option to not use alpha when drawing status2d status
@@ -120,7 +121,7 @@ static char selbordercolor[]             = "#440000";
 
 static char titlenormfgcolor[]           = "#C6BDBD";
 static char titlenormbgcolor[]           = "#180A13";
-static char titlenormbordercolor[]       = "#440000";
+static char titlenormbordercolor[]       = "#180A13";
 
 static char titleselfgcolor[]            = "#FFF7D4";
 static char titleselbgcolor[]            = "#440000";

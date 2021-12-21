@@ -240,14 +240,22 @@ enum {
 	ClkLast
 }; /* clicks */
 
-/* Named flextile constants */
 enum {
 	LAYOUT,       // controls overall layout arrangement / split
 	MASTER,       // indicates the tile arrangement for the master area
 	STACK,        // indicates the tile arrangement for the stack area
 	STACK2,       // indicates the tile arrangement for the secondary stack area
 	LTAXIS_LAST,
-};
+}; /* named flextile constants */
+
+enum {
+	GRP_NOSELECTION,
+	GRP_MASTER,
+	GRP_STACK1,
+	GRP_STACK2,
+	GRP_FLOAT,
+	GRP_HIDDEN,
+}; /* arrange groups */
 
 typedef struct ClientState ClientState;
 struct ClientState {
@@ -285,6 +293,8 @@ struct Client {
 	int basew, baseh, incw, inch, maxw, maxh, minw, minh;
 	int bw, oldbw;
 	int group;
+	int area; // arrangement area (master, stack, secondary stack)
+	int arr;  // tile arrangement (left to right, top to bottom, etc.)
 	int scheme;
 	char scratchkey;
 	unsigned int idx;
@@ -416,6 +426,7 @@ static void cleanupmon(Monitor *mon);
 static void clientfittomon(Client *c, Monitor *m, int *cx, int *cy, int *cw, int *ch);
 static void clientfsrestore(Client *c);
 static void clientsfsrestore(Client *clients);
+static int clientscheme(Client *c, Client *sel);
 static void clientmessage(XEvent *e);
 static void clientmonresize(Client *c, Monitor *from, Monitor *to);
 static void clientsmonresize(Client *clients, Monitor *from, Monitor *to);
@@ -1150,6 +1161,35 @@ clientsfsrestore(Client *clients)
 		clientfsrestore(c);
 }
 
+int
+clientscheme(Client *c, Client *s)
+{
+	int active = 0, sel = 0;
+
+	if (!c)
+		return SchemeTitleNorm;
+
+	if (c->ws == selws) {
+		sel = c == s;
+		active = !sel && s && s->area == c->area;
+	}
+
+	if (ISMARKED(c))
+		return SchemeMarked;
+	if (HIDDEN(c))
+		return sel ? SchemeHidSel : SchemeHidNorm;
+	if (ISSCRATCHPAD(c))
+		return sel ? SchemeScratchSel : SchemeScratchNorm;
+	if (ISFLOATING(c))
+		return sel ? SchemeFlexSelFloat : active ? SchemeFlexActFloat : SchemeFlexInaFloat;
+	if (ISURGENT(c))
+		return SchemeUrg;
+
+	if (enabled(FlexWinBorders))
+		return c->arr + (sel ? SchemeFlexSelTTB : active ? SchemeFlexActTTB : SchemeFlexInaTTB);
+	return sel ? SchemeTitleSel : SchemeTitleNorm;
+}
+
 /* Works out a client's (c) position on a new monitor (n) relative to that of the position on
  * another (o) monitor.
  *
@@ -1583,6 +1623,7 @@ focus(Client *c)
 			XSync(dpy, False);
 			skipfocusevents();
 		}
+		XSetWindowBorder(dpy, c->win, scheme[clientscheme(c, c)][ColBorder].pixel);
 	} else {
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
 		XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
@@ -3156,8 +3197,12 @@ unfocus(Client *c, int setfocus, Client *nextfocus)
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
 		XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
 	}
-	if (!ISMARKED(c))
-		XSetWindowBorder(dpy, c->win, scheme[c->scheme][ColBorder].pixel);
+
+	if (enabled(FlexWinBorders))
+		setwindowborders(c->ws, nextfocus);
+	else
+		XSetWindowBorder(dpy, c->win, scheme[clientscheme(c, nextfocus)][ColBorder].pixel);
+
 	c->ws->sel = NULL;
 }
 
