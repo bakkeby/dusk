@@ -404,6 +404,7 @@ typedef struct {
 
 /* function declarations */
 static void applyrules(Client *c);
+static int reapplyrules(Client *c);
 static int applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact);
 static void arrange(Workspace *ws);
 static void arrangemon(Monitor *m);
@@ -644,6 +645,115 @@ applyrules(Client *c)
 		XFree(ch.res_class);
 	if (ch.res_name)
 		XFree(ch.res_name);
+}
+
+/* This mimics most of what the manage function does when initially managing the window. It returns
+ * 1 if rules were applied, and 0 otherwise. A window getting rules applied this way will not be
+ * swallowed.
+ */
+int
+reapplyrules(Client *c)
+{
+	Client *t;
+	Window trans = None;
+	Workspace *client_ws, *rule_ws;
+
+	if (RULED(c))
+		return 0;
+
+	client_ws = c->ws;
+	applyrules(c);
+
+	if (!RULED(c))
+		return 0;
+
+	if (DISALLOWED(c)) {
+		killclient(&((Arg) { .v = c }));
+		return 1;
+	}
+
+	if (ISUNMANAGED(c)) {
+		XMapWindow(dpy, c->win);
+		if (LOWER(c))
+			XLowerWindow(dpy, c->win);
+		else if (RAISE(c))
+			XRaiseWindow(dpy, c->win);
+		unmanage(c, 0);
+		return 1;
+	}
+
+	rule_ws = c->ws;
+	if (rule_ws != client_ws || ISSTICKY(c)) {
+		c->ws = client_ws;
+		detach(c);
+		detachstack(c);
+		if (ISSTICKY(c)) {
+			stickyws->next = rule_ws;
+			stickyws->mon = rule_ws->mon;
+			c->ws = stickyws;
+			stickyws->sel = c;
+			rule_ws = stickyws;
+		} else
+			c->ws = rule_ws;
+		attach(c);
+		attachstack(c);
+		if (client_ws->visible)
+			arrange(client_ws);
+		else if (client_ws->mon != rule_ws->mon)
+			drawbar(client_ws->mon);
+	}
+
+	if (NOBORDER(c))
+		c->bw = 0;
+	if (c->opacity)
+		opacity(c, c->opacity);
+
+	if (ISCENTERED(c)) {
+		/* Transient windows are centered within the geometry of the parent window */
+		if (ISTRANSIENT(c) && XGetTransientForHint(dpy, c->win, &trans) && (t = wintoclient(trans))) {
+			c->sfx = c->x = t->x + WIDTH(t) / 2 - WIDTH(c) / 2;
+			c->sfy = c->y = t->y + HEIGHT(t) / 2 - HEIGHT(c) / 2;
+		} else {
+			c->sfx = c->x = c->ws->mon->wx + (c->ws->mon->ww - WIDTH(c)) / 2;
+			c->sfy = c->y = c->ws->mon->wy + (c->ws->mon->wh - HEIGHT(c)) / 2;
+		}
+	}
+
+	if (rule_ws->visible && rule_ws != stickyws)
+		arrange(rule_ws);
+	else
+		drawbar(rule_ws->mon);
+
+	/* If the client indicates that it is in fullscreen, or if the FullScreen flag has been
+	 * explictly set via client rules, then enable fullscreen now. */
+	if (getatomprop(c, netatom[NetWMState], XA_ATOM) == netatom[NetWMFullscreen] || ISFULLSCREEN(c)) {
+		setflag(c, FullScreen, 0);
+		setfullscreen(c, 1, 0);
+	} else if (ISFLOATING(c)) {
+		XRaiseWindow(dpy, c->win);
+		XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
+	}
+
+	if (LOWER(c))
+		XLowerWindow(dpy, c->win);
+	else if (RAISE(c))
+		XRaiseWindow(dpy, c->win);
+
+	updatesizehints(c);
+	updateclientdesktop(c);
+	updatewmhints(c);
+	updatemotifhints(c);
+	setfloatinghint(c);
+
+	if (SEMISCRATCHPAD(c) && c->scratchkey)
+		initsemiscratchpad(c);
+
+	if (ISVISIBLE(c))
+		show(c);
+	else
+		hide(c);
+
+	return 1;
 }
 
 int
@@ -2350,7 +2460,7 @@ propertynotify(XEvent *e)
 		}
 		if (ev->atom == XA_WM_NAME || ev->atom == netatom[NetWMName]) {
 			updatetitle(c);
-			if (c == c->ws->sel)
+			if (!reapplyrules(c) && c == c->ws->sel)
 				drawbar(c->ws->mon);
 		}
 		else if (ev->atom == motifatom)
@@ -2361,7 +2471,8 @@ propertynotify(XEvent *e)
 				drawbar(selws->mon);
 		} else if (ev->atom == wmatom[WMClass]) {
 			saveclientclass(c);
-			drawbars();
+			if (!reapplyrules(c))
+				drawbars();
 		}
 	}
 }
