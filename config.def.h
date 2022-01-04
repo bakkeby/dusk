@@ -580,17 +580,17 @@ static const BarRule barrules[] = {
  *
  */
 static const WorkspaceRule wsrules[] = {
-	/*                                                                     ------ icons ------
-	   name,  monitor,  pinned,  layout,  mfact,  nmaster,  nstack,  gaps, def,   vac,  occ,  */
-	{  "1",   -1,       0,       0,       -1,    -1,       -1,      -1,    "𝟣",   "",   "𝟭", },
-	{  "2",   -1,       0,       9,       .80,   -1,       -1,      -1,    "𝟤",   "",   "𝟮", },
-	{  "3",   -1,       0,       0,       -1,    -1,       -1,      -1,    "𝟥",   "",   "𝟯", },
-	{  "4",   -1,       0,       0,       -1,    -1,       -1,      -1,    "𝟦",   "",   "𝟰", },
-	{  "5",   -1,       0,       0,       -1,    -1,       -1,      -1,    "𝟧",   "",   "𝟱", },
-	{  "6",   -1,       0,       0,       -1,    -1,       -1,      -1,    "𝟨",   "",   "𝟲", },
-	{  "7",   -1,       0,       10,      .75,   -1,       -1,      -1,    "𝟩",   "",   "𝟳", },
-	{  "8",   -1,       0,       1,       -1,    -1,       -1,      -1,    "𝟪",   "",   "𝟴", },
-	{  "9",   -1,       0,       0,       -1,    -1,       -1,      -1,    "𝟫",   "",   "𝟵", },
+	/*                                                                     ------------------------------- schemes ------------------------------- ------ icons ------
+	   name,  monitor,  pinned,  layout,  mfact,  nmaster,  nstack,  gaps, default,          visible,          selected,         occupied,         def,   vac,  occ,  */
+	{  "1",   -1,       0,       0,       -1,    -1,       -1,      -1,    SchemeWsNorm,     SchemeWsVisible,  SchemeWsSel,      SchemeWsOcc,      "1",   "",   "[1]", },
+	{  "2",   -1,       0,       9,       .80,   -1,       -1,      -1,    SchemeWsNorm,     SchemeWsVisible,  SchemeWsSel,      SchemeWsOcc,      "2",   "",   "[2]", },
+	{  "3",   -1,       0,       0,       -1,    -1,       -1,      -1,    SchemeWsNorm,     SchemeWsVisible,  SchemeWsSel,      SchemeWsOcc,      "3",   "",   "[3]", },
+	{  "4",   -1,       0,       0,       -1,    -1,       -1,      -1,    SchemeWsNorm,     SchemeWsVisible,  SchemeWsSel,      SchemeWsOcc,      "4",   "",   "[4]", },
+	{  "5",   -1,       0,       0,       -1,    -1,       -1,      -1,    SchemeWsNorm,     SchemeWsVisible,  SchemeWsSel,      SchemeWsOcc,      "5",   "",   "[5]", },
+	{  "6",   -1,       0,       0,       -1,    -1,       -1,      -1,    SchemeWsNorm,     SchemeWsVisible,  SchemeWsSel,      SchemeWsOcc,      "6",   "",   "[6]", },
+	{  "7",   -1,       0,       10,      .75,   -1,       -1,      -1,    SchemeWsNorm,     SchemeWsVisible,  SchemeWsSel,      SchemeWsOcc,      "7",   "",   "[7]", },
+	{  "8",   -1,       0,       1,       -1,    -1,       -1,      -1,    SchemeWsNorm,     SchemeWsVisible,  SchemeWsSel,      SchemeWsOcc,      "8",   "",   "[8]", },
+	{  "9",   -1,       0,       0,       -1,    -1,       -1,      -1,    SchemeWsNorm,     SchemeWsVisible,  SchemeWsSel,      SchemeWsOcc,      "9",   "",   "[9]", },
 };
 
 static const float mfact     = 0.50; /* factor of master area size [0.05..0.95] */

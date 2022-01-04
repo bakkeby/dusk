@@ -84,6 +84,10 @@ createworkspace(int num, const WorkspaceRule *r)
 	ws->icondef = r->icondef; // default icons
 	ws->iconvac = r->iconvac; // vacant icons
 	ws->iconocc = r->iconocc; // occupied icons
+	ws->scheme[NORMAL] = r->norm_scheme;
+	ws->scheme[VISIBLE] = r->vis_scheme;
+	ws->scheme[SELECTED] = r->sel_scheme;
+	ws->scheme[OCCUPIED] = r->occ_scheme;
 
 	getworkspacestate(ws);
 

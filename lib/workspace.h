@@ -1,3 +1,10 @@
+enum {
+	NORMAL,
+	VISIBLE,
+	SELECTED,
+	OCCUPIED,
+};
+
 static void comboviewwsbyname(const Arg *arg);
 static void createworkspaces();
 static Workspace *createworkspace(int num, const WorkspaceRule *r);

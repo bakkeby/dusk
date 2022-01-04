@@ -367,6 +367,7 @@ struct Workspace {
 	char ltsymbol[64];
 	char name[16];
 	float mfact;
+	int scheme[4];
 	int ltaxis[4];
 	int nstack;
 	int nmaster;
@@ -397,6 +398,10 @@ typedef struct {
 	int nmaster;
 	int nstack;
 	int enablegaps;
+	int norm_scheme;
+	int vis_scheme;
+	int sel_scheme;
+	int occ_scheme;
 	char *icondef;
 	char *iconvac;
 	char *iconocc;
