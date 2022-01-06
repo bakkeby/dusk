@@ -2941,9 +2941,6 @@ setup(void)
 
 	enablefunc(functionality);
 
-	if (enabled(Xresources))
-		loadxrdb();
-
 	/* init screen */
 	screen = DefaultScreen(dpy);
 	sw = DisplayWidth(dpy, screen);
@@ -3049,6 +3046,9 @@ setup(void)
 
 	for (i = 0; i < LENGTH(colors); i++)
 		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
+
+	if (enabled(Xresources))
+		loadxrdb();
 
 	updatebars();
 
