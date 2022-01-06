@@ -1,11 +1,42 @@
+int
+loadxrdbcolor(XrmDatabase xrdb, char **dest, char *resource)
+{
+	XrmValue value;
+	char *type;
+	if (XrmGetResource(xrdb, resource, NULL, &type, &value) == True) {
+		if (value.addr != NULL && strnlen(value.addr, 8) == 7 && value.addr[0] == '#') {
+			int i = 1;
+			for (; i <= 6; i++) {
+				if (value.addr[i] < 48) break;
+				if (value.addr[i] > 57 && value.addr[i] < 65) break;
+				if (value.addr[i] > 70 && value.addr[i] < 97) break;
+				if (value.addr[i] > 102) break;
+			}
+			if (i == 7) {
+				strncpy(*dest, value.addr, 7);
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
 void
 loadxrdb()
 {
 	Display *display;
 	char * resm;
 	XrmDatabase xrdb;
-	char *type;
-	XrmValue value;
+
+	int s;
+	char resource[40];
+	char *pattern = "dusk.%s%scolor";
+
+	char fg[] = "#000000";
+	char bg[] = "#000000";
+	char bd[] = "#000000";
+	char *clrnames[3] = { fg, bg, bd };
+	char *dmenunames[4] = { dmenunormfgcolor, dmenunormbgcolor, dmenuselfgcolor, dmenuselbgcolor };
 
 	if (disabled(Xresources))
 		return;
@@ -19,162 +50,43 @@ loadxrdb()
 			xrdb = XrmGetStringDatabase(resm);
 
 			if (xrdb != NULL) {
-				XRDB_LOAD_COLOR("dusk.normfgcolor", colors[SchemeNorm][ColFg]);
-				XRDB_LOAD_COLOR("dusk.normbgcolor", colors[SchemeNorm][ColBg]);
-				XRDB_LOAD_COLOR("dusk.normbordercolor", colors[SchemeNorm][ColBorder]);
-				XRDB_LOAD_COLOR("dusk.selfgcolor", colors[SchemeSel][ColFg]);
-				XRDB_LOAD_COLOR("dusk.selbgcolor", colors[SchemeSel][ColBg]);
-				XRDB_LOAD_COLOR("dusk.selbordercolor", colors[SchemeSel][ColBorder]);
-				XRDB_LOAD_COLOR("dusk.titlenormfgcolor", colors[SchemeTitleNorm][ColFg]);
-				XRDB_LOAD_COLOR("dusk.titlenormbgcolor", colors[SchemeTitleNorm][ColBg]);
-				XRDB_LOAD_COLOR("dusk.titlenormbordercolor", colors[SchemeTitleNorm][ColBorder]);
-				XRDB_LOAD_COLOR("dusk.titleselfgcolor", colors[SchemeTitleSel][ColFg]);
-				XRDB_LOAD_COLOR("dusk.titleselbgcolor", colors[SchemeTitleSel][ColBg]);
-				XRDB_LOAD_COLOR("dusk.titleselbordercolor", colors[SchemeTitleSel][ColBorder]);
-				XRDB_LOAD_COLOR("dusk.wsnormfgcolor", colors[SchemeWsNorm][ColFg]);
-				XRDB_LOAD_COLOR("dusk.wsnormbgcolor", colors[SchemeWsNorm][ColBg]);
-				XRDB_LOAD_COLOR("dusk.wsvisfgcolor", colors[SchemeWsVisible][ColFg]);
-				XRDB_LOAD_COLOR("dusk.wsvisbgcolor", colors[SchemeWsVisible][ColBg]);
-				XRDB_LOAD_COLOR("dusk.wsselfgcolor", colors[SchemeWsSel][ColFg]);
-				XRDB_LOAD_COLOR("dusk.wsselbgcolor", colors[SchemeWsSel][ColBg]);
-				XRDB_LOAD_COLOR("dusk.wsoccfgcolor", colors[SchemeWsOcc][ColFg]);
-				XRDB_LOAD_COLOR("dusk.wsoccbgcolor", colors[SchemeWsOcc][ColBg]);
-				XRDB_LOAD_COLOR("dusk.hidnormfgcolor", colors[SchemeHidNorm][ColFg]);
-				XRDB_LOAD_COLOR("dusk.hidnormbgcolor", colors[SchemeHidNorm][ColBg]);
-				XRDB_LOAD_COLOR("dusk.hidnormbordercolor", colors[SchemeHidNorm][ColBorder]);
-				XRDB_LOAD_COLOR("dusk.hidselfgcolor", colors[SchemeHidSel][ColFg]);
-				XRDB_LOAD_COLOR("dusk.hidselbgcolor", colors[SchemeHidSel][ColBg]);
-				XRDB_LOAD_COLOR("dusk.hidselbordercolor", colors[SchemeHidSel][ColBorder]);
-				XRDB_LOAD_COLOR("dusk.urgfgcolor", colors[SchemeUrg][ColFg]);
-				XRDB_LOAD_COLOR("dusk.urgbgcolor", colors[SchemeUrg][ColBg]);
-				XRDB_LOAD_COLOR("dusk.urgbordercolor", colors[SchemeUrg][ColBorder]);
-				XRDB_LOAD_COLOR("dusk.markedfgcolor", colors[SchemeMarked][ColFg]);
-				XRDB_LOAD_COLOR("dusk.markedbgcolor", colors[SchemeMarked][ColBg]);
-				XRDB_LOAD_COLOR("dusk.markedbordercolor", colors[SchemeMarked][ColBorder]);
-				XRDB_LOAD_COLOR("dusk.scratchnormfgcolor", colors[SchemeScratchNorm][ColFg]);
-				XRDB_LOAD_COLOR("dusk.scratchnormbgcolor", colors[SchemeScratchNorm][ColBg]);
-				XRDB_LOAD_COLOR("dusk.scratchnormbordercolor", colors[SchemeScratchNorm][ColBorder]);
-				XRDB_LOAD_COLOR("dusk.scratchselfgcolor", colors[SchemeScratchSel][ColFg]);
-				XRDB_LOAD_COLOR("dusk.scratchselbgcolor", colors[SchemeScratchSel][ColBg]);
-				XRDB_LOAD_COLOR("dusk.scratchselbordercolor", colors[SchemeScratchSel][ColBorder]);
+				for (s = 0; s < SchemeLast; s++) {
+					/* Skip schemes that do not specify a resource string */
+					if (colors[s][ColResource][0] == '\0')
+						continue;
 
-				/* flexwintitle background colours */
-				XRDB_LOAD_COLOR("dusk.normTTBbgcolor", colors[SchemeFlexInaTTB][ColBg]);
-				XRDB_LOAD_COLOR("dusk.normLTRbgcolor", colors[SchemeFlexInaLTR][ColBg]);
-				XRDB_LOAD_COLOR("dusk.normMONObgcolor", colors[SchemeFlexInaMONO][ColBg]);
-				XRDB_LOAD_COLOR("dusk.normGRIDbgcolor", colors[SchemeFlexInaGRID][ColBg]);
-				XRDB_LOAD_COLOR("dusk.normGRIDCbgcolor", colors[SchemeFlexInaGRIDC][ColBg]);
-				XRDB_LOAD_COLOR("dusk.normGRD1bgcolor", colors[SchemeFlexInaGRD1][ColBg]);
-				XRDB_LOAD_COLOR("dusk.normGRD2bgcolor", colors[SchemeFlexInaGRD2][ColBg]);
-				XRDB_LOAD_COLOR("dusk.normGRDMbgcolor", colors[SchemeFlexInaGRDM][ColBg]);
-				XRDB_LOAD_COLOR("dusk.normHGRDbgcolor", colors[SchemeFlexInaHGRD][ColBg]);
-				XRDB_LOAD_COLOR("dusk.normDWDLbgcolor", colors[SchemeFlexInaDWDL][ColBg]);
-				XRDB_LOAD_COLOR("dusk.normDWDLCbgcolor", colors[SchemeFlexInaDWDLC][ColBg]);
-				XRDB_LOAD_COLOR("dusk.normSPRLbgcolor", colors[SchemeFlexInaSPRL][ColBg]);
-				XRDB_LOAD_COLOR("dusk.normSPRLCbgcolor", colors[SchemeFlexInaSPRLC][ColBg]);
-				XRDB_LOAD_COLOR("dusk.normTTMIbgcolor", colors[SchemeFlexInaTTMI][ColBg]);
-				XRDB_LOAD_COLOR("dusk.normTTMICbgcolor", colors[SchemeFlexInaTTMIC][ColBg]);
-				XRDB_LOAD_COLOR("dusk.normfloatbgcolor", colors[SchemeFlexInaFloat][ColBg]);
-				XRDB_LOAD_COLOR("dusk.actTTBbgcolor", colors[SchemeFlexActTTB][ColBg]);
-				XRDB_LOAD_COLOR("dusk.actLTRbgcolor", colors[SchemeFlexActLTR][ColBg]);
-				XRDB_LOAD_COLOR("dusk.actMONObgcolor", colors[SchemeFlexActMONO][ColBg]);
-				XRDB_LOAD_COLOR("dusk.actGRIDbgcolor", colors[SchemeFlexActGRID][ColBg]);
-				XRDB_LOAD_COLOR("dusk.actGRIDCbgcolor", colors[SchemeFlexActGRIDC][ColBg]);
-				XRDB_LOAD_COLOR("dusk.actGRD1bgcolor", colors[SchemeFlexActGRD1][ColBg]);
-				XRDB_LOAD_COLOR("dusk.actGRD2bgcolor", colors[SchemeFlexActGRD2][ColBg]);
-				XRDB_LOAD_COLOR("dusk.actGRDMbgcolor", colors[SchemeFlexActGRDM][ColBg]);
-				XRDB_LOAD_COLOR("dusk.actHGRDbgcolor", colors[SchemeFlexActHGRD][ColBg]);
-				XRDB_LOAD_COLOR("dusk.actDWDLbgcolor", colors[SchemeFlexActDWDL][ColBg]);
-				XRDB_LOAD_COLOR("dusk.actDWDLCbgcolor", colors[SchemeFlexActDWDLC][ColBg]);
-				XRDB_LOAD_COLOR("dusk.actSPRLbgcolor", colors[SchemeFlexActSPRL][ColBg]);
-				XRDB_LOAD_COLOR("dusk.actSPRLCbgcolor", colors[SchemeFlexActSPRLC][ColBg]);
-				XRDB_LOAD_COLOR("dusk.actTTMIbgcolor", colors[SchemeFlexActTTMI][ColBg]);
-				XRDB_LOAD_COLOR("dusk.actTTMICbgcolor", colors[SchemeFlexActTTMIC][ColBg]);
-				XRDB_LOAD_COLOR("dusk.actfloatbgcolor", colors[SchemeFlexActFloat][ColBg]);
-				XRDB_LOAD_COLOR("dusk.selTTBbgcolor", colors[SchemeFlexSelTTB][ColBg]);
-				XRDB_LOAD_COLOR("dusk.selLTRbgcolor", colors[SchemeFlexSelLTR][ColBg]);
-				XRDB_LOAD_COLOR("dusk.selMONObgcolor", colors[SchemeFlexSelMONO][ColBg]);
-				XRDB_LOAD_COLOR("dusk.selGRIDbgcolor", colors[SchemeFlexSelGRID][ColBg]);
-				XRDB_LOAD_COLOR("dusk.selGRIDCbgcolor", colors[SchemeFlexSelGRIDC][ColBg]);
-				XRDB_LOAD_COLOR("dusk.selGRD1bgcolor", colors[SchemeFlexSelGRD1][ColBg]);
-				XRDB_LOAD_COLOR("dusk.selGRD2bgcolor", colors[SchemeFlexSelGRD2][ColBg]);
-				XRDB_LOAD_COLOR("dusk.selGRDMbgcolor", colors[SchemeFlexSelGRDM][ColBg]);
-				XRDB_LOAD_COLOR("dusk.selHGRDbgcolor", colors[SchemeFlexSelHGRD][ColBg]);
-				XRDB_LOAD_COLOR("dusk.selDWDLbgcolor", colors[SchemeFlexSelDWDL][ColBg]);
-				XRDB_LOAD_COLOR("dusk.selDWDLCbgcolor", colors[SchemeFlexSelDWDLC][ColBg]);
-				XRDB_LOAD_COLOR("dusk.selSPRLbgcolor", colors[SchemeFlexSelSPRL][ColBg]);
-				XRDB_LOAD_COLOR("dusk.selSPRLCbgcolor", colors[SchemeFlexSelSPRLC][ColBg]);
-				XRDB_LOAD_COLOR("dusk.selTTMIbgcolor", colors[SchemeFlexSelTTMI][ColBg]);
-				XRDB_LOAD_COLOR("dusk.selTTMICbgcolor", colors[SchemeFlexSelTTMIC][ColBg]);
-				XRDB_LOAD_COLOR("dusk.selfloatbgcolor", colors[SchemeFlexSelFloat][ColBg]);
+					sprintf(resource, pattern, colors[s][ColResource], "fg");
+					if (!loadxrdbcolor(xrdb, &clrnames[ColFg], resource))
+						strcpy(clrnames[ColFg], colors[s][ColFg]);
 
-				/* flexwintitle foreground colours */
-				XRDB_LOAD_COLOR("dusk.normTTBfgcolor", colors[SchemeFlexInaTTB][ColFg]);
-				XRDB_LOAD_COLOR("dusk.normLTRfgcolor", colors[SchemeFlexInaLTR][ColFg]);
-				XRDB_LOAD_COLOR("dusk.normMONOfgcolor", colors[SchemeFlexInaMONO][ColFg]);
-				XRDB_LOAD_COLOR("dusk.normGRIDfgcolor", colors[SchemeFlexInaGRID][ColFg]);
-				XRDB_LOAD_COLOR("dusk.normGRIDCfgcolor", colors[SchemeFlexInaGRIDC][ColFg]);
-				XRDB_LOAD_COLOR("dusk.normGRD1fgcolor", colors[SchemeFlexInaGRD1][ColFg]);
-				XRDB_LOAD_COLOR("dusk.normGRD2fgcolor", colors[SchemeFlexInaGRD2][ColFg]);
-				XRDB_LOAD_COLOR("dusk.normGRDMfgcolor", colors[SchemeFlexInaGRDM][ColFg]);
-				XRDB_LOAD_COLOR("dusk.normHGRDfgcolor", colors[SchemeFlexInaHGRD][ColFg]);
-				XRDB_LOAD_COLOR("dusk.normDWDLfgcolor", colors[SchemeFlexInaDWDL][ColFg]);
-				XRDB_LOAD_COLOR("dusk.normDWDLCfgcolor", colors[SchemeFlexInaDWDLC][ColFg]);
-				XRDB_LOAD_COLOR("dusk.normSPRLfgcolor", colors[SchemeFlexInaSPRL][ColFg]);
-				XRDB_LOAD_COLOR("dusk.normSPRLCfgcolor", colors[SchemeFlexInaSPRLC][ColFg]);
-				XRDB_LOAD_COLOR("dusk.normTTMIfgcolor", colors[SchemeFlexInaTTMI][ColFg]);
-				XRDB_LOAD_COLOR("dusk.normTTMICfgcolor", colors[SchemeFlexInaTTMIC][ColFg]);
-				XRDB_LOAD_COLOR("dusk.normfloatfgcolor", colors[SchemeFlexInaFloat][ColFg]);
-				XRDB_LOAD_COLOR("dusk.actTTBfgcolor", colors[SchemeFlexActTTB][ColFg]);
-				XRDB_LOAD_COLOR("dusk.actLTRfgcolor", colors[SchemeFlexActLTR][ColFg]);
-				XRDB_LOAD_COLOR("dusk.actMONOfgcolor", colors[SchemeFlexActMONO][ColFg]);
-				XRDB_LOAD_COLOR("dusk.actGRIDfgcolor", colors[SchemeFlexActGRID][ColFg]);
-				XRDB_LOAD_COLOR("dusk.actGRIDCfgcolor", colors[SchemeFlexActGRIDC][ColFg]);
-				XRDB_LOAD_COLOR("dusk.actGRD1fgcolor", colors[SchemeFlexActGRD1][ColFg]);
-				XRDB_LOAD_COLOR("dusk.actGRD2fgcolor", colors[SchemeFlexActGRD2][ColFg]);
-				XRDB_LOAD_COLOR("dusk.actGRDMfgcolor", colors[SchemeFlexActGRDM][ColFg]);
-				XRDB_LOAD_COLOR("dusk.actHGRDfgcolor", colors[SchemeFlexActHGRD][ColFg]);
-				XRDB_LOAD_COLOR("dusk.actDWDLfgcolor", colors[SchemeFlexActDWDL][ColFg]);
-				XRDB_LOAD_COLOR("dusk.actDWDLCfgcolor", colors[SchemeFlexActDWDLC][ColFg]);
-				XRDB_LOAD_COLOR("dusk.actSPRLfgcolor", colors[SchemeFlexActSPRL][ColFg]);
-				XRDB_LOAD_COLOR("dusk.actSPRLCfgcolor", colors[SchemeFlexActSPRLC][ColFg]);
-				XRDB_LOAD_COLOR("dusk.actTTMIfgcolor", colors[SchemeFlexActTTMI][ColFg]);
-				XRDB_LOAD_COLOR("dusk.actTTMICfgcolor", colors[SchemeFlexActTTMIC][ColFg]);
-				XRDB_LOAD_COLOR("dusk.actfloatfgcolor", colors[SchemeFlexActFloat][ColFg]);
-				XRDB_LOAD_COLOR("dusk.selTTBfgcolor", colors[SchemeFlexSelTTB][ColFg]);
-				XRDB_LOAD_COLOR("dusk.selLTRfgcolor", colors[SchemeFlexSelLTR][ColFg]);
-				XRDB_LOAD_COLOR("dusk.selMONOfgcolor", colors[SchemeFlexSelMONO][ColFg]);
-				XRDB_LOAD_COLOR("dusk.selGRIDfgcolor", colors[SchemeFlexSelGRID][ColFg]);
-				XRDB_LOAD_COLOR("dusk.selGRIDCfgcolor", colors[SchemeFlexSelGRIDC][ColFg]);
-				XRDB_LOAD_COLOR("dusk.selGRD1fgcolor", colors[SchemeFlexSelGRD1][ColFg]);
-				XRDB_LOAD_COLOR("dusk.selGRD2fgcolor", colors[SchemeFlexSelGRD2][ColFg]);
-				XRDB_LOAD_COLOR("dusk.selGRDMfgcolor", colors[SchemeFlexSelGRDM][ColFg]);
-				XRDB_LOAD_COLOR("dusk.selHGRDfgcolor", colors[SchemeFlexSelHGRD][ColFg]);
-				XRDB_LOAD_COLOR("dusk.selDWDLfgcolor", colors[SchemeFlexSelDWDL][ColFg]);
-				XRDB_LOAD_COLOR("dusk.selDWDLCfgcolor", colors[SchemeFlexSelDWDLC][ColFg]);
-				XRDB_LOAD_COLOR("dusk.selSPRLfgcolor", colors[SchemeFlexSelSPRL][ColFg]);
-				XRDB_LOAD_COLOR("dusk.selSPRLCfgcolor", colors[SchemeFlexSelSPRLC][ColFg]);
-				XRDB_LOAD_COLOR("dusk.selTTMIfgcolor", colors[SchemeFlexSelTTMI][ColFg]);
-				XRDB_LOAD_COLOR("dusk.selTTMICfgcolor", colors[SchemeFlexSelTTMIC][ColFg]);
-				XRDB_LOAD_COLOR("dusk.selfloatfgcolor", colors[SchemeFlexSelFloat][ColFg]);
+					sprintf(resource, pattern, colors[s][ColResource], "bg");
+					if (!loadxrdbcolor(xrdb, &clrnames[ColBg], resource))
+						strcpy(clrnames[ColBg], colors[s][ColBg]);
+
+					sprintf(resource, pattern, colors[s][ColResource], "border");
+					if (!loadxrdbcolor(xrdb, &clrnames[ColBorder], resource))
+						strcpy(clrnames[ColBorder], colors[s][ColBorder]);
+
+					scheme[s] = drw_scm_create(drw, clrnames, alphas[s], 3);
+				}
 
 				/* status2d terminal colours */
-				XRDB_LOAD_COLOR("dusk.color0", termcolor[0]);
-				XRDB_LOAD_COLOR("dusk.color1", termcolor[1]);
-				XRDB_LOAD_COLOR("dusk.color2", termcolor[2]);
-				XRDB_LOAD_COLOR("dusk.color3", termcolor[3]);
-				XRDB_LOAD_COLOR("dusk.color4", termcolor[4]);
-				XRDB_LOAD_COLOR("dusk.color5", termcolor[5]);
-				XRDB_LOAD_COLOR("dusk.color6", termcolor[6]);
-				XRDB_LOAD_COLOR("dusk.color7", termcolor[7]);
-				XRDB_LOAD_COLOR("dusk.color8", termcolor[8]);
-				XRDB_LOAD_COLOR("dusk.color9", termcolor[9]);
-				XRDB_LOAD_COLOR("dusk.color10", termcolor[10]);
-				XRDB_LOAD_COLOR("dusk.color11", termcolor[11]);
-				XRDB_LOAD_COLOR("dusk.color12", termcolor[12]);
-				XRDB_LOAD_COLOR("dusk.color13", termcolor[13]);
-				XRDB_LOAD_COLOR("dusk.color14", termcolor[14]);
-				XRDB_LOAD_COLOR("dusk.color15", termcolor[15]);
+				for (s = 0; s < 16; s++) {
+					sprintf(resource, "dusk.color%d", s);
+					loadxrdbcolor(xrdb, &termcolor[s], resource);
+				}
+
+				/* dmenu colours */
+				sprintf(resource, pattern, "dmenunorm", "fg");
+				loadxrdbcolor(xrdb, &dmenunames[0], resource);
+				sprintf(resource, pattern, "dmenunorm", "bg");
+				loadxrdbcolor(xrdb, &dmenunames[1], resource);
+
+				sprintf(resource, pattern, "dmenusel", "fg");
+				loadxrdbcolor(xrdb, &dmenunames[2], resource);
+				sprintf(resource, pattern, "dmenusel", "bg");
+				loadxrdbcolor(xrdb, &dmenunames[3], resource);
+
 			}
 		}
 	}
@@ -186,9 +98,6 @@ void
 xrdb(const Arg *arg)
 {
 	loadxrdb();
-	int i;
-	for (i = 0; i < LENGTH(colors); i++)
-		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], ColCount);
 	focus(NULL);
 	arrange(NULL);
 }

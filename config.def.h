@@ -111,154 +111,10 @@ static int flexwintitle_separator        = 0;  // width of client separator
 static const char *fonts[]               = { "monospace:size=10" };
 static const char dmenufont[]            = "monospace:size=10";
 
-static char normfgcolor[]                = "#C6BDBD";
-static char normbgcolor[]                = "#180A13";
-static char normbordercolor[]            = "#444444";
-
-static char selfgcolor[]                 = "#FFF7D4";
-static char selbgcolor[]                 = "#440000";
-static char selbordercolor[]             = "#440000";
-
-static char titlenormfgcolor[]           = "#C6BDBD";
-static char titlenormbgcolor[]           = "#180A13";
-static char titlenormbordercolor[]       = "#180A13";
-
-static char titleselfgcolor[]            = "#FFF7D4";
-static char titleselbgcolor[]            = "#440000";
-static char titleselbordercolor[]        = "#440000";
-
-static char wsnormfgcolor[]              = "#C6BDBD";
-static char wsnormbgcolor[]              = "#180A13";
-static char wsvisfgcolor[]               = "#FFF7D4";
-static char wsvisbgcolor[]               = "#5E294B";
-static char wsselfgcolor[]               = "#FFF7D4";
-static char wsselbgcolor[]               = "#6F3A5C";
-static char wsoccfgcolor[]               = "#C6BDBD";
-static char wsoccbgcolor[]               = "#180A13";
-
-static char hidnormfgcolor[]             = "#c278b6";
-static char hidnormbgcolor[]             = "#222222";
-static char hidnormbordercolor[]         = "#440000";
-
-static char hidselfgcolor[]              = "#D288C6";
-static char hidselbgcolor[]              = "#111111";
-static char hidselbordercolor[]          = "#440000";
-
-static char urgfgcolor[]                 = "#bbbbbb";
-static char urgbgcolor[]                 = "#222222";
-static char urgbordercolor[]             = "#d10f3f";
-
-static char markedfgcolor[]              = "#615656";
-static char markedbgcolor[]              = "#ECB820";
-static char markedbordercolor[]          = "#ECB820";
-
-static char scratchnormfgcolor[]         = "#FFF7D4";
-static char scratchnormbgcolor[]         = "#664C67";
-static char scratchnormbordercolor[]     = "#77547E";
-
-static char scratchselfgcolor[]          = "#FFF7D4";
-static char scratchselbgcolor[]          = "#77547E";
-static char scratchselbordercolor[]      = "#894B9F";
-
-/* flexwintitle background colours */
-static char normTTBbgcolor[]             = "#330000";
-static char normLTRbgcolor[]             = "#330033";
-static char normMONObgcolor[]            = "#000033";
-static char normGRIDbgcolor[]            = "#003300";
-static char normGRIDCbgcolor[]           = "#003300";
-static char normGRD1bgcolor[]            = "#003300";
-static char normGRD2bgcolor[]            = "#003300";
-static char normGRDMbgcolor[]            = "#506600";
-static char normHGRDbgcolor[]            = "#b96600";
-static char normDWDLbgcolor[]            = "#003333";
-static char normDWDLCbgcolor[]           = "#003333";
-static char normSPRLbgcolor[]            = "#333300";
-static char normSPRLCbgcolor[]           = "#333300";
-static char normTTMIbgcolor[]            = "#B32727";
-static char normTTMICbgcolor[]           = "#B32727";
-static char normfloatbgcolor[]           = "#4C314C";
-static char actTTBbgcolor[]              = "#440000";
-static char actLTRbgcolor[]              = "#440044";
-static char actMONObgcolor[]             = "#000044";
-static char actGRIDbgcolor[]             = "#004400";
-static char actGRIDCbgcolor[]            = "#004400";
-static char actGRD1bgcolor[]             = "#004400";
-static char actGRD2bgcolor[]             = "#004400";
-static char actGRDMbgcolor[]             = "#507711";
-static char actHGRDbgcolor[]             = "#b97711";
-static char actDWDLbgcolor[]             = "#004444";
-static char actDWDLCbgcolor[]            = "#004444";
-static char actSPRLbgcolor[]             = "#444400";
-static char actSPRLCbgcolor[]            = "#444400";
-static char actTTMIbgcolor[]             = "#C81C1C";
-static char actTTMICbgcolor[]            = "#C81C1C";
-static char actfloatbgcolor[]            = "#4C314C";
-static char selTTBbgcolor[]              = "#550000";
-static char selLTRbgcolor[]              = "#550055";
-static char selMONObgcolor[]             = "#212171";
-static char selGRIDbgcolor[]             = "#005500";
-static char selGRIDCbgcolor[]            = "#005500";
-static char selGRD1bgcolor[]             = "#005500";
-static char selGRD2bgcolor[]             = "#005500";
-static char selGRDMbgcolor[]             = "#508822";
-static char selHGRDbgcolor[]             = "#b98822";
-static char selDWDLbgcolor[]             = "#005555";
-static char selDWDLCbgcolor[]            = "#005555";
-static char selSPRLbgcolor[]             = "#555500";
-static char selSPRLCbgcolor[]            = "#555500";
-static char selTTMIbgcolor[]             = "#C91717";
-static char selTTMICbgcolor[]            = "#C91717";
-static char selfloatbgcolor[]            = "#5C415C";
-
-/* flexwintitle foreground colours */
-static char normTTBfgcolor[]             = "#C6BDBD";
-static char normLTRfgcolor[]             = "#C6BDBD";
-static char normMONOfgcolor[]            = "#C6BDBD";
-static char normGRIDfgcolor[]            = "#C6BDBD";
-static char normGRIDCfgcolor[]           = "#C6BDBD";
-static char normGRD1fgcolor[]            = "#C6BDBD";
-static char normGRD2fgcolor[]            = "#C6BDBD";
-static char normGRDMfgcolor[]            = "#C6BDBD";
-static char normHGRDfgcolor[]            = "#C6BDBD";
-static char normDWDLfgcolor[]            = "#C6BDBD";
-static char normDWDLCfgcolor[]           = "#C6BDBD";
-static char normSPRLfgcolor[]            = "#C6BDBD";
-static char normSPRLCfgcolor[]           = "#C6BDBD";
-static char normTTMIfgcolor[]            = "#C6BDBD";
-static char normTTMICfgcolor[]           = "#C6BDBD";
-static char normfloatfgcolor[]           = "#C6BDBD";
-static char actTTBfgcolor[]              = "#FFF7D4";
-static char actLTRfgcolor[]              = "#FFF7D4";
-static char actMONOfgcolor[]             = "#FFF7D4";
-static char actGRIDfgcolor[]             = "#FFF7D4";
-static char actGRIDCfgcolor[]            = "#FFF7D4";
-static char actGRD1fgcolor[]             = "#FFF7D4";
-static char actGRD2fgcolor[]             = "#FFF7D4";
-static char actGRDMfgcolor[]             = "#FFF7D4";
-static char actHGRDfgcolor[]             = "#FFF7D4";
-static char actDWDLfgcolor[]             = "#FFF7D4";
-static char actDWDLCfgcolor[]            = "#FFF7D4";
-static char actSPRLfgcolor[]             = "#FFF7D4";
-static char actSPRLCfgcolor[]            = "#FFF7D4";
-static char actTTMIfgcolor[]             = "#FFF7D4";
-static char actTTMICfgcolor[]            = "#FFF7D4";
-static char actfloatfgcolor[]            = "#FFF7D4";
-static char selTTBfgcolor[]              = "#FFF7D4";
-static char selLTRfgcolor[]              = "#FFF7D4";
-static char selMONOfgcolor[]             = "#FFF7D4";
-static char selGRIDfgcolor[]             = "#FFF7D4";
-static char selGRIDCfgcolor[]            = "#FFF7D4";
-static char selGRD1fgcolor[]             = "#FFF7D4";
-static char selGRD2fgcolor[]             = "#FFF7D4";
-static char selGRDMfgcolor[]             = "#FFF7D4";
-static char selHGRDfgcolor[]             = "#FFF7D4";
-static char selDWDLfgcolor[]             = "#FFF7D4";
-static char selDWDLCfgcolor[]            = "#FFF7D4";
-static char selSPRLfgcolor[]             = "#FFF7D4";
-static char selSPRLCfgcolor[]            = "#FFF7D4";
-static char selTTMIfgcolor[]             = "#FFF7D4";
-static char selTTMICfgcolor[]            = "#FFF7D4";
-static char selfloatfgcolor[]            = "#FFF7D4";
+static char dmenunormfgcolor[] = "#BE89AE";
+static char dmenunormbgcolor[] = "#180A13";
+static char dmenuselfgcolor[] = "#FFF7D4";
+static char dmenuselbgcolor[] = "#440000";
 
 static const unsigned int baralpha = 0xc0;
 static const unsigned int borderalpha = OPAQUE;
@@ -328,70 +184,70 @@ static const unsigned int alphas[][3] = {
 	[SchemeFlexSelFloat] = { OPAQUE, baralpha, borderalpha },
 };
 
-static char *colors[][ColCount] = {
-	/*                       fg                  bg                  border                  */
-	[SchemeNorm]         = { normfgcolor,        normbgcolor,        normbordercolor,        },
-	[SchemeSel]          = { selfgcolor,         selbgcolor,         selbordercolor,         },
-	[SchemeTitleNorm]    = { titlenormfgcolor,   titlenormbgcolor,   titlenormbordercolor,   },
-	[SchemeTitleSel]     = { titleselfgcolor,    titleselbgcolor,    titleselbordercolor,    },
-	[SchemeWsNorm]       = { wsnormfgcolor,      wsnormbgcolor,                              },
-	[SchemeWsVisible]    = { wsvisfgcolor,       wsvisbgcolor,                               },
-	[SchemeWsSel]        = { wsselfgcolor,       wsselbgcolor,                               },
-	[SchemeWsOcc]        = { wsoccfgcolor,       wsoccbgcolor,                               },
-	[SchemeHidNorm]      = { hidnormfgcolor,     hidnormbgcolor,     hidnormbordercolor,     },
-	[SchemeHidSel]       = { hidselfgcolor,      hidselbgcolor,      hidselbordercolor,      },
-	[SchemeUrg]          = { urgfgcolor,         urgbgcolor,         urgbordercolor,         },
-	[SchemeMarked]       = { markedfgcolor,      markedbgcolor,      markedbordercolor,      },
-	[SchemeScratchNorm]  = { scratchnormfgcolor, scratchnormbgcolor, scratchnormbordercolor, },
-	[SchemeScratchSel]   = { scratchselfgcolor,  scratchselbgcolor,  scratchselbordercolor,  },
-	[SchemeFlexActTTB]   = { actTTBfgcolor,      actTTBbgcolor,      actTTBbgcolor,          },
-	[SchemeFlexActLTR]   = { actLTRfgcolor,      actLTRbgcolor,      actLTRbgcolor,          },
-	[SchemeFlexActMONO]  = { actMONOfgcolor,     actMONObgcolor,     actMONObgcolor,         },
-	[SchemeFlexActGRID]  = { actGRIDfgcolor,     actGRIDbgcolor,     actGRIDbgcolor,         },
-	[SchemeFlexActGRIDC] = { actGRIDCfgcolor,    actGRIDCbgcolor,    actGRIDCbgcolor,        },
-	[SchemeFlexActGRD1]  = { actGRD1fgcolor,     actGRD1bgcolor,     actGRD1bgcolor,         },
-	[SchemeFlexActGRD2]  = { actGRD2fgcolor,     actGRD2bgcolor,     actGRD2bgcolor,         },
-	[SchemeFlexActGRDM]  = { actGRDMfgcolor,     actGRDMbgcolor,     actGRDMbgcolor,         },
-	[SchemeFlexActHGRD]  = { actHGRDfgcolor,     actHGRDbgcolor,     actHGRDbgcolor,         },
-	[SchemeFlexActDWDL]  = { actDWDLfgcolor,     actDWDLbgcolor,     actDWDLbgcolor,         },
-	[SchemeFlexActDWDLC] = { actDWDLCfgcolor,    actDWDLCbgcolor,    actDWDLCbgcolor,        },
-	[SchemeFlexActSPRL]  = { actSPRLfgcolor,     actSPRLbgcolor,     actSPRLbgcolor,         },
-	[SchemeFlexActSPRLC] = { actSPRLCfgcolor,    actSPRLCbgcolor,    actSPRLCbgcolor,        },
-	[SchemeFlexActTTMI]  = { actTTMIfgcolor,     actTTMIbgcolor,     actTTMIbgcolor,         },
-	[SchemeFlexActTTMIC] = { actTTMICfgcolor,    actTTMICbgcolor,    actTTMICbgcolor,        },
-	[SchemeFlexActFloat] = { actfloatfgcolor,    actfloatbgcolor,    actfloatbgcolor,        },
-	[SchemeFlexInaTTB]   = { normTTBfgcolor,     normTTBbgcolor,     normTTBbgcolor,         },
-	[SchemeFlexInaLTR]   = { normLTRfgcolor,     normLTRbgcolor,     normLTRbgcolor,         },
-	[SchemeFlexInaMONO]  = { normMONOfgcolor,    normMONObgcolor,    normMONObgcolor,        },
-	[SchemeFlexInaGRID]  = { normGRIDfgcolor,    normGRIDbgcolor,    normGRIDbgcolor,        },
-	[SchemeFlexInaGRIDC] = { normGRIDCfgcolor,   normGRIDCbgcolor,   normGRIDCbgcolor,       },
-	[SchemeFlexInaGRD1]  = { normGRD1fgcolor,    normGRD1bgcolor,    normGRD1bgcolor,        },
-	[SchemeFlexInaGRD2]  = { normGRD2fgcolor,    normGRD2bgcolor,    normGRD2bgcolor,        },
-	[SchemeFlexInaGRDM]  = { normGRDMfgcolor,    normGRDMbgcolor,    normGRDMbgcolor,        },
-	[SchemeFlexInaHGRD]  = { normHGRDfgcolor,    normHGRDbgcolor,    normHGRDbgcolor,        },
-	[SchemeFlexInaDWDL]  = { normDWDLfgcolor,    normDWDLbgcolor,    normDWDLbgcolor,        },
-	[SchemeFlexInaDWDLC] = { normDWDLCfgcolor,   normDWDLCbgcolor,   normDWDLCbgcolor,       },
-	[SchemeFlexInaSPRL]  = { normSPRLfgcolor,    normSPRLbgcolor,    normSPRLbgcolor,        },
-	[SchemeFlexInaSPRLC] = { normSPRLCfgcolor,   normSPRLCbgcolor,   normSPRLCbgcolor,       },
-	[SchemeFlexInaTTMI]  = { normTTMIfgcolor,    normTTMIbgcolor,    normTTMIbgcolor,        },
-	[SchemeFlexInaTTMIC] = { normTTMICfgcolor,   normTTMICbgcolor,   normTTMICbgcolor,       },
-	[SchemeFlexInaFloat] = { normfloatfgcolor,   normfloatbgcolor,   normfloatbgcolor,       },
-	[SchemeFlexSelTTB]   = { selTTBfgcolor,      selTTBbgcolor,      selTTBbgcolor,          },
-	[SchemeFlexSelLTR]   = { selLTRfgcolor,      selLTRbgcolor,      selLTRbgcolor,          },
-	[SchemeFlexSelMONO]  = { selMONOfgcolor,     selMONObgcolor,     selMONObgcolor,         },
-	[SchemeFlexSelGRID]  = { selGRIDCfgcolor,    selGRIDCbgcolor,    selGRIDCbgcolor,        },
-	[SchemeFlexSelGRIDC] = { selGRIDfgcolor,     selGRIDbgcolor,     selGRIDbgcolor,         },
-	[SchemeFlexSelGRD1]  = { selGRD1fgcolor,     selGRD1bgcolor,     selGRD1bgcolor,         },
-	[SchemeFlexSelGRD2]  = { selGRD2fgcolor,     selGRD2bgcolor,     selGRD2bgcolor,         },
-	[SchemeFlexSelGRDM]  = { selGRDMfgcolor,     selGRDMbgcolor,     selGRDMbgcolor,         },
-	[SchemeFlexSelHGRD]  = { selHGRDfgcolor,     selHGRDbgcolor,     selHGRDbgcolor,         },
-	[SchemeFlexSelDWDL]  = { selDWDLfgcolor,     selDWDLbgcolor,     selDWDLbgcolor,         },
-	[SchemeFlexSelDWDLC] = { selDWDLCfgcolor,    selDWDLCbgcolor,    selDWDLCbgcolor,        },
-	[SchemeFlexSelSPRL]  = { selSPRLfgcolor,     selSPRLbgcolor,     selSPRLbgcolor,         },
-	[SchemeFlexSelSPRLC] = { selSPRLCfgcolor,    selSPRLCbgcolor,    selSPRLCbgcolor,        },
-	[SchemeFlexSelTTMI]  = { selTTMIfgcolor,     selTTMIbgcolor,     selTTMIbgcolor,         },
-	[SchemeFlexSelTTMIC] = { selTTMICfgcolor,    selTTMICbgcolor,    selTTMICbgcolor,        },
-	[SchemeFlexSelFloat] = { selfloatfgcolor,    selfloatbgcolor,    selfloatbgcolor,        },
+static char *colors[SchemeLast][ColCount] = {
+	/*                       fg         bg         border     resource prefix */
+	[SchemeNorm]         = { "#BE89AE", "#180A13", "#444444", "norm" },
+	[SchemeSel]          = { "#FFF7D4", "#440000", "#440000", "sel" },
+	[SchemeTitleNorm]    = { "#C6BDBD", "#180A13", "#180A13", "titlenorm" },
+	[SchemeTitleSel]     = { "#FFF7D4", "#440000", "#440000", "titlesel" },
+	[SchemeWsNorm]       = { "#BE89AE", "#180A13", "#000000", "wsnorm" },
+	[SchemeWsVisible]    = { "#BE89AE", "#5E294B", "#000000", "wsvis" },
+	[SchemeWsSel]        = { "#D8B2CD", "#6F3A5C", "#000000", "wssel" },
+	[SchemeWsOcc]        = { "#BE89AE", "#180A13", "#000000", "wsocc" },
+	[SchemeHidNorm]      = { "#c278b6", "#222222", "#000000", "hidnorm" },
+	[SchemeHidSel]       = { "#D288C6", "#111111", "#000000", "hidsel" },
+	[SchemeUrg]          = { "#bbbbbb", "#222222", "#d10f3f", "urg" },
+	[SchemeMarked]       = { "#615656", "#ECB820", "#ECB820", "marked" },
+	[SchemeScratchNorm]  = { "#FFF7D4", "#664C67", "#77547E", "scratchnorm" },
+	[SchemeScratchSel]   = { "#FFF7D4", "#77547E", "#894B9F", "scratchsel" },
+	[SchemeFlexActTTB]   = { "#FFF7D4", "#440000", "#440000", "actTTB" },
+	[SchemeFlexActLTR]   = { "#FFF7D4", "#440044", "#440044", "actLTR" },
+	[SchemeFlexActMONO]  = { "#FFF7D4", "#000044", "#000044", "actMONO" },
+	[SchemeFlexActGRID]  = { "#FFF7D4", "#004400", "#004400", "actGRID" },
+	[SchemeFlexActGRIDC] = { "#FFF7D4", "#004400", "#004400", "actGRIDC" },
+	[SchemeFlexActGRD1]  = { "#FFF7D4", "#004400", "#004400", "actGRD1" },
+	[SchemeFlexActGRD2]  = { "#FFF7D4", "#004400", "#004400", "actGRD2" },
+	[SchemeFlexActGRDM]  = { "#FFF7D4", "#507711", "#507711", "actGRDM" },
+	[SchemeFlexActHGRD]  = { "#FFF7D4", "#b97711", "#b97711", "actHGRD" },
+	[SchemeFlexActDWDL]  = { "#FFF7D4", "#004444", "#004444", "actDWDL" },
+	[SchemeFlexActDWDLC] = { "#FFF7D4", "#004444", "#004444", "actDWDLC" },
+	[SchemeFlexActSPRL]  = { "#FFF7D4", "#444400", "#444400", "actSPRL" },
+	[SchemeFlexActSPRLC] = { "#FFF7D4", "#444400", "#444400", "actSPRLC" },
+	[SchemeFlexActTTMI]  = { "#FFF7D4", "#B81616", "#B81616", "actTTMI" },
+	[SchemeFlexActTTMIC] = { "#FFF7D4", "#B81616", "#B81616", "actTTMIC" },
+	[SchemeFlexActFloat] = { "#FFF7D4", "#4C314C", "#4C314C", "actfloat" },
+	[SchemeFlexInaTTB]   = { "#C6BDBD", "#330000", "#330000", "normTTB" },
+	[SchemeFlexInaLTR]   = { "#C6BDBD", "#330033", "#330033", "normLTR" },
+	[SchemeFlexInaMONO]  = { "#C6BDBD", "#000033", "#000033", "normMONO" },
+	[SchemeFlexInaGRID]  = { "#C6BDBD", "#003300", "#003300", "normGRID" },
+	[SchemeFlexInaGRIDC] = { "#C6BDBD", "#003300", "#003300", "normGRIDC" },
+	[SchemeFlexInaGRD1]  = { "#C6BDBD", "#003300", "#003300", "normGRD1" },
+	[SchemeFlexInaGRD2]  = { "#C6BDBD", "#003300", "#003300", "normGRD2" },
+	[SchemeFlexInaGRDM]  = { "#C6BDBD", "#506600", "#506600", "normGRDM" },
+	[SchemeFlexInaHGRD]  = { "#C6BDBD", "#b96600", "#b96600", "normHGRD" },
+	[SchemeFlexInaDWDL]  = { "#C6BDBD", "#003333", "#003333", "normDWDL" },
+	[SchemeFlexInaDWDLC] = { "#C6BDBD", "#003333", "#003333", "normDWDLC" },
+	[SchemeFlexInaSPRL]  = { "#C6BDBD", "#333300", "#333300", "normSPRL" },
+	[SchemeFlexInaSPRLC] = { "#C6BDBD", "#333300", "#333300", "normSPRLC" },
+	[SchemeFlexInaTTMI]  = { "#C6BDBD", "#B32727", "#B32727", "normTTMI" },
+	[SchemeFlexInaTTMIC] = { "#C6BDBD", "#B32727", "#B32727", "normTTMIC" },
+	[SchemeFlexInaFloat] = { "#C6BDBD", "#4C314C", "#4C314C", "normfloat" },
+	[SchemeFlexSelTTB]   = { "#FFF7D4", "#550000", "#550000", "selTTB" },
+	[SchemeFlexSelLTR]   = { "#FFF7D4", "#550055", "#550055", "selLTR" },
+	[SchemeFlexSelMONO]  = { "#FFF7D4", "#212171", "#212171", "selMONO" },
+	[SchemeFlexSelGRID]  = { "#FFF7D4", "#005500", "#005500", "selGRID" },
+	[SchemeFlexSelGRIDC] = { "#FFF7D4", "#005500", "#005500", "selGRIDC" },
+	[SchemeFlexSelGRD1]  = { "#FFF7D4", "#005500", "#005500", "selGRD1" },
+	[SchemeFlexSelGRD2]  = { "#FFF7D4", "#005500", "#005500", "selGRD2" },
+	[SchemeFlexSelGRDM]  = { "#FFF7D4", "#508822", "#508822", "selGRDM" },
+	[SchemeFlexSelHGRD]  = { "#FFF7D4", "#b98822", "#b98822", "selHGRD" },
+	[SchemeFlexSelDWDL]  = { "#FFF7D4", "#005555", "#005555", "selDWDL" },
+	[SchemeFlexSelDWDLC] = { "#FFF7D4", "#005555", "#005555", "selDWDLC" },
+	[SchemeFlexSelSPRL]  = { "#FFF7D4", "#555500", "#555500", "selSPRL" },
+	[SchemeFlexSelSPRLC] = { "#FFF7D4", "#555500", "#555500", "selSPRLC" },
+	[SchemeFlexSelTTMI]  = { "#FFF7D4", "#C91717", "#C91717", "selTTMI" },
+	[SchemeFlexSelTTMIC] = { "#FFF7D4", "#C91717", "#C91717", "selTTMIC" },
+	[SchemeFlexSelFloat] = { "#FFF7D4", "#5C415C", "#5C415C", "selfloat" },
 };
 
 static const char *const autostart[] = {
@@ -528,7 +384,7 @@ static const BarRule barrules[] = {
 	{ -1,       0,     0,       0,   0,   PWRL,  BAR_ALIGN_LEFT,         size_powerline,           draw_powerline,          NULL,                     NULL,                     "powerline join" },
 	{  0,       0,     0,       5,   5,   7,     BAR_ALIGN_LEFT,         size_status,              draw_status,             click_status,             NULL,                     "status7" },
 	{  0,       0,     0,       0,   0,   PWRL,  BAR_ALIGN_LEFT,         size_powerline,           draw_powerline,          NULL,                     NULL,                     "powerline join" },
-	{ -1,       0,     4,       0,   0,   PWRL,  BAR_ALIGN_LEFT,         size_workspaces,          draw_workspaces,         click_workspaces,         hover_workspaces,         "workspaces" },
+	{ -1,       0,     0,       0,   0,   PWRL,  BAR_ALIGN_LEFT,         size_workspaces,          draw_workspaces,         click_workspaces,         hover_workspaces,         "workspaces" },
 	{  0,       0,     6,       5,   5,   0,     BAR_ALIGN_RIGHT,        size_systray,             draw_systray,            click_systray,            NULL,                     "systray" },
 	{  0,       0,     0,       0,   0,   PWRL,  BAR_ALIGN_RIGHT,        size_powerline,           draw_powerline,          NULL,                     NULL,                     "powerline join" },
 	{ -1,       0,     0,       0,   0,   PWRL,  BAR_ALIGN_LEFT,         size_powerline,           draw_powerline,          NULL,                     NULL,                     "powerline join" },
@@ -663,10 +519,10 @@ static const char *dmenucmd[] = {
 	NULL,
 	"dmenu_run",
 	"-fn", dmenufont,
-	"-nb", normbgcolor,
-	"-nf", normfgcolor,
-	"-sb", selbgcolor,
-	"-sf", selfgcolor,
+	"-nb", dmenunormbgcolor,
+	"-nf", dmenunormfgcolor,
+	"-sb", dmenuselbgcolor,
+	"-sf", dmenuselfgcolor,
 	NULL
 };
 static const char *spcmd_w[] = {"w", "st", "-n", "spterm (w)", "-g", "120x34", NULL };

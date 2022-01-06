@@ -150,6 +150,7 @@ enum {
 	SchemeFlexActFloat,
 	SchemeFlexInaFloat,
 	SchemeFlexSelFloat,
+	SchemeLast, // leave this as the last item, mmmkay
 }; /* color schemes */
 
 enum {
@@ -3044,10 +3045,10 @@ setup(void)
 	/* init appearance */
 
 	scheme = ecalloc(LENGTH(colors) + 1, sizeof(Clr *));
-	scheme[LENGTH(colors)] = drw_scm_create(drw, colors[0], alphas[0], ColCount); // ad-hoc color scheme used by status2d
+	scheme[LENGTH(colors)] = drw_scm_create(drw, colors[0], alphas[0], 3); // ad-hoc color scheme used by status2d
 
 	for (i = 0; i < LENGTH(colors); i++)
-		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], ColCount);
+		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
 
 	updatebars();
 
