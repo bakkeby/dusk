@@ -2031,7 +2031,7 @@ keyrelease(XEvent *e)
 	Monitor *m = selmon;
 
 	wsmask = getwsmask(m);
-	if (prevwsmask == wsmask)
+	if (prevwsmask == wsmask && m->wsmask)
 		viewwsmask(m, m->wsmask);
 	else
 		m->wsmask = prevwsmask;

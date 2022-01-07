@@ -1,4 +1,4 @@
-static unsigned long prevwsmask;
+static unsigned long prevwsmask = 1 << 1;
 static Workspace *stickyws;
 
 void
