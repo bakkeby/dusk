@@ -145,9 +145,9 @@ drawbarwin(Bar *bar)
 	const BarRule *br;
 	Monitor *lastmon;
 
-	if (enabled(BarActiveGroupBorderColor))
+	if (enabled(BarActiveGroupBorderColor) && bar->mon->selws)
 		bar->scheme = clientscheme(bar->mon->selws->sel, bar->mon->selws->sel);
-	else if (enabled(BarMasterGroupBorderColor))
+	else if (enabled(BarMasterGroupBorderColor) && bar->mon->selws)
 		bar->scheme = clientscheme(bar->mon->selws->clients, NULL);
 	else
 		bar->scheme = SchemeTitleNorm;
