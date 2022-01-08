@@ -185,7 +185,7 @@ hasfloating(Workspace *ws)
 void
 adjustwsformonitor(Workspace *ws, Monitor *m)
 {
-	if (ws->mon == m)
+	if (!ws || ws->mon == m)
 		return;
 
 	clientsmonresize(ws->clients, ws->mon, m);
@@ -226,7 +226,11 @@ void
 showws(Workspace *ws)
 {
 	if (enabled(Debug))
-		fprintf(stderr, "showws called for ws %s\n", ws->name);
+		fprintf(stderr, "showws called for ws %s\n", ws ? ws->name : "NULL");
+
+	if (!ws)
+		return;
+
 	ws->visible = 1;
 	selws = ws->mon->selws = ws;
 }
@@ -722,7 +726,7 @@ nextvismonws(Monitor *mon, Workspace *ws)
 void
 assignworkspacetomonitor(Workspace *ws, Monitor *m)
 {
-	if (ws->mon == m)
+	if (!ws || ws->mon == m)
 		return;
 
 	adjustwsformonitor(ws, m);

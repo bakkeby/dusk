@@ -201,6 +201,9 @@ flextitlecalculate(
 	int mas_w = 0, st1_w = 0, st2_w = 0, hid_w = 0, flt_w = 0;
 	int order[5] = { 1, 2, 3, 4, 5 };
 
+	if (!ws)
+		return 0;
+
 	/* This avoids drawing a separator on the left hand side of the wintitle section if
 	 * there is a border and the wintitle module rests at the left border. */
 	if (a->x > bar->borderpx) {
