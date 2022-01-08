@@ -528,7 +528,7 @@ static const char *dmenucmd[] = {
 static const char *spcmd_w[] = {"w", "st", "-n", "spterm (w)", "-g", "120x34", NULL };
 static const char *spcmd_e[] = {"e", "st", "-n", "spterm (e)", "-g", "120x34", NULL };
 static const char *spcmd_r[] = {"r", "st", "-n", "spfm (r)", "-g", "144x41", "-e", "ranger", NULL };
-static const char *statusclickcmd[] = { NULL, "/path/to/statusclick", NULL };
+static const char *statusclickcmd[] = { NULL, "bin/statusbar/statusclick.sh", NULL };
 
 static Key keys[] = {
 	/* type       modifier                      key              function                argument */
