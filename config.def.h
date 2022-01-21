@@ -116,11 +116,9 @@ static char dmenunormbgcolor[] = "#180A13";
 static char dmenuselfgcolor[] = "#FFF7D4";
 static char dmenuselbgcolor[] = "#440000";
 
-static const unsigned int baralpha = 0xc0;
-static const unsigned int borderalpha = OPAQUE;
 static const unsigned int alphas[SchemeLast][3] = {
-	/*                       fg      bg        border     */
-	[SchemeNorm]         = { OPAQUE, baralpha, borderalpha },
+	/*                       fg      bg      border */
+	[SchemeNorm]         = { OPAQUE, 0xd0,   OPAQUE },
 };
 
 static char *colors[SchemeLast][ColCount] = {
