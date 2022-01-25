@@ -21,7 +21,7 @@ createworkspaces()
 			break;
 
 	const WorkspaceRule stickywsrule = { .name = "Sticky", .layout = i };
-	stickyws = createworkspace(4096, &stickywsrule);
+	stickyws = createworkspace(LENGTH(wsrules), &stickywsrule);
 	stickyws->visible = 1;
 	stickyws->mon = mons; // not sure about how to handle mon
 	stickyws->wh = sh;

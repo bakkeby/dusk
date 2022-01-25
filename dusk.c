@@ -221,10 +221,10 @@ enum {
 
 enum {
 	IsFloating,
-	DuskClientFlags1,
-	DuskClientFlags2,
+	DuskClientFlags,
 	DuskClientFields,
 	DuskClientLabel,
+	DuskWorkspace,
 	SteamGameID,
 	ClientLast
 }; /* dusk client atoms */
@@ -2961,7 +2961,6 @@ setup(void)
 
 
 	updategeom();
-	createworkspaces();
 
 	/* init atoms */
 	utf8string = XInternAtom(dpy, "UTF8_STRING", False);
@@ -2973,10 +2972,10 @@ setup(void)
 	wmatom[WMWindowRole] = XInternAtom(dpy, "WM_WINDOW_ROLE", False);
 	wmatom[WMChangeState] = XInternAtom(dpy, "WM_CHANGE_STATE", False);
 	clientatom[IsFloating] = XInternAtom(dpy, "_IS_FLOATING", False);
-	clientatom[DuskClientFlags1] = XInternAtom(dpy, "_DUSK_CLIENT_FLAGS1", False);
-	clientatom[DuskClientFlags2] = XInternAtom(dpy, "_DUSK_CLIENT_FLAGS2", False);
+	clientatom[DuskClientFlags] = XInternAtom(dpy, "_DUSK_CLIENT_FLAGS", False);
 	clientatom[DuskClientFields] = XInternAtom(dpy, "_DUSK_CLIENT_FIELDS", False);
 	clientatom[DuskClientLabel] = XInternAtom(dpy, "_DUSK_CLIENT_LABEL", False);
+	clientatom[DuskWorkspace] = XInternAtom(dpy, "_DUSK_WORKSPACE", False);
 	clientatom[SteamGameID] = XInternAtom(dpy, "STEAM_GAME", False);
 	netatom[NetActiveWindow] = XInternAtom(dpy, "_NET_ACTIVE_WINDOW", False);
 	netatom[NetClientList] = XInternAtom(dpy, "_NET_CLIENT_LIST", False);
@@ -3039,8 +3038,9 @@ setup(void)
 	cursor[CurResizeVertArrow] = drw_cur_create(drw, XC_sb_v_double_arrow);
 	cursor[CurIronCross] = drw_cur_create(drw, XC_iron_cross);
 	cursor[CurMove] = drw_cur_create(drw, XC_fleur);
-	/* init appearance */
 
+	createworkspaces();
+	/* init appearance */
 	scheme = ecalloc(LENGTH(colors) + 1, sizeof(Clr *));
 	scheme[LENGTH(colors)] = drw_scm_create(drw, colors[0], alphas[0], 3); // ad-hoc color scheme used by status2d
 
