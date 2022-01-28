@@ -260,8 +260,6 @@ getworkspacestate(Workspace *ws)
 			return;
 		}
 
-		XFree(p);
-
 		/* See bit layout in the persistworkspacestate function */
 		mon = (settings >> 8) & 0x7;
 		for (m = mons; m && m->num != mon; m = m->next);
@@ -281,6 +279,8 @@ getworkspacestate(Workspace *ws)
 			if (ws->visible)
 				ws->mon->selws = ws;
 		}
+
+		XFree(p);
 	}
 }
 
