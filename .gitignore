@@ -1,4 +1,6 @@
 *.o
 dusk
 duskc
-config.h
+config.*
+*.txt
+*.sh
