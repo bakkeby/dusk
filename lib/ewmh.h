@@ -1,3 +1,4 @@
+static int atomin(Atom input, Atom *list, int nitems);
 static void getclientflags(Client *c);
 static void getclientfields(Client *c);
 static void getworkspacestate(Workspace *ws);

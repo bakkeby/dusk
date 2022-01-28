@@ -1,3 +1,12 @@
+int
+atomin(Atom input, Atom *list, int nitems)
+{
+	for (int i = 0; list && i < nitems; i++)
+		if (input == list[i])
+			return 1;
+	return 0;
+}
+
 void
 persistworkspacestate(Workspace *ws)
 {

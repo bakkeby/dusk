@@ -570,19 +570,26 @@ static Window root, wmcheckwin;
 void
 applyrules(Client *c)
 {
-	const char *class, *instance;
-	Atom wintype, game_id;
-	char role[64] = {0};
-	unsigned int i, transient;
 	const Rule *r;
+	const char *class, *instance;
+	Atom game_id = None, da = None, *win_types = NULL;
+	char role[64] = {0};
+	int di;
+	unsigned long dl, nitems;
+	unsigned char *p = NULL;
+	unsigned int i, transient;
 	Workspace *ws = NULL;
 	XClassHint ch = { NULL, NULL };
+
+	if (XGetWindowProperty(dpy, c->win, netatom[NetWMWindowType], 0L, sizeof(Atom), False, XA_ATOM,
+			&da, &di, &nitems, &dl, &p) == Success && p) {
+		win_types = (Atom *) p;
+	}
 
 	/* rule matching */
 	XGetClassHint(dpy, c->win, &ch);
 	class    = ch.res_class ? ch.res_class : broken;
 	instance = ch.res_name  ? ch.res_name  : broken;
-	wintype  = getatomprop(c, netatom[NetWMWindowType], XA_ATOM);
 	gettextprop(c->win, wmatom[WMWindowRole], role, sizeof(role));
 	game_id = getatomprop(c, clientatom[SteamGameID], AnyPropertyType);
 	transient = ISTRANSIENT(c) ? 1 : 0;
@@ -593,7 +600,7 @@ applyrules(Client *c)
 		class = "steam_app_";
 
 	if (enabled(Debug))
-		fprintf(stderr, "applyrules: new client %s, class = '%s', instance = '%s', role = '%s', wintype = '%ld'\n", c->name, class, instance, role, wintype);
+		fprintf(stderr, "applyrules: new client %s, class = '%s', instance = '%s', role = '%s', wintype = '%ld'\n", c->name, class, instance, role, nitems ? win_types[0] : 0);
 
 	for (i = 0; i < LENGTH(clientrules); i++) {
 		r = &clientrules[i];
@@ -601,7 +608,7 @@ applyrules(Client *c)
 		&& (!r->class || strstr(class, r->class))
 		&& (!r->role || strstr(role, r->role))
 		&& (!r->instance || strstr(instance, r->instance))
-		&& (!r->wintype || wintype == XInternAtom(dpy, r->wintype, False))
+		&& (!r->wintype || atomin(XInternAtom(dpy, r->wintype, False), win_types, nitems))
 		&& (r->transient == transient))
 		{
 			c->flags |= Ruled | r->flags;
@@ -651,6 +658,8 @@ applyrules(Client *c)
 		XFree(ch.res_class);
 	if (ch.res_name)
 		XFree(ch.res_name);
+	if (p)
+		XFree(p);
 }
 
 /* This mimics most of what the manage function does when initially managing the window. It returns
