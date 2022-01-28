@@ -174,7 +174,7 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 	if (w <= textw_single_char + tpad) // reduce text padding if wintitle is too small
 		tpad = (w - textw_single_char < 0 ? 0 : (w - textw_single_char) / 2);
 	else if (enabled(CenteredWindowName) && TEXTW(c->name) + lrpad + ipad < w)
-		cpad = (w - TEXTW(c->name) - lrpad - ipad) / 2;
+		cpad = (w - TEXTW(c->name) - tpad - ipad) / 2 - tpad;
 
 	XSetForeground(drw->dpy, drw->gc, drw->scheme[ColBg].pixel);
 	XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, barg->y, w, barg->h);
