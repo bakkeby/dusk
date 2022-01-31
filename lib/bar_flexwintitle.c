@@ -123,8 +123,9 @@ flextitledrawarea(Workspace *ws, Client *c, int x, int w, int num_clients, int t
 {
 	int i, rw, cw;
 	int plw = drw->fonts->h / 2 + 1;
-	cw = (w - flexwintitle_separator * (num_clients - 1)) / num_clients;
-	rw = (w - flexwintitle_separator * (num_clients - 1)) % num_clients;
+	int sepw = barg->value ? plw : flexwintitle_separator;
+	cw = (w - sepw * (num_clients - 1)) / num_clients;
+	rw = (w - sepw * (num_clients - 1)) % num_clients;
 
 	for (i = 0; c && i < num_clients; c = c->next) {
 		if (
@@ -136,12 +137,12 @@ flextitledrawarea(Workspace *ws, Client *c, int x, int w, int num_clients, int t
 				(draw_hidden && HIDDEN(c))
 			)
 		) {
-			tabfn(ws, c, passx, x, cw + (i < rw ? 1 : 0), titlescheme, arg, barg);
+			tabfn(ws, c, passx, x + (firstpwlwintitle ? 0 : sepw), cw + (i < rw ? 1 : 0), titlescheme, arg, barg);
 
 			if (tabfn == flextitledraw && barg->value && !firstpwlwintitle && prevscheme > -1 && barg->lastscheme > 1)
-				drw_arrow(drw, x - plw, barg->y, plw, barg->h, barg->value, scheme[prevscheme][ColBg], scheme[barg->lastscheme][ColBg], scheme[SchemeNorm][ColBg]);
+				drw_arrow(drw, x, barg->y, plw, barg->h, barg->value, scheme[prevscheme][ColBg], scheme[barg->lastscheme][ColBg], scheme[SchemeNorm][ColBg]);
 			firstpwlwintitle = 0;
-			x += cw + (i < rw ? 1 : 0) + flexwintitle_separator;
+			x += cw + (i < rw ? 1 : 0) + sepw;
 			i++;
 		}
 	}
@@ -153,10 +154,9 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 	if (!c)
 		return;
 
-	/* text padding, icon padding, centered padding */
-	int tpad = lrpad / 2;
+	/* icon padding, left padding */
 	int ipad = enabled(WinTitleIcons) && c->icon ? c->icw + iconspacing : 0;
-	int cpad = 0;
+	int lpad = 0;
 	int tx = x;
 	int tw = w;
 
@@ -171,17 +171,21 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 	if (barg->lastscheme != SchemeMarked && c != ws->sel)
 		c->scheme = barg->lastscheme;
 
-	if (w <= textw_single_char + tpad) // reduce text padding if wintitle is too small
-		tpad = (w - textw_single_char < 0 ? 0 : (w - textw_single_char) / 2);
-	else if (enabled(CenteredWindowName) && TEXTW(c->name) + lrpad + ipad < w)
-		cpad = (w - TEXTW(c->name) - tpad - ipad) / 2 - tpad;
-
 	XSetForeground(drw->dpy, drw->gc, drw->scheme[ColBg].pixel);
 	XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, barg->y, w, barg->h);
 
-	/* Apply center padding, if any */
-	tx += cpad + tpad;
-	tw -= cpad + lrpad;
+	if (w < textw_single_char + lrpad) { // reduce text padding if wintitle is too small
+		lpad = MAX(0, (w - textw_single_char) / 2);
+		tx += lpad;
+		tw -= lpad;
+	} else if (enabled(CenteredWindowName) && TEXTW(c->name) + lrpad + ipad < w) {
+		lpad = (w - TEXTW(c->name) - ipad) / 2;
+		tx += lpad;
+		tw -= lpad;
+	} else {
+		tx += lrpad / 2;
+		tw -= lrpad;
+	}
 
  	if (ipad) {
 		drw_pic(drw, tx, barg->y + (barg->h - c->ich) / 2, c->icw, c->ich, c->icon);
