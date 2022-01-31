@@ -10,6 +10,7 @@ removescratch(const Arg *arg)
 		if (SEMISCRATCHPAD(c) && c->linked) {
 			n = unmanagesemiscratchpad(c);
 			arrangews(n->ws);
+			drawbar(n->ws->mon);
 		}
 
 		c->scratchkey = 0;

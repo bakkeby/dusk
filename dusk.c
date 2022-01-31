@@ -432,10 +432,10 @@ static void clientrelposmon(Client *c, Monitor *o, Monitor *n, int *cx, int *cy,
 static void clienttomon(const Arg *arg);
 static void clientstomon(const Arg *arg);
 static void configure(Client *c);
-static void configurenotify(XEvent *e);
+static Workspace *configurenotify(XEvent *e);
 static void configurerequest(XEvent *e);
 static Monitor *createmon(int num);
-static void destroynotify(XEvent *e);
+static Workspace *destroynotify(XEvent *e);
 static void detach(Client *c);
 static void detachstack(Client *c);
 static Monitor *dirtomon(int dir);
@@ -494,11 +494,12 @@ static void sigchld(int unused);
 static void skipfocusevents(void);
 static void spawn(const Arg *arg);
 static pid_t spawncmd(const Arg *arg, int buttonclick);
+static void structurenotify(XEvent *e);
 static void togglefloating(const Arg *arg);
 static void togglemaximize(Client *c, int maximize_vert, int maximize_horz);
 static void unfocus(Client *c, int setfocus, Client *nextfocus);
 static void unmanage(Client *c, int destroyed);
-static void unmapnotify(XEvent *e);
+static Workspace *unmapnotify(XEvent *e);
 static void updateclientlist(void);
 static int updategeom(void);
 static void updatenumlockmask(void);
@@ -536,9 +537,9 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 	[ButtonPress] = buttonpress,
 	[ButtonRelease] = keyrelease,
 	[ClientMessage] = clientmessage,
-	[ConfigureNotify] = configurenotify,
+	[ConfigureNotify] = structurenotify,
 	[ConfigureRequest] = configurerequest,
-	[DestroyNotify] = destroynotify,
+	[DestroyNotify] = structurenotify,
 	[EnterNotify] = enternotify,
 	[Expose] = expose,
 	[FocusIn] = focusin,
@@ -549,7 +550,7 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 	[MotionNotify] = motionnotify,
 	[PropertyNotify] = propertynotify,
 	[ResizeRequest] = resizerequest,
-	[UnmapNotify] = unmapnotify
+	[UnmapNotify] = structurenotify,
 };
 static Atom wmatom[WMLast], netatom[NetLast], allowed[NetWMActionLast], xatom[XLast], clientatom[ClientLast];
 static int running = 1;
@@ -694,6 +695,11 @@ reapplyrules(Client *c)
 		else if (RAISE(c))
 			XRaiseWindow(dpy, c->win);
 		unmanage(c, 0);
+		if (client_ws) {
+			focus(NULL);
+			arrange(client_ws);
+			drawbar(client_ws->mon);
+		}
 		return 1;
 	}
 
@@ -1389,7 +1395,7 @@ configure(Client *c)
 	XSendEvent(dpy, c->win, False, StructureNotifyMask, (XEvent *)&ce);
 }
 
-void
+Workspace *
 configurenotify(XEvent *e)
 {
 	Monitor *m;
@@ -1443,6 +1449,8 @@ configurenotify(XEvent *e)
 			arrange(NULL);
 		}
 	}
+
+	return NULL;
 }
 
 void
@@ -1536,34 +1544,36 @@ createmon(int num)
 	return m;
 }
 
-void
+Workspace *
 destroynotify(XEvent *e)
 {
 	Client *c;
 	Bar *bar;
+	Workspace *ws = NULL;
 	XDestroyWindowEvent *ev = &e->xdestroywindow;
 
 	if ((c = wintoclient(ev->window))) {
+		ws = c->ws;
 		if (enabled(Debug))
 			fprintf(stderr, "destroynotify: received event for client %s\n", c->name);
 		unmanage(c, 1);
-	}
-	else if ((c = swallowingclient(ev->window))) {
+	} else if ((c = swallowingclient(ev->window))) {
+		ws = c->ws;
 		if (enabled(Debug))
 			fprintf(stderr, "destroynotify: received event for swallowing client %s\n", c->name);
 		unmanage(c->swallowing, 1);
-	}
-	else if (enabled(Systray) && (c = wintosystrayicon(ev->window))) {
+	} else if (enabled(Systray) && (c = wintosystrayicon(ev->window))) {
 		if (enabled(Debug))
 			fprintf(stderr, "destroynotify: removing systray icon for client %s\n", c->name);
 		removesystrayicon(c);
 		drawbarwin(systray->bar);
-	}
-	else if ((bar = wintobar(ev->window))) {
+	} else if ((bar = wintobar(ev->window))) {
 		if (enabled(Debug))
 			fprintf(stderr, "destroynotify: received event for bar %s\n", bar->name);
 		recreatebar(bar);
 	}
+
+	return ws;
 }
 
 void
@@ -3212,6 +3222,40 @@ spawncmd(const Arg *arg, int buttonclick)
 }
 
 void
+structurenotify(XEvent *e)
+{
+	Workspace *ws = NULL, *prevws = NULL;
+	int multiws = 0;
+
+	do {
+		switch (e->type) {
+		case UnmapNotify:
+			ws = unmapnotify(e);
+			break;
+		case DestroyNotify:
+			ws = destroynotify(e);
+			break;
+		case ConfigureNotify:
+			ws = configurenotify(e);
+			break;
+		}
+		if (prevws && prevws != ws)
+			multiws = 1;
+		prevws = ws;
+	} while (XCheckMaskEvent(dpy, StructureNotifyMask|SubstructureNotifyMask, e));
+
+	if (multiws) {
+		focus(NULL);
+		arrange(NULL);
+		drawbars();
+	} else if (ws) {
+		focus(NULL);
+		arrange(ws);
+		drawbar(ws->mon);
+	}
+}
+
+void
 togglefloating(const Arg *arg)
 {
 	Client *c = CLIENT;
@@ -3368,9 +3412,6 @@ unmanage(Client *c, int destroyed)
 	}
 	free(c);
 
-	focus(NULL);
-	arrange(ws);
-	drawbar(ws->mon);
 	updateclientlist();
 
 	if (revertws) {
@@ -3397,15 +3438,20 @@ unmanage(Client *c, int destroyed)
  *
  * https://tronche.com/gui/x/xlib/events/window-state-change/unmap.html
  */
-void
+Workspace *
 unmapnotify(XEvent *e)
 {
 	Client *c;
-	XUnmapEvent *ev = &e->xunmap;
+	XUnmapEvent *ev;
+	Workspace *ws = NULL;
+
+	ev = &e->xunmap;
+
 	if (enabled(Debug))
 		fprintf(stderr, "unmapnotify: received event type %s (%d), serial %ld, window %ld, event %ld, ev->send_event = %d, ev->from_configure = %d\n", XGetAtomName(dpy, ev->type), ev->type, ev->serial, ev->window, ev->event, ev->send_event, ev->from_configure);
 
 	if ((c = wintoclient(ev->window))) {
+		ws = c->ws;
 		if (enabled(Debug))
 			fprintf(stderr, "unmapnotify: window %ld --> client %s (%s)\n", ev->window, c->name, ev->send_event ? "WithdrawnState" : "unmanage");
 		if (ev->send_event)
@@ -3418,6 +3464,8 @@ unmapnotify(XEvent *e)
 		XMapRaised(dpy, c->win);
 		drawbarwin(systray->bar);
 	}
+
+	return ws;
 }
 
 void
