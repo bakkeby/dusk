@@ -121,11 +121,12 @@ void
 flextitledrawarea(Workspace *ws, Client *c, int x, int w, int num_clients, int titlescheme, int draw_tiled, int draw_hidden, int draw_floating,
 	int passx, void(*tabfn)(Workspace *, Client *, int, int, int, int, Arg *arg, BarArg *barg), Arg *arg, BarArg *barg)
 {
-	int i, rw, cw;
-	int plw = drw->fonts->h / 2 + 1;
-	int sepw = barg->value ? plw : flexwintitle_separator;
-	cw = (w - sepw * (num_clients - 1)) / num_clients;
-	rw = (w - sepw * (num_clients - 1)) % num_clients;
+	int i, rw, cw, padw;
+	int drawpowerline = barg->value;
+	int sepw = drawpowerline ? drw->fonts->h / 2 + 1 : flexwintitle_separator;
+	int num_separators = (num_clients - (!drawpowerline || firstpwlwintitle ? 1 : 0));
+	cw = (w - sepw * num_separators) / num_clients;
+	rw = (w - sepw * num_separators) % num_clients;
 
 	for (i = 0; c && i < num_clients; c = c->next) {
 		if (
@@ -137,12 +138,17 @@ flextitledrawarea(Workspace *ws, Client *c, int x, int w, int num_clients, int t
 				(draw_hidden && HIDDEN(c))
 			)
 		) {
-			tabfn(ws, c, passx, x + (firstpwlwintitle ? 0 : sepw), cw + (i < rw ? 1 : 0), titlescheme, arg, barg);
+			padw = (!drawpowerline || firstpwlwintitle ? 0 : sepw);
+			tabfn(ws, c, passx, x + padw, cw + (i < rw ? 1 : 0), titlescheme, arg, barg);
 
-			if (tabfn == flextitledraw && barg->value && !firstpwlwintitle && prevscheme > -1 && barg->lastscheme > 1)
-				drw_arrow(drw, x, barg->y, plw, barg->h, barg->value, scheme[prevscheme][ColBg], scheme[barg->lastscheme][ColBg], scheme[SchemeNorm][ColBg]);
+			if (drawpowerline && tabfn == flextitledraw && !firstpwlwintitle && prevscheme > -1 && barg->lastscheme > -1)
+				drw_arrow(drw, x, barg->y, sepw, barg->h, barg->value, scheme[prevscheme][ColBg], scheme[barg->lastscheme][ColBg], scheme[SchemeNorm][ColBg]);
+
 			firstpwlwintitle = 0;
-			x += cw + (i < rw ? 1 : 0) + sepw;
+			if (drawpowerline)
+				x += cw + (i < rw ? 1 : 0) + padw;
+			else
+				x += cw + (i < rw ? 1 : 0) + flexwintitle_separator;
 			i++;
 		}
 	}
@@ -212,6 +218,9 @@ flextitlecalculate(
 ) {
 	Workspace *ws = bar->mon->selws;
 	firstpwlwintitle = 1;
+
+	int drawpowerline = a->value;
+	int sepw = drawpowerline ? 0 : flexwintitle_separator;
 	int n, center = 0, mirror = 0; // layout configuration
 	int clientsnmaster = 0, clientsnstack = 0, clientsnstack2 = 0, clientsnfloating = 0, clientsnhidden = 0;
 	int i, w, r, x, den;
@@ -225,14 +234,14 @@ flextitlecalculate(
 
 	/* This avoids drawing a separator on the left hand side of the wintitle section if
 	 * there is a border and the wintitle module rests at the left border. */
-	if (a->x > bar->borderpx) {
+	if (!drawpowerline && a->x > bar->borderpx) {
 		offx += flexwintitle_separator;
 		tabw -= flexwintitle_separator;
 	}
 
 	/* This avoids drawing a separator on the right hand side of the wintitle section if
 	 * there is a border and the wintitle module rests at the right border. */
-	if (a->x + a->w < bar->bw - bar->borderpx)
+	if (!drawpowerline && a->x + a->w < bar->bw - bar->borderpx)
 		tabw -= flexwintitle_separator;
 
 	getclientcounts(ws, &n, &clientsnmaster, &clientsnstack, &clientsnstack2, &clientsnfloating, &clientsnhidden);
@@ -257,28 +266,11 @@ flextitlecalculate(
 		    + (clientsnstack + clientsnstack2) * flexwintitle_stackweight
 		    + clientsnhidden * flexwintitle_hiddenweight
 		    + clientsnfloating * flexwintitle_floatweight;
-		w = (tabw - (n - 1) * flexwintitle_separator) / den;
-		r = (tabw - (n - 1) * flexwintitle_separator) % den;
+		w = (tabw - (n - 1) * sepw) / den;
+		r = (tabw - (n - 1) * sepw) % den;
 
 		rw = r / n; // rest incr per client
 		rr = r % n; // rest rest
-
-		if (clientsnmaster && flexwintitle_masterweight)
-			mas_w = clientsnmaster * rw + w * clientsnmaster * flexwintitle_masterweight + (rr > 0 ? MIN(rr, clientsnmaster) : 0) + (clientsnmaster - 1) * flexwintitle_separator;
-		rr -= clientsnmaster;
-		if (clientsnstack && flexwintitle_stackweight)
-			st1_w = clientsnstack * (rw + w * flexwintitle_stackweight) + (rr > 0 ? MIN(rr, clientsnstack) : 0) + (clientsnstack - 1) * flexwintitle_separator;
-		rr -= clientsnstack;
-		if (clientsnstack2 && flexwintitle_stackweight)
-			st2_w = clientsnstack2 * (rw + w * flexwintitle_stackweight) + (rr > 0 ? MIN(rr, clientsnstack2) : 0) + (clientsnstack2 - 1) * flexwintitle_separator;
-		rr -= clientsnstack2;
-		if (clientsnhidden && flexwintitle_hiddenweight)
-			hid_w = clientsnhidden * (rw + w * flexwintitle_hiddenweight) + (rr > 0 ? MIN(rr, clientsnhidden) : 0) + (clientsnhidden - 1) * flexwintitle_separator;
-		rr -= clientsnhidden;
-		if (clientsnfloating && flexwintitle_floatweight)
-			flt_w = clientsnfloating * (rw + w * flexwintitle_floatweight) + (rr > 0 ? MIN(rr, clientsnfloating) : 0) + (clientsnfloating - 1) * flexwintitle_separator;
-		if (rr > 0)
-			mas_w += rr;
 
 		if (mirror) {
 			if (!center && clientsnstack2) {
@@ -294,6 +286,23 @@ flextitlecalculate(
 			order[1] = 1;
 			order[2] = 2;
 		}
+
+		if (clientsnmaster && flexwintitle_masterweight)
+			mas_w = clientsnmaster * rw + w * clientsnmaster * flexwintitle_masterweight + (rr > 0 ? MIN(rr, clientsnmaster) : 0) + (clientsnmaster - 1) * sepw;
+		rr -= clientsnmaster;
+		if (clientsnstack && flexwintitle_stackweight)
+			st1_w = clientsnstack * (rw + w * flexwintitle_stackweight) + (rr > 0 ? MIN(rr, clientsnstack) : 0) + (clientsnstack - 1) * sepw;
+		rr -= clientsnstack;
+		if (clientsnstack2 && flexwintitle_stackweight)
+			st2_w = clientsnstack2 * (rw + w * flexwintitle_stackweight) + (rr > 0 ? MIN(rr, clientsnstack2) : 0) + (clientsnstack2 - 1) * sepw;
+		rr -= clientsnstack2;
+		if (clientsnhidden && flexwintitle_hiddenweight)
+			hid_w = clientsnhidden * (rw + w * flexwintitle_hiddenweight) + (rr > 0 ? MIN(rr, clientsnhidden) : 0) + (clientsnhidden - 1) * sepw;
+		rr -= clientsnhidden;
+		if (clientsnfloating && flexwintitle_floatweight)
+			flt_w = clientsnfloating * (rw + w * flexwintitle_floatweight) + (rr > 0 ? MIN(rr, clientsnfloating) : 0) + (clientsnfloating - 1) * sepw;
+		if (rr > 0)
+			mas_w += rr;
 
 		for (i = 0, x = offx; i < LENGTH(order); i++) {
 			w = 0;
@@ -329,7 +338,9 @@ flextitlecalculate(
 				}
 				break;
 			}
-			x += (w ? w + flexwintitle_separator : 0);
+			x += w;
+			if (!drawpowerline && w)
+				x += flexwintitle_separator;
 		}
 	}
 	return 1;
