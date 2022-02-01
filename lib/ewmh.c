@@ -42,7 +42,8 @@ persistworkspacestate(Workspace *ws)
 		(ws->enablegaps & 0x1) << 28
 	};
 
-	XChangeProperty(dpy, root, clientatom[DuskWorkspace], XA_CARDINAL, 32, ws->num ? PropModeAppend : PropModeReplace, (unsigned char *)data, 1);
+	XChangeProperty(dpy, root, clientatom[DuskWorkspace], XA_CARDINAL, 32,
+		ws->num ? PropModeAppend : PropModeReplace, (unsigned char *)data, 1);
 
 	/* set dusk client atoms */
 	for (i = 1, c = ws->clients; c; c = c->next, ++i) {
@@ -187,8 +188,8 @@ getclientflags(Client *c)
 	Atom da = None;
 	Atom *cflags;
 
-	if (XGetWindowProperty(dpy, c->win, clientatom[DuskClientFlags], 0L, 2 * sizeof flags1, False, AnyPropertyType,
-		&da, &di, &nitems, &dl, &p) == Success && p) {
+	if (XGetWindowProperty(dpy, c->win, clientatom[DuskClientFlags], 0L, 2 * sizeof flags1, False,
+			AnyPropertyType, &da, &di, &nitems, &dl, &p) == Success && p) {
 		cflags = (Atom *) p;
 		if (nitems == 2) {
 			flags1 = cflags[0] & 0xFFFFFFFF;
@@ -196,6 +197,15 @@ getclientflags(Client *c)
 		}
 		XFree(p);
 	}
+
+	/* Temporary code to allow live restart from previous atom properties */
+	if (!flags1 && !flags2) {
+		Atom flag1atom = XInternAtom(dpy, "_DUSK_CLIENT_FLAGS1", False);
+		Atom flag2atom = XInternAtom(dpy, "_DUSK_CLIENT_FLAGS2", False);
+		flags1 = getatomprop(c, flag1atom, AnyPropertyType) & 0xFFFFFFFF;
+		flags2 = getatomprop(c, flag2atom, AnyPropertyType);
+	}
+	/* End temporary code */
 
 	if (flags1 || flags2) {
 		c->flags = flags1 | (flags2 << 32);
@@ -251,14 +261,21 @@ getworkspacestate(Workspace *ws)
 	unsigned char *p = NULL;
 	Atom da, settings = None;
 
-	if (XGetWindowProperty(dpy, root, clientatom[DuskWorkspace], ws->num, LENGTH(wsrules) * sizeof dl, False, AnyPropertyType,
-		&da, &di, &nitems, &dl, &p) == Success && p) {
-		settings = *(Atom *)p;
-
-		if (!nitems) {
-			XFree(p);
+	if (!(XGetWindowProperty(dpy, root, clientatom[DuskWorkspace], ws->num, LENGTH(wsrules) * sizeof dl,
+			False, AnyPropertyType, &da, &di, &nitems, &dl, &p) == Success && p)) {
+		/* Temporary code to allow live restart from previous atom properties */
+		char atom[22] = {0};
+		sprintf(atom, "_DUSK_WORKSPACE_%u", ws->num == LENGTH(wsrules) ? 4096 : ws->num);
+		Atom wsatom = XInternAtom(dpy, atom, True);
+		if (!(XGetWindowProperty(dpy, root, wsatom, 0L, sizeof settings, False, AnyPropertyType,
+			&da, &di, &nitems, &dl, &p) == Success && p)) {
 			return;
 		}
+		/* End temporary code */
+	}
+
+	if (nitems) {
+		settings = *(Atom *)p;
 
 		/* See bit layout in the persistworkspacestate function */
 		mon = (settings >> 8) & 0x7;
@@ -279,9 +296,9 @@ getworkspacestate(Workspace *ws)
 			if (ws->visible)
 				ws->mon->selws = ws;
 		}
-
-		XFree(p);
 	}
+
+	XFree(p);
 }
 
 void
