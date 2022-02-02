@@ -13,6 +13,11 @@ persistworkspacestate(Workspace *ws)
 	Client *c;
 	unsigned int i;
 
+	/* Fill flextile attributes if arrange method is NULL (floating layout) */
+	if (!ws->layout->arrange)
+		for (i = 0; i < LTAXIS_LAST; i++)
+			ws->ltaxis[i] = 0xF;
+
 	/* Perists workspace information in 32 bits laid out like this:
 	 *
 	 * 000|1|0|0000|0000|0001|0001|000|000|001|0|1
@@ -256,7 +261,7 @@ void
 getworkspacestate(Workspace *ws)
 {
 	Monitor *m;
-	int di, mon;
+	int i, di, mon;
 	unsigned long dl, nitems;
 	unsigned char *p = NULL;
 	Atom da, settings = None;
@@ -266,7 +271,7 @@ getworkspacestate(Workspace *ws)
 		/* Temporary code to allow live restart from previous atom properties */
 		char atom[22] = {0};
 		sprintf(atom, "_DUSK_WORKSPACE_%u", ws->num == LENGTH(wsrules) ? 4096 : ws->num);
-		Atom wsatom = XInternAtom(dpy, atom, True);
+		Atom wsatom = XInternAtom(dpy, atom, False);
 		if (!(XGetWindowProperty(dpy, root, wsatom, 0L, sizeof settings, False, AnyPropertyType,
 			&da, &di, &nitems, &dl, &p) == Success && p)) {
 			return;
@@ -286,12 +291,25 @@ getworkspacestate(Workspace *ws)
 			ws->pinned = (settings >> 1) & 0x1;
 			ws->nmaster = (settings >> 2) & 0x7;
 			ws->nstack = (settings >> 5) & 0x7;
-			ws->ltaxis[LAYOUT] = (settings >> 11) & 0xF;
-			if (settings & (1 << 27)) // mirror layout
-				ws->ltaxis[LAYOUT] *= -1;
-			ws->ltaxis[MASTER] = (settings >> 15) & 0xF;
-			ws->ltaxis[STACK] = (settings >> 19) & 0xF;
-			ws->ltaxis[STACK2] = (settings >> 23) & 0xF;
+
+			/* Restore floating layout if used prior to restarting (0xffff << 11 == 0x7fff800) */
+			if ((settings & 0x7fff800) == 0x7fff800) {
+				for (i = 0; i < LENGTH(layouts); i++) {
+					if ((&layouts[i])->arrange == NULL) {
+						ws->layout = &layouts[i];
+						strncpy(ws->ltsymbol, ws->layout->symbol, sizeof ws->ltsymbol);
+						break;
+					}
+				}
+			} else {
+				ws->ltaxis[LAYOUT] = (settings >> 11) & 0xF;
+				if (settings & (1 << 27)) // mirror layout
+					ws->ltaxis[LAYOUT] *= -1;
+				ws->ltaxis[MASTER] = (settings >> 15) & 0xF;
+				ws->ltaxis[STACK] = (settings >> 19) & 0xF;
+				ws->ltaxis[STACK2] = (settings >> 23) & 0xF;
+			}
+
 			ws->enablegaps = (settings >> 28) & 0x1;
 			if (ws->visible)
 				ws->mon->selws = ws;
