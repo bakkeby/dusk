@@ -261,6 +261,7 @@ void
 getworkspacestate(Workspace *ws)
 {
 	Monitor *m;
+	const Layout *layout;
 	int i, di, mon;
 	unsigned long dl, nitems;
 	unsigned char *p = NULL;
@@ -291,26 +292,31 @@ getworkspacestate(Workspace *ws)
 			ws->pinned = (settings >> 1) & 0x1;
 			ws->nmaster = (settings >> 2) & 0x7;
 			ws->nstack = (settings >> 5) & 0x7;
+			ws->ltaxis[LAYOUT] = (settings >> 11) & 0xF;
+			if (settings & (1 << 27)) // mirror layout
+				ws->ltaxis[LAYOUT] *= -1;
+			ws->ltaxis[MASTER] = (settings >> 15) & 0xF;
+			ws->ltaxis[STACK] = (settings >> 19) & 0xF;
+			ws->ltaxis[STACK2] = (settings >> 23) & 0xF;
+			ws->enablegaps = (settings >> 28) & 0x1;
 
-			/* Restore floating layout if used prior to restarting (0xffff << 11 == 0x7fff800) */
-			if ((settings & 0x7fff800) == 0x7fff800) {
-				for (i = 0; i < LENGTH(layouts); i++) {
-					if ((&layouts[i])->arrange == NULL) {
-						ws->layout = &layouts[i];
-						strncpy(ws->ltsymbol, ws->layout->symbol, sizeof ws->ltsymbol);
-						break;
-					}
+			/* Restore layout if we have an exact match, floating layout interpreted as 0x7fff800 */
+			for (i = 0; i < LENGTH(layouts); i++) {
+				layout = &layouts[i];
+				if ((layout->arrange == flextile
+					&& ws->ltaxis[LAYOUT] == layout->preset.layout
+					&& ws->ltaxis[MASTER] == layout->preset.masteraxis
+					&& ws->ltaxis[STACK]  == layout->preset.stack1axis
+					&& ws->ltaxis[STACK2] == layout->preset.stack2axis)
+					|| ((settings & 0x7fff800) == 0x7fff800
+					&& layout->arrange == NULL)
+				) {
+					ws->layout = layout;
+					strncpy(ws->ltsymbol, ws->layout->symbol, sizeof ws->ltsymbol);
+					break;
 				}
-			} else {
-				ws->ltaxis[LAYOUT] = (settings >> 11) & 0xF;
-				if (settings & (1 << 27)) // mirror layout
-					ws->ltaxis[LAYOUT] *= -1;
-				ws->ltaxis[MASTER] = (settings >> 15) & 0xF;
-				ws->ltaxis[STACK] = (settings >> 19) & 0xF;
-				ws->ltaxis[STACK2] = (settings >> 23) & 0xF;
 			}
 
-			ws->enablegaps = (settings >> 28) & 0x1;
 			if (ws->visible)
 				ws->mon->selws = ws;
 		}
