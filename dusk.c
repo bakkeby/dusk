@@ -632,7 +632,7 @@ applyrules(Client *c)
 			else
 				saveclientclass(c);
 
-			if (enabled(Debug))
+			if (enabled(Debug) || DEBUGGING(c))
 				fprintf(stderr, "applyrules: client rule %d matched:\n    class: %s\n    role: %s\n    instance: %s\n    title: %s\n    wintype: %s\n    flags: %ld\n    floatpos: %s\n    workspace: %s\n    label: %s\n",
 					i,
 					r->class ? r->class : "NULL",
@@ -1113,7 +1113,7 @@ clientmessage(XEvent *e)
 	if (!c)
 		return;
 
-	if (enabled(Debug)) {
+	if (enabled(Debug) || DEBUGGING(c)) {
 		fprintf(stderr, "clientmessage: received message type of %s (%ld) for client %s\n", XGetAtomName(dpy, cme->message_type), cme->message_type, c->name);
 		fprintf(stderr, "    - data 0 = %s (%ld)\n", (cme->data.l[0] == 0 ? "_NET_WM_STATE_REMOVE" : cme->data.l[0] == 1 ? "_NET_WM_STATE_ADD" : cme->data.l[0] == 2 ? "_NET_WM_STATE_TOGGLE" : "?"), cme->data.l[0]);
 		fprintf(stderr, "    - data 1 = %s (%ld)\n", XGetAtomName(dpy, cme->data.l[1]), cme->data.l[1]);
@@ -1464,7 +1464,7 @@ configurerequest(XEvent *e)
 
 	if ((c = wintoclient(ev->window))) {
 
-		if (enabled(Debug)) {
+		if (enabled(Debug) || DEBUGGING(c)) {
 			fprintf(stderr, "configurerequest: received event %ld for client %s\n", ev->value_mask, c->name);
 			fprintf(stderr, "    - x = %d, y = %d, w = %d, h = %d\n", ev->x, ev->y, ev->width, ev->height);
 		}
@@ -1554,16 +1554,16 @@ destroynotify(XEvent *e)
 
 	if ((c = wintoclient(ev->window))) {
 		ws = c->ws;
-		if (enabled(Debug))
+		if (enabled(Debug) || DEBUGGING(c))
 			fprintf(stderr, "destroynotify: received event for client %s\n", c->name);
 		unmanage(c, 1);
 	} else if ((c = swallowingclient(ev->window))) {
 		ws = c->ws;
-		if (enabled(Debug))
+		if (enabled(Debug) || DEBUGGING(c))
 			fprintf(stderr, "destroynotify: received event for swallowing client %s\n", c->name);
 		unmanage(c->swallowing, 1);
 	} else if (enabled(Systray) && (c = wintosystrayicon(ev->window))) {
-		if (enabled(Debug))
+		if (enabled(Debug) || DEBUGGING(c))
 			fprintf(stderr, "destroynotify: removing systray icon for client %s\n", c->name);
 		removesystrayicon(c);
 		drawbarwin(systray->bar);
@@ -2460,7 +2460,7 @@ propertynotify(XEvent *e)
 		return; /* ignore */
 	} else if ((c = wintoclient(ev->window))) {
 
-		if (enabled(Debug) && ev->atom != netatom[NetWMUserTime])
+		if ((enabled(Debug) || DEBUGGING(c)) && ev->atom != netatom[NetWMUserTime])
 			fprintf(stderr, "propertynotify: received message type of %s (%ld) for client %s\n", XGetAtomName(dpy, ev->atom), ev->atom, c->name);
 
 		switch (ev->atom) {
@@ -3452,7 +3452,7 @@ unmapnotify(XEvent *e)
 
 	if ((c = wintoclient(ev->window))) {
 		ws = c->ws;
-		if (enabled(Debug))
+		if (enabled(Debug) || DEBUGGING(c))
 			fprintf(stderr, "unmapnotify: window %ld --> client %s (%s)\n", ev->window, c->name, ev->send_event ? "WithdrawnState" : "unmanage");
 		if (ev->send_event)
 			setclientstate(c, WithdrawnState);

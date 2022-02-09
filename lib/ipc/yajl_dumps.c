@@ -135,6 +135,7 @@ dump_client(yajl_gen gen, Client *c)
 
     YSTR("flags"); YMAP(
       YSTR("AlwaysOnTop"); YBOOL(ALWAYSONTOP(c));
+      YSTR("Debug"); YBOOL(DEBUGGING(c));
       YSTR("Floating"); YBOOL(ISFLOATING(c));
       YSTR("Fixed"); YBOOL(ISFIXED(c));
       YSTR("Hidden"); YBOOL(HIDDEN(c));

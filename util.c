@@ -115,8 +115,8 @@ getfuncbyname(const char *name)
 		return ViewOnWs;
 	else if (strcmp(name, "Xresources") == 0)
 		return Xresources;
-	else if (strcmp(name, "Debug") == 0)
-		return Debug;
+	else if (strcmp(name, "FuncPlaceholder0x800000") == 0)
+		return FuncPlaceholder0x800000;
 	else if (strcmp(name, "AltWorkspaceIcons") == 0)
 		return AltWorkspaceIcons;
 	else if (strcmp(name, "GreedyMonitor") == 0)
@@ -181,8 +181,8 @@ getfuncbyname(const char *name)
 		return FuncPlaceholder18014398509481984;
 	else if (strcmp(name, "FuncPlaceholder36028797018963968") == 0)
 		return FuncPlaceholder36028797018963968;
-	else if (strcmp(name, "FuncPlaceholder72057594037927936") == 0)
-		return FuncPlaceholder72057594037927936;
+	else if (strcmp(name, "Debug") == 0)
+		return Debug;
 	else if (strcmp(name, "FuncPlaceholder144115188075855872") == 0)
 		return FuncPlaceholder144115188075855872;
 	else if (strcmp(name, "FuncPlaceholder288230376151711744") == 0)

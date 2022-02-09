@@ -38,7 +38,7 @@ static const unsigned long
 	ViewOnWs = 0x100000, // follow a window to the workspace it is being moved to
 	Xresources = 0x200000, // xrdb patch
 	SnapToWindows = 0x400000, // snap to windows when moving floating clients
-	Debug = 0x800000,
+	FuncPlaceholder0x800000 = 0x800000,
 	AltWorkspaceIcons = 0x1000000, // show the workspace name instead of the icons
 	GreedyMonitor = 0x2000000, // when viewing a workspace the monitor is greedy and gives nothing in return (i.e. disables swap of workspaces)
 	SmartLayoutConvertion = 0x4000000, // when moving a workspace from one monitor to another, automatically adjust layout based on monitor orientation (i.e. vertical vs horizontal)
@@ -71,7 +71,7 @@ static const unsigned long
 	FuncPlaceholder9007199254740992 = 0x20000000000000,
 	FuncPlaceholder18014398509481984 = 0x40000000000000,
 	FuncPlaceholder36028797018963968 = 0x80000000000000,
-	FuncPlaceholder72057594037927936 = 0x100000000000000,
+	Debug = 0x100000000000000, // same name and value used for client flags, see flags.h
 	FuncPlaceholder144115188075855872 = 0x200000000000000,
 	FuncPlaceholder288230376151711744 = 0x400000000000000,
 	FuncPlaceholder576460752303423488 = 0x800000000000000,

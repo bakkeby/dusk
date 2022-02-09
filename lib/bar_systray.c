@@ -170,7 +170,7 @@ updatesystrayiconstate(Client *i, XPropertyEvent *ev)
 	long flags;
 	int code = 0;
 
-	if (enabled(Debug))
+	if (enabled(Debug) || DEBUGGING(i))
 		fprintf(stderr, "updatesystrayiconstate: ev->atom = %ld (%s), xatom[XembedInfo] = %ld\n", ev->atom, XGetAtomName(dpy, ev->atom), xatom[XembedInfo]);
 
 	if (disabled(Systray) || !systray || !i || ev->atom != xatom[XembedInfo] ||
