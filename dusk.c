@@ -1774,7 +1774,7 @@ focusin(XEvent *e)
 {
 	Workspace *ws = selws;
 	XFocusChangeEvent *ev = &e->xfocus;
-	if (ws->sel && ev->window != ws->sel->win)
+	if (ws->sel && ev->window != ws->sel->win && wintoclient(ev->window))
 		setfocus(ws->sel);
 }
 
