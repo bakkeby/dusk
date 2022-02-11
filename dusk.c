@@ -2110,7 +2110,8 @@ manage(Window w, XWindowAttributes *wa)
 
 	updateicon(c);
 	updatetitle(c);
-	fprintf(stderr, "manage --> client %s\n", c->name);
+	if (enabled(Debug))
+		fprintf(stderr, "manage --> client %s\n", c->name);
 	getclientflags(c);
 	getclientfields(c);
 	getclientopacity(c);
@@ -2148,7 +2149,8 @@ manage(Window w, XWindowAttributes *wa)
 		else if (RAISE(c))
 			XRaiseWindow(dpy, c->win);
 		free(c);
-		fprintf(stderr, "manage <-- unmanaged (%s)\n", c->name);
+		if (enabled(Debug))
+			fprintf(stderr, "manage <-- unmanaged (%s)\n", c->name);
 		return;
 	}
 
@@ -2293,7 +2295,8 @@ manage(Window w, XWindowAttributes *wa)
 	if (!c->ws->visible)
 		drawbar(c->ws->mon);
 
-	fprintf(stderr, "manage <-- (%s) on workspace %s\n", c->name, c->ws->name);
+	if (enabled(Debug))
+		fprintf(stderr, "manage <-- (%s) on workspace %s\n", c->name, c->ws->name);
 }
 
 void
