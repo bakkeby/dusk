@@ -32,6 +32,7 @@ static void movews(const Arg *arg);
 static void movewsdir(const Arg *arg);
 static void movetows(Client *c, Workspace *ws);
 static void movetowsbyname(const Arg *arg);
+static void sendtowsbyname(const Arg *arg);
 static void moveallclientstows(Workspace *from, Workspace *to);
 static void moveallfromwsbyname(const Arg *arg);
 static void movealltowsbyname(const Arg *arg);

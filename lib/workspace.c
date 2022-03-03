@@ -438,6 +438,14 @@ movetowsbyname(const Arg *arg)
 }
 
 void
+sendtowsbyname(const Arg *arg)
+{
+	togglefunc(ViewOnWs);
+	movetows(selws->sel, getwsbyname(arg));
+	togglefunc(ViewOnWs);
+}
+
+void
 movealltowsbyname(const Arg *arg)
 {
 	moveallclientstows(selws, getwsbyname(arg));

@@ -432,11 +432,12 @@ static const Layout layouts[] = {
 
 #define WSKEYS(MOD,KEY,NAME) \
 	{ KeyPress,   MOD,                      KEY,      comboviewwsbyname,   {.v = NAME} }, \
+	{ KeyPress,   MOD|Alt,                  KEY,      enablewsbyname,      {.v = NAME} }, \
 	{ KeyPress,   MOD|Shift,                KEY,      movetowsbyname,      {.v = NAME} }, \
+	{ KeyPress,   MOD|Ctrl,                 KEY,      sendtowsbyname,      {.v = NAME} }, \
 	{ KeyPress,   MOD|Ctrl|Shift,           KEY,      movealltowsbyname,   {.v = NAME} }, \
 	{ KeyPress,   MOD|Ctrl|Alt,             KEY,      moveallfromwsbyname, {.v = NAME} }, \
-	{ KeyPress,   MOD|Ctrl,                 KEY,      swapwsbyname,        {.v = NAME} }, \
-	{ KeyPress,   MOD|Alt,                  KEY,      enablewsbyname,      {.v = NAME} }, \
+	{ KeyPress,   MOD|Ctrl|Alt|Shift,       KEY,      swapwsbyname,        {.v = NAME} }, \
 
 #define STACKKEYS(MOD,ACTION) \
 	{ KeyPress,   MOD, XK_j, ACTION, {.i = INC(+1) } }, \
@@ -694,6 +695,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( markall, ARG_TYPE_SINT ), // 0 = mark all, 1 = mark floating, 2 = mark hidden
 	IPCCOMMAND( mirrorlayout, ARG_TYPE_NONE ),
 	IPCCOMMAND( movetowsbyname, ARG_TYPE_STR ),
+	IPCCOMMAND( sendtowsbyname, ARG_TYPE_STR ),
 	IPCCOMMAND( movealltowsbyname, ARG_TYPE_STR ),
 	IPCCOMMAND( moveallfromwsbyname, ARG_TYPE_STR ),
 	IPCCOMMAND( movewsdir, ARG_TYPE_SINT ),
