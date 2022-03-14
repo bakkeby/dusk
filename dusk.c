@@ -2199,7 +2199,8 @@ manage(Window w, XWindowAttributes *wa)
 	XSelectInput(dpy, w, EnterWindowMask|FocusChangeMask|PropertyChangeMask|StructureNotifyMask);
 	grabbuttons(c, 0);
 
-	if (trans != None)
+	/* If this is a transient window for a window that is managed by the window manager, then it should be floating. */
+	if (t)
 		c->prevflags |= Floating;
 	if (!ISFLOATING(c) && (ISFIXED(c) || WASFLOATING(c) || getatomprop(c, clientatom[IsFloating], AnyPropertyType)))
 		SETFLOATING(c);
