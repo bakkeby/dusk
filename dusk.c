@@ -2982,6 +2982,7 @@ setup(void)
 	occupied_workspace_label_format_length = TEXT2DW(occupied_workspace_label_format) - TEXTW(workspace_label_placeholder) * 2;
 	vacant_workspace_label_format_length = TEXT2DW(vacant_workspace_label_format) - TEXTW(workspace_label_placeholder);
 	textw_single_char = TEXTW("A");
+	elipsis_width = TEXTW("...");
 
 	updategeom();
 

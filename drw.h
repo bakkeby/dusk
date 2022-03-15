@@ -15,6 +15,7 @@ typedef struct Fnt {
 enum { ColFg, ColBg, ColBorder, ColResource, ColCount }; /* Clr scheme index */
 enum { PwrlNone, PwrlRightArrow, PwrlLeftArrow, PwrlForwardSlash, PwrlBackslash, PwrlSolid, PwrlSolidRev };
 typedef XftColor Clr;
+extern unsigned int elipsis_width;
 
 typedef struct {
 	unsigned int w, h;
