@@ -199,12 +199,16 @@ void
 setstatus(const Arg args[], int num_args)
 {
 	const BarRule *br;
+	int i, sid = args[0].i;
 
-	int sid = args[0].i;
 	if (sid < 0 || sid >= NUM_STATUSES)
 		return;
 
-	strcpy(rawstatustext[sid], args[1].v);
+	char const *statustext = args[1].v;
+
+	for (i = 0; i < STATUS_BUFFER - 1 && statustext[i] != '\0'; i++)
+		rawstatustext[sid][i] = statustext[i];
+	rawstatustext[sid][i] = '\0';
 
 	for (int r = 0; r < LENGTH(barrules); r++) {
 		br = &barrules[r];

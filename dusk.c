@@ -56,6 +56,7 @@
 #define Button9                 9
 #define BARRULES                50
 #define NUM_STATUSES            10
+#define STATUS_BUFFER           512
 #define BUTTONMASK              (ButtonPressMask|ButtonReleaseMask)
 #define CLEANMASK(mask)         (mask & ~(numlockmask|LockMask) & (ShiftMask|ControlMask|Mod1Mask|Mod2Mask|Mod3Mask|Mod4Mask|Mod5Mask))
 #define INTERSECT(X,Y,W,H,Z)    (MAX(0, MIN((X)+(W),(Z)->wx+(Z)->ww) - MAX((X),(Z)->wx)) \
@@ -519,7 +520,7 @@ static void zoom(const Arg *arg);
 
 /* variables */
 static const char broken[] = "fubar";
-static char rawstatustext[NUM_STATUSES][512];
+static char rawstatustext[NUM_STATUSES][STATUS_BUFFER];
 
 static int screen;
 static int sw, sh;             /* X display screen geometry width, height */
@@ -2981,7 +2982,6 @@ setup(void)
 	occupied_workspace_label_format_length = TEXT2DW(occupied_workspace_label_format) - TEXTW(workspace_label_placeholder) * 2;
 	vacant_workspace_label_format_length = TEXT2DW(vacant_workspace_label_format) - TEXTW(workspace_label_placeholder);
 	textw_single_char = TEXTW("A");
-
 
 	updategeom();
 
