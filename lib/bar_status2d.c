@@ -45,7 +45,7 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 	if (!w && drawbg)
 		return 0;
 
-	int i, tw, dx = x, len;
+	int i, tw, dx = x, len, mw = w - 2 * lpad;
 	int rx, ry, rw, rh;
 	int fillbg = drawbg;
 	short isCode = 0;
@@ -66,7 +66,6 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 	}
 
 	dx += lpad;
-	lpad = 0;
 	drw_setscheme(drw, scheme[LENGTH(colors)]);
 	drw->scheme[ColFg] = scheme[defscheme][ColFg];
 	drw->scheme[ColBg] = scheme[defscheme][ColBg];
@@ -78,11 +77,12 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 			isCode = 1;
 
 			text[i] = '\0';
-			tw = TEXTWM(text);
+			tw = MIN(mw, TEXTWM(text));
 
 			if (tw) {
-				drw_text(drw, dx, y, tw + lpad * 2, bh, lpad, text, invert, markup, fillbg);
-				dx += tw + lpad;
+				drw_text(drw, dx, y, tw, bh, 0, text, invert, markup, fillbg);
+				dx += tw;
+				mw -= tw;
 			}
 
 			/* process code */
@@ -134,7 +134,7 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 						break;
 					rx = (strncmp(text + i, "w", 1) == 0 ? w - 1 : atoi(text + i));
 					if (rx < 0)
-						rx += w;
+						rx += mw;
 					while (i < len && text[++i] != ',');
 					if (++i >= len)
 						break;
@@ -146,7 +146,7 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 						break;
 					rw = (strncmp(text + i, "w", 1) == 0 ? w : atoi(text + i));
 					if (rw < 0)
-						rw += w;
+						rw += mw;
 					while (i < len && text[++i] != ',');
 					if (++i >= len)
 						break;
@@ -167,10 +167,11 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 				} else if (text[i] == 'f') {
 					if (++i >= len)
 						break;
-					rx = (strncmp(text + i, "p", 1) == 0 ? lpad : atoi(text + i));
+					rx = (strncmp(text + i, "p", 1) == 0 ? 0 : atoi(text + i));
 					if (rx < 0)
-						rx += w;
+						rx += mw;
 					dx += rx;
+					mw -= rx;
 				}
 			}
 
@@ -184,11 +185,9 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 		}
 	}
 	if (!isCode && len > 0) {
-		tw = TEXTWM(text);
-		if (tw) {
-			drw_text(drw, dx, y, tw + lpad * 2, bh, lpad, text, invert, markup, fillbg);
-			dx += tw + lpad;
-		}
+		tw = MIN(mw, TEXTWM(text));
+		if (tw > 0)
+			drw_text(drw, dx, y, tw, bh, 0, text, invert, markup, fillbg);
 	}
 	free(p);
 
