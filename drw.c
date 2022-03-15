@@ -318,7 +318,7 @@ drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lp
 				if (charexists) {
 					if (curfont == usedfont) {
 						XftTextExtentsUtf8(curfont->dpy, curfont->xfont, (XftChar8 *)text, utf8charlen, &ext);
-						if (ew + ext.xOff > w || b + utf8charlen > sizeof(buf) - 1) {
+						if (ew + ext.xOff + lpad > w || b + utf8charlen > sizeof(buf) - 1) {
 							/* Only draw elipsis if we have not recently started another font */
 							if (elipsis_b > 3) {
 								ew = elipsis_ew;
@@ -331,7 +331,7 @@ drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lp
 						}
 
 						/* Record the last buffer index where the elipsis would still fit */
-						if (ew + elipsis_width <= w) {
+						if (ew + elipsis_width + lpad <= w) {
 							elipsis_ew = ew;
 							elipsis_b = b;
 						}
