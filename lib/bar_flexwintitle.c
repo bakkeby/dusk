@@ -199,7 +199,7 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 		tw -= ipad;
  	}
 
- 	if (tw > textw_single_char)
+ 	if (tw >= textw_single_char)
  		drw_text(drw, tx, barg->y, tw, barg->h, 0, c->name, 0, False, 1);
 	drawstateindicator(ws, c, 1, x, barg->y, w, barg->h, 0, 0);
 }
