@@ -161,8 +161,8 @@ getflagbyname(const char *name)
 		return FlagPlaceholder0x20000000000000;
 	else if (strcmp(name, "FlagPlaceholder0x40000000000000") == 0)
 		return FlagPlaceholder0x40000000000000;
-	else if (strcmp(name, "FlagPlaceholder0x80000000000000") == 0)
-		return FlagPlaceholder0x80000000000000;
+	else if (strcmp(name, "RefreshSizeHints") == 0)
+		return RefreshSizeHints;
 	else if (strcmp(name, "Debug") == 0)
 		return Debug;
 	else if (strcmp(name, "Invisible") == 0)

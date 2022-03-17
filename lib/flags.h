@@ -65,9 +65,9 @@ static const unsigned long
 	FlagPlaceholder0x10000000000000 = 0x10000000000000,
 	FlagPlaceholder0x20000000000000 = 0x20000000000000,
 	FlagPlaceholder0x40000000000000 = 0x40000000000000,
-	FlagPlaceholder0x80000000000000 = 0x80000000000000,
-	/* Debug = 0x100000000000000,  // same name and value as debug functionality, see util.h */
 	/* Below are flags that are intended to only be used internally */
+	RefreshSizeHints = 0x80000000000000, // used internally to indicate that size hints for the window should be (re-)loaded
+	/* Debug = 0x100000000000000,  // same name and value as debug functionality, see util.h */
 	Invisible = 0x200000000000000, // by default all clients are visible, used by scratchpads to hide clients
 	/* Some clients (e.g. alacritty) helpfully send configure requests with a new size or position
 	 * when they detect that they have been moved to another monitor. This can cause visual glitches
@@ -107,6 +107,7 @@ static const unsigned long
 #define IGNOREPROPTRANSIENTFOR(C) (C && C->flags & IgnorePropTransientFor)
 #define IGNORESIZEHINTS(C) (C && C->flags & IgnoreSizeHints)
 #define IGNOREMINIMUMSIZEHINTS(C) (C && C->flags & IgnoreMinimumSizeHints)
+#define REFRESHSIZEHINTS(C) (C && C->flags & RefreshSizeHints)
 #define NEEDRESIZE(C) (C && C->flags & NeedResize)
 #define NEVERFOCUS(C) (C && C->flags & NeverFocus)
 #define NOBORDER(C) (C && C->flags & NoBorder)

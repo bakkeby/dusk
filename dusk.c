@@ -761,7 +761,6 @@ reapplyrules(Client *c)
 	else if (RAISE(c))
 		XRaiseWindow(dpy, c->win);
 
-	updatesizehints(c);
 	updateclientdesktop(c);
 	updatewmhints(c);
 	updatemotifhints(c);
@@ -811,6 +810,8 @@ applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact)
 	if (*w < bh)
 		*w = bh;
 	if (!IGNORESIZEHINTS(c) && (enabled(ResizeHints) || RESPECTSIZEHINTS(c) || ISFLOATING(c) || !c->ws->layout->arrange)) {
+		if (REFRESHSIZEHINTS(c))
+			updatesizehints(c);
 		/* see last two sentences in ICCCM 4.1.2.3 */
 		baseismin = c->basew == c->minw && c->baseh == c->minh;
 		if (!baseismin) { /* temporarily remove base dimensions */
@@ -2184,8 +2185,8 @@ manage(Window w, XWindowAttributes *wa)
 	wc.border_width = c->bw;
 	XConfigureWindow(dpy, w, CWBorderWidth, &wc);
 	configure(c); /* propagates border_width, if size doesn't change */
-	updatesizehints(c);
 	updateclientdesktop(c);
+	addflag(c, RefreshSizeHints);
 
 	/* If the client indicates that it is in fullscreen, or if the FullScreen flag has been
 	 * explictly set via client rules, then enable fullscreen now. */
@@ -2479,8 +2480,7 @@ propertynotify(XEvent *e)
 				arrange(c->ws);
 			break;
 		case XA_WM_NORMAL_HINTS:
-			updatesizehints(c);
-			arrange(c->ws);
+			addflag(c, RefreshSizeHints);
 			break;
 		case XA_WM_HINTS:
 			updatewmhints(c);
@@ -3625,6 +3625,7 @@ updatesizehints(Client *c)
 	} else
 		c->maxa = c->mina = 0.0;
 	setflag(c, Fixed, (c->maxw && c->maxh && c->maxw == c->minw && c->maxh == c->minh));
+	removeflag(c, RefreshSizeHints);
 }
 
 void
