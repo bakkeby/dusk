@@ -16,7 +16,7 @@ static const unsigned char utfmask[UTF_SIZ + 1] = {0xC0, 0x80, 0xE0, 0xF0, 0xF8}
 static const long utfmin[UTF_SIZ + 1] = {       0,    0,  0x80,  0x800,  0x10000};
 static const long utfmax[UTF_SIZ + 1] = {0x10FFFF, 0x7F, 0x7FF, 0xFFFF, 0x10FFFF};
 static const unsigned int alpha_default[] = { 0xffU, 0xd0U, 0xffU };
-unsigned int elipsis_width = 0;
+unsigned int ellipsis_width = 0;
 
 static long
 utf8decodebyte(const char c, size_t *i)
@@ -278,10 +278,10 @@ drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lp
 {
 	char buf[1024] = {0};
 	int ty, stop = 0, charexists = 0;
-	unsigned int ew = 0, elipsis_ew = 0;
+	unsigned int ew = 0, ellipsis_ew = 0;
 	XftDraw *d = NULL;
 	Fnt *usedfont, *curfont, *nextfont;
-	size_t i, b = 0, elipsis_b = 0;
+	size_t i, b = 0, ellipsis_b = 0;
 	int utf8charlen, render = x || y || w || h;
 	long utf8codepoint = 0;
 	FcCharSet *fccharset;
@@ -307,8 +307,8 @@ drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lp
 
 	usedfont = drw->fonts;
 	while (1) {
-		elipsis_ew = ew = 0;
-		elipsis_b = b = 0;
+		ellipsis_ew = ew = 0;
+		ellipsis_b = b = 0;
 		nextfont = NULL;
 
 		while (*text) {
@@ -319,10 +319,10 @@ drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lp
 					if (curfont == usedfont) {
 						XftTextExtentsUtf8(curfont->dpy, curfont->xfont, (XftChar8 *)text, utf8charlen, &ext);
 						if (ew + ext.xOff + lpad > w || b + utf8charlen > sizeof(buf) - 1) {
-							/* Only draw elipsis if we have not recently started another font */
-							if (elipsis_b > 3) {
-								ew = elipsis_ew;
-								b = elipsis_b;
+							/* Only draw ellipsis if we have not recently started another font */
+							if (render && ellipsis_b > 3) {
+								ew = ellipsis_ew;
+								b = ellipsis_b;
 								for (i = 0; i < 3; i++)
 									buf[b++] = '.';
 							}
@@ -330,10 +330,10 @@ drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lp
 							break;
 						}
 
-						/* Record the last buffer index where the elipsis would still fit */
-						if (ew + elipsis_width + lpad <= w) {
-							elipsis_ew = ew;
-							elipsis_b = b;
+						/* Record the last buffer index where the ellipsis would still fit */
+						if (ew + ellipsis_width + lpad <= w) {
+							ellipsis_ew = ew;
+							ellipsis_b = b;
 						}
 						for (i = 0; i < utf8charlen; i++)
 							buf[b++] = *text++;
@@ -487,21 +487,6 @@ drw_fontset_getwidth(Drw *drw, const char *text, Bool markup)
 	if (!drw || !drw->fonts || !text)
 		return 0;
 	return drw_text(drw, 0, 0, 0, 0, 0, text, 0, markup, 0);
-}
-
-void
-drw_font_getexts(Fnt *font, const char *text, unsigned int len, unsigned int *w, unsigned int *h)
-{
-	XGlyphInfo ext;
-
-	if (!font || !text)
-		return;
-
-	XftTextExtentsUtf8(font->dpy, font->xfont, (XftChar8 *)text, len, &ext);
-	if (w)
-		*w = ext.xOff;
-	if (h)
-		*h = font->h;
 }
 
 Cur *
