@@ -36,11 +36,11 @@ click_status(Bar *bar, Arg *arg, BarArg *a)
 int
 draw_status(Bar *bar, BarArg *a)
 {
-	return drw_2dtext(drw, a->x, a->y, a->w, a->h, a->lpad, rawstatustext[a->value], 0, 0, 1, a->scheme);
+	return drw_2dtext(drw, a->x, a->y, a->w, a->h, a->lpad, rawstatustext[a->value], 0, 1, a->scheme);
 }
 
 int
-drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lpad, const char *text2d, int invert, Bool markup, int drawbg, int defscheme)
+drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lpad, const char *text2d, int invert, int drawbg, int defscheme)
 {
 	if (!w && drawbg)
 		return 0;
@@ -77,10 +77,10 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 			isCode = 1;
 
 			text[i] = '\0';
-			tw = MIN(mw, TEXTWM(text));
+			tw = TEXTW_CLAMP(text, mw);
 
 			if (tw) {
-				drw_text(drw, dx, y, tw, bh, 0, text, invert, markup, fillbg);
+				drw_text(drw, dx, y, tw, bh, 0, text, invert, fillbg);
 				dx += tw;
 				mw -= tw;
 			}
@@ -185,9 +185,9 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 		}
 	}
 	if (!isCode && len > 0) {
-		tw = MIN(mw, TEXTWM(text));
+		tw = TEXTW_CLAMP(text, mw);
 		if (tw > 0)
-			drw_text(drw, dx, y, tw, bh, 0, text, invert, markup, fillbg);
+			drw_text(drw, dx, y, tw, bh, 0, text, invert, fillbg);
 	}
 	free(p);
 
@@ -239,7 +239,7 @@ status2dtextlength(char* text2d)
 			if (!isCode) {
 				isCode = 1;
 				text[i] = '\0';
-				w += TEXTWM(text);
+				w += TEXTW(text);
 				text[i] = '^';
 				if (text[++i] == 'f')
 					w += atoi(text + ++i);
@@ -251,7 +251,7 @@ status2dtextlength(char* text2d)
 		}
 	}
 	if (!isCode)
-		w += TEXTWM(text);
+		w += TEXTW(text);
 	free(p);
 	return w;
 }

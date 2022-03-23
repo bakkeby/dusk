@@ -68,8 +68,8 @@
 #define WIDTH(X)                ((X)->w + 2 * (X)->bw)
 #define HEIGHT(X)               ((X)->h + 2 * (X)->bw)
 #define WTYPE                   "_NET_WM_WINDOW_TYPE_"
-#define TEXTWM(X)               (drw_fontset_getwidth(drw, (X), True))
-#define TEXTW(X)                (drw_fontset_getwidth(drw, (X), False))
+#define TEXTW(X)                (drw_fontset_getwidth(drw, (X)))
+#define TEXTW_CLAMP(X, N)       (MIN((drw_fontset_getwidth_clamp(drw, (X), (N))), (N)))
 #define TEXT2DW(X)              (status2dtextlength((X)))
 #define CLIENT                  (arg && arg->v ? (Client*)arg->v : selws->sel)
 
@@ -2981,8 +2981,6 @@ setup(void)
 	/* One off calculating workspace label widths, used by WorkspaceLabels functionality */
 	occupied_workspace_label_format_length = TEXT2DW(occupied_workspace_label_format) - TEXTW(workspace_label_placeholder) * 2;
 	vacant_workspace_label_format_length = TEXT2DW(vacant_workspace_label_format) - TEXTW(workspace_label_placeholder);
-	textw_single_char = TEXTW("A");
-	ellipsis_width = TEXTW("...");
 
 	updategeom();
 

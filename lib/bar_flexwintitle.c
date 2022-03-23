@@ -1,6 +1,5 @@
 int firstpwlwintitle = 0;
 int prevscheme = 0;
-int textw_single_char = 0;
 
 int
 size_flexwintitle(Bar *bar, BarArg *a)
@@ -165,6 +164,9 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 	int lpad = 0;
 	int tx = x;
 	int tw = w;
+	static unsigned int textw_single_char = 0;
+	if (!textw_single_char)
+		textw_single_char = TEXTW("A");
 
 	prevscheme = barg->lastscheme;
 	barg->lastscheme = clientscheme(c, c->ws->sel);
@@ -200,7 +202,7 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
  	}
 
  	if (tw >= textw_single_char)
- 		drw_text(drw, tx, barg->y, tw, barg->h, 0, c->name, 0, False, 1);
+ 		drw_text(drw, tx, barg->y, tw, barg->h, 0, c->name, 0, 1);
 	drawstateindicator(ws, c, 1, x, barg->y, w, barg->h, 0, 0);
 }
 

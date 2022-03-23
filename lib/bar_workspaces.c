@@ -84,7 +84,7 @@ draw_workspaces(Bar *bar, BarArg *a)
 				}
 				icon = label;
 			}
-			drw_2dtext(drw, x, y, w, h, padding / 2, icon, inv, False, 1, wsscheme);
+			drw_2dtext(drw, x, y, w, h, padding / 2, icon, inv, 1, wsscheme);
 
 			if (plw && nextws)
 				drw_arrow(drw, x + w, y, plw, h, a->value, scheme[wsscheme][ColBg], scheme[nextscheme][ColBg], scheme[SchemeNorm][ColBg]);
