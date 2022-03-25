@@ -77,7 +77,7 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 			isCode = 1;
 
 			text[i] = '\0';
-			tw = TEXTW_CLAMP(text, mw);
+			tw = textw_clamp(text, mw);
 
 			if (tw) {
 				drw_text(drw, dx, y, tw, bh, 0, text, invert, fillbg);
@@ -185,7 +185,7 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 		}
 	}
 	if (!isCode && len > 0) {
-		tw = TEXTW_CLAMP(text, mw);
+		tw = textw_clamp(text, mw);
 		if (tw > 0)
 			drw_text(drw, dx, y, tw, bh, 0, text, invert, fillbg);
 	}

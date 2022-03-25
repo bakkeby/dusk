@@ -69,7 +69,6 @@
 #define HEIGHT(X)               ((X)->h + 2 * (X)->bw)
 #define WTYPE                   "_NET_WM_WINDOW_TYPE_"
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X)))
-#define TEXTW_CLAMP(X, N)       (MIN((drw_fontset_getwidth_clamp(drw, (X), (N))), (N)))
 #define TEXT2DW(X)              (status2dtextlength((X)))
 #define CLIENT                  (arg && arg->v ? (Client*)arg->v : selws->sel)
 
@@ -496,6 +495,7 @@ static void skipfocusevents(void);
 static void spawn(const Arg *arg);
 static pid_t spawncmd(const Arg *arg, int buttonclick);
 static void structurenotify(XEvent *e);
+static unsigned int textw_clamp(const char *str, unsigned int n);
 static void togglefloating(const Arg *arg);
 static void togglemaximize(Client *c, int maximize_vert, int maximize_horz);
 static void unfocus(Client *c, int setfocus, Client *nextfocus);
@@ -3256,6 +3256,13 @@ structurenotify(XEvent *e)
 		arrange(ws);
 		drawbar(ws->mon);
 	}
+}
+
+static unsigned int
+textw_clamp(const char *str, unsigned int n)
+{
+	unsigned int w = drw_fontset_getwidth_clamp(drw, str, n) + lrpad;
+	return MIN(w, n);
 }
 
 void
