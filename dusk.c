@@ -3261,7 +3261,7 @@ structurenotify(XEvent *e)
 static unsigned int
 textw_clamp(const char *str, unsigned int n)
 {
-	unsigned int w = drw_fontset_getwidth_clamp(drw, str, n) + lrpad;
+	unsigned int w = drw_fontset_getwidth_clamp(drw, str, n);
 	return MIN(w, n);
 }
 
