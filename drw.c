@@ -276,7 +276,7 @@ int
 drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lpad, const char *text, int invert, int fillbg)
 {
 	int i, ty = 0, ellipsis_x = 0, charexists = 0, overflow = 0;
-	unsigned int ew = 0, ellipsis_len;
+	unsigned int ew = 0, ellipsis_w = 0, ellipsis_len;
 	static unsigned int ellipsis_width = 0;
 	XftDraw *d = NULL;
 	Fnt *usedfont, *curfont, *nextfont;
@@ -327,6 +327,7 @@ drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lp
 					/* Keep track of the last len and x-position where ellipsis fits */
 					if (ew + ellipsis_width <= w) {
 						ellipsis_x = x + ew;
+						ellipsis_w = w - ew;
 						ellipsis_len = utf8strlen;
 					}
 
@@ -363,8 +364,9 @@ drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lp
 			w -= ew;
 		}
 
-		if (render && overflow && ellipsis_width <= w) {
+		if (render && overflow && ellipsis_w) {
 			ty = y + (h - drw->fonts->h) / 2 + drw->fonts->xfont->ascent;
+			XFillRectangle(drw->dpy, drw->drawable, drw->gc, ellipsis_x, y, ellipsis_w, h);
 			XftDrawStringUtf8(d, &drw->scheme[invert ? ColBg : ColFg],
 			                  drw->fonts->xfont, ellipsis_x, ty, (XftChar8 *)ellipsis, 3);
 		}
