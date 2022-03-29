@@ -277,7 +277,6 @@ drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lp
 {
 	int i, ty = 0, ellipsis_x = 0, charexists = 0, overflow = 0;
 	unsigned int ew = 0, ellipsis_w = 0, ellipsis_len;
-	static unsigned int ellipsis_width = 0;
 	XftDraw *d = NULL;
 	Fnt *usedfont, *curfont, *nextfont;
 	int utf8strlen, utf8charlen, render = x || y || w || h;
@@ -288,7 +287,9 @@ drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lp
 	FcPattern *match;
 	XftResult result;
 	XGlyphInfo ext;
-	const char *ellipsis = "…";
+	static const char *ellipsis = "…";
+	static unsigned int ellipsis_width = 0;
+
 	/* keep track of a couple codepoints for which we have no match. */
 	enum { nomatches_len = 64 };
 	static struct { long codepoint[nomatches_len]; unsigned int idx; } nomatches;
@@ -309,10 +310,8 @@ drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lp
 	}
 
 	usedfont = drw->fonts;
-	if (!ellipsis_width) {
-		XftTextExtentsUtf8(usedfont->dpy, usedfont->xfont, (XftChar8 *)ellipsis, 3, &ext);
-		ellipsis_width = ext.xOff;
-	}
+	if (!ellipsis_width && render)
+		ellipsis_width = drw_fontset_getwidth(drw, ellipsis);
 
 	while (1) {
 		ew = ellipsis_len = utf8strlen = 0;
@@ -364,12 +363,8 @@ drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lp
 			w -= ew;
 		}
 
-		if (render && overflow && ellipsis_w) {
-			ty = y + (h - drw->fonts->h) / 2 + drw->fonts->xfont->ascent;
-			XFillRectangle(drw->dpy, drw->drawable, drw->gc, ellipsis_x, y, ellipsis_w, h);
-			XftDrawStringUtf8(d, &drw->scheme[invert ? ColBg : ColFg],
-			                  drw->fonts->xfont, ellipsis_x, ty, (XftChar8 *)ellipsis, 3);
-		}
+		if (render && overflow && ellipsis_w)
+			drw_text(drw, ellipsis_x, y, ellipsis_w, h, 0, ellipsis, invert, fillbg);
 
 		if (!*text || overflow) {
 			break;
