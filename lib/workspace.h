@@ -26,7 +26,7 @@ static void hidewsclients(Client *c);
 static void showws(Workspace *ws);
 static void showwsclient(Client *c);
 static void showwsclients(Client *c);
-static void drawws(Workspace *ws, Monitor *m, int enablews, int arrangeall, int do_warp);
+static void drawws(Workspace *ws, Monitor *m, unsigned long prevwsmask, int enablews, int arrangeall, int do_warp);
 
 static void movews(const Arg *arg);
 static void movewsdir(const Arg *arg);

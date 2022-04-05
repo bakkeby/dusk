@@ -127,7 +127,7 @@ void
 viewwsmask(Monitor *m, unsigned long wsmask)
 {
 	Workspace *ws;
-	long unsigned int currmask = getwsmask(m);
+	unsigned long currmask = getwsmask(m);
 	int wasvisible;
 
 	if (wsmask == currmask)
@@ -141,7 +141,7 @@ viewwsmask(Monitor *m, unsigned long wsmask)
 			hidews(ws);
 	}
 
-	drawws(NULL, m, 1, 0, 0);
+	drawws(NULL, m, currmask, 1, 0, 0);
 }
 
 int
@@ -205,7 +205,6 @@ hidews(Workspace *ws)
 		return;
 
 	ws->visible = 0;
-	hidewsclients(ws->stack);
 
 	/* If the workspace being hidden was the selected workspace, then try to find another
 	 * visible workspace on the same monitor that can become the selected workspace. */
@@ -331,14 +330,14 @@ swapwsclients(Workspace *ws1, Workspace *ws2)
 		showwsclients(c2);
 		arrangews(ws1);
 	} else
-		hidews(ws1);
+		hidewsclients(ws1->stack);
 
 	if (ws2->visible) {
 		showwsclients(c1);
 		arrangews(ws2);
 	}
 	else
-		hidews(ws2);
+		hidewsclients(ws2->stack);
 
 	drawbars();
 }
@@ -418,12 +417,12 @@ moveallclientstows(Workspace *from, Workspace *to)
 	if (from->visible)
 		arrangews(from);
 	else
-		hidews(from);
+		hidewsclients(from->stack);
 
 	if (to->visible)
 		arrangews(to);
 	else
-		hidews(to);
+		hidewsclients(to->stack);
 
 	if (from->mon == to->mon)
 		drawbar(to->mon);
@@ -560,8 +559,8 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 	if (m == NULL)
 		m = selmon;
 
-	Monitor *mon, *omon = NULL;
-	Workspace *w, *ows = NULL;
+	Monitor *omon = NULL;
+	Workspace *ows = NULL, *w;
 
 	prevwsmask = getwsmask(m);
 
@@ -646,12 +645,23 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 	}
 
 	if (!enablews) {
-		/* Note that we hide workspaces after showing workspaces to avoid flickering when
-		 * changing workspace (i.e. seeing the wallpaper for a fraction of a second). */
 		for (w = nextvismonws(ws->mon, workspaces); w; w = nextvismonws(ws->mon, w->next))
 			if (w != ws)
 				hidews(w);
 	}
+
+	drawws(ws, m, prevwsmask, enablews, arrangeall, do_warp);
+}
+
+void
+drawws(Workspace *ws, Monitor *m, unsigned long prevwsmask, int enablews, int arrangeall, int do_warp)
+{
+	int x, y;
+	Workspace *mousepointerws, *w;
+	Monitor *mon;
+	unsigned long hidewsmask = prevwsmask - (prevwsmask & getwsmask(m));
+
+	setworkspaceareas();
 
 	/* Clear the selected workspace for a monitor if there are no visible workspaces */
 	for (mon = mons; mon; mon = mon->next) {
@@ -659,21 +669,6 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 		if (!w)
 			mon->selws = NULL;
 	}
-
-	drawws(ws, m, enablews, arrangeall, do_warp);
-}
-
-void
-drawws(Workspace *ws, Monitor *m, int enablews, int arrangeall, int do_warp)
-{
-	int x, y;
-	Workspace *mousepointerws, *w;
-
-	setworkspaceareas();
-
-	for (w = workspaces; w; w = w->next)
-		if (w->visible)
-			showwsclients(w->stack);
 
 	/* When enabling new workspaces into view let the focus remain with the one
 	 * that has the mouse cursor on it. */
@@ -683,10 +678,21 @@ drawws(Workspace *ws, Monitor *m, int enablews, int arrangeall, int do_warp)
 			selws = m->selws = mousepointerws;
 	}
 
+	/* This reveals floating clients while the arrange handles tiled clients */
+	for (w = workspaces; w; w = w->next)
+		if (w->visible)
+			showwsclients(w->stack);
+
 	if (arrangeall)
 		arrange(NULL);
 	else
 		arrangemon(ws ? ws->mon : m);
+
+	/* Note that we hide workspaces after showing workspaces to avoid flickering when
+	 * changing workspace (i.e. seeing the wallpaper for a fraction of a second). */
+	for (w = workspaces; w; w = w->next)
+		if (w->mon == m && (hidewsmask & (1L << w->num)))
+			hidewsclients(w->stack);
 
 	drawbars();
 	updatecurrentdesktop();
