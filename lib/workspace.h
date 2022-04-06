@@ -16,8 +16,9 @@ static int hasfloating(Workspace *ws);
 static void adjustwsformonitor(Workspace *ws, Monitor *m);
 static Workspace * getwsbyname(const Arg *arg);
 static Workspace * getwsbyindex(int index);
-static unsigned long getwsmask(Monitor *m);
-static void viewwsmask(Monitor *m, unsigned long wsmask);
+static uint64_t getwsmask(Monitor *m);
+static uint64_t getallwsmask(Monitor *m);
+static void viewwsmask(Monitor *m, uint64_t wsmask);
 
 static void enablews(const Arg *arg);
 static void enablewsbyname(const Arg *arg);
@@ -26,7 +27,7 @@ static void hidewsclients(Client *c);
 static void showws(Workspace *ws);
 static void showwsclient(Client *c);
 static void showwsclients(Client *c);
-static void drawws(Workspace *ws, Monitor *m, unsigned long prevwsmask, int enablews, int arrangeall, int do_warp);
+static void drawws(Workspace *ws, Monitor *m, uint64_t prevwsmask, int enablews, int arrangeall, int do_warp);
 
 static void movews(const Arg *arg);
 static void movewsdir(const Arg *arg);

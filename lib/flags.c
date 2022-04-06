@@ -1,31 +1,31 @@
 void
-addflag(Client *c, const unsigned long flag)
+addflag(Client *c, const uint64_t flag)
 {
 	c->prevflags = (c->prevflags & ~flag) | (c->flags & flag);
 	c->flags |= flag;
 }
 
 void
-setflag(Client *c, const unsigned long flag, const int value)
+setflag(Client *c, const uint64_t flag, const int value)
 {
 	value ? addflag(c, flag) : removeflag(c, flag);
 }
 
 void
-removeflag(Client *c, const unsigned long flag)
+removeflag(Client *c, const uint64_t flag)
 {
 	c->prevflags = (c->prevflags & ~flag) | (c->flags & flag);
 	c->flags &= ~flag;
 }
 
 void
-toggleflag(Client *c, const unsigned long flag)
+toggleflag(Client *c, const uint64_t flag)
 {
 	c->flags ^= flag;
 }
 
 void
-toggleflagop(Client *c, const unsigned long flag, int op)
+toggleflagop(Client *c, const uint64_t flag, int op)
 {
 	switch (op) {
 	default:
@@ -48,7 +48,7 @@ toggleclientflag(const Arg *arg)
 	arrangews(selws);
 }
 
-const unsigned long
+const uint64_t
 getflagbyname(const char *name)
 {
 	if (strcmp(name, "AlwaysOnTop") == 0)

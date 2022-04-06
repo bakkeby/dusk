@@ -1,4 +1,5 @@
 /* See LICENSE file for copyright and license details. */
+#include <stdint.h>
 
 #ifndef MAX
 #define MAX(A, B)               ((A) > (B) ? (A) : (B))
@@ -14,7 +15,7 @@
 #define DEBUG(...)
 #endif
 
-static const unsigned long
+static const uint64_t
 	SmartGaps = 0x1, // enables no gaps if there is only one visible window
 	SmartGapsMonocle = 0x2, // enforces no (outer) gaps in monocle layout
 	Swallow = 0x4, // enables swallowing of clients
@@ -82,9 +83,9 @@ static const unsigned long
 
 void die(const char *fmt, ...);
 void *ecalloc(size_t nmemb, size_t size);
-int enabled(const long functionality);
-int disabled(const long functionality);
-void enablefunc(const long functionality);
-void disablefunc(const long functionality);
-void togglefunc(const long functionality);
-const unsigned long getfuncbyname(const char *name);
+int enabled(const uint64_t functionality);
+int disabled(const uint64_t functionality);
+void enablefunc(const uint64_t functionality);
+void disablefunc(const uint64_t functionality);
+void togglefunc(const uint64_t functionality);
+const uint64_t getfuncbyname(const char *name);

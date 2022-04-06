@@ -60,7 +60,7 @@ static char *vacant_workspace_label_format = "%s";       /* format of an empty /
 static int lowercase_workspace_labels = 1;               /* whether to change workspace labels to lower case */
 
 /* See util.h for options */
-static unsigned long functionality = 0
+static uint64_t functionality = 0
 //	|AutoReduceNmaster // automatically reduce the number of master clients if one is closed
 //	|SmartGaps // enables no or increased gaps if there is only one visible window
 //	|SmartGapsMonocle // enforces no gaps in monocle layout

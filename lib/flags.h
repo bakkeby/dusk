@@ -1,12 +1,12 @@
-static void addflag(Client *c, const unsigned long flag);
-static void setflag(Client *c, const unsigned long flag, const int value);
-static void removeflag(Client *c, const unsigned long flag);
-static void toggleflag(Client *c, const unsigned long flag);
+static void addflag(Client *c, const uint64_t flag);
+static void setflag(Client *c, const uint64_t flag, const int value);
+static void removeflag(Client *c, const uint64_t flag);
+static void toggleflag(Client *c, const uint64_t flag);
 static void toggleclientflag(const Arg *arg);
-static void toggleflagop(Client *c, const unsigned long flag, int op);
-static const unsigned long getflagbyname(const char *name);
+static void toggleflagop(Client *c, const uint64_t flag, int op);
+static const uint64_t getflagbyname(const char *name);
 
-static const unsigned long
+static const uint64_t
 	AlwaysOnTop = 0x1, // client window is intended to always display on top (even above floating windows)
 	Fixed = 0x2, // used when client has a fixed size where width equals height
 	Floating = 0x4, // the client is floating (i.e. not tiled)

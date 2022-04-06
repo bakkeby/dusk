@@ -1,4 +1,3 @@
-static unsigned long prevwsmask = 1 << 1;
 static Workspace *stickyws;
 
 void
@@ -111,11 +110,11 @@ wsicon(Workspace *ws)
 	return icon;
 }
 
-unsigned long
+uint64_t
 getwsmask(Monitor *m)
 {
-	unsigned long wsmask = 0;
 	Workspace *ws;
+	uint64_t wsmask = 0;
 
 	for (ws = nextvismonws(m, workspaces); ws; ws = nextvismonws(m, ws->next))
 		wsmask |= (1L << ws->num);
@@ -123,11 +122,23 @@ getwsmask(Monitor *m)
 	return wsmask;
 }
 
-void
-viewwsmask(Monitor *m, unsigned long wsmask)
+uint64_t
+getallwsmask(Monitor *m)
 {
 	Workspace *ws;
-	unsigned long currmask = getwsmask(m);
+	uint64_t wsmask = 0;
+
+	for (ws = nextmonws(m, workspaces); ws; ws = nextmonws(m, ws->next))
+		wsmask |= (1L << ws->num);
+
+	return wsmask;
+}
+
+void
+viewwsmask(Monitor *m, uint64_t wsmask)
+{
+	Workspace *ws;
+	uint64_t currmask = getwsmask(m);
 	int wasvisible;
 
 	if (wsmask == currmask)
@@ -505,14 +516,7 @@ viewws(const Arg *arg)
 void
 viewallwsonmon(const Arg *arg)
 {
-	Workspace *ws;
-	Monitor *m = selmon;
-	unsigned long wsmask = 0;
-
-	for (ws = nextmonws(m, workspaces); ws; ws = nextmonws(m, ws->next))
-		wsmask |= (1L << ws->num);
-
-	viewwsmask(m, wsmask);
+	viewwsmask(selmon, getallwsmask(selmon));
 }
 
 void
@@ -520,8 +524,8 @@ viewalloccwsonmon(const Arg *arg)
 {
 	Workspace *ws;
 	Monitor *m = selmon;
-	unsigned long wsmask = 0;
-	long unsigned int currmask = getwsmask(m);
+	uint64_t wsmask = 0;
+	uint64_t currmask = getwsmask(m);
 	int wscount = 0;
 
 	for (ws = nextmonws(m, workspaces); ws; ws = nextmonws(m, ws->next)) {
@@ -552,6 +556,7 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 {
 	int do_warp = 0;
 	int arrangeall = 0;
+	uint64_t prevwsmask;
 
 	if (!ws)
 		return;
@@ -562,7 +567,7 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 	Monitor *omon = NULL;
 	Workspace *ows = NULL, *w;
 
-	prevwsmask = getwsmask(m);
+	m->prevwsmask = prevwsmask = getwsmask(m);
 
 	if (enabled(WorkspacePreview)) {
 		storepreview(ws->mon->selws);
@@ -575,8 +580,13 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 		hidews(ws);
 	} else if (ws->pinned) {
 		/* The workspace is pinned, show it on the monitor it is assigned to */
-		if (selws && selws->mon != ws->mon)
+		if (selws && selws->mon != ws->mon) {
 			do_warp = 1;
+			m = ws->mon;
+			prevwsmask = getwsmask(m);
+			m->prevwsmask = ws->visible ? 0 : prevwsmask;
+		}
+
 		if (!ws->visible)
 			showws(ws);
 		else
@@ -654,12 +664,12 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 }
 
 void
-drawws(Workspace *ws, Monitor *m, unsigned long prevwsmask, int enablews, int arrangeall, int do_warp)
+drawws(Workspace *ws, Monitor *m, uint64_t prevwsmask, int enablews, int arrangeall, int do_warp)
 {
 	int x, y;
 	Workspace *mousepointerws, *w;
 	Monitor *mon;
-	unsigned long hidewsmask = prevwsmask - (prevwsmask & getwsmask(m));
+	uint64_t hidewsmask = prevwsmask - (prevwsmask & getwsmask(m));
 
 	setworkspaceareas();
 

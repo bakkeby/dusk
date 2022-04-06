@@ -33,7 +33,7 @@ persistworkspacestate(Workspace *ws)
 	 *    | |-- mirror layout (indicated by negative ws->ltaxis[LAYOUT])
 	 *    |-- ws->enablegaps
 	 */
-	unsigned long data[] = {
+	uint32_t data[] = {
 		(ws->visible & 0x1) |
 		(ws->pinned & 0x1) << 1 |
 		(ws->nmaster & 0x7) << 2 |
@@ -84,11 +84,11 @@ savewindowfloatposition(Client *c, Monitor *m)
 		return;
 
 	sprintf(atom, "_DUSK_FLOATPOS_%u", m->num);
-	unsigned long pos[] = { (MAX(c->sfx - m->mx, 0) & 0xffff) | ((MAX(c->sfy - m->my, 0) & 0xffff) << 16) };
+	uint32_t pos[] = { (MAX(c->sfx - m->mx, 0) & 0xffff) | ((MAX(c->sfy - m->my, 0) & 0xffff) << 16) };
 	XChangeProperty(dpy, c->win, XInternAtom(dpy, atom, False), XA_CARDINAL, 32, PropModeReplace, (unsigned char *)pos, 1);
 
 	sprintf(atom, "_DUSK_FLOATSIZE_%u", m->num);
-	unsigned long size[] = { (c->sfw & 0xffff) | ((c->sfh & 0xffff) << 16) };
+	uint32_t size[] = { (c->sfw & 0xffff) | ((c->sfh & 0xffff) << 16) };
 	XChangeProperty(dpy, c->win, XInternAtom(dpy, atom, False), XA_CARDINAL, 32, PropModeReplace, (unsigned char *)size, 1);
 
 	XSync(dpy, False);
@@ -165,8 +165,8 @@ setfloatinghint(Client *c)
 void
 setclientflags(Client *c)
 {
-	unsigned long data1[] = { c->flags & 0xFFFFFFFF };
-	unsigned long data2[] = { c->flags >> 32 };
+	uint32_t data1[] = { c->flags & 0xFFFFFFFF };
+	uint32_t data2[] = { c->flags >> 32 };
 	XChangeProperty(dpy, c->win, clientatom[DuskClientFlags], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data1, 1);
 	XChangeProperty(dpy, c->win, clientatom[DuskClientFlags], XA_CARDINAL, 32, PropModeAppend,  (unsigned char *)data2, 1);
 }
@@ -174,7 +174,7 @@ setclientflags(Client *c)
 void
 setclientfields(Client *c)
 {
-	unsigned long data[] = { c->ws->num | (c->idx << 6) | (c->scratchkey << 14)};
+	uint32_t data[] = { c->ws->num | (c->idx << 6) | (c->scratchkey << 14)};
 	XChangeProperty(dpy, c->win, clientatom[DuskClientFields], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
 }
 
@@ -188,7 +188,8 @@ void
 getclientflags(Client *c)
 {
 	int di;
-	unsigned long dl, nitems, flags1 = 0, flags2 = 0;
+	unsigned long dl, nitems;
+	uint64_t flags1 = 0, flags2 = 0;
 	unsigned char *p = NULL;
 	Atom da = None;
 	Atom *cflags;

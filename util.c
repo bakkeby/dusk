@@ -6,7 +6,7 @@
 
 #include "util.h"
 
-unsigned long settings = 0;
+uint64_t settings = 0;
 
 void *
 ecalloc(size_t nmemb, size_t size)
@@ -37,36 +37,36 @@ die(const char *fmt, ...) {
 }
 
 int
-enabled(const long functionality)
+enabled(const uint64_t functionality)
 {
 	return (settings & functionality) > 0;
 }
 
 int
-disabled(const long functionality)
+disabled(const uint64_t functionality)
 {
 	return !(settings & functionality);
 }
 
 void
-enablefunc(const long functionality)
+enablefunc(const uint64_t functionality)
 {
 	settings |= functionality;
 }
 
 void
-disablefunc(const long functionality)
+disablefunc(const uint64_t functionality)
 {
 	settings &= ~functionality;
 }
 
 void
-togglefunc(const long functionality)
+togglefunc(const uint64_t functionality)
 {
 	settings ^= functionality;
 }
 
-const unsigned long
+const uint64_t
 getfuncbyname(const char *name)
 {
 	if (strcmp(name, "SmartGaps") == 0)

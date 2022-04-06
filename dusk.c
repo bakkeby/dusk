@@ -301,8 +301,8 @@ struct Client {
 	Window win;
 	unsigned int icw, ich;
 	Picture icon;
-	unsigned long flags;
-	unsigned long prevflags;
+	uint64_t flags;
+	uint64_t prevflags;
 };
 
 typedef struct {
@@ -339,7 +339,8 @@ struct Monitor {
 	int gappoh;           /* horizontal outer gaps */
 	int gappov;           /* vertical outer gaps */
 	int showbar;
-	unsigned long wsmask;
+	uint64_t wsmask;
+	uint64_t prevwsmask;
 	unsigned int borderpx;
 	Monitor *next;
 	Workspace *selws;
@@ -1538,6 +1539,8 @@ createmon(int num)
 	m->gappiv = gappiv;
 	m->gappoh = gappoh;
 	m->gappov = gappov;
+	m->wsmask = 0;
+	m->prevwsmask = 0;
 	m->num = num;
 	m->bar = NULL;
 
@@ -2048,14 +2051,15 @@ keyrelease(XEvent *e)
 	if (!combo)
 		return;
 
-	unsigned long wsmask;
-	Monitor *m = selmon;
+	Monitor *m = selws->mon;
+	uint64_t wsmask = getwsmask(m);
 
-	wsmask = getwsmask(m);
-	if (prevwsmask == wsmask && m->wsmask)
-		viewwsmask(m, m->wsmask);
-	else
-		m->wsmask = prevwsmask;
+	if (m->prevwsmask == wsmask && m->wsmask) {
+		if (getallwsmask(m) & m->wsmask)
+			viewwsmask(m, m->wsmask);
+	}
+	else if (m->prevwsmask)
+		m->wsmask = m->prevwsmask;
 	combo = 0;
 }
 
