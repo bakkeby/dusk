@@ -530,6 +530,7 @@ static int force_warp = 0;     /* force warp in some situations, e.g. killclient
 static int ignore_warp = 0;    /* force skip warp in some situations, e.g. dragmfact, dragcfact */
 static int num_workspaces = 0; /* the number of available workspaces */
 static int combo = 0;          /* used for combo keys */
+static int monitorchanged = 0; /* used for combo logic */
 static int grp_idx = 0;        /* used for grouping windows together */
 static int arrange_focus_on_monocle = 1; /* used in focus to arrange monocle layouts on focus */
 
@@ -2055,12 +2056,12 @@ keyrelease(XEvent *e)
 	uint64_t wsmask = getwsmask(m);
 
 	if (m->prevwsmask == wsmask && m->wsmask) {
-		if (getallwsmask(m) & m->wsmask)
+		if (!monitorchanged && getallwsmask(m) & m->wsmask)
 			viewwsmask(m, m->wsmask);
-	}
-	else if (m->prevwsmask)
+	} else if (m->prevwsmask)
 		m->wsmask = m->prevwsmask;
 	combo = 0;
+	monitorchanged = 0;
 }
 
 void

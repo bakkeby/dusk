@@ -556,7 +556,6 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 {
 	int do_warp = 0;
 	int arrangeall = 0;
-	uint64_t prevwsmask;
 
 	if (!ws)
 		return;
@@ -567,7 +566,7 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 	Monitor *omon = NULL;
 	Workspace *ows = NULL, *w;
 
-	m->prevwsmask = prevwsmask = getwsmask(m);
+	m->prevwsmask = getwsmask(m);
 
 	if (enabled(WorkspacePreview)) {
 		storepreview(ws->mon->selws);
@@ -583,8 +582,8 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 		if (selws && selws->mon != ws->mon) {
 			do_warp = 1;
 			m = ws->mon;
-			prevwsmask = getwsmask(m);
-			m->prevwsmask = ws->visible ? 0 : prevwsmask;
+			m->prevwsmask = getwsmask(m);
+			monitorchanged = 1;
 		}
 
 		if (!ws->visible)
@@ -660,7 +659,7 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 				hidews(w);
 	}
 
-	drawws(ws, m, prevwsmask, enablews, arrangeall, do_warp);
+	drawws(ws, m, m->prevwsmask, enablews, arrangeall, do_warp);
 }
 
 void
