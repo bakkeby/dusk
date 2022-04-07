@@ -725,6 +725,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( toggle, ARG_TYPE_STR ), // toggle functionality on and off
 	IPCCOMMAND( togglebar, ARG_TYPE_NONE ),
 	IPCCOMMAND( togglebarpadding, ARG_TYPE_NONE ),
+	IPCCOMMAND( togglecompact, ARG_TYPE_NONE ),
 	IPCCOMMAND( toggleclientflag, ARG_TYPE_STR ),
 	IPCCOMMAND( togglefakefullscreen, ARG_TYPE_NONE ),
 	IPCCOMMAND( togglefloating, ARG_TYPE_NONE ),

@@ -657,6 +657,27 @@ togglebarpadding(const Arg *arg)
 	}
 }
 
+void
+togglecompact(const Arg *arg)
+{
+	Bar *bar;
+	Monitor *m;
+	Workspace *ws;
+	int gaps = 1, px = enabled(BarBorder) ? borderpx : 0;
+
+	if (enabled(BarPadding))
+		gaps = px = 0;
+
+	for (ws = workspaces; ws; ws = ws->next)
+		ws->enablegaps = gaps;
+
+	for (m = mons; m; m = m->next)
+		for (bar = m->bar; bar; bar = bar->next)
+			bar->borderpx = px;
+
+	togglebarpadding(arg);
+}
+
 Bar *
 wintobar(Window win)
 {

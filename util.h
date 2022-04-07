@@ -88,4 +88,3 @@ int disabled(const uint64_t functionality);
 void enablefunc(const uint64_t functionality);
 void disablefunc(const uint64_t functionality);
 void togglefunc(const uint64_t functionality);
-const uint64_t getfuncbyname(const char *name);

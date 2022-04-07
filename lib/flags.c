@@ -48,139 +48,81 @@ toggleclientflag(const Arg *arg)
 	arrangews(selws);
 }
 
+#define map(N,F) else if (!strcmp(name, N)) return F;
+
 const uint64_t
 getflagbyname(const char *name)
 {
-	if (strcmp(name, "AlwaysOnTop") == 0)
-		return AlwaysOnTop;
-	else if (strcmp(name, "Fixed") == 0)
-		return Fixed;
-	else if (strcmp(name, "Floating") == 0)
-		return Floating;
-	else if (strcmp(name, "Urgent") == 0)
-		return Urgent;
-	else if (strcmp(name, "NeverFocus") == 0)
-		return NeverFocus;
-	else if (strcmp(name, "FullScreen") == 0)
-		return FullScreen;
-	else if (strcmp(name, "FakeFullScreen") == 0)
-		return FakeFullScreen;
-	else if (strcmp(name, "RestoreFakeFullScreen") == 0)
-		return RestoreFakeFullScreen;
-	else if (strcmp(name, "Centered") == 0)
-		return Centered;
-	else if (strcmp(name, "Permanent") == 0)
-		return Permanent;
-	else if (strcmp(name, "Hidden") == 0)
-		return Hidden;
-	else if (strcmp(name, "Sticky") == 0)
-		return Sticky;
-	else if (strcmp(name, "Terminal") == 0)
-		return Terminal;
-	else if (strcmp(name, "NoSwallow") == 0)
-		return NoSwallow;
-	else if (strcmp(name, "Locked") == 0)
-		return Locked;
-	else if (strcmp(name, "Transient") == 0)
-		return Transient;
-	else if (strcmp(name, "OnlyModButtons") == 0)
-		return OnlyModButtons;
-	else if (strcmp(name, "Disallowed") == 0)
-		return Disallowed;
-	else if (strcmp(name, "AttachMaster") == 0)
-		return AttachMaster;
-	else if (strcmp(name, "AttachAbove") == 0)
-		return AttachAbove;
-	else if (strcmp(name, "AttachBelow") == 0)
-		return AttachBelow;
-	else if (strcmp(name, "AttachAside") == 0)
-		return AttachAside;
-	else if (strcmp(name, "AttachBottom") == 0)
-		return AttachBottom;
-	else if (strcmp(name, "SwitchWorkspace") == 0)
-		return SwitchWorkspace;
-	else if (strcmp(name, "EnableWorkspace") == 0)
-		return EnableWorkspace;
-	else if (strcmp(name, "RevertWorkspace") == 0)
-		return RevertWorkspace;
-	else if (strcmp(name, "IgnoreCfgReq") == 0)
-		return IgnoreCfgReq;
-	else if (strcmp(name, "IgnoreCfgReqPos") == 0)
-		return IgnoreCfgReqPos;
-	else if (strcmp(name, "IgnoreCfgReqSize") == 0)
-		return IgnoreCfgReqSize;
-	else if (strcmp(name, "IgnorePropTransientFor") == 0)
-		return IgnorePropTransientFor;
-	else if (strcmp(name, "IgnoreSizeHints") == 0)
-		return IgnoreSizeHints;
-	else if (strcmp(name, "IgnoreMinimumSizeHints") == 0)
-		return IgnoreMinimumSizeHints;
-	else if (strcmp(name, "IgnoreDecorationHints") == 0)
-		return IgnoreDecorationHints;
-	else if (strcmp(name, "NoBorder") == 0)
-		return NoBorder;
-	else if (strcmp(name, "FlagPlaceholder0x400000000") == 0)
-		return FlagPlaceholder0x400000000;
-	else if (strcmp(name, "SemiScratchpad") == 0)
-		return SemiScratchpad;
-	else if (strcmp(name, "RespectSizeHints") == 0)
-		return RespectSizeHints;
-	else if (strcmp(name, "RioDrawNoMatchPID") == 0)
-		return RioDrawNoMatchPID;
-	else if (strcmp(name, "FlagPlaceholder0x200000000") == 0)
-		return FlagPlaceholder0x200000000;
-	else if (strcmp(name, "SteamGame") == 0)
-		return SteamGame;
-	else if (strcmp(name, "NoFocusOnNetActive") == 0)
-		return NoFocusOnNetActive;
-	else if (strcmp(name, "ScratchpadStayOnMon") == 0)
-		return ScratchpadStayOnMon;
-	else if (strcmp(name, "Lower") == 0)
-		return Lower;
-	else if (strcmp(name, "Raise") == 0)
-		return Raise;
-	else if (strcmp(name, "SkipTaskbar") == 0)
-		return SkipTaskbar;
-	else if (strcmp(name, "FlagPlaceholder0x200000000000") == 0)
-		return FlagPlaceholder0x200000000000;
-	else if (strcmp(name, "FlagPlaceholder0x400000000000") == 0)
-		return FlagPlaceholder0x400000000000;
-	else if (strcmp(name, "FlagPlaceholder0x800000000000") == 0)
-		return FlagPlaceholder0x800000000000;
-	else if (strcmp(name, "FlagPlaceholder0x1000000000000") == 0)
-		return FlagPlaceholder0x1000000000000;
-	else if (strcmp(name, "FlagPlaceholder0x2000000000000") == 0)
-		return FlagPlaceholder0x2000000000000;
-	else if (strcmp(name, "FlagPlaceholder0x4000000000000") == 0)
-		return FlagPlaceholder0x4000000000000;
-	else if (strcmp(name, "FlagPlaceholder0x8000000000000") == 0)
-		return FlagPlaceholder0x8000000000000;
-	else if (strcmp(name, "FlagPlaceholder0x10000000000000") == 0)
-		return FlagPlaceholder0x10000000000000;
-	else if (strcmp(name, "FlagPlaceholder0x20000000000000") == 0)
-		return FlagPlaceholder0x20000000000000;
-	else if (strcmp(name, "FlagPlaceholder0x40000000000000") == 0)
-		return FlagPlaceholder0x40000000000000;
-	else if (strcmp(name, "RefreshSizeHints") == 0)
-		return RefreshSizeHints;
-	else if (strcmp(name, "Debug") == 0)
-		return Debug;
-	else if (strcmp(name, "Invisible") == 0)
-		return Invisible;
-	else if (strcmp(name, "MoveResize") == 0)
-		return MoveResize;
-	else if (strcmp(name, "MovePlace") == 0)
-		return MovePlace;
-	else if (strcmp(name, "NeedResize") == 0)
-		return NeedResize;
-	else if (strcmp(name, "Ruled") == 0)
-		return Ruled;
-	else if (strcmp(name, "Marked") == 0)
-		return Marked;
-	else if (strcmp(name, "Unmanaged") == 0)
-		return Unmanaged;
+	if (!name)
+		return 0;
+	map("AlwaysOnTop", AlwaysOnTop)
+	map("Fixed", Fixed)
+	map("Floating", Floating)
+	map("Urgent", Urgent)
+	map("NeverFocus", NeverFocus)
+	map("FullScreen", FullScreen)
+	map("FakeFullScreen", FakeFullScreen)
+	map("RestoreFakeFullScreen", RestoreFakeFullScreen)
+	map("Centered", Centered)
+	map("Permanent", Permanent)
+	map("Hidden", Hidden)
+	map("Sticky", Sticky)
+	map("Terminal", Terminal)
+	map("NoSwallow", NoSwallow)
+	map("Locked", Locked)
+	map("Transient", Transient)
+	map("OnlyModButtons", OnlyModButtons)
+	map("Disallowed", Disallowed)
+	map("AttachMaster", AttachMaster)
+	map("AttachAbove", AttachAbove)
+	map("AttachBelow", AttachBelow)
+	map("AttachAside", AttachAside)
+	map("AttachBottom", AttachBottom)
+	map("SwitchWorkspace", SwitchWorkspace)
+	map("EnableWorkspace", EnableWorkspace)
+	map("RevertWorkspace", RevertWorkspace)
+	map("IgnoreCfgReq", IgnoreCfgReq)
+	map("IgnoreCfgReqPos", IgnoreCfgReqPos)
+	map("IgnoreCfgReqSize", IgnoreCfgReqSize)
+	map("IgnorePropTransientFor", IgnorePropTransientFor)
+	map("IgnoreSizeHints", IgnoreSizeHints)
+	map("IgnoreMinimumSizeHints", IgnoreMinimumSizeHints)
+	map("IgnoreDecorationHints", IgnoreDecorationHints)
+	map("NoBorder", NoBorder)
+	map("FlagPlaceholder0x400000000", FlagPlaceholder0x400000000)
+	map("SemiScratchpad", SemiScratchpad)
+	map("RespectSizeHints", RespectSizeHints)
+	map("RioDrawNoMatchPID", RioDrawNoMatchPID)
+	map("FlagPlaceholder0x200000000", FlagPlaceholder0x200000000)
+	map("SteamGame", SteamGame)
+	map("NoFocusOnNetActive", NoFocusOnNetActive)
+	map("ScratchpadStayOnMon", ScratchpadStayOnMon)
+	map("Lower", Lower)
+	map("Raise", Raise)
+	map("SkipTaskbar", SkipTaskbar)
+	map("FlagPlaceholder0x200000000000", FlagPlaceholder0x200000000000)
+	map("FlagPlaceholder0x400000000000", FlagPlaceholder0x400000000000)
+	map("FlagPlaceholder0x800000000000", FlagPlaceholder0x800000000000)
+	map("FlagPlaceholder0x1000000000000", FlagPlaceholder0x1000000000000)
+	map("FlagPlaceholder0x2000000000000", FlagPlaceholder0x2000000000000)
+	map("FlagPlaceholder0x4000000000000", FlagPlaceholder0x4000000000000)
+	map("FlagPlaceholder0x8000000000000", FlagPlaceholder0x8000000000000)
+	map("FlagPlaceholder0x10000000000000", FlagPlaceholder0x10000000000000)
+	map("FlagPlaceholder0x20000000000000", FlagPlaceholder0x20000000000000)
+	map("FlagPlaceholder0x40000000000000", FlagPlaceholder0x40000000000000)
+	map("RefreshSizeHints", RefreshSizeHints)
+	map("Debug", Debug)
+	map("Invisible", Invisible)
+	map("MoveResize", MoveResize)
+	map("MovePlace", MovePlace)
+	map("NeedResize", NeedResize)
+	map("Ruled", Ruled)
+	map("Marked", Marked)
+	map("Unmanaged", Unmanaged)
 
 	if (enabled(Debug))
 		fprintf(stderr, "getflagbyname for name '%s' not found\n", name);
 	return 0;
 }
+
+#undef map

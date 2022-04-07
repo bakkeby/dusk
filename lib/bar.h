@@ -98,4 +98,5 @@ static void showbar(const Arg *arg);
 static void hidebar(const Arg *arg);
 static void togglebar(const Arg *arg);
 static void togglebarpadding(const Arg *arg);
+static void togglecompact(const Arg *arg);
 static Bar * wintobar(Window win);
