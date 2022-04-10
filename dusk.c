@@ -3526,37 +3526,36 @@ updategeom(void)
 		nn = j;
 		if (enabled(SortScreens))
 			sortscreens(unique, nn);
-		if (n <= nn) { /* new monitors available */
-			for (i = n; i < nn; i++) {
-				for (m = mons; m && m->next; m = m->next);
-				if (m)
-					m->next = createmon(i);
-				else
-					mons = createmon(i);
+
+		for (i = n; i < nn; i++) {
+			for (m = mons; m && m->next; m = m->next);
+			if (m)
+				m->next = createmon(i);
+			else
+				mons = createmon(i);
+		}
+		for (m = mons; m && m->num < nn; m = m->next) {
+			if (m->num >= n
+			|| unique[m->num].x_org != m->mx || unique[m->num].y_org != m->my
+			|| unique[m->num].width != m->mw || unique[m->num].height != m->mh)
+			{
+				dirty = 1;
+				m->mx = m->wx = unique[m->num].x_org;
+				m->my = m->wy = unique[m->num].y_org;
+				m->mw = m->ww = unique[m->num].width;
+				m->mh = m->wh = unique[m->num].height;
+				updatebarpos(m);
+				createpreview(m);
 			}
-			for (m = mons; m && m->num < nn; m = m->next) {
-				if (m->num >= n
-				|| unique[m->num].x_org != m->mx || unique[m->num].y_org != m->my
-				|| unique[m->num].width != m->mw || unique[m->num].height != m->mh)
-				{
-					dirty = 1;
-					m->mx = m->wx = unique[m->num].x_org;
-					m->my = m->wy = unique[m->num].y_org;
-					m->mw = m->ww = unique[m->num].width;
-					m->mh = m->wh = unique[m->num].height;
-					updatebarpos(m);
-					createpreview(m);
-				}
-				if (m->num >= n)
-					redistributeworkspaces(m);
-			}
-		} else { /* less monitors available nn < n */
-			for (i = nn; i < n; i++) {
-				for (m = mons; m && m->next; m = m->next);
-				if (m == selmon)
-					selmon = mons;
-				cleanupmon(m);
-			}
+			if (m->num >= n)
+				redistributeworkspaces(m);
+		}
+
+		for (i = nn; i < n; i++) {
+			for (m = mons; m && m->next; m = m->next);
+			if (m == selmon)
+				selmon = mons;
+			cleanupmon(m);
 		}
 		free(unique);
 	} else
