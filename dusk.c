@@ -676,15 +676,23 @@ reapplyrules(Client *c)
 	Client *t;
 	Window trans = None;
 	Workspace *client_ws, *rule_ws;
+	uint64_t flags;
 
-	if (RULED(c))
+	if (RULED(c) && !REAPPLYRULES(c))
 		return 0;
+
+	flags = c->flags;
+	c->flags = 0;
 
 	client_ws = c->ws;
 	applyrules(c);
 
-	if (!RULED(c))
+	if (!RULED(c)) {
+		c->flags = flags;
 		return 0;
+	}
+
+	removeflag(c, ReapplyRules);
 
 	if (DISALLOWED(c)) {
 		killclient(&((Arg) { .v = c }));
@@ -756,6 +764,7 @@ reapplyrules(Client *c)
 	} else if (ISFLOATING(c)) {
 		XRaiseWindow(dpy, c->win);
 		XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
+		savefloats(c);
 	}
 
 	if (LOWER(c))

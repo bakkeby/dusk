@@ -55,7 +55,7 @@ static const uint64_t
 	Lower = 0x40000000000, // place this window below all other windows, used when window is unmanaged
 	Raise = 0x80000000000, // place this window above all other windows, used when window is unmanaged
 	SkipTaskbar = 0x100000000000, // do not include the window title for this client on the bar
-	FlagPlaceholder0x200000000000 = 0x200000000000,
+	ReapplyRules = 0x200000000000, // allow the client to get rules re-applied once when the window title changes
 	FlagPlaceholder0x400000000000 = 0x400000000000,
 	FlagPlaceholder0x800000000000 = 0x800000000000,
 	FlagPlaceholder0x1000000000000 = 0x1000000000000,
@@ -114,6 +114,7 @@ static const uint64_t
 #define NOSWALLOW(C) (C && C->flags & NoSwallow)
 #define NOFOCUSONNETACTIVE(C) (C && C->flags & NoFocusOnNetActive)
 #define ONLYMODBUTTONS(C) (C && C->flags & OnlyModButtons)
+#define REAPPLYRULES(C) (C && C->flags & ReapplyRules)
 #define RESPECTSIZEHINTS(C) (C && C->flags & RespectSizeHints)
 #define RESTOREFAKEFULLSCREEN(C) (C && C->flags & RestoreFakeFullScreen)
 #define RIODRAWNOMATCHPID(C) (C && C->flags & RioDrawNoMatchPID)
