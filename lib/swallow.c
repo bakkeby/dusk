@@ -36,6 +36,9 @@ replaceclient(Client *old, Client *new)
 	new->ws = ws;
 	setflag(new, Floating, old->flags & Floating);
 
+	new->scratchkey = old->scratchkey;
+	old->scratchkey = 0;
+
 	new->next = old->next;
 	new->snext = old->snext;
 
