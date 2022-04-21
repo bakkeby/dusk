@@ -273,10 +273,9 @@ showwsclient(Client *c)
 			XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
 		} else if (c->sfx != -9999 && (!ISFULLSCREEN(c) || ISFAKEFULLSCREEN(c))) {
 			restorefloats(c);
-		}
-		show(c);
-	} else if (HIDDEN(c))
-		show(c);
+		} else
+			show(c);
+	}
 }
 
 void

@@ -771,7 +771,9 @@ reapplyrules(Client *c)
 	if (SEMISCRATCHPAD(c) && c->scratchkey)
 		initsemiscratchpad(c);
 
-	if (!ISVISIBLE(c))
+	if (ISVISIBLE(c))
+		show(c);
+	else
 		hide(c);
 
 	return 1;
@@ -1217,13 +1219,20 @@ clientmessage(XEvent *e)
 		if (cme->data.l[0] == IconicState) {
 			/* Some applications assume that setting the IconicState a second
 			 * time will toggle the state. */
-			if (HIDDEN(c))
+			if ((getstate(c->win) == IconicState)) {
+				setclientstate(c, NormalState);
 				reveal(c);
-			else
+			} else if (!HIDDEN(c)) {
+				setclientstate(c, IconicState);
 				conceal(c);
+			}
 		} else if (cme->data.l[0] == NormalState ) {
 			if (HIDDEN(c))
 				reveal(c);
+			else {
+				setclientstate(c, NormalState);
+				show(c);
+			}
 		} else if (cme->data.l[0] == WithdrawnState)
 			setclientstate(c, WithdrawnState);
 		arrange(c->ws);
@@ -1436,7 +1445,7 @@ configurenotify(XEvent *e)
 					else if (ISFLOATING(c)) {
 						c->x = c->sfx;
 						c->y = c->sfy;
-						XMoveWindow(dpy, c->win, c->x, c->y);
+						show(c);
 					}
 				}
 			}
@@ -1962,18 +1971,7 @@ grabkeys(void)
 void
 hide(Client *c)
 {
-	static XWindowAttributes ra, ca;
-	XGrabServer(dpy);
-	XGetWindowAttributes(dpy, root, &ra);
-	XGetWindowAttributes(dpy, c->win, &ca);
-	/* prevent UnmapNotify events */
-	XSelectInput(dpy, root, ra.your_event_mask & ~SubstructureNotifyMask);
-	XSelectInput(dpy, c->win, ca.your_event_mask & ~StructureNotifyMask);
-	XUnmapWindow(dpy, c->win);
-	setclientstate(c, IconicState);
-	XSelectInput(dpy, root, ra.your_event_mask);
-	XSelectInput(dpy, c->win, ca.your_event_mask);
-	XUngrabServer(dpy);
+	XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
 }
 
 void
@@ -2255,6 +2253,8 @@ manage(Window w, XWindowAttributes *wa)
 	XChangeProperty(dpy, root, netatom[NetClientListStacking], XA_WINDOW, 32, PropModePrepend,
 		(unsigned char *) &(c->win), 1);
 
+	setclientstate(c, NormalState);
+
 	if (focusclient) {
 		if (c->ws == selws)
 			unfocus(selws->sel, 0, c);
@@ -2282,11 +2282,11 @@ manage(Window w, XWindowAttributes *wa)
 
 	if (ISFLOATING(c))
 		XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
-
 	if (ISVISIBLE(c))
 		show(c);
 	else
 		hide(c);
+	XMapWindow(dpy, c->win);
 
 	if (focusclient)
 		focus(c);
@@ -3129,8 +3129,7 @@ seturgent(Client *c, int urg)
 void
 show(Client *c)
 {
-	XMapWindow(dpy, c->win);
-	setclientstate(c, NormalState);
+	XMoveWindow(dpy, c->win, c->x, c->y);
 }
 
 void
