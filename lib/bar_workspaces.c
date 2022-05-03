@@ -264,7 +264,7 @@ Client *
 firsttiled(Workspace *ws)
 {
 	Client *c;
-	for (c = ws->clients; c && (ISFLOATING(c) || ISINVISIBLE(c)); c = c->next);
+	for (c = ws->clients; c && (ISFLOATING(c) || ISINVISIBLE(c) || HIDDEN(c)); c = c->next);
 	if (!c)
 		for (c = ws->stack; c && ISINVISIBLE(c); c = c->snext);
 	return c;
