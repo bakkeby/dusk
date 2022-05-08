@@ -3,6 +3,7 @@ struct Preview {
 	int show;
 };
 
-static void hidewspreview(Monitor *m);
-static void showwspreview(Workspace *w, int x, int y);
+static void createpreview(Monitor *m);
+static void hidepreview(Monitor *m);
+static void showpreview(Workspace *w, int x, int y);
 static void storepreview(Workspace *ws);

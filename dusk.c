@@ -2381,10 +2381,8 @@ motionnotify(XEvent *e)
 		return;
 	}
 
-	if (selmon->preview->show) {
-		selmon->preview->show = 0;
-		hidewspreview(selmon);
-	}
+	if (selmon->preview && selmon->preview->show)
+		hidepreview(selmon);
 
 	if (ev->window != root)
 		return;
@@ -3553,7 +3551,6 @@ updategeom(void)
 				m->mw = m->ww = unique[m->num].width;
 				m->mh = m->wh = unique[m->num].height;
 				updatebarpos(m);
-				createpreview(m);
 			}
 			if (m->num >= n)
 				redistributeworkspaces(m);
@@ -3576,7 +3573,6 @@ updategeom(void)
 			mons->mw = mons->ww = sw;
 			mons->mh = mons->wh = sh;
 			updatebarpos(mons);
-			createpreview(mons);
 		}
 	}
 	if (dirty) {

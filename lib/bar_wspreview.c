@@ -1,9 +1,6 @@
 void
 createpreview(Monitor *m)
 {
-	if (m->preview)
-		return;
-
 	XSetWindowAttributes wa = {
 		.override_redirect = True,
 		.background_pixel = 0,
@@ -13,28 +10,30 @@ createpreview(Monitor *m)
 	};
 	XClassHint ch = {"preview", "preview"};
 
-	m->preview = ecalloc(1, sizeof(Preview));
+	if (m->preview) {
+		XUnmapWindow(dpy, m->preview->win);
+		XDestroyWindow(dpy, m->preview->win);
+	} else
+		m->preview = ecalloc(1, sizeof(Preview));
 	m->preview->win = XCreateWindow(dpy, root,
-		m->bar->next->bx,
-		m->bar->next->by + m->bar->bh,
+		m->mx,
+		m->my + m->bar->bh,
 		m->mw / scalepreview,
 		m->mh / scalepreview,
 		0, depth, InputOutput, visual,
 		CWOverrideRedirect|CWBackPixel|CWBorderPixel|CWColormap|CWEventMask, &wa);
-	XMapRaised(dpy, m->preview->win);
-	XUnmapWindow(dpy, m->preview->win);
 	XSetClassHint(dpy, m->preview->win, &ch);
 }
 
 void
-hidewspreview(Monitor *m)
+hidepreview(Monitor *m)
 {
 	m->preview->show = 0;
 	XUnmapWindow(dpy, m->preview->win);
 }
 
 void
-showwspreview(Workspace *ws, int x, int y)
+showpreview(Workspace *ws, int x, int y)
 {
 	Monitor *m = ws->mon;
 
@@ -42,7 +41,7 @@ showwspreview(Workspace *ws, int x, int y)
 		return;
 
 	if (!m->preview->show) {
-		hidewspreview(m);
+		hidepreview(m);
 		return;
 	}
 
@@ -51,8 +50,7 @@ showwspreview(Workspace *ws, int x, int y)
 		XCopyArea(dpy, ws->preview, m->preview->win, drw->gc, 0, 0, m->mw / scalepreview, m->mh / scalepreview, 0, 0);
 		XMoveWindow(dpy, m->preview->win, x, y);
 		XSync(dpy, False);
-		XMapWindow(dpy, m->preview->win);
-		XRaiseWindow(dpy, m->preview->win);
+		XMapRaised(dpy, m->preview->win);
 	} else
 		XUnmapWindow(dpy, m->preview->win);
 }
@@ -66,6 +64,9 @@ storepreview(Workspace *ws)
 	Imlib_Image image;
 	Monitor *m = ws->mon;
 
+	if (!m->preview)
+		createpreview(m);
+
 	if (ws->preview) {
 		XFreePixmap(dpy, ws->preview);
 		ws->preview = 0;
@@ -74,7 +75,7 @@ storepreview(Workspace *ws)
 	if (!ws->clients)
 		return;
 
-	hidewspreview(m);
+	hidepreview(m);
 	XMoveWindow(dpy, m->preview->win, -m->mx, -m->my);
 	XFlush(dpy);
 

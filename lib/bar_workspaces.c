@@ -156,12 +156,18 @@ click_workspaces(Bar *bar, Arg *arg, BarArg *a)
 int
 hover_workspaces(Bar *bar, BarArg *a, XMotionEvent *ev)
 {
+	if (disabled(WorkspacePreview))
+		return 0;
+
 	Client *c;
 	Workspace *ws;
 	Monitor *m = bar->mon;
 	int x, y, w, s = 0, t = (bar->vert ? a->y : a->x);
 	int plw = (bar->vert ? 0 : a->value ? drw->fonts->h / 2 + 1 : 0);
 	int padding = lrpad - plw;
+
+	if (!m->preview)
+		createpreview(m);
 
 	/* This avoids clicks to the immediate left of the leftmost workspace (e.g. 2) to evaluate
 	 * as workspace 1 (which can be on a different monitor). */
@@ -189,7 +195,7 @@ hover_workspaces(Bar *bar, BarArg *a, XMotionEvent *ev)
 	} while (t >= s && (ws = ws->next));
 
 	if (!ws) {
-		hidewspreview(m);
+		hidepreview(m);
 		return 0;
 	}
 
@@ -217,9 +223,9 @@ hover_workspaces(Bar *bar, BarArg *a, XMotionEvent *ev)
 
 	if (m->preview->show != (ws->num + 1) && m->selws != ws) {
 		m->preview->show = ws->num + 1;
-		showwspreview(ws, x, y);
+		showpreview(ws, x, y);
 	} else if (m->selws == ws)
-		hidewspreview(m);
+		hidepreview(m);
 
 	return 1;
 }
