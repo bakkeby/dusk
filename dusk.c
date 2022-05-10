@@ -3551,6 +3551,8 @@ updategeom(void)
 				m->mw = m->ww = unique[m->num].width;
 				m->mh = m->wh = unique[m->num].height;
 				updatebarpos(m);
+				if (enabled(WorkspacePreview))
+					createpreview(m);
 			}
 			if (m->num >= n)
 				redistributeworkspaces(m);
@@ -3573,6 +3575,8 @@ updategeom(void)
 			mons->mw = mons->ww = sw;
 			mons->mh = mons->wh = sh;
 			updatebarpos(mons);
+			if (enabled(WorkspacePreview))
+				createpreview(mons);
 		}
 	}
 	if (dirty) {

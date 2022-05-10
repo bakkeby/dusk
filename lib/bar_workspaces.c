@@ -201,22 +201,22 @@ hover_workspaces(Bar *bar, BarArg *a, XMotionEvent *ev)
 
 	if (bar->vert) {
 		if (bar->bx > m->mx + m->mw / 2) // right bar
-			x = bar->bx - m->mw / scalepreview - gappov;
+			x = bar->bx - m->mw * pfact - gappov;
 		else // left bar
 			x = bar->bx + bar->bw + gappov;
-		y = bar->by + ev->y - m->mh / scalepreview / 2;
-		if (y + m->mh / scalepreview > m->wy + m->wh)
-			y = m->wy + m->wh - m->mh / scalepreview - gappoh;
+		y = bar->by + ev->y - m->mh * pfact / 2;
+		if (y + m->mh * pfact > m->wy + m->wh)
+			y = m->wy + m->wh - m->mh * pfact - gappoh;
 		else if (y < bar->by)
 			y = m->wy + gappoh;
 	} else {
 		if (bar->by > m->my + m->mh / 2) // bottom bar
-			y = bar->by - m->mh / scalepreview - gappoh;
+			y = bar->by - m->mh * pfact - gappoh;
 		else // top bar
 			y = bar->by + bar->bh + gappoh;
-		x = bar->bx + ev->x - m->mw / scalepreview / 2;
-		if (x + m->mw / scalepreview > m->mx + m->mw)
-			x = m->wx + m->ww - m->mw / scalepreview - gappov;
+		x = bar->bx + ev->x - m->mw * pfact / 2;
+		if (x + m->mw * pfact > m->mx + m->mw)
+			x = m->wx + m->ww - m->mw * pfact - gappov;
 		else if (x < bar->bx)
 			x = m->wx + gappov;
 	}

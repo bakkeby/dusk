@@ -21,7 +21,7 @@ static const int sidepad                 = borderpx;  /* horizontal (outer) padd
 static const int iconsize                = 16;  /* icon size */
 static const int iconspacing             = 5;   /* space between icon and title */
 
-static const int scalepreview            = 4;   /* size of workspace previews compared to monitor size */
+static const float pfact                 = 0.25; /* size of workspace previews relative to monitor size */
 
 static int floatposgrid_x                = 5;   /* float grid columns */
 static int floatposgrid_y                = 5;   /* float grid rows */
