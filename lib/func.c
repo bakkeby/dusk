@@ -1,5 +1,5 @@
-#define mapfunc(N,F) else if (!strcmp(name, N)) F(NULL);
-#define map(N,F) else if (!strcmp(name, N)) return F;
+#define mapfunc(N,F) else if (!strcasecmp(name, N)) F(NULL);
+#define map(N,F) else if (!strcasecmp(name, N)) return F;
 
 void
 enable(const Arg *arg)
