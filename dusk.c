@@ -249,11 +249,6 @@ enum {
 	LTAXIS_LAST,
 }; /* named flextile constants */
 
-typedef struct ClientState ClientState;
-struct ClientState {
-	int isfixed, isfloating, isurgent, neverfocus, oldstate, isfullscreen;
-};
-
 typedef union {
 	long i;
 	unsigned long ui;

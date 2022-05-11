@@ -30,8 +30,6 @@ int dump_monitors(yajl_gen gen, Monitor *mons, Monitor *selmon);
 
 int dump_layouts(yajl_gen gen, const Layout layouts[], const int layouts_len);
 
-int dump_client_state(yajl_gen gen, const ClientState *state);
-
 int dump_error_message(yajl_gen gen, const char *reason);
 
 int dump_settings(yajl_gen gen);
