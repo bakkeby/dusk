@@ -412,7 +412,6 @@ static const Layout layouts[] = {
 	{ "(@)",      flextile,         { -1, -1, NO_SPLIT, SPIRAL_CFACTS, SPIRAL_CFACTS, 0, NULL } }, // fibonacci spiral
 	{ "[T]",      flextile,         { -1, -1, SPLIT_VERTICAL, LEFT_TO_RIGHT, TATAMI_CFACTS, 0, NULL } }, // tatami mats
  	{ "><>",      NULL,             {0} },    /* no layout function means floating behavior */
-	{ NULL,       NULL,             {0} },    /* end of layouts marker for cyclelayouts */
 };
 
 #define Shift ShiftMask
