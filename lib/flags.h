@@ -31,6 +31,7 @@ static const uint64_t
 	AttachBelow = 3 << 18, // attach the client after the currently selected client
 	AttachAside = 4 << 18, // attach the client as the first client in the stack area
 	AttachBottom = 5 << 18, // attach the client at the end of the list
+	AttachFlag = 7 << 18, // used internally to test for the attach flags above
 	FlagPlaceholder0x200000 = 0x200000,
 	FlagPlaceholder0x400000 = 0x400000,
 	SwitchWorkspace = 0x800000, // automatically moves you to the workspace of the newly opened application

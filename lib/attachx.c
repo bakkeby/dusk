@@ -1,16 +1,16 @@
 void
-attachx(Client *c, unsigned long mode, Workspace *ws)
+attachx(Client *c, uint64_t mode, Workspace *ws)
 {
 	if (!c)
 		return;
 
 	Client *at, *last;
 	unsigned int n;
-	unsigned long attachmode
+	uint64_t attachmode
 		= mode
 		? mode
-		: c->flags & (7 << 18)
-		? c->flags & (7 << 18)
+		: c->flags & AttachFlag
+		? c->flags & AttachFlag
 		: attachdefault;
 
 	for (last = c; last && last->next; last = last->next);
@@ -26,7 +26,7 @@ attachx(Client *c, unsigned long mode, Workspace *ws)
 	}
 
 	if (c->idx > 0) { /* then the client has a designated position in the client list */
-		for (at = ws->clients; at; at = at->next)
+		for (at = ws->clients; at; at = at->next) {
 			if (c->idx < at->idx) {
 				last->next = at;
 				ws->clients = c;
@@ -36,6 +36,7 @@ attachx(Client *c, unsigned long mode, Workspace *ws)
 				at->next = c;
 				return;
 			}
+		}
 	}
 
 	if (attachmode == AttachAbove) {
@@ -77,18 +78,18 @@ attachx(Client *c, unsigned long mode, Workspace *ws)
 }
 
 void
-attachstackx(Client *c, unsigned long mode, Workspace *ws)
+attachstackx(Client *c, uint64_t mode, Workspace *ws)
 {
 	if (!c)
 		return;
 
 	Client *at, *last;
 	unsigned int n;
-	unsigned long attachmode
+	uint64_t attachmode
 		= mode
 		? mode
-		: c->flags & (7 << 18)
-		? c->flags & (7 << 18)
+		: c->flags & AttachFlag
+		? c->flags & AttachFlag
 		: attachdefault;
 
 	if (!ws)
@@ -137,14 +138,5 @@ attachstackx(Client *c, unsigned long mode, Workspace *ws)
 void
 setattachdefault(const Arg *arg)
 {
-	if (strcmp(arg->v, "AttachMaster") == 0)
-		attachdefault = AttachMaster;
-	else if (strcmp(arg->v, "AttachAbove") == 0)
-		attachdefault = AttachAbove;
-	else if (strcmp(arg->v, "AttachBelow") == 0)
-		attachdefault = AttachBelow;
-	else if (strcmp(arg->v, "AttachAside") == 0)
-		attachdefault = AttachAside;
-	else if (strcmp(arg->v, "AttachBottom") == 0)
-		attachdefault = AttachBottom;
+	attachdefault = getflagbyname(arg->v) & AttachFlag;
 }
