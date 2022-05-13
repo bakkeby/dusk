@@ -9,8 +9,14 @@ killunsel(const Arg *arg)
 
 	for (i = ws->clients; i; i = i->next) {
 		if (ISVISIBLE(i) && i != ws->sel) {
-			if (!sendevent(i->win, wmatom[WMDelete], NoEventMask, wmatom[WMDelete], CurrentTime, 0, 0, 0))
-			{
+			if (!sendevent(
+				i->win,
+				wmatom[WMDelete],
+				NoEventMask,
+				wmatom[WMDelete],
+				CurrentTime,
+				0, 0, 0
+			)) {
 				XGrabServer(dpy);
 				XSetErrorHandler(xerrordummy);
 				XSetCloseDownMode(dpy, DestroyAll);

@@ -13,7 +13,7 @@ handlexevent(struct epoll_event *ev)
 				handler[ev.type](&ev); /* call handler */
 			}
 		}
-	} else if (ev-> events & EPOLLHUP)
+	} else if (ev->events & EPOLLHUP)
 		return -1;
 
 	return 0;

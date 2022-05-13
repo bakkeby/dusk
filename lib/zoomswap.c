@@ -1,4 +1,3 @@
-
 Client *
 findbefore(Client *c) {
 	Client *p;
