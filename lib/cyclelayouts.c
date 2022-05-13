@@ -4,15 +4,13 @@ cyclelayout(const Arg *arg)
 	Workspace *ws = selws;
 	Layout *l;
 	for (l = (Layout *)layouts; l != ws->layout; l++);
-	if (arg->i > 0) {
-		if (l->symbol && (l + 1)->symbol)
-			setlayout(&((Arg) { .v = (l + 1) }));
-		else
-			setlayout(&((Arg) { .v = layouts }));
-	} else {
-		if (l != layouts && (l - 1)->symbol)
-			setlayout(&((Arg) { .v = (l - 1) }));
-		else
-			setlayout(&((Arg) { .v = &layouts[LENGTH(layouts) - 1] }));
-	}
+	setlayout(&((Arg) { .v =
+		arg->i > 0
+		? l->symbol && (l + 1)->symbol
+			? l + 1
+			: layouts
+		: l != layouts && (l - 1)->symbol
+			? l - 1
+			: &layouts[LENGTH(layouts) - 1]
+	}));
 }
