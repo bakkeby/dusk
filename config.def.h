@@ -109,12 +109,21 @@ static int flexwintitle_floatweight      = 0;  // floating window title weight, 
 static int flexwintitle_separator        = 0;  // width of client separator
 
 static const char *fonts[]               = { "monospace:size=10" };
-static const char dmenufont[]            = "monospace:size=10";
+static       char dmenufont[]            = "monospace:size=10";
 
 static char dmenunormfgcolor[] = "#BE89AE";
 static char dmenunormbgcolor[] = "#180A13";
 static char dmenuselfgcolor[] = "#FFF7D4";
 static char dmenuselbgcolor[] = "#440000";
+
+/* Xresources preferences to load at startup. */
+static const ResourcePref resources[] = {
+	{ "dmenunormfgcolor", STRING, &dmenunormfgcolor },
+	{ "dmenunormbgcolor", STRING, &dmenunormbgcolor },
+	{ "dmenuselfgcolor", STRING, &dmenuselfgcolor },
+	{ "dmenuselbgcolor", STRING, &dmenuselbgcolor },
+	{ "dmenufont", STRING, &dmenufont },
+};
 
 static const unsigned int alphas[SchemeLast][3] = {
 	/*                       fg      bg      border */
