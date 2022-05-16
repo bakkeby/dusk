@@ -351,7 +351,7 @@ typedef struct {
 	const char *wintype;
 	const int transient;
 	const double opacity;
-	const unsigned long flags;
+	const uint64_t flags;
 	const char *floatpos;
 	const char scratchkey;
 	const char *workspace;
