@@ -958,10 +958,11 @@ cleanup(void)
 	Layout foo = { "", NULL };
 	Workspace *ws, *next;
 	size_t i;
-	selws->layout = &foo;
-	for (ws = workspaces; ws; ws = ws->next)
+	for (ws = workspaces; ws; ws = ws->next) {
+		ws->layout = &foo;
 		while (ws->stack)
 			unmanage(ws->stack, 0);
+	}
 	XUngrabKey(dpy, AnyKey, AnyModifier, root);
 	while (mons)
 		cleanupmon(mons);
@@ -2159,9 +2160,9 @@ manage(Window w, XWindowAttributes *wa)
 			XLowerWindow(dpy, c->win);
 		else if (RAISE(c))
 			XRaiseWindow(dpy, c->win);
-		free(c);
 		if (enabled(Debug))
 			fprintf(stderr, "manage <-- unmanaged (%s)\n", c->name);
+		free(c);
 		return;
 	}
 
@@ -2757,7 +2758,7 @@ scan(void)
 				manage(wins[i], &wa);
 		}
 		for (i = 0; i < num; i++) { /* now the transients */
-			if (!XGetWindowAttributes(dpy, wins[i], &wa))
+			if (!XGetWindowAttributes(dpy, wins[i], &wa) || wa.override_redirect)
 				continue;
 			if (XGetTransientForHint(dpy, wins[i], &d1)
 			&& (wa.map_state == IsViewable || getstate(wins[i]) == IconicState))
