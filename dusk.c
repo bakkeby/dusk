@@ -2122,6 +2122,7 @@ manage(Window w, XWindowAttributes *wa)
 
 	updateicon(c);
 	updatetitle(c);
+	updatesizehints(c);
 	if (enabled(Debug))
 		fprintf(stderr, "manage --> client %s\n", c->name);
 	getclientflags(c);
