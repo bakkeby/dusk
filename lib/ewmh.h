@@ -8,6 +8,7 @@ static void savewindowfloatposition(Client *c, Monitor *m);
 static int restorewindowfloatposition(Client *c, Monitor *m);
 static void setdesktopnames(void);
 static void setfloatinghint(Client *c);
+static void setfloatinghints(Workspace *ws);
 static void setclientflags(Client *c);
 static void setclientfields(Client *c);
 static void setclientlabel(Client *c);

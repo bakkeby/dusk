@@ -259,5 +259,5 @@ status2dtextlength(char* text2d)
 void
 statusclick(const Arg *arg)
 {
-	spawncmd(&((Arg) { .v = statusclickcmd }), arg->i);
+	spawncmd(&((Arg) { .v = statusclickcmd }), arg->i, 1);
 }

@@ -158,8 +158,16 @@ setdesktopnames(void)
 void
 setfloatinghint(Client *c)
 {
-	unsigned int floating[1] = {ISFLOATING(c) ? 1 : 0};
+	unsigned int floating[1] = {ISFLOATING(c) || !c->ws->layout->arrange ? 1 : 0};
 	XChangeProperty(dpy, c->win, clientatom[IsFloating], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)floating, 1);
+}
+
+void
+setfloatinghints(Workspace *ws)
+{
+	Client *c;
+	for (c = ws->clients; c; c = c->next)
+		setfloatinghint(c);
 }
 
 void

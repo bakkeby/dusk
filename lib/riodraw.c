@@ -101,10 +101,10 @@ void
 riospawn(const Arg *arg)
 {
 	if (enabled(RioDrawSpawnAsync) && arg->v != dmenucmd) {
-		riopid = spawncmd(arg, 0);
+		riopid = spawncmd(arg, 0, 0);
 		riodraw(NULL, slopspawnstyle);
 	} else if (riodraw(NULL, slopspawnstyle))
-		riopid = spawncmd(arg, 0);
+		riopid = spawncmd(arg, 0, 0);
 
 	if (riopid && arg->v == dmenucmd)
 		riopid = 1;

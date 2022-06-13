@@ -489,7 +489,7 @@ static void show(Client *c);
 static void sigchld(int unused);
 static void skipfocusevents(void);
 static void spawn(const Arg *arg);
-static pid_t spawncmd(const Arg *arg, int buttonclick);
+static pid_t spawncmd(const Arg *arg, int buttonclick, int orphan);
 static void structurenotify(XEvent *e);
 static unsigned int textw_clamp(const char *str, unsigned int n);
 static void togglefloating(const Arg *arg);
@@ -2938,6 +2938,7 @@ setlayout(const Arg *arg)
 	strncpy(ws->ltsymbol, ws->layout->symbol, sizeof ws->ltsymbol);
 
 	arrange(ws);
+	setfloatinghints(ws);
 }
 
 /* arg > 1.0 will set mfact absolutely */
@@ -3170,14 +3171,18 @@ skipfocusevents(void)
 void
 spawn(const Arg *arg)
 {
-	spawncmd(arg, 0);
+	spawncmd(arg, 0, 1);
 }
 
 pid_t
-spawncmd(const Arg *arg, int buttonclick)
+spawncmd(const Arg *arg, int buttonclick, int orphan)
 {
 	pid_t pid;
 	if ((pid = fork()) == 0) {
+
+		if (orphan && fork() != 0)
+			exit(EXIT_SUCCESS);
+
 		if (dpy)
 			close(ConnectionNumber(dpy));
 		if (enabled(SpawnCwd) && selws->sel) {
