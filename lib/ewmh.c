@@ -278,15 +278,7 @@ getworkspacestate(Workspace *ws)
 
 	if (!(XGetWindowProperty(dpy, root, clientatom[DuskWorkspace], ws->num, LENGTH(wsrules) * sizeof dl,
 			False, AnyPropertyType, &da, &di, &nitems, &dl, &p) == Success && p)) {
-		/* Temporary code to allow live restart from previous atom properties */
-		char atom[22] = {0};
-		sprintf(atom, "_DUSK_WORKSPACE_%u", ws->num == LENGTH(wsrules) ? 4096 : ws->num);
-		Atom wsatom = XInternAtom(dpy, atom, False);
-		if (!(XGetWindowProperty(dpy, root, wsatom, 0L, sizeof settings, False, AnyPropertyType,
-			&da, &di, &nitems, &dl, &p) == Success && p)) {
-			return;
-		}
-		/* End temporary code */
+		return;
 	}
 
 	if (nitems) {
