@@ -1267,7 +1267,7 @@ clientmonresize(Client *c, Monitor *from, Monitor *to)
 void
 clientsmonresize(Client *clients, Monitor *from, Monitor *to)
 {
-	if (from == to)
+	if (from == to || !from || !to)
 		return;
 
 	for (Client *c = clients; c; c = c->next)
@@ -3824,9 +3824,9 @@ main(int argc, char *argv[])
 #endif /* __OpenBSD__ */
 	scan();
 	run();
-	if (restartsig)
-		execvp(argv[0], argv);
 	cleanup();
 	XCloseDisplay(dpy);
+	if (restartsig)
+		execvp(argv[0], argv);
 	return EXIT_SUCCESS;
 }

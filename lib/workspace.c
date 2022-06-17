@@ -196,7 +196,7 @@ hasfloating(Workspace *ws)
 void
 adjustwsformonitor(Workspace *ws, Monitor *m)
 {
-	if (!ws || ws->mon == m)
+	if (!ws || !m || ws->mon == m)
 		return;
 
 	clientsmonresize(ws->clients, ws->mon, m);
