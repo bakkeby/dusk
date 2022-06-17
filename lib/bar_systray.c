@@ -118,6 +118,7 @@ removesystrayicon(Client *i)
 	for (ii = &systray->icons; *ii && *ii != i; ii = &(*ii)->next);
 	if (ii)
 		*ii = i->next;
+	XReparentWindow(dpy, i->win, root, 0, 0);
 	free(i);
 	if (enabled(Systray))
 		drawbarwin(systray->bar);
