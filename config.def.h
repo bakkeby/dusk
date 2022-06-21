@@ -492,10 +492,10 @@ static Key keys[] = {
 	{ KeyPress,   MODKEY,                       XK_Right,        focusdir,               {.i = 1 } }, // focus on the client right of the currently focused client
 	{ KeyPress,   MODKEY,                       XK_Up,           focusdir,               {.i = 2 } }, // focus on the client above the currently focused client
 	{ KeyPress,   MODKEY,                       XK_Down,         focusdir,               {.i = 3 } }, // focus on the client below the currently focused client
-	{ KeyPress,   MODKEY|ControlMask,           XK_Left,         placedir,               {.i = 0 } }, // swap places with the client window on the immediate left of the current client
-	{ KeyPress,   MODKEY|ControlMask,           XK_Right,        placedir,               {.i = 1 } }, // swap places with the client window on the immediate right of the current client
-	{ KeyPress,   MODKEY|ControlMask,           XK_Up,           placedir,               {.i = 2 } }, // swap places with the client window on the immediate up of the current client
-	{ KeyPress,   MODKEY|ControlMask,           XK_Down,         placedir,               {.i = 3 } }, // swap places with the client window on the immediate down of the current client
+	{ KeyPress,   MODKEY|Ctrl,                  XK_Left,         placedir,               {.i = 0 } }, // swap places with the client window on the immediate left of the current client
+	{ KeyPress,   MODKEY|Ctrl,                  XK_Right,        placedir,               {.i = 1 } }, // swap places with the client window on the immediate right of the current client
+	{ KeyPress,   MODKEY|Ctrl,                  XK_Up,           placedir,               {.i = 2 } }, // swap places with the client window on the immediate up of the current client
+	{ KeyPress,   MODKEY|Ctrl,                  XK_Down,         placedir,               {.i = 3 } }, // swap places with the client window on the immediate down of the current client
 
 	{ KeyPress,   MODKEY|Ctrl,                  XK_j,            pushdown,               {0} }, // move the selected client down the stack
 	{ KeyPress,   MODKEY|Ctrl,                  XK_k,            pushup,                 {0} }, // move the selected client up the stack
@@ -542,8 +542,8 @@ static Key keys[] = {
 	{ KeyPress,   MODKEY,                       XK_f,            togglefullscreen,       {0} }, // toggles fullscreen for the currently selected client
 	{ KeyPress,   MODKEY|Shift,                 XK_f,            togglefakefullscreen,   {0} }, // toggles "fake" fullscreen for the selected window
 	{ KeyPress,   Ctrl|Alt,                     XK_Tab,          togglenomodbuttons,     {0} }, // disables / enables keybindings that are not accompanied by any modifier buttons for a client
-	{ KeyPress,   MODKEY|ShiftMask,             XK_plus,         changeopacity,          {.f = +0.05 } }, // increase the client opacity (for compositors that support _NET_WM_OPACITY)
-	{ KeyPress,   MODKEY|ShiftMask,             XK_minus,        changeopacity,          {.f = -0.05 } }, // decrease the client opacity (for compositors that support _NET_WM_OPACITY)
+	{ KeyPress,   MODKEY|Shift,                 XK_plus,         changeopacity,          {.f = +0.05 } }, // increase the client opacity (for compositors that support _NET_WM_OPACITY)
+	{ KeyPress,   MODKEY|Shift,                 XK_minus,        changeopacity,          {.f = -0.05 } }, // decrease the client opacity (for compositors that support _NET_WM_OPACITY)
 
 	{ KeyPress,   MODKEY|Shift,                 XK_comma,        focusmon,               {.i = -1 } }, // focus on the previous monitor, if any
 	{ KeyPress,   MODKEY|Shift,                 XK_period,       focusmon,               {.i = +1 } }, // focus on the next monitor, if any
