@@ -10,7 +10,7 @@ size_systray(Bar *bar, BarArg *a)
 	if (enabled(Systray)) {
 		for (i = systray->icons; i; w += i->w + systrayspacing, i = i->next);
 		if (!w)
-			XMoveWindow(dpy, systray->win, -500, bar->by);
+			XMoveWindow(dpy, systray->win, -systray->h, bar->by);
 	}
 
 	return w ? w - systrayspacing : 0;
@@ -21,7 +21,7 @@ draw_systray(Bar *bar, BarArg *a)
 {
 	if (disabled(Systray)) {
 		if (systray)
-			XMoveWindow(dpy, systray->win, -500, bar->by);
+			XMoveWindow(dpy, systray->win, -systray->h, bar->by);
 		return 0;
 	}
 
@@ -45,7 +45,7 @@ draw_systray(Bar *bar, BarArg *a)
 		systray->h = MIN(a->h, drw->fonts->h);
 		if (!enabled(SystrayNoAlpha)) {
 			wa.colormap = cmap;
-			systray->win = XCreateWindow(dpy, root, bar->bx + a->x, bar->by + a->y + (a->h - systray->h) / 2, MAX(a->w + a->lpad + a->rpad + 40, 1), systray->h, 0, depth,
+			systray->win = XCreateWindow(dpy, root, bar->bx + a->x, -systray->h, MAX(a->w + a->lpad + a->rpad + 40, 1), systray->h, 0, depth,
 							InputOutput, visual,
 							CWOverrideRedirect|CWBorderPixel|CWBackPixel|CWColormap|CWEventMask, &wa);
 		} else {
@@ -98,7 +98,7 @@ draw_systray(Bar *bar, BarArg *a)
 			i->ws = bar->mon->selws;
 	}
 
-	XMoveResizeWindow(dpy, systray->win, bar->bx + a->x + a->lpad, (w ? bar->by + a->y + (a->h - systray->h) / 2 : -bar->by - a->y), MAX(w, 1), systray->h);
+	XMoveResizeWindow(dpy, systray->win, bar->bx + a->x + a->lpad, (w ? bar->by + a->y + (a->h - systray->h) / 2 : -systray->h), MAX(w, 1), systray->h);
 	return w;
 }
 
