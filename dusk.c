@@ -958,6 +958,20 @@ cleanup(void)
 	Layout foo = { "", NULL };
 	Workspace *ws, *next;
 	size_t i;
+
+	/* Persist data for restart purposes. */
+	for (ws = workspaces; ws; ws = ws->next)
+		persistworkspacestate(ws);
+	persistworkspacestate(stickyws);
+
+	/* Kill child processes */
+	for (i = 0; i < autostart_len; i++) {
+		if (0 < autostart_pids[i]) {
+			kill(autostart_pids[i], SIGTERM);
+			waitpid(autostart_pids[i], NULL, 0);
+		}
+	}
+
 	for (ws = workspaces; ws; ws = ws->next) {
 		ws->layout = &foo;
 		while (ws->stack)
@@ -2519,28 +2533,14 @@ propertynotify(XEvent *e)
 void
 restart(const Arg *arg)
 {
-	Workspace *ws;
 	restartsig = 1;
-	quit(arg);
-
-	for (ws = workspaces; ws; ws = ws->next)
-		persistworkspacestate(ws);
-	persistworkspacestate(stickyws);
+	running = 0;
 }
 
 void
 quit(const Arg *arg)
 {
-	size_t i;
 	running = 0;
-
-	/* kill child processes */
-	for (i = 0; i < autostart_len; i++) {
-		if (0 < autostart_pids[i]) {
-			kill(autostart_pids[i], SIGTERM);
-			waitpid(autostart_pids[i], NULL, 0);
-		}
-	}
 }
 
 /* This reads the stacking order on the X server side and updates the client
