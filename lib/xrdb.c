@@ -102,6 +102,7 @@ loadxrdb()
 					if (!loadxrdbcolor(xrdb, &clrnames[ColBorder], resource))
 						strcpy(clrnames[ColBorder], colors[s][ColBorder]);
 
+					free(scheme[s]);
 					scheme[s] = drw_scm_create(drw, clrnames, alphas[s], 3);
 				}
 
