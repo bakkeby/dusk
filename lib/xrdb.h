@@ -14,6 +14,7 @@ typedef struct {
 } ResourcePref;
 
 static void loadxrdb(void);
-static int loadxrdbcolor(XrmDatabase xrdb, char **dest, char *resource);
+static int loadxrdbcolor(XrmDatabase xrdb, char **dest, unsigned int *alpha, char *resource);
+static int loadxrdbalpha(XrmDatabase xrdb, unsigned int *alpha, char *resource);
 static void loadxrdbconfig(XrmDatabase xrdb, char *name, enum resource_type rtype, void *dst);
 static void xrdb(const Arg *arg);

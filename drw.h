@@ -12,7 +12,7 @@ typedef struct Fnt {
 	struct Fnt *next;
 } Fnt;
 
-enum { ColFg, ColBg, ColBorder, ColResource, ColCount }; /* Clr scheme index */
+enum { ColFg, ColBg, ColBorder, ColCount }; /* Clr scheme index */
 enum { PwrlNone, PwrlRightArrow, PwrlLeftArrow, PwrlForwardSlash, PwrlBackslash, PwrlSolid, PwrlSolidRev };
 typedef XftColor Clr;
 
@@ -52,7 +52,7 @@ void drw_clr_create(
 Clr *drw_scm_create(
 	Drw *drw,
 	char *clrnames[],
-	const unsigned int alphas[],
+	unsigned int alphas[],
 	size_t clrcount
 );
 

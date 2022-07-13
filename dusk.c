@@ -2987,10 +2987,10 @@ setup(void)
 
 	/* init appearance */
 	scheme = ecalloc(LENGTH(colors) + 1, sizeof(Clr *));
-	scheme[LENGTH(colors)] = drw_scm_create(drw, colors[0], alphas[0], 3); // ad-hoc color scheme used by status2d
+	scheme[LENGTH(colors)] = drw_scm_create(drw, colors[0], default_alphas, 3); // ad-hoc color scheme used by status2d
 
 	for (i = 0; i < LENGTH(colors); i++)
-		scheme[i] = drw_scm_create(drw, colors[i], alphas[i], 3);
+		scheme[i] = drw_scm_create(drw, colors[i], default_alphas, 3);
 
 	if (enabled(Xresources))
 		loadxrdb();
@@ -3082,8 +3082,6 @@ setup(void)
 	cursor[CurMove] = drw_cur_create(drw, XC_fleur);
 
 	createworkspaces();
-
-
 	updatebars();
 
 	/* supporting window for NetWMCheck */
@@ -3118,7 +3116,6 @@ setup(void)
 		showws(m->selws);
 	selws = selmon->selws;
 }
-
 
 void
 seturgent(Client *c, int urg)

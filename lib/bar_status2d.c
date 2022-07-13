@@ -95,7 +95,7 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 					}
 					memcpy(buf, (char*)text+i+1, 7);
 					buf[7] = '\0';
-					drw_clr_create(drw, &drw->scheme[ColFg], buf, enabled(Status2DNoAlpha) ? 0xff : alphas[defscheme][ColFg]);
+					drw_clr_create(drw, &drw->scheme[ColFg], buf, enabled(Status2DNoAlpha) ? 0xff : default_alphas[ColFg]);
 					i += 7;
 				} else if (text[i] == 'b') {
 					char buf[8];
@@ -105,14 +105,14 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 					}
 					memcpy(buf, (char*)text+i+1, 7);
 					buf[7] = '\0';
-					drw_clr_create(drw, &drw->scheme[ColBg], buf, enabled(Status2DNoAlpha) ? 0xff : alphas[defscheme][ColBg]);
+					drw_clr_create(drw, &drw->scheme[ColBg], buf, enabled(Status2DNoAlpha) ? 0xff : default_alphas[ColBg]);
 					i += 7;
 				} else if (text[i] == 'C') {
 					int c = atoi(text + ++i) % 16;
-					drw_clr_create(drw, &drw->scheme[ColFg], termcolor[c], enabled(Status2DNoAlpha) ? 0xff : alphas[defscheme][ColFg]);
+					drw_clr_create(drw, &drw->scheme[ColFg], termcolor[c], enabled(Status2DNoAlpha) ? 0xff : default_alphas[ColFg]);
 				} else if (text[i] == 'B') {
 					int c = atoi(text + ++i) % 16;
-					drw_clr_create(drw, &drw->scheme[ColBg], termcolor[c], enabled(Status2DNoAlpha) ? 0xff : alphas[defscheme][ColBg]);
+					drw_clr_create(drw, &drw->scheme[ColBg], termcolor[c], enabled(Status2DNoAlpha) ? 0xff : default_alphas[ColBg]);
 				} else if (text[i] == 'd') {
 					drw->scheme[ColFg] = scheme[defscheme][ColFg];
 					drw->scheme[ColBg] = scheme[defscheme][ColBg];
