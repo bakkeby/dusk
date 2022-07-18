@@ -35,6 +35,7 @@ restorefloats(Client *c)
 	if (c->sfx == -9999)
 		savefloats(c);
 
+	c->area = -99;
 	Workspace *ws = c->ws;
 	Monitor *m = ws->mon;
 
