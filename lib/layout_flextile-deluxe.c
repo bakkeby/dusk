@@ -1202,8 +1202,10 @@ flextile(Workspace *ws)
 		setflexsymbols(ws, n);
 	else if (ws->layout->preset.symbolfunc != NULL)
 		ws->layout->preset.symbolfunc(ws, n);
-	if (n == 0)
+	if (n == 0) {
+		setwindowborders(ws, ws->sel);
 		return;
+	}
 
 	if (enabled(SmartGapsMonocle)) {
 		/* Apply outer gap factor if full screen monocle */
