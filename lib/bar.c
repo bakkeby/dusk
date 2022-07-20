@@ -150,7 +150,7 @@ drawbarwin(Bar *bar)
 	else if (enabled(BarMasterGroupBorderColor) && bar->mon->selws)
 		bar->scheme = clientscheme(bar->mon->selws->clients, NULL);
 	else
-		bar->scheme = SchemeTitleNorm;
+		bar->scheme = SchemeNorm;
 
 	if (bar->borderpx) {
 		XSetForeground(drw->dpy, drw->gc, scheme[bar->scheme][ColBorder].pixel);
