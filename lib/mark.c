@@ -128,9 +128,11 @@ unmark(const Arg *arg)
 void
 unmarkclient(Client *c)
 {
+	int s;
 	if (ISMARKED(c)) {
 		removeflag(c, Marked);
-		XSetWindowBorder(dpy, c->win, scheme[c->scheme][ColBorder].pixel);
+		s = (c == selws->sel ? clientscheme(c, c) : c->scheme);
+		XSetWindowBorder(dpy, c->win, scheme[s][ColBorder].pixel);
 		--num_marked;
 	}
 }
