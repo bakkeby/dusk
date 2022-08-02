@@ -118,11 +118,11 @@ static char dmenuselbgcolor[] = "#440000";
 
 /* Xresources preferences to load at startup. */
 static const ResourcePref resources[] = {
-	{ "dmenunormfgcolor", STRING, &dmenunormfgcolor },
-	{ "dmenunormbgcolor", STRING, &dmenunormbgcolor },
-	{ "dmenuselfgcolor", STRING, &dmenuselfgcolor },
-	{ "dmenuselbgcolor", STRING, &dmenuselbgcolor },
-	{ "dmenufont", STRING, &dmenufont },
+	{ "dmenu.norm.fg.color", STRING, &dmenunormfgcolor },
+	{ "dmenu.norm.bg.color", STRING, &dmenunormbgcolor },
+	{ "dmenu.sel.fg.color", STRING, &dmenuselfgcolor },
+	{ "dmenu.sel.bg.color", STRING, &dmenuselbgcolor },
+	{ "dmenu.font", STRING, &dmenufont },
 };
 
 unsigned int default_alphas[] = { OPAQUE, 0xd0U, OPAQUE };
