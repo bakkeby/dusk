@@ -46,6 +46,7 @@
 #include "movemouse.h"
 #include "resizemouse.h"
 #include "placemouse.h"
+#include "swallowmouse.h"
 #include "mark.h"
 #include "nomodbuttons.h"
 #include "push.h"

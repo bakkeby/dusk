@@ -84,6 +84,7 @@ enum {
 	CurNormal,
 	CurResize,
 	CurMove,
+	CurSwallow,
 	CurLast
 }; /* cursor */
 
@@ -284,6 +285,7 @@ struct Client {
 	int arr;  // tile arrangement (left to right, top to bottom, etc.)
 	int scheme;
 	char scratchkey;
+	char swallowkey;
 	unsigned int idx;
 	double opacity;
 	pid_t pid;
@@ -356,6 +358,7 @@ typedef struct {
 	const char scratchkey;
 	const char *workspace;
 	const char *label;
+	const char swallowedby;
 	int resume;
 } Rule;
 
@@ -612,6 +615,7 @@ applyrules(Client *c)
 		{
 			c->flags |= Ruled | r->flags;
 			c->scratchkey = r->scratchkey;
+			c->swallowkey = r->swallowedby;
 
 			if (r->opacity)
 				c->opacity = r->opacity;
@@ -1582,7 +1586,7 @@ destroynotify(XEvent *e)
 		if (enabled(Debug) || DEBUGGING(c))
 			fprintf(stderr, "destroynotify: received event for client %s\n", c->name);
 		unmanage(c, 1);
-	} else if ((c = swallowingclient(ev->window))) {
+	} else if ((c = swallowingparent(ev->window))) {
 		ws = c->ws;
 		if (enabled(Debug) || DEBUGGING(c))
 			fprintf(stderr, "destroynotify: received event for swallowing client %s\n", c->name);
@@ -1933,13 +1937,11 @@ gettextprop(Window w, Atom atom, char *text, unsigned int size)
 	text[0] = '\0';
 	if (!XGetTextProperty(dpy, w, &name, atom) || !name.nitems)
 		return 0;
-	if (name.encoding == XA_STRING)
+	if (name.encoding == XA_STRING) {
 		strncpy(text, (char *)name.value, size - 1);
-	else {
-		if (XmbTextPropertyToTextList(dpy, &name, &list, &n) >= Success && n > 0 && *list) {
-			strncpy(text, *list, size - 1);
-			XFreeStringList(list);
-		}
+	} else if (XmbTextPropertyToTextList(dpy, &name, &list, &n) >= Success && n > 0 && *list) {
+		strncpy(text, *list, size - 1);
+		XFreeStringList(list);
 	}
 	text[size - 1] = '\0';
 	XFree(name.value);
@@ -2239,7 +2241,7 @@ manage(Window w, XWindowAttributes *wa)
 		PropModeReplace, (unsigned char *) allowed, NetWMActionLast);
 
 	/* Do not attach client if it is being swallowed */
-	if (term && swallow(term, c)) {
+	if (term && swallowclient(term, c)) {
 		/* Do not let swallowed client steal focus unless the terminal has focus */
 		focusclient = (term == selws->sel);
 	} else {
@@ -3080,6 +3082,7 @@ setup(void)
 	cursor[CurResizeVertArrow] = drw_cur_create(drw, XC_sb_v_double_arrow);
 	cursor[CurIronCross] = drw_cur_create(drw, XC_iron_cross);
 	cursor[CurMove] = drw_cur_create(drw, XC_fleur);
+	cursor[CurSwallow] = drw_cur_create(drw, XC_target);
 
 	createworkspaces();
 	updatebars();
@@ -3174,8 +3177,8 @@ spawn(const Arg *arg)
 pid_t
 spawncmd(const Arg *arg, int buttonclick, int orphan)
 {
-	pid_t pid;
-	if ((pid = fork()) == 0) {
+	pid_t pid = fork();
+	if (pid == 0) {
 
 		if (orphan && fork() != 0)
 			exit(EXIT_SUCCESS);
@@ -3403,14 +3406,15 @@ unmanage(Client *c, int destroyed)
 	ws = c->ws;
 	revertws = c->revertws;
 
-	if (c->swallowing)
-		unswallow(c);
-
-	s = swallowingclient(c->win);
+	s = swallowingparent(c->win);
 	if (s) {
-		s->swallowing = NULL;
+		s->swallowing = c->swallowing;
+		c->swallowing = NULL;
 		revertws = NULL;
 	}
+
+	if (c->swallowing)
+		unswallow(&((Arg) { .v = c }));
 
 	if (ISMARKED(c))
 		unmarkclient(c);
@@ -3434,6 +3438,7 @@ unmanage(Client *c, int destroyed)
 		XSetErrorHandler(xerror);
 		XUngrabServer(dpy);
 	}
+
 	free(c);
 
 	updateclientlist();
@@ -3482,6 +3487,14 @@ unmapnotify(XEvent *e)
 			setclientstate(c, WithdrawnState);
 		else
 			unmanage(c, 0);
+	} else if ((c = swallowingparent(ev->window))) {
+		ws = c->ws;
+		if (enabled(Debug) || DEBUGGING(c))
+			fprintf(stderr, "unmapnotify: received event for swallowing client %s\n", c->name);
+		if (ev->send_event)
+			setclientstate(c, WithdrawnState);
+		else
+			unmanage(c->swallowing, 0);
 	} else if (enabled(Systray) && (c = wintosystrayicon(ev->window))) {
 		/* KLUDGE! sometimes icons occasionally unmap their windows, but do
 		 * _not_ destroy them. We map those windows back */

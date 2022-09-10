@@ -616,6 +616,8 @@ static Key keys[] = {
 //	{ KeyPress,   MODKEY,                       XK_,             switchcol,              {0} }, // changes focus between the master and the primary stack area
 //	{ KeyPress,   MODKEY,                       XK_,             setlayout,              {.v = &layouts[0]} }, // sets a specific layout, see the layouts array for indices
 //	{ KeyPress,   MODKEY,                       XK_,             xrdb,                   {0 } }, // reloads colors from XResources
+//	{ KeyPress,   MODKEY,                       XK_,             swallow,                {0} }, // makes the focused client swallow marked clients
+//	{ KeyPress,   MODKEY,                       XK_,             unswallow,              {0} }, // makes the focused client unswallow the most recently swallowed client
 };
 
 /* button definitions */
@@ -725,6 +727,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( showhideclient, ARG_TYPE_NONE ),
 	IPCCOMMAND( stackpush, ARG_TYPE_SINT ),
 	IPCCOMMAND( stackfocus, ARG_TYPE_SINT ),
+	IPCCOMMAND( swallow, ARG_TYPE_NONE ),
 	IPCCOMMAND( switchcol, ARG_TYPE_NONE ),
 	IPCCOMMAND( swapwsbyname, ARG_TYPE_STR ),
 	IPCCOMMAND( toggle, ARG_TYPE_STR ), // toggle functionality on and off
@@ -745,6 +748,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( unfloatvisible, ARG_TYPE_NONE ),
 	IPCCOMMAND( unmark, ARG_TYPE_NONE ),
 	IPCCOMMAND( unmarkall, ARG_TYPE_NONE ),
+	IPCCOMMAND( unswallow, ARG_TYPE_NONE ),
 	IPCCOMMAND( viewallwsonmon, ARG_TYPE_NONE ),
 	IPCCOMMAND( viewalloccwsonmon, ARG_TYPE_NONE ),
 	IPCCOMMAND( viewselws, ARG_TYPE_NONE ),

@@ -8,10 +8,35 @@
 static int scanner;
 static xcb_connection_t *xcon;
 
-int
-swallow(Client *t, Client *c)
+void
+swallow(const Arg *arg)
 {
-	if (disabled(Swallow) || NOSWALLOW(c) || ISTERMINAL(c))
+	Client *c, *next, *last, *s = CLIENT;
+
+	if (!s)
+		return;
+
+	for (c = nextmarked(NULL, s); c; c = nextmarked(next, NULL)) {
+		next = c->next;
+		if (c != s) {
+			detach(c);
+			detachstack(c);
+			for (last = c->swallowing; last && last->swallowing; last = last->swallowing);
+			if (last)
+				last->swallowing = s->swallowing;
+			else
+				c->swallowing = s->swallowing;
+			s->swallowing = c;
+			XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
+		}
+	}
+	arrange(NULL);
+}
+
+int
+swallowclient(Client *t, Client *c)
+{
+	if (disabled(Swallow) || NOSWALLOW(c))
 		return 0;
 	if (!RULED(c) && disabled(SwallowFloating) && ISFLOATING(c))
 		return 0;
@@ -20,6 +45,7 @@ swallow(Client *t, Client *c)
 		setfullscreen(c, 1, ISFAKEFULLSCREEN(t));
 
 	replaceclient(t, c);
+	XMoveWindow(dpy, t->win, WIDTH(t) * -2, t->y);
 	addflag(c, IgnoreCfgReqPos);
 	c->swallowing = t;
 	c->revertws = NULL;
@@ -27,9 +53,12 @@ swallow(Client *t, Client *c)
 	return 1;
 }
 
-void
+int
 replaceclient(Client *old, Client *new)
 {
+	if (!old || !new || old == new)
+		return 0;
+
 	Client *c = NULL;
 	Workspace *ws = old->ws;
 
@@ -59,21 +88,33 @@ replaceclient(Client *old, Client *new)
 	old->next = NULL;
 	old->snext = NULL;
 
-	XMoveWindow(dpy, old->win, WIDTH(old) * -2, old->y);
-
 	if (ISVISIBLE(new) && !ISFULLSCREEN(new)) {
 		if (ISFLOATING(new))
 			resize(new, old->x, old->y, new->w, new->h, 0);
 		else
 			resize(new, old->x, old->y, old->w, old->h, 0);
 	}
+
+	return 1;
 }
 
 void
-unswallow(Client *c)
+unswallow(const Arg *arg)
 {
-	replaceclient(c, c->swallowing);
-	c->swallowing = NULL;
+	Client *c = CLIENT, *s;
+
+	if (!c || !c->swallowing)
+		return;
+
+	s = c->swallowing;
+	if (c && replaceclient(c, s)) {
+		c->swallowing = s->swallowing;
+		s->swallowing = NULL;
+		attach(c);
+		attachstack(c);
+		focus(c);
+		arrange(c->ws);
+	}
 }
 
 pid_t
@@ -173,32 +214,60 @@ termforwin(const Client *w)
 {
 	Workspace *ws;
 	Client *c;
+	char key = w->swallowkey;
 
-	if (!w->pid || ISTERMINAL(w))
+	if (!w->pid)
 		return NULL;
 
 	c = selws->sel;
-	if (c && ISTERMINAL(c) && !c->swallowing && c->pid && isdescprocess(c->pid, w->pid))
+	if (c && ISTERMINAL(c) && ((key && c->scratchkey == key) || (c->pid && isdescprocess(c->pid, w->pid))))
 		return c;
 
 	for (ws = workspaces; ws; ws = ws->next)
-		for (c = ws->clients; c; c = c->next)
-			if (ISTERMINAL(c) && !c->swallowing && c->pid && isdescprocess(c->pid, w->pid))
+		for (c = ws->stack; c; c = c->snext)
+			if (ISTERMINAL(c) && ((key && c->scratchkey == key) || (c->pid && isdescprocess(c->pid, w->pid))))
 				return c;
 
 	return NULL;
 }
 
 Client *
-swallowingclient(Window w)
+swallowingparent(Window w)
 {
 	Workspace *ws;
-	Client *c;
+	Client *c, *next;
 
-	for (ws = workspaces; ws; ws = ws->next)
-		for (c = ws->clients; c; c = c->next)
-			if (c->swallowing && c->swallowing->win == w)
-				return c;
+	for (ws = workspaces; ws; ws = ws->next) {
+		for (c = ws->clients; c; c = next) {
+			next = c->next;
+			while (c->swallowing) {
+				if (c->swallowing->win == w)
+					return c;
+				c = c->swallowing;
+			}
+		}
+	}
+
+	return NULL;
+}
+
+Client *
+swallowingroot(Window w)
+{
+	Workspace *ws;
+	Client *c, *s, *next;
+
+	for (ws = workspaces; ws; ws = ws->next) {
+		for (c = ws->clients; c; c = next) {
+			next = c->next;
+			s = c;
+			while (s->swallowing) {
+				if (s->swallowing->win == w)
+					return c;
+				s = s->swallowing;
+			}
+		}
+	}
 
 	return NULL;
 }

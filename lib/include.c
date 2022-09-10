@@ -50,6 +50,7 @@
 #include "movemouse.c"
 #include "resizemouse.c"
 #include "placemouse.c"
+#include "swallowmouse.c"
 #include "nomodbuttons.c"
 #include "push.c"
 #include "semi_scratchpads.c"

@@ -10,7 +10,7 @@ atomin(Atom input, Atom *list, int nitems)
 void
 persistworkspacestate(Workspace *ws)
 {
-	Client *c;
+	Client *c, *s;
 	unsigned int i;
 
 	/* Fill flextile attributes if arrange method is NULL (floating layout) */
@@ -64,12 +64,15 @@ persistworkspacestate(Workspace *ws)
 		setclientfields(c);
 		setclientlabel(c);
 		savewindowfloatposition(c, c->ws->mon);
-		if (c->swallowing) {
-			c->swallowing->idx = i;
-			setclientflags(c->swallowing);
-			setclientfields(c->swallowing);
-			setclientlabel(c->swallowing);
-			savewindowfloatposition(c->swallowing, c->swallowing->ws->mon);
+
+		s = c->swallowing;
+		while (s) {
+			s->idx = i;
+			setclientflags(s);
+			setclientfields(s);
+			setclientlabel(s);
+			savewindowfloatposition(s, s->ws->mon);
+			s = s->swallowing;
 		}
 	}
 
