@@ -10,10 +10,10 @@ setcfact(const Arg *arg)
 			continue;
 		if (!arg->f)
 			f = 1.0;
-		else if (arg->f > 4.0) // set fact absolutely
-			f = arg->f - 4.0;
-		else
+		else if (arg->f < 4.0)
 			f = arg->f + c->cfact;
+		else // set fact absolutely
+			f = arg->f - 4.0;
 		if (f < 0.25)
 			f = 0.25;
 		else if (f > 4.0)

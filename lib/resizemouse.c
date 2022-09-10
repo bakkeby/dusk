@@ -162,7 +162,7 @@ resizemouse(const Arg *arg)
 }
 
 void
-resizeorcfacts(const Arg *arg)
+resizeorfacts(const Arg *arg)
 {
 	if (!selws || !selws->sel)
 		return;
@@ -170,5 +170,5 @@ resizeorcfacts(const Arg *arg)
 	if (!selws->layout->arrange || ISFLOATING(selws->sel))
 		resizemouse(arg);
 	else
-		dragcfact(arg);
+		dragfact(arg);
 }
