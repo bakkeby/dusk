@@ -3369,6 +3369,7 @@ togglemaximize(Client *c, int maximize_vert, int maximize_horz)
 		setfloatpos(c, "0% -1y 100% -1h", 1);
 
 	resizeclient(c, c->x, c->y, c->w, c->h);
+	drawbar(ws->mon);
 }
 
 void
