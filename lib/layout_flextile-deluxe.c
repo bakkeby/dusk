@@ -337,7 +337,7 @@ layout_split_horizontal_dual_stack(Workspace *ws, int x, int y, int h, int w, in
 void
 layout_split_horizontal_dual_stack_fixed(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n)
 {
-	int sh, sy, ox, sc;
+	int sw, sh, sy, ox, sc;
 
 	if (ws->nstack)
 		sc = ws->nstack;
