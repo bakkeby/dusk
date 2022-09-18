@@ -71,6 +71,10 @@ setfloatpos(Client *c, const char *floatpos, const int auto_float)
 	if (ISVISIBLE(c) && (ISFLOATING(c) || !c->ws->layout->arrange)) {
 		getfloatpos(x, xCh, w, wCh, wx, ww, c->x, c->w, c->bw, floatposgrid_x, &c->x, &c->w);
 		getfloatpos(y, yCh, h, hCh, wy, wh, c->y, c->h, c->bw, floatposgrid_y, &c->y, &c->h);
+		c->sfx = c->x;
+		c->sfy = c->y;
+		c->sfw = c->w;
+		c->sfh = c->h;
 	} else {
 		getfloatpos(x, xCh, w, wCh, wx, ww, c->x, c->w, c->bw, floatposgrid_x, &c->sfx, &c->sfw);
 		getfloatpos(y, yCh, h, hCh, wy, wh, c->y, c->h, c->bw, floatposgrid_y, &c->sfy, &c->sfh);
