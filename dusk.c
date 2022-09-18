@@ -501,7 +501,7 @@ static void unfocus(Client *c, int setfocus, Client *nextfocus);
 static void unmanage(Client *c, int destroyed);
 static Workspace *unmapnotify(XEvent *e);
 static void updateclientlist(void);
-static int updategeom(void);
+static int updategeom(int width, int height);
 static void updatenumlockmask(void);
 static void updatesizehints(Client *c);
 static void updatetitle(Client *c);
@@ -1430,7 +1430,6 @@ configurenotify(XEvent *e)
 	Workspace *ws;
 	Client *c;
 	XConfigureEvent *ev = &e->xconfigure;
-	int dirty;
 
 	if (ev->window == root) {
 
@@ -1439,11 +1438,11 @@ configurenotify(XEvent *e)
 			fprintf(stderr, "    - x = %d, y = %d, w = %d, h = %d\n", ev->x, ev->y, ev->width, ev->height);
 		}
 
-		dirty = (sw != ev->width || sh != ev->height);
-		stickyws->ww = sw = ev->width;
-		stickyws->wh = sh = ev->height;
+		if (updategeom(ev->width, ev->height)) {
 
-		if (updategeom() || dirty) {
+			stickyws->ww = sw;
+			stickyws->wh = sh;
+
 			for (ws = workspaces; ws; ws = ws->next) {
 				for (c = ws->clients; c; c = c->next) {
 					c->sfx = (c->sfx != -9999 ? c->sfx : c->x) - c->ws->wx;
@@ -3005,7 +3004,7 @@ setup(void)
 	occupied_workspace_label_format_length = TEXT2DW(occupied_workspace_label_format) - TEXTW(workspace_label_placeholder) * 2;
 	vacant_workspace_label_format_length = TEXT2DW(vacant_workspace_label_format) - TEXTW(workspace_label_placeholder);
 
-	updategeom();
+	updategeom(sw, sh);
 
 	/* init atoms */
 	utf8string = XInternAtom(dpy, "UTF8_STRING", False);
@@ -3529,9 +3528,15 @@ updateclientlist()
 }
 
 int
-updategeom(void)
+updategeom(int width, int height)
 {
 	int dirty = 0;
+	if (sw != width || sh != height) {
+		sw = width;
+		sh = height;
+		dirty = 1;
+	}
+
 #ifdef XINERAMA
 	if (XineramaIsActive(dpy)) {
 		int i, j, n, nn;
