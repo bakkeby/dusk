@@ -602,7 +602,7 @@ applyrules(Client *c)
 		class = "steam_app_";
 
 	if (enabled(Debug))
-		fprintf(stderr, "applyrules: new client %s, class = '%s', instance = '%s', role = '%s', wintype = '%ld'\n", c->name, class, instance, role, nitems ? win_types[0] : 0);
+		fprintf(stderr, "applyrules: new client %s (%ld), class = '%s', instance = '%s', role = '%s', wintype = '%ld'\n", c->name, c->win, class, instance, role, nitems ? win_types[0] : 0);
 
 	for (i = 0; i < LENGTH(clientrules); i++) {
 		r = &clientrules[i];
