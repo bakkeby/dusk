@@ -672,11 +672,14 @@ drawws(Workspace *ws, Monitor *m, uint64_t prevwsmask, int enablews, int arrange
 
 	setworkspaceareas();
 
-	/* Clear the selected workspace for a monitor if there are no visible workspaces */
+	/* Clear the selected workspace for a monitor if there are no visible workspaces,
+	 * likewise set the selected workspace for the monitor if present and not already set. */
 	for (mon = mons; mon; mon = mon->next) {
 		w = nextvismonws(mon, workspaces);
 		if (!w)
 			mon->selws = NULL;
+		else if (mon->selws == NULL)
+			mon->selws = w;
 	}
 
 	/* When enabling new workspaces into view let the focus remain with the one
