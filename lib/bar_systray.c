@@ -27,7 +27,7 @@ draw_systray(Bar *bar, BarArg *a)
 
 	XSetWindowAttributes wa;
 	XWindowChanges wc;
-	Client *i;
+	Client *i, *next;
 	unsigned int w;
 
 	drw_setscheme(drw, scheme[a->scheme]);
@@ -86,7 +86,13 @@ draw_systray(Bar *bar, BarArg *a)
 	}
 
 	drw_setscheme(drw, scheme[a->scheme]);
-	for (w = 0, i = systray->icons; i; i = i->next) {
+	for (w = 0, i = systray->icons; i; i = next) {
+		next = i->next;
+		if (ISUNMANAGED(i)) {
+			removesystrayicon(i);
+			continue;
+		}
+
 		XChangeWindowAttributes(dpy, i->win, CWBackPixel, &wa);
 		XMapRaised(dpy, i->win);
 		i->x = w;

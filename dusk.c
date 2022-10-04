@@ -1104,10 +1104,13 @@ clientmessage(XEvent *e)
 			c->bw = 0;
 			SETFLOATING(c);
 			updatesizehints(c);
+			updatetitle(c);
 			updatesystrayicongeom(c, wa.width, wa.height);
 			XAddToSaveSet(dpy, c->win);
 			XSelectInput(dpy, c->win, StructureNotifyMask | PropertyChangeMask | ResizeRedirectMask);
 			XClassHint ch = {"systray", "systray"};
+			if (enabled(Debug))
+				fprintf(stderr, "clientmessage: received systray request dock for window %ld (%s)\n", c->win, c->name);
 			XSetClassHint(dpy, c->win, &ch);
 			XReparentWindow(dpy, c->win, systray->win, 0, 0);
 			/* use parents background color */
@@ -3497,10 +3500,7 @@ unmapnotify(XEvent *e)
 		else
 			unmanage(c->swallowing, 0);
 	} else if (enabled(Systray) && (c = wintosystrayicon(ev->window))) {
-		/* KLUDGE! sometimes icons occasionally unmap their windows, but do
-		 * _not_ destroy them. We map those windows back */
-		XMapRaised(dpy, c->win);
-		drawbarwin(systray->bar);
+		removesystrayicon(c);
 	}
 
 	return ws;
@@ -3739,8 +3739,12 @@ wintomon(Window w)
 int
 xerror(Display *dpy, XErrorEvent *ee)
 {
-	if (ee->error_code == BadWindow
-	|| (ee->request_code == X_GetAtomName && ee->error_code == BadAtom)
+	Client *i;
+	if (ee->error_code == BadWindow) {
+		if ((i = wintosystrayicon(ee->resourceid)))
+			addflag(i, Unmanaged);
+		return 0;
+	} else if ((ee->request_code == X_GetAtomName && ee->error_code == BadAtom)
 	|| (ee->request_code == X_SetInputFocus && ee->error_code == BadMatch)
 	|| (ee->request_code == X_PolyText8 && ee->error_code == BadDrawable)
 	|| (ee->request_code == X_PolyFillRectangle && ee->error_code == BadDrawable)
@@ -3748,8 +3752,11 @@ xerror(Display *dpy, XErrorEvent *ee)
 	|| (ee->request_code == X_ConfigureWindow && ee->error_code == BadMatch)
 	|| (ee->request_code == X_GrabButton && ee->error_code == BadAccess)
 	|| (ee->request_code == X_GrabKey && ee->error_code == BadAccess)
-	|| (ee->request_code == X_CopyArea && ee->error_code == BadDrawable))
+	|| (ee->request_code == X_CopyArea && ee->error_code == BadDrawable)) {
+		if (enabled(Debug))
+			fprintf(stderr, "xerror: got XErrorEvent type %d serial %ld, error code %d request code %d minor code %d resource ID %ld\n", ee->type, ee->serial, ee->error_code, ee->request_code, ee->minor_code, ee->resourceid);
 		return 0;
+	}
 	fprintf(stderr, "dusk: fatal error: request code=%d, error code=%d\n",
 		ee->request_code, ee->error_code);
 	return xerrorxlib(dpy, ee); /* may call exit */
