@@ -622,6 +622,21 @@ ipc_get_settings(IPCClient *c)
 	ipc_reply_prepare_send_message(gen, c, IPC_TYPE_GET_SETTINGS);
 }
 
+/**
+ * Called when an IPC_TYPE_GET_SYSTRAY_ICONS message is received from a client. It
+ * prepares a reply with a list of systray client windows in JSON.
+ */
+static void
+ipc_get_systray_clients(IPCClient *c)
+{
+	yajl_gen gen;
+	ipc_reply_init_message(&gen);
+
+	dump_systray_icons(gen);
+
+	ipc_reply_prepare_send_message(gen, c, IPC_TYPE_GET_SYSTRAY_ICONS);
+}
+
 int
 ipc_init(const char *socket_path, const int p_epoll_fd, IPCCommand commands[],
 				 const int commands_len)
@@ -923,6 +938,8 @@ ipc_handle_client_epoll_event(
 			ipc_get_workspaces(c);
 		else if (msg_type == IPC_TYPE_GET_SETTINGS)
 			ipc_get_settings(c);
+		else if (msg_type == IPC_TYPE_GET_SYSTRAY_ICONS)
+			ipc_get_systray_clients(c);
 		else if (msg_type == IPC_TYPE_GET_LAYOUTS)
 			ipc_get_layouts(c, layouts, layouts_len);
 		else if (msg_type == IPC_TYPE_RUN_COMMAND) {
