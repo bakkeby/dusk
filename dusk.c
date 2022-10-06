@@ -481,6 +481,7 @@ static void restack(Workspace *ws);
 static void run(void);
 static void scan(void);
 static int sendevent(Window w, Atom proto, int m, long d0, long d1, long d2, long d3, long d4);
+static void setbackground();
 static void setclientstate(Client *c, long state);
 static void setfocus(Client *c);
 static void setfullscreen(Client *c, int fullscreen, int setfakefullscreen);
@@ -2776,6 +2777,21 @@ scan(void)
 }
 
 void
+setbackground()
+{
+	int di;
+	unsigned long dl;
+	unsigned char *p = NULL;
+	Atom da, atom = None;
+	/* Set a solid background, but only if a wallpaper has not been set. */
+	if (!(XGetWindowProperty(dpy, root, XInternAtom(dpy, "_XROOTPMAP_ID", False), 0L, sizeof atom,
+			False, AnyPropertyType, &da, &di, &dl, &dl, &p) == Success && p)) {
+		XSetWindowBackground(dpy, root, scheme[SchemeNorm][ColBg].pixel);
+		XClearWindow(dpy, root);
+	}
+}
+
+void
 setclientstate(Client *c, long state)
 {
 	long data[] = { state, None };
@@ -3087,6 +3103,7 @@ setup(void)
 	cursor[CurMove] = drw_cur_create(drw, XC_fleur);
 	cursor[CurSwallow] = drw_cur_create(drw, XC_target);
 
+	setbackground();
 	createworkspaces();
 	updatebars();
 
