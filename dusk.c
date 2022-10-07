@@ -3103,7 +3103,6 @@ setup(void)
 	cursor[CurMove] = drw_cur_create(drw, XC_fleur);
 	cursor[CurSwallow] = drw_cur_create(drw, XC_target);
 
-	setbackground();
 	createworkspaces();
 	updatebars();
 
@@ -3118,6 +3117,7 @@ setup(void)
 	/* EWMH support per view */
 	XChangeProperty(dpy, root, netatom[NetSupported], XA_ATOM, 32,
 		PropModeReplace, (unsigned char *) netatom, NetLast);
+	setbackground();
 	setnumdesktops();
 	updatecurrentdesktop();
 	setdesktopnames();
