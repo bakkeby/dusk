@@ -139,18 +139,15 @@ viewwsmask(Monitor *m, uint64_t wsmask)
 {
 	Workspace *ws;
 	uint64_t currmask = getwsmask(m);
-	int wasvisible;
 
 	if (wsmask == currmask)
 		wsmask = m->wsmask;
 	m->wsmask = currmask;
 
-	for (ws = nextmonws(m, workspaces); ws; ws = nextmonws(m, ws->next)) {
-		wasvisible = ws->visible;
+	for (ws = nextmonws(m, workspaces); ws; ws = nextmonws(m, ws->next))
 		ws->visible = wsmask & (1L << ws->num);
-		if (wasvisible && !ws->visible)
-			hidews(ws);
-	}
+
+	selws = m->selws = nextvismonws(m, workspaces);
 
 	drawws(NULL, m, currmask, 1, 0, 0);
 }
@@ -678,8 +675,6 @@ drawws(Workspace *ws, Monitor *m, uint64_t prevwsmask, int enablews, int arrange
 		w = nextvismonws(mon, workspaces);
 		if (!w)
 			mon->selws = NULL;
-		else if (mon->selws == NULL)
-			mon->selws = w;
 	}
 
 	/* When enabling new workspaces into view let the focus remain with the one
