@@ -526,6 +526,8 @@ static int screen;
 static int sw, sh;             /* X display screen geometry width, height */
 static int lrpad;              /* sum of left and right padding for text */
 static int force_warp = 0;     /* force warp in some situations, e.g. killclient */
+static int prev_ptr_x = 0;
+static int prev_ptr_y = 0;
 static int ignore_warp = 0;    /* force skip warp in some situations, e.g. dragmfact, dragcfact */
 static int num_workspaces = 0; /* the number of available workspaces */
 static int combo = 0;          /* used for combo keys */
@@ -1804,10 +1806,21 @@ focus(Client *c)
 void
 focusin(XEvent *e)
 {
+	int x, y;
 	Workspace *ws = selws;
 	XFocusChangeEvent *ev = &e->xfocus;
+
+	getrootptr(&x, &y);
+	if (x == prev_ptr_x && y == prev_ptr_y) {
+		skipfocusevents();
+		return;
+	}
+
 	if (ws->sel && ev->window != ws->sel->win && wintoclient(ev->window))
 		setfocus(ws->sel);
+
+	prev_ptr_x = x;
+	prev_ptr_y = y;
 }
 
 void
@@ -2034,6 +2047,8 @@ keypress(XEvent *e)
 	int keysyms_return;
 	KeySym* keysym;
 	XKeyEvent *ev;
+
+	getrootptr(&prev_ptr_x, &prev_ptr_y);
 
 	ev = &e->xkey;
 	ignore_marked = 0;
