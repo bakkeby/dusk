@@ -44,6 +44,9 @@ toggleflagop(Client *c, const uint64_t flag, int op)
 void
 toggleclientflag(const Arg *arg)
 {
+	if (!selws->sel)
+		return;
+
 	toggleflagop(selws->sel, getflagbyname(arg->v), 2);
 	arrangews(selws);
 }
