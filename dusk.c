@@ -971,14 +971,6 @@ cleanup(void)
 		persistworkspacestate(ws);
 	persistworkspacestate(stickyws);
 
-	/* Kill child processes */
-	for (i = 0; i < autostart_len; i++) {
-		if (0 < autostart_pids[i]) {
-			kill(autostart_pids[i], SIGTERM);
-			waitpid(autostart_pids[i], NULL, 0);
-		}
-	}
-
 	for (ws = workspaces; ws; ws = ws->next) {
 		ws->layout = &foo;
 		while (ws->stack)
@@ -995,6 +987,15 @@ cleanup(void)
 			XDestroyWindow(dpy, systray->win);
 		}
 		free(systray);
+		XSync(dpy, False);
+	}
+
+	/* Kill child processes */
+	for (i = 0; i < autostart_len; i++) {
+		if (0 < autostart_pids[i]) {
+			kill(autostart_pids[i], SIGTERM);
+			waitpid(autostart_pids[i], NULL, 0);
+		}
 	}
 
 	for (ws = workspaces; ws; ws = next) {
