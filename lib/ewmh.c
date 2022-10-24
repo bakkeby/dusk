@@ -274,12 +274,21 @@ getworkspacestate(Workspace *ws)
 {
 	Monitor *m;
 	const Layout *layout;
-	int i, di, mon;
+	int i, di, mon, num_ws = 0;
 	unsigned long dl, nitems;
 	unsigned char *p = NULL;
 	Atom da, settings = None;
 
-	if (!(XGetWindowProperty(dpy, root, clientatom[DuskWorkspace], ws->num, LENGTH(wsrules) * sizeof dl,
+	if (XGetWindowProperty(dpy, root, netatom[NetNumberOfDesktops], 0L, sizeof da,
+			False, AnyPropertyType, &da, &di, &nitems, &dl, &p) == Success && p) {
+		num_ws = *(Atom *)p;
+		XFree(p);
+	}
+
+	if (ws->num > num_ws)
+		return;
+
+	if (!(XGetWindowProperty(dpy, root, clientatom[DuskWorkspace], ws->num, num_ws * sizeof dl,
 			False, AnyPropertyType, &da, &di, &nitems, &dl, &p) == Success && p)) {
 		return;
 	}
