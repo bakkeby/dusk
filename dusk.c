@@ -1762,11 +1762,12 @@ focus(Client *c)
 			/* Move all visible tiled clients that are not marked as on top below the bar window */
 			wc.stack_mode = Below;
 			wc.sibling = c->ws->mon->bar->win;
-			for (f = c->ws->stack; f; f = f->snext)
+			for (f = c->ws->stack; f; f = f->snext) {
 				if (f != c && !ISFLOATING(f) && ISVISIBLE(f) && !(ALWAYSONTOP(f) || ISTRANSIENT(f))) {
 					XConfigureWindow(dpy, f->win, CWSibling|CWStackMode, &wc);
 					wc.sibling = f->win;
 				}
+			}
 
 			/* Move the currently focused client above the bar window */
 			wc.stack_mode = Above;
@@ -1776,14 +1777,29 @@ focus(Client *c)
 			/* Move all visible floating windows that are not marked as on top below the current window */
 			wc.stack_mode = Below;
 			wc.sibling = c->win;
-			for (f = c->ws->stack; f; f = f->snext)
+			for (f = c->ws->stack; f; f = f->snext) {
 				if (f != c && ISFLOATING(f) && ISVISIBLE(f) && !(ALWAYSONTOP(f) || ISTRANSIENT(f))) {
 					XConfigureWindow(dpy, f->win, CWSibling|CWStackMode, &wc);
 					wc.sibling = f->win;
 				}
-			XSync(dpy, False);
-			skipfocusevents();
+			}
+		} else {
+			wc.stack_mode = Below;
+			wc.sibling = 0;
+			for (f = c->ws->stack; f; f = f->snext) {
+				if (ISFLOATING(f) && ISVISIBLE(f) && ALWAYSONTOP(f)) {
+					if (!wc.sibling) {
+						XRaiseWindow(dpy, f->win);
+						wc.sibling = f->win;
+					} else {
+						XConfigureWindow(dpy, f->win, CWSibling|CWStackMode, &wc);
+						wc.sibling = f->win;
+					}
+				}
+			}
 		}
+		XSync(dpy, False);
+		skipfocusevents();
 		XSetWindowBorder(dpy, c->win, scheme[clientscheme(c, c)][ColBorder].pixel);
 	} else {
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
