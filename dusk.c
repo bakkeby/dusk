@@ -629,7 +629,7 @@ applyrules(Client *c)
 			c->ws = ws ? ws : selws;
 
 			if (r->floatpos)
-				setfloatpos(c, r->floatpos, 0);
+				setfloatpos(c, r->floatpos, 0, 1);
 
 			if (REVERTWORKSPACE(c) && !c->ws->visible)
 				c->revertws = c->ws->mon->selws;
@@ -2422,11 +2422,11 @@ maximize(Client *c, int maximize_vert, int maximize_horz)
 	XRaiseWindow(dpy, c->win);
 
 	if (maximize_vert && maximize_horz)
-		setfloatpos(c, "0% 0% 100% 100%", 1);
+		setfloatpos(c, "0% 0% 100% 100%", 1, 0);
 	else if (maximize_vert)
-		setfloatpos(c, "-1x 0% -1w 100%", 1);
+		setfloatpos(c, "-1x 0% -1w 100%", 1, 0);
 	else
-		setfloatpos(c, "0% -1y 100% -1h", 1);
+		setfloatpos(c, "0% -1y 100% -1h", 1, 0);
 
 	resizeclient(c, c->x, c->y, c->w, c->h);
 	drawbar(ws->mon);
