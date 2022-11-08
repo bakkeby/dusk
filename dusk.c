@@ -463,6 +463,7 @@ static void killclient(const Arg *arg);
 static void manage(Window w, XWindowAttributes *wa);
 static void mappingnotify(XEvent *e);
 static void maprequest(XEvent *e);
+static void maximize(Client *c, int maximize_vert, int maximize_horz);
 static void motionnotify(XEvent *e);
 static Client *nexttiled(Client *c);
 static Client *nthtiled(Client *c, int n);
@@ -1224,8 +1225,18 @@ clientmessage(XEvent *e)
 		} else {
 			maximize_vert = isatomstate(cme, netatom[NetWMMaximizedVert]);
 			maximize_horz = isatomstate(cme, netatom[NetWMMaximizedHorz]);
-			if (maximize_vert || maximize_horz)
-				togglemaximize(c, maximize_vert, maximize_horz);
+			if (maximize_vert || maximize_horz) {
+				switch (cme->data.l[0]) {
+				default:
+				case 0: /* _NET_WM_STATE_REMOVE */
+					restorefloats(c);
+					break;
+				case 1: /* _NET_WM_STATE_ADD */
+				case 2: /* _NET_WM_STATE_TOGGLE */
+					togglemaximize(c, maximize_vert, maximize_horz);
+					break;
+				}
+			}
 		}
 	} else if (cme->message_type == netatom[NetCloseWindow]) {
 		killclient(&((Arg) { .v = c }));
@@ -2401,6 +2412,27 @@ maprequest(XEvent *e)
 }
 
 void
+maximize(Client *c, int maximize_vert, int maximize_horz)
+{
+	if (!maximize_vert && !maximize_horz)
+		return;
+	Workspace *ws = c->ws;
+
+	SETFLOATING(c);
+	XRaiseWindow(dpy, c->win);
+
+	if (maximize_vert && maximize_horz)
+		setfloatpos(c, "0% 0% 100% 100%", 1);
+	else if (maximize_vert)
+		setfloatpos(c, "-1x 0% -1w 100%", 1);
+	else
+		setfloatpos(c, "0% -1y 100% -1h", 1);
+
+	resizeclient(c, c->x, c->y, c->w, c->h);
+	drawbar(ws->mon);
+}
+
+void
 motionnotify(XEvent *e)
 {
 	Bar *bar;
@@ -3411,18 +3443,7 @@ togglemaximize(Client *c, int maximize_vert, int maximize_horz)
 		savefloats(c);
 	}
 
- 	SETFLOATING(c);
- 	XRaiseWindow(dpy, c->win);
-
-	if (maximize_vert && maximize_horz)
-		setfloatpos(c, "0% 0% 100% 100%", 1);
-	else if (maximize_vert)
-		setfloatpos(c, "-1x 0% -1w 100%", 1);
-	else
-		setfloatpos(c, "0% -1y 100% -1h", 1);
-
-	resizeclient(c, c->x, c->y, c->w, c->h);
-	drawbar(ws->mon);
+	maximize(c, maximize_vert, maximize_horz);
 }
 
 void
