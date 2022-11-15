@@ -1001,8 +1001,7 @@ cleanup(void)
 
 	for (ws = workspaces; ws; ws = next) {
 		next = ws->next;
-		if (ws->preview)
-			XFreePixmap(dpy, ws->preview);
+		removepreview(ws);
 		free(ws);
 	}
 
@@ -1055,12 +1054,7 @@ cleanupmon(Monitor *mon)
 			systray->bar = NULL;
 		free(bar);
 	}
-	if (mon->preview) {
-		XUnmapWindow(dpy, mon->preview->win);
-		XDestroyWindow(dpy, mon->preview->win);
-		free(mon->preview);
-	}
-
+	freepreview(mon);
 	free(mon);
 }
 
@@ -1471,9 +1465,11 @@ configurenotify(XEvent *e)
 			updatebars();
 			setworkspaceareas();
 			setviewport();
-			for (m = mons; m; m = m->next)
+			for (m = mons; m; m = m->next) {
 				for (bar = m->bar; bar; bar = bar->next)
 					XMoveResizeWindow(dpy, bar->win, bar->bx, bar->by, bar->bw, bar->bh);
+				freepreview(m);
+			}
 			for (ws = workspaces; ws; ws = ws->next) {
 				for (c = ws->clients; c; c = c->next) {
 					c->sfx += c->ws->wx;
@@ -1488,6 +1484,7 @@ configurenotify(XEvent *e)
 						show(c);
 					}
 				}
+				removepreview(ws);
 			}
 			focus(NULL);
 			arrange(NULL);
@@ -3644,8 +3641,6 @@ updategeom(int width, int height)
 				m->mw = m->ww = unique[m->num].width;
 				m->mh = m->wh = unique[m->num].height;
 				updatebarpos(m);
-				if (enabled(WorkspacePreview))
-					createpreview(m);
 			}
 			if (m->num >= n)
 				redistributeworkspaces(m);
@@ -3668,8 +3663,6 @@ updategeom(int width, int height)
 			mons->mw = mons->ww = sw;
 			mons->mh = mons->wh = sh;
 			updatebarpos(mons);
-			if (enabled(WorkspacePreview))
-				createpreview(mons);
 		}
 	}
 	if (dirty) {

@@ -36,10 +36,30 @@ createpreview(Monitor *m)
 }
 
 void
+freepreview(Monitor *m)
+{
+	if (m->preview) {
+		XUnmapWindow(dpy, m->preview->win);
+		XDestroyWindow(dpy, m->preview->win);
+		free(m->preview);
+		m->preview = 0;
+	}
+}
+
+void
 hidepreview(Monitor *m)
 {
 	m->preview->show = 0;
 	XUnmapWindow(dpy, m->preview->win);
+}
+
+void
+removepreview(Workspace *ws)
+{
+	if (ws->preview) {
+		XFreePixmap(dpy, ws->preview);
+		ws->preview = 0;
+	}
 }
 
 void
@@ -80,10 +100,7 @@ storepreview(Workspace *ws)
 	if (!m->preview)
 		createpreview(m);
 
-	if (ws->preview) {
-		XFreePixmap(dpy, ws->preview);
-		ws->preview = 0;
-	}
+	removepreview(ws);
 
 	if (!ws->clients)
 		return;
