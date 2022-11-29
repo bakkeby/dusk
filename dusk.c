@@ -2709,7 +2709,7 @@ resizeclientpad(Client *c, int x, int y, int w, int h, int tw, int th)
 	c->w = wc.width = w;
 	c->h = wc.height = h;
 
-	if (enabled(CenterSizeHintsClients) && !ISFLOATING(c)) {
+	if (enabled(CenterSizeHintsClients) && !ISFLOATING(c) && c->ws->layout->arrange) {
 		if (w != tw)
 			c->x = wc.x += (tw - w) / 2;
 		if (h != th)
