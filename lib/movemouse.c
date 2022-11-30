@@ -128,9 +128,11 @@ movemouse(const Arg *arg)
 			sy = ny = ocy[0] + (ev.xmotion.y - y);
 			vsnap = hsnap = snap;
 
-			if (!ISFLOATING(c) && selws->layout->arrange
-					&& (abs(nx - c->x) > snap || abs(ny - c->y) > snap))
+			if (!ISFLOATING(c) && selws->layout->arrange) {
+				if (abs(nx - c->x) <= snap && abs(ny - c->y) <= snap)
+					continue;
 				togglefloating(NULL);
+			}
 
 			for (i = 0; i < ngirders; i++) {
 				for (g = 0; g < ngroup; g++) {
