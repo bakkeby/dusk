@@ -20,18 +20,6 @@ handlexevent(struct epoll_event *ev)
 }
 
 void
-setlayoutsafe(const Arg *arg)
-{
-	const Layout *ltptr = (Layout *)arg->v;
-	if (ltptr == 0)
-		setlayout(arg);
-	for (int i = 0; i < LENGTH(layouts); i++) {
-		if (ltptr == &layouts[i])
-			setlayout(arg);
-	}
-}
-
-void
 setupepoll(void)
 {
 	epoll_fd = epoll_create1(0);

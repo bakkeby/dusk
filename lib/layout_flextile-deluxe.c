@@ -129,12 +129,6 @@ setlayoutaxisex(const Arg *arg)
 }
 
 void
-setlayoutex(const Arg *arg)
-{
-	setlayout(&((Arg) { .v = &layouts[arg->i % LENGTH(layouts)] }));
-}
-
-void
 setwindowborders(Workspace *ws, Client *sel)
 {
 	for (Client *s = ws->stack; s; s = s->snext)

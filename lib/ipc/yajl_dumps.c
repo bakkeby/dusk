@@ -332,8 +332,9 @@ dump_layouts(yajl_gen gen, const Layout layouts[], const int layouts_len)
 			YMAP(
 				// Check for a NULL pointer. The cycle layouts patch adds an entry at
 				// the end of the layouts array with a NULL pointer for the symbol
+				YSTR("name"); YSTR((layouts[i].name ? layouts[i].name : layouts[i].symbol ? layouts[i].symbol : ""));
 				YSTR("symbol"); YSTR((layouts[i].symbol ? layouts[i].symbol : ""));
-				YSTR("address"); YINT((uintptr_t)(layouts + i));
+				YSTR("index"); YINT(i);
 			)
 		}
 	)

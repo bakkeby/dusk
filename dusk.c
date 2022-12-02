@@ -246,6 +246,7 @@ typedef struct {
 	const char *symbol;
 	void (*arrange)(Workspace *);
 	LayoutPreset preset;
+	const char *name;
 } Layout;
 
 typedef struct Preview Preview;
@@ -2912,13 +2913,20 @@ void
 setlayout(const Arg *arg)
 {
 	Workspace *ws = selws;
-	const Layout *tmp = ws->layout;
+	const Layout *tmplayout;
 
-	ws->layout = ws->prevlayout;
-	ws->prevlayout = tmp;
+	if (!ws || !arg || (arg->i > 0 && arg->i > LENGTH(layouts))) {
+		return;
+	}
 
-	if (arg && arg->v)
-		ws->layout = (Layout *)arg->v;
+	if (arg->i < 0) {
+		tmplayout = ws->layout;
+		ws->layout = ws->prevlayout;
+		ws->prevlayout = tmplayout;
+	} else if (&layouts[arg->i] != ws->layout) {
+		ws->prevlayout = ws->layout;
+		ws->layout = &layouts[arg->i];
+	}
 
 	if (ws->layout->preset.nmaster != -1)
 		ws->nmaster = ws->layout->preset.nmaster;
