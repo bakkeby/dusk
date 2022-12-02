@@ -398,6 +398,8 @@ movetows(Client *c, Workspace *ws)
 		arrange(ws);
 		if (enabled(ViewOnWs) && hadfocus)
 			warp(hadfocus);
+	} else {
+		drawbar(ws->mon);
 	}
 }
 
