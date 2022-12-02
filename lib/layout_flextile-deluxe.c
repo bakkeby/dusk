@@ -1230,10 +1230,9 @@ setflexsymbols(Workspace *ws, unsigned int n)
 {
 	int l;
 	char sym1, sym2, sym3;
-	Client *c;
 
-	if (n == 0)
-		for (c = nexttiled(ws->clients); c; c = nexttiled(c->next), n++);
+	if (!n)
+		n = numtiled(ws);
 
 	l = abs(ws->ltaxis[LAYOUT]);
 	if (ws->ltaxis[MASTER] == MONOCLE && (l == NO_SPLIT || !ws->nmaster || n <= ws->nmaster)) {

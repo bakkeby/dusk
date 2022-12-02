@@ -1,7 +1,6 @@
 void
 dragfact(const Arg *arg)
 {
-	unsigned int n;
 	int px, py; // pointer coordinates
 	int dist_x, dist_y;
 	int horizontal = 0; // layout configuration
@@ -10,8 +9,8 @@ dragfact(const Arg *arg)
 	Workspace *ws = selws;
 	XEvent ev;
 	Time lasttime = 0;
+	unsigned int n = numtiled(ws);
 
-	for (n = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), n++);
 	if (!(c = ws->sel) || !n || !ws->layout->arrange)
 		return;
 

@@ -1910,9 +1910,15 @@ focusstack(const Arg *arg)
 		if (enabled(FocusedOnTop)) {
 			if (enabled(Warp)) {
 				force_warp = 1;
-				for (n = 0, i = nexttiled(c->ws->clients); i; i = nexttiled(i->next), n++);
-				if (ISFLOATING(c) || !(c->ws->ltaxis[MASTER] == MONOCLE && (abs(c->ws->ltaxis[LAYOUT] == NO_SPLIT || !c->ws->nmaster || n <= c->ws->nmaster))))
+				if (
+					ISFLOATING(c) || !(c->ws->ltaxis[MASTER] == MONOCLE && (
+						abs(c->ws->ltaxis[LAYOUT]) == NO_SPLIT
+						|| !c->ws->nmaster
+						|| numtiled(ws) <= c->ws->nmaster
+					))
+				) {
 					warp(c);
+				}
 			}
 		} else
 			restack(c->ws);
@@ -2041,7 +2047,7 @@ void
 incnmaster(const Arg *arg)
 {
 	Workspace *ws = selws;
-	ws->nmaster = MAX(ws->nmaster + arg->i, 0);
+	ws->nmaster = MAX(MIN(ws->nmaster,numtiled(ws)) + arg->i, 0);
 	arrange(ws);
 }
 
@@ -2740,7 +2746,6 @@ restack(Workspace *ws)
 {
 	Client *c;
 	XWindowChanges wc;
-	int n = 0;
 
 	if (!ws->sel)
 		return;
@@ -2759,10 +2764,8 @@ restack(Workspace *ws)
 	skipfocusevents();
 
 	if (enabled(Warp)) {
-		if (ws->nmaster)
-			for (c = nexttiled(ws->clients); c && n <= ws->nmaster; c = nexttiled(c->next), n++);
 		if (ws == selws && (
-			!(ws->ltaxis[MASTER] == MONOCLE && (abs(ws->ltaxis[LAYOUT] == NO_SPLIT || !ws->nmaster || n <= ws->nmaster)))
+			!(ws->ltaxis[MASTER] == MONOCLE && (abs(ws->ltaxis[LAYOUT] == NO_SPLIT || !ws->nmaster || numtiled(ws) <= ws->nmaster)))
 			|| ISFLOATING(ws->sel))
 		)
 			warp(ws->sel);
