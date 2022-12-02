@@ -190,6 +190,18 @@ hasfloating(Workspace *ws)
 	return c != NULL;
 }
 
+int
+ismasterclient(Client *c)
+{
+	Client *i;
+	int n;
+	for (n = 0, i = nexttiled(c->ws->clients); i && n < c->ws->nmaster; i = nexttiled(i->next), ++n)
+		if (i == c)
+			return 1;
+
+	return 0;
+}
+
 void
 adjustwsformonitor(Workspace *ws, Monitor *m)
 {

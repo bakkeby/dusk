@@ -13,6 +13,7 @@ static char * wsicon(Workspace *ws);
 static int hasclients(Workspace *ws);
 static int hashidden(Workspace *ws);
 static int hasfloating(Workspace *ws);
+static int ismasterclient(Client *c);
 static void adjustwsformonitor(Workspace *ws, Monitor *m);
 static Workspace * getwsbyname(const Arg *arg);
 static Workspace * getwsbyindex(int index);

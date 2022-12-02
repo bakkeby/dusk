@@ -456,7 +456,6 @@ static void hide(Client *c);
 static void incnmaster(const Arg *arg);
 static void incnstack(const Arg *arg);
 static int isatomstate(XClientMessageEvent *cme, int atom);
-static int ismasterclient(Client *c);
 static void keypress(XEvent *e);
 static void keyrelease(XEvent *e);
 static void killclient(const Arg *arg);
@@ -2103,18 +2102,6 @@ int
 isatomstate(XClientMessageEvent *cme, int atom)
 {
 	return (cme->data.l[1] == atom || cme->data.l[2] == atom);
-}
-
-int
-ismasterclient(Client *c)
-{
-	Client *i;
-	int n;
-	for (n = 0, i = nexttiled(c->ws->clients); i && n < c->ws->nmaster; i = nexttiled(i->next), ++n)
-		if (i == c)
-			return 1;
-
-	return 0;
 }
 
 void
