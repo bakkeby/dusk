@@ -1236,7 +1236,7 @@ clientmessage(XEvent *e)
 		killclient(&((Arg) { .v = c }));
 	} else if (cme->message_type == netatom[NetWMDesktop]) {
 		if ((ws = getwsbyindex(cme->data.l[0])))
-			movetows(c, ws);
+			movetows(c, ws, enabled(ViewOnWs));
 	} else if (cme->message_type == netatom[NetActiveWindow]) {
 		if (HIDDEN(c)) {
 			reveal(c);
@@ -1392,7 +1392,7 @@ clienttomon(const Arg *arg)
 	Monitor *m = dirtomon(arg->i);
 
 	if (m->selws)
-		movetows(c, m->selws);
+		movetows(c, m->selws, enabled(ViewOnWs));
 }
 
 /* Moves all clients from one monitor to another.
@@ -1409,7 +1409,7 @@ clientstomon(const Arg *arg)
 
 	m = dirtomon(arg->i);
 	if (m->selws) {
-		moveallclientstows(ws, m->selws);
+		moveallclientstows(ws, m->selws, enabled(ViewOnWs));
 		focus(NULL);
 		arrange(NULL);
 	}

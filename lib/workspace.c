@@ -289,7 +289,7 @@ movews(const Arg *arg)
 {
 	Workspace *ws = (Workspace*)arg->v;
 	Client *c = selws->sel;
-	movetows(c, ws);
+	movetows(c, ws, enabled(ViewOnWs));
 }
 
 void
@@ -351,7 +351,7 @@ swapwsclients(Workspace *ws1, Workspace *ws2)
 }
 
 void
-movetows(Client *c, Workspace *ws)
+movetows(Client *c, Workspace *ws, int view_workspace)
 {
 	if (!c || !ws || ISSTICKY(c))
 		return;
@@ -380,7 +380,7 @@ movetows(Client *c, Workspace *ws)
 
 		clientfsrestore(c);
 
-		if (!enabled(ViewOnWs) && !ws->visible)
+		if (!view_workspace && !ws->visible)
 			hide(c);
 	}
 
@@ -392,11 +392,11 @@ movetows(Client *c, Workspace *ws)
 	else
 		focus(NULL);
 
-	if (enabled(ViewOnWs) && !ws->visible)
+	if (view_workspace && !ws->visible)
 		viewwsonmon(ws, ws->mon, 0);
 	else if (ws->visible) {
 		arrange(ws);
-		if (enabled(ViewOnWs) && hadfocus)
+		if (view_workspace && hadfocus)
 			warp(hadfocus);
 	} else {
 		drawbar(ws->mon);
@@ -404,7 +404,7 @@ movetows(Client *c, Workspace *ws)
 }
 
 void
-moveallclientstows(Workspace *from, Workspace *to)
+moveallclientstows(Workspace *from, Workspace *to, int view_workspace)
 {
 	Client *clients = from->clients;
 
@@ -421,7 +421,7 @@ moveallclientstows(Workspace *from, Workspace *to)
 	from->clients = NULL;
 	from->stack = NULL;
 
-	if (enabled(ViewOnWs) && !to->visible)
+	if (view_workspace && !to->visible)
 		viewwsonmon(to, to->mon, 0);
 
 	if (from->visible)
@@ -443,34 +443,32 @@ moveallclientstows(Workspace *from, Workspace *to)
 void
 movetowsbyname(const Arg *arg)
 {
-	movetows(selws->sel, getwsbyname(arg));
+	movetows(selws->sel, getwsbyname(arg), 1);
 }
 
 void
 sendtowsbyname(const Arg *arg)
 {
-	togglefunc(ViewOnWs);
-	movetows(selws->sel, getwsbyname(arg));
-	togglefunc(ViewOnWs);
+	movetows(selws->sel, getwsbyname(arg), 0);
 }
 
 void
 movealltowsbyname(const Arg *arg)
 {
-	moveallclientstows(selws, getwsbyname(arg));
+	moveallclientstows(selws, getwsbyname(arg), enabled(ViewOnWs));
 }
 
 void
 moveallfromwsbyname(const Arg *arg)
 {
-	moveallclientstows(getwsbyname(arg), selws);
+	moveallclientstows(getwsbyname(arg), selws, 0);
 }
 
 /* Send client to an adjacent workspace on the current monitor */
 void
 movewsdir(const Arg *arg)
 {
-	movetows(selws->sel, dirtows(arg->i));
+	movetows(selws->sel, dirtows(arg->i), enabled(ViewOnWs));
 }
 
 /* View an adjacent workspace on the current monitor */
