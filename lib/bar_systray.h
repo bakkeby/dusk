@@ -15,9 +15,6 @@
 #define VERSION_MINOR               0
 #define XEMBED_EMBEDDED_VERSION (VERSION_MAJOR << 16) | VERSION_MINOR
 
-/* enums */
-enum { Manager, Xembed, XembedInfo, XLast }; /* Xembed atoms */
-
 typedef struct SystrayWin SystrayWin;
 struct SystrayWin {
 	Window win;
@@ -39,4 +36,3 @@ static void resizerequest(XEvent *e);
 static void updatesystrayicongeom(Client *i, int w, int h);
 static void updatesystrayiconstate(Client *i, XPropertyEvent *ev);
 static Client *wintosystrayicon(Window w);
-

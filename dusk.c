@@ -155,84 +155,6 @@ enum {
 }; /* color schemes */
 
 enum {
-	NetActiveWindow,
-	NetClientList,
-	NetClientListStacking,
-	NetCloseWindow,
-	NetCurrentDesktop,
-	NetDesktopNames,
-	NetDesktopViewport,
-	NetNumberOfDesktops,
-	NetSupported,
-	NetSystemTray,
-	NetSystemTrayOP,
-	NetSystemTrayOrientation,
-	NetSystemTrayOrientationHorz,
-	NetSystemTrayVisual,
-	NetWMAllowedActions,
-	NetWMCheck,
-	NetWMDemandsAttention,
-	NetWMDesktop,
-	NetWMFullPlacement,
-	NetWMFullscreen,
-	NetWMHidden,
-	NetWMIcon,
-	NetWMName,
-	NetWMState,
-	NetWMStateAbove,
-	NetWMMaximizedVert,
-	NetWMMaximizedHorz,
-	NetWMSkipTaskbar,
-	NetWMStaysOnTop,
-	NetWMSticky,
-	NetWMWindowOpacity,
-	NetWMWindowType,
-	NetWMWindowTypeDock,
-	NetWMMoveResize,
-	NetWMUserTime,
-	NetLast
-}; /* EWMH atoms */
-
-enum {
-	NetWMActionMove,
-	NetWMActionResize,
-	NetWMActionMinimize,
-	NetWMActionShade,
-	NetWMActionStick,
-	NetWMActionMaximizeHorz,
-	NetWMActionMaximizeVert,
-	NetWMActionFullscreen,
-	NetWMActionChangeDesktop,
-	NetWMActionClose,
-	NetWMActionAbove,
-	NetWMActionBelow,
-	NetWMActionLast
-}; /* _NET_WM_ALLOWED_ACTIONS */
-
-enum {
-	WMChangeState,
-	WMClass,
-	WMDelete,
-	WMProtocols,
-	WMState,
-	WMTakeFocus,
-	WMWindowRole,
-	WMLast
-}; /* default atoms */
-
-enum {
-	IsFloating,
-	DuskClientFlags,
-	DuskClientFields,
-	DuskClientLabel,
-	DuskWorkspace,
-	SteamGameID,
-	ClientLast
-}; /* dusk client atoms */
-
-/* https://specifications.freedesktop.org/wm-spec/latest/ar01s05.html - Application Window Properties */
-
-enum {
 	ClkLtSymbol,
 	ClkStatusText,
 	ClkWinTitle,
@@ -3079,69 +3001,13 @@ setup(void)
 
 	/* init atoms */
 	utf8string = XInternAtom(dpy, "UTF8_STRING", False);
-	wmatom[WMClass] = XInternAtom(dpy, "WM_CLASS", False);
-	wmatom[WMProtocols] = XInternAtom(dpy, "WM_PROTOCOLS", False);
-	wmatom[WMDelete] = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
-	wmatom[WMState] = XInternAtom(dpy, "WM_STATE", False);
-	wmatom[WMTakeFocus] = XInternAtom(dpy, "WM_TAKE_FOCUS", False);
-	wmatom[WMWindowRole] = XInternAtom(dpy, "WM_WINDOW_ROLE", False);
-	wmatom[WMChangeState] = XInternAtom(dpy, "WM_CHANGE_STATE", False);
-	clientatom[IsFloating] = XInternAtom(dpy, "_IS_FLOATING", False);
-	clientatom[DuskClientFlags] = XInternAtom(dpy, "_DUSK_CLIENT_FLAGS", False);
-	clientatom[DuskClientFields] = XInternAtom(dpy, "_DUSK_CLIENT_FIELDS", False);
-	clientatom[DuskClientLabel] = XInternAtom(dpy, "_DUSK_CLIENT_LABEL", False);
-	clientatom[DuskWorkspace] = XInternAtom(dpy, "_DUSK_WORKSPACE", False);
-	clientatom[SteamGameID] = XInternAtom(dpy, "STEAM_GAME", False);
-	netatom[NetActiveWindow] = XInternAtom(dpy, "_NET_ACTIVE_WINDOW", False);
-	netatom[NetClientList] = XInternAtom(dpy, "_NET_CLIENT_LIST", False);
-	netatom[NetClientListStacking] = XInternAtom(dpy, "_NET_CLIENT_LIST_STACKING", False);
-	netatom[NetCloseWindow] = XInternAtom(dpy, "_NET_CLOSE_WINDOW", False);
-	netatom[NetCurrentDesktop] = XInternAtom(dpy, "_NET_CURRENT_DESKTOP", False);
-	netatom[NetDesktopNames] = XInternAtom(dpy, "_NET_DESKTOP_NAMES", False);
-	netatom[NetDesktopViewport] = XInternAtom(dpy, "_NET_DESKTOP_VIEWPORT", False);
-	netatom[NetNumberOfDesktops] = XInternAtom(dpy, "_NET_NUMBER_OF_DESKTOPS", False);
-	netatom[NetSupported] = XInternAtom(dpy, "_NET_SUPPORTED", False);
-	netatom[NetSystemTray] = XInternAtom(dpy, "_NET_SYSTEM_TRAY_S0", False);
-	netatom[NetSystemTrayOP] = XInternAtom(dpy, "_NET_SYSTEM_TRAY_OPCODE", False);
-	netatom[NetSystemTrayOrientation] = XInternAtom(dpy, "_NET_SYSTEM_TRAY_ORIENTATION", False);
-	netatom[NetSystemTrayOrientationHorz] = XInternAtom(dpy, "_NET_SYSTEM_TRAY_ORIENTATION_HORZ", False);
-	netatom[NetSystemTrayVisual] = XInternAtom(dpy, "_NET_SYSTEM_TRAY_VISUAL", False);
-	netatom[NetWMAllowedActions] = XInternAtom(dpy, "_NET_WM_ALLOWED_ACTIONS", False);
-	netatom[NetWMCheck] = XInternAtom(dpy, "_NET_SUPPORTING_WM_CHECK", False);
-	netatom[NetWMDemandsAttention] = XInternAtom(dpy, "_NET_WM_STATE_DEMANDS_ATTENTION", False);
-	netatom[NetWMDesktop] = XInternAtom(dpy, "_NET_WM_DESKTOP", False);
-	netatom[NetWMFullPlacement] = XInternAtom(dpy, "_NET_WM_FULL_PLACEMENT", False); /* https://specifications.freedesktop.org/wm-spec/latest/ar01s07.html */
-	netatom[NetWMFullscreen] = XInternAtom(dpy, "_NET_WM_STATE_FULLSCREEN", False);
-	netatom[NetWMHidden] = XInternAtom(dpy, "_NET_WM_STATE_HIDDEN", False);
-	netatom[NetWMIcon] = XInternAtom(dpy, "_NET_WM_ICON", False);
-	netatom[NetWMMaximizedVert] = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_VERT", False);
-	netatom[NetWMMaximizedHorz] = XInternAtom(dpy, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
-	netatom[NetWMSkipTaskbar] = XInternAtom(dpy, "_NET_WM_STATE_SKIP_TASKBAR", False);
-	netatom[NetWMStaysOnTop] = XInternAtom(dpy, "_NET_WM_STATE_STAYS_ON_TOP", False);
-	netatom[NetWMSticky] = XInternAtom(dpy, "_NET_WM_STATE_STICKY", False);
-	netatom[NetWMMoveResize] = XInternAtom(dpy, "_NET_WM_MOVERESIZE", False);
-	netatom[NetWMUserTime] = XInternAtom(dpy, "_NET_WM_USER_TIME", False);
-	netatom[NetWMName] = XInternAtom(dpy, "_NET_WM_NAME", False);
-	netatom[NetWMState] = XInternAtom(dpy, "_NET_WM_STATE", False);
-	netatom[NetWMWindowOpacity] = XInternAtom(dpy, "_NET_WM_WINDOW_OPACITY", False);
-	netatom[NetWMWindowType] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE", False);
-	netatom[NetWMWindowTypeDock] = XInternAtom(dpy, "_NET_WM_WINDOW_TYPE_DOCK", False);
-	allowed[NetWMActionMove] = XInternAtom(dpy, "_NET_WM_ACTION_MOVE", False);
-	allowed[NetWMActionResize] = XInternAtom(dpy, "_NET_WM_ACTION_RESIZE", False);
-	allowed[NetWMActionMinimize] = XInternAtom(dpy, "_NET_WM_ACTION_MINIMIZE", False);
-	allowed[NetWMActionShade] = XInternAtom(dpy, "_NET_WM_ACTION_SHADE", False);
-	allowed[NetWMActionStick] = XInternAtom(dpy, "_NET_WM_ACTION_STICK", False);
-	allowed[NetWMActionMaximizeHorz] = XInternAtom(dpy, "_NET_WM_ACTION_MAXIMIZE_HORZ", False);
-	allowed[NetWMActionMaximizeVert] = XInternAtom(dpy, "_NET_WM_ACTION_MAXIMIZE_VERT", False);
-	allowed[NetWMActionFullscreen] = XInternAtom(dpy, "_NET_WM_ACTION_FULLSCREEN", False);
-	allowed[NetWMActionChangeDesktop] = XInternAtom(dpy, "_NET_WM_ACTION_CHANGE_DESKTOP", False);
-	allowed[NetWMActionClose] = XInternAtom(dpy, "_NET_WM_ACTION_CLOSE", False);
-	allowed[NetWMActionAbove] = XInternAtom(dpy, "_NET_WM_ACTION_ABOVE", False);
-	allowed[NetWMActionBelow] = XInternAtom(dpy, "_NET_WM_ACTION_BELOW", False);
 	motifatom = XInternAtom(dpy, "_MOTIF_WM_HINTS", False);
-	xatom[Manager] = XInternAtom(dpy, "MANAGER", False);
-	xatom[Xembed] = XInternAtom(dpy, "_XEMBED", False);
-	xatom[XembedInfo] = XInternAtom(dpy, "_XEMBED_INFO", False);
+	XInternAtoms(dpy, wmatom_names, WMLast, False, wmatom);
+	XInternAtoms(dpy, client_names, ClientLast, False, clientatom);
+	XInternAtoms(dpy, netatom_names, NetLast, False, netatom);
+	XInternAtoms(dpy, allowed_names, NetWMActionLast, False, allowed);
+	XInternAtoms(dpy, xembed_names, XLast, False, xatom);
+
 	/* init cursors */
 	cursor[CurNormal] = drw_cur_create(drw, XC_left_ptr);
 	cursor[CurResize] = drw_cur_create(drw, XC_rightbutton);
