@@ -57,7 +57,7 @@ static const uint64_t
 	Raise = 0x80000000000, // place this window above all other windows, used when window is unmanaged
 	SkipTaskbar = 0x100000000000, // do not include the window title for this client on the bar
 	ReapplyRules = 0x200000000000, // allow the client to get rules re-applied once when the window title changes
-	FlagPlaceholder0x400000000000 = 0x400000000000,
+	CfgReqPosRelativeToMonitor = 0x400000000000, // makes configure requests relative to the client's monitor
 	FlagPlaceholder0x800000000000 = 0x800000000000,
 	FlagPlaceholder0x1000000000000 = 0x1000000000000,
 	FlagPlaceholder0x2000000000000 = 0x2000000000000,
@@ -82,6 +82,7 @@ static const uint64_t
 	Unmanaged = 0x8000000000000000; // indicates that the client is not to be managed by the window manager
 
 #define ALWAYSONTOP(C) (C && C->flags & AlwaysOnTop)
+#define CFGREQPOSRELATIVETOMONITOR(C) (C && C->flags & CfgReqPosRelativeToMonitor)
 #define DEBUGGING(C) (C && C->flags & Debug)
 #define DISALLOWED(C) (C && C->flags & Disallowed)
 #define HIDDEN(C) (C && ((C->flags & Hidden) || (getstate(C->win) == IconicState)))

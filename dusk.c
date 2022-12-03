@@ -1423,7 +1423,7 @@ configurerequest(XEvent *e)
 	Monitor *m;
 	XConfigureRequestEvent *ev = &e->xconfigurerequest;
 	XWindowChanges wc;
-	Workspace *ws = selws;
+	Workspace *ws;
 
 	if ((c = wintoclient(ev->window))) {
 
@@ -1436,7 +1436,7 @@ configurerequest(XEvent *e)
 			return;
 		if (ev->value_mask & CWBorderWidth)
 			c->bw = ev->border_width;
-		else if (ISFLOATING(c) || !ws->layout->arrange) {
+		else if (ISFLOATING(c) || !c->ws->layout->arrange) {
 			if (IGNORECFGREQPOS(c) && IGNORECFGREQSIZE(c))
 				return;
 
@@ -1444,11 +1444,15 @@ configurerequest(XEvent *e)
 			if (!IGNORECFGREQPOS(c)) {
 				if (ev->value_mask & CWX) {
 					c->oldx = c->x;
-					c->x = m->mx + ev->x;
+					c->x = ev->x;
+					if (CFGREQPOSRELATIVETOMONITOR(c))
+						c->x += m->mx;
 				}
 				if (ev->value_mask & CWY) {
 					c->oldy = c->y;
-					c->y = m->my + ev->y;
+					c->y = ev->y;
+					if (CFGREQPOSRELATIVETOMONITOR(c))
+						c->y += m->my;
 				}
 			}
 
@@ -1462,10 +1466,23 @@ configurerequest(XEvent *e)
 					c->h = ev->height;
 				}
 			}
-			if ((c->x + c->w) > m->mx + m->mw && ISFLOATING(c))
-				c->x = m->mx + (m->mw / 2 - WIDTH(c) / 2);  /* center in x direction */
-			if ((c->y + c->h) > m->my + m->mh && ISFLOATING(c))
-				c->y = m->my + (m->mh / 2 - HEIGHT(c) / 2); /* center in y direction */
+			if (CFGREQPOSRELATIVETOMONITOR(c) && !ISSTICKY(c)) {
+				if ((c->x + c->w) > m->mx + m->mw && ISFLOATING(c))
+					c->x = m->mx + (m->mw / 2 - WIDTH(c) / 2);  /* center in x direction */
+				if ((c->y + c->h) > m->my + m->mh && ISFLOATING(c))
+					c->y = m->my + (m->mh / 2 - HEIGHT(c) / 2); /* center in y direction */
+			} else {
+				ws = recttows(c->x, c->y, c->w, c->h);
+				if (ws && ISSTICKY(c)) {
+					stickyws->mon = ws->mon;
+					drawbars();
+				} else if (ws && ws != c->ws) {
+					detach(c);
+					detachstack(c);
+					attachx(c, AttachBottom, ws);
+					attachstack(c);
+				}
+			}
 			if ((ev->value_mask & (CWX|CWY)) && !(ev->value_mask & (CWWidth|CWHeight)))
 				configure(c);
 			if (ISVISIBLE(c))
