@@ -106,7 +106,6 @@ storepreview(Workspace *ws)
 		return;
 
 	hidepreview(m);
-	XMoveWindow(dpy, m->preview->win, -m->mx, -m->my);
 	XFlush(dpy);
 
 	image = imlib_create_image(sw, sh);
