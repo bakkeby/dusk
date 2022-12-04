@@ -13,60 +13,71 @@
 #define IPC_MAGIC_LEN 8 // Not including null char
 
 #define IPCCOMMAND(FUNC, TYPE)                                                \
-  { #FUNC, {.single_param=FUNC }, 1, (ArgType[1]){TYPE} }
+	{ #FUNC, {.single_param=FUNC }, 1, (ArgType[1]){TYPE} }
 
 #define IPCCOMMANDS(FUNC, ARGC, ...)                                          \
-  { #FUNC, {.array_param=FUNC }, ARGC, (ArgType[ARGC]){__VA_ARGS__} }
+	{ #FUNC, {.array_param=FUNC }, ARGC, (ArgType[ARGC]){__VA_ARGS__} }
 // clang-format on
 
 typedef enum IPCMessageType {
-  IPC_TYPE_RUN_COMMAND = 0,
-  IPC_TYPE_GET_MONITORS = 1,
-  IPC_TYPE_GET_WORKSPACES = 2,
-  IPC_TYPE_GET_LAYOUTS = 3,
-  IPC_TYPE_GET_CLIENT = 4,
-  IPC_TYPE_GET_SETTINGS = 5,
-  IPC_TYPE_GET_SYSTRAY_ICONS = 6
+	IPC_TYPE_RUN_COMMAND = 0,
+	IPC_TYPE_GET_MONITORS = 1,
+	IPC_TYPE_GET_WORKSPACES = 2,
+	IPC_TYPE_GET_LAYOUTS = 3,
+	IPC_TYPE_GET_CLIENT = 4,
+	IPC_TYPE_GET_SETTINGS = 5,
+	IPC_TYPE_GET_SYSTRAY_ICONS = 6,
+	IPC_TYPE_GET_COMMANDS = 7,
 } IPCMessageType;
 
 /**
  * Every IPC packet starts with this structure
  */
 typedef struct dusk_ipc_header {
-  uint8_t magic[IPC_MAGIC_LEN];
-  uint32_t size;
-  uint8_t type;
+	uint8_t magic[IPC_MAGIC_LEN];
+	uint32_t size;
+	uint8_t type;
 } __attribute((packed)) dusk_ipc_header_t;
 
 typedef enum ArgType {
-  ARG_TYPE_NONE = 0,
-  ARG_TYPE_UINT = 1,
-  ARG_TYPE_SINT = 2,
-  ARG_TYPE_FLOAT = 3,
-  ARG_TYPE_PTR = 4,
-  ARG_TYPE_STR = 5
+	ARG_TYPE_NONE = 0,
+	ARG_TYPE_UINT = 1,
+	ARG_TYPE_SINT = 2,
+	ARG_TYPE_FLOAT = 3,
+	ARG_TYPE_PTR = 4,
+	ARG_TYPE_STR = 5,
+	ARG_TYPE_LAST,
 } ArgType;
+
+static const char * argtype_names[ARG_TYPE_LAST] = {
+	[ARG_TYPE_NONE] = "None",
+	[ARG_TYPE_UINT] = "unsigned int",
+	[ARG_TYPE_SINT] = "int",
+	[ARG_TYPE_FLOAT] = "float",
+	[ARG_TYPE_PTR] = "pointer",
+	[ARG_TYPE_STR] = "string",
+};
 
 /**
  * An IPCCommand function can have either of these function signatures
  */
 typedef union ArgFunction {
-  void (*single_param)(const Arg *);
-  void (*array_param)(const Arg *, int);
+	void (*single_param)(const Arg *);
+	void (*array_param)(const Arg *, int);
 } ArgFunction;
 
 typedef struct IPCCommand {
-  char *name;
-  ArgFunction func;
-  unsigned int argc;
-  ArgType *arg_types;
+	char *name;
+	ArgFunction func;
+	unsigned int argc;
+	ArgType *arg_types;
 } IPCCommand;
 
 typedef struct IPCParsedCommand {
-  char *name;
-  Arg *args;
-  ArgType *arg_types;
-  unsigned int argc;
+	char *name;
+	Arg *args;
+	ArgType *arg_types;
+	unsigned int argc;
 } IPCParsedCommand;
 
 /**
@@ -81,7 +92,7 @@ typedef struct IPCParsedCommand {
  *   -1 otherwise
  */
 int ipc_init(const char *socket_path, const int p_epoll_fd,
-             IPCCommand commands[], const int commands_len);
+						 IPCCommand commands[], const int commands_len);
 
 /**
  * Uninitialize the socket and module. Free allocated memory and restore static
@@ -148,7 +159,7 @@ int ipc_accept_client();
  * resulted in EAGAIN, EINTR, or EWOULDBLOCK.
  */
 int ipc_read_client(IPCClient *c, IPCMessageType *msg_type, uint32_t *msg_size,
-                    char **msg);
+					char **msg);
 
 /**
  * Write any pending buffer of the client to the client's socket
@@ -171,7 +182,7 @@ ssize_t ipc_write_client(IPCClient *c);
  *   freed after the function invocation.
  */
 void ipc_prepare_send_message(IPCClient *c, const IPCMessageType msg_type,
-                              const uint32_t msg_size, const char *msg);
+							  const uint32_t msg_size, const char *msg);
 
 /**
  * Prepare an error message in the specified client's buffer
@@ -182,7 +193,7 @@ void ipc_prepare_send_message(IPCClient *c, const IPCMessageType msg_type,
  * @param ... Arguments for format string
  */
 void ipc_prepare_reply_failure(IPCClient *c, IPCMessageType msg_type,
-                               const char *format, ...);
+							   const char *format, ...);
 
 /**
  * Prepare a success message in the specified client's buffer
@@ -210,8 +221,8 @@ void ipc_prepare_reply_success(IPCClient *c, IPCMessageType msg_type);
  * or handling incoming messages or unhandled epoll event.
  */
 int ipc_handle_client_epoll_event(struct epoll_event *ev, Monitor *mons,
-                                  Monitor **lastselmon, Monitor *selmon, const int num_workspaces,
-                                  const Layout *layouts, const int layouts_len);
+								  Monitor **lastselmon, Monitor *selmon, const int num_workspaces,
+								  const Layout *layouts, const int layouts_len);
 
 /**
  * Handle an epoll event caused by the IPC socket. This function only handles an

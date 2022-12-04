@@ -23,17 +23,12 @@
   }
 
 int dump_client(yajl_gen gen, Client *c);
-
 int dump_monitor(yajl_gen gen, Monitor *mon, int is_selected);
-
 int dump_monitors(yajl_gen gen, Monitor *mons, Monitor *selmon);
-
 int dump_layouts(yajl_gen gen, const Layout layouts[], const int layouts_len);
-
 int dump_error_message(yajl_gen gen, const char *reason);
-
 int dump_settings(yajl_gen gen);
-
+int dump_commands(yajl_gen gen);
 int dump_workspace(yajl_gen gen, const char *name, const int mon, const int visible, const int pinned, const int num_clients);
 int dump_workspaces(yajl_gen gen);
 

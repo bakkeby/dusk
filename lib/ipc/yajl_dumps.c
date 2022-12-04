@@ -8,17 +8,22 @@ dump_settings(yajl_gen gen)
 	// clang-format off
 	YMAP(
 		YSTR("Functionality"); YMAP(
+			YSTR("AutoReduceNmaster"); YBOOL(enabled(AutoReduceNmaster));
 			YSTR("SmartGaps"); YBOOL(enabled(SmartGaps));
 			YSTR("SmartGapsMonocle"); YBOOL(enabled(SmartGapsMonocle));
 			YSTR("Systray"); YBOOL(enabled(Systray));
+			YSTR("SystrayNoAlpha"); YBOOL(enabled(SystrayNoAlpha));
 			YSTR("Swallow"); YBOOL(enabled(Swallow));
 			YSTR("SwallowFloating"); YBOOL(enabled(SwallowFloating));
 			YSTR("CenteredWindowName"); YBOOL(enabled(CenteredWindowName));
 			YSTR("BarActiveGroupBorderColor"); YBOOL(enabled(BarActiveGroupBorderColor));
+			YSTR("BarMasterGroupBorderColor"); YBOOL(enabled(BarMasterGroupBorderColor));
+			YSTR("FlexWinBorders"); YBOOL(enabled(FlexWinBorders));
 			YSTR("SpawnCwd"); YBOOL(enabled(SpawnCwd));
 			YSTR("ColorEmoji"); YBOOL(enabled(ColorEmoji));
 			YSTR("Status2DNoAlpha"); YBOOL(enabled(Status2DNoAlpha));
 			YSTR("BarBorder"); YBOOL(enabled(BarBorder));
+			YSTR("BarPadding"); YBOOL(enabled(BarPadding));
 			YSTR("NoBorders"); YBOOL(enabled(NoBorders));
 			YSTR("Warp"); YBOOL(enabled(Warp));
 			YSTR("FocusedOnTop"); YBOOL(enabled(FocusedOnTop));
@@ -27,19 +32,46 @@ dump_settings(yajl_gen gen)
 			YSTR("AllowNoModifierButtons"); YBOOL(enabled(AllowNoModifierButtons));
 			YSTR("CenterSizeHintsClients"); YBOOL(enabled(CenterSizeHintsClients));
 			YSTR("ResizeHints"); YBOOL(enabled(ResizeHints));
+			YSTR("SnapToWindows"); YBOOL(enabled(SnapToWindows));
 			YSTR("SortScreens"); YBOOL(enabled(SortScreens));
 			YSTR("ViewOnWs"); YBOOL(enabled(ViewOnWs));
 			YSTR("Xresources"); YBOOL(enabled(Xresources));
 			YSTR("Debug"); YBOOL(enabled(Debug));
 			YSTR("AltWorkspaceIcons"); YBOOL(enabled(AltWorkspaceIcons));
 			YSTR("GreedyMonitor"); YBOOL(enabled(GreedyMonitor));
-			YSTR("AutoHideScratchpads"); YBOOL(enabled(AutoHideScratchpads));
 			YSTR("SmartLayoutConvertion"); YBOOL(enabled(SmartLayoutConvertion));
+			YSTR("AutoHideScratchpads"); YBOOL(enabled(AutoHideScratchpads));
 			YSTR("RioDrawIncludeBorders"); YBOOL(enabled(RioDrawIncludeBorders));
 			YSTR("RioDrawSpawnAsync"); YBOOL(enabled(RioDrawSpawnAsync));
 			YSTR("RestrictFocusstackToMonitor"); YBOOL(enabled(RestrictFocusstackToMonitor));
-			YSTR("AutoReduceNmaster"); YBOOL(enabled(AutoReduceNmaster));
+			YSTR("WinTitleIcons"); YBOOL(enabled(WinTitleIcons));
+			YSTR("WorkspaceLabels"); YBOOL(enabled(WorkspaceLabels));
+			YSTR("WorkspacePreview"); YBOOL(enabled(WorkspacePreview));
 		)
+	)
+	// clang-format on
+
+	return 0;
+}
+
+int
+dump_commands(yajl_gen gen)
+{
+	int i, a;
+	IPCCommand c;
+	// clang-format off
+	YARR(
+		for (i = 0; i < LENGTH(ipccommands); i++) {
+			c = ipccommands[i];
+			YMAP(
+				YSTR("command"); YSTR(c.name);
+				if (c.argc != 1 || c.arg_types[0] != ARG_TYPE_NONE) {
+					for (a = 0; a < c.argc; a++) {
+						YSTR("argument"); YSTR(argtype_names[c.arg_types[a]]);
+					}
+				}
+			)
+		}
 	)
 	// clang-format on
 
