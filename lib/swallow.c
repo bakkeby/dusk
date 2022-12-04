@@ -27,7 +27,7 @@ swallow(const Arg *arg)
 			else
 				c->swallowing = s->swallowing;
 			s->swallowing = c;
-			XMoveWindow(dpy, c->win, c->x, HEIGHT(c) * -2);
+			hide(c);
 		}
 	}
 	arrange(NULL);
@@ -45,7 +45,7 @@ swallowclient(Client *t, Client *c)
 		setfullscreen(c, 1, ISFAKEFULLSCREEN(t));
 
 	replaceclient(t, c);
-	XMoveWindow(dpy, t->win, t->x, HEIGHT(t) * -2);
+	hide(t);
 	addflag(c, IgnoreCfgReqPos);
 	c->swallowing = t;
 	c->revertws = NULL;
