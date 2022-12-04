@@ -86,7 +86,7 @@ static const uint64_t
 #define CFGREQPOSRELATIVETOMONITOR(C) (C && C->flags & CfgReqPosRelativeToMonitor)
 #define DEBUGGING(C) (C && C->flags & Debug)
 #define DISALLOWED(C) (C && C->flags & Disallowed)
-#define HIDDEN(C) (C && ((C->flags & Hidden) || (getstate(C->win) == IconicState)))
+#define HIDDEN(C) (C && C->flags & Hidden)
 #define ISFIXED(C) (C && C->flags & Fixed)
 #define FLOATING(C) (C && C->flags & Floating)
 #define ISFLOATING(C) (C && C->flags & (Floating|Sticky|Fixed))

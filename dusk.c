@@ -2162,7 +2162,8 @@ grabkeys(void)
 void
 hide(Client *c)
 {
-	XMoveWindow(dpy, c->win, c->x, HEIGHT(c) * -2);
+	setclientstate(c, IconicState);
+	XUnmapWindow(dpy, c->win);
 }
 
 void
@@ -2456,8 +2457,6 @@ manage(Window w, XWindowAttributes *wa)
 	XChangeProperty(dpy, root, netatom[NetClientListStacking], XA_WINDOW, 32, PropModePrepend,
 		(unsigned char *) &(c->win), 1);
 
-	setclientstate(c, NormalState);
-
 	if (focusclient) {
 		if (c->ws == selws && c->ws->sel != c) {
 			unfocus(selws->sel, 0, c);
@@ -2494,7 +2493,6 @@ manage(Window w, XWindowAttributes *wa)
 		show(c);
 	else
 		hide(c);
-	XMapWindow(dpy, c->win);
 
 	if (focusclient)
 		focus(c);
@@ -3444,7 +3442,8 @@ seturgent(Client *c, int urg)
 void
 show(Client *c)
 {
-	XMoveWindow(dpy, c->win, c->x, c->y);
+	setclientstate(c, NormalState);
+	XMapWindow(dpy, c->win);
 }
 
 void
@@ -3691,7 +3690,6 @@ unmanage(Client *c, int destroyed)
 		XSelectInput(dpy, c->win, NoEventMask);
 		XConfigureWindow(dpy, c->win, CWBorderWidth, &wc); /* restore border */
 		XUngrabButton(dpy, AnyButton, AnyModifier, c->win);
-		setclientstate(c, WithdrawnState);
 		XSync(dpy, False);
 		XSetErrorHandler(xerror);
 		XUngrabServer(dpy);
@@ -3734,17 +3732,13 @@ unmapnotify(XEvent *e)
 
 	ev = &e->xunmap;
 
-	if (enabled(Debug))
-		fprintf(stderr, "unmapnotify: received event type %s (%d), serial %ld, window %ld, event %ld, ev->send_event = %d, ev->from_configure = %d\n", XGetAtomName(dpy, ev->type), ev->type, ev->serial, ev->window, ev->event, ev->send_event, ev->from_configure);
-
 	if ((c = wintoclient(ev->window))) {
-		ws = c->ws;
-		if (enabled(Debug) || DEBUGGING(c))
-			fprintf(stderr, "unmapnotify: window %ld --> client %s (%s)\n", ev->window, c->name, ev->send_event ? "WithdrawnState" : "unmanage");
-		if (ev->send_event)
-			setclientstate(c, WithdrawnState);
-		else
+		if (getstate(c->win) == WithdrawnState) {
+			ws = c->ws;
+			if (enabled(Debug) || DEBUGGING(c))
+				fprintf(stderr, "unmapnotify: window %ld --> client %s (%s)\n", ev->window, c->name, "unmanage");
 			unmanage(c, 0);
+		}
 	} else if (systray && (c = wintosystrayicon(ev->window))) {
 		removesystrayicon(c);
 		drawbarwin(systray->bar);
