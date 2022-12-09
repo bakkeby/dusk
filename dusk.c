@@ -1263,7 +1263,7 @@ clientscheme(Client *c, Client *s)
 		return sel ? SchemeHidSel : SchemeHidNorm;
 	if (ISSCRATCHPAD(c))
 		return sel ? SchemeScratchSel : SchemeScratchNorm;
-	if (ISFLOATING(c))
+	if (ISFLOATING(c) || !c->ws->layout->arrange)
 		return sel ? SchemeFlexSelFloat : active ? SchemeFlexActFloat : SchemeFlexInaFloat;
 	if (ISURGENT(c))
 		return SchemeUrg;

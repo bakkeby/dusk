@@ -59,6 +59,9 @@ getclientcounts(Workspace *ws, int *n, int *clientsnmaster, int *clientsnstack, 
 		case STACK2:
 			++cs2;
 			break;
+		default:
+			++cm;
+			break;
 		}
 	}
 	*n = cm + cs1 + cs2 + cf + ch;
@@ -262,7 +265,7 @@ flextitlecalculate(
 
 	/* floating mode */
 	if (!ws->layout->arrange) {
-		flextitledrawarea(ws, ws->clients, offx, tabw, n, 0, 1, flexwintitle_hiddenweight, 1, passx, tabfn, arg, a); // floating
+		flextitledrawarea(ws, ws->clients, offx, tabw, n, 0, flexwintitle_masterweight, flexwintitle_hiddenweight, flexwintitle_floatweight, passx, tabfn, arg, a); // floating
 	/* tiled mode */
 	} else {
 		den = clientsnmaster * flexwintitle_masterweight
