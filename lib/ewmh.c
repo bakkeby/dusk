@@ -293,6 +293,12 @@ getworkspacestate(Workspace *ws)
 		return;
 	}
 
+	/* If the root window has the _DUSK_WORKSPACES property, which is confirmed by the above if
+	 * statement, then we do not want to trigger autostart of applications. This is only to happen
+	 * during the initial startup and not as part of restarts. The run_autostart variable is
+	 * defined in lib/autostart.c */
+	run_autostart = 0;
+
 	if (nitems) {
 		settings = *(Atom *)p;
 

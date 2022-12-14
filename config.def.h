@@ -193,6 +193,8 @@ static char *colors[SchemeLast][4] = {
 	[SchemeFlexSelFloat] = { "#FFF7D4", "#5C415C", "#5C415C", "sel.float" },
 };
 
+/* List of programs to start automatically during startup only. Note that these will not be
+ * executed again when doing a restart. */
 static const char *const autostart[] = {
 	"st", NULL,
 	NULL /* terminate */

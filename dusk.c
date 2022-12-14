@@ -913,14 +913,6 @@ cleanup(void)
 		XSync(dpy, False);
 	}
 
-	/* Kill child processes */
-	for (i = 0; i < autostart_len; i++) {
-		if (0 < autostart_pids[i]) {
-			kill(autostart_pids[i], SIGTERM);
-			waitpid(autostart_pids[i], NULL, 0);
-		}
-	}
-
 	for (ws = workspaces; ws; ws = next) {
 		next = ws->next;
 		removepreview(ws);
@@ -3117,23 +3109,9 @@ show(Client *c)
 void
 sigchld(int unused)
 {
-	pid_t pid;
 	if (signal(SIGCHLD, sigchld) == SIG_ERR)
 		die("can't install SIGCHLD handler:");
-	while (0 < (pid = waitpid(-1, NULL, WNOHANG))) {
-		pid_t *p, *lim;
-
-		if (!(p = autostart_pids))
-			continue;
-		lim = &p[autostart_len];
-
-		for (; p < lim; p++) {
-			if (*p == pid) {
-				*p = -1;
-				break;
-			}
-		}
-	}
+	while (0 < waitpid(-1, NULL, WNOHANG));
 }
 
 void
@@ -3797,8 +3775,9 @@ main(int argc, char *argv[])
 
 	checkotherwm();
 	XrmInitialize(); // needed for xrdb / Xresources
-	autostart_exec();
 	setup();
+	if (run_autostart)
+		autostart_exec();
 #ifdef __OpenBSD__
 	if (pledge("stdio rpath proc exec ps", NULL) == -1)
 		die("pledge");
