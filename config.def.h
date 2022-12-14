@@ -200,6 +200,12 @@ static const char *const autostart[] = {
 	NULL /* terminate */
 };
 
+/* List of programs to start automatically during a restart only. These should usually be short
+ * scripts that perform specific operations, e.g. changing a wallpaper. */
+static const char *const autorestart[] = {
+	NULL /* terminate */
+};
+
 /* There are two options when it comes to per-client rules:
  *  - a traditional struct table or
  *  - specifying the fields used

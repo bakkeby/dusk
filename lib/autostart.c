@@ -1,12 +1,12 @@
 /* execute command from autostart array */
-static int run_autostart = 1;
+static int autostart_startup = 1;
 
 static void
-autostart_exec()
+autostart_exec(void)
 {
 	const char *const *p;
 
-	for (p = autostart; *p; p++) {
+	for (p = autostart_startup ? autostart : autorestart; *p; p++) {
 		if (fork() == 0) {
 			setsid();
 			execvp(*p, (char *const *)p);

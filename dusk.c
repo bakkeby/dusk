@@ -3776,8 +3776,7 @@ main(int argc, char *argv[])
 	checkotherwm();
 	XrmInitialize(); // needed for xrdb / Xresources
 	setup();
-	if (run_autostart)
-		autostart_exec();
+	autostart_exec();
 #ifdef __OpenBSD__
 	if (pledge("stdio rpath proc exec ps", NULL) == -1)
 		die("pledge");
