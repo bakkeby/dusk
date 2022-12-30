@@ -102,6 +102,37 @@ updateicon(Client *c)
 	c->icon = geticonprop(c->win, &c->icw, &c->ich);
 }
 
+void
+load_icon_from_png_image(Client *c, const char *iconpath)
+{
+	unsigned int* data;
+	Imlib_Image image;
+	int w, h, s, ich, icw;
+
+	struct stat stbuf;
+	s = stat(iconpath, &stbuf);
+
+	if (s == -1 || S_ISDIR(s) || strlen(iconpath) <= 2)
+		return; /* no readable file */
+
+	freeicon(c);
+	image = imlib_load_image(iconpath);
+	imlib_context_set_image(image);
+	imlib_image_set_has_alpha(1);
+	icw = w = imlib_image_get_width();
+	ich = h = imlib_image_get_height();
+	if (h >= bh) {
+		icw = w * ((float)(bh - 2) / (float)h);
+		ich = bh - 2;
+	}
+
+	data = imlib_image_get_data_for_reading_only();
+	imlib_free_image();
+
+	c->icon = drw_picture_create_resized(drw, (char*)data, w, h, icw, ich);
+	c->icw = icw;
+	c->ich = ich;
+}
 
 Picture
 drw_picture_create_resized(Drw *drw, char *src, unsigned int srcw, unsigned int srch, unsigned int dstw, unsigned int dsth) {

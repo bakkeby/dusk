@@ -282,6 +282,7 @@ typedef struct {
 	const char *workspace;
 	const char *label;
 	const char swallowedby;
+	const char *iconpath;
 	int resume;
 } Rule;
 
@@ -559,6 +560,9 @@ applyrules(Client *c)
 				strcpy(c->label, r->label);
 			else
 				saveclientclass(c);
+
+			if (r->iconpath)
+				load_icon_from_png_image(c, r->iconpath);
 
 			if (enabled(Debug) || DEBUGGING(c))
 				fprintf(stderr, "applyrules: client rule %d matched:\n    class: %s\n    role: %s\n    instance: %s\n    title: %s\n    wintype: %s\n    flags: %ld\n    floatpos: %s\n    workspace: %s\n    label: %s\n",
