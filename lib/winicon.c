@@ -99,10 +99,13 @@ void
 updateicon(Client *c)
 {
 	freeicon(c);
+	if (strlen(c->iconpath) && load_icon_from_png_image(c, c->iconpath))
+		return;
+
 	c->icon = geticonprop(c->win, &c->icw, &c->ich);
 }
 
-void
+int
 load_icon_from_png_image(Client *c, const char *iconpath)
 {
 	unsigned int* data;
@@ -113,9 +116,10 @@ load_icon_from_png_image(Client *c, const char *iconpath)
 	s = stat(iconpath, &stbuf);
 
 	if (s == -1 || S_ISDIR(s) || strlen(iconpath) <= 2)
-		return; /* no readable file */
+		return 0; /* no readable file */
 
 	freeicon(c);
+	strlcpy(c->iconpath, iconpath, sizeof c->iconpath);
 	image = imlib_load_image(iconpath);
 	imlib_context_set_image(image);
 	imlib_image_set_has_alpha(1);
@@ -132,6 +136,7 @@ load_icon_from_png_image(Client *c, const char *iconpath)
 	c->icon = drw_picture_create_resized(drw, (char*)data, w, h, icw, ich);
 	c->icw = icw;
 	c->ich = ich;
+	return 1;
 }
 
 Picture

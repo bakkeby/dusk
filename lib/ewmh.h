@@ -1,8 +1,9 @@
 static int atomin(Atom input, Atom *list, int nitems);
 static void getclientflags(Client *c);
 static void getclientfields(Client *c);
-static void getworkspacestate(Workspace *ws);
+static void getclienticonpath(Client *c);
 static void getclientlabel(Client *c);
+static void getworkspacestate(Workspace *ws);
 static void persistworkspacestate(Workspace *ws);
 static void savewindowfloatposition(Client *c, Monitor *m);
 static int restorewindowfloatposition(Client *c, Monitor *m);
@@ -11,6 +12,7 @@ static void setfloatinghint(Client *c);
 static void setfloatinghints(Workspace *ws);
 static void setclientflags(Client *c);
 static void setclientfields(Client *c);
+static void setclienticonpath(Client *c);
 static void setclientlabel(Client *c);
 static void setnumdesktops(void);
 static void setviewport(void);
@@ -149,6 +151,7 @@ enum {
 	DuskClientFlags,
 	DuskClientFields,
 	DuskClientLabel,
+	DuskClientIconPath,
 	DuskWorkspace,
 	SteamGameID,
 	ClientLast
@@ -159,6 +162,7 @@ static char *client_names[ClientLast] = {
 	[DuskClientFlags] = "_DUSK_CLIENT_FLAGS",
 	[DuskClientFields] = "_DUSK_CLIENT_FIELDS",
 	[DuskClientLabel] = "_DUSK_CLIENT_LABEL",
+	[DuskClientIconPath] = "_DUSK_CLIENT_ICON_PATH",
 	[DuskWorkspace] = "_DUSK_WORKSPACE",
 	[SteamGameID] = "STEAM_GAME",
 };

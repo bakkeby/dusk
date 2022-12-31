@@ -61,7 +61,7 @@ customlayout(const Arg args[], int num_args)
 
 	/* 1) Layout symbol */
 	if (args[1].v)
-		strncpy(ws->ltsymbol, args[1].v, sizeof ws->ltsymbol);
+		strlcpy(ws->ltsymbol, args[1].v, sizeof ws->ltsymbol);
 
 	/* 2) nmaster */
 	if (args[2].i > -1)

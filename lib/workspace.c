@@ -67,7 +67,7 @@ createworkspace(int num, const WorkspaceRule *r)
 			ws->pinned = 1;
 	}
 
-	strcpy(ws->name, r->name);
+	strlcpy(ws->name, r->name, sizeof ws->name);
 
 	ws->layout = (r->layout == -1 ? &layouts[0] : &layouts[MIN(r->layout, LENGTH(layouts))]);
 	ws->prevlayout = &layouts[1 % LENGTH(layouts)];

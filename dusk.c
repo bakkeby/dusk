@@ -195,6 +195,7 @@ typedef struct Client Client;
 struct Client {
 	char name[256];
 	char label[32];
+	char iconpath[256]; /* maximum file path length under linux is 4096 bytes */
 	float mina, maxa;
 	float cfact;
 	int x, y, w, h;
@@ -203,8 +204,8 @@ struct Client {
 	int basew, baseh, incw, inch, maxw, maxh, minw, minh;
 	int bw, oldbw;
 	int group;
-	int area; // arrangement area (master, stack, secondary stack)
-	int arr;  // tile arrangement (left to right, top to bottom, etc.)
+	int area; /* arrangement area (master, stack, secondary stack) */
+	int arr;  /* tile arrangement (left to right, top to bottom, etc.) */
 	int scheme;
 	char scratchkey;
 	char swallowkey;
@@ -557,7 +558,7 @@ applyrules(Client *c)
 			if (REVERTWORKSPACE(c) && !c->ws->visible)
 				c->revertws = c->ws->mon->selws;
 			if (r->label)
-				strcpy(c->label, r->label);
+				strlcpy(c->label, r->label, sizeof c->label);
 			else
 				saveclientclass(c);
 
@@ -816,7 +817,7 @@ arrangews(Workspace *ws)
 	if (!ws->visible)
 		return;
 
-	strncpy(ws->ltsymbol, ws->layout->symbol, sizeof ws->ltsymbol);
+	strlcpy(ws->ltsymbol, ws->layout->symbol, sizeof ws->ltsymbol);
 	if (ws->layout->arrange)
 		ws->layout->arrange(ws);
 	else
@@ -1921,9 +1922,9 @@ gettextprop(Window w, Atom atom, char *text, unsigned int size)
 	if (!XGetTextProperty(dpy, w, &name, atom) || !name.nitems)
 		return 0;
 	if (name.encoding == XA_STRING) {
-		strncpy(text, (char *)name.value, size - 1);
+		strlcpy(text, (char *)name.value, size);
 	} else if (XmbTextPropertyToTextList(dpy, &name, &list, &n) >= Success && n > 0 && *list) {
-		strncpy(text, *list, size - 1);
+		strlcpy(text, *list, size);
 		XFreeStringList(list);
 	}
 	text[size - 1] = '\0';
@@ -2121,7 +2122,6 @@ manage(Window w, XWindowAttributes *wa)
 	c->ws = NULL;
 	c->icon = 0;
 
-	updateicon(c);
 	updatetitle(c);
 	updatesizehints(c);
 	if (enabled(Debug))
@@ -2130,6 +2130,9 @@ manage(Window w, XWindowAttributes *wa)
 	getclientfields(c);
 	getclientopacity(c);
 	getclientlabel(c);
+	getclienticonpath(c);
+
+	updateicon(c);
 
 	if (ISSTICKY(c))
 		c->ws = recttows(c->x + c->w / 2, c->y + c->h / 2, 1, 1);
@@ -2963,7 +2966,7 @@ setlayout(const Arg *arg)
 	ws->ltaxis[STACK]  = ws->layout->preset.stack1axis;
 	ws->ltaxis[STACK2] = ws->layout->preset.stack2axis;
 
-	strncpy(ws->ltsymbol, ws->layout->symbol, sizeof ws->ltsymbol);
+	strlcpy(ws->ltsymbol, ws->layout->symbol, sizeof ws->ltsymbol);
 
 	arrange(ws);
 	setfloatinghints(ws);
