@@ -2,13 +2,25 @@ void
 dragwfact(const Arg *arg)
 {
 	int prev_x, prev_y, dist_x, dist_y;
+	int nw = 0;
 	float fact;
 	XEvent ev;
 	Time lasttime = 0;
-	Workspace *ws = selws;
+	Workspace *ws;
+	Monitor *m;
 
-	if (!ws)
+	/* If we have no selected workspace then deny the dragwfact action. */
+	if (!selws)
 		return;
+
+	m = selws->mon;
+
+	/* If we are not viewing more than one workspace then deny the dragwfact action. */
+	for (ws = nextvismonws(m, workspaces); ws; ws = nextvismonws(m, ws->next), ++nw);
+	if (nw <= 1)
+		return;
+
+	ws = selws;
 
 	if (XGrabPointer(dpy, root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync,
 		None, cursor[CurIronCross]->cursor, CurrentTime) != GrabSuccess)
