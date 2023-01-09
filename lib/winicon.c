@@ -140,7 +140,8 @@ load_icon_from_png_image(Client *c, const char *iconpath)
 }
 
 Picture
-drw_picture_create_resized(Drw *drw, char *src, unsigned int srcw, unsigned int srch, unsigned int dstw, unsigned int dsth) {
+drw_picture_create_resized(Drw *drw, char *src, unsigned int srcw, unsigned int srch, unsigned int dstw, unsigned int dsth)
+{
 	Pixmap pm;
 	Picture pic;
 	GC gc;

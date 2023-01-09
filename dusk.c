@@ -292,6 +292,7 @@ struct Workspace {
 	char ltsymbol[64];
 	char name[16];
 	float mfact;
+	float wfact;
 	int scheme[4];
 	int ltaxis[4];
 	int nstack;

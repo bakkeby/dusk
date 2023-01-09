@@ -59,6 +59,7 @@ createworkspace(int num, const WorkspaceRule *r)
 	ws = ecalloc(1, sizeof(Workspace));
 	ws->num = num;
 	ws->pinned = 0;
+	ws->wfact = 1.0;
 
 	if (r->monitor != -1) {
 		for (m = mons; m && m->num != r->monitor; m = m->next);
@@ -824,6 +825,31 @@ redistributeworkspaces(Monitor *new)
 }
 
 void
+setwfact(const Arg *arg)
+{
+	float f;
+	Workspace *ws = selws;
+
+	if (!ws)
+		return;
+
+	if (!arg->f)
+		f = 1.0;
+	else if (arg->f < 4.0)
+		f = arg->f + ws->wfact;
+	else // set fact absolutely
+		f = arg->f - 4.0;
+	if (f < 0.25)
+		f = 0.25;
+	else if (f > 4.0)
+		f = 4.0;
+	ws->wfact = f;
+
+	setworkspaceareasformon(ws->mon);
+	arrangemon(ws->mon);
+}
+
+void
 setworkspaceareas()
 {
 	Monitor *mon;
@@ -832,19 +858,20 @@ setworkspaceareas()
 }
 
 void
-setworkspaceareasformon(Monitor *mon)
+setworkspaceareasformon(Monitor *m)
 {
 	Workspace *ws;
-	int rrest, crest, cols, rows, cw, ch, cn, rn, cc, nw, x, y;
+	int i, crest, colw, cols, rows, cx, cy, cw, ch, cn, rn, wc, nw;
+	float wfacts_total = 0;
 
 	/* get a count of the number of visible workspaces for this monitor */
-	for (nw = 0, ws = nextvismonws(mon, workspaces); ws; ws = nextvismonws(mon, ws->next), ++nw);
+	for (nw = 0, ws = nextvismonws(m, workspaces); ws; ws = nextvismonws(m, ws->next), ++nw);
 	if (!nw)
 		return;
 
 	/* grid dimensions */
-	if (mon->ww > mon->wh) {
-		if (mon->ww / nw < mon->wh / 2) {
+	if (m->ww > m->wh) {
+		if (m->ww / nw < m->wh / 2) {
 			rows = 2;
 			cols = nw / rows + (nw - rows * (nw / rows));
 		} else {
@@ -852,7 +879,7 @@ setworkspaceareasformon(Monitor *mon)
 			cols = nw;
 		}
 	} else {
-		if (mon->wh / nw < mon->ww / 2) {
+		if (m->wh / nw < m->ww / 2) {
 			cols = 2;
 			rows = nw / cols + (nw - cols * (nw / cols));
 		} else {
@@ -861,33 +888,70 @@ setworkspaceareasformon(Monitor *mon)
 		}
 	}
 
-	/* window geoms (cell height/width) */
-	ch = mon->wh / rows;
-	rrest = mon->wh % rows;
-	cw = mon->ww / cols;
-	crest = mon->ww % cols;
-	x = mon->wx;
-	y = mon->wy;
+	crest = colw = m->ww;
 
-	cn = rn = cc = 0; // reset column no, row no, workspace count
-	for (ws = nextvismonws(mon, workspaces); ws; ws = nextvismonws(mon, ws->next)) {
-		if ((rows * cols) > nw && cc + 1 == nw) {
-			rows = 1;
-			ch = mon->wh;
-			rrest = 0;
-		}
+	float wfacts[cols];
+	int rrests[cols];
+	for (i = 0; i < cols; i++) {
+		wfacts[i] = 0;
+		rrests[i] = 0;
+	}
 
-		ws->wx = x;
-		ws->wy = y + rn * ch + MIN(rn, rrest);
-		ws->wh = ch + (rn < rrest ? 1 : 0);
-		ws->ww = cw + (cn < crest ? 1 : 0);
-
+	/* Sum wfacts for columns */
+	cn = rn = 0; /* reset column no, row no */
+	for (ws = nextvismonws(m, workspaces); ws; ws = nextvismonws(m, ws->next)) {
+		wfacts[cn] += ws->wfact;
+		wfacts_total += ws->wfact;
 		rn++;
-		cc++;
 		if (rn >= rows) {
 			rn = 0;
-			x += cw + (cn < crest ? 1 : 0);
 			cn++;
+		}
+	}
+
+	/* Work out wfact remainders */
+	cn = rn = 0; /* reset column no, row no */
+	for (ws = nextvismonws(m, workspaces); ws; ws = nextvismonws(m, ws->next)) {
+		rrests[cn] += m->wh * (ws->wfact / wfacts[cn]);
+		rn++;
+		if (rn >= rows) {
+			rn = 0;
+			cn++;
+		}
+	}
+
+	/* Now wfacts and rrests contain a sum of height and width used. This goes through each
+	 * column and make sure that we only store the remainder. */
+	for (i = 0; i < cols; i++) {
+		crest -= (int)(colw * (wfacts[i] / wfacts_total));
+		rrests[i] = m->wh - rrests[i];
+	}
+
+	cx = m->wx;
+	cy = m->wy;
+
+	cn = rn = wc = 0; /* reset column no, row no, workspace count */
+	for (ws = nextvismonws(m, workspaces); ws; ws = nextvismonws(m, ws->next)) {
+		if ((rows * cols) > nw && wc + 1 == nw) {
+			rows = 1;
+			ch = m->wh;
+		}
+
+		cw = (int)(colw * (wfacts[cn] / wfacts_total)) + (cn < crest ? 1 : 0);
+		ch = m->wh * ((double)ws->wfact / (double)wfacts[cn]) + (rn < rrests[cn] ? 1 : 0);
+
+		ws->ww = cw;
+		ws->wh = ch;
+		ws->wx = cx;
+		ws->wy = cy;
+		rn++;
+		wc++;
+		cy += ch;
+		if (rn >= rows) {
+			rn = 0;
+			cx += cw + (cn < crest ? 1 : 0);
+			cn++;
+			cy = m->wy;
 		}
 	}
 }

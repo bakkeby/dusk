@@ -30,6 +30,7 @@
 #include "decorationhints.h"
 #include "dragcfact.h"
 #include "dragmfact.h"
+#include "dragwfact.h"
 #include "dragfact.h"
 #include "ewmh.h"
 #include "group.h"

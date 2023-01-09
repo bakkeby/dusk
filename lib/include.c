@@ -29,6 +29,7 @@
 #include "decorationhints.c"
 #include "dragcfact.c"
 #include "dragmfact.c"
+#include "dragwfact.c"
 #include "dragfact.c"
 #include "ewmh.c"
 #include "group.c"
