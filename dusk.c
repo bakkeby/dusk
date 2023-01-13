@@ -3354,6 +3354,10 @@ unmanage(Client *c, int destroyed)
 	if (SEMISCRATCHPAD(c))
 		c = unmanagesemiscratchpad(c);
 
+	for (ws = workspaces; ws; ws = ws->next)
+		if (ws->prevzoom == c)
+			ws->prevzoom = NULL;
+
 	ws = c->ws;
 	revertws = c->revertws;
 
