@@ -540,7 +540,7 @@ applyrules(Client *c)
 		&& (!r->role || strstr(role, r->role))
 		&& (!r->instance || strstr(instance, r->instance))
 		&& (!r->wintype || atomin(XInternAtom(dpy, r->wintype, False), win_types, nitems))
-		&& (r->transient == transient))
+		&& (r->transient == -1 || r->transient == transient))
 		{
 			c->flags |= Ruled | r->flags;
 			c->scratchkey = r->scratchkey;
