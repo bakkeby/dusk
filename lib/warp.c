@@ -1,3 +1,37 @@
+int
+canwarp(Workspace *ws)
+{
+	/* Do not warp if the functionality is disabled */
+	if (disabled(Warp))
+		return 0;
+
+	/* Do not warp if we are currently ignoring warp (e.g. when using drag functionality) */
+	if (ignore_warp)
+		return 0;
+
+	/* Do not warp if this is not the currently selected workspace (to avoid the mouse cursor
+	 * jumping around when moving windows between visible workspaces for example). */
+	if (ws != selws)
+		return 0;
+
+	/* Do warp if the client is floating or floating layout is used */
+	if (ISFLOATING(ws->sel) || !ws->layout->arrange)
+		return 1;
+
+	/* Do not warp if the monocle layout used */
+	if (
+		ws->ltaxis[MASTER] == MONOCLE && (
+			abs(ws->ltaxis[LAYOUT]) == NO_SPLIT ||
+			!ws->nmaster ||
+			numtiled(ws) <= ws->nmaster
+		)
+	)
+		return 0;
+
+	/* Fine to warp in other situations */
+	return 1;
+}
+
 void
 warp(const Client *c)
 {

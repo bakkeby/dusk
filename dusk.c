@@ -1801,7 +1801,7 @@ focusmon(const Arg *arg)
 		selws = m->selws;
 	unfocus(sel, 0, NULL);
 	focus(NULL);
-	if (enabled(Warp))
+	if (canwarp(selws))
 		warp(selws->sel);
 }
 
@@ -1845,17 +1845,9 @@ focusstack(const Arg *arg)
 	if (c) {
 		focus(c);
 		if (enabled(FocusedOnTop)) {
-			if (enabled(Warp)) {
+			if (canwarp(c->ws)) {
 				force_warp = 1;
-				if (
-					ISFLOATING(c) || !(c->ws->ltaxis[MASTER] == MONOCLE && (
-						abs(c->ws->ltaxis[LAYOUT]) == NO_SPLIT
-						|| !c->ws->nmaster
-						|| numtiled(ws) <= c->ws->nmaster
-					))
-				) {
-					warp(c);
-				}
+				warp(c);
 			}
 		} else
 			restack(c->ws);
@@ -2702,13 +2694,8 @@ restack(Workspace *ws)
 	XSync(dpy, False);
 	skipfocusevents();
 
-	if (enabled(Warp)) {
-		if (ws == selws && (
-			!(ws->ltaxis[MASTER] == MONOCLE && (abs(ws->ltaxis[LAYOUT] == NO_SPLIT || !ws->nmaster || numtiled(ws) <= ws->nmaster)))
-			|| ISFLOATING(ws->sel))
-		)
-			warp(ws->sel);
-	}
+	if (canwarp(ws))
+		warp(ws->sel);
 }
 
 void
