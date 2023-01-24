@@ -68,7 +68,7 @@ resizemouse(const Arg *arg)
 		prevopacity = c->opacity;
 		opacity(c, resizeopacity);
 	}
-	restack(selws);
+
 	ocx = c->x;
 	ocy = c->y;
 	och = c->h;

@@ -396,6 +396,7 @@ static Client *prevtiled(Client *c);
 static void propertynotify(XEvent *e);
 static void restart(const Arg *arg);
 static void quit(const Arg *arg);
+static void raiseclient(Client *c);
 static void readclientstackingorder(void);
 static Monitor *recttomon(int x, int y, int w, int h);
 static Workspace *recttows(int x, int y, int w, int h);
@@ -693,7 +694,7 @@ reapplyrules(Client *c)
 		setflag(c, FullScreen, 0);
 		setfullscreen(c, 1, 0);
 	} else if (ISFLOATING(c)) {
-		XRaiseWindow(dpy, c->win);
+		raiseclient(c);
 		XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
 		savefloats(c);
 	}
@@ -701,7 +702,7 @@ reapplyrules(Client *c)
 	if (LOWER(c))
 		XLowerWindow(dpy, c->win);
 	else if (RAISE(c))
-		XRaiseWindow(dpy, c->win);
+		raiseclient(c);
 
 	updateclientdesktop(c);
 	updatewmhints(c);
@@ -849,6 +850,7 @@ buttonpress(XEvent *e)
 	Workspace *ws;
 	XButtonPressedEvent *ev = &e->xbutton;
 	click = ClkRootWin;
+
 	/* focus monitor if necessary */
 	if ((m = wintomon(ev->window)) && m != selmon) {
 		ws = m->selws;
@@ -1699,10 +1701,12 @@ focus(Client *c)
 
 		if (ISURGENT(c))
 			seturgent(c, 0);
+
 		detachstack(c);
 		attachstack(c);
 		grabbuttons(c, 1);
 		setfocus(c);
+
 		if (enabled(FocusedOnTop)) {
 			/* Move all visible tiled clients that are not marked as on top below the bar window */
 			wc.stack_mode = Below;
@@ -1728,21 +1732,8 @@ focus(Client *c)
 					wc.sibling = f->win;
 				}
 			}
-		} else {
-			wc.stack_mode = Below;
-			wc.sibling = 0;
-			for (f = c->ws->stack; f; f = f->snext) {
-				if (ISFLOATING(f) && ISVISIBLE(f) && ALWAYSONTOP(f)) {
-					if (!wc.sibling) {
-						XRaiseWindow(dpy, f->win);
-						wc.sibling = f->win;
-					} else {
-						XConfigureWindow(dpy, f->win, CWSibling|CWStackMode, &wc);
-						wc.sibling = f->win;
-					}
-				}
-			}
 		}
+
 		XSync(dpy, False);
 		skipfocusevents();
 		XSetWindowBorder(dpy, c->win, scheme[clientscheme(c, c)][ColBorder].pixel);
@@ -2548,6 +2539,33 @@ quit(const Arg *arg)
 	running = 0;
 }
 
+void
+raiseclient(Client *c)
+{
+	Client *s, *l = NULL;
+	Workspace *ws = c->ws;
+	XWindowChanges wc;
+
+	/* Do not raise if client is tiled. */
+	if (!ISFLOATING(c) && ws->layout->arrange)
+		return;
+
+	if (!ALWAYSONTOP(c)) {
+		/* find the lowest stacked client that is always on top and place the window below that */
+		for (s = ws->stack; s; s = s->snext)
+			if (ALWAYSONTOP(s) && (ISFLOATING(c) || !ws->layout->arrange))
+				l = s;
+		if (l) {
+			wc.stack_mode = Below;
+			wc.sibling = l->win;
+			XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
+			return;
+		}
+	}
+
+	XRaiseWindow(dpy, c->win);
+}
+
 /* This reads the stacking order on the X server side and updates the client
  * index (idx) value accordingly. This information can later be used to determine
  * whether one window is on top of another, for example in recttoclient.
@@ -2680,8 +2698,10 @@ restack(Workspace *ws)
 
 	if (!ws->sel)
 		return;
-	if (ISFLOATING(ws->sel) || !ws->layout->arrange)
-		XRaiseWindow(dpy, ws->sel->win);
+
+	raiseclient(ws->sel);
+
+	/* Place tiled clients below the bar window */
 	if (ws->layout->arrange) {
 		wc.stack_mode = Below;
 		wc.sibling = ws->mon->bar->win;
@@ -2691,6 +2711,7 @@ restack(Workspace *ws)
 				wc.sibling = c->win;
 			}
 	}
+
 	XSync(dpy, False);
 	skipfocusevents();
 

@@ -26,7 +26,6 @@ movemouse(const Arg *arg)
 		return;
 	if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c)) /* no support moving fullscreen windows by mouse */
 		return;
-	restack(selws);
 
 	group_after = c->group;
 	if (ISMARKED(c)) {

@@ -11,7 +11,7 @@ floatpos(const Arg *arg)
 	resizeclient(c, c->x, c->y, c->w, c->h);
 	savefloats(c);
 
-	XRaiseWindow(dpy, c->win);
+	raiseclient(c);
 	XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w/2, c->h/2);
 }
 

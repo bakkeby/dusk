@@ -109,8 +109,7 @@ togglescratch(const Arg *arg)
 				}
 			} else {
 				XSetWindowBorder(dpy, c->win, scheme[SchemeScratchNorm][ColBorder].pixel);
-				if (ISFLOATING(c))
-					XRaiseWindow(dpy, c->win);
+				raiseclient(c);
 				if (SEMISCRATCHPAD(c) && c->linked)
 					swapsemiscratchpadclients(c->linked, c);
 				else {
@@ -136,9 +135,7 @@ togglescratch(const Arg *arg)
 		attachstack(c);
 		removeflag(c, Invisible);
 		showwsclient(c);
-
-		if (ISFLOATING(c))
-			XRaiseWindow(dpy, c->win);
+		raiseclient(c);
 	}
 
 	if (!found) {
@@ -180,8 +177,7 @@ togglescratch(const Arg *arg)
 		else
 			arrange(c->ws);
 		skipfocusevents();
-		if (ISFLOATING(c))
-			XRaiseWindow(dpy, c->win);
+		raiseclient(c);
 	} else {
 		spawn(arg);
 	}
