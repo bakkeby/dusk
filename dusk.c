@@ -1160,18 +1160,23 @@ clientmessage(XEvent *e)
 		if ((ws = getwsbyindex(cme->data.l[0])))
 			movetows(c, ws, enabled(ViewOnWs));
 	} else if (cme->message_type == netatom[NetActiveWindow]) {
-		if (HIDDEN(c)) {
-			reveal(c);
-			arrange(c->ws);
-			drawbar(c->ws->mon);
-		}
 		if (enabled(FocusOnNetActive) && !NOFOCUSONNETACTIVE(c)) {
-			if (c->ws->visible)
+			if (ISINVISIBLE(c) && c->scratchkey) {
+				togglescratch(&((Arg) {.v = (const char*[]){ &c->scratchkey, NULL } }));
+			}
+			if (HIDDEN(c)) {
+				reveal(c);
+				arrange(c->ws);
+				drawbar(c->ws->mon);
+			}
+			if (c->ws->visible) {
 				focus(c);
-			else
+			} else {
 				viewwsonmon(c->ws, c->ws->mon, 0);
-		} else if (c != selws->sel && !ISURGENT(c))
+			}
+		} else if (c != selws->sel && !ISURGENT(c)) {
 			seturgent(c, 1);
+		}
 	} else if (cme->message_type == wmatom[WMChangeState]) {
 		if (cme->data.l[0] == IconicState) {
 			/* Some applications assume that setting the IconicState a second
