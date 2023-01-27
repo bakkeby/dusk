@@ -226,15 +226,6 @@ getclientflags(Client *c)
 		XFree(p);
 	}
 
-	/* Temporary code to allow live restart from previous atom properties */
-	if (!flags1 && !flags2) {
-		Atom flag1atom = XInternAtom(dpy, "_DUSK_CLIENT_FLAGS1", False);
-		Atom flag2atom = XInternAtom(dpy, "_DUSK_CLIENT_FLAGS2", False);
-		flags1 = getatomprop(c, flag1atom, AnyPropertyType) & 0xFFFFFFFF;
-		flags2 = getatomprop(c, flag2atom, AnyPropertyType);
-	}
-	/* End temporary code */
-
 	if (flags1 || flags2) {
 		c->flags = flags1 | (flags2 << 32);
 		/* Remove flags that should not survive a restart */
