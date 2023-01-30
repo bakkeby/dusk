@@ -417,7 +417,6 @@ static void setmfact(const Arg *arg);
 static void setup(void);
 static void seturgent(Client *c, int urg);
 static void show(Client *c);
-static void sigchld(int unused);
 static void skipfocusevents(void);
 static void spawn(const Arg *arg);
 static pid_t spawncmd(const Arg *arg, int buttonclick, int orphan);
@@ -3010,11 +3009,28 @@ setup(void)
 	int i;
 	XSetWindowAttributes wa;
 	Atom utf8string;
+	struct sigaction chld, hup, term;
 
-	/* clean up any zombies immediately */
-	sigchld(0);
-	signal(SIGHUP, sighup);
-	signal(SIGTERM, sigterm);
+	/* Handle children when they terminate. */
+	sigemptyset(&chld.sa_mask);
+	chld.sa_flags = SA_NOCLDSTOP | SA_RESTART;
+	chld.sa_handler = sigchld;
+	sigaction(SIGCHLD, &chld, NULL);
+
+	/* Handle hang up signal */
+	sigemptyset(&hup.sa_mask);
+	hup.sa_flags = SA_RESTART;
+	hup.sa_handler = sighup;
+	sigaction(SIGHUP, &hup, NULL);
+
+	/* Handle terminate signal */
+	sigemptyset(&term.sa_mask);
+	term.sa_flags = SA_RESTART;
+	term.sa_handler = sigterm;
+	sigaction(SIGTERM, &term, NULL);
+
+	/* Clean up any zombies (inherited from .xinitrc etc) immediately. */
+	while (waitpid(-1, NULL, WNOHANG) > 0);
 
 	putenv("_JAVA_AWT_WM_NONREPARENTING=1");
 
@@ -3125,14 +3141,6 @@ void
 show(Client *c)
 {
 	XMoveWindow(dpy, c->win, c->x, c->y);
-}
-
-void
-sigchld(int unused)
-{
-	if (signal(SIGCHLD, sigchld) == SIG_ERR)
-		die("can't install SIGCHLD handler:");
-	while (0 < waitpid(-1, NULL, WNOHANG));
 }
 
 void
