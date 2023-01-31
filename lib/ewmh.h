@@ -5,6 +5,8 @@ static void getclienticonpath(Client *c);
 static void getclientlabel(Client *c);
 static void getworkspacestate(Workspace *ws);
 static void persistworkspacestate(Workspace *ws);
+static void persistpids(void);
+static void restorepids(void);
 static void savewindowfloatposition(Client *c, Monitor *m);
 static int restorewindowfloatposition(Client *c, Monitor *m);
 static void setdesktopnames(void);
@@ -148,6 +150,8 @@ static char *wmatom_names[WMLast] = {
 
 enum {
 	IsFloating,
+	DuskAutostartCount,
+	DuskAutostartPIDs,
 	DuskClientFlags,
 	DuskClientFields,
 	DuskClientLabel,
@@ -159,6 +163,8 @@ enum {
 
 static char *client_names[ClientLast] = {
 	[IsFloating] = "_IS_FLOATING",
+	[DuskAutostartCount] = "_DUSK_AUTOSTART_COUNT",
+	[DuskAutostartPIDs] = "_DUSK_AUTOSTART_PIDS",
 	[DuskClientFlags] = "_DUSK_CLIENT_FLAGS",
 	[DuskClientFields] = "_DUSK_CLIENT_FIELDS",
 	[DuskClientLabel] = "_DUSK_CLIENT_LABEL",

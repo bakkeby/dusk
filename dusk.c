@@ -901,6 +901,12 @@ cleanup(void)
 		persistworkspacestate(ws);
 	persistworkspacestate(stickyws);
 
+	if (restartsig) {
+		persistpids();
+	} else {
+		autostart_killpids();
+	}
+
 	for (ws = workspaces; ws; ws = ws->next) {
 		ws->layout = &foo;
 		while (ws->stack)
@@ -3106,6 +3112,7 @@ setup(void)
 	updatecurrentdesktop();
 	setdesktopnames();
 	setviewport();
+	restorepids();
 	XDeleteProperty(dpy, root, netatom[NetClientList]);
 	XDeleteProperty(dpy, root, netatom[NetClientListStacking]);
 	/* select events */

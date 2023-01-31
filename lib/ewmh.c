@@ -82,6 +82,66 @@ persistworkspacestate(Workspace *ws)
 }
 
 void
+persistpids(void)
+{
+	unsigned int i, count = 0;
+
+	for (i = 0; i < LENGTH(autostart_pids); i++) {
+		if (autostart_pids[i] == 0)
+			break;
+
+		if (autostart_pids[i] == -1)
+			continue;
+
+		/* Append the PID to the root window property */
+		long data[] = { autostart_pids[i] };
+		XChangeProperty(dpy, root, clientatom[DuskAutostartPIDs], XA_CARDINAL, 32,
+			count ? PropModeAppend : PropModeReplace, (unsigned char *)data, 1);
+
+		count++;
+	}
+
+	/* Record the count of PID properties. */
+	long data[] = { count };
+	XChangeProperty(dpy, root, clientatom[DuskAutostartCount], XA_CARDINAL, 32,
+			PropModeReplace, (unsigned char *)data, 1);
+
+	XSync(dpy, False);
+}
+
+void
+restorepids(void)
+{
+	int di, count = 0;
+	unsigned int i;
+	unsigned long dl, nitems;
+	unsigned char *p = NULL;
+	Atom da, *pids;
+
+	/* Get the count of PIDs (if any). */
+	if (XGetWindowProperty(dpy, root, clientatom[DuskAutostartCount], 0L, sizeof da,
+			False, AnyPropertyType, &da, &di, &nitems, &dl, &p) == Success && p) {
+		count = *(Atom *)p;
+		XFree(p);
+	}
+
+	if (!count)
+		return;
+
+	if (XGetWindowProperty(dpy, root, clientatom[DuskAutostartPIDs], 0L, count * sizeof da,
+			False, AnyPropertyType, &da, &di, &nitems, &dl, &p) == Success && p) {
+		pids = (Atom *)p;
+		for (i = 0; i < nitems; i++) {
+			autostart_addpid(pids[i]);
+		}
+		XFree(p);
+	}
+
+	XDeleteProperty(dpy, root, clientatom[DuskAutostartCount]);
+	XDeleteProperty(dpy, root, clientatom[DuskAutostartPIDs]);
+}
+
+void
 savewindowfloatposition(Client *c, Monitor *m)
 {
 	char atom[22] = {0};
@@ -218,7 +278,7 @@ getclientflags(Client *c)
 
 	if (XGetWindowProperty(dpy, c->win, clientatom[DuskClientFlags], 0L, 2 * sizeof flags1, False,
 			AnyPropertyType, &da, &di, &nitems, &dl, &p) == Success && p) {
-		cflags = (Atom *) p;
+		cflags = (Atom *)p;
 		if (nitems == 2) {
 			flags1 = cflags[0] & 0xFFFFFFFF;
 			flags2 = cflags[1] & 0xFFFFFFFF;
