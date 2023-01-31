@@ -1,4 +1,4 @@
-static int restartsig = 0;
+static int restartwm = 0;
 
 void
 sigchld(int unused)

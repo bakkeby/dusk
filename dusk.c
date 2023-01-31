@@ -901,7 +901,7 @@ cleanup(void)
 		persistworkspacestate(ws);
 	persistworkspacestate(stickyws);
 
-	if (restartsig) {
+	if (restartwm) {
 		persistpids();
 	} else {
 		autostart_killpids();
@@ -2539,7 +2539,7 @@ propertynotify(XEvent *e)
 void
 restart(const Arg *arg)
 {
-	restartsig = 1;
+	restartwm = 1;
 	running = 0;
 }
 
@@ -3825,7 +3825,7 @@ main(int argc, char *argv[])
 	run();
 	cleanup();
 	XCloseDisplay(dpy);
-	if (restartsig)
+	if (restartwm)
 		execvp(argv[0], argv);
 	return EXIT_SUCCESS;
 }
