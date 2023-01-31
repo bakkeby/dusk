@@ -47,7 +47,7 @@ persistworkspacestate(Workspace *ws)
 		(ws->enablegaps & 0x1) << 28
 	};
 
-	XChangeProperty(dpy, root, clientatom[DuskWorkspace], XA_CARDINAL, 32,
+	XChangeProperty(dpy, root, duskatom[DuskWorkspace], XA_CARDINAL, 32,
 		ws->num ? PropModeAppend : PropModeReplace, (unsigned char *)data, 1);
 
 	/* set dusk client atoms */
@@ -95,7 +95,7 @@ persistpids(void)
 
 		/* Append the PID to the root window property */
 		long data[] = { autostart_pids[i] };
-		XChangeProperty(dpy, root, clientatom[DuskAutostartPIDs], XA_CARDINAL, 32,
+		XChangeProperty(dpy, root, duskatom[DuskAutostartPIDs], XA_CARDINAL, 32,
 			count ? PropModeAppend : PropModeReplace, (unsigned char *)data, 1);
 
 		count++;
@@ -103,7 +103,7 @@ persistpids(void)
 
 	/* Record the count of PID properties. */
 	long data[] = { count };
-	XChangeProperty(dpy, root, clientatom[DuskAutostartCount], XA_CARDINAL, 32,
+	XChangeProperty(dpy, root, duskatom[DuskAutostartCount], XA_CARDINAL, 32,
 			PropModeReplace, (unsigned char *)data, 1);
 
 	XSync(dpy, False);
@@ -119,7 +119,7 @@ restorepids(void)
 	Atom da, *pids;
 
 	/* Get the count of PIDs (if any). */
-	if (XGetWindowProperty(dpy, root, clientatom[DuskAutostartCount], 0L, sizeof da,
+	if (XGetWindowProperty(dpy, root, duskatom[DuskAutostartCount], 0L, sizeof da,
 			False, AnyPropertyType, &da, &di, &nitems, &dl, &p) == Success && p) {
 		count = *(Atom *)p;
 		XFree(p);
@@ -128,7 +128,7 @@ restorepids(void)
 	if (!count)
 		return;
 
-	if (XGetWindowProperty(dpy, root, clientatom[DuskAutostartPIDs], 0L, count * sizeof da,
+	if (XGetWindowProperty(dpy, root, duskatom[DuskAutostartPIDs], 0L, count * sizeof da,
 			False, AnyPropertyType, &da, &di, &nitems, &dl, &p) == Success && p) {
 		pids = (Atom *)p;
 		for (i = 0; i < nitems; i++) {
@@ -137,8 +137,8 @@ restorepids(void)
 		XFree(p);
 	}
 
-	XDeleteProperty(dpy, root, clientatom[DuskAutostartCount]);
-	XDeleteProperty(dpy, root, clientatom[DuskAutostartPIDs]);
+	XDeleteProperty(dpy, root, duskatom[DuskAutostartCount]);
+	XDeleteProperty(dpy, root, duskatom[DuskAutostartPIDs]);
 }
 
 void
@@ -224,7 +224,7 @@ void
 setfloatinghint(Client *c)
 {
 	unsigned int floating[1] = {ISFLOATING(c) || !c->ws->layout->arrange ? 1 : 0};
-	XChangeProperty(dpy, c->win, clientatom[IsFloating], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)floating, 1);
+	XChangeProperty(dpy, c->win, duskatom[IsFloating], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)floating, 1);
 }
 
 void
@@ -240,15 +240,15 @@ setclientflags(Client *c)
 {
 	uint32_t data1[] = { c->flags & 0xFFFFFFFF };
 	uint32_t data2[] = { c->flags >> 32 };
-	XChangeProperty(dpy, c->win, clientatom[DuskClientFlags], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data1, 1);
-	XChangeProperty(dpy, c->win, clientatom[DuskClientFlags], XA_CARDINAL, 32, PropModeAppend,  (unsigned char *)data2, 1);
+	XChangeProperty(dpy, c->win, duskatom[DuskClientFlags], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data1, 1);
+	XChangeProperty(dpy, c->win, duskatom[DuskClientFlags], XA_CARDINAL, 32, PropModeAppend,  (unsigned char *)data2, 1);
 }
 
 void
 setclientfields(Client *c)
 {
 	uint32_t data[] = { c->ws->num | (c->idx << 6) | (c->scratchkey << 14)};
-	XChangeProperty(dpy, c->win, clientatom[DuskClientFields], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
+	XChangeProperty(dpy, c->win, duskatom[DuskClientFields], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)data, 1);
 }
 
 void
@@ -257,13 +257,13 @@ setclienticonpath(Client *c)
 	if (!strlen(c->iconpath))
 		return;
 
-	XChangeProperty(dpy, c->win, clientatom[DuskClientIconPath], XA_STRING, 8, PropModeReplace, (unsigned char *)c->iconpath, strlen(c->iconpath));
+	XChangeProperty(dpy, c->win, duskatom[DuskClientIconPath], XA_STRING, 8, PropModeReplace, (unsigned char *)c->iconpath, strlen(c->iconpath));
 }
 
 void
 setclientlabel(Client *c)
 {
-	XChangeProperty(dpy, c->win, clientatom[DuskClientLabel], XA_STRING, 8, PropModeReplace, (unsigned char *)c->label, strlen(c->label));
+	XChangeProperty(dpy, c->win, duskatom[DuskClientLabel], XA_STRING, 8, PropModeReplace, (unsigned char *)c->label, strlen(c->label));
 }
 
 void
@@ -276,7 +276,7 @@ getclientflags(Client *c)
 	Atom da = None;
 	Atom *cflags;
 
-	if (XGetWindowProperty(dpy, c->win, clientatom[DuskClientFlags], 0L, 2 * sizeof flags1, False,
+	if (XGetWindowProperty(dpy, c->win, duskatom[DuskClientFlags], 0L, 2 * sizeof flags1, False,
 			AnyPropertyType, &da, &di, &nitems, &dl, &p) == Success && p) {
 		cflags = (Atom *)p;
 		if (nitems == 2) {
@@ -297,7 +297,7 @@ void
 getclientfields(Client *c)
 {
 	Workspace *ws;
-	Atom fields = getatomprop(c, clientatom[DuskClientFields], AnyPropertyType);
+	Atom fields = getatomprop(c, duskatom[DuskClientFields], AnyPropertyType);
 	if (fields) {
 		c->scratchkey = (fields >> 14);
 		c->idx = (fields & 0x3FC0) >> 6;
@@ -319,7 +319,7 @@ getclienticonpath(Client *c)
 	unsigned char *data = 0;
 	long unsigned int size = LENGTH(c->iconpath);
 
-	if (XGetWindowProperty(dpy, c->win, clientatom[DuskClientIconPath], 0, 1024, 0, XA_STRING,
+	if (XGetWindowProperty(dpy, c->win, duskatom[DuskClientIconPath], 0, 1024, 0, XA_STRING,
 				&type, &format, &size, &after, &data) == Success) {
 		if (data) {
 			if (type == XA_STRING) {
@@ -341,7 +341,7 @@ getclientlabel(Client *c)
 	unsigned char *data = 0;
 	long unsigned int size = LENGTH(c->label);
 
-	if (XGetWindowProperty(dpy, c->win, clientatom[DuskClientLabel], 0, 1024, 0, XA_STRING,
+	if (XGetWindowProperty(dpy, c->win, duskatom[DuskClientLabel], 0, 1024, 0, XA_STRING,
 				&type, &format, &size, &after, &data) == Success) {
 		if (data) {
 			if (type == XA_STRING) {
@@ -372,7 +372,7 @@ getworkspacestate(Workspace *ws)
 	if (ws->num > num_ws)
 		return;
 
-	if (!(XGetWindowProperty(dpy, root, clientatom[DuskWorkspace], ws->num, num_ws * sizeof dl,
+	if (!(XGetWindowProperty(dpy, root, duskatom[DuskWorkspace], ws->num, num_ws * sizeof dl,
 			False, AnyPropertyType, &da, &di, &nitems, &dl, &p) == Success && p)) {
 		return;
 	}

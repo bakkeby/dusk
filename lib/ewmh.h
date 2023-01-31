@@ -158,10 +158,10 @@ enum {
 	DuskClientIconPath,
 	DuskWorkspace,
 	SteamGameID,
-	ClientLast
-}; /* dusk client atoms */
+	DuskLast
+}; /* dusk atoms */
 
-static char *client_names[ClientLast] = {
+static char *dusk_names[DuskLast] = {
 	[IsFloating] = "_IS_FLOATING",
 	[DuskAutostartCount] = "_DUSK_AUTOSTART_COUNT",
 	[DuskAutostartPIDs] = "_DUSK_AUTOSTART_PIDS",

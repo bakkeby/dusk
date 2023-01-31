@@ -482,7 +482,7 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 	[ResizeRequest] = resizerequest,
 	[UnmapNotify] = structurenotify,
 };
-static Atom wmatom[WMLast], netatom[NetLast], allowed[NetWMActionLast], xatom[XLast], clientatom[ClientLast];
+static Atom wmatom[WMLast], netatom[NetLast], allowed[NetWMActionLast], xatom[XLast], duskatom[DuskLast];
 static int running = 1;
 static Cur *cursor[CurLast];
 static Clr **scheme;
@@ -522,7 +522,7 @@ applyrules(Client *c)
 	class    = ch.res_class ? ch.res_class : broken;
 	instance = ch.res_name  ? ch.res_name  : broken;
 	gettextprop(c->win, wmatom[WMWindowRole], role, sizeof(role));
-	game_id = getatomprop(c, clientatom[SteamGameID], AnyPropertyType);
+	game_id = getatomprop(c, duskatom[SteamGameID], AnyPropertyType);
 	transient = ISTRANSIENT(c) ? 1 : 0;
 
 	/* Steam games may come through with custom class, instance and name making it hard to create
@@ -2214,7 +2214,7 @@ manage(Window w, XWindowAttributes *wa)
 	/* If this is a transient window for a window that is managed by the window manager, then it should be floating. */
 	if (t)
 		c->prevflags |= Floating;
-	if (!ISFLOATING(c) && (ISFIXED(c) || WASFLOATING(c) || getatomprop(c, clientatom[IsFloating], AnyPropertyType)))
+	if (!ISFLOATING(c) && (ISFIXED(c) || WASFLOATING(c) || getatomprop(c, duskatom[IsFloating], AnyPropertyType)))
 		SETFLOATING(c);
 
 	if (ISFLOATING(c))
@@ -3075,7 +3075,7 @@ setup(void)
 	utf8string = XInternAtom(dpy, "UTF8_STRING", False);
 	motifatom = XInternAtom(dpy, "_MOTIF_WM_HINTS", False);
 	XInternAtoms(dpy, wmatom_names, WMLast, False, wmatom);
-	XInternAtoms(dpy, client_names, ClientLast, False, clientatom);
+	XInternAtoms(dpy, dusk_names, DuskLast, False, duskatom);
 	XInternAtoms(dpy, netatom_names, NetLast, False, netatom);
 	XInternAtoms(dpy, allowed_names, NetWMActionLast, False, allowed);
 	XInternAtoms(dpy, xembed_names, XLast, False, xatom);
