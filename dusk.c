@@ -461,6 +461,12 @@ static int monitorchanged = 0; /* used for combo logic */
 static int grp_idx = 0;        /* used for grouping windows together */
 static int arrange_focus_on_monocle = 1; /* used in focus to arrange monocle layouts on focus */
 
+/* Used by propertynotify to throttle repeating notifications */
+static int pn_prev_state = 0;
+static Window pn_prev_win = 0;
+static Atom pn_prev_atom = None;
+static unsigned int pn_prev_count = 0;
+
 static int (*xerrorxlib)(Display *, XErrorEvent *);
 static unsigned int numlockmask = 0;
 static void (*handler[LASTEvent]) (XEvent *) = {
@@ -2472,15 +2478,37 @@ propertynotify(XEvent *e)
 {
 	Client *c;
 	Window trans;
+	XEvent ignored;
 	XPropertyEvent *ev = &e->xproperty;
+
+	/* Some programs may end up spamming property notifications rendering the window
+	 * manager unable to do anything else than to process the backlog of these for as
+	 * long as it takes. One may think of it as a DOS attack for the window manager.
+	 * This section handles throttling of such events allowing only three consecutive
+	 * and identical property notifications to be processed. */
+	if (ev->state != pn_prev_state || ev->window != pn_prev_win || ev->atom != pn_prev_atom) {
+		pn_prev_state = ev->state;
+		pn_prev_win = ev->window;
+		pn_prev_atom = ev->atom;
+		pn_prev_count = 0;
+	} else if (pn_prev_count > 3) {
+		if (pn_prev_count == 4 && enabled(Debug)) {
+			pn_prev_count++; /* Only print the below log line once. */
+			fprintf(stderr, "propertynotify: throttling repeating %s (%ld) property notificatons for window %ld\n", XGetAtomName(dpy, ev->atom), ev->atom, ev->window);
+		}
+		while (XCheckMaskEvent(dpy, PropertyChangeMask, &ignored));
+		return;
+	}
+
+	pn_prev_count++;
 
 	if (enabled(Systray) && (c = wintosystrayicon(ev->window))) {
 		if (ev->atom == XA_WM_NORMAL_HINTS) {
 			updatesizehints(c);
 			updatesystrayicongeom(c, c->w, c->h);
-		}
-		else
+		} else {
 			updatesystrayiconstate(c, ev);
+		}
 		drawbarwin(systray->bar);
 	}
 
