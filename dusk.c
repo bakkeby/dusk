@@ -1156,7 +1156,9 @@ clientmessage(XEvent *e)
 				switch (cme->data.l[0]) {
 				default:
 				case 0: /* _NET_WM_STATE_REMOVE */
-					restorefloats(c);
+					if (ISFLOATING(c) || !c->ws->layout->arrange) {
+						restorefloats(c);
+					}
 					break;
 				case 1: /* _NET_WM_STATE_ADD */
 				case 2: /* _NET_WM_STATE_TOGGLE */
