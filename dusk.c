@@ -2191,6 +2191,10 @@ manage(Window w, XWindowAttributes *wa)
 
 	m = c->ws->mon;
 
+	if (WIDTH(c) > m->mw)
+		c->w = m->mw - 2 * c->bw;
+	if (HEIGHT(c) > m->mh)
+		c->h = m->mh - 2 * c->bw;
 	if (c->x + WIDTH(c) > m->mx + m->mw)
 		c->x = m->mx + m->mw - WIDTH(c);
 	if (c->y + HEIGHT(c) > m->my + m->mh)
