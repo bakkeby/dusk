@@ -1687,12 +1687,20 @@ void
 leavenotify(XEvent *e)
 {
 	XCrossingEvent *ev = &e->xcrossing;
+	Client *c;
 
 	if (ev->mode != NotifyNormal || ev->detail == NotifyInferior)
 		return;
 
-	XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
-	XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
+	c = wintoclient(ev->window);
+
+	if (enabled(Debug)) {
+		fprintf(stderr, "leavenotify, mode = %d, detail = %d, window = %ld (%s), subwindow = %ld\n", ev->mode, ev->detail, ev->window, c ? c->name : "null", ev->subwindow);
+		fprintf(stderr, "leavenotify, NotifyAncestor = %d, NotifyVirtual = %d, NotifyInferior = %d, NotifyNonlinear = %d, NotifyNonlinearVirtual = %d\n", NotifyAncestor, NotifyVirtual, NotifyInferior, NotifyNonlinear, NotifyNonlinearVirtual);
+	}
+
+	if (c && !KEEPINPUTFOCUSONLEAVENOTIFY(c))
+		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
 }
 
 void
