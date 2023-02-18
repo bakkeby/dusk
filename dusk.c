@@ -367,7 +367,6 @@ static Monitor *dirtomon(int dir);
 static Workspace *dirtows(int dir);
 static void entermon(Monitor *m, Client *next);
 static void enternotify(XEvent *e);
-static void leavenotify(XEvent *e);
 static void expose(XEvent *e);
 static void focus(Client *c);
 static void focusin(XEvent *e);
@@ -478,7 +477,6 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 	[ConfigureRequest] = configurerequest,
 	[DestroyNotify] = structurenotify,
 	[EnterNotify] = enternotify,
-	[LeaveNotify] = leavenotify,
 	[Expose] = expose,
 	[FocusIn] = focusin,
 	[KeyPress] = keypress,
@@ -575,7 +573,7 @@ applyrules(Client *c)
 				load_icon_from_png_image(c, r->iconpath);
 
 			if (enabled(Debug) || DEBUGGING(c))
-				fprintf(stderr, "applyrules: client rule %d matched:\n    class: %s\n    role: %s\n    instance: %s\n    title: %s\n    wintype: %s\n    flags: %lu\n    floatpos: %s\n    workspace: %s\n    label: %s\n",
+				fprintf(stderr, "applyrules: client rule %d matched:\n    class: %s\n    role: %s\n    instance: %s\n    title: %s\n    wintype: %s\n    flags: %ld\n    floatpos: %s\n    workspace: %s\n    label: %s\n",
 					i,
 					r->class ? r->class : "NULL",
 					r->role ? r->role : "NULL",
@@ -1672,35 +1670,12 @@ enternotify(XEvent *e)
 		return;
 	c = wintoclient(ev->window);
 	m = c ? c->ws->mon : wintomon(ev->window);
-	if (m != selmon) {
+	if (m != selmon)
 		entermon(m, c);
-	} else if (selws == m->selws && (!c || (m->selws && c == m->selws->sel))) {
-		if (c) {
-			setfocus(c);
-		}
+	else if (selws == m->selws && (!c || (m->selws && c == m->selws->sel)))
 		return;
-	}
+
 	focus(c);
-}
-
-void
-leavenotify(XEvent *e)
-{
-	XCrossingEvent *ev = &e->xcrossing;
-	Client *c;
-
-	if (ev->mode != NotifyNormal || ev->detail == NotifyInferior)
-		return;
-
-	c = wintoclient(ev->window);
-
-	if (enabled(Debug)) {
-		fprintf(stderr, "leavenotify, mode = %d, detail = %d, window = %ld (%s), subwindow = %ld\n", ev->mode, ev->detail, ev->window, c ? c->name : "null", ev->subwindow);
-		fprintf(stderr, "leavenotify, NotifyAncestor = %d, NotifyVirtual = %d, NotifyInferior = %d, NotifyNonlinear = %d, NotifyNonlinearVirtual = %d\n", NotifyAncestor, NotifyVirtual, NotifyInferior, NotifyNonlinear, NotifyNonlinearVirtual);
-	}
-
-	if (c && !KEEPINPUTFOCUSONLEAVENOTIFY(c))
-		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
 }
 
 void
@@ -2245,7 +2220,7 @@ manage(Window w, XWindowAttributes *wa)
 	updatewmhints(c);
 	updatemotifhints(c);
 
-	XSelectInput(dpy, w, EnterWindowMask|LeaveWindowMask|FocusChangeMask|PropertyChangeMask|StructureNotifyMask);
+	XSelectInput(dpy, w, EnterWindowMask|FocusChangeMask|PropertyChangeMask|StructureNotifyMask);
 	grabbuttons(c, 0);
 
 	/* If this is a transient window for a window that is managed by the window manager, then it should be floating. */

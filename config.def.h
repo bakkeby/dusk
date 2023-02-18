@@ -244,7 +244,7 @@ static const Rule clientrules[] = {
 	{ .instance = "spterm (e)", .scratchkey = 'e', .flags = Floating },
 	{ .instance = "spfm (r)", .scratchkey = 'r', .flags = Floating },
 	{ .class = "Gimp", .workspace = "5", .flags = Floating|SwitchWorkspace },
-	{ .class = "firefox", .workspace = "8", .flags = AttachMaster|SwitchWorkspace|KeepInputFocusOnLeaveNotify },
+	{ .class = "firefox", .workspace = "8", .flags = AttachMaster|SwitchWorkspace },
 	{ .class = "Steam", .flags = Floating|Centered },
 	{ .class = "steam_app_", .flags = SteamGame|Floating|Centered },
 	{ .class = "Google-chrome", .role = "GtkFileChooserDialog", .floatpos = "50% 50%", .flags = AlwaysOnTop|Floating },

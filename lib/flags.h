@@ -58,7 +58,7 @@ static const uint64_t
 	SkipTaskbar = 0x100000000000, // do not include the window title for this client on the bar
 	ReapplyRules = 0x200000000000, // allow the client to get rules re-applied once when the window title changes
 	CfgReqPosRelativeToMonitor = 0x400000000000, // makes configure requests relative to the client's monitor
-	KeepInputFocusOnLeaveNotify = 0x800000000000, // makes a program retain input focus following a leavenotify event
+	FlagPlaceholder0x800000000000 = 0x800000000000,
 	FlagPlaceholder0x1000000000000 = 0x1000000000000,
 	FlagPlaceholder0x2000000000000 = 0x2000000000000,
 	FlagPlaceholder0x4000000000000 = 0x4000000000000,
@@ -109,7 +109,6 @@ static const uint64_t
 #define IGNOREPROPTRANSIENTFOR(C) (C && C->flags & IgnorePropTransientFor)
 #define IGNORESIZEHINTS(C) (C && C->flags & IgnoreSizeHints)
 #define IGNOREMINIMUMSIZEHINTS(C) (C && C->flags & IgnoreMinimumSizeHints)
-#define KEEPINPUTFOCUSONLEAVENOTIFY(C) (C && C->flags & KeepInputFocusOnLeaveNotify)
 #define REFRESHSIZEHINTS(C) (C && C->flags & RefreshSizeHints)
 #define NEEDRESIZE(C) (C && C->flags & NeedResize)
 #define NEVERFOCUS(C) (C && C->flags & NeverFocus)
