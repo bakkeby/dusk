@@ -1695,6 +1695,7 @@ focus(Client *c)
 
 	Workspace *ws = c ? c->ws : selws;
 	Client *f;
+	Bar *bar;
 	XWindowChanges wc;
 
 	if (!c || ISINVISIBLE(c))
@@ -1756,7 +1757,8 @@ focus(Client *c)
 		skipfocusevents();
 		XSetWindowBorder(dpy, c->win, scheme[clientscheme(c, c)][ColBorder].pixel);
 	} else {
-		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);
+		for (bar = selmon->bar; bar && !bar->showbar; bar = bar->next);
+		XSetInputFocus(dpy, bar ? bar->win : root, RevertToPointerRoot, CurrentTime);
 		XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
 		ws->sel = ws->stack;
 	}
