@@ -3792,29 +3792,33 @@ void
 zoom(const Arg *arg)
 {
 	Client *c = CLIENT, *at = NULL, *cold, *cprevious = NULL, *p;
+	Workspace *ws;
 	if (!c)
 		return;
 
+	ws = c->ws;
 	if (c && ISFLOATING(c))
 		togglefloating(&((Arg) { .v = c }));
 
-	if (!c->ws->layout->arrange || (c && ISFLOATING(c)) || !c)
+	if (!ws->layout->arrange || (c && ISFLOATING(c)) || !c)
 		return;
 
-	if (c == nexttiled(c->ws->clients)) {
-		p = c->ws->prevzoom;
+	if (c == nexttiled(ws->clients)) {
+		if (ws->prevzoom && ws->prevzoom->ws != ws)
+			ws->prevzoom = NULL;
+		p = ws->prevzoom;
 		at = findbefore(p);
 		if (at)
 			cprevious = nexttiled(at->next);
 		if (!cprevious || cprevious != p) {
-			c->ws->prevzoom = NULL;
+			ws->prevzoom = NULL;
 			if (!c || !(c = nexttiled(c->next)))
 				return;
 		} else
 			c = cprevious;
 	}
 
-	cold = nexttiled(c->ws->clients);
+	cold = nexttiled(ws->clients);
 	if (c != cold && !at)
 		at = findbefore(c);
 
@@ -3823,7 +3827,7 @@ zoom(const Arg *arg)
 
 	/* swap windows instead of pushing the previous one down */
 	if (c != cold && at) {
-		c->ws->prevzoom = cold;
+		ws->prevzoom = cold;
 		if (cold && at != cold) {
 			detach(cold);
 			cold->next = at->next;
