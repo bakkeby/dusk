@@ -10,6 +10,8 @@ static const unsigned int gappov         = 5;   /* vert outer gap between window
 static const unsigned int gappfl         = 5;   /* gap between floating windows (when relevant) */
 static const unsigned int smartgaps_fact = 0;   /* smartgaps factor when there is only one client; 0 = no gaps, 3 = 3x outer gaps */
 
+static const unsigned int dpyHz          = 60;  /* determines the rate which dusk interprets MotionNotify events - set this to your monitor's refresh rate for a smooth experience when interacting with clients while using the mouse */
+
 static unsigned int attachdefault        = AttachAside; // AttachMaster, AttachAbove, AttachAside, AttachBelow, AttachBottom
 
 static const int initshowbar             = 1;   /* 0 means no bar */
