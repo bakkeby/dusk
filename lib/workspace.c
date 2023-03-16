@@ -203,6 +203,27 @@ ismasterclient(Client *c)
 	return 0;
 }
 
+int
+noborder(Client *c)
+{
+	if (disabled(NoBorders))
+		return 0;
+
+	if (nexttiled(c->ws->clients) != c || nexttiled(c->next))
+		return 0;
+
+	if (ISFLOATING(c))
+		return 0;
+
+	if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c))
+		return 0;
+
+	if (!c->ws->layout->arrange)
+		return 0;
+
+	return 1;
+}
+
 void
 adjustwsformonitor(Workspace *ws, Monitor *m)
 {

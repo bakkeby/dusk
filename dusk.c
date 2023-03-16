@@ -1369,6 +1369,13 @@ configure(Client *c)
 	ce.width = c->w;
 	ce.height = c->h;
 	ce.border_width = c->bw;
+
+	if (noborder(c)) {
+		ce.width += c->bw * 2;
+		ce.height += c->bw * 2;
+		ce.border_width = 0;
+	}
+
 	ce.above = None;
 	ce.override_redirect = False;
 	XSendEvent(dpy, c->win, False, StructureNotifyMask, (XEvent *)&ce);
@@ -2722,15 +2729,12 @@ resizeclientpad(Client *c, int x, int y, int w, int h, int tw, int th)
 		return;
 	}
 
-	if (enabled(NoBorders) && ((nexttiled(c->ws->clients) == c && !nexttiled(c->next)))
-		&& (ISFAKEFULLSCREEN(c) || !ISFULLSCREEN(c))
-		&& !ISFLOATING(c)
-		&& c->ws->layout->arrange)
-	{
+	if (noborder(c)) {
 		wc.width += c->bw * 2;
 		wc.height += c->bw * 2;
 		wc.border_width = 0;
 	}
+
 	XConfigureWindow(dpy, c->win, CWX|CWY|CWWidth|CWHeight|CWBorderWidth, &wc);
 	configure(c);
 	XSync(dpy, False);
