@@ -121,6 +121,8 @@ load_icon_from_png_image(Client *c, const char *iconpath)
 	freeicon(c);
 	strlcpy(c->iconpath, iconpath, sizeof c->iconpath);
 	image = imlib_load_image(iconpath);
+	if (!image)
+		return 0; /* corrupt or otherwise not loadable file */
 	imlib_context_set_image(image);
 	imlib_image_set_has_alpha(1);
 	icw = w = imlib_image_get_width();
