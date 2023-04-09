@@ -3206,7 +3206,9 @@ spawn(const Arg *arg)
 pid_t
 spawncmd(const Arg *arg, int buttonclick, int orphan)
 {
+	struct sigaction sa;
 	pid_t pid = fork();
+
 	if (pid == 0) {
 
 		if (orphan && fork() != 0)
@@ -3261,6 +3263,13 @@ spawncmd(const Arg *arg, int buttonclick, int orphan)
 		}
 
 		setsid();
+
+		/* Restore SIGCHLD sighandler to default before spawning a program */
+		sigemptyset(&sa.sa_mask);
+		sa.sa_flags = 0;
+		sa.sa_handler = SIG_DFL;
+		sigaction(SIGCHLD, &sa, NULL);
+
 		execvp(((char **)arg->v)[1], ((char **)arg->v)+1);
 		fprintf(stderr, "dusk: execvp %s", ((char **)arg->v)[1]);
 		perror(" failed");

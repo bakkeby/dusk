@@ -6,11 +6,19 @@ void
 autostart_exec(void)
 {
 	const char *const *p;
+	struct sigaction sa;
 	pid_t pid;
 
 	for (p = autostart_startup ? autostart : autorestart; *p; p++) {
 		if ((pid = fork()) == 0) {
 			setsid();
+
+			/* Restore SIGCHLD sighandler to default before spawning a program */
+			sigemptyset(&sa.sa_mask);
+			sa.sa_flags = 0;
+			sa.sa_handler = SIG_DFL;
+			sigaction(SIGCHLD, &sa, NULL);
+
 			execvp(*p, (char *const *)p);
 			fprintf(stderr, "dusk: execvp %s\n", *p);
 			perror(" failed");
