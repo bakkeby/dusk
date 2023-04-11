@@ -51,14 +51,10 @@ loadxrdbconfig(XrmDatabase xrdb, char *name, enum resource_type rtype, void *dst
 	idst = dst;
 	fdst = dst;
 
-	char fullname[256];
 	char *type;
 	XrmValue ret;
 
-	snprintf(fullname, sizeof(fullname), "%s.%s", "dusk", name);
-	fullname[sizeof(fullname) - 1] = '\0';
-
-	XrmGetResource(xrdb, fullname, "*", &type, &ret);
+	XrmGetResource(xrdb, name, "*", &type, &ret);
 	if (!(ret.addr == NULL || strncmp("String", type, 64)))
 	{
 		switch (rtype) {
