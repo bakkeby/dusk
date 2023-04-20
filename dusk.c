@@ -848,7 +848,7 @@ attachstack(Client *c)
 void
 buttonpress(XEvent *e)
 {
-	int click, i;
+	int click, i, allow_focus;
 	Arg arg = {0};
 	Client *c;
 	Monitor *m;
@@ -856,8 +856,10 @@ buttonpress(XEvent *e)
 	XButtonPressedEvent *ev = &e->xbutton;
 	click = ClkRootWin;
 
+	allow_focus = (disabled(FocusOnClick) || (ev->button != Button4 && ev->button != Button5));
+
 	/* focus monitor if necessary */
-	if ((m = wintomon(ev->window)) && m != selmon) {
+	if ((m = wintomon(ev->window)) && m != selmon && allow_focus) {
 		ws = m->selws;
 		if (ws) {
 			unfocus(ws->sel, 1, NULL);
@@ -870,8 +872,10 @@ buttonpress(XEvent *e)
 	barpress(ev, m, &arg, &click);
 
 	if (click == ClkRootWin && (c = wintoclient(ev->window))) {
-		focus(c);
-		restack(selws);
+		if (allow_focus) {
+			focus(c);
+			restack(selws);
+		}
 		XAllowEvents(dpy, ReplayPointer, CurrentTime);
 		click = ClkClientWin;
 	}
@@ -1673,6 +1677,10 @@ enternotify(XEvent *e)
 	Client *c;
 	Monitor *m;
 	XCrossingEvent *ev = &e->xcrossing;
+
+	if (enabled(FocusOnClick))
+		return;
+
 	if ((ev->mode != NotifyNormal || ev->detail == NotifyInferior) && ev->window != root)
 		return;
 	c = wintoclient(ev->window);

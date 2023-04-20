@@ -26,6 +26,7 @@ dump_settings(yajl_gen gen)
 			YSTR("BarPadding"); YBOOL(enabled(BarPadding));
 			YSTR("NoBorders"); YBOOL(enabled(NoBorders));
 			YSTR("Warp"); YBOOL(enabled(Warp));
+			YSTR("FocusOnClick"); YBOOL(enabled(FocusOnClick));
 			YSTR("FocusedOnTop"); YBOOL(enabled(FocusedOnTop));
 			YSTR("DecorationHints"); YBOOL(enabled(DecorationHints));
 			YSTR("FocusOnNetActive"); YBOOL(enabled(FocusOnNetActive));
