@@ -23,17 +23,17 @@
 #define YBOOL(v) yajl_gen_bool(gen, v)
 #define YNULL() yajl_gen_null(gen)
 #define YARR(body)                                                             \
-  {                                                                            \
-    yajl_gen_array_open(gen);                                                  \
-    body;                                                                      \
-    yajl_gen_array_close(gen);                                                 \
-  }
+	{                                                                          \
+		yajl_gen_array_open(gen);                                              \
+		body;                                                                  \
+		yajl_gen_array_close(gen);                                             \
+	}
 #define YMAP(body)                                                             \
-  {                                                                            \
-    yajl_gen_map_open(gen);                                                    \
-    body;                                                                      \
-    yajl_gen_map_close(gen);                                                   \
-  }
+	{                                                                          \
+		yajl_gen_map_open(gen);                                                \
+		body;                                                                  \
+		yajl_gen_map_close(gen);                                               \
+	}
 
 typedef unsigned long Window;
 
@@ -50,6 +50,7 @@ typedef enum IPCMessageType {
 	IPC_TYPE_GET_SETTINGS = 5,
 	IPC_TYPE_GET_SYSTRAY_ICONS = 6,
 	IPC_TYPE_GET_COMMANDS = 7,
+	IPC_TYPE_GET_BAR_HEIGHT = 8
 } IPCMessageType;
 
 // Every IPC message must begin with this
@@ -426,6 +427,15 @@ get_commands()
 }
 
 static int
+get_bar_height()
+{
+	send_message(IPC_TYPE_GET_BAR_HEIGHT, 1, (uint8_t *)"");
+	print_socket_reply();
+
+	return 0;
+}
+
+static int
 get_systray_windows()
 {
 	send_message(IPC_TYPE_GET_SYSTRAY_ICONS, 1, (uint8_t *)"");
@@ -462,6 +472,8 @@ print_usage(const char *name)
 	puts("  get_layouts                     Get list of layouts");
 	puts("");
 	puts("  get_client <window_id>          Get client proprties");
+	puts("");
+	puts("  get_bar_height                  Get the bar height");
 	puts("");
 	puts("  get_workspaces                  Get list of workspaces");
 	puts("");
@@ -525,6 +537,8 @@ main(int argc, char *argv[])
 		get_settings();
 	} else if (strcmp(argv[i], "get_commands") == 0) {
 		get_commands();
+	} else if (strcmp(argv[i], "get_bar_height") == 0) {
+		get_bar_height();
 	} else if (strcmp(argv[i], "get_systray_windows") == 0) {
 		get_systray_windows();
 	} else

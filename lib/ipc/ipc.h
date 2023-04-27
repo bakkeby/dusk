@@ -28,6 +28,7 @@ typedef enum IPCMessageType {
 	IPC_TYPE_GET_SETTINGS = 5,
 	IPC_TYPE_GET_SYSTRAY_ICONS = 6,
 	IPC_TYPE_GET_COMMANDS = 7,
+	IPC_TYPE_GET_BAR_HEIGHT = 8
 } IPCMessageType;
 
 /**

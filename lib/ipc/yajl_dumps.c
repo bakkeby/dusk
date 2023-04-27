@@ -27,9 +27,9 @@ dump_settings(yajl_gen gen)
 			YSTR("NoBorders"); YBOOL(enabled(NoBorders));
 			YSTR("Warp"); YBOOL(enabled(Warp));
 			YSTR("FocusOnClick"); YBOOL(enabled(FocusOnClick));
+			YSTR("FocusOnNetActive"); YBOOL(enabled(FocusOnNetActive));
 			YSTR("FocusedOnTop"); YBOOL(enabled(FocusedOnTop));
 			YSTR("DecorationHints"); YBOOL(enabled(DecorationHints));
-			YSTR("FocusOnNetActive"); YBOOL(enabled(FocusOnNetActive));
 			YSTR("AllowNoModifierButtons"); YBOOL(enabled(AllowNoModifierButtons));
 			YSTR("CenterSizeHintsClients"); YBOOL(enabled(CenterSizeHintsClients));
 			YSTR("ResizeHints"); YBOOL(enabled(ResizeHints));
@@ -74,6 +74,16 @@ dump_commands(yajl_gen gen)
 			)
 		}
 	)
+	// clang-format on
+
+	return 0;
+}
+
+int
+dump_bar_height(yajl_gen gen)
+{
+	// clang-format off
+	YINT(bh);
 	// clang-format on
 
 	return 0;
