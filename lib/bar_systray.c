@@ -19,7 +19,7 @@ size_systray(Bar *bar, BarArg *a)
 int
 draw_systray(Bar *bar, BarArg *a)
 {
-	if (disabled(Systray)) {
+	if (disabled(Systray) || !bar) {
 		if (systray)
 			XMoveWindow(dpy, systray->win, -systray->h, bar->by);
 		return 0;

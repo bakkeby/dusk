@@ -280,12 +280,14 @@ dump_monitor(yajl_gen gen, Monitor *mon, int is_selected)
 				YSTR("current"); YSTR("NULL");
 			)
 
-			YSTR("bar"); YMAP(
-				YSTR("y"); YINT(mon->bar->by);
-				YSTR("is_shown"); YBOOL(mon->showbar);
-				YSTR("is_vert"); YBOOL(mon->bar->vert);
-				YSTR("window_id"); YINT(mon->bar->win);
-			)
+			if (mon->bar) {
+				YSTR("bar"); YMAP(
+					YSTR("y"); YINT(mon->bar->by);
+					YSTR("is_shown"); YBOOL(mon->showbar);
+					YSTR("is_vert"); YBOOL(mon->bar->vert);
+					YSTR("window_id"); YINT(mon->bar->win);
+				)
+			}
 		)
 
 		return 0;
@@ -338,12 +340,14 @@ dump_monitor(yajl_gen gen, Monitor *mon, int is_selected)
 			)
 		)
 
-		YSTR("bar"); YMAP(
-			YSTR("y"); YINT(mon->bar->by);
-			YSTR("is_shown"); YBOOL(mon->showbar);
-			YSTR("is_vert"); YBOOL(mon->bar->vert);
-			YSTR("window_id"); YINT(mon->bar->win);
-		)
+		if (mon->bar) {
+			YSTR("bar"); YMAP(
+				YSTR("y"); YINT(mon->bar->by);
+				YSTR("is_shown"); YBOOL(mon->showbar);
+				YSTR("is_vert"); YBOOL(mon->bar->vert);
+				YSTR("window_id"); YINT(mon->bar->win);
+			)
+		}
 	)
 	// clang-format on
 

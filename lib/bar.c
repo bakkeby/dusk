@@ -4,6 +4,9 @@ struct NumBarRules { char TooManyBarRules__Increase_BARRULES_macro_to_fix_this[L
 void
 barhover(XEvent *e, Bar *bar)
 {
+	if (!bar)
+		return;
+
 	const BarRule *br;
 	Monitor *m = bar->mon;
 	XMotionEvent *ev = &e->xmotion;
@@ -432,6 +435,9 @@ updatebarpos(Monitor *m)
 void
 setbarpos(Bar *bar)
 {
+	if (!bar)
+		return;
+
 	char xCh, yCh, wCh, hCh;
 	float w, h;
 	float x, y;

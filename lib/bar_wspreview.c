@@ -1,6 +1,9 @@
 void
 createpreview(Monitor *m)
 {
+	if (!m->bar)
+		return;
+
 	if (m->preview) {
 		XMoveResizeWindow(
 			dpy, m->preview->win,

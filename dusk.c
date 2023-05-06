@@ -1741,7 +1741,7 @@ focus(Client *c)
 		grabbuttons(c, 1);
 		setfocus(c);
 
-		if (enabled(FocusedOnTop)) {
+		if (enabled(FocusedOnTop) && c->ws->mon->bar) {
 			/* Move all visible tiled clients that are not marked as on top below the bar window */
 			wc.stack_mode = Below;
 			wc.sibling = c->ws->mon->bar->win;
@@ -2218,7 +2218,7 @@ manage(Window w, XWindowAttributes *wa)
 		c->y = m->my + m->mh - HEIGHT(c);
 	c->x = MAX(c->x, m->mx);
 	/* only fix client y-offset, if the client center might cover the bar */
-	c->y = MAX(c->y, ((m->bar->by == m->my) && (c->x + (c->w / 2) >= m->wx)
+	c->y = MAX(c->y, ((m->bar && m->bar->by == m->my) && (c->x + (c->w / 2) >= m->wx)
 		&& (c->x + (c->w / 2) < m->wx + m->ww)) ? bh : m->my);
 	wc.border_width = c->bw;
 	XConfigureWindow(dpy, w, CWBorderWidth, &wc);
@@ -2760,7 +2760,7 @@ restack(Workspace *ws)
 	raiseclient(ws->sel);
 
 	/* Place tiled clients below the bar window */
-	if (ws->layout->arrange) {
+	if (ws->layout->arrange && ws->mon->bar) {
 		wc.stack_mode = Below;
 		wc.sibling = ws->mon->bar->win;
 		for (c = ws->stack; c; c = c->snext)
@@ -3351,8 +3351,10 @@ togglefloating(const Arg *arg)
 			else
 				restorefloats(c);
 
-			wc.sibling = c->ws->mon->bar->win;
-			XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
+			if (c->ws->mon->bar) {
+				wc.sibling = c->ws->mon->bar->win;
+				XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
+			}
 		}
 
 		setfloatinghint(c);
