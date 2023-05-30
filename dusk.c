@@ -1752,14 +1752,31 @@ focus(Client *c)
 				}
 			}
 
-			/* Move the currently focused client above the bar window */
 			wc.stack_mode = Above;
 			wc.sibling = c->ws->mon->bar->win;
-			XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
+
+			/* If there are sticky clients, then raise those first. */
+			for (f = stickyws->stack; f; f = f->snext) {
+				XConfigureWindow(dpy, f->win, CWSibling|CWStackMode, &wc);
+				wc.stack_mode = Below;
+				wc.sibling = f->win;
+			}
+			/* Followed by always on top clients */
+			for (f = c->ws->stack; f; f = f->snext) {
+				if (ISVISIBLE(f) && (ALWAYSONTOP(f) || ISTRANSIENT(f))) {
+					XConfigureWindow(dpy, f->win, CWSibling|CWStackMode, &wc);
+					wc.stack_mode = Below;
+					wc.sibling = f->win;
+				}
+			}
+			/* Followed by the current client, if not already included above */
+			if (!(ALWAYSONTOP(c) || ISTRANSIENT(c))) {
+				XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
+				wc.sibling = c->win;
+			}
 
 			/* Move all visible floating windows that are not marked as on top below the current window */
 			wc.stack_mode = Below;
-			wc.sibling = c->win;
 			for (f = c->ws->stack; f; f = f->snext) {
 				if (f != c && ISFLOATING(f) && ISVISIBLE(f) && !(ALWAYSONTOP(f) || ISTRANSIENT(f))) {
 					XConfigureWindow(dpy, f->win, CWSibling|CWStackMode, &wc);
