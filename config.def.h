@@ -82,6 +82,7 @@ static uint64_t functionality = 0
 //	|NoBorders // as per the noborder patch, show no border when only one client in tiled mode
 //	|Warp // warp cursor to currently focused window
 //	|FocusedOnTop // allows focused window to stay on top of other windows
+//	|FocusedOnTopTiled // additional toggle to allow focused tiled clients to show on top of floating windows
 //	|DecorationHints // omit drawing the window border if the applications asks not to
 	|FocusOnNetActive //  allow windows demanding attention to receive focus automatically
 	|AllowNoModifierButtons // allow some window operations, like move and resize, to work without having to hold down a modifier key

@@ -56,7 +56,7 @@ static const uint64_t
 	WorkspaceLabels = 0x2000000000, // adds the class of the master client next to the workspace icon
 	FlexWinBorders = 0x4000000000, // option to use the SchemeFlex* colour schemes, if disabled then SchemeTitle* is used instead
 	FocusOnClick = 0x8000000000, // only allow focus change when the user clicks on windows (disables sloppy focus)
-	FuncPlaceholder1099511627776 = 0x10000000000,
+	FocusedOnTopTiled = 0x10000000000, // additional toggle to also allow focused tiled clients to display on top of floating windows
 	FuncPlaceholder2199023255552 = 0x20000000000,
 	FuncPlaceholder4398046511104 = 0x40000000000,
 	FuncPlaceholder8796093022208 = 0x80000000000,

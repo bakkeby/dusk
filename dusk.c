@@ -874,7 +874,11 @@ buttonpress(XEvent *e)
 	if (click == ClkRootWin && (c = wintoclient(ev->window))) {
 		if (allow_focus) {
 			focus(c);
-			restack(selws);
+			if (ISSTICKY(c)) {
+				restack(stickyws);
+			} else {
+				restack(selws);
+			}
 		}
 		XAllowEvents(dpy, ReplayPointer, CurrentTime);
 		click = ClkClientWin;
@@ -1709,9 +1713,7 @@ focus(Client *c)
 		return;
 
 	Workspace *ws = c ? c->ws : selws;
-	Client *f;
 	Bar *bar;
-	XWindowChanges wc;
 
 	if (!c || ISINVISIBLE(c))
 		for (c = ws->stack; c && !ISVISIBLE(c); c = c->snext);
@@ -1741,52 +1743,12 @@ focus(Client *c)
 		grabbuttons(c, 1);
 		setfocus(c);
 
-		if (enabled(FocusedOnTop) && c->ws->mon->bar) {
-			/* Move all visible tiled clients that are not marked as on top below the bar window */
-			wc.stack_mode = Below;
-			wc.sibling = c->ws->mon->bar->win;
-			for (f = c->ws->stack; f; f = f->snext) {
-				if (f != c && !ISFLOATING(f) && ISVISIBLE(f) && !(ALWAYSONTOP(f) || ISTRANSIENT(f))) {
-					XConfigureWindow(dpy, f->win, CWSibling|CWStackMode, &wc);
-					wc.sibling = f->win;
-				}
-			}
-
-			wc.stack_mode = Above;
-			wc.sibling = c->ws->mon->bar->win;
-
-			/* If there are sticky clients, then raise those first. */
-			for (f = stickyws->stack; f; f = f->snext) {
-				XConfigureWindow(dpy, f->win, CWSibling|CWStackMode, &wc);
-				wc.stack_mode = Below;
-				wc.sibling = f->win;
-			}
-			/* Followed by always on top clients */
-			for (f = c->ws->stack; f; f = f->snext) {
-				if (ISVISIBLE(f) && (ALWAYSONTOP(f) || ISTRANSIENT(f))) {
-					XConfigureWindow(dpy, f->win, CWSibling|CWStackMode, &wc);
-					wc.stack_mode = Below;
-					wc.sibling = f->win;
-				}
-			}
-			/* Followed by the current client, if not already included above */
-			if (!(ALWAYSONTOP(c) || ISTRANSIENT(c))) {
-				XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
-				wc.sibling = c->win;
-			}
-
-			/* Move all visible floating windows that are not marked as on top below the current window */
-			wc.stack_mode = Below;
-			for (f = c->ws->stack; f; f = f->snext) {
-				if (f != c && ISFLOATING(f) && ISVISIBLE(f) && !(ALWAYSONTOP(f) || ISTRANSIENT(f))) {
-					XConfigureWindow(dpy, f->win, CWSibling|CWStackMode, &wc);
-					wc.sibling = f->win;
-				}
-			}
+		if (enabled(FocusedOnTop)) {
+			restack(c->ws);
+		} else {
+			XSync(dpy, False);
+			skipfocusevents();
 		}
-
-		XSync(dpy, False);
-		skipfocusevents();
 		XSetWindowBorder(dpy, c->win, scheme[clientscheme(c, c)][ColBorder].pixel);
 	} else {
 		for (bar = selmon->bar; bar && !bar->showbar; bar = bar->next);
@@ -2386,8 +2348,10 @@ maprequest(XEvent *e)
 		fprintf(stderr, "maprequest: refusing to map window %ld with depth of 0\n", ev->window);
 		return;
 	}
-	if (wa.override_redirect)
+	if (wa.override_redirect) {
+		XRaiseWindow(dpy, ev->window);
 		return;
+	}
 	if (!wintoclient(ev->window))
 		manage(ev->window, &wa);
 }
@@ -2620,28 +2584,66 @@ quit(const Arg *arg)
 void
 raiseclient(Client *c)
 {
-	Client *s, *l = NULL;
-	Workspace *ws = c->ws;
+	Client *s, *top = NULL;
+	Workspace *ws;
 	XWindowChanges wc;
 
+	/* If the raised client is on the sticky workspace, then refer to the previously
+	 * selected workspace when for searching other clients. */
+	ws = (c->ws == stickyws ? stickyws->next : c->ws);
+
 	/* Do not raise if client is tiled. */
-	if (!ISFLOATING(c) && ws->layout->arrange)
+	if (disabled(FocusedOnTopTiled) && !ISFLOATING(c) && ws->layout->arrange)
 		return;
 
-	if (!ALWAYSONTOP(c)) {
-		/* find the lowest stacked client that is always on top and place the window below that */
-		for (s = ws->stack; s; s = s->snext)
-			if (ALWAYSONTOP(s) && (ISFLOATING(c) || !ws->layout->arrange))
-				l = s;
-		if (l) {
-			wc.stack_mode = Below;
-			wc.sibling = l->win;
-			XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
-			return;
+	wc.stack_mode = Below;
+
+	/* Check if there are floating always on top clients that need to be on top. */
+	for (s = ws->stack; s; s = s->snext) {
+		if (!ISFLOATING(s) || !(ALWAYSONTOP(s) || ISTRANSIENT(s)))
+			continue;
+
+		if (!top) {
+			top = s;
+			XRaiseWindow(dpy, s->win);
+			wc.sibling = s->win;
+			continue;
 		}
+		XConfigureWindow(dpy, s->win, CWSibling|CWStackMode, &wc);
+		wc.sibling = s->win;
 	}
 
-	XRaiseWindow(dpy, c->win);
+	/* Otherwise check if there are sticky clients first that need to be on top. */
+	for (s = stickyws->stack; s; s = s->snext) {
+		if (!top) {
+			top = s;
+			XRaiseWindow(dpy, s->win);
+			wc.sibling = s->win;
+			continue;
+		}
+
+		XConfigureWindow(dpy, s->win, CWSibling|CWStackMode, &wc);
+		wc.sibling = s->win;
+	}
+
+	if (!ISFLOATING(c) || !(ALWAYSONTOP(c) || ISTRANSIENT(c))) {
+		if (!top) {
+			XRaiseWindow(dpy, c->win);
+		} else {
+			XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
+		}
+		wc.sibling = c->win;
+	}
+
+	if (enabled(FocusedOnTopTiled)) {
+		/* Move all visible floating windows that are not marked as on top below the current window */
+		for (s = ws->stack; s; s = s->snext) {
+			if (s != c && (!ws->layout->arrange || ISFLOATING(s)) && ISVISIBLE(s) && !(ALWAYSONTOP(s) || ISTRANSIENT(s))) {
+				XConfigureWindow(dpy, s->win, CWSibling|CWStackMode, &wc);
+				wc.sibling = s->win;
+			}
+		}
+	}
 }
 
 /* This reads the stacking order on the X server side and updates the client
@@ -2768,30 +2770,31 @@ resizeclientpad(Client *c, int x, int y, int w, int h, int tw, int th)
 void
 restack(Workspace *ws)
 {
-	Client *c;
+	Client *c = ws->sel;
+	Client *s;
 	XWindowChanges wc;
 
-	if (!ws->sel)
+	if (!c)
 		return;
 
-	raiseclient(ws->sel);
-
 	/* Place tiled clients below the bar window */
-	if (ws->layout->arrange && ws->mon->bar) {
+	if (ws->layout->arrange) {
 		wc.stack_mode = Below;
-		wc.sibling = ws->mon->bar->win;
-		for (c = ws->stack; c; c = c->snext)
-			if (!ISFLOATING(c) && ISVISIBLE(c)) {
+		wc.sibling = ws->mon->bar ? ws->mon->bar->win : wmcheckwin;
+		for (s = ws->stack; s; s = s->snext)
+			if (s != c && !ISFLOATING(s) && ISVISIBLE(s) && !(ALWAYSONTOP(s) || ISTRANSIENT(s))) {
 				XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
-				wc.sibling = c->win;
+				wc.sibling = s->win;
 			}
 	}
+
+	raiseclient(c);
 
 	XSync(dpy, False);
 	skipfocusevents();
 
 	if (canwarp(ws))
-		warp(ws->sel);
+		warp(c);
 }
 
 void
@@ -3367,11 +3370,8 @@ togglefloating(const Arg *arg)
 				floatpos(&((Arg) { .v = toggle_float_pos }));
 			else
 				restorefloats(c);
-
-			if (c->ws->mon->bar) {
-				wc.sibling = c->ws->mon->bar->win;
-				XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
-			}
+			wc.sibling = c->ws->mon->bar ? c->ws->mon->bar->win : wmcheckwin;
+			XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
 		}
 
 		setfloatinghint(c);
@@ -3617,6 +3617,7 @@ updategeom(int width, int height)
 			else
 				mons = createmon(i);
 		}
+
 		for (m = mons; m && m->num < nn; m = m->next) {
 			if (m->num >= n
 			|| unique[m->num].x_org != m->mx || unique[m->num].y_org != m->my
