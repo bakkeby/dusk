@@ -10,7 +10,7 @@ resizemouse(const Arg *arg)
 	Client *c, *s;
 	Monitor *m;
 	XEvent ev;
-	Workspace *ws;
+	Workspace *ws, *next;
 	Time lasttime = 0;
 	double prevopacity;
 
@@ -35,9 +35,15 @@ resizemouse(const Arg *arg)
 		ngirders++;
 	}
 
-	for (ws = workspaces; ws; ws = ws->next) {
+	for (ws = workspaces; ws; ws = next) {
+		next = ws->next;
+
+		if (next == NULL)
+			next = stickyws;
+
 		if (!ws->visible)
 			continue;
+
 		lgirder[ngirders] = ws->wx + gappov;
 		rgirder[ngirders] = ws->wx + ws->ww - gappov;
 		tgirder[ngirders] = ws->wy + gappoh;
@@ -62,6 +68,9 @@ resizemouse(const Arg *arg)
 			bgirder[ngirders] = s->y - gap;
 			ngirders++;
 		}
+
+		if (ws == stickyws)
+			break;
 	}
 
 	if (resizeopacity) {
