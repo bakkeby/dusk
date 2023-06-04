@@ -20,7 +20,6 @@ movemouse(const Arg *arg)
 	XEvent ev;
 	Time lasttime = 0;
 	double prevopacity;
-	ignore_marked = 0; // movemouse supports marked clients
 
 	if (!(c = selws->sel))
 		return;
@@ -29,6 +28,7 @@ movemouse(const Arg *arg)
 
 	group_after = c->group;
 	if (ISMARKED(c)) {
+		ignore_marked = 0; // movemouse supports marked clients
 		group(NULL);
 	}
 

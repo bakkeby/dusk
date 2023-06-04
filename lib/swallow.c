@@ -11,12 +11,12 @@ static xcb_connection_t *xcon;
 void
 swallow(const Arg *arg)
 {
-	Client *c, *next, *last, *s = CLIENT;
+	Client *c = selws->sel, *next, *last, *s = CLIENT;
 
 	if (!s)
 		return;
 
-	for (c = nextmarked(NULL, s); c; c = nextmarked(next, NULL)) {
+	for (c = nextmarked(NULL, c); c; c = nextmarked(next, NULL)) {
 		next = c->next;
 		if (c != s) {
 			detach(c);

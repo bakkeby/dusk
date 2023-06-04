@@ -885,6 +885,7 @@ buttonpress(XEvent *e)
 			buttons[i].func((click == ClkWorkspaceBar || click == ClkWinTitle) && buttons[i].arg.i == 0 ? &arg : &buttons[i].arg);
 		}
 	}
+	ignore_marked = 1;
 }
 
 void
