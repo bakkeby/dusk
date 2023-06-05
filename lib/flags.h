@@ -132,6 +132,7 @@ static const uint64_t
 #define MOVEPLACE(C) (C && C->flags & MovePlace)
 #define LOWER(C) (C && C->flags & Lower)
 #define RAISE(C) (C && C->flags & Raise)
+#define TILED(C) (C && C->win && !(C->flags & (Invisible|Hidden|Floating|Sticky)))
 
 #define WASFLOATING(C) (C && C->prevflags & Floating)
 #define WASFAKEFULLSCREEN(C) (C && C->prevflags & FakeFullScreen)

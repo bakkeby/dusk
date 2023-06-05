@@ -2,77 +2,110 @@ void
 stackfocus(const Arg *arg)
 {
 	Workspace *ws = selws;
-	int i = stackpos(arg);
-	Client *c, *p;
+	Client *c = NULL;
 
-	if (i < 0)
- 		return;
+	if (!ws->clients)
+		return;
 
-	for (p = NULL, c = ws->clients; c && (i || !ISVISIBLE(c));
-	    i -= ISVISIBLE(c) ? 1 : 0, p = c, c = c->next);
-	focus(c ? c : p);
+	stackposclient(arg, &c);
+
+	if (c == ws->sel) {
+		if (arg->i != PREVSEL) {
+			stackfocus(&((Arg) { .i = PREVSEL }));
+		}
+		return;
+	}
+
+	focus(c);
 	arrangews(ws);
 	skipfocusevents();
 	if (canwarp(ws))
-		warp(ws->sel);
+		warp(c);
 }
 
 void
 stackpush(const Arg *arg)
 {
 	Workspace *ws = selws;
-	int i = stackpos(arg);
-	Client *sel = ws->sel, *c, *p;
-
-	if (i < 0)
-		return;
-	else if (i == 0) {
-		detach(sel);
-		attach(sel);
-	}
-	else {
-		for (p = NULL, c = ws->clients; c; p = c, c = c->next)
-			if (!(i -= (ISVISIBLE(c) && c != sel)))
-				break;
-		c = c ? c : p;
-		detach(sel);
-		sel->next = c->next;
-		c->next = sel;
-	}
-	arrange(ws);
-	skipfocusevents();
-	if (canwarp(ws))
-		warp(ws->sel);
-}
-
-int
-stackpos(const Arg *arg)
-{
-	Workspace *ws = selws;
-	int n, i;
-	Client *c, *l;
+	Client *c = NULL, *sel = ws->sel;
 
 	if (!ws->clients)
-		return -1;
+		return;
 
-	if (arg->i == PREVSEL) {
-		for (l = ws->stack; l && (!ISVISIBLE(l) || l == ws->sel); l = l->snext);
-		if (!l)
-			return -1;
-		for (i = 0, c = ws->clients; c != l; i += ISVISIBLE(c) ? 1 : 0, c = c->next);
-		return i;
+	stackposclient(arg, &c);
+
+	if (c == sel)
+		return;
+
+	detach(sel);
+	attachabove(sel, c);
+
+	arrangews(ws);
+	skipfocusevents();
+	if (canwarp(ws))
+		warp(sel);
+}
+
+void
+stackswap(const Arg *arg)
+{
+	Workspace *ws = selws;
+	Client *c = NULL, *sel = ws->sel;
+
+	if (!ws->clients)
+		return;
+
+	stackposclient(arg, &c);
+
+	if (c == sel)
+		return;
+
+	swap(sel, c);
+
+	if (ismasterclient(c)) {
+		focus(c);
+		sel = c;
 	}
-	else if (ISINC(arg->i)) {
-		if (!ws->sel)
-			return -1;
-		for (i = 0, c = ws->clients; c != ws->sel; i += ISVISIBLE(c) ? 1 : 0, c = c->next);
-		for (n = i; c; n += ISVISIBLE(c) ? 1 : 0, c = c->next);
-		return MOD(i + GETINC(arg->i), n);
+
+	arrangews(ws);
+	skipfocusevents();
+	if (canwarp(ws))
+		warp(sel);
+}
+
+void
+stackposclient(const Arg *arg, Client **f)
+{
+	Workspace *ws = selws;
+
+	if (!ws->clients)
+		return;
+
+	if (ISINC(arg)) {
+		focusstack(&((Arg) { .i = GETINC(arg) }));
+		return;
 	}
-	else if (arg->i < 0) {
-		for (i = 0, c = ws->clients; c; i += ISVISIBLE(c) ? 1 : 0, c = c->next);
-		return MAX(i + arg->i, 0);
+
+	if (ISMASTER(arg)) {
+		*f = nthmaster(ws->clients, GETMASTER(arg), 1);
+		return;
 	}
-	else
-		return arg->i;
+
+	if (ISSTACK(arg)) {
+		*f = nthstack(ws->clients, GETSTACK(arg), 1);
+		return;
+	}
+
+	if (ISLAST(arg)) {
+		*f = lasttiled(ws->clients);
+		return;
+	}
+
+	if (ISPREVSEL(arg)) {
+		*f = prevsel();
+		return;
+	}
+
+	*f = nthtiled(ws->clients, arg->i, 1);
+	return;
 }

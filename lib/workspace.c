@@ -192,18 +192,6 @@ hasfloating(Workspace *ws)
 }
 
 int
-ismasterclient(Client *c)
-{
-	Client *i;
-	int n;
-	for (n = 0, i = nexttiled(c->ws->clients); i && n < c->ws->nmaster; i = nexttiled(i->next), ++n)
-		if (i == c)
-			return 1;
-
-	return 0;
-}
-
-int
 noborder(Client *c)
 {
 	if (disabled(NoBorders))

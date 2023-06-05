@@ -71,6 +71,7 @@
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X)))
 #define TEXT2DW(X)              (status2dtextlength((X)))
 #define CLIENT                  (arg && arg->v ? (Client*)arg->v : selws->sel)
+#define NAME(X)                 ((X) ? (X)->name : "NULL")
 
 /* enums */
 enum {
@@ -390,9 +391,6 @@ static void mappingnotify(XEvent *e);
 static void maprequest(XEvent *e);
 static void maximize(Client *c, int maximize_vert, int maximize_horz);
 static void motionnotify(XEvent *e);
-static Client *nexttiled(Client *c);
-static Client *nthtiled(Client *c, int n);
-static Client *prevtiled(Client *c);
 static void propertynotify(XEvent *e);
 static void restart(const Arg *arg);
 static void quit(const Arg *arg);
@@ -2429,31 +2427,6 @@ motionnotify(XEvent *e)
 	}
 }
 
-Client *
-nexttiled(Client *c)
-{
-	for (; c && (ISFLOATING(c) || !ISVISIBLE(c)); c = c->next);
-	return c;
-}
-
-Client *
-nthtiled(Client *c, int n)
-{
-	int i;
-	for (i = 0; c && i < n; c = c->next)
-		if (!ISFLOATING(c) && ISVISIBLE(c))
-			i++;
-	return c;
-}
-
-Client *
-prevtiled(Client *c)
-{
-	Client *p, *r;
-	for (p = nexttiled(c->ws->clients), r = NULL; p && p != c && (r = p); p = nexttiled(p->next));
-	return r;
-}
-
 /* The structure for PropertyNotify events contains:
  *
  * typedef struct {
@@ -3822,8 +3795,9 @@ xerrorstart(Display *dpy, XErrorEvent *ee)
 void
 zoom(const Arg *arg)
 {
-	Client *c = CLIENT, *at = NULL, *cold, *cprevious = NULL, *p;
+	Client *c = CLIENT, *master = NULL;
 	Workspace *ws;
+
 	if (!c)
 		return;
 
@@ -3834,37 +3808,17 @@ zoom(const Arg *arg)
 	if (!ws->layout->arrange || (c && ISFLOATING(c)) || !c)
 		return;
 
-	if (c == nexttiled(ws->clients)) {
-		if (ws->prevzoom && ws->prevzoom->ws != ws)
-			ws->prevzoom = NULL;
-		p = ws->prevzoom;
-		at = findbefore(p);
-		if (at)
-			cprevious = nexttiled(at->next);
-		if (!cprevious || cprevious != p) {
-			ws->prevzoom = NULL;
-			if (!c || !(c = nexttiled(c->next)))
-				return;
-		} else
-			c = cprevious;
-	}
-
-	cold = nexttiled(ws->clients);
-	if (c != cold && !at)
-		at = findbefore(c);
-
-	detach(c);
-	attach(c);
-
-	/* swap windows instead of pushing the previous one down */
-	if (c != cold && at) {
-		ws->prevzoom = cold;
-		if (cold && at != cold) {
-			detach(cold);
-			cold->next = at->next;
-			at->next = cold;
+	master = nexttiled(ws->clients);
+	if (c == master) {
+		if (ws->prevzoom && ws->prevzoom->ws == ws) {
+			c = ws->prevzoom;
+		} else {
+			c = nthstack(ws->clients, 1, 1);
 		}
 	}
+
+	swap(master, c);
+	ws->prevzoom = master;
 
 	arrange(c->ws);
 }

@@ -1,3 +1,6 @@
+/* Utilities */
+#include "lookup.c"
+
 /* Bar functionality */
 #include "bar_indicators.c"
 #include "flags.c"
@@ -75,7 +78,6 @@
 #include "unfloatvisible.c"
 #include "vanitygaps.c"
 #include "winicon.c"
-#include "zoomswap.c"
 #include "xrdb.c"
 
 /* Layouts */

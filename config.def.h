@@ -573,6 +573,7 @@ static Key keys[] = {
 
 //	STACKKEYS(AltGr|Ctrl,                                        stackfocus)                           // focus on the nth client in the stack, see the STACKKEYS macro for keybindings
 //	STACKKEYS(AltGr|Ctrl|Shift,                                  stackpush)                            // move the currently focused client to the nth place in the stack
+//	STACKKEYS(AltGr|Shift,                                       stackswap)                            // swap the currently focused client with the nth client in the stack
 
 	SCRATCHKEYS(MODKEY,                         XK_w,            spcmd_w)
 	SCRATCHKEYS(MODKEY,                         XK_e,            spcmd_e)
@@ -738,8 +739,9 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMANDS( setstatus, 2, ARG_TYPE_UINT, ARG_TYPE_STR ),
 	IPCCOMMAND( showbar, ARG_TYPE_NONE ),
 	IPCCOMMAND( showhideclient, ARG_TYPE_NONE ),
-	IPCCOMMAND( stackpush, ARG_TYPE_SINT ),
 	IPCCOMMAND( stackfocus, ARG_TYPE_SINT ),
+	IPCCOMMAND( stackpush, ARG_TYPE_SINT ),
+	IPCCOMMAND( stackswap, ARG_TYPE_SINT ),
 	IPCCOMMAND( swallow, ARG_TYPE_NONE ),
 	IPCCOMMAND( switchcol, ARG_TYPE_NONE ),
 	IPCCOMMAND( swapwsbyname, ARG_TYPE_STR ),

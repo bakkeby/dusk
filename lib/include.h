@@ -1,3 +1,6 @@
+/* Utilities */
+#include "lookup.h"
+
 /* Bar functionality */
 #include "bar.h"
 #include "bar_indicators.h"
@@ -71,7 +74,6 @@
 #include "transferall.h"
 #include "unfloatvisible.h"
 #include "vanitygaps.h"
-#include "zoomswap.h"
 #include "xrdb.h"
 
 /* Layouts */

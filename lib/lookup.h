@@ -1,0 +1,10 @@
+static Client **clientptr(Client *c);
+static int ismasterclient(Client *c);
+static Client *lasttiled(Client *c);
+static Client *nexttiled(Client *c);
+static Client *nthmaster(Client *c, int n, int reduce);
+static Client *nthstack(Client *c, int n, int reduce);
+static Client *nthtiled(Client *c, int n, int reduce);
+static Client *prevtiled(Client *c);
+static Client *prevsel(void);
+static void swap(Client *a, Client *b);
