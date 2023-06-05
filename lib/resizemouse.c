@@ -49,8 +49,13 @@ resizemouse(const Arg *arg)
 		tgirder[ngirders] = ws->wy + gappoh;
 		bgirder[ngirders] = ws->wy + ws->wh - gappoh;
 		ngirders++;
-		if (disabled(SnapToWindows) || arg->i == 11)
+
+		if (disabled(SnapToWindows) || arg->i == 11) {
+			if (ws == stickyws)
+				break;
 			continue;
+		}
+
 		for (s = ws->stack; s; s = s->snext) {
 			if ((!ISFLOATING(s) && ws->layout->arrange) || !ISVISIBLE(s) || s == c)
 				continue;
