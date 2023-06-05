@@ -1,5 +1,6 @@
 static Client **clientptr(Client *c);
 static int ismasterclient(Client *c);
+static Client *lastclient(Client *c);
 static Client *lasttiled(Client *c);
 static Client *nexttiled(Client *c);
 static Client *nthmaster(Client *c, int n, int reduce);

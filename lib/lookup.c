@@ -21,6 +21,15 @@ ismasterclient(Client *client)
 }
 
 Client *
+lastclient(Client *c)
+{
+	Client *last;
+	for (last = c; last && last->next; last = last->next);
+
+	return last;
+}
+
+Client *
 lasttiled(Client *c)
 {
 	Client *last = NULL;
@@ -41,12 +50,18 @@ nexttiled(Client *c)
 Client *
 nthmaster(Client *c, int n, int reduce)
 {
+	if (!c)
+		return NULL;
+
 	return nthtiled(c, MIN(n, c->ws->nmaster), 1);
 }
 
 Client *
 nthstack(Client *c, int n, int reduce)
 {
+	if (!c)
+		return NULL;
+
 	return nthtiled(c, n + c->ws->nmaster, 1);
 }
 
@@ -55,7 +70,6 @@ nthtiled(Client *c, int n, int reduce)
 {
 	Client *prev = NULL;
 	int i;
-
 	for (i = 1, c = nexttiled(c); c && (i++ < n); prev = c, c = nexttiled(c->next));
 
 	if (!c && reduce) {
