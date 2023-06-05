@@ -3808,17 +3808,20 @@ zoom(const Arg *arg)
 	if (!ws->layout->arrange || (c && ISFLOATING(c)) || !c)
 		return;
 
-	master = nexttiled(ws->clients);
-	if (c == master) {
+	if (ismasterclient(c)) {
+		master = c;
 		if (ws->prevzoom && ws->prevzoom->ws == ws) {
 			c = ws->prevzoom;
 		} else {
 			c = nthstack(ws->clients, 1, 1);
 		}
+	} else {
+		master = nexttiled(ws->clients);
 	}
 
 	swap(master, c);
 	ws->prevzoom = master;
+	focus(c);
 
 	arrange(c->ws);
 }
