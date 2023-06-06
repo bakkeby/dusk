@@ -213,8 +213,12 @@ setdesktopnames(void)
 	XTextProperty text;
 
 	char *wslist[num_workspaces];
-	for (i = 0, ws = workspaces; ws; ws = ws->next, ++i)
+	for (i = 0, ws = workspaces; ws; ws = ws->next) {
+		if (ws == stickyws)
+			continue;
 		wslist[i] = wsicon(ws);
+		++i;
+	}
 
 	Xutf8TextListToTextProperty(dpy, wslist, num_workspaces, XUTF8StringStyle, &text);
 	XSetTextProperty(dpy, root, &text, netatom[NetDesktopNames]);
@@ -301,11 +305,12 @@ getclientfields(Client *c)
 	if (fields) {
 		c->scratchkey = (fields >> 14);
 		c->idx = (fields & 0x3FC0) >> 6;
-		for (ws = workspaces; ws; ws = ws->next)
+		for (ws = workspaces; ws; ws = ws->next) {
 			if (ws->num == (fields & 0x3F)) {
 				c->ws = ws;
 				break;
 			}
+		}
 	}
 }
 

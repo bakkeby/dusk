@@ -34,7 +34,7 @@ calc_wintitle_sticky(
 	firstpwlwintitle = 1;
 
 	for (c = ws->clients; c; c = c->next) {
-		if (SKIPTASKBAR(c))
+		if (SKIPTASKBAR(c) || !ISVISIBLE(c))
 			continue;
 		clientsnsticky++;
 	}

@@ -89,7 +89,7 @@ togglescratch(const Arg *arg)
 			   not been processed yet, hence we could be processing a scratchpad twice. To avoid
 			   this we detach them and add them to a temporary list (monclients) which is to be
 			   processed later. */
-			if (!SCRATCHPADSTAYONMON(c) && !multimonscratch && c->ws != selws && selws != stickyws) {
+			if (!SCRATCHPADSTAYONMON(c) && !multimonscratch && c->ws != selws && c->ws != stickyws) {
 				if (SEMISCRATCHPAD(c) && c->linked && !c->win)
 					swapsemiscratchpadclients(c->linked, c);
 				detach(c);
@@ -134,16 +134,6 @@ togglescratch(const Arg *arg)
 		attachstack(c);
 		removeflag(c, Invisible);
 		showwsclient(c);
-	}
-
-	if (!found) {
-		for (c = stickyws->stack; c; c = next) {
-			next = c->snext;
-			if (c->scratchkey != ((char**)arg->v)[0][0])
-				continue;
-			found = c;
-			break;
-		}
 	}
 
 	if (found) {

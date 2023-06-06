@@ -655,8 +655,9 @@ reapplyrules(Client *c)
 		detach(c);
 		detachstack(c);
 		if (ISSTICKY(c)) {
-			stickyws->next = rule_ws;
 			stickyws->mon = rule_ws->mon;
+			detachws(stickyws);
+			attachws(stickyws, rule_ws);
 			c->ws = stickyws;
 			stickyws->sel = c;
 			rule_ws = stickyws;
@@ -796,20 +797,25 @@ arrange(Workspace *ws)
 		arrangews(ws);
 		restack(ws);
 		drawbar(ws->mon);
-	} else {
-		for (ws = workspaces; ws; ws = ws->next)
-			arrangews(ws);
-		drawbars();
+		return;
 	}
+
+	for (ws = workspaces; ws; ws = ws->next) {
+		if (ws == stickyws)
+			continue;
+		arrangews(ws);
+	}
+	drawbars();
 }
 
 void
 arrangemon(Monitor *m)
 {
 	Workspace *ws;
-	for (ws = workspaces; ws; ws = ws->next)
-		if (ws->mon == m)
+	for (ws = workspaces; ws; ws = ws->next) {
+		if (ws->mon == m && ws != stickyws)
 			arrangews(ws);
+	}
 }
 void
 arrangews(Workspace *ws)
@@ -905,8 +911,11 @@ cleanup(void)
 	size_t i;
 
 	/* Persist data for restart purposes. */
-	for (ws = workspaces; ws; ws = ws->next)
+	for (ws = workspaces; ws; ws = ws->next) {
+		if (ws == stickyws)
+			continue;
 		persistworkspacestate(ws);
+	}
 	persistworkspacestate(stickyws);
 
 	if (restartwm) {
@@ -974,9 +983,11 @@ cleanupmon(Monitor *mon)
 		if (ws->mon == mon) {
 			adjustwsformonitor(ws, mons);
 			ws->mon = mons;
-			ws->visible = 0;
-			ws->pinned = 0;
-			hidewsclients(ws->stack);
+			if (ws != stickyws) {
+				ws->visible = 0;
+				ws->pinned = 0;
+				hidewsclients(ws->stack);
+			}
 		}
 	}
 	for (bar = mon->bar; bar; bar = mon->bar) {
@@ -1635,16 +1646,21 @@ dirtows(int dir)
 	Workspace *ws = selws, *nws = NULL, *tws;
 
 	if (dir > 0) { // right circular search
-		for (nws = ws->next; nws && !(nws->mon == ws->mon && (dir != 2 || nws->clients)); nws = nws->next);
+		for (nws = ws->next; nws; nws = nws->next)
+			if (nws->mon == ws->mon && nws != stickyws && (dir != 2 || nws->clients))
+				break;
 		if (!nws && ws != workspaces)
-			for (tws = workspaces; tws && tws != ws; tws = tws->next)
+			for (tws = workspaces; tws && tws != ws; tws = tws->next) {
+				if (tws == stickyws)
+					continue;
 				if (tws->mon == ws->mon && (dir != 2 || tws->clients)) {
 					nws = tws;
 					break;
 				}
+			}
 	} else { // left circular search
 		for (tws = workspaces; tws && !(nws && tws == ws); tws = tws->next)
-			if (tws->mon == ws->mon && (dir != -2 || tws->clients))
+			if (tws->mon == ws->mon && tws != stickyws && (dir != -2 || tws->clients))
 				nws = tws;
 	}
 
@@ -1678,16 +1694,15 @@ enternotify(XEvent *e)
 
 	if (enabled(FocusOnClick))
 		return;
-
 	if ((ev->mode != NotifyNormal || ev->detail == NotifyInferior) && ev->window != root)
 		return;
 	c = wintoclient(ev->window);
 	m = c ? c->ws->mon : wintomon(ev->window);
-	if (m != selmon)
+	if (m != selmon) {
 		entermon(m, c);
+	}
 	else if (selws == m->selws && (!c || (m->selws && c == m->selws->sel)))
 		return;
-
 	focus(c);
 }
 
@@ -1717,7 +1732,6 @@ focus(Client *c)
 		if (c->ws != selws) {
 			if (ISSTICKY(c)) {
 				stickyws->mon = selmon;
-				stickyws->next = selws;
 				XSetWindowBorder(dpy, c->win, scheme[SchemeFlexSelFloat][ColBorder].pixel);
 			} else {
 				if (c->ws->mon != selmon)
@@ -1777,7 +1791,8 @@ focusin(XEvent *e)
 		return;
 	}
 
-	if (ws->sel && ev->window != ws->sel->win && wintoclient(ev->window))
+	Client *c = wintoclient(ev->window);
+	if (ws->sel && ev->window != ws->sel->win && c)
 		setfocus(ws->sel);
 
 	prev_ptr_x = x;
@@ -1809,7 +1824,8 @@ focusstack(const Arg *arg)
 {
 	Client *c = NULL, *i;
 	Workspace *ws = selws, *prevws = NULL, *w = NULL;
-	int n = (selws && selws->sel == NULL);
+
+	int n = 0;
 
 	if (!ws || !getwsmask(selws->mon))
 		return;
@@ -1818,7 +1834,7 @@ focusstack(const Arg *arg)
 		for (; ws && !c; ws = (ws->next ? ws->next : workspaces)) {
 			if (!ws->visible || (enabled(RestrictFocusstackToMonitor) && ws->mon != selws->mon))
 				continue;
-			for (c = (n == 0 && ws->sel ? ws->sel->next : ws->clients); c && (ISINVISIBLE(c) || (arg->i == 1 && HIDDEN(c))); c = c->next);
+			for (c = (ws == selws ? selws->sel : ws->clients); c && (c == selws->sel || ISINVISIBLE(c) || (arg->i == 1 && HIDDEN(c))); c = c->next);
 			if (n++ > LENGTH(wsrules))
 				break;
 		}
@@ -1848,8 +1864,9 @@ focusstack(const Arg *arg)
 				force_warp = 1;
 				warp(c);
 			}
-		} else
+		} else {
 			restack(c->ws);
+		}
 	}
 }
 
@@ -2167,7 +2184,8 @@ manage(Window w, XWindowAttributes *wa)
 		term = termforwin(c);
 
 	if (ISSTICKY(c)) {
-		stickyws->next = c->ws;
+		detachws(stickyws);
+		attachws(stickyws, c->ws);
 		stickyws->mon = c->ws->mon;
 		c->ws = stickyws;
 		stickyws->sel = c;
@@ -2659,7 +2677,7 @@ recttows(int x, int y, int w, int h)
 	int a, area = 0;
 
 	for (ws = workspaces; ws; ws = ws->next)
-		if (ws->visible && (a = INTERSECT(x, y, w, h, ws)) > area) {
+		if (ws->visible && ws != stickyws && (a = INTERSECT(x, y, w, h, ws)) > area) {
 			area = a;
 			r = ws;
 		}
@@ -2725,31 +2743,35 @@ void
 restack(Workspace *ws)
 {
 	Client *c = ws->sel;
-	Client *s;
+	Client *s, *raised;
 	XWindowChanges wc;
 
 	if (!c)
 		return;
+
+	raised = (enabled(FocusedOnTopTiled) || ISFLOATING(c) ? c : NULL);
 
 	/* Place tiled clients below the bar window */
 	if (ws->layout->arrange) {
 		wc.stack_mode = Below;
 		wc.sibling = ws->mon->bar ? ws->mon->bar->win : wmcheckwin;
 		for (s = ws->stack; s; s = s->snext) {
-			if (s != c && !ISFLOATING(s) && ISVISIBLE(s) && !(ALWAYSONTOP(s) || ISTRANSIENT(s))) {
+			if (TILED(s) && s != raised) {
 				XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
 				wc.sibling = s->win;
 			}
 		}
 	}
 
-	raiseclient(enabled(FocusedOnTopTiled) || ISFLOATING(c) ? c : NULL);
+	if (raised)
+		raiseclient(raised);
 
 	XSync(dpy, False);
-	skipfocusevents();
-
 	if (canwarp(ws))
 		warp(c);
+
+	skipfocusevents();
+
 }
 
 void
@@ -3722,9 +3744,6 @@ wintoclient(Window w)
 		for (c = ws->clients; c; c = c->next)
 			if (c->win == w)
 				return c;
-	for (c = stickyws->clients; c; c = c->next)
-		if (c->win == w)
-			return c;
 	return NULL;
 }
 

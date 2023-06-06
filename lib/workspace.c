@@ -1,6 +1,24 @@
 static Workspace *stickyws;
 
 void
+attachws(Workspace *ws, Workspace *target)
+{
+	Workspace **wsp;
+	for (wsp = &workspaces; *wsp && *wsp != target; wsp = &(*wsp)->next);
+	ws->next = target;
+	*wsp = ws;
+}
+
+void
+detachws(Workspace *ws)
+{
+	Workspace **wsp;
+	for (wsp = &workspaces; *wsp && *wsp != ws; wsp = &(*wsp)->next);
+	*wsp = ws->next;
+	ws->next = NULL;
+}
+
+void
 comboviewwsbyname(const Arg *arg)
 {
 	viewwsonmon(getwsbyname(arg), NULL, combo);
@@ -26,7 +44,7 @@ createworkspaces()
 	stickyws->wh = sh;
 	stickyws->ww = sw;
 
-	stickyws->next = pws = selws = workspaces = createworkspace(0, &wsrules[0]);
+	pws = selws = workspaces = createworkspace(0, &wsrules[0]);
 	for (i = 1; i < LENGTH(wsrules); i++)
 		pws = pws->next = createworkspace(i, &wsrules[i]);
 
@@ -47,6 +65,7 @@ createworkspaces()
 		}
 		m = (m->next == NULL ? mons : m->next);
 	}
+	attachws(stickyws, workspaces);
 	setworkspaceareas();
 }
 
@@ -119,6 +138,8 @@ getwsmask(Monitor *m)
 
 	for (ws = nextvismonws(m, workspaces); ws; ws = nextvismonws(m, ws->next))
 		wsmask |= (1L << ws->num);
+
+	wsmask |= (1L << stickyws->num);
 
 	return wsmask;
 }
@@ -290,10 +311,11 @@ showwsclient(Client *c)
 		if (NEEDRESIZE(c)) {
 			removeflag(c, NeedResize);
 			XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
-		} else if (c->sfx != -9999 && (!ISFULLSCREEN(c) || ISFAKEFULLSCREEN(c))) {
+		} else if (!ISSTICKY(c) && c->sfx != -9999 && (!ISFULLSCREEN(c) || ISFAKEFULLSCREEN(c))) {
 			restorefloats(c);
-		} else
+		} else {
 			show(c);
+		}
 	}
 }
 
@@ -763,7 +785,7 @@ Workspace *
 nextmonws(Monitor *mon, Workspace *ws)
 {
 	Workspace *w;
-	for (w = ws; w && w->mon != mon; w = w->next);
+	for (w = ws; w && (w->mon != mon || w == stickyws); w = w->next);
 	return w;
 }
 
@@ -771,7 +793,7 @@ Workspace *
 nextvismonws(Monitor *mon, Workspace *ws)
 {
 	Workspace *w;
-	for (w = ws; w && !(w->mon == mon && w->visible); w = w->next);
+	for (w = ws; w && !(w->mon == mon && w->visible && w != stickyws); w = w->next);
 	return w;
 }
 
@@ -800,8 +822,12 @@ redistributeworkspaces(Monitor *new)
 	Monitor *m = mons;
 	Workspace *ws;
 
-	for (i = 0, ws = workspaces; ws && i < LENGTH(wsrules); ws = ws->next, i++) {
+	for (i = 0, ws = workspaces; ws && i < LENGTH(wsrules); ws = ws->next) {
+		if (ws == stickyws)
+			continue;
+
 		r = &wsrules[i];
+		i++;
 
 		if (ws->pinned)
 			continue;

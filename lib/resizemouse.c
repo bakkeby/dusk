@@ -10,7 +10,7 @@ resizemouse(const Arg *arg)
 	Client *c, *s;
 	Monitor *m;
 	XEvent ev;
-	Workspace *ws, *next;
+	Workspace *ws;
 	Time lasttime = 0;
 	double prevopacity;
 
@@ -35,11 +35,7 @@ resizemouse(const Arg *arg)
 		ngirders++;
 	}
 
-	for (ws = workspaces; ws; ws = next) {
-		next = ws->next;
-
-		if (next == NULL)
-			next = stickyws;
+	for (ws = workspaces; ws; ws = ws->next) {
 
 		if (!ws->visible)
 			continue;
@@ -73,9 +69,6 @@ resizemouse(const Arg *arg)
 			bgirder[ngirders] = s->y - gap;
 			ngirders++;
 		}
-
-		if (ws == stickyws)
-			break;
 	}
 
 	if (resizeopacity) {

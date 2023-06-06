@@ -15,7 +15,7 @@ movemouse(const Arg *arg)
 {
 	int i, g, x, y, w, h, nx, ny, sx, sy, vsnap, hsnap, xoff, yoff, group_after;
 	Client *c, *s;
-	Workspace *ws, *next;
+	Workspace *ws;
 	Monitor *m;
 	XEvent ev;
 	Time lasttime = 0;
@@ -56,11 +56,7 @@ movemouse(const Arg *arg)
 		ngirders++;
 	}
 
-	for (ws = workspaces; ws; ws = next) {
-		next = ws->next;
-
-		if (next == NULL)
-			next = stickyws;
+	for (ws = workspaces; ws; ws = ws->next) {
 
 		if (!ws->visible)
 			continue;
@@ -72,8 +68,6 @@ movemouse(const Arg *arg)
 		ngirders++;
 
 		if (disabled(SnapToWindows) || arg->i == 11) {
-			if (ws == stickyws)
-				break;
 			continue;
 		}
 
@@ -105,9 +99,6 @@ movemouse(const Arg *arg)
 			bgirder[ngirders] = s->y - gap;
 			ngirders++;
 		}
-
-		if (ws == stickyws)
-			break;
 	}
 
 	if (XGrabPointer(dpy, root, False, MOUSEMASK, GrabModeAsync, GrabModeAsync,

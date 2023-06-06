@@ -12,7 +12,7 @@ size_workspaces(Bar *bar, BarArg *a)
 	int padding = lrpad - plw;
 
 	for (ws = workspaces; ws; ws = ws->next) {
-		if (ws->mon != bar->mon)
+		if (ws->mon != bar->mon || ws == stickyws)
 			continue;
 		w = TEXT2DW(wsicon(ws));
 		if (!w)
@@ -153,12 +153,12 @@ click_workspaces(Bar *bar, Arg *arg, BarArg *a)
 
 	/* This avoids clicks to the immediate left of the leftmost workspace (e.g. 2) to evaluate
 	 * as workspace 1 (which can be on a different monitor). */
-	for (ws = workspaces; ws && ws->mon != bar->mon; ws = ws->next); // find first workspace for mon
+	for (ws = workspaces; ws && (ws->mon != bar->mon || ws == stickyws); ws = ws->next); // find first workspace for mon
 	if (!ws)
 		return ClkWorkspaceBar;
 
 	do {
-		if (ws->mon != bar->mon)
+		if (ws->mon != bar->mon || ws == stickyws)
 			continue;
 		w = TEXT2DW(wsicon(ws));
 		if (!w)
@@ -208,12 +208,12 @@ hover_workspaces(Bar *bar, BarArg *a, XMotionEvent *ev)
 
 	/* This avoids clicks to the immediate left of the leftmost workspace (e.g. 2) to evaluate
 	 * as workspace 1 (which can be on a different monitor). */
-	for (ws = workspaces; ws && ws->mon != m; ws = ws->next); // find first workspace for mon
+	for (ws = workspaces; ws && (ws->mon != m || ws == stickyws); ws = ws->next); // find first workspace for mon
 	if (!ws)
 		return 0;
 
 	do {
-		if (ws->mon != m)
+		if (ws->mon != m || ws == stickyws)
 			continue;
 		w = TEXT2DW(wsicon(ws));
 		if (!w)
@@ -293,7 +293,7 @@ nextwsicon(Bar *bar, Workspace *ws, Workspace **next, char **nexticon, int *next
 	*nextw = 0;
 
 	for (; ws; ws = ws->next) {
-		if (ws->mon != bar->mon)
+		if (ws->mon != bar->mon || ws == stickyws)
 			continue;
 
 		icon = wsicon(ws);

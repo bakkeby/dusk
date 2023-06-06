@@ -5,6 +5,9 @@ enum {
 	OCCUPIED,
 };
 
+static void attachws(Workspace *ws, Workspace *target);
+static void detachws(Workspace *ws);
+
 static void comboviewwsbyname(const Arg *arg);
 static void createworkspaces();
 static Workspace *createworkspace(int num, const WorkspaceRule *r);
