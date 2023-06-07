@@ -322,13 +322,13 @@ flextitlecalculate(
 			case 2:
 				if (clientsnstack) {
 					w = st1_w;
-					flextitledrawarea(ws, nthtiled(ws->clients, clientsnmaster, 0), x, w, clientsnstack, 0, 1, 0, 0, passx, tabfn, arg, a); // stack1
+					flextitledrawarea(ws, nthtiled(ws->clients, clientsnmaster + 1, 0), x, w, clientsnstack, 0, 1, 0, 0, passx, tabfn, arg, a); // stack1
 				}
 				break;
 			case 3:
 				if (clientsnstack2) {
 					w = st2_w;
-					flextitledrawarea(ws, nthtiled(ws->clients, clientsnmaster + clientsnstack, 0), x, w, clientsnstack2, 0, 1, 0, 0, passx, tabfn, arg, a); // stack2
+					flextitledrawarea(ws, nthtiled(ws->clients, clientsnmaster + clientsnstack + 1, 0), x, w, clientsnstack2, 0, 1, 0, 0, passx, tabfn, arg, a); // stack2
 				}
 				break;
 			case 4:
