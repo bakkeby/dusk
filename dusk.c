@@ -1722,6 +1722,8 @@ focus(Client *c)
 		return;
 
 	Workspace *ws = c ? c->ws : selws;
+	Window focus_return;
+	int revert_to_return;
 	Bar *bar;
 
 	if (!c || ISINVISIBLE(c))
@@ -1761,10 +1763,15 @@ focus(Client *c)
 		}
 		XSetWindowBorder(dpy, c->win, scheme[clientscheme(c, c)][ColBorder].pixel);
 	} else {
-		for (bar = selmon->bar; bar && !bar->showbar; bar = bar->next);
-		XSetInputFocus(dpy, bar ? bar->win : root, RevertToPointerRoot, CurrentTime);
-		XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
-		ws->sel = ws->stack;
+		XGetInputFocus(dpy, &focus_return, &revert_to_return);
+
+		/* Allow sticky windows to retain focus when changing to an empty workspace */
+		if (!stickyws->sel || stickyws->sel != wintoclient(focus_return)) {
+			for (bar = selmon->bar; bar && !bar->showbar; bar = bar->next);
+			XSetInputFocus(dpy, bar ? bar->win : root, RevertToPointerRoot, CurrentTime);
+			XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
+			ws->sel = ws->stack;
+		}
 	}
 
 	if (arrange_focus_on_monocle &&
