@@ -1730,8 +1730,10 @@ focus(Client *c)
 		unfocus(selws->sel, 0, c);
 	if (c) {
 		if (c->ws != selws) {
-			if (ISSTICKY(c)) {
+			if (c->ws == stickyws) {
 				stickyws->mon = selmon;
+				detachws(stickyws);
+				attachws(stickyws, selws);
 				XSetWindowBorder(dpy, c->win, scheme[SchemeFlexSelFloat][ColBorder].pixel);
 			} else {
 				if (c->ws->mon != selmon)
