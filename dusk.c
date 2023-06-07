@@ -1828,6 +1828,7 @@ focusstack(const Arg *arg)
 	Workspace *ws = selws, *prevws = NULL, *w = NULL;
 
 	int n = 0;
+	int firstws = 1;
 
 	if (!ws || !getwsmask(selws->mon))
 		return;
@@ -1836,7 +1837,8 @@ focusstack(const Arg *arg)
 		for (; ws && !c; ws = (ws->next ? ws->next : workspaces)) {
 			if (!ws->visible || (enabled(RestrictFocusstackToMonitor) && ws->mon != selws->mon))
 				continue;
-			for (c = (ws == selws ? selws->sel : ws->clients); c && (c == selws->sel || ISINVISIBLE(c) || (arg->i == 1 && HIDDEN(c))); c = c->next);
+			for (c = (firstws ? selws->sel : ws->clients); c && (c == selws->sel || ISINVISIBLE(c) || (arg->i == 1 && HIDDEN(c))); c = c->next);
+			firstws = 0;
 			if (n++ > LENGTH(wsrules))
 				break;
 		}
