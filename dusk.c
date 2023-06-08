@@ -30,6 +30,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <time.h>
 #include <X11/cursorfont.h>
 #include <X11/keysym.h>
 #include <X11/Xatom.h>
@@ -391,6 +392,7 @@ static void mappingnotify(XEvent *e);
 static void maprequest(XEvent *e);
 static void maximize(Client *c, int maximize_vert, int maximize_horz);
 static void motionnotify(XEvent *e);
+static unsigned long long now(void);
 static void propertynotify(XEvent *e);
 static void restart(const Arg *arg);
 static void quit(const Arg *arg);
@@ -450,6 +452,9 @@ static int screen;
 static int sw, sh;             /* X display screen geometry width, height */
 static int lrpad;              /* sum of left and right padding for text */
 static int force_warp = 0;     /* force warp in some situations, e.g. killclient */
+static int cursor_hidden = 0;
+static int mouse_x = 0;
+static int mouse_y = 0;
 static int prev_ptr_x = 0;
 static int prev_ptr_y = 0;
 static int ignore_warp = 0;    /* force skip warp in some situations, e.g. dragmfact, dragcfact */
@@ -477,6 +482,9 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 	[EnterNotify] = enternotify,
 	[Expose] = expose,
 	[FocusIn] = focusin,
+	#ifdef HAVE_LIBXI
+	[GenericEvent] = genericevent,
+	#endif
 	[KeyPress] = keypress,
 	[KeyRelease] = keypress,
 	[MappingNotify] = mappingnotify,
@@ -1691,9 +1699,15 @@ enternotify(XEvent *e)
 	Client *c;
 	Monitor *m;
 	XCrossingEvent *ev = &e->xcrossing;
+	int x, y;
 
 	if (enabled(FocusOnClick))
 		return;
+
+	getrootptr(&x, &y);
+	if (cursor_hidden || (x == prev_ptr_x && y == prev_ptr_y))
+		return;
+
 	if ((ev->mode != NotifyNormal || ev->detail == NotifyInferior) && ev->window != root)
 		return;
 	c = wintoclient(ev->window);
@@ -1795,7 +1809,7 @@ focusin(XEvent *e)
 	XFocusChangeEvent *ev = &e->xfocus;
 
 	getrootptr(&x, &y);
-	if (x == prev_ptr_x && y == prev_ptr_y) {
+	if (cursor_hidden || (x == prev_ptr_x && y == prev_ptr_y)) {
 		skipfocusevents();
 		return;
 	}
@@ -2454,6 +2468,13 @@ motionnotify(XEvent *e)
 		entermon(m, NULL);
 		focus(NULL);
 	}
+}
+
+unsigned long long
+now(void) {
+	struct timespec currentTime;
+	clock_gettime(CLOCK_REALTIME, &currentTime);
+	return currentTime.tv_sec * 1000LL + currentTime.tv_nsec / 1000000LL;
 }
 
 /* The structure for PropertyNotify events contains:
@@ -3178,6 +3199,27 @@ setup(void)
 		|LeaveWindowMask|StructureNotifyMask|PropertyChangeMask;
 	XChangeWindowAttributes(dpy, root, CWEventMask|CWCursor, &wa);
 	XSelectInput(dpy, root, wa.event_mask);
+
+	#ifdef HAVE_LIBXI
+	if (!XQueryExtension(dpy, "XInputExtension", &xi_opcode, &i, &i)) {
+		fprintf(stderr, "Warning: XInput is not available.");
+	}
+	/* Tell XInput to send us all RawMotion events. */
+	unsigned char mask_bytes[XIMaskLen(XI_LASTEVENT)];
+	memset(mask_bytes, 0, sizeof(mask_bytes));
+	XISetMask(mask_bytes, XI_RawMotion);
+	XISetMask(mask_bytes, XI_RawButtonPress);
+	XISetMask(mask_bytes, XI_RawKeyRelease);
+	XISetMask(mask_bytes, XI_RawTouchBegin);
+	XISetMask(mask_bytes, XI_RawTouchEnd);
+	XISetMask(mask_bytes, XI_RawTouchUpdate);
+
+	XIEventMask mask;
+	mask.deviceid = XIAllMasterDevices;
+	mask.mask_len = sizeof(mask_bytes);
+	mask.mask = mask_bytes;
+	XISelectEvents(dpy, root, &mask, 1);
+	#endif
 	grabkeys();
 	focus(NULL);
 	setupepoll();

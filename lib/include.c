@@ -80,5 +80,9 @@
 #include "winicon.c"
 #include "xrdb.c"
 
+#ifdef HAVE_LIBXI
+#include "xban.c"
+#endif
+
 /* Layouts */
 #include "layout_flextile-deluxe.c"

@@ -14,6 +14,11 @@ X11LIB = /usr/X11R6/lib
 #X11INC = /usr/local/include
 #X11LIB = /usr/local/lib
 
+# Optional dependency on libxi for mouse related features
+#HAVE_LIBXI = -DHAVE_LIBXI=1
+#XINPUTLIBS = -lXi
+#XFIXESLIBS = -lXfixes
+
 # Xinerama, comment if you don't want it
 XINERAMALIBS  = -lXinerama
 XINERAMAFLAGS = -DXINERAMA
@@ -41,14 +46,14 @@ XCBLIBS = -lX11-xcb -lxcb -lxcb-res
 IMLIB2LIBS = -lImlib2
 
 # includes and libs
-INCS = -I${X11INC} -I${FREETYPEINC} ${YAJLINC}
-LIBS = -L${X11LIB} -lX11 ${XINERAMALIBS} ${FREETYPELIBS}  ${XRENDER} ${XCBLIBS} ${KVMLIB} ${YAJLLIBS} ${IMLIB2LIBS}
+INCS = -I${X11INC} -I${FREETYPEINC} ${YAJLINC} ${XINPUTINC}
+LIBS = -L${X11LIB} -lX11 ${XINERAMALIBS} ${FREETYPELIBS}  ${XRENDER} ${XCBLIBS} ${KVMLIB} ${YAJLLIBS} ${IMLIB2LIBS} ${XINPUTLIBS} ${XFIXESLIBS}
 
 # Optional host flag for computer specific configuration
 #HOSTFLAGS = -DHOST=$(shell command -v cksum > /dev/null && hostname | cksum | tr -d ' ')
 
 # flags
-CPPFLAGS = -D_DEFAULT_SOURCE -D_BSD_SOURCE -D_POSIX_C_SOURCE=200809L -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS} ${HOSTFLAGS}
+CPPFLAGS = -D_DEFAULT_SOURCE $(HAVE_LIBXI) -D_BSD_SOURCE -D_POSIX_C_SOURCE=200809L -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS} ${HOSTFLAGS}
 #CFLAGS   = -g -std=c99 -pedantic -Wall -O0 ${INCS} ${CPPFLAGS}
 CFLAGS   = -std=c99 -pedantic -Wall -Wno-unused-function -Wno-deprecated-declarations -Os ${INCS} ${CPPFLAGS}
 LDFLAGS  = ${LIBS}

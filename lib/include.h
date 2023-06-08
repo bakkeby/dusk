@@ -76,5 +76,9 @@
 #include "vanitygaps.h"
 #include "xrdb.h"
 
+#ifdef HAVE_LIBXI
+#include "xban.h"
+#endif
+
 /* Layouts */
 #include "layout_flextile-deluxe.h"
