@@ -878,17 +878,29 @@ buttonpress(XEvent *e)
 
 	barpress(ev, m, &arg, &click);
 
-	if (click == ClkRootWin && (c = wintoclient(ev->window))) {
-		if (allow_focus) {
-			focus(c);
-			if (ISSTICKY(c)) {
-				restack(stickyws);
-			} else {
-				restack(selws);
-			}
+	if (click == ClkRootWin) {
+		c = wintoclient(ev->window);
+
+		#ifdef HAVE_LIBXI
+		if (!c && cursor_hidden && enabled(BanishMouseCursor)) {
+			fprintf(stderr, "ey is this it\n");
+			c = recttoclient(mouse_x, mouse_y, 1, 1, 1);
+			show_cursor(NULL);
 		}
-		XAllowEvents(dpy, ReplayPointer, CurrentTime);
-		click = ClkClientWin;
+		#endif
+
+		if (c) {
+			if (allow_focus) {
+				focus(c);
+				if (ISSTICKY(c)) {
+					restack(stickyws);
+				} else {
+					restack(selws);
+				}
+			}
+			XAllowEvents(dpy, ReplayPointer, CurrentTime);
+			click = ClkClientWin;
+		}
 	}
 
 	for (i = 0; i < LENGTH(buttons); i++) {
@@ -897,6 +909,11 @@ buttonpress(XEvent *e)
 			buttons[i].func((click == ClkWorkspaceBar || click == ClkWinTitle) && buttons[i].arg.i == 0 ? &arg : &buttons[i].arg);
 		}
 	}
+
+	#ifdef HAVE_LIBXI
+	last_button_press = now();
+	#endif
+
 	ignore_marked = 1;
 }
 
@@ -1921,6 +1938,12 @@ getrootptr(int *x, int *y)
 	int di;
 	unsigned int dui;
 	Window dummy;
+
+	if (cursor_hidden && enabled(BanishMouseCursor)) {
+		*x = mouse_x;
+		*y = mouse_y;
+		return 1;
+	}
 
 	return XQueryPointer(dpy, root, &dummy, &dummy, x, y, &di, &di, &dui);
 }
@@ -3208,7 +3231,6 @@ setup(void)
 	unsigned char mask_bytes[XIMaskLen(XI_LASTEVENT)];
 	memset(mask_bytes, 0, sizeof(mask_bytes));
 	XISetMask(mask_bytes, XI_RawMotion);
-	XISetMask(mask_bytes, XI_RawButtonPress);
 	XISetMask(mask_bytes, XI_RawKeyRelease);
 	XISetMask(mask_bytes, XI_RawTouchBegin);
 	XISetMask(mask_bytes, XI_RawTouchEnd);

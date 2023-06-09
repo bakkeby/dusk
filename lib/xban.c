@@ -18,14 +18,10 @@ genericevent(XEvent *e)
 		if (!cursor_hidden)
 			hide_cursor(NULL);
 		break;
-	case XI_RawButtonPress:
-		last_button_press = now();
-		if (cursor_hidden)
-			show_cursor(NULL);
-		break;
 	case XI_RawKeyRelease:
-		if (now() - last_button_press > 2000 && !cursor_hidden)
+		if (now() - last_button_press > 2000 && !cursor_hidden) {
 			hide_cursor(NULL);
+		}
 		break;
 	}
 
