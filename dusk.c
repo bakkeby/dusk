@@ -2812,7 +2812,7 @@ restack(Workspace *ws)
 		wc.sibling = ws->mon->bar ? ws->mon->bar->win : wmcheckwin;
 		for (s = ws->stack; s; s = s->snext) {
 			if (TILED(s) && s != raised) {
-				XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
+				XConfigureWindow(dpy, s->win, CWSibling|CWStackMode, &wc);
 				wc.sibling = s->win;
 			}
 		}
