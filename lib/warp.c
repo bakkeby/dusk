@@ -72,6 +72,12 @@ warp(const Client *c)
 				return;
 	}
 
+	if (enabled(BanishMouseCursor) && cursor_hidden) {
+		mouse_x = c->x + c->w / 2;
+		mouse_y = c->y + c->h / 2;
+		return;
+	}
+
 	/* Do not warp if cursor rests on one of the bars */
 	for (m = mons; m; m = m->next)
 		for (bar = m->bar; bar; bar = bar->next)
@@ -81,10 +87,5 @@ warp(const Client *c)
 				y < bar->by + bar->bh)
 				return;
 
-	if (enabled(BanishMouseCursor) && cursor_hidden) {
-		mouse_x = c->x + c->w / 2;
-		mouse_y = c->y + c->h / 2;
-	} else {
-		XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w / 2, c->h / 2);
-	}
+	XWarpPointer(dpy, None, c->win, 0, 0, 0, 0, c->w / 2, c->h / 2);
 }
