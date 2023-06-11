@@ -3415,6 +3415,8 @@ setup(void)
 	unsigned char mask_bytes[XIMaskLen(XI_LASTEVENT)];
 	memset(mask_bytes, 0, sizeof(mask_bytes));
 	XISetMask(mask_bytes, XI_RawMotion);
+	XISetMask(mask_bytes, XI_RawButtonPress);
+	XISetMask(mask_bytes, XI_RawKeyPress);
 	XISetMask(mask_bytes, XI_RawKeyRelease);
 	XISetMask(mask_bytes, XI_RawTouchBegin);
 	XISetMask(mask_bytes, XI_RawTouchEnd);
@@ -3443,6 +3445,9 @@ seturgent(Client *c, int urg)
 	setflag(c, Urgent, urg);
 	if (!(wmh = XGetWMHints(dpy, c->win)))
 		return;
+	if (ISMARKED(c))
+		return;
+
 	wmh->flags = urg ? (wmh->flags | XUrgencyHint) : (wmh->flags & ~XUrgencyHint);
 	XSetWMHints(dpy, c->win, wmh);
 	XFree(wmh);
@@ -3889,6 +3894,9 @@ updatenumlockmask(void)
 			if (modmap->modifiermap[i * modmap->max_keypermod + j]
 				== XKeysymToKeycode(dpy, XK_Num_Lock))
 				numlockmask = (1 << i);
+	#if HAVE_LIBXI
+	modmask &= numlockmask;
+	#endif
 	XFreeModifiermap(modmap);
 }
 
