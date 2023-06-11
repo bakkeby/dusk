@@ -461,10 +461,10 @@ static const Layout layouts[] = {
 	{ KeyPress,   MOD, XK_j, ACTION, {.i = INC(+1) } }, \
 	{ KeyPress,   MOD, XK_k, ACTION, {.i = INC(-1) } }, \
 	{ KeyPress,   MOD, XK_s, ACTION, {.i = PREVSEL } }, \
-	{ KeyPress,   MOD, XK_w, ACTION, {.i = 0 } }, \
-	{ KeyPress,   MOD, XK_e, ACTION, {.i = 1 } }, \
-	{ KeyPress,   MOD, XK_a, ACTION, {.i = 2 } }, \
-	{ KeyPress,   MOD, XK_z, ACTION, {.i = -1 } },
+	{ KeyPress,   MOD, XK_w, ACTION, {.i = 1 } }, \
+	{ KeyPress,   MOD, XK_e, ACTION, {.i = 2 } }, \
+	{ KeyPress,   MOD, XK_a, ACTION, {.i = 3 } }, \
+	{ KeyPress,   MOD, XK_z, ACTION, {.i = LASTTILED } },
 
 /* Helper macros for spawning commands */
 #define SHCMD(cmd) { .v = (const char*[]){ NULL, "/bin/sh", "-c", cmd, NULL } }
