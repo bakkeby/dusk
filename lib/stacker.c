@@ -34,11 +34,13 @@ stackpush(const Arg *arg)
 	Workspace *ws = selws;
 	Client *c = NULL, *sel = ws->sel;
 
-	if (ISINC(arg))
-		return;
-
 	if (!ws->clients)
 		return;
+
+	if (ISINC(arg)) {
+		stackswap(arg);
+		return;
+	}
 
 	stackposclient(arg, &c);
 
@@ -60,9 +62,6 @@ stackswap(const Arg *arg)
 	Workspace *ws = selws;
 	Client *c = NULL, *sel = ws->sel;
 
-	if (ISINC(arg))
-		return;
-
 	if (!ws->clients)
 		return;
 
@@ -73,7 +72,7 @@ stackswap(const Arg *arg)
 
 	swap(sel, c);
 
-	if (ismasterclient(c)) {
+	if (!ISINC(arg) && ismasterclient(c)) {
 		focus(c);
 		sel = c;
 	}
@@ -91,6 +90,21 @@ stackposclient(const Arg *arg, Client **f)
 
 	if (!ws->clients)
 		return;
+
+	if (ISINC(arg)) {
+		if (GETINC(arg) > 0) {
+			*f = nexttiled(ws->sel->next);
+			if (!*f) {
+				*f = nexttiled(ws->clients);
+			}
+		} else {
+			*f = prevtiled(ws->sel);
+			if (!*f) {
+				*f = lasttiled(ws->clients);
+			}
+		}
+		return;
+	}
 
 	if (ISMASTER(arg)) {
 		*f = nthmaster(ws->clients, GETMASTER(arg), 1);
