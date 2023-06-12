@@ -883,7 +883,6 @@ buttonpress(XEvent *e)
 
 		#ifdef HAVE_LIBXI
 		if (!c && cursor_hidden && enabled(BanishMouseCursor)) {
-			fprintf(stderr, "ey is this it\n");
 			c = recttoclient(mouse_x, mouse_y, 1, 1, 1);
 			show_cursor(NULL);
 		}
