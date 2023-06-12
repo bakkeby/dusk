@@ -876,30 +876,30 @@ buttonpress(XEvent *e)
 		focus(NULL);
 	}
 
-	barpress(ev, m, &arg, &click);
+	c = wintoclient(ev->window);
+
+	#ifdef HAVE_LIBXI
+	if (!c && cursor_hidden && enabled(BanishMouseCursor)) {
+		c = recttoclient(mouse_x, mouse_y, 1, 1, 1);
+		show_cursor(NULL);
+	}
+	#endif
+
+	if (c) {
+		if (allow_focus) {
+			focus(c);
+			if (ISSTICKY(c)) {
+				restack(stickyws);
+			} else {
+				restack(selws);
+			}
+		}
+		XAllowEvents(dpy, ReplayPointer, CurrentTime);
+		click = ClkClientWin;
+	}
 
 	if (click == ClkRootWin) {
-		c = wintoclient(ev->window);
-
-		#ifdef HAVE_LIBXI
-		if (!c && cursor_hidden && enabled(BanishMouseCursor)) {
-			c = recttoclient(mouse_x, mouse_y, 1, 1, 1);
-			show_cursor(NULL);
-		}
-		#endif
-
-		if (c) {
-			if (allow_focus) {
-				focus(c);
-				if (ISSTICKY(c)) {
-					restack(stickyws);
-				} else {
-					restack(selws);
-				}
-			}
-			XAllowEvents(dpy, ReplayPointer, CurrentTime);
-			click = ClkClientWin;
-		}
+		barpress(ev, m, &arg, &click);
 	}
 
 	for (i = 0; i < LENGTH(buttons); i++) {
