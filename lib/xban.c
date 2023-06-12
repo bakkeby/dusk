@@ -50,6 +50,7 @@ show_cursor(const Arg *arg)
 	if (enabled(BanishMouseCursor)) {
 		XWarpPointer(dpy, None, root, 0, 0, 0, 0, mouse_x, mouse_y);
 		XFixesShowCursor(dpy, root);
+		XSync(dpy, False);
 	}
 	cursor_hidden = 0;
 }

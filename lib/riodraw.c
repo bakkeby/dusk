@@ -12,6 +12,12 @@ riodraw(Client *c, const char slopstyle[])
 	int firstchar = 0;
 	int counter = 0;
 
+	#ifdef HAVE_LIBXI
+	if (cursor_hidden && enabled(BanishMouseCursor)) {
+		show_cursor(NULL);
+	}
+	#endif
+
 	strcat(slopcmd, slopstyle);
 	FILE *fp = popen(slopcmd, "r");
 
@@ -72,15 +78,9 @@ rioposition(Client *c, int x, int y, int w, int h)
 
 	SETFLOATING(c);
 	if (enabled(RioDrawIncludeBorders)) {
-		c->x = x;
-		c->y = y;
-		c->w = w - (c->bw * 2);
-		c->h = h - (c->bw * 2);
+		resize(c, x, y, w - (c->bw * 2), h - (c->bw * 2), 1);
 	} else {
-		c->x = x - c->bw;
-		c->y = y - c->bw;
-		c->w = w;
-		c->h = h;
+		resize(c, x - c->bw, y - c->bw, w, h, 1);
 	}
 
 	savefloats(c);
