@@ -100,7 +100,7 @@ togglescratch(const Arg *arg)
 					last = last->next = c;
 				else
 					last = monclients = c;
-			} else if (scratchvisible == numscratchpads) {
+			} else if (scratchvisible == numscratchpads && (numscratchpads > 1 || c->ws != selws || selws->sel == c)) {
 				if (SEMISCRATCHPAD(c) && c->linked)
 					swapsemiscratchpadclients(c, c->linked);
 				else {
