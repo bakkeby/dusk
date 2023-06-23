@@ -147,6 +147,6 @@ xrdb(const Arg *arg)
 {
 	loadxrdb();
 	setbackground();
-	focus(NULL);
 	arrange(NULL);
+	focus(NULL);
 }

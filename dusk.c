@@ -375,6 +375,7 @@ static void focusin(XEvent *e);
 static void focusmon(const Arg *arg);
 static void focusstack(const Arg *arg);
 static Atom getatomprop(Client *c, Atom prop, Atom req);
+static Client *getpointerclient(void);
 static int getrootptr(int *x, int *y);
 static long getstate(Window w);
 static int gettextprop(Window w, Atom atom, char *text, unsigned int size);
@@ -650,8 +651,8 @@ reapplyrules(Client *c)
 			XRaiseWindow(dpy, c->win);
 		unmanage(c, 0);
 		if (client_ws) {
-			focus(NULL);
 			arrange(client_ws);
+			focus(NULL);
 			drawbar(client_ws->mon);
 		}
 		return 1;
@@ -1387,8 +1388,8 @@ clientstomon(const Arg *arg)
 	m = dirtomon(arg->i);
 	if (m->selws) {
 		moveallclientstows(ws, m->selws, enabled(ViewOnWs));
-		focus(NULL);
 		arrange(NULL);
+		focus(NULL);
 	}
 }
 
@@ -1470,8 +1471,8 @@ configurenotify(XEvent *e)
 				}
 				removepreview(ws);
 			}
-			focus(NULL);
 			arrange(NULL);
+			focus(NULL);
 		}
 	}
 
@@ -1757,6 +1758,8 @@ focus(Client *c)
 	Bar *bar;
 
 	if (!c || ISINVISIBLE(c))
+		c = getpointerclient();
+	if (!c || ISINVISIBLE(c))
 		for (c = ws->stack; c && !ISVISIBLE(c); c = c->snext);
 	if (selws->sel && selws->sel != c)
 		unfocus(selws->sel, 0, c);
@@ -1945,6 +1948,23 @@ getrootptr(int *x, int *y)
 	}
 
 	return XQueryPointer(dpy, root, &dummy, &dummy, x, y, &di, &di, &dui);
+}
+
+Client *
+getpointerclient(void)
+{
+	Window dummy, win;
+	int di;
+	unsigned int dui;
+
+	if (disabled(FocusFollowMouse))
+		return NULL;
+
+	if (cursor_hidden && enabled(BanishMouseCursor))
+		return NULL;
+
+	XQueryPointer(dpy, root, &dummy, &win, &di, &di, &di, &di, &dui);
+	return wintoclient(win);
 }
 
 long
@@ -3381,12 +3401,12 @@ structurenotify(XEvent *e)
 	} while (XCheckMaskEvent(dpy, StructureNotifyMask|SubstructureNotifyMask, e));
 
 	if (multiws) {
-		focus(NULL);
 		arrange(NULL);
+		focus(NULL);
 		drawbars();
 	} else if (ws) {
-		focus(NULL);
 		arrange(ws);
+		focus(NULL);
 		drawbar(ws->mon);
 	}
 }
