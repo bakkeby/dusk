@@ -1529,23 +1529,25 @@ configurerequest(XEvent *e)
 					c->h = ev->height;
 				}
 			}
+
 			if (CFGREQPOSRELATIVETOMONITOR(c) && !ISSTICKY(c)) {
 				if ((c->x + c->w) > m->mx + m->mw && ISFLOATING(c))
 					c->x = m->mx + (m->mw / 2 - WIDTH(c) / 2);  /* center in x direction */
 				if ((c->y + c->h) > m->my + m->mh && ISFLOATING(c))
 					c->y = m->my + (m->mh / 2 - HEIGHT(c) / 2); /* center in y direction */
-			} else {
-				ws = recttows(c->x, c->y, c->w, c->h);
-				if (ws && ISSTICKY(c)) {
-					stickyws->mon = ws->mon;
-					drawbars();
-				} else if (ws && ws != c->ws) {
-					detach(c);
-					detachstack(c);
-					attachx(c, AttachBottom, ws);
-					attachstack(c);
-				}
 			}
+
+			ws = recttows(c->x, c->y, c->w, c->h);
+			if (ws && ISSTICKY(c)) {
+				stickyws->mon = ws->mon;
+				drawbars();
+			} else if (ISVISIBLE(c) && ws && ws != c->ws) {
+				detach(c);
+				detachstack(c);
+				attachx(c, AttachBottom, ws);
+				attachstack(c);
+			}
+
 			if ((ev->value_mask & (CWX|CWY)) && !(ev->value_mask & (CWWidth|CWHeight)))
 				configure(c);
 			if (ISVISIBLE(c))
