@@ -1,7 +1,7 @@
 void
 swallowmouse(const Arg *arg)
 {
-	Client *r, *c = CLIENT;
+	Client *r, *tmp, *c = selws->sel;
 	XEvent ev;
 	int nx = 0, ny = 0, di;
 	unsigned int dui;
@@ -18,9 +18,6 @@ swallowmouse(const Arg *arg)
 		GrabModeAsync, None, cursor[CurSwallow]->cursor, CurrentTime) != GrabSuccess) {
 		return;
 	}
-
-	if (ISMARKED(c))
-		ignore_marked = 0; // swallowmouse supports marked clients
 
 	do {
 		XMaskEvent(dpy, MOUSEMASK|ExposureMask|SubstructureRedirectMask, &ev);
@@ -39,16 +36,28 @@ swallowmouse(const Arg *arg)
 			break;
 		}
 	} while (ev.type != ButtonRelease);
+
 	XUngrabPointer(dpy, CurrentTime);
 
-	r = recttoclient(nx, ny, 1, 1, 1);
+	r = getpointerclient();
 	if (r && r != c) {
+		if (arg->i) {
+			tmp = c;
+			c = r;
+			r = tmp;
+			selws = c->ws;
+			selws->sel = c;
+		}
 
-		// mark(&((Arg) { .v = c }));
+		if (ISMARKED(c) || ISMARKED(r)) {
+			markclient(c);
+			markclient(r);
+			ignore_marked = 0; // swallowmouse supports marked clients
+		}
+
 		swallow(&((Arg) { .v = r }));
 	}
 
-	/* Remove accumulated pending EnterWindow events caused by the mouse
-	 * movements. */
+	/* Remove accumulated pending EnterWindow events caused by the mouse movements. */
 	XCheckMaskEvent(dpy, EnterWindowMask, &ev);
 }
