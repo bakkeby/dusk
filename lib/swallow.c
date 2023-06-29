@@ -209,23 +209,70 @@ isdescprocess(pid_t p, pid_t c)
 	return (int)c;
 }
 
+void
+readswallowkey(Client *c)
+{
+	struct stat st;
+	char buffer[1024];
+	ssize_t bytes_read;
+	char path[30];
+	FILE* envfile;
+
+	if (!c || !c->pid || disabled(Swallow)) {
+		return;
+	}
+
+	/* Verify access to /proc */
+	if (access("/proc", R_OK | X_OK) != 0) {
+		return;
+	}
+
+	snprintf(path, 29, "/proc/%d/environ", c->pid);
+
+	/* Verify access to /proc/<pid>/environ file */
+	if (stat(path, &st) != 0 || !S_ISREG(st.st_mode) || access(path, R_OK) != 0) {
+		return;
+	}
+
+	envfile = fopen(path, "r");
+	if (!envfile) {
+		return;
+	}
+
+	while ((bytes_read = fread(buffer, 1, 1023, envfile)) > 0) {
+		char* token = strtok(buffer, "\0");
+		while (token != NULL) {
+			if (strncmp(token, "SWALLOWKEY=", 11) == 0) {
+				c->swallowedby = (token + 11)[0];
+				break;
+			}
+			token = strtok(NULL, "\0");
+		}
+		if (c->swallowedby) {
+			break;
+		}
+	}
+
+	fclose(envfile);
+}
+
 Client *
 termforwin(const Client *w)
 {
 	Workspace *ws;
 	Client *c;
-	char key = w->swallowkey;
+	char key = w->swallowedby;
 
 	if (!w->pid)
 		return NULL;
 
 	c = selws->sel;
-	if (c && ISTERMINAL(c) && ((key && c->scratchkey == key) || (c->pid && isdescprocess(c->pid, w->pid))))
+	if (c && ISTERMINAL(c) && ((key && c->swallowkey == key) || (c->pid && isdescprocess(c->pid, w->pid))))
 		return c;
 
 	for (ws = workspaces; ws; ws = ws->next)
 		for (c = ws->stack; c; c = c->snext)
-			if (ISTERMINAL(c) && ((key && c->scratchkey == key) || (c->pid && isdescprocess(c->pid, w->pid))))
+			if (ISTERMINAL(c) && ((key && c->swallowkey == key) || (c->pid && isdescprocess(c->pid, w->pid))))
 				return c;
 
 	return NULL;

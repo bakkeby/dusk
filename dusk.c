@@ -211,6 +211,7 @@ struct Client {
 	int scheme;
 	char scratchkey;
 	char swallowkey;
+	char swallowedby;
 	unsigned int idx;
 	double opacity;
 	pid_t pid;
@@ -285,6 +286,7 @@ typedef struct {
 	const char *workspace;
 	const char *label;
 	const char swallowedby;
+	const char swallowkey;
 	const char *iconpath;
 	int resume;
 } Rule;
@@ -557,7 +559,8 @@ applyrules(Client *c)
 		{
 			c->flags |= Ruled | r->flags;
 			c->scratchkey = r->scratchkey;
-			c->swallowkey = r->swallowedby;
+			c->swallowedby = r->swallowedby;
+			c->swallowkey = r->swallowkey;
 
 			if (r->opacity)
 				c->opacity = r->opacity;
@@ -2296,6 +2299,7 @@ manage(Window w, XWindowAttributes *wa)
 
 	updatewmhints(c);
 	updatemotifhints(c);
+	readswallowkey(c);
 
 	XSelectInput(dpy, w, EnterWindowMask|FocusChangeMask|PropertyChangeMask|StructureNotifyMask);
 	grabbuttons(c, 0);
