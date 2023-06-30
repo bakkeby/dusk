@@ -58,7 +58,7 @@ static const uint64_t
 	SkipTaskbar = 0x100000000000, // do not include the window title for this client on the bar
 	ReapplyRules = 0x200000000000, // allow the client to get rules re-applied once when the window title changes
 	CfgReqPosRelativeToMonitor = 0x400000000000, // makes configure requests relative to the client's monitor
-	FlagPlaceholder0x800000000000 = 0x800000000000,
+	SwallowRetainSize = 0x800000000000, // allows for a client to retain its height and width when swallowed or unswallowed
 	FlagPlaceholder0x1000000000000 = 0x1000000000000,
 	FlagPlaceholder0x2000000000000 = 0x2000000000000,
 	FlagPlaceholder0x4000000000000 = 0x4000000000000,
@@ -125,6 +125,7 @@ static const uint64_t
 #define SEMISCRATCHPAD(C) (C && C->flags & SemiScratchpad)
 #define SKIPTASKBAR(C) (C && C->flags & SkipTaskbar)
 #define STEAMGAME(C) (C && C->flags & SteamGame)
+#define SWALLOWRETAINSIZE(C) (C && C->flags & SwallowRetainSize)
 #define SWITCHWORKSPACE(C) (C && C->flags & SwitchWorkspace)
 #define ENABLEWORKSPACE(C) (C && C->flags & EnableWorkspace)
 #define REVERTWORKSPACE(C) (C && C->flags & RevertWorkspace)

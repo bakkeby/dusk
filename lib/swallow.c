@@ -89,7 +89,7 @@ replaceclient(Client *old, Client *new)
 	old->snext = NULL;
 
 	if (ISVISIBLE(new) && !ISFULLSCREEN(new)) {
-		if (ISFLOATING(new))
+		if (ISFLOATING(new) && (SWALLOWRETAINSIZE(new) || SWALLOWRETAINSIZE(old)))
 			resize(new, old->x, old->y, new->w, new->h, 0);
 		else
 			resize(new, old->x, old->y, old->w, old->h, 0);

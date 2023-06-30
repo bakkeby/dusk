@@ -233,6 +233,7 @@ dump_client(yajl_gen gen, Client *c)
 			YSTR("SemiScratchpad"); YBOOL(SEMISCRATCHPAD(c));
 			YSTR("ScratchpadStayOnMon"); YBOOL(SCRATCHPADSTAYONMON(c));
 			YSTR("SkipTaskbar"); YBOOL(SKIPTASKBAR(c));
+			YSTR("SwallowRetainSize"); YBOOL(SWALLOWRETAINSIZE(c));
 			YSTR("SwitchWorkspace"); YBOOL(SWITCHWORKSPACE(c));
 			YSTR("EnableWorkspace"); YBOOL(ENABLEWORKSPACE(c));
 			YSTR("RevertWorkspace"); YBOOL(REVERTWORKSPACE(c));
