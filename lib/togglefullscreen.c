@@ -10,6 +10,8 @@ togglefullscreen(const Arg *arg)
 		removeflag(c, FakeFullScreen);
 		addflag(c, RestoreFakeFullScreen);
 		setfullscreen(c, 1, 0);
-	} else
+	} else {
 		setfullscreen(c, !ISFULLSCREEN(c), 0);
+		restack(c->ws);
+	}
 }
