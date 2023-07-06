@@ -2294,7 +2294,7 @@ manage(Window w, XWindowAttributes *wa)
 	if (getatomprop(c, netatom[NetWMState], XA_ATOM) == netatom[NetWMFullscreen] || ISFULLSCREEN(c)) {
 		setflag(c, FullScreen, 0);
 		setfullscreen(c, 1, 0);
-		term = NULL; /* do not allow terminals to swallow windows that start in fullscreen */
+		term = NULL; /* do not allow terminals to be swallowed by windows that start in fullscreen */
 	}
 
 	updatewmhints(c);
@@ -2316,9 +2316,9 @@ manage(Window w, XWindowAttributes *wa)
 	XChangeProperty(dpy, c->win, netatom[NetWMAllowedActions], XA_ATOM, 32,
 		PropModeReplace, (unsigned char *) allowed, NetWMActionLast);
 
-	/* Do not attach client if it is being swallowed */
+	/* Do not attach client if it swallows a terminal */
 	if (term && swallowclient(term, c)) {
-		/* Do not let swallowed client steal focus unless the terminal has focus */
+		/* Do not let the swallowing client steal focus unless the terminal has focus */
 		focusclient = (term == selws->sel);
 	} else {
 		attachx(c, 0, NULL);
@@ -3557,14 +3557,14 @@ unmanage(Client *c, int destroyed)
 		revertws = NULL;
 	}
 
-	if (c->swallowing)
+	if (c->swallowing) {
 		unswallow(&((Arg) { .v = c }));
+	} else if (enabled(AutoReduceNmaster) && ws->nmaster > 1 && ismasterclient(c)) {
+		ws->nmaster--;
+	}
 
 	if (ISMARKED(c))
 		unmarkclient(c);
-
-	if (enabled(AutoReduceNmaster) && ws->nmaster > 1 && ismasterclient(c))
-		ws->nmaster--;
 
 	detach(c);
 	detachstack(c);

@@ -110,10 +110,12 @@ unswallow(const Arg *arg)
 	if (c && replaceclient(c, s)) {
 		c->swallowing = s->swallowing;
 		s->swallowing = NULL;
-		attach(c);
+		attachabove(c, s);
 		attachstack(c);
-		focus(c);
-		arrange(c->ws);
+		if (!arg->v) {
+			focus(c);
+			arrange(c->ws);
+		}
 	}
 }
 

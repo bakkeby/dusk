@@ -19,7 +19,7 @@ static const uint64_t
 	SmartGaps = 0x1, // enables no gaps if there is only one visible window
 	SmartGapsMonocle = 0x2, // enforces no (outer) gaps in monocle layout
 	Swallow = 0x4, // enables swallowing of clients
-	SwallowFloating = 0x8, // means swallow floating windows by default
+	SwallowFloating = 0x8, // means that unruled floating windows are allowed to swallow by default
 	CenteredWindowName = 0x10,
 	BarActiveGroupBorderColor = 0x20, // use border color of active group, otherwise title scheme is used
 	BarMasterGroupBorderColor = 0x40, // use border color of master group, otherwise title scheme is used

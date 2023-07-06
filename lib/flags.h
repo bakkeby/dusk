@@ -20,7 +20,7 @@ static const uint64_t
 	Hidden = 0x400, // indicates that the client is hidden
 	Sticky = 0x800, // indicates that the client is sticky (always shown)
 	Terminal = 0x1000, // indicates that the client is a terminal, used by swallow
-	NoSwallow = 0x2000, // indicates that the client should never be swallowed if launched by a terminal
+	NoSwallow = 0x2000, // indicates that the client should never swallow another window
 	Locked = 0x4000, // used by setfullscreen, prevents state change
 	Transient = 0x8000, // whether the client has the transient for hint
 	OnlyModButtons = 0x10000, // restricts button keybindings to those that involve modifiers

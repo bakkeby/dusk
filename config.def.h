@@ -69,8 +69,8 @@ static uint64_t functionality = 0
 //	|SmartGapsMonocle // enforces no gaps in monocle layout
 	|Systray // enables a systray in the bar
 //	|SystrayNoAlpha // disables the use of transparency for the systray, enable if you do not use a compositor
-	|Swallow // allows terminals to swallow X applications started from the command line
-	|SwallowFloating // means swallow floating windows by default
+	|Swallow // allows X applications started from the command line to swallow the terminal
+	|SwallowFloating // allow floating windows to swallow the terminal by default
 	|CenteredWindowName // center the window titles on the bar
 //	|BarActiveGroupBorderColor // use border color of active group, otherwise title scheme is used
 	|BarMasterGroupBorderColor // use border color of master group, otherwise title scheme is used
