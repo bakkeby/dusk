@@ -1862,7 +1862,7 @@ focusmon(const Arg *arg)
 		selws = m->selws;
 	unfocus(sel, 0, NULL);
 	focus(NULL);
-	if (canwarp(selws))
+	if (canwarp(selws->sel))
 		warp(selws->sel);
 }
 
@@ -1909,7 +1909,7 @@ focusstack(const Arg *arg)
 	if (c) {
 		focus(c);
 		if (enabled(FocusedOnTop)) {
-			if (canwarp(c->ws)) {
+			if (canwarp(c)) {
 				force_warp = 1;
 				warp(c);
 			}
@@ -2847,7 +2847,7 @@ restack(Workspace *ws)
 		raiseclient(raised);
 
 	XSync(dpy, False);
-	if (canwarp(ws))
+	if (canwarp(c))
 		warp(c);
 
 	skipfocusevents();

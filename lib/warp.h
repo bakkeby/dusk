@@ -1,2 +1,2 @@
-static int canwarp(Workspace *ws);
+static int canwarp(Client *c);
 static void warp(const Client *c);

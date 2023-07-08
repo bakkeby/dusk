@@ -223,8 +223,9 @@ dump_client(yajl_gen gen, Client *c)
 			YSTR("NeedResize"); YBOOL(NEEDRESIZE(c));
 			YSTR("NeverFocus"); YBOOL(NEVERFOCUS(c));
 			YSTR("NoBorder"); YBOOL(NOBORDER(c));
-			YSTR("NoSwallow"); YBOOL(NOSWALLOW(c));
 			YSTR("NoFocusOnNetActive"); YBOOL(NOFOCUSONNETACTIVE(c));
+			YSTR("NoSwallow"); YBOOL(NOSWALLOW(c));
+			YSTR("NoWarp"); YBOOL(NOWARP(c));
 			YSTR("OnlyModButtons"); YBOOL(ONLYMODBUTTONS(c));
 			YSTR("RespectSizeHints"); YBOOL(RESPECTSIZEHINTS(c));
 			YSTR("RestoreFakeFullScreen"); YBOOL(RESTOREFAKEFULLSCREEN(c));

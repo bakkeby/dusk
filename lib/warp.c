@@ -1,8 +1,14 @@
 int
-canwarp(Workspace *ws)
+canwarp(Client *c)
 {
+	Workspace *ws = c->ws;
+
 	/* Do not warp if the functionality is disabled */
 	if (disabled(Warp))
+		return 0;
+
+	/* Do not warp if the client says not to */
+	if (NOWARP(c))
 		return 0;
 
 	/* Do not warp if we are currently ignoring warp (e.g. when using drag functionality) */
@@ -15,18 +21,19 @@ canwarp(Workspace *ws)
 		return 0;
 
 	/* Do warp if the client is floating or floating layout is used */
-	if (ISFLOATING(ws->sel) || !ws->layout->arrange)
+	if (ISFLOATING(c) || !ws->layout->arrange)
 		return 1;
 
-	/* Do not warp if the monocle layout used */
+	/* Do not warp if monocle layout is used */
 	if (
 		ws->ltaxis[MASTER] == MONOCLE && (
 			abs(ws->ltaxis[LAYOUT]) == NO_SPLIT ||
 			!ws->nmaster ||
 			numtiled(ws) <= ws->nmaster
 		)
-	)
+	) {
 		return 0;
+	}
 
 	/* Fine to warp in other situations */
 	return 1;
