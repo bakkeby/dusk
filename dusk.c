@@ -1048,51 +1048,15 @@ clientfittomon(Client *c, Monitor *m, int *cx, int *cy, int *cw, int *ch)
 void
 clientmessage(XEvent *e)
 {
-	XWindowAttributes wa;
-	XSetWindowAttributes swa;
 	XClientMessageEvent *cme = &e->xclient;
 	Workspace *ws;
 	Client *c;
 	unsigned int maximize_vert, maximize_horz;
 	int setfakefullscreen = 0;
 
-	if (enabled(Systray) && systray && cme->window == systray->win && cme->message_type == netatom[NetSystemTrayOP]) {
-		/* add systray icons */
-		if (cme->data.l[1] == SYSTEM_TRAY_REQUEST_DOCK) {
-			if (!(c = (Client *)calloc(1, sizeof(Client))))
-				die("fatal: could not malloc() %u bytes\n", sizeof(Client));
-			if (!(c->win = cme->data.l[2])) {
-				free(c);
-				return;
-			}
-
-			c->ws = selws;
-			c->next = systray->icons;
-			systray->icons = c;
-			XGetWindowAttributes(dpy, c->win, &wa);
-			c->x = c->oldx = c->y = c->oldy = 0;
-			c->w = c->oldw = wa.width;
-			c->h = c->oldh = wa.height;
-			c->oldbw = wa.border_width;
-			c->bw = 0;
-			SETFLOATING(c);
-			updatesizehints(c);
-			updatetitle(c);
-			updatesystrayicongeom(c, wa.width, wa.height);
-			XAddToSaveSet(dpy, c->win);
-			XSelectInput(dpy, c->win, StructureNotifyMask | PropertyChangeMask | ResizeRedirectMask);
-			XClassHint ch = {"systray", "systray"};
-			if (enabled(Debug))
-				fprintf(stderr, "clientmessage: received systray request dock for window %ld (%s)\n", c->win, c->name);
-			XSetClassHint(dpy, c->win, &ch);
-			XReparentWindow(dpy, c->win, systray->win, 0, 0);
-			/* use parents background color */
-			swa.background_pixel = scheme[SchemeNorm][ColBg].pixel;
-			XChangeWindowAttributes(dpy, c->win, CWBackPixel, &swa);
-			sendevent(c->win, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_EMBEDDED_NOTIFY, 0 , systray->win, XEMBED_EMBEDDED_VERSION);
-			XSync(dpy, False);
-			setclientstate(c, NormalState);
-		}
+	if (systray && cme->message_type == netatom[NetSystemTrayOP]) {
+		addsystrayicon(cme);
+		drawbarwin(systray->bar);
 		return;
 	}
 
@@ -1612,7 +1576,7 @@ destroynotify(XEvent *e)
 		if (enabled(Debug) || DEBUGGING(c))
 			fprintf(stderr, "destroynotify: received event for swallowing client %s\n", c->name);
 		unmanage(c->swallowing, 1);
-	} else if (enabled(Systray) && (c = wintosystrayicon(ev->window))) {
+	} else if (systray && (c = wintosystrayicon(ev->window))) {
 		if (enabled(Debug) || DEBUGGING(c))
 			fprintf(stderr, "destroynotify: removing systray icon for client %s\n", c->name);
 		removesystrayicon(c);
@@ -2418,7 +2382,7 @@ maprequest(XEvent *e)
 	XMapRequestEvent *ev = &e->xmaprequest;
 
 	Client *i;
-	if (enabled(Systray) && systray && (i = wintosystrayicon(ev->window))) {
+	if (systray && (i = wintosystrayicon(ev->window))) {
 		sendevent(i->win, netatom[Xembed], StructureNotifyMask, CurrentTime, XEMBED_WINDOW_ACTIVATE, 0, systray->win, XEMBED_EMBEDDED_VERSION);
 		drawbarwin(systray->bar);
 	}
@@ -2569,7 +2533,7 @@ propertynotify(XEvent *e)
 
 	pn_prev_count++;
 
-	if (enabled(Systray) && (c = wintosystrayicon(ev->window))) {
+	if (systray && (c = wintosystrayicon(ev->window))) {
 		if (ev->atom == XA_WM_NORMAL_HINTS) {
 			updatesizehints(c);
 			updatesystrayicongeom(c, c->w, c->h);
@@ -3220,6 +3184,7 @@ setup(void)
 
 	createworkspaces();
 	updatebars();
+	initsystray();
 
 	/* supporting window for NetWMCheck */
 	wmcheckwin = XCreateSimpleWindow(dpy, root, 0, 0, 1, 1, 0, 0, 0);
@@ -3639,8 +3604,9 @@ unmapnotify(XEvent *e)
 			setclientstate(c, WithdrawnState);
 		else
 			unmanage(c->swallowing, 0);
-	} else if (enabled(Systray) && (c = wintosystrayicon(ev->window))) {
+	} else if (systray && (c = wintosystrayicon(ev->window))) {
 		removesystrayicon(c);
+		drawbarwin(systray->bar);
 	}
 
 	return ws;
