@@ -761,6 +761,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( togglenomodbuttons, ARG_TYPE_NONE ),
 	IPCCOMMAND( togglepinnedws, ARG_TYPE_NONE ),
 	IPCCOMMAND( togglesticky, ARG_TYPE_NONE ),
+	IPCCOMMAND( togglews, ARG_TYPE_NONE ),
 	IPCCOMMAND( transfer, ARG_TYPE_NONE ),
 	IPCCOMMAND( transferall, ARG_TYPE_NONE ),
 	IPCCOMMAND( unfloatvisible, ARG_TYPE_NONE ),

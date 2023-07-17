@@ -49,6 +49,7 @@ static void swapwsclients(Workspace *ws, Workspace *ows);
 static void swapwsbyname(const Arg *arg);
 
 static void togglepinnedws(const Arg *arg);
+static void togglews(const Arg *arg);
 
 static void viewallwsonmon(const Arg *arg);
 static void viewalloccwsonmon(const Arg *arg);

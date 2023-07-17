@@ -561,6 +561,18 @@ togglepinnedws(const Arg *arg)
 }
 
 void
+togglews(const Arg *arg)
+{
+	Monitor *m;
+
+	if (!selws)
+		return;
+
+	m = selws->mon;
+	viewwsmask(m, m->wsmask);
+}
+
+void
 enablews(const Arg *arg)
 {
 	viewwsonmon((Workspace*)arg->v, NULL, 1);
