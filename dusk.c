@@ -583,7 +583,7 @@ applyrules(Client *c)
 				load_icon_from_png_image(c, r->iconpath);
 
 			if (enabled(Debug) || DEBUGGING(c))
-				fprintf(stderr, "applyrules: client rule %d matched:\n    class: %s\n    role: %s\n    instance: %s\n    title: %s\n    wintype: %s\n    flags: %ld\n    floatpos: %s\n    workspace: %s\n    label: %s\n",
+				fprintf(stderr, "applyrules: client rule %d matched:\n    class: %s\n    role: %s\n    instance: %s\n    title: %s\n    wintype: %s\n    flags: %lu\n    floatpos: %s\n    workspace: %s\n    label: %s\n",
 					i,
 					r->class ? r->class : "NULL",
 					r->role ? r->role : "NULL",
@@ -2104,16 +2104,8 @@ keyrelease(XEvent *e)
 	if (!combo)
 		return;
 
-	Monitor *m = selws->mon;
-	uint64_t wsmask = getwsmask(m);
-
-	if (m->prevwsmask == wsmask && m->wsmask) {
-		if (!monitorchanged && getallwsmask(m) & m->wsmask)
-			viewwsmask(m, m->wsmask);
-	} else if (m->prevwsmask)
-		m->wsmask = m->prevwsmask;
+	storewsmask(1);
 	combo = 0;
-	monitorchanged = 0;
 }
 
 void

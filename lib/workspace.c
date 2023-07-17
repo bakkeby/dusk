@@ -174,6 +174,21 @@ viewwsmask(Monitor *m, uint64_t wsmask)
 	drawws(NULL, m, currmask, 1, 0, 0);
 }
 
+void
+storewsmask(int toggleprevious)
+{
+	Monitor *m = selws->mon;
+	uint64_t wsmask = getwsmask(m);
+
+	if (m->prevwsmask == wsmask && m->wsmask) {
+		if (!monitorchanged && toggleprevious && getallwsmask(m) & m->wsmask)
+			viewwsmask(m, m->wsmask);
+	} else if (m->prevwsmask)
+		m->wsmask = m->prevwsmask;
+
+	monitorchanged = 0;
+}
+
 int
 hasclients(Workspace *ws)
 {
@@ -561,6 +576,7 @@ void
 viewws(const Arg *arg)
 {
 	viewwsonmon((Workspace*)arg->v, NULL, 0);
+	storewsmask(0);
 }
 
 void
