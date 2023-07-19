@@ -2114,8 +2114,13 @@ killclient(const Arg *arg)
 	Client *c = CLIENT;
 
 	for (c = nextmarked(NULL, c); c; c = nextmarked(c->next, NULL)) {
-		if (ISPERMANENT(c))
+		if (ISPERMANENT(c)) {
+			if (c->scratchkey) {
+				addflag(c, Invisible);
+				hide(c);
+			}
 			continue;
+		}
 
 		if (sendevent(c->win, wmatom[WMDelete], NoEventMask, wmatom[WMDelete], CurrentTime, 0, 0, 0))
 			continue;
