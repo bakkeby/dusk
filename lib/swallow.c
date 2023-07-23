@@ -61,28 +61,37 @@ replaceclient(Client *old, Client *new)
 
 	Client *c = NULL;
 	Workspace *ws = old->ws;
+	XWindowChanges wc;
 
 	new->ws = ws;
+
+	/* Place the new window below the old in terms of stack order. */
+	wc.stack_mode = Below;
+	wc.sibling = old->win;
+	XConfigureWindow(dpy, new->win, CWSibling|CWStackMode, &wc);
 	setflag(new, Floating, old->flags & Floating);
 
 	new->scratchkey = old->scratchkey;
 	old->scratchkey = 0;
 
 	new->next = old->next;
-	new->snext = old->snext;
-
-	if (old == ws->clients)
+	if (old == ws->clients) {
 		ws->clients = new;
-	else {
+	} else {
 		for (c = ws->clients; c && c->next != old; c = c->next);
 		c->next = new;
 	}
 
-	if (old == ws->stack)
+	new->snext = old->snext;
+	if (old == ws->stack) {
 		ws->stack = new;
-	else {
+	} else {
 		for (c = ws->stack; c && c->snext != old; c = c->snext);
 		c->snext = new;
+	}
+
+	if (ws->sel == old) {
+		ws->sel = new;
 	}
 
 	old->next = NULL;
@@ -105,7 +114,6 @@ unswallow(const Arg *arg)
 
 	if (!c || !c->swallowing)
 		return;
-
 	s = c->swallowing;
 	if (c && replaceclient(c, s)) {
 		c->swallowing = s->swallowing;

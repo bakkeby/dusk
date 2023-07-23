@@ -2633,6 +2633,9 @@ raiseclient(Client *c)
 
 		XConfigureWindow(dpy, s->win, CWSibling|CWStackMode, &wc);
 		wc.sibling = s->win;
+
+		if (s == c)
+			c = NULL;
 	}
 
 	/* Otherwise check if there are sticky clients first that need to be on top. */
@@ -2647,10 +2650,13 @@ raiseclient(Client *c)
 
 		XConfigureWindow(dpy, s->win, CWSibling|CWStackMode, &wc);
 		wc.sibling = s->win;
+
+		if (s == c)
+			c = NULL;
 	}
 
 	/* If the given client c is not handled by the two for loops above */
-	if (c && !ISSTICKY(c) && (!ISFLOATING(c) || !(ALWAYSONTOP(c) || ISTRANSIENT(c)))) {
+	if (c) {
 		if (!top) {
 			XRaiseWindow(dpy, c->win);
 		} else {
