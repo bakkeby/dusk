@@ -1696,13 +1696,16 @@ enternotify(XEvent *e)
 
 	if ((ev->mode != NotifyNormal || ev->detail == NotifyInferior) && ev->window != root)
 		return;
-	c = wintoclient(ev->window);
+
+	c = getpointerclient();
+	if (!c)
+		c = wintoclient(ev->window);
+
 	m = c ? c->ws->mon : wintomon(ev->window);
-	if (m != selmon) {
-		entermon(m, c);
-	}
-	else if (selws == m->selws && (!c || (m->selws && c == m->selws->sel)))
+	if (selws == m->selws && (!c || (m->selws && c == m->selws->sel)))
 		return;
+	if (m != selmon)
+		entermon(m, c);
 	focus(c);
 }
 
@@ -1726,7 +1729,7 @@ focus(Client *c)
 	int revert_to_return;
 	Bar *bar;
 
-	if (!c || ISINVISIBLE(c))
+	if (enabled(FocusFollowMouse) && (!c || ISINVISIBLE(c)))
 		c = getpointerclient();
 	if (!c || ISINVISIBLE(c))
 		for (c = ws->stack; c && !ISVISIBLE(c); c = c->snext);
@@ -1925,9 +1928,6 @@ getpointerclient(void)
 	Window dummy, win;
 	int di;
 	unsigned int dui;
-
-	if (disabled(FocusFollowMouse))
-		return NULL;
 
 	if (cursor_hidden && enabled(BanishMouseCursor))
 		return NULL;
