@@ -30,6 +30,7 @@ dump_settings(yajl_gen gen)
 			YSTR("FocusOnNetActive"); YBOOL(enabled(FocusOnNetActive));
 			YSTR("FocusedOnTop"); YBOOL(enabled(FocusedOnTop));
 			YSTR("FocusedOnTopTiled"); YBOOL(enabled(FocusedOnTopTiled));
+			YSTR("FocusFollowMouse"); YBOOL(enabled(FocusFollowMouse));
 			YSTR("DecorationHints"); YBOOL(enabled(DecorationHints));
 			YSTR("AllowNoModifierButtons"); YBOOL(enabled(AllowNoModifierButtons));
 			YSTR("CenterSizeHintsClients"); YBOOL(enabled(CenterSizeHintsClients));
