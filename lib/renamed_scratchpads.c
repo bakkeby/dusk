@@ -114,6 +114,8 @@ togglescratch(const Arg *arg)
 				else {
 					removeflag(c, Invisible);
 					showwsclient(c);
+					detachstack(c);
+					attachstack(c);
 				}
 			}
 		}
@@ -159,10 +161,12 @@ togglescratch(const Arg *arg)
 			focus(NULL);
 		}
 		arrange_focus_on_monocle = 1;
-		if (multimonscratch || monclients || SEMISCRATCHPAD(c))
+		if (multimonscratch || monclients || SEMISCRATCHPAD(c)) {
 			arrange(NULL);
-		else
+			restack(c->ws);
+		} else {
 			arrange(c->ws);
+		}
 		skipfocusevents();
 	} else {
 		spawn(arg);
