@@ -1690,8 +1690,11 @@ enternotify(XEvent *e)
 	if (enabled(FocusOnClick))
 		return;
 
+	if (cursor_hidden)
+		return;
+
 	getrootptr(&x, &y);
-	if (cursor_hidden || (x == prev_ptr_x && y == prev_ptr_y))
+	if (x == prev_ptr_x && y == prev_ptr_y)
 		return;
 
 	if ((ev->mode != NotifyNormal || ev->detail == NotifyInferior) && ev->window != root)
@@ -1764,7 +1767,6 @@ focus(Client *c)
 			restack(c->ws);
 		} else {
 			XSync(dpy, False);
-			skipfocusevents();
 		}
 		XSetWindowBorder(dpy, c->win, scheme[clientscheme(c, c)][ColBorder].pixel);
 	} else {
@@ -1791,26 +1793,16 @@ focus(Client *c)
 	drawbar(ws->mon);
 }
 
-/* there are some broken focus acquiring clients needing extra handling */
+/* There are some broken focus acquiring clients needing extra handling */
 void
 focusin(XEvent *e)
 {
-	int x, y;
 	Workspace *ws = selws;
 	XFocusChangeEvent *ev = &e->xfocus;
-
-	getrootptr(&x, &y);
-	if (cursor_hidden || (x == prev_ptr_x && y == prev_ptr_y)) {
-		skipfocusevents();
-		return;
-	}
 
 	Client *c = wintoclient(ev->window);
 	if (ws->sel && ev->window != ws->sel->win && c)
 		setfocus(ws->sel);
-
-	prev_ptr_x = x;
-	prev_ptr_y = y;
 }
 
 void
@@ -2818,7 +2810,6 @@ restack(Workspace *ws)
 		warp(c);
 
 	skipfocusevents();
-
 }
 
 void
