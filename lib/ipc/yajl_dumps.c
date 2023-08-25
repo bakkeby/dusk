@@ -9,6 +9,7 @@ dump_settings(yajl_gen gen)
 	YMAP(
 		YSTR("Functionality"); YMAP(
 			YSTR("AutoReduceNmaster"); YBOOL(enabled(AutoReduceNmaster));
+			YSTR("BanishMouseCursor"); YBOOL(enabled(BanishMouseCursor));
 			YSTR("SmartGaps"); YBOOL(enabled(SmartGaps));
 			YSTR("SmartGapsMonocle"); YBOOL(enabled(SmartGapsMonocle));
 			YSTR("Systray"); YBOOL(enabled(Systray));
