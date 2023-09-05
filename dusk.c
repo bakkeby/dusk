@@ -2603,6 +2603,7 @@ raiseclient(Client *c)
 	Client *s, *top = NULL;
 	Workspace *ws;
 	XWindowChanges wc;
+	int raised = 0;
 
 	/* If the raised client is on the sticky workspace, then refer to the previously
 	 * selected workspace when for searching other clients. */
@@ -2610,9 +2611,18 @@ raiseclient(Client *c)
 	wc.stack_mode = Above;
 	wc.sibling = ws->mon->bar ? ws->mon->bar->win : wmcheckwin;
 
+	/* If the raised client is always on top, then it should be raised first. */
+	if (ALWAYSONTOP(c) || ISTRANSIENT(c) || ISSTICKY(c)) {
+		top = c;
+		XRaiseWindow(dpy, c->win);
+		wc.stack_mode = Below;
+		wc.sibling = c->win;
+		raised = 1;
+	}
+
 	/* Check if there are floating always on top clients that need to be on top. */
 	for (s = ws->stack; s; s = s->snext) {
-		if (!ISFLOATING(s) || !(ALWAYSONTOP(s) || ISTRANSIENT(s)))
+		if (s == c || !ISFLOATING(s) || !(ALWAYSONTOP(s) || ISTRANSIENT(s)))
 			continue;
 
 		if (!top) {
@@ -2625,13 +2635,13 @@ raiseclient(Client *c)
 
 		XConfigureWindow(dpy, s->win, CWSibling|CWStackMode, &wc);
 		wc.sibling = s->win;
-
-		if (s == c)
-			c = NULL;
 	}
 
 	/* Otherwise check if there are sticky clients first that need to be on top. */
 	for (s = stickyws->stack; s; s = s->snext) {
+		if (s == c)
+			continue;
+
 		if (!top) {
 			top = s;
 			XRaiseWindow(dpy, s->win);
@@ -2642,19 +2652,17 @@ raiseclient(Client *c)
 
 		XConfigureWindow(dpy, s->win, CWSibling|CWStackMode, &wc);
 		wc.sibling = s->win;
-
-		if (s == c)
-			c = NULL;
 	}
 
-	/* If the given client c is not handled by the two for loops above */
-	if (c) {
-		if (!top) {
-			XRaiseWindow(dpy, c->win);
-		} else {
-			XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
-		}
+	if (raised)
+		return;
+
+	if (top) {
+		XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
+		return;
 	}
+
+	XRaiseWindow(dpy, c->win);
 }
 
 /* This reads the stacking order on the X server side and updates the client
