@@ -14,6 +14,9 @@ stackfocus(const Arg *arg)
 
 	stackposclient(arg, &c);
 
+	if (!c)
+		return;
+
 	if (c == ws->sel) {
 		if (arg->i != PREVSEL) {
 			stackfocus(&((Arg) { .i = PREVSEL }));
@@ -43,6 +46,9 @@ stackpush(const Arg *arg)
 	}
 
 	stackposclient(arg, &c);
+
+	if (!c)
+		return;
 
 	if (c == sel)
 		return;

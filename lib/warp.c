@@ -1,7 +1,13 @@
 int
 canwarp(Client *c)
 {
-	Workspace *ws = c->ws;
+	Workspace *ws;
+
+	/* Do not warp if the client is NULL */
+	if (!c)
+		return 0;
+
+	ws = c->ws;
 
 	/* Do not warp if the functionality is disabled */
 	if (disabled(Warp))
