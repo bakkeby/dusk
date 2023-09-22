@@ -8,13 +8,7 @@ OBJ = ${SRC:.c=.o}
 
 # FreeBSD users, prefix all ifdef, else and endif statements with a . for this to work (e.g. .ifdef)
 
-all: options dusk duskc
-
-options:
-	@echo dusk build options:
-	@echo "CFLAGS   = ${CFLAGS}"
-	@echo "LDFLAGS  = ${LDFLAGS}"
-	@echo "CC       = ${CC}"
+all: dusk duskc
 
 .c.o:
 	${CC} -c ${CFLAGS} $<
@@ -60,4 +54,4 @@ uninstall:
 		${DESTDIR}${MANPREFIX}/man1/dusk.1\
 		/usr/share/xsessions/dusk.desktop
 
-.PHONY: all options clean dist install uninstall
+.PHONY: all clean dist install uninstall
