@@ -36,7 +36,9 @@ hide_cursor(const Arg *arg)
 	if (enabled(BanishMouseCursor)) {
 		XFixesHideCursor(dpy, root);
 		if (getrootptr(&mouse_x, &mouse_y)) {
-			XWarpPointer(dpy, None, root, 0, 0, 0, 0, selmon->mx + selmon->mw, selmon->my);
+			if (enabled(BanishMouseCursorToCorner)) {
+				XWarpPointer(dpy, None, root, 0, 0, 0, 0, selmon->mx + selmon->mw, selmon->my);
+			}
 		}
 	}
 	cursor_hidden = 1;

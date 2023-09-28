@@ -59,7 +59,7 @@ static const uint64_t
 	FocusedOnTopTiled = 0x10000000000, // additional toggle to also allow focused tiled clients to display on top of floating windows
 	BanishMouseCursor = 0x20000000000, // like xbanish, hides mouse cursor when using the keyboard
 	FocusFollowMouse = 0x40000000000, // window that rests under the mouse cursor will get focus when changing workspace or killing clients
-	FuncPlaceholder8796093022208 = 0x80000000000,
+	BanishMouseCursorToCorner = 0x80000000000, // makes BanishMouseCursor also move the cursor to top right corner of the screen
 	FuncPlaceholder17592186044416 = 0x100000000000,
 	FuncPlaceholder35184372088832 = 0x200000000000,
 	FuncPlaceholder70368744177664 = 0x400000000000,
