@@ -3311,7 +3311,7 @@ spawncmd(const Arg *arg, int buttonclick, int orphan)
 					if (!S_ISDIR(statbuf.st_mode))
 						cwd = dirname(cwd);
 
-					if (!chdir(cwd))
+					if (strlen(cwd) > 1 && !chdir(cwd))
 						break;
 				}
 
