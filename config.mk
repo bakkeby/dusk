@@ -19,6 +19,11 @@ X11LIB = /usr/X11R6/lib
 #XINPUTLIBS = -lXi
 #XFIXESLIBS = -lXfixes
 
+# Optional dependency on fribidi for RTL languages
+#HAVE_FRIBIDI = -DHAVE_FRIBIDI=1
+#FRIBIDIINC = -I/usr/include/fribidi
+#FRIBIDILIBS = -lfribidi
+
 # Xinerama, comment if you don't want it
 XINERAMALIBS  = -lXinerama
 XINERAMAFLAGS = -DXINERAMA
@@ -46,14 +51,14 @@ XCBLIBS = -lX11-xcb -lxcb -lxcb-res
 IMLIB2LIBS = -lImlib2
 
 # includes and libs
-INCS = -I${X11INC} -I${FREETYPEINC} ${YAJLINC} ${XINPUTINC}
-LIBS = -L${X11LIB} -lX11 ${XINERAMALIBS} ${FREETYPELIBS}  ${XRENDER} ${XCBLIBS} ${KVMLIB} ${YAJLLIBS} ${IMLIB2LIBS} ${XINPUTLIBS} ${XFIXESLIBS}
+INCS = -I${X11INC} -I${FREETYPEINC} ${YAJLINC} ${XINPUTINC} ${FRIBIDIINC}
+LIBS = -L${X11LIB} -lX11 ${XINERAMALIBS} ${FREETYPELIBS}  ${XRENDER} ${XCBLIBS} ${KVMLIB} ${YAJLLIBS} ${IMLIB2LIBS} ${XINPUTLIBS} ${XFIXESLIBS} ${FRIBIDILIBS}
 
 # Optional host flag for computer specific configuration
 #HOSTFLAGS = -DHOST=$(shell command -v cksum > /dev/null && hostname | cksum | tr -d ' ')
 
 # flags
-CPPFLAGS = -D_DEFAULT_SOURCE $(HAVE_LIBXI) -D_BSD_SOURCE -D_POSIX_C_SOURCE=200809L -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS} ${HOSTFLAGS}
+CPPFLAGS = -D_DEFAULT_SOURCE $(HAVE_LIBXI) ${HAVE_FRIBIDI} -D_BSD_SOURCE -D_POSIX_C_SOURCE=200809L -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS} ${HOSTFLAGS}
 #CFLAGS   = -g -std=c99 -pedantic -Wall -O0 ${INCS} ${CPPFLAGS}
 CFLAGS   = -std=c99 -pedantic -Wall -Wno-unused-function -Wno-deprecated-declarations -Os ${INCS} ${CPPFLAGS}
 LDFLAGS  = ${LIBS}

@@ -4,17 +4,40 @@
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/Xft/Xft.h>
+#ifdef HAVE_FRIBIDI
+#include <fribidi.h>
+#endif
 
 #include "drw.h"
 #include "util.h"
 
 #define UTF_INVALID 0xFFFD
 #define UTF_SIZ     4
+#define STATUS_BUFFER 512
 
 static const unsigned char utfbyte[UTF_SIZ + 1] = {0x80,    0, 0xC0, 0xE0, 0xF0};
 static const unsigned char utfmask[UTF_SIZ + 1] = {0xC0, 0x80, 0xE0, 0xF0, 0xF8};
 static const long utfmin[UTF_SIZ + 1] = {       0,    0,  0x80,  0x800,  0x10000};
 static const long utfmax[UTF_SIZ + 1] = {0x10FFFF, 0x7F, 0x7FF, 0xFFFF, 0x10FFFF};
+
+#if HAVE_FRIBIDI
+static char fribidi_text[STATUS_BUFFER] = {0};
+
+static void
+apply_fribidi(const char *str)
+{
+	FriBidiStrIndex len = strlen(str);
+	FriBidiChar logical[STATUS_BUFFER];
+	FriBidiChar visual[STATUS_BUFFER];
+	FriBidiParType base = FRIBIDI_PAR_ON;
+	FriBidiCharSet charset;
+
+	charset = fribidi_parse_charset("UTF-8");
+	len = fribidi_charset_to_unicode(charset, str, len, logical);
+	fribidi_log2vis(logical, len, &base, visual, NULL, NULL, NULL);
+	fribidi_unicode_to_charset(charset, visual, len, fribidi_text);
+}
+#endif
 
 static long
 utf8decodebyte(const char c, size_t *i)
@@ -288,6 +311,11 @@ drw_text(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lp
 	XGlyphInfo ext;
 	static const char *ellipsis = "…";
 	static unsigned int ellipsis_width = 0;
+
+	#if HAVE_FRIBIDI
+	apply_fribidi(text);
+	text = fribidi_text;
+	#endif
 
 	/* keep track of a couple codepoints for which we have no match. */
 	enum { nomatches_len = 64 };
