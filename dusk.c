@@ -3140,8 +3140,6 @@ setup(void)
 	root = RootWindow(dpy, screen);
 	xinitvisual();
 	drw = drw_create(dpy, screen, root, sw, sh, visual, depth, cmap);
-	if (!drw_fontset_create(drw, fonts, LENGTH(fonts)))
-		die("no fonts could be loaded.");
 
 	/* init appearance */
 	scheme = ecalloc(LENGTH(colors) + 1, sizeof(Clr *));
@@ -3152,6 +3150,9 @@ setup(void)
 
 	if (enabled(Xresources))
 		loadxrdb();
+
+	if (!drw_fontset_create(drw, fonts, LENGTH(fonts)))
+		die("no fonts could be loaded.");
 
 	lrpad = drw->fonts->h + horizpadbar;
 	bh = bar_height ? bar_height : drw->fonts->h + vertpadbar;
