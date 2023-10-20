@@ -58,6 +58,7 @@ createworkspaces()
 		ws->wy = ws->mon->wy;
 		ws->wh = ws->mon->wh;
 		ws->ww = ws->mon->ww;
+		ws->orientation = ws->mon->orientation;
 
 		if (m->selws == NULL) {
 			m->selws = ws;
@@ -258,6 +259,7 @@ adjustwsformonitor(Workspace *ws, Monitor *m)
 
 	if (enabled(SmartLayoutConvertion))
 		layoutmonconvert(ws, ws->mon, m);
+	ws->orientation = m->orientation;
 }
 
 void
@@ -842,12 +844,14 @@ assignworkspacetomonitor(Workspace *ws, Monitor *m)
 	ws->ww = ws->mon->ww;
 }
 
+/* This is called when a new monitor is added and it handles redistribution of workspaces across
+ * all available monitors. */
 void
-redistributeworkspaces(Monitor *new)
+redistributeworkspaces(void)
 {
 	int i;
 	const WorkspaceRule *r;
-	Monitor *m = mons;
+	Monitor *m = mons, *mr = NULL;
 	Workspace *ws;
 
 	for (i = 0, ws = workspaces; ws && i < LENGTH(wsrules); ws = ws->next) {
@@ -857,18 +861,17 @@ redistributeworkspaces(Monitor *new)
 		r = &wsrules[i];
 		i++;
 
-		if (ws->pinned)
-			continue;
-
-		if (r->monitor == new->num) {
-			assignworkspacetomonitor(ws, new);
+		/* If the workspace rule specifies a designated monitor, and that monitor exists, then
+		 * this will have precedence. */
+		for (mr = mons; mr && mr->num != r->monitor; mr = mr->next);
+		if (mr) {
+			assignworkspacetomonitor(ws, mr);
 			ws->pinned = r->pinned;
 			continue;
 		}
 
-		if (r->monitor > -1 && r->monitor < new->num)
-			continue;
-
+		/* Otherwise redistribute workspaces evently. */
+		ws->pinned = 0;
 		assignworkspacetomonitor(ws, m);
 		m = (m->next == NULL ? mons : m->next);
 	}

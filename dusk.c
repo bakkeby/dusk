@@ -263,6 +263,7 @@ struct Monitor {
 	int gappoh;           /* horizontal outer gaps */
 	int gappov;           /* vertical outer gaps */
 	int showbar;
+	int orientation;      /* screen orientation: 0 = Horizontal, 1 = Vertical */
 	uint64_t wsmask;
 	uint64_t prevwsmask;
 	unsigned int borderpx;
@@ -303,6 +304,7 @@ struct Workspace {
 	int nmaster;
 	int enablegaps;
 	int visible;
+	int orientation;
 	int num;
 	int pinned; // whether workspace is pinned to assigned monitor or not
 	Client *clients;
@@ -3682,11 +3684,13 @@ updategeom(int width, int height)
 				m->my = m->wy = unique[m->num].y_org;
 				m->mw = m->ww = unique[m->num].width;
 				m->mh = m->wh = unique[m->num].height;
+				m->orientation = (m->mw < m->mh);
 				updatebarpos(m);
 			}
-			if (m->num >= n)
-				redistributeworkspaces(m);
 		}
+
+		if (n < nn)
+			redistributeworkspaces();
 
 		for (i = nn; i < n; i++) {
 			for (m = mons; m && m->next; m = m->next);
@@ -3704,6 +3708,7 @@ updategeom(int width, int height)
 			dirty = 1;
 			mons->mw = mons->ww = sw;
 			mons->mh = mons->wh = sh;
+			mons->orientation = (mons->mw < mons->mh);
 			updatebarpos(mons);
 		}
 	}

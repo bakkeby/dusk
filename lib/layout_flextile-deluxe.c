@@ -138,10 +138,7 @@ setwindowborders(Workspace *ws, Client *sel)
 void
 layoutmonconvert(Workspace *ws, Monitor *from, Monitor *to)
 {
-	int from_orientation = from->mw < from->mh;
-	int to_orientation = to->mw < to->mh;
-
-	if (from_orientation == to_orientation)
+	if (ws->orientation == to->orientation)
 		return;
 
 	if (ws->layout->arrange != flextile)
