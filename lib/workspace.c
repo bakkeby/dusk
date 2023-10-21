@@ -252,14 +252,11 @@ noborder(Client *c)
 void
 adjustwsformonitor(Workspace *ws, Monitor *m)
 {
-	if (!ws || !m || ws->mon == m)
+	if (!ws || !m)
 		return;
 
 	clientsmonresize(ws->clients, ws->mon, m);
-
-	if (enabled(SmartLayoutConvertion))
-		layoutmonconvert(ws, ws->mon, m);
-	ws->orientation = m->orientation;
+	reorientworkspace(ws, m->orientation);
 }
 
 void
@@ -830,7 +827,7 @@ nextvismonws(Monitor *mon, Workspace *ws)
 void
 assignworkspacetomonitor(Workspace *ws, Monitor *m)
 {
-	if (!ws || ws->mon == m)
+	if (!ws || !m || ws->mon == m)
 		return;
 
 	adjustwsformonitor(ws, m);
@@ -870,7 +867,7 @@ redistributeworkspaces(void)
 			continue;
 		}
 
-		/* Otherwise redistribute workspaces evently. */
+		/* Otherwise redistribute workspaces evenly. */
 		ws->pinned = 0;
 		assignworkspacetomonitor(ws, m);
 		m = (m->next == NULL ? mons : m->next);
@@ -888,6 +885,27 @@ redistributeworkspaces(void)
 			m->selws->visible = 1;
 		}
 	}
+}
+
+void
+reorientworkspaces(void)
+{
+	Workspace *ws;
+
+	for (ws = workspaces; ws; ws = ws->next) {
+		adjustwsformonitor(ws, ws->mon);
+	}
+}
+
+void
+reorientworkspace(Workspace *ws, int orientation)
+{
+	if (ws->orientation == orientation)
+		return;
+
+	if (enabled(SmartLayoutConvertion) && ws->layout->arrange == flextile)
+		layoutconvert(&((Arg) { .v = ws }));
+	ws->orientation = orientation;
 }
 
 void

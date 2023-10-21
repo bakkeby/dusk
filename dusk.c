@@ -1009,17 +1009,22 @@ cleanupmon(Monitor *mon)
 		for (m = mons; m && m->next != mon; m = m->next);
 		m->next = mon->next;
 	}
+
 	for (ws = workspaces; ws; ws = ws->next) {
-		if (ws->mon == mon) {
-			adjustwsformonitor(ws, mons);
+		if (ws->mon != mon || !mons)
+			continue;
+
+		if (ws == stickyws) {
 			ws->mon = mons;
-			if (ws != stickyws) {
-				ws->visible = 0;
-				ws->pinned = 0;
-				hidewsclients(ws->stack);
-			}
+			continue;
 		}
+
+		assignworkspacetomonitor(ws, mons);
+		ws->visible = 0;
+		ws->pinned = 0;
+		hidewsclients(ws->stack);
 	}
+
 	for (bar = mon->bar; bar; bar = mon->bar) {
 		if (!bar->external) {
 			XUnmapWindow(dpy, bar->win);
@@ -3688,6 +3693,8 @@ updategeom(int width, int height)
 				updatebarpos(m);
 			}
 		}
+
+		reorientworkspaces();
 
 		if (n < nn)
 			redistributeworkspaces();

@@ -61,6 +61,8 @@ static void viewwsonmon(Workspace *ws, Monitor *m, int enablews);
 
 static void assignworkspacetomonitor(Workspace *ws, Monitor *m);
 static void redistributeworkspaces(void);
+static void reorientworkspaces(void);
+static void reorientworkspace(Workspace *ws, int orientation);
 static void setwfact(const Arg *arg);
 static void setworkspaceareas();
 static void setworkspaceareasformon(Monitor *mon);

@@ -136,18 +136,6 @@ setwindowborders(Workspace *ws, Client *sel)
 }
 
 void
-layoutmonconvert(Workspace *ws, Monitor *from, Monitor *to)
-{
-	if (ws->orientation == to->orientation)
-		return;
-
-	if (ws->layout->arrange != flextile)
-		return;
-
-	layoutconvert(&((Arg) { .v = ws }));
-}
-
-void
 layoutconvert(const Arg *arg)
 {
 	Workspace *ws = (arg && arg->v ? (Workspace *)arg->v : selws);
