@@ -153,7 +153,7 @@ enum {
 	SchemeFlexActFloat,
 	SchemeFlexInaFloat,
 	SchemeFlexSelFloat,
-	SchemeLast, // leave this as the last item, mmmkay
+	SchemeLast,
 }; /* color schemes */
 
 enum {
@@ -167,10 +167,10 @@ enum {
 }; /* clicks */
 
 enum {
-	LAYOUT,       // controls overall layout arrangement / split
-	MASTER,       // indicates the tile arrangement for the master area
-	STACK,        // indicates the tile arrangement for the stack area
-	STACK2,       // indicates the tile arrangement for the secondary stack area
+	LAYOUT,       /* controls overall layout arrangement / split */
+	MASTER,       /* indicates the tile arrangement for the master area */
+	STACK,        /* indicates the tile arrangement for the stack area */
+	STACK2,       /* indicates the tile arrangement for the secondary stack area */
 	LTAXIS_LAST,
 }; /* named flextile constants */
 
@@ -197,17 +197,17 @@ typedef struct Client Client;
 struct Client {
 	char name[256];
 	char label[32];
-	char iconpath[256]; /* maximum file path length under linux is 4096 bytes */
+	char iconpath[256];  /* maximum file path length under linux is 4096 bytes */
 	float mina, maxa;
 	float cfact;
 	int x, y, w, h;
-	int sfx, sfy, sfw, sfh; /* stored float geometry, used on mode revert */
+	int sfx, sfy, sfw, sfh;  /* stored float geometry, used on mode revert */
 	int oldx, oldy, oldw, oldh;
 	int basew, baseh, incw, inch, maxw, maxh, minw, minh;
 	int bw, oldbw;
 	int group;
-	int area; /* arrangement area (master, stack, secondary stack) */
-	int arr;  /* tile arrangement (left to right, top to bottom, etc.) */
+	int area;  /* arrangement area (master, stack, secondary stack) */
+	int arr;   /* tile arrangement (left to right, top to bottom, etc.) */
 	int scheme;
 	char scratchkey;
 	char swallowkey;
@@ -220,7 +220,7 @@ struct Client {
 	Client *swallowing;
 	Client *linked;
 	Workspace *ws;
-	Workspace *revertws; /* holds the original workspace info from when the client was opened */
+	Workspace *revertws;  /* holds the original workspace info from when the client was opened */
 	Window win;
 	unsigned int icw, ich;
 	Picture icon;
@@ -240,9 +240,9 @@ typedef struct {
 	int nmaster;
 	int nstack;
 	int layout;
-	int masteraxis; // master stack area
-	int stack1axis; // primary stack area
-	int stack2axis; // secondary stack area, e.g. centered master
+	int masteraxis;  /* master stack area */
+	int stack1axis;  /* primary stack area */
+	int stack2axis;  /* secondary stack area, e.g. centered master */
 	void (*symbolfunc)(Workspace *, unsigned int);
 } LayoutPreset;
 
@@ -293,7 +293,7 @@ typedef struct {
 } Rule;
 
 struct Workspace {
-	int wx, wy, ww, wh; /* workspace area */
+	int wx, wy, ww, wh;  /* workspace area */
 	char ltsymbol[64];
 	char name[16];
 	float mfact;
@@ -306,7 +306,7 @@ struct Workspace {
 	int visible;
 	int orientation;
 	int num;
-	int pinned; // whether workspace is pinned to assigned monitor or not
+	int pinned;  /* whether workspace is pinned to assigned monitor or not */
 	Client *clients;
 	Client *sel;
 	Client *stack;
@@ -316,9 +316,9 @@ struct Workspace {
 	Pixmap preview;
 	const Layout *layout;
 	const Layout *prevlayout;
-	char *icondef; // default icon
-	char *iconvac; // vacant icon (when workspace is selected, default is empty, and no clients)
-	char *iconocc; // when workspace has clients
+	char *icondef;  /* default icon */
+	char *iconvac;  /* vacant icon (when workspace is selected, default is empty, and no clients) */
+	char *iconocc;  /* when workspace has clients */
 };
 
 typedef struct {
@@ -597,7 +597,7 @@ applyrules(Client *c)
 					r->workspace,
 					r->label ? r->label : "NULL");
 			if (!r->resume)
-				break; // only allow one rule match
+				break; /* only allow one rule match */
 		}
 	}
 
@@ -774,7 +774,7 @@ applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact)
 			*w -= c->basew;
 			*h -= c->baseh;
 		}
-		/* adjust for aspect limits */
+		/* adjust for aspect ratio limits */
 		if (c->mina > 0 && c->maxa > 0) {
 			if (c->maxa < (float)*w / *h)
 				*w = *h * c->maxa + 0.5;
