@@ -22,7 +22,7 @@ attachx(Client *c, uint64_t mode, Workspace *ws)
 		}
 	}
 
-	if (c->idx > 0) { /* then the client has a designated position in the client list */
+	if (c->idx > 0 && !c->next) { /* then the client has a designated position in the client list */
 		for (i = ws->clients; i; i = i->next) {
 			if (c->idx < i->idx) {
 				attachabove(c, i);
@@ -43,8 +43,7 @@ attachx(Client *c, uint64_t mode, Workspace *ws)
 	} else if (attachmode == AttachBottom) {
 		attachbottom(c);
 	} else {
-		/* Attach master (default) */
-		attachabove(c, ws->clients);
+		attachmaster(c);
 	}
 }
 
@@ -62,7 +61,7 @@ attachabove(Client *c, Client *target)
 		return;
 	}
 
-	attach(c);
+	attachmaster(c);
 }
 
 void
@@ -75,7 +74,7 @@ attachaside(Client *c)
 		return;
 	}
 
-	attach(c);
+	attachbottom(c);
 }
 
 void
@@ -90,13 +89,21 @@ attachbelow(Client *c, Client *target)
 		return;
 	}
 
-	attach(c);
+	attachmaster(c);
 }
 
 void
 attachbottom(Client *c)
 {
 	attachbelow(c, lastclient(c->ws->clients));
+}
+
+void
+attachmaster(Client *c)
+{
+	Client *last = lastclient(c);
+	last->next = c->ws->clients;
+	c->ws->clients = c;
 }
 
 void
