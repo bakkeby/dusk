@@ -3705,6 +3705,9 @@ updategeom(int width, int height)
 				selmon = mons;
 			cleanupmon(m);
 		}
+
+		reviewworkspaces();
+
 		free(unique);
 	} else
 #endif /* XINERAMA */

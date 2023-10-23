@@ -909,6 +909,32 @@ reorientworkspace(Workspace *ws, int orientation)
 }
 
 void
+reviewworkspaces(void)
+{
+	Workspace *ws;
+	Monitor *m;
+
+	/* Make sure that at least one workspace is visible on each monitor.
+	 * For consistency; make sure that there is not more than one visible workspace per monitor. */
+	for (m = mons; m; m = m->next) {
+		if (m->selws && m->selws->mon != m)
+			m->selws = NULL;
+
+		ws = nextvismonws(m, workspaces);
+		if (!ws)
+			ws = nextmonws(m, workspaces);
+		if (ws) {
+			m->selws = ws;
+			m->selws->visible = 1;
+			/* Hide the rest, if any */
+			while ((ws = nextvismonws(m, ws->next))) {
+				ws->visible = 0;
+			}
+		}
+	}
+}
+
+void
 setwfact(const Arg *arg)
 {
 	float f;
