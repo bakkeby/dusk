@@ -60,7 +60,7 @@ initsemiscratchpad(Client *c)
 	s->win = 0;
 	s->linked = c; // circular dependency, what could possibly go wrong?
 	c->scratchkey = 0; // the original client is normal, not a scratchpad
-	attachx(s, 0, NULL);
+	attachx(s, AttachDefault, NULL);
 	attachstack(s);
 }
 

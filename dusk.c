@@ -2281,7 +2281,7 @@ manage(Window w, XWindowAttributes *wa)
 		/* Do not let the swallowing client steal focus unless the terminal has focus */
 		focusclient = (term == selws->sel);
 	} else {
-		attachx(c, 0, NULL);
+		attachx(c, AttachDefault, NULL);
 
 		if (focusclient || !c->ws->sel || !c->ws->stack)
 			attachstack(c);

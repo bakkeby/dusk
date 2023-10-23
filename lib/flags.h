@@ -26,6 +26,7 @@ static const uint64_t
 	OnlyModButtons = 0x10000, // restricts button keybindings to those that involve modifiers
 	Disallowed = 0x20000, // window is disallowed and will be forcibly killed
 	/* 0x40000, 0x80000, 0x100000 - three bits for attach modes as they are mutually exclusive, still room for two more up to 7 */
+	AttachDefault = 0, // used internally to prioritise client specific attach method and to fall back to default if not set
 	AttachMaster = 1 << 18, // attach at the top of the master area
 	AttachAbove = 2 << 18, // attach the client before the currently selected client
 	AttachBelow = 3 << 18, // attach the client after the currently selected client
