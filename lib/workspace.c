@@ -677,6 +677,7 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 			m = ws->mon;
 			m->prevwsmask = getwsmask(m);
 			monitorchanged = 1;
+			selmon = m;
 		}
 
 		if (!ws->visible)
