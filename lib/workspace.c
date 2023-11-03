@@ -176,16 +176,29 @@ viewwsmask(Monitor *m, uint64_t wsmask)
 }
 
 void
-storewsmask(int toggleprevious)
+storewsmask(void)
+{
+	Monitor *m = selws->mon;
+	uint64_t wsmask = getwsmask(m);
+
+	if (m->prevwsmask == wsmask && m->wsmask)
+		return;
+
+	if (m->prevwsmask)
+		m->wsmask = m->prevwsmask;
+}
+
+void
+togglewsmask(void)
 {
 	Monitor *m = selws->mon;
 	uint64_t wsmask = getwsmask(m);
 
 	if (m->prevwsmask == wsmask && m->wsmask) {
-		if (!monitorchanged && toggleprevious && getallwsmask(m) & m->wsmask)
+		if (!monitorchanged && getallwsmask(m) & m->wsmask) {
 			viewwsmask(m, m->wsmask);
-	} else if (m->prevwsmask)
-		m->wsmask = m->prevwsmask;
+		}
+	}
 
 	monitorchanged = 0;
 }
@@ -459,15 +472,19 @@ movetows(Client *c, Workspace *ws, int view_workspace)
 	else
 		focus(NULL);
 
-	if (view_workspace && !ws->visible)
+	if (view_workspace && !ws->visible) {
 		viewwsonmon(ws, ws->mon, 0);
-	else if (ws->visible) {
+		return;
+	}
+
+	if (ws->visible) {
 		arrange(ws);
 		if (view_workspace && hadfocus)
 			warp(hadfocus);
-	} else {
-		drawbar(ws->mon);
+		return;
 	}
+
+	drawbar(ws->mon);
 }
 
 void
@@ -587,7 +604,6 @@ void
 viewws(const Arg *arg)
 {
 	viewwsonmon((Workspace*)arg->v, NULL, 0);
-	storewsmask(0);
 }
 
 void
@@ -735,6 +751,8 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 			if (w != ws)
 				hidews(w);
 	}
+
+	storewsmask();
 
 	drawws(ws, m, m->prevwsmask, enablews, arrangeall, do_warp);
 }

@@ -23,7 +23,8 @@ static Workspace * getwsbyindex(int index);
 static uint64_t getwsmask(Monitor *m);
 static uint64_t getallwsmask(Monitor *m);
 static void viewwsmask(Monitor *m, uint64_t wsmask);
-static void storewsmask(int toggleprevious);
+static void storewsmask(void);
+static void togglewsmask(void);
 
 static void enablews(const Arg *arg);
 static void enablewsbyname(const Arg *arg);

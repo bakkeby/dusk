@@ -2103,7 +2103,7 @@ keyrelease(XEvent *e)
 	if (!combo)
 		return;
 
-	storewsmask(1);
+	togglewsmask();
 	combo = 0;
 }
 
