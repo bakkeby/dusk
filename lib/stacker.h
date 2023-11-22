@@ -17,4 +17,4 @@
 static void stackfocus(const Arg *arg);
 static void stackpush(const Arg *arg);
 static void stackswap(const Arg *arg);
-static void stackposclient(const Arg *arg, Client **f);
+static Client * stackposclient(const Arg *arg);

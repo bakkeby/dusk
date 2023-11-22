@@ -6,6 +6,7 @@ static Client *nexttiled(Client *c);
 static Client *nthmaster(Client *c, int n, int reduce);
 static Client *nthstack(Client *c, int n, int reduce);
 static Client *nthtiled(Client *c, int n, int reduce);
+static Client *inctiled(Client *sel, int n);
 static Client *prevtiled(Client *c);
 static Client *prevsel(void);
 static void swap(Client *a, Client *b);

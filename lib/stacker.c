@@ -2,7 +2,7 @@ void
 stackfocus(const Arg *arg)
 {
 	Workspace *ws = selws;
-	Client *c = NULL;
+	Client *c;
 
 	if (ISINC(arg)) {
 		focusstack(&((Arg) { .i = GETINC(arg) }));
@@ -12,7 +12,7 @@ stackfocus(const Arg *arg)
 	if (!ws->clients)
 		return;
 
-	stackposclient(arg, &c);
+	c = stackposclient(arg);
 
 	if (!c)
 		return;
@@ -35,7 +35,7 @@ void
 stackpush(const Arg *arg)
 {
 	Workspace *ws = selws;
-	Client *c = NULL, *sel = ws->sel;
+	Client *c, *sel = ws->sel;
 
 	if (!ws->clients)
 		return;
@@ -45,7 +45,7 @@ stackpush(const Arg *arg)
 		return;
 	}
 
-	stackposclient(arg, &c);
+	c = stackposclient(arg);
 
 	if (!c)
 		return;
@@ -66,12 +66,12 @@ void
 stackswap(const Arg *arg)
 {
 	Workspace *ws = selws;
-	Client *c = NULL, *sel = ws->sel;
+	Client *c, *sel = ws->sel;
 
 	if (!ws->clients)
 		return;
 
-	stackposclient(arg, &c);
+	c = stackposclient(arg);
 
 	if (!c)
 		return;
@@ -92,49 +92,28 @@ stackswap(const Arg *arg)
 		warp(sel);
 }
 
-void
-stackposclient(const Arg *arg, Client **f)
+Client *
+stackposclient(const Arg *arg)
 {
 	Workspace *ws = selws;
 
 	if (!ws->clients)
-		return;
+		return NULL;
 
-	if (ISINC(arg)) {
-		if (GETINC(arg) > 0) {
-			*f = nexttiled(ws->sel->next);
-			if (!*f) {
-				*f = nexttiled(ws->clients);
-			}
-		} else {
-			*f = prevtiled(ws->sel);
-			if (!*f) {
-				*f = lasttiled(ws->clients);
-			}
-		}
-		return;
-	}
+	if (ISINC(arg))
+		return inctiled(ws->sel, GETINC(arg));
 
-	if (ISMASTER(arg)) {
-		*f = nthmaster(ws->clients, GETMASTER(arg), 1);
-		return;
-	}
+	if (ISMASTER(arg))
+		return nthmaster(ws->clients, GETMASTER(arg), 1);
 
-	if (ISSTACK(arg)) {
-		*f = nthstack(ws->clients, GETSTACK(arg), 1);
-		return;
-	}
+	if (ISSTACK(arg))
+		return nthstack(ws->clients, GETSTACK(arg), 1);
 
-	if (ISLAST(arg)) {
-		*f = lasttiled(ws->clients);
-		return;
-	}
+	if (ISLAST(arg))
+		return lasttiled(ws->clients);
 
-	if (ISPREVSEL(arg)) {
-		*f = prevsel();
-		return;
-	}
+	if (ISPREVSEL(arg))
+		return prevsel();
 
-	*f = nthtiled(ws->clients, arg->i, 1);
-	return;
+	return nthtiled(ws->clients, arg->i, 1);
 }

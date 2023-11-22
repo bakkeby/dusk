@@ -80,6 +80,28 @@ nthtiled(Client *c, int n, int reduce)
 }
 
 Client *
+inctiled(Client *c, int n)
+{
+	Client *f;
+
+	if (!c)
+		return NULL;
+
+	if (n > 0) {
+		f = nexttiled(c->next);
+		if (!f) {
+			f = nexttiled(c->ws->clients);
+		}
+	} else {
+		f = prevtiled(c);
+		if (!f) {
+			f = lasttiled(c->ws->clients);
+		}
+	}
+	return f;
+}
+
+Client *
 prevtiled(Client *c)
 {
 	Client *p, *r;
