@@ -73,6 +73,9 @@ stackswap(const Arg *arg)
 
 	stackposclient(arg, &c);
 
+	if (!c)
+		return;
+
 	if (c == sel)
 		return;
 
