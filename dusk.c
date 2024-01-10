@@ -1739,8 +1739,12 @@ focus(Client *c)
 	int revert_to_return;
 	Bar *bar;
 
-	if (enabled(FocusFollowMouse) && !monitorchanged && (!c || ISINVISIBLE(c)))
+	if (enabled(FocusFollowMouse) && !monitorchanged && (!c || ISINVISIBLE(c))) {
 		c = getpointerclient();
+		if (c && c->ws->mon != selmon) {
+			c = NULL;
+		}
+	}
 	if (!c || ISINVISIBLE(c))
 		for (c = ws->stack; c && !ISVISIBLE(c); c = c->snext);
 	if (selws->sel && selws->sel != c)
