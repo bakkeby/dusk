@@ -1076,7 +1076,7 @@ clientmessage(XEvent *e)
 		}
 
 		if (cme->message_type == netatom[NetCurrentDesktop]) {
-			if ((ws = getwsbyindex(cme->data.l[0])))
+			if ((ws = getwsbynum(cme->data.l[0])))
 				viewwsonmon(ws, selmon, 0);
 		}
 
@@ -1182,7 +1182,7 @@ clientmessage(XEvent *e)
 	} else if (cme->message_type == netatom[NetCloseWindow]) {
 		killclient(&((Arg) { .v = c }));
 	} else if (cme->message_type == netatom[NetWMDesktop]) {
-		if ((ws = getwsbyindex(cme->data.l[0])))
+		if ((ws = getwsbynum(cme->data.l[0])))
 			movetows(c, ws, enabled(ViewOnWs));
 	} else if (cme->message_type == netatom[NetActiveWindow]) {
 		if (enabled(FocusOnNetActive) && !NOFOCUSONNETACTIVE(c)) {

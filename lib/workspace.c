@@ -26,6 +26,13 @@ comboviewwsbyname(const Arg *arg)
 }
 
 void
+comboviewwsbyindex(const Arg *arg)
+{
+	viewwsonmon(getwsbyindex(arg), NULL, combo);
+	combo = 1;
+}
+
+void
 createworkspaces()
 {
 	Workspace *pws, *ws;
@@ -385,6 +392,12 @@ swapwsbyname(const Arg *arg)
 }
 
 void
+swapwsbyindex(const Arg *arg)
+{
+	swapwsclients(selws, getwsbyindex(arg));
+}
+
+void
 swapwsclients(Workspace *ws1, Workspace *ws2)
 {
 	Client *c1, *c2;
@@ -531,9 +544,21 @@ movetowsbyname(const Arg *arg)
 }
 
 void
+movetowsbyindex(const Arg *arg)
+{
+	movetows(selws->sel, getwsbyindex(arg), 1);
+}
+
+void
 sendtowsbyname(const Arg *arg)
 {
 	movetows(selws->sel, getwsbyname(arg), 0);
+}
+
+void
+sendtowsbyindex(const Arg *arg)
+{
+	movetows(selws->sel, getwsbyindex(arg), 0);
 }
 
 void
@@ -543,9 +568,21 @@ movealltowsbyname(const Arg *arg)
 }
 
 void
+movealltowsbyindex(const Arg *arg)
+{
+	moveallclientstows(selws, getwsbyindex(arg), enabled(ViewOnWs));
+}
+
+void
 moveallfromwsbyname(const Arg *arg)
 {
 	moveallclientstows(getwsbyname(arg), selws, 0);
+}
+
+void
+moveallfromwsbyindex(const Arg *arg)
+{
+	moveallclientstows(getwsbyindex(arg), selws, 0);
 }
 
 /* Send client to an adjacent workspace on the current monitor */
@@ -601,6 +638,12 @@ enablewsbyname(const Arg *arg)
 }
 
 void
+enablewsbyindex(const Arg *arg)
+{
+	viewwsonmon(getwsbyindex(arg), NULL, 1);
+}
+
+void
 viewws(const Arg *arg)
 {
 	viewwsonmon((Workspace*)arg->v, NULL, 0);
@@ -642,6 +685,12 @@ void
 viewwsbyname(const Arg *arg)
 {
 	viewwsonmon(getwsbyname(arg), NULL, 0);
+}
+
+void
+viewwsbyindex(const Arg *arg)
+{
+	viewwsonmon(getwsbyindex(arg), NULL, 0);
 }
 
 void
@@ -820,10 +869,25 @@ getwsbyname(const Arg *arg)
 }
 
 Workspace *
-getwsbyindex(int index)
+getwsbyindex(const Arg *arg)
 {
 	Workspace *ws;
-	for (ws = workspaces; ws && ws->num != index; ws = ws->next);
+	int index = arg->i;
+	int i = 0;
+	for (ws = workspaces; ws; ws = ws->next) {
+		if (ws->mon != selmon || ws == stickyws)
+			continue;
+		if (++i == index)
+			return ws;
+	}
+	return NULL;
+}
+
+Workspace *
+getwsbynum(int num)
+{
+	Workspace *ws;
+	for (ws = workspaces; ws && ws->num != num; ws = ws->next);
 	return ws;
 }
 

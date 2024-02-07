@@ -693,6 +693,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( clientstomon, ARG_TYPE_SINT ),
 	IPCCOMMAND( cyclelayout, ARG_TYPE_SINT ),
 	IPCCOMMAND( enable, ARG_TYPE_STR ),
+	IPCCOMMAND( enablewsbyindex, ARG_TYPE_SINT ),
 	IPCCOMMAND( enablewsbyname, ARG_TYPE_STR ),
 	IPCCOMMAND( defaultgaps, ARG_TYPE_NONE ),
 	IPCCOMMAND( disable, ARG_TYPE_STR ),
@@ -719,9 +720,13 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( mark, ARG_TYPE_NONE ),
 	IPCCOMMAND( markall, ARG_TYPE_SINT ), // 0 = mark all, 1 = mark floating, 2 = mark hidden
 	IPCCOMMAND( mirrorlayout, ARG_TYPE_NONE ),
+	IPCCOMMAND( movetowsbyindex, ARG_TYPE_SINT ),
 	IPCCOMMAND( movetowsbyname, ARG_TYPE_STR ),
+	IPCCOMMAND( sendtowsbyindex, ARG_TYPE_SINT ),
 	IPCCOMMAND( sendtowsbyname, ARG_TYPE_STR ),
+	IPCCOMMAND( movealltowsbyindex, ARG_TYPE_SINT ),
 	IPCCOMMAND( movealltowsbyname, ARG_TYPE_STR ),
+	IPCCOMMAND( moveallfromwsbyindex, ARG_TYPE_SINT ),
 	IPCCOMMAND( moveallfromwsbyname, ARG_TYPE_STR ),
 	IPCCOMMAND( movewsdir, ARG_TYPE_SINT ),
 	IPCCOMMAND( rotatelayoutaxis, ARG_TYPE_SINT ),
@@ -748,6 +753,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( stackswap, ARG_TYPE_SINT ),
 	IPCCOMMAND( swallow, ARG_TYPE_NONE ),
 	IPCCOMMAND( switchcol, ARG_TYPE_NONE ),
+	IPCCOMMAND( swapwsbyindex, ARG_TYPE_SINT ),
 	IPCCOMMAND( swapwsbyname, ARG_TYPE_STR ),
 	IPCCOMMAND( toggle, ARG_TYPE_STR ), // toggle functionality on and off
 	IPCCOMMAND( togglebar, ARG_TYPE_NONE ),
@@ -772,6 +778,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( viewallwsonmon, ARG_TYPE_NONE ),
 	IPCCOMMAND( viewalloccwsonmon, ARG_TYPE_NONE ),
 	IPCCOMMAND( viewselws, ARG_TYPE_NONE ),
+	IPCCOMMAND( viewwsbyindex, ARG_TYPE_SINT ),
 	IPCCOMMAND( viewwsbyname, ARG_TYPE_STR ),
 	IPCCOMMAND( viewwsdir, ARG_TYPE_SINT ),
 	IPCCOMMAND( xrdb, ARG_TYPE_NONE ), // reload xrdb / Xresources
