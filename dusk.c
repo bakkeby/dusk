@@ -3291,6 +3291,7 @@ pid_t
 spawncmd(const Arg *arg, int buttonclick, int orphan)
 {
 	struct sigaction sa;
+	XUngrabPointer(dpy, CurrentTime);
 	pid_t pid = fork();
 
 	if (pid == 0) {
