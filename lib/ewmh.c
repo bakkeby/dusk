@@ -394,6 +394,8 @@ getworkspacestate(Workspace *ws)
 		/* See bit layout in the persistworkspacestate function */
 		mon = (settings >> 8) & 0x7;
 		for (m = mons; m && m->num != mon; m = m->next);
+		if (!m && workspaces_per_mon && mon == dummymon->num)
+			m = dummymon;
 		if (m) {
 			ws->mon = m;
 			ws->visible = settings & 0x1;

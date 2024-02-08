@@ -61,6 +61,15 @@ static int lowercase_workspace_labels = 1;                /* whether to change w
 static int prefer_window_icons_over_workspace_labels = 0; /* whether to use window icons instead of labels if present */
 static int swap_occupied_workspace_label_format_strings = 0; /* 0 gives "icon: label", 1 gives "label: icon" */
 
+/* This determines what happens with pinned workspaces on a monitor when that monitor is removed.
+ *   0 - the workspaces becomes unpinned and is moved to another monitor or
+ *   1 - the workspace clients are moved to the selected workspace on the first monitor, but
+ *       the workspace itself is hidden
+ *
+ * Non-pinned workspaces are always redistributed among the remaining monitors.
+ */
+static const int workspaces_per_mon = 0;
+
 /* See util.h for options */
 static uint64_t functionality = 0
 //	|AutoReduceNmaster // automatically reduce the number of master clients if one is closed

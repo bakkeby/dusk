@@ -90,6 +90,10 @@ createworkspace(int num, const WorkspaceRule *r)
 
 	if (r->monitor != -1) {
 		for (m = mons; m && m->num != r->monitor; m = m->next);
+		if (!m && workspaces_per_mon && r->pinned) {
+			m = dummymon;
+			ws->pinned = r->pinned;
+		}
 		ws->mon = m;
 		if (r->pinned > 0 && m && m->num == r->monitor)
 			ws->pinned = 1;
@@ -119,6 +123,27 @@ createworkspace(int num, const WorkspaceRule *r)
 	getworkspacestate(ws);
 
 	return ws;
+}
+
+void
+handleabandoned(Workspace *ws)
+{
+	Workspace *target;
+
+	if (workspaces_per_mon && ws->pinned) {
+		ws->visible = 0;
+		hidewsclients(ws->stack);
+		target = mons->selws;
+		if (!target || target == stickyws)
+			for (target = workspaces; target == stickyws; target = target->next);
+		moveallclientstows(ws, target, 0);
+		ws->mon = dummymon;
+		return;
+	}
+
+	assignworkspacetomonitor(ws, mons);
+	ws->visible = 0;
+	ws->pinned = 0;
 }
 
 char *
