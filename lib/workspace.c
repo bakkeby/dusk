@@ -890,6 +890,8 @@ getwsbyname(const Arg *arg)
 	Workspace *ws;
 	char *wsname = (char*)arg->v;
 	for (ws = workspaces; ws && strcmp(ws->name, wsname) != 0; ws = ws->next);
+	if (workspaces_per_mon && ws && ws->mon == dummymon)
+		return NULL;
 	return ws;
 }
 
