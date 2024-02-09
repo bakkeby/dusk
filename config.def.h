@@ -39,7 +39,7 @@ static const double resizeopacity        = 0;   /* client opacity when being res
 static const double placeopacity         = 0;   /* client opacity when being placed, 0 means don't apply opacity */
 
 /* Indicators: see lib/bar_indicators.h for options */
-static int wsindicatortype               = INDICATOR_BOTTOM_BAR_SLIM;
+static int wsindicatortype               = INDICATOR_NONE;
 static int wspinnedindicatortype         = INDICATOR_NONE;
 static int fakefsindicatortype           = INDICATOR_PLUS;
 static int floatfakefsindicatortype      = INDICATOR_PLUS_AND_LARGER_SQUARE;
@@ -83,7 +83,7 @@ static uint64_t functionality = 0
 	|SwallowFloating // allow floating windows to swallow the terminal by default
 	|CenteredWindowName // center the window titles on the bar
 //	|BarActiveGroupBorderColor // use border color of active group, otherwise title scheme is used
-	|BarMasterGroupBorderColor // use border color of master group, otherwise title scheme is used
+//	|BarMasterGroupBorderColor // use border color of master group, otherwise title scheme is used
 	|FlexWinBorders // use the SchemeFlex* color schemes, falls back to SchemeTitle* if disabled
 	|SpawnCwd // spawn applications in the currently selected client's working directory
 	|ColorEmoji // enables color emoji support (removes Xft workaround)
@@ -131,6 +131,7 @@ static char dmenunormfgcolor[] = "#D9CFC5";
 static char dmenunormbgcolor[] = "#492B2D";
 static char dmenuselfgcolor[] = "#D9CFC5";
 static char dmenuselbgcolor[] = "#82363A";
+static char dmenubordercolor[] = "#492B2D";
 
 /* Xresources preferences to load at startup. */
 static const ResourcePref resources[] = {
@@ -138,6 +139,7 @@ static const ResourcePref resources[] = {
 	{ "dmenu.norm.bg.color", STRING, &dmenunormbgcolor },
 	{ "dmenu.sel.fg.color", STRING, &dmenuselfgcolor },
 	{ "dmenu.sel.bg.color", STRING, &dmenuselbgcolor },
+	{ "dmenu.border.bg.color", STRING, &dmenubordercolor },
 	{ "dmenu.font", STRING, &dmenufont },
 };
 
@@ -212,7 +214,7 @@ static char *colors[SchemeLast][4] = {
 /* List of programs to start automatically during startup only. Note that these will not be
  * executed again when doing a restart. */
 static const char *const autostart[] = {
-	"st", NULL,
+//	"st", NULL,
 	NULL /* terminate */
 };
 
@@ -491,6 +493,7 @@ static const char *dmenucmd[] = {
 	"-nf", dmenunormfgcolor,
 	"-sb", dmenuselbgcolor,
 	"-sf", dmenuselfgcolor,
+//	"-bb", dmenubordercolor,
 	NULL
 };
 static const char *spcmd_w[] = {"w", "st", "-n", "spterm (w)", "-g", "120x34", NULL };
