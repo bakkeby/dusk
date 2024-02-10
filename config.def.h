@@ -55,10 +55,10 @@ static char *custom_2d_indicator_5 = "^c#CB9700^^r0,h,w,1^^r0,0,w,1^"; // top an
 static char *custom_2d_indicator_6 = "^c#F0A523^^r6,2,1,-4^^r-6,2,1,-4^"; // orange vertical bars
 
 /* The below are only used if the WorkspaceLabels functionality is enabled */
-static char *occupied_workspace_label_format = "%s: %s";  /* format of a workspace label */
-static char *vacant_workspace_label_format = "%s";        /* format of an empty / vacant workspace */
-static int lowercase_workspace_labels = 1;                /* whether to change workspace labels to lower case */
-static int prefer_window_icons_over_workspace_labels = 0; /* whether to use window icons instead of labels if present */
+static char *occupied_workspace_label_format = "%s: %s";     /* format of a workspace label */
+static char *vacant_workspace_label_format = "%s";           /* format of an empty / vacant workspace */
+static int lowercase_workspace_labels = 1;                   /* whether to change workspace labels to lower case */
+static int prefer_window_icons_over_workspace_labels = 0;    /* whether to use window icons instead of labels if present */
 static int swap_occupied_workspace_label_format_strings = 0; /* 0 gives "icon: label", 1 gives "label: icon" */
 
 /* This determines what happens with pinned workspaces on a monitor when that monitor is removed.
@@ -125,7 +125,7 @@ static int flexwintitle_floatweight      = 0;  // floating window title weight, 
 static int flexwintitle_separator        = 0;  // width of client separator
 
 static const char *fonts[]               = { "monospace:size=10" };
-static       char dmenufont[]            = "monospace:size=10";
+static       char dmenufont[60]          = "monospace:size=10";
 
 static char dmenunormfgcolor[] = "#D9CFC5";
 static char dmenunormbgcolor[] = "#492B2D";
