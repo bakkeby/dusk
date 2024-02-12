@@ -109,6 +109,10 @@ togglescratch(const Arg *arg)
 				}
 			} else {
 				XSetWindowBorder(dpy, c->win, scheme[SchemeScratchNorm][ColBorder].pixel);
+				if ((c->flags & AttachFlag) && ISINVISIBLE(c) && !ISFLOATING(c)) {
+					detach(c);
+					attachx(c, 0, c->ws);
+				}
 				if (SEMISCRATCHPAD(c) && c->linked)
 					swapsemiscratchpadclients(c->linked, c);
 				else {
@@ -124,15 +128,10 @@ togglescratch(const Arg *arg)
 	/* Attach moved scratchpad clients on the selected monitor */
 	for (c = monclients; c; c = next) {
 		next = c->next;
-		clientmonresize(c, c->ws->mon, selws->mon);
-		c->ws = selws;
-		/* Attach scratchpad clients from other monitors at the bottom of the stack */
-		if (selws->clients) {
-			for (last = selws->clients; last && last->next; last = last->next);
-			last->next = c;
-		} else
-			selws->clients = c;
 		c->next = NULL;
+		clientmonresize(c, c->ws->mon, selws->mon);
+		/* Attach scratchpad clients from other monitors at the bottom of the stack */
+		attachx(c, c->flags & AttachFlag ? 0 : AttachBottom, selws);
 		attachstack(c);
 		removeflag(c, Invisible);
 		showwsclient(c);
