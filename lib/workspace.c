@@ -210,7 +210,7 @@ viewwsmask(Monitor *m, uint64_t wsmask)
 void
 storewsmask(void)
 {
-	Monitor *m = selws->mon;
+	Monitor *m = selws ? selws->mon : selmon;
 	uint64_t wsmask = getwsmask(m);
 
 	if (m->prevwsmask == wsmask && m->wsmask)
