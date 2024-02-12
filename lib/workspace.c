@@ -58,8 +58,10 @@ createworkspaces()
 	num_workspaces = i;
 
 	for (m = mons, ws = workspaces; ws; ws = ws->next) {
-		if (ws->mon == NULL)
+		if (ws->mon == NULL) {
 			ws->mon = m;
+			m = (m->next == NULL ? mons : m->next);
+		}
 
 		ws->wx = ws->mon->wx;
 		ws->wy = ws->mon->wy;
@@ -67,11 +69,10 @@ createworkspaces()
 		ws->ww = ws->mon->ww;
 		ws->orientation = ws->mon->orientation;
 
-		if (m->selws == NULL) {
-			m->selws = ws;
-			m->selws->visible = 1;
+		if (ws->mon->selws == NULL) {
+			ws->mon->selws = ws;
+			ws->visible = 1;
 		}
-		m = (m->next == NULL ? mons : m->next);
 	}
 	attachws(stickyws, workspaces);
 	setworkspaceareas();
@@ -985,8 +986,10 @@ redistributeworkspaces(void)
 
 	/* Set selected workspaces for monitors, if not already set */
 	for (m = mons; m; m = m->next) {
-		if (m->selws)
+		if (m->selws) {
+			m->selws->visible = 1;
 			continue;
+		}
 		ws = nextvismonws(m, workspaces);
 		if (!ws)
 			ws = nextmonws(m, workspaces);
