@@ -59,7 +59,8 @@ LIBS = -L${X11LIB} -lX11 ${XINERAMALIBS} ${FREETYPELIBS}  ${XRENDER} ${XCBLIBS} 
 
 # Optional compiler optimisations may create smaller binaries and
 # faster code, but increases compile time.
-#OPTIMISATIONS = -march=native -O3
+# See https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html
+#OPTIMISATIONS = -march=native -flto=auto -O3
 
 # flags
 CPPFLAGS = -D_DEFAULT_SOURCE ${HAVE_LIBXI} ${HAVE_FRIBIDI} -D_BSD_SOURCE -D_POSIX_C_SOURCE=200809L -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS} ${HOSTFLAGS}
