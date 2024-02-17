@@ -31,7 +31,7 @@ clean:
 dist: clean
 	mkdir -p dusk-${VERSION}
 	cp -R LICENSE Makefile README config.def.h config.mk\
-		dusk.1 drw.h util.h ${SRC} dusk.png transient.c dusk-${VERSION}
+		dusk.1 drw.h util.h ${SRC} dusk-${VERSION}
 	tar -cf dusk-${VERSION}.tar dusk-${VERSION}
 	gzip dusk-${VERSION}.tar
 	rm -rf dusk-${VERSION}
