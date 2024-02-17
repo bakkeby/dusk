@@ -36,7 +36,7 @@ static int
 ipc_create_socket(const char *filename)
 {
 	char *normal_filename;
-	char *parent;
+	char *parent = NULL;
 	const size_t addr_size = sizeof(struct sockaddr_un);
 	const int sock_type = SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC;
 
