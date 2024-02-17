@@ -6,8 +6,6 @@ include config.mk
 SRC = drw.c dusk.c util.c
 OBJ = ${SRC:.c=.o}
 
-# FreeBSD users, prefix all ifdef, else and endif statements with a . for this to work (e.g. .ifdef)
-
 all: dusk duskc
 
 .c.o:
@@ -19,7 +17,7 @@ config.h:
 	cp config.def.h $@
 
 dusk: ${OBJ}
-	${CC} -O3 -march=native -o $@ ${OBJ} ${LDFLAGS}
+	${CC} -o $@ ${OBJ} ${LDFLAGS}
 
 duskc:
 	${CC} -o $@ lib/ipc/duskc.c ${LDFLAGS}
