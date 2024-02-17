@@ -10,10 +10,6 @@ MANPREFIX = ${PREFIX}/share/man
 X11INC = /usr/X11R6/include
 X11LIB = /usr/X11R6/lib
 
-# FreeBSD (uncomment)
-#X11INC = /usr/local/include
-#X11LIB = /usr/local/lib
-
 # Optional dependency on libxi for mouse related features
 #HAVE_LIBXI = -DHAVE_LIBXI=1
 #XINPUTLIBS = -lXi
@@ -31,11 +27,6 @@ XINERAMAFLAGS = -DXINERAMA
 # freetype
 FREETYPELIBS = -lfontconfig -lXft
 FREETYPEINC = /usr/include/freetype2
-# FreeBSD (uncomment)
-#FREETYPEINC = /usr/local/include/freetype2
-# OpenBSD (uncomment)
-#FREETYPEINC = ${X11INC}/freetype2
-#KVMLIB = -lkvm
 
 # Needed for the alpha patch and the winicon patch
 XRENDER = -lXrender
@@ -66,10 +57,6 @@ LIBS = -L${X11LIB} -lX11 ${XINERAMALIBS} ${FREETYPELIBS}  ${XRENDER} ${XCBLIBS} 
 CPPFLAGS = -D_DEFAULT_SOURCE ${HAVE_LIBXI} ${HAVE_FRIBIDI} -D_BSD_SOURCE -D_POSIX_C_SOURCE=200809L -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS} ${HOSTFLAGS}
 CFLAGS   = ${OPTIMISATIONS} -std=c99 -pedantic -Wall -Wno-unused-function -Wno-deprecated-declarations ${INCS} ${CPPFLAGS}
 LDFLAGS  = ${LIBS}
-
-# Solaris
-#CFLAGS = -fast ${INCS} -DVERSION=\"${VERSION}\"
-#LDFLAGS = ${LIBS}
 
 # compiler and linker
 CC = cc
