@@ -79,10 +79,10 @@ loadxrdb()
 	XrmDatabase xrdb;
 	const ResourcePref *p;
 
-	int s, c;
+	int s, c, colorscheme;
 	char resource[40];
+	const char *resource_prefix;
 	char *pattern = "dusk.%s.%s.%s";
-	char *oldpattern = "dusk.%s%s%s";
 
 	char fg[20] = {0};
 	char bg[20] = {0};
@@ -90,6 +90,16 @@ loadxrdb()
 	unsigned int alpha[] = { 0, 0, 0 };
 	char *clrnames[3] = { fg, bg, bd };
 	const char *columns[] = { "fg", "bg", "border" };
+
+	char tnfg[20] = {0};
+	char tnbg[20] = {0};
+	char tnbd[20] = {0};
+	char *titlenorm[3] = { tnfg, tnbg, tnbd };
+
+	char tsfg[20] = {0};
+	char tsbg[20] = {0};
+	char tsbd[20] = {0};
+	char *titlesel[3] = { tsfg, tsbg, tsbd };
 
 	if (disabled(Xresources))
 		return;
@@ -104,21 +114,39 @@ loadxrdb()
 
 			if (xrdb != NULL) {
 				for (s = 0; s < SchemeLast; s++) {
+					resource_prefix = colors[s][ColCount] ? colors[s][ColCount] : default_resource_prefixes[s];
 					/* Skip schemes that do not specify a resource string */
-					if (colors[s][ColCount][0] == '\0')
+					if (!resource_prefix || resource_prefix[0] == '\0') {
 						continue;
-
+					}
 					for (c = 0; c < ColCount; c++) {
-						sprintf(resource, pattern, colors[s][ColCount], columns[c], "alpha");
+						sprintf(resource, pattern, resource_prefix, columns[c], "alpha");
 						if (!loadxrdbalpha(xrdb, &alpha[c], resource))
 							alpha[c] = default_alphas[c];
-						sprintf(resource, pattern, colors[s][ColCount], columns[c], "color");
+						sprintf(resource, pattern, resource_prefix, columns[c], "color");
 						if (!loadxrdbcolor(xrdb, &clrnames[c], &alpha[c], resource)) {
-							/* Temporary backwards compatibility, should be removed at some point
-							 * in the future. */
-							sprintf(resource, oldpattern, colors[s][ColCount], columns[c], "color");
-							if (!loadxrdbcolor(xrdb, &clrnames[c], &alpha[c], resource))
-								strcpy(clrnames[c], colors[s][c]);
+							colorscheme = s;
+							/* Fall back to SchemeTitleNorm / Sel for SchemeFlex colors if not defined. */
+							if (!colors[s][0]) {
+								colorscheme = (s >= SchemeFlexSelTTB ? SchemeTitleSel : SchemeTitleNorm);
+							}
+							if (colorscheme == SchemeTitleNorm && titlenorm[0][0]) {
+								strcpy(clrnames[c], titlenorm[c]);
+							} else if (colorscheme == SchemeTitleSel && titlesel[0][0]) {
+								strcpy(clrnames[c], titlesel[c]);
+							} else {
+								strcpy(clrnames[c], colors[colorscheme][c]);
+							}
+						}
+					}
+
+					if (s == SchemeTitleNorm) {
+						for (c = 0; c < ColCount; c++) {
+							strcpy(titlenorm[c], clrnames[c]);
+						}
+					} else if (s == SchemeTitleSel) {
+						for (c = 0; c < ColCount; c++) {
+							strcpy(titlesel[c], clrnames[c]);
 						}
 					}
 

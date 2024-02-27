@@ -84,7 +84,7 @@ static uint64_t functionality = 0
 	|CenteredWindowName // center the window titles on the bar
 //	|BarActiveGroupBorderColor // use border color of active group for the bar, otherwise normal scheme is used
 //	|BarMasterGroupBorderColor // use border color of master group for the bar, otherwise normal scheme is used
-	|FlexWinBorders // use the SchemeFlex* color schemes, falls back to SchemeTitle* if disabled
+//	|FlexWinBorders // use the SchemeFlex* color schemes, falls back to SchemeTitle* if disabled
 	|SpawnCwd // spawn applications in the currently selected client's working directory
 	|ColorEmoji // enables color emoji support (removes Xft workaround)
 //	|Status2DNoAlpha // option to not use alpha when drawing status2d status
@@ -143,72 +143,24 @@ static const ResourcePref resources[] = {
 	{ "dmenu.font", STRING, &dmenufont },
 };
 
+/* Default opacity levels         fg      bg     border */
 unsigned int default_alphas[] = { OPAQUE, 0xd0U, OPAQUE };
 
 static char *colors[SchemeLast][4] = {
-	/*                       fg         bg         border     resource prefix */
-	[SchemeNorm]         = { "#D9CFC5", "#492B2D", "#492B2D", "norm" },
-	[SchemeSel]          = { "#D9CFC5", "#82363A", "#82363A", "sel" },
-	[SchemeTitleNorm]    = { "#D9CFC5", "#492B2D", "#643B3E", "titlenorm" },
-	[SchemeTitleSel]     = { "#D9CFC5", "#82363A", "#82363A", "titlesel" },
-	[SchemeWsNorm]       = { "#D9CFC5", "#492B2D", "#000000", "wsnorm" },
-	[SchemeWsVisible]    = { "#D9CFC5", "#82363A", "#000000", "wsvis" },
-	[SchemeWsSel]        = { "#D9CFC5", "#82363A", "#000000", "wssel" },
-	[SchemeWsOcc]        = { "#D9CFC5", "#492B2D", "#000000", "wsocc" },
-	[SchemeHidNorm]      = { "#D9CFC5", "#492B2D", "#643B3E", "hidnorm" },
-	[SchemeHidSel]       = { "#D9CFC5", "#82363A", "#82363A", "hidsel" },
-	[SchemeUrg]          = { "#E0E0E0", "#A23419", "#A23419", "urg" },
-	[SchemeMarked]       = { "#DDC470", "#724559", "#724559", "marked" },
-	[SchemeScratchNorm]  = { "#D9CFC5", "#492B2D", "#643B3E", "scratchnorm" },
-	[SchemeScratchSel]   = { "#D9CFC5", "#82363A", "#82363A", "scratchsel" },
-	[SchemeFlexActTTB]   = { "#D9CFC5", "#492B2D", "#643B3E", "act.TTB" },
-	[SchemeFlexActLTR]   = { "#D9CFC5", "#492B2D", "#643B3E", "act.LTR" },
-	[SchemeFlexActMONO]  = { "#D9CFC5", "#492B2D", "#643B3E", "act.MONO" },
-	[SchemeFlexActGRID]  = { "#D9CFC5", "#492B2D", "#643B3E", "act.GRID" },
-	[SchemeFlexActGRIDC] = { "#D9CFC5", "#492B2D", "#643B3E", "act.GRIDC" },
-	[SchemeFlexActGRD1]  = { "#D9CFC5", "#492B2D", "#643B3E", "act.GRD1" },
-	[SchemeFlexActGRD2]  = { "#D9CFC5", "#492B2D", "#643B3E", "act.GRD2" },
-	[SchemeFlexActGRDM]  = { "#D9CFC5", "#492B2D", "#643B3E", "act.GRDM" },
-	[SchemeFlexActHGRD]  = { "#D9CFC5", "#492B2D", "#643B3E", "act.HGRD" },
-	[SchemeFlexActDWDL]  = { "#D9CFC5", "#492B2D", "#643B3E", "act.DWDL" },
-	[SchemeFlexActDWDLC] = { "#D9CFC5", "#492B2D", "#643B3E", "act.DWDLC" },
-	[SchemeFlexActSPRL]  = { "#D9CFC5", "#492B2D", "#643B3E", "act.SPRL" },
-	[SchemeFlexActSPRLC] = { "#D9CFC5", "#492B2D", "#643B3E", "act.SPRLC" },
-	[SchemeFlexActTTMI]  = { "#D9CFC5", "#492B2D", "#643B3E", "act.TTMI" },
-	[SchemeFlexActTTMIC] = { "#D9CFC5", "#492B2D", "#643B3E", "act.TTMIC" },
-	[SchemeFlexActFloat] = { "#D9CFC5", "#492B2D", "#643B3E", "act.float" },
-	[SchemeFlexInaTTB]   = { "#D9CFC5", "#492B2D", "#643B3E", "norm.TTB" },
-	[SchemeFlexInaLTR]   = { "#D9CFC5", "#492B2D", "#643B3E", "norm.LTR" },
-	[SchemeFlexInaMONO]  = { "#D9CFC5", "#492B2D", "#643B3E", "norm.MONO" },
-	[SchemeFlexInaGRID]  = { "#D9CFC5", "#492B2D", "#643B3E", "norm.GRID" },
-	[SchemeFlexInaGRIDC] = { "#D9CFC5", "#492B2D", "#643B3E", "norm.GRIDC" },
-	[SchemeFlexInaGRD1]  = { "#D9CFC5", "#492B2D", "#643B3E", "norm.GRD1" },
-	[SchemeFlexInaGRD2]  = { "#D9CFC5", "#492B2D", "#643B3E", "norm.GRD2" },
-	[SchemeFlexInaGRDM]  = { "#D9CFC5", "#492B2D", "#643B3E", "norm.GRDM" },
-	[SchemeFlexInaHGRD]  = { "#D9CFC5", "#492B2D", "#643B3E", "norm.HGRD" },
-	[SchemeFlexInaDWDL]  = { "#D9CFC5", "#492B2D", "#643B3E", "norm.DWDL" },
-	[SchemeFlexInaDWDLC] = { "#D9CFC5", "#492B2D", "#643B3E", "norm.DWDLC" },
-	[SchemeFlexInaSPRL]  = { "#D9CFC5", "#492B2D", "#643B3E", "norm.SPRL" },
-	[SchemeFlexInaSPRLC] = { "#D9CFC5", "#492B2D", "#643B3E", "norm.SPRLC" },
-	[SchemeFlexInaTTMI]  = { "#D9CFC5", "#492B2D", "#643B3E", "norm.TTMI" },
-	[SchemeFlexInaTTMIC] = { "#D9CFC5", "#492B2D", "#643B3E", "norm.TTMIC" },
-	[SchemeFlexInaFloat] = { "#D9CFC5", "#492B2D", "#643B3E", "norm.float" },
-	[SchemeFlexSelTTB]   = { "#D9CFC5", "#82363A", "#82363A", "sel.TTB" },
-	[SchemeFlexSelLTR]   = { "#D9CFC5", "#82363A", "#82363A", "sel.LTR" },
-	[SchemeFlexSelMONO]  = { "#D9CFC5", "#82363A", "#82363A", "sel.MONO" },
-	[SchemeFlexSelGRID]  = { "#D9CFC5", "#82363A", "#82363A", "sel.GRID" },
-	[SchemeFlexSelGRIDC] = { "#D9CFC5", "#82363A", "#82363A", "sel.GRIDC" },
-	[SchemeFlexSelGRD1]  = { "#D9CFC5", "#82363A", "#82363A", "sel.GRD1" },
-	[SchemeFlexSelGRD2]  = { "#D9CFC5", "#82363A", "#82363A", "sel.GRD2" },
-	[SchemeFlexSelGRDM]  = { "#D9CFC5", "#82363A", "#82363A", "sel.GRDM" },
-	[SchemeFlexSelHGRD]  = { "#D9CFC5", "#82363A", "#82363A", "sel.HGRD" },
-	[SchemeFlexSelDWDL]  = { "#D9CFC5", "#82363A", "#82363A", "sel.DWDL" },
-	[SchemeFlexSelDWDLC] = { "#D9CFC5", "#82363A", "#82363A", "sel.DWDLC" },
-	[SchemeFlexSelSPRL]  = { "#D9CFC5", "#82363A", "#82363A", "sel.SPRL" },
-	[SchemeFlexSelSPRLC] = { "#D9CFC5", "#82363A", "#82363A", "sel.SPRLC" },
-	[SchemeFlexSelTTMI]  = { "#D9CFC5", "#82363A", "#82363A", "sel.TTMI" },
-	[SchemeFlexSelTTMIC] = { "#D9CFC5", "#82363A", "#82363A", "sel.TTMIC" },
-	[SchemeFlexSelFloat] = { "#D9CFC5", "#82363A", "#82363A", "sel.float" },
+	/*                       fg         bg         border    */
+	[SchemeNorm]         = { "#D9CFC5", "#492B2D", "#492B2D" },
+	[SchemeTitleNorm]    = { "#D9CFC5", "#492B2D", "#643B3E" },
+	[SchemeTitleSel]     = { "#D9CFC5", "#82363A", "#82363A" },
+	[SchemeScratchNorm]  = { "#D9CFC5", "#492B2D", "#643B3E" },
+	[SchemeScratchSel]   = { "#D9CFC5", "#82363A", "#82363A" },
+	[SchemeHidNorm]      = { "#D9CFC5", "#492B2D", "#000000" },
+	[SchemeHidSel]       = { "#D9CFC5", "#82363A", "#000000" },
+	[SchemeUrg]          = { "#E0E0E0", "#A23419", "#A23419" },
+	[SchemeMarked]       = { "#DDC470", "#724559", "#724559" },
+	[SchemeWsNorm]       = { "#D9CFC5", "#492B2D", "#000000" },
+	[SchemeWsVisible]    = { "#D9CFC5", "#82363A", "#000000" },
+	[SchemeWsSel]        = { "#D9CFC5", "#82363A", "#000000" },
+	[SchemeWsOcc]        = { "#D9CFC5", "#492B2D", "#000000" },
 };
 
 /* List of programs to start automatically during startup only. Note that these will not be

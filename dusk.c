@@ -120,6 +120,7 @@ enum {
 	SchemeFlexActSPRLC,
 	SchemeFlexActTTMI,
 	SchemeFlexActTTMIC,
+	SchemeFlexActFloat,
 	SchemeFlexInaTTB,
 	SchemeFlexInaLTR,
 	SchemeFlexInaMONO,
@@ -135,6 +136,7 @@ enum {
 	SchemeFlexInaSPRLC,
 	SchemeFlexInaTTMI,
 	SchemeFlexInaTTMIC,
+	SchemeFlexInaFloat,
 	SchemeFlexSelTTB,
 	SchemeFlexSelLTR,
 	SchemeFlexSelMONO,
@@ -150,11 +152,75 @@ enum {
 	SchemeFlexSelSPRLC,
 	SchemeFlexSelTTMI,
 	SchemeFlexSelTTMIC,
-	SchemeFlexActFloat,
-	SchemeFlexInaFloat,
 	SchemeFlexSelFloat,
 	SchemeLast,
 }; /* color schemes */
+
+static const char *default_resource_prefixes[SchemeLast] = {
+	/*                     resource prefix */
+	[SchemeNorm]         = "norm",
+	[SchemeSel]          = "sel",
+	[SchemeTitleNorm]    = "titlenorm",
+	[SchemeTitleSel]     = "titlesel",
+	[SchemeWsNorm]       = "wsnorm",
+	[SchemeWsVisible]    = "wsvis",
+	[SchemeWsSel]        = "wssel",
+	[SchemeWsOcc]        = "wsocc",
+	[SchemeHidNorm]      = "hidnorm",
+	[SchemeHidSel]       = "hidsel",
+	[SchemeUrg]          = "urg",
+	[SchemeMarked]       = "marked",
+	[SchemeScratchNorm]  = "scratchnorm",
+	[SchemeScratchSel]   = "scratchsel",
+	[SchemeFlexActTTB]   = "act.TTB",
+	[SchemeFlexActLTR]   = "act.LTR",
+	[SchemeFlexActMONO]  = "act.MONO",
+	[SchemeFlexActGRID]  = "act.GRID",
+	[SchemeFlexActGRIDC] = "act.GRIDC",
+	[SchemeFlexActGRD1]  = "act.GRD1",
+	[SchemeFlexActGRD2]  = "act.GRD2",
+	[SchemeFlexActGRDM]  = "act.GRDM",
+	[SchemeFlexActHGRD]  = "act.HGRD",
+	[SchemeFlexActDWDL]  = "act.DWDL",
+	[SchemeFlexActDWDLC] = "act.DWDLC",
+	[SchemeFlexActSPRL]  = "act.SPRL",
+	[SchemeFlexActSPRLC] = "act.SPRLC",
+	[SchemeFlexActTTMI]  = "act.TTMI",
+	[SchemeFlexActTTMIC] = "act.TTMIC",
+	[SchemeFlexActFloat] = "act.float",
+	[SchemeFlexInaTTB]   = "norm.TTB",
+	[SchemeFlexInaLTR]   = "norm.LTR",
+	[SchemeFlexInaMONO]  = "norm.MONO",
+	[SchemeFlexInaGRID]  = "norm.GRID",
+	[SchemeFlexInaGRIDC] = "norm.GRIDC",
+	[SchemeFlexInaGRD1]  = "norm.GRD1",
+	[SchemeFlexInaGRD2]  = "norm.GRD2",
+	[SchemeFlexInaGRDM]  = "norm.GRDM",
+	[SchemeFlexInaHGRD]  = "norm.HGRD",
+	[SchemeFlexInaDWDL]  = "norm.DWDL",
+	[SchemeFlexInaDWDLC] = "norm.DWDLC",
+	[SchemeFlexInaSPRL]  = "norm.SPRL",
+	[SchemeFlexInaSPRLC] = "norm.SPRLC",
+	[SchemeFlexInaTTMI]  = "norm.TTMI",
+	[SchemeFlexInaTTMIC] = "norm.TTMIC",
+	[SchemeFlexInaFloat] = "norm.float",
+	[SchemeFlexSelTTB]   = "sel.TTB",
+	[SchemeFlexSelLTR]   = "sel.LTR",
+	[SchemeFlexSelMONO]  = "sel.MONO",
+	[SchemeFlexSelGRID]  = "sel.GRID",
+	[SchemeFlexSelGRIDC] = "sel.GRIDC",
+	[SchemeFlexSelGRD1]  = "sel.GRD1",
+	[SchemeFlexSelGRD2]  = "sel.GRD2",
+	[SchemeFlexSelGRDM]  = "sel.GRDM",
+	[SchemeFlexSelHGRD]  = "sel.HGRD",
+	[SchemeFlexSelDWDL]  = "sel.DWDL",
+	[SchemeFlexSelDWDLC] = "sel.DWDLC",
+	[SchemeFlexSelSPRL]  = "sel.SPRL",
+	[SchemeFlexSelSPRLC] = "sel.SPRLC",
+	[SchemeFlexSelTTMI]  = "sel.TTMI",
+	[SchemeFlexSelTTMIC] = "sel.TTMIC",
+	[SchemeFlexSelFloat] = "sel.float",
+};
 
 enum {
 	ClkLtSymbol,
@@ -1275,28 +1341,28 @@ clientsfsrestore(Client *clients)
 int
 clientscheme(Client *c, Client *s)
 {
-	int active = 0, sel = 0;
+	int active = 0, sel = 0, fwb = enabled(FlexWinBorders);
 
 	if (!c)
 		return SchemeTitleNorm;
 
 	if (c->ws == selws) {
 		sel = c == s;
-		active = !sel && s && s->area == c->area;
+		active = fwb && !sel && s && s->area == c->area;
 	}
 
 	if (ISMARKED(c))
 		return SchemeMarked;
+	if (ISURGENT(c))
+		return SchemeUrg;
 	if (HIDDEN(c))
 		return sel ? SchemeHidSel : SchemeHidNorm;
 	if (ISSCRATCHPAD(c))
 		return sel ? SchemeScratchSel : SchemeScratchNorm;
 	if (ISFLOATING(c) || !c->ws->layout->arrange)
 		return sel ? SchemeFlexSelFloat : active ? SchemeFlexActFloat : SchemeFlexInaFloat;
-	if (ISURGENT(c))
-		return SchemeUrg;
 
-	if (enabled(FlexWinBorders))
+	if (fwb)
 		return c->arr + (sel ? SchemeFlexSelTTB : active ? SchemeFlexActTTB : SchemeFlexInaTTB);
 	return sel ? SchemeTitleSel : SchemeTitleNorm;
 }
@@ -3112,7 +3178,7 @@ void
 setup(void)
 {
 	Monitor *m;
-	int i;
+	int i, colorscheme;
 	XSetWindowAttributes wa;
 	Atom utf8string;
 	struct sigaction chld, hup, term;
@@ -3154,8 +3220,14 @@ setup(void)
 	scheme = ecalloc(LENGTH(colors) + 1, sizeof(Clr *));
 	scheme[LENGTH(colors)] = drw_scm_create(drw, colors[0], default_alphas, 3); // ad-hoc color scheme used by status2d
 
-	for (i = 0; i < LENGTH(colors); i++)
-		scheme[i] = drw_scm_create(drw, colors[i], default_alphas, 3);
+	for (i = 0; i < LENGTH(colors); i++) {
+		colorscheme = i;
+		/* Fall back to SchemeTitleNorm / Sel for SchemeFlex colors if not defined. */
+		if (!colors[i][0]) {
+			colorscheme = (i >= SchemeFlexSelTTB ? SchemeTitleSel : SchemeTitleNorm);
+		}
+		scheme[i] = drw_scm_create(drw, colors[colorscheme], default_alphas, 3);
+	}
 
 	if (enabled(Xresources))
 		loadxrdb();
