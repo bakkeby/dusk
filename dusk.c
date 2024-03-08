@@ -2346,8 +2346,7 @@ manage(Window w, XWindowAttributes *wa)
 
 	/* Do not attach client if it swallows a terminal */
 	if (term && swallowclient(term, c)) {
-		/* Do not let the swallowing client steal focus unless the terminal has focus */
-		focusclient = (term == selws->sel);
+		focusclient = (c == selws->sel);
 	} else {
 		attachx(c, AttachDefault, NULL);
 
