@@ -97,6 +97,7 @@ initsystray(void)
 	wa.override_redirect = True;
 	wa.event_mask = ButtonPressMask|ExposureMask;
 	wa.border_pixel = 0;
+	wa.background_pixel = 0;
 	systray->h = drw->fonts->h;
 
 	if (!enabled(SystrayNoAlpha)) {
