@@ -28,16 +28,13 @@ clean:
 
 install: all
 	mkdir -p ${DESTDIR}${PREFIX}/bin
-	cp -f dusk ${DESTDIR}${PREFIX}/bin
-	cp -f duskc ${DESTDIR}${PREFIX}/bin
-	chmod 755 ${DESTDIR}${PREFIX}/bin/dusk
-	chmod 755 ${DESTDIR}${PREFIX}/bin/duskc
+	install -Dm755 dusk ${DESTDIR}${PREFIX}/bin
+	install -Dm755 duskc ${DESTDIR}${PREFIX}/bin
 	mkdir -p ${DESTDIR}${MANPREFIX}/man1
 	sed "s/VERSION/${VERSION}/g" < dusk.1 > ${DESTDIR}${MANPREFIX}/man1/dusk.1
 	chmod 644 ${DESTDIR}${MANPREFIX}/man1/dusk.1
 	mkdir -p /usr/share/xsessions
-	test -f /usr/share/xsessions/dusk.desktop || cp -n dusk.desktop /usr/share/xsessions/
-	chmod 644 /usr/share/xsessions/dusk.desktop
+	test -f /usr/share/xsessions/dusk.desktop || install -Dm644 dusk.desktop /usr/share/xsessions/
 
 uninstall:
 	rm -f ${DESTDIR}${PREFIX}/bin/dusk\
