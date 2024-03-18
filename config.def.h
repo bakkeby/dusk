@@ -625,7 +625,7 @@ static Button buttons[] = {
 	{ ClkClientWin,              MODKEY,                  Button8,        markmouse,        {1} }, // toggles marking of clients under the mouse cursor for group action
 	{ ClkClientWin,              MODKEY,                  Button9,        markmouse,        {0} }, // unmarks clients under the mouse cursor
 	{ ClkClientWin,              MODKEY,                  Button1,        moveorplace,      {1} }, // moves a client window into a floating or tiled position depending on floating state
-	{ ClkClientWin,              MODKEY|Shift,            Button1,        movemouse,        {0} }, // moves a floating window, if the window is tiled then it will snap out to become floating
+	{ ClkClientWin,              MODKEY|Shift,            Button1,        togglemoveorplace,{0} }, // as above, but forces a tiled client to become floating and vice versa
 	{ ClkClientWin,              MODKEY|Alt,              Button2,        togglefloating,   {0} }, // toggles between tiled and floating arrangement for given client
 	{ ClkClientWin,              MODKEY,                  Button3,        resizeorfacts,    {0} }, // change the size of a floating client window or adjust cfacts and mfacts when tiled
 	{ ClkClientWin,              MODKEY|Shift,            Button3,        resizemouse,      {0} }, // change the size of a floating client window

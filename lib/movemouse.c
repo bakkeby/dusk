@@ -11,6 +11,18 @@ moveorplace(const Arg *arg)
 }
 
 void
+togglemoveorplace(const Arg *arg)
+{
+	if (!selws || !selws->sel)
+		return;
+
+	if (!selws->layout->arrange || ISFLOATING(selws->sel))
+		placemouse(arg);
+	else
+		movemouse(arg);
+}
+
+void
 movemouse(const Arg *arg)
 {
 	int i, g, x, y, w, h, nx, ny, sx, sy, vsnap, hsnap, xoff, yoff, group_after;
