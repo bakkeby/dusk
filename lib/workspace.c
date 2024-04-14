@@ -144,6 +144,7 @@ handleabandoned(Workspace *ws)
 
 	assignworkspacetomonitor(ws, mons);
 	ws->visible = 0;
+	hidewsclients(ws->stack);
 	ws->pinned = 0;
 }
 
@@ -928,11 +929,38 @@ nextmonws(Monitor *mon, Workspace *ws)
 }
 
 Workspace *
+nextoccmonws(Monitor *mon, Workspace *ws)
+{
+	Workspace *w;
+	for (w = ws; w && (w->mon != mon || w == stickyws || w->stack == NULL); w = w->next);
+	return w;
+}
+
+Workspace *
 nextvismonws(Monitor *mon, Workspace *ws)
 {
 	Workspace *w;
 	for (w = ws; w && !(w->mon == mon && w->visible && w != stickyws); w = w->next);
 	return w;
+}
+
+Workspace *
+selectmonws(Monitor *mon)
+{
+	Workspace *ws;
+
+	/* Prioritise the first visible workspace on the given monitor */
+	ws = nextvismonws(mon, workspaces);
+
+	/* Fall back to the first occcupied workspace on the given monitor */
+	if (!ws)
+		ws = nextoccmonws(mon, workspaces);
+
+	/* Fall back to the first workspace on the given monitor */
+	if (!ws)
+		ws = nextmonws(mon, workspaces);
+
+	return ws;
 }
 
 void
@@ -990,9 +1018,7 @@ redistributeworkspaces(void)
 			m->selws->visible = 1;
 			continue;
 		}
-		ws = nextvismonws(m, workspaces);
-		if (!ws)
-			ws = nextmonws(m, workspaces);
+		ws = selectmonws(m);
 		if (ws) {
 			m->selws = ws;
 			m->selws->visible = 1;
@@ -1024,7 +1050,7 @@ reorientworkspace(Workspace *ws, int orientation)
 void
 reviewworkspaces(void)
 {
-	Workspace *ws;
+	Workspace *ws, *sel;
 	Monitor *m;
 
 	/* Make sure that at least one workspace is visible on each monitor.
@@ -1033,15 +1059,17 @@ reviewworkspaces(void)
 		if (m->selws && m->selws->mon != m)
 			m->selws = NULL;
 
-		ws = nextvismonws(m, workspaces);
-		if (!ws)
-			ws = nextmonws(m, workspaces);
-		if (ws) {
-			m->selws = ws;
-			m->selws->visible = 1;
+		sel = selectmonws(m);
+		if (sel) {
+			m->selws = sel;
+			sel->visible = 1;
+
 			/* Hide the rest, if any */
-			while ((ws = nextvismonws(m, ws->next))) {
+			for (ws = nextvismonws(m, workspaces); ws; ws = nextvismonws(m, ws->next)) {
+				if (ws == sel)
+					continue;
 				ws->visible = 0;
+				hidewsclients(ws->stack);
 			}
 		}
 	}

@@ -79,4 +79,6 @@ static void setwfact(const Arg *arg);
 static void setworkspaceareas();
 static void setworkspaceareasformon(Monitor *mon);
 static Workspace * nextmonws(Monitor *mon, Workspace *ws);
+static Workspace * nextoccmonws(Monitor *mon, Workspace *ws);
 static Workspace * nextvismonws(Monitor *mon, Workspace *ws);
+static Workspace * selectmonws(Monitor *mon);
