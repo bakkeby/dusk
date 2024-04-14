@@ -297,7 +297,11 @@ struct Client {
 typedef struct {
 	int type;
 	unsigned int mod;
+	#if USE_KEYCODES
+	KeyCode keycode;
+	#else
 	KeySym keysym;
+	#endif // USE_KEYCODES
 	void (*func)(const Arg *);
 	const Arg arg;
 } Key;
@@ -2072,6 +2076,17 @@ grabkeys(void)
 {
 	updatenumlockmask();
 	{
+		#if USE_KEYCODES
+		unsigned int i, j;
+		unsigned int modifiers[] = { 0, LockMask, numlockmask, numlockmask|LockMask };
+
+		XUngrabKey(dpy, AnyKey, AnyModifier, root);
+
+		for (i = 0; i < LENGTH(keys); i++)
+			for (j = 0; j < LENGTH(modifiers); j++)
+				XGrabKey(dpy, keys[i].keycode, keys[i].mod | modifiers[j], root,
+						True, GrabModeAsync, GrabModeAsync);
+		#else // keysyms
 		unsigned int i, j, k;
 		unsigned int modifiers[] = { 0, LockMask, numlockmask, numlockmask|LockMask };
 		int start, end, skip;
@@ -2094,6 +2109,7 @@ grabkeys(void)
 			}
 		}
 		XFree(syms);
+		#endif // USE_KEYCODES
 	}
 }
 
@@ -2136,23 +2152,36 @@ void
 keypress(XEvent *e)
 {
 	unsigned int i;
+	#if !USE_KEYCODES
 	int keysyms_return;
 	KeySym* keysym;
+	#endif
 	XKeyEvent *ev;
 
 	getrootptr(&prev_ptr_x, &prev_ptr_y);
 
 	ev = &e->xkey;
 	ignore_marked = 0;
+	#if !USE_KEYCODES
 	keysym = XGetKeyboardMapping(dpy, (KeyCode)ev->keycode, 1, &keysyms_return);
+	#endif
 	for (i = 0; i < LENGTH(keys); i++) {
-		if (*keysym == keys[i].keysym
-				&& ev->type == keys[i].type
-				&& CLEANMASK(keys[i].mod) == CLEANMASK(ev->state)
-				&& keys[i].func)
+		if (
+			#if USE_KEYCODES
+			ev->keycode == keys[i].keycode
+			#else
+			*keysym == keys[i].keysym
+			#endif // USE_KEYCODES
+			&& ev->type == keys[i].type
+			&& CLEANMASK(keys[i].mod) == CLEANMASK(ev->state)
+			&& keys[i].func
+		) {
 			keys[i].func(&(keys[i].arg));
+		}
 	}
+	#if !USE_KEYCODES
 	XFree(keysym);
+	#endif // USE_KEYCODES
 	ignore_marked = 1;
 
 	if (ev->type == KeyRelease)

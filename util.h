@@ -15,6 +15,10 @@
 #define DEBUG(...)
 #endif
 
+#ifndef USE_KEYCODES
+#define USE_KEYCODES 0
+#endif
+
 static const uint64_t
 	SmartGaps = 0x1, // enables no gaps if there is only one visible window
 	SmartGapsMonocle = 0x2, // enforces no (outer) gaps in monocle layout
