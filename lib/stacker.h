@@ -18,3 +18,4 @@ static void stackfocus(const Arg *arg);
 static void stackpush(const Arg *arg);
 static void stackswap(const Arg *arg);
 static Client * stackposclient(const Arg *arg);
+static const StackerIcon * getstackericonforclient(Client *c);

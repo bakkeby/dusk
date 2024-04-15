@@ -117,3 +117,52 @@ stackposclient(const Arg *arg)
 
 	return nthtiled(ws->clients, arg->i, 1);
 }
+
+const StackerIcon *
+getstackericonforclient(Client *c)
+{
+	int i, stacklevel;
+	int fine = -1, good = -1, better = -1, best = -1; // prioritisation levels
+	int nthc, ntht, nthf, nthm, nths; // nth client, tiled, floating, master, stack
+	int nc, nt, nf, nm, ns;           // num clients, tiled, floating, master, stack
+	getclientindices(c, &nthc, &ntht, &nthf, &nthm, &nths, &nc, &nt, &nf, &nm, &ns);
+
+	for (i = 0; i < LENGTH(stackericons); i++) {
+		stacklevel = stackericons[i].arg.i;
+
+		/* MASTER, STACK and implicit client positions take precedence for icons */
+		if (nthm && stacklevel == MASTER(nthm)) {
+			best = i;
+		} else if (nths && stacklevel == STACK(nths)) {
+			best = i;
+		} else if (stacklevel == nthc) {
+			best = i;
+		}
+
+		/* Falls back to LASTTILED, if applicable */
+		if (stacklevel == LASTTILED && ntht == nt) {
+			better = i;
+		}
+
+		/* Falls back to INC, if applicable */
+		if (stacklevel == INC(-1) && c->next == c->ws->sel) {
+			good = i;
+		}
+
+		if (stacklevel == INC(+1) && c->ws->sel && c->ws->sel->next == c) {
+			good = i;
+		}
+
+		/* Falls back to PREVSEL, if applicable */
+		if (stacklevel == PREVSEL && c == prevsel()) {
+			fine = i;
+		}
+	}
+
+	i = best > -1 ? best : better > -1 ? better : good > -1 ? good : fine;
+
+	if (i == -1)
+		return NULL;
+
+	return &stackericons[i];
+}

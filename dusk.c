@@ -307,6 +307,12 @@ typedef struct {
 } Key;
 
 typedef struct {
+	char *icon;
+	Arg arg;
+	int pos; /* indicates that the icon is to be added as a prefix (0) or suffix (1) */
+} StackerIcon;
+
+typedef struct {
 	int nmaster;
 	int nstack;
 	int layout;

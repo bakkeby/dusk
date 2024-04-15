@@ -167,9 +167,30 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 	int lpad = 0;
 	int tx = x;
 	int tw = w;
+	char title[512] = {0};
+	int titleidx = 0;
+	const StackerIcon *stackericon = NULL;
 	static unsigned int textw_single_char = 0;
 	if (!textw_single_char)
 		textw_single_char = TEXTW("A");
+
+	if (enabled(StackerIcons) && c->ws == selws && c != c->ws->sel) {
+		if ((stackericon = getstackericonforclient(c))) {
+			if (stackericon->pos) {
+				/* Add as suffix */
+				titleidx = strlcpy(title, c->name, TEXTW(c->name));
+				strlcpy(title + titleidx, stackericon->icon, TEXTW(stackericon->icon));
+			} else {
+				/* Add as prefix (default) */
+				titleidx = strlcpy(title, stackericon->icon, TEXTW(stackericon->icon));
+				strlcpy(title + titleidx, c->name, TEXTW(c->name));
+			}
+		}
+	}
+
+	if (!stackericon) {
+		strlcpy(title, c->name, TEXTW(c->name));
+	}
 
 	prevscheme = barg->lastscheme;
 	barg->lastscheme = clientscheme(c, c->ws->sel);
@@ -189,8 +210,8 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 		lpad = MAX(0, (w - textw_single_char) / 2);
 		tx += lpad;
 		tw -= lpad;
-	} else if (enabled(CenteredWindowName) && TEXTW(c->name) + lrpad + ipad < w) {
-		lpad = (w - TEXTW(c->name) - ipad) / 2;
+	} else if (enabled(CenteredWindowName) && TEXTW(title) + lrpad + ipad < w) {
+		lpad = (w - TEXTW(title) - ipad) / 2;
 		tx += lpad;
 		tw -= lpad;
 	} else {
@@ -198,14 +219,19 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 		tw -= lrpad;
 	}
 
- 	if (ipad) {
+	if (ipad) {
 		drw_pic(drw, tx, barg->y + (barg->h - c->ich) / 2, c->icw, c->ich, c->icon);
 		tx += ipad;
 		tw -= ipad;
- 	}
+	}
 
- 	if (tw >= textw_single_char)
- 		drw_text(drw, tx, barg->y, tw, barg->h, 0, c->name, 0, 1);
+	if (tw >= textw_single_char) {
+		if (stackericon) {
+			drw_2dtext(drw, tx, barg->y, tw, barg->h, 0, title, 0, 1, barg->lastscheme);
+		} else {
+			drw_text(drw, tx, barg->y, tw, barg->h, 0, title, 0, 1);
+		}
+	}
 	drawstateindicator(ws, c, 1, x, barg->y, w, barg->h, 0, 0);
 }
 

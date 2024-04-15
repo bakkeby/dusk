@@ -1,4 +1,5 @@
 static Client **clientptr(Client *c);
+static void getclientindices(Client *c, int *nth_client, int *nth_tiled, int *nth_floating, int *nth_master, int *nth_stack, int *num_clients, int *num_tiled, int *num_floating, int *num_master, int *num_stack);
 static int ismasterclient(Client *c);
 static Client *lastclient(Client *c);
 static Client *lasttiled(Client *c);
