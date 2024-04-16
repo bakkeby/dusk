@@ -169,6 +169,7 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 	int tw = w;
 	char title[512] = {0};
 	int titleidx = 0;
+	int titlewidth = TEXTW(c->name);
 	const StackerIcon *stackericon = NULL;
 	static unsigned int textw_single_char = 0;
 	if (!textw_single_char)
@@ -178,18 +179,19 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 		if ((stackericon = getstackericonforclient(c))) {
 			if (stackericon->pos) {
 				/* Add as suffix */
-				titleidx = strlcpy(title, c->name, TEXTW(c->name));
+				titleidx = strlcpy(title, c->name, titlewidth);
 				strlcpy(title + titleidx, stackericon->icon, TEXTW(stackericon->icon));
 			} else {
 				/* Add as prefix (default) */
 				titleidx = strlcpy(title, stackericon->icon, TEXTW(stackericon->icon));
-				strlcpy(title + titleidx, c->name, TEXTW(c->name));
+				strlcpy(title + titleidx, c->name, titlewidth);
 			}
+			titlewidth += TEXT2DW(stackericon->icon);
 		}
 	}
 
 	if (!stackericon) {
-		strlcpy(title, c->name, TEXTW(c->name));
+		strlcpy(title, c->name, titlewidth);
 	}
 
 	prevscheme = barg->lastscheme;
@@ -210,8 +212,8 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 		lpad = MAX(0, (w - textw_single_char) / 2);
 		tx += lpad;
 		tw -= lpad;
-	} else if (enabled(CenteredWindowName) && TEXTW(title) + lrpad + ipad < w) {
-		lpad = (w - TEXTW(title) - ipad) / 2;
+	} else if (enabled(CenteredWindowName) && titlewidth + lrpad + ipad < w) {
+		lpad = (w - titlewidth - ipad) / 2;
 		tx += lpad;
 		tw -= lpad;
 	} else {
