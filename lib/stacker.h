@@ -14,6 +14,14 @@
 #define MOD(N,M)                ((N)%(M) < 0 ? (N)%(M) + (M) : (N)%(M))
 #define TRUNC(X,A,B)            (MAX((A), MIN((X), (B))))
 
+enum {
+	StackerTitlePrefix,
+	StackerTitleSuffix,
+	StackerTitleHead,
+	StackerTitleTail,
+};
+
+
 static void stackfocus(const Arg *arg);
 static void stackpush(const Arg *arg);
 static void stackswap(const Arg *arg);
