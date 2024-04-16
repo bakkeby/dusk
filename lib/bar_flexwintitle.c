@@ -174,7 +174,7 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 	if (!textw_single_char)
 		textw_single_char = TEXTW("A");
 
-	if (enabled(StackerIcons) && c->ws == selws && c != c->ws->sel) {
+	if (enabled(StackerIcons) && c->ws == selws) {
 		if ((stackericon = getstackericonforclient(c))) {
 			if (stackericon->pos) {
 				/* Add as suffix */
