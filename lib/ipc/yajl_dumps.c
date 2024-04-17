@@ -50,6 +50,7 @@ dump_settings(yajl_gen gen)
 			YSTR("RioDrawSpawnAsync"); YBOOL(enabled(RioDrawSpawnAsync));
 			YSTR("RestrictFocusstackToMonitor"); YBOOL(enabled(RestrictFocusstackToMonitor));
 			YSTR("WinTitleIcons"); YBOOL(enabled(WinTitleIcons));
+			YSTR("StackerIcons"); YBOOL(enabled(StackerIcons));
 			YSTR("WorkspaceLabels"); YBOOL(enabled(WorkspaceLabels));
 			YSTR("WorkspacePreview"); YBOOL(enabled(WorkspacePreview));
 		)
