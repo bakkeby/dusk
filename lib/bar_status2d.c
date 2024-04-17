@@ -54,8 +54,7 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 	Clr oldbg = scheme[defscheme][ColFg];
 	Clr oldfg = scheme[defscheme][ColBg];
 	len = strlen(text2d) + 1;
-	if (!(text = (char*) malloc(sizeof(char)*(len))))
-		die("malloc");
+	text = (char*) ecalloc(1, sizeof(char)*(len));
 	p = text;
 
 	strcpy(text, text2d);
@@ -225,8 +224,7 @@ status2dtextlength(char* text2d)
 	char *p = {0};
 
 	len = strlen(text2d) + 1;
-	if (!(text = (char*) malloc(sizeof(char)*len)))
-		die("malloc");
+	text = (char*) ecalloc(1, sizeof(char)*len);
 	p = text;
 
 	strcpy(text, text2d);
