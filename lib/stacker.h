@@ -15,12 +15,12 @@
 #define TRUNC(X,A,B)            (MAX((A), MIN((X), (B))))
 
 enum {
+	StackerRightOfWindowIcon,
+	StackerLeftOfWindowIcon,
 	StackerTitlePrefix,
 	StackerTitleSuffix,
-	StackerTitleHead,
-	StackerTitleTail,
+	StackerTitleEllipsis,
 };
-
 
 static void stackfocus(const Arg *arg);
 static void stackpush(const Arg *arg);

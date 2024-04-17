@@ -434,13 +434,13 @@ static const Layout layouts[] = {
 
 /* This relates to the StackerIcons functionality and should mirror the STACKKEYS list above. */
 static const StackerIcon stackericons[] = {
-	{ "[j] ", {.i = INC(+1) } },
-	{ "[k] ", {.i = INC(-1) } },
-	{ "[s] ", {.i = PREVSEL } },
-	{ "[w] ", {.i = 1 } },
-	{ "[e] ", {.i = 2 } },
-	{ "[a] ", {.i = 3 } },
-	{ "[z] ", {.i = LASTTILED } },
+	{ "[j]", {.i = INC(+1) } },
+	{ "[k]", {.i = INC(-1) } },
+	{ "[s]", {.i = PREVSEL } },
+	{ "[w]", {.i = 1 } },
+	{ "[e]", {.i = 2 } },
+	{ "[a]", {.i = 3 } },
+	{ "[z]", {.i = LASTTILED } },
 };
 
 /* Helper macros for spawning commands */

@@ -169,6 +169,11 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 	int tw = w;
 	int icon2dwidth = 0;
 	int titlewidth = TEXTW(c->name);
+	int max_items = 4;
+	int order[max_items];
+	int idx = 0;
+	int i;
+
 	const StackerIcon *stackericon = NULL;
 	static int textw_single_char = 0;
 	if (!textw_single_char)
@@ -180,6 +185,7 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 		}
 	}
 
+	/* This works out the colour scheme to use and fills the background with a solid block */
 	prevscheme = barg->lastscheme;
 	barg->lastscheme = clientscheme(c, c->ws->sel);
 
@@ -194,7 +200,8 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 	XSetForeground(drw->dpy, drw->gc, drw->scheme[ColBg].pixel);
 	XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, barg->y, w, barg->h);
 
-	if (w < textw_single_char + lrpad) { // reduce text padding if wintitle is too small
+	/* This works out how much padding to add on the left side before drawing the window title */
+	if (w < textw_single_char + lrpad) { // reduce text padding if title is too small
 		lpad = MAX(0, (w - textw_single_char) / 2);
 		tx += lpad;
 		tw -= lpad;
@@ -207,45 +214,72 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 		tw -= lrpad;
 	}
 
-	if (stackericon && stackericon->pos == StackerTitleHead) {
-		drw_2dtext(drw, tx, barg->y, tw, barg->h, 0, stackericon->icon, 0, 1, barg->lastscheme);
-		tx += icon2dwidth;
-		tw -= icon2dwidth;
+	enum {
+		window_icon = 1,
+		icon_spacing = 2,
+		stacker_icon = 3,
+		window_title = 4,
+	};
+
+	/* The below determines the order of the window title components */
+	if (stackericon && stackericon->pos == StackerLeftOfWindowIcon)
+		order[idx++] = stacker_icon;
+
+	if (ipad)
+		order[idx++] = window_icon;
+
+	if (stackericon && stackericon->pos == StackerRightOfWindowIcon) {
+		order[idx++] = stacker_icon;
+		order[idx++] = icon_spacing;
+	} else if (ipad) {
+		order[idx++] = icon_spacing;
 	}
 
-	if (ipad) {
-		drw_pic(drw, tx, barg->y + (barg->h - c->ich) / 2, c->icw, c->ich, c->icon);
-		tx += ipad;
-		tw -= ipad;
-	}
+	if (stackericon && stackericon->pos == StackerTitlePrefix)
+		order[idx++] = stacker_icon;
 
-	if (tw >= textw_single_char) {
-		if (stackericon && stackericon->pos == StackerTitlePrefix) {
+	order[idx++] = window_title;
+
+	if (stackericon && stackericon->pos == StackerTitleSuffix)
+		order[idx++] = stacker_icon;
+
+	if (stackericon && stackericon->pos == StackerTitleEllipsis)
+		order[idx++] = stacker_icon;
+
+	/* Then loop through and draw the title components in the given order */
+	for (i = 0; i < max_items && order[i]; i++) {
+
+		switch (order[i]) {
+		case window_icon:
+			drw_pic(drw, tx, barg->y + (barg->h - c->ich) / 2, c->icw, c->ich, c->icon);
+			tx += c->icw;
+			tw -= c->icw;
+			break;
+		case icon_spacing:
+			tx += iconspacing;
+			tw -= iconspacing;
+			break;
+		case window_title:
+			drw_text(drw, tx, barg->y, tw, barg->h, 0, c->name, 0, 1);
+			tx += titlewidth;
+			tw -= titlewidth;
+			break;
+		case stacker_icon:
+			if (tw < textw_single_char) {
+				if (stackericon->pos != StackerTitleEllipsis)
+					break;
+				tx = x + w - icon2dwidth;
+				tw = icon2dwidth;
+			}
+
 			drw_2dtext(drw, tx, barg->y, tw, barg->h, 0, stackericon->icon, 0, 1, barg->lastscheme);
 			tx += icon2dwidth;
 			tw -= icon2dwidth;
+			break;
 		}
 
-		drw_text(drw, tx, barg->y, tw, barg->h, 0, c->name, 0, 1);
-		tx += titlewidth;
-		tw -= titlewidth;
-
-		if (stackericon) {
-			if (stackericon->pos == StackerTitleSuffix && tw >= textw_single_char) {
-				drw_2dtext(drw, tx, barg->y, tw, barg->h, 0, stackericon->icon, 0, 1, barg->lastscheme);
-				tx += icon2dwidth;
-				tw -= icon2dwidth;
-			} else if (stackericon->pos == StackerTitleTail) {
-				if (tw < textw_single_char) {
-					tx = x + w - icon2dwidth;
-					tw = icon2dwidth;
-				}
-				drw_2dtext(drw, tx, barg->y, tw, barg->h, 0, stackericon->icon, 0, 1, barg->lastscheme);
-				tx += icon2dwidth;
-				tw -= icon2dwidth;
-			}
-		}
 	}
+
 	drawstateindicator(ws, c, 1, x, barg->y, w, barg->h, 0, 0);
 }
 
