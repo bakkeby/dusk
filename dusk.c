@@ -3396,6 +3396,9 @@ spawncmd(const Arg *arg, int buttonclick, int orphan)
 {
 	struct sigaction sa;
 	pid_t pid = fork();
+	int i;
+	char **argv = ((char **)arg->v);
+	argv++;
 
 	if (pid == 0) {
 
@@ -3404,10 +3407,12 @@ spawncmd(const Arg *arg, int buttonclick, int orphan)
 
 		if (dpy)
 			close(ConnectionNumber(dpy));
+
+		const char* const home = getenv("HOME");
+		assert(home && strchr(home, '/'));
+		const size_t homelen = strlen(home);
+
 		if (enabled(SpawnCwd) && selws->sel) {
-			const char* const home = getenv("HOME");
-			assert(home && strchr(home, '/'));
-			const size_t homelen = strlen(home);
 			char *cwd, *pathbuf = NULL;
 			struct stat statbuf;
 
@@ -3416,10 +3421,10 @@ spawncmd(const Arg *arg, int buttonclick, int orphan)
 			 * but that does not matter because we are going to
 			 * exec() below anyway; nothing else will use it */
 			while (cwd) {
-				if (*cwd == '~') { /* replace ~ with $HOME */
-					if (!(pathbuf = malloc(homelen + strlen(cwd)))) /* ~ counts for NULL term */
-						die("fatal: could not malloc() %u bytes\n", homelen + strlen(cwd));
-					strcpy(strcpy(pathbuf, home) + homelen, cwd + 1);
+				if (*cwd == '~') {
+					/* Replace ~ with HOME environment variable */
+					pathbuf = ecalloc(1, homelen + strlen(cwd));
+					sprintf(pathbuf, "%s%s", home, cwd + 1);
 					cwd = pathbuf;
 				}
 
@@ -3458,10 +3463,17 @@ spawncmd(const Arg *arg, int buttonclick, int orphan)
 		sa.sa_handler = SIG_DFL;
 		sigaction(SIGCHLD, &sa, NULL);
 
-		execvp(((char **)arg->v)[1], ((char **)arg->v)+1);
-		fprintf(stderr, "dusk: execvp %s", ((char **)arg->v)[1]);
-		perror(" failed");
-		exit(EXIT_SUCCESS);
+		/* Replace occurrences of "~/" with the value of HOME environment variable */
+		for (i = 0; argv[i] != NULL; i++) {
+			if (strncmp(argv[i], "~/", 2) == 0) {
+				char *buffer = ecalloc(1, homelen + strlen(argv[i]));
+				sprintf(buffer, "%s%s", home, argv[i] + 1);
+				argv[i] = buffer;
+			}
+		}
+
+		execvp(argv[0], argv);
+		die("dusk: execvp %s failed:", argv[0]);
 	}
 	return pid;
 }
