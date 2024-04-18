@@ -448,9 +448,8 @@ static const StackerIcon stackericons[] = {
 #define CMD(...)   { .v = (const char*[]){ NULL, __VA_ARGS__, NULL } }
 
 /* Scratch/Spawn commands:        NULL (scratchkey), command, argument, argument, ..., NULL */
-static const char *termcmd[]  = { NULL, "st", NULL };
+static const char *termcmd[]  = { "st", NULL };
 static const char *dmenucmd[] = {
-	NULL,
 	"dmenu_run",
 	"-fn", dmenufont,
 	"-nb", dmenunormbgcolor,
@@ -463,7 +462,7 @@ static const char *dmenucmd[] = {
 static const char *spcmd_w[] = {"w", "st", "-n", "spterm (w)", "-g", "120x34", NULL };
 static const char *spcmd_e[] = {"e", "st", "-n", "spterm (e)", "-g", "120x34", NULL };
 static const char *spcmd_r[] = {"r", "st", "-n", "spfm (r)", "-g", "144x41", "-e", "ranger", NULL };
-static const char *statusclickcmd[] = { NULL, "bin/statusbar/statusclick.sh", NULL };
+static const char *statusclickcmd[] = { "~/bin/statusbar/statusclick.sh", NULL };
 
 static Key keys[] = {
 	/* type       modifier                      key              function                argument */

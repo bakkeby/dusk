@@ -3398,7 +3398,8 @@ spawncmd(const Arg *arg, int buttonclick, int orphan)
 	pid_t pid = fork();
 	int i;
 	char **argv = ((char **)arg->v);
-	argv++;
+	if (!argv[0] || strlen(argv[0]) == 1)
+		argv++;
 
 	if (pid == 0) {
 
