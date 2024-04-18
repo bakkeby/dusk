@@ -40,6 +40,10 @@ getclientindices(
 	int nthc = 0, ntht = 0, nthf = 0, nthm = 0, nths = 0;
 
 	for (s = ws->clients; s; s = s->next) {
+
+		if (!ISVISIBLE(s))
+			continue;
+
 		nc++;
 
 		if (ISFLOATING(s)) {

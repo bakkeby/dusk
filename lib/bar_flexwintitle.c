@@ -179,7 +179,7 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 	if (!textw_single_char)
 		textw_single_char = TEXTW("A");
 
-	if (enabled(StackerIcons) && c->ws == selws) {
+	if (enabled(StackerIcons) && c->ws == selws && ISVISIBLE(c)) {
 		if ((stackericon = getstackericonforclient(c))) {
 			icon2dwidth = TEXT2DW(stackericon->icon);
 		}
