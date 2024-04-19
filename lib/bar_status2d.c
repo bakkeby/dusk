@@ -115,6 +115,10 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 				} else if (text[i] == 'B') {
 					int c = atoi(text + ++i) % 16;
 					drw_clr_create(drw, &drw->scheme[ColBg], termcolor[c], enabled(Status2DNoAlpha) ? 0xff : default_alphas[ColBg]);
+				} else if (text[i] == 'S') {
+					int s = atoi(text + ++i) % SchemeLast;
+					drw->scheme[ColFg] = scheme[s][ColFg];
+					drw->scheme[ColBg] = scheme[s][ColBg];
 				} else if (text[i] == 'd') {
 					drw->scheme[ColFg] = scheme[defscheme][ColFg];
 					drw->scheme[ColBg] = scheme[defscheme][ColBg];
