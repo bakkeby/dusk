@@ -739,6 +739,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( togglefloating, ARG_TYPE_NONE ),
 	IPCCOMMAND( togglefullscreen, ARG_TYPE_NONE ),
 	IPCCOMMAND( togglegaps, ARG_TYPE_NONE ),
+	IPCCOMMAND( togglekeybindings, ARG_TYPE_NONE ),
 	IPCCOMMAND( togglemark, ARG_TYPE_NONE ),
 	IPCCOMMAND( togglenomodbuttons, ARG_TYPE_NONE ),
 	IPCCOMMAND( togglepinnedws, ARG_TYPE_NONE ),
