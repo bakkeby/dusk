@@ -20,6 +20,8 @@ static char *termcolor[] = {
 };
 static int statusclicked = -1;
 
+static ImageBuffer imagebuffer[30] = {0};
+
 int
 size_status(Bar *bar, BarArg *a)
 {
@@ -45,12 +47,13 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 	if (!w && drawbg)
 		return 0;
 
-	int i, tw, dx = x, len, mw = w - 2 * lpad;
+	int i, j, tw, dx = x, len, mw = w - 2 * lpad;
 	int rx, ry, rw, rh;
 	int fillbg = drawbg;
 	short isCode = 0;
 	char *text = {0};
 	char *p = {0};
+	Image *image;
 	Clr oldbg = scheme[defscheme][ColFg];
 	Clr oldfg = scheme[defscheme][ColBg];
 	len = strlen(text2d) + 1;
@@ -163,6 +166,22 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 						rh = 0;
 
 					drw_rect(drw, dx + rx, y + ry, rw, rh, 1, 0);
+				} else if (text[i] == 'i') {
+					/* Linux has a maximum filename length of 255 characters for most filesystems
+					 * and a maxixmum path of 4096 characters. For status updates we do not expect
+					 * that long path names so we keep this at 255 characters. */
+					int maxlen = 256;
+					char buf[maxlen];
+					for (j = 0, i++; j < maxlen - 1 && i < len && text[i] != '^'; i++, j++)
+						buf[j] = text[i];
+					buf[j] = '\0';
+					i--;
+
+					if ((image = loadimage(buf))) {
+						drw_pic(drw, dx, y + (h - image->ich) / 2, MIN(image->icw, mw), image->ich, image->icon);
+						dx += image->icw;
+						mw -= image->icw;
+					}
 				} else if (text[i] == 'f') {
 					if (++i >= len)
 						break;
@@ -176,8 +195,9 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 
 			isCode = 0;
 			len -= i + 1;
-			if (len <= 0)
+			if (len <= 0) {
 				break;
+			}
 
 			text = text + i + 1;
 			i = -1;
@@ -197,16 +217,22 @@ void
 setstatus(const Arg args[], int num_args)
 {
 	const BarRule *br;
-	int i, sid = args[0].i;
+	int i, j, sid = args[0].i;
 
 	if (sid < 0 || sid >= NUM_STATUSES)
 		return;
 
 	char const *statustext = args[1].v;
 
-	for (i = 0; i < STATUS_BUFFER - 1 && statustext[i] != '\0'; i++)
-		rawstatustext[sid][i] = statustext[i];
-	rawstatustext[sid][i] = '\0';
+	for (j = 0, i = 0; j < STATUS_BUFFER - 1 && statustext[i] != '\0'; j++, i++) {
+		if (statustext[i] == '~' && statustext[i + 1] == '/') {
+			strlcpy(rawstatustext[sid] + j, env_home, env_homelen + 1);
+			j += env_homelen - 1;
+		} else {
+			rawstatustext[sid][j] = statustext[i];
+		}
+	}
+	rawstatustext[sid][j] = '\0';
 
 	for (int r = 0; r < LENGTH(barrules); r++) {
 		br = &barrules[r];
@@ -218,10 +244,11 @@ setstatus(const Arg args[], int num_args)
 int
 status2dtextlength(char* text2d)
 {
-	int i, w, len;
+	int i, j, w, len;
 	short isCode = 0;
 	char *text = {0};
 	char *p = {0};
+	Image *image;
 
 	len = strlen(text2d) + 1;
 	text = (char*) ecalloc(1, sizeof(char)*len);
@@ -239,8 +266,21 @@ status2dtextlength(char* text2d)
 				text[i] = '\0';
 				w += TEXTW(text);
 				text[i] = '^';
-				if (text[++i] == 'f')
+				++i;
+				if (text[i] == 'f') {
 					w += atoi(text + ++i);
+				} else if (text[i] == 'i') {
+					int maxlen = 256;
+					char buf[maxlen];
+					for (j = 0, i++; j < maxlen - 1 && i < len && text[i] != '^'; i++, j++)
+						buf[j] = text[i];
+					buf[j] = '\0';
+					i--;
+
+					if ((image = loadimage(buf))) {
+						w += image->icw;
+					}
+				}
 			} else {
 				isCode = 0;
 				text = text + i + 1;
@@ -258,4 +298,95 @@ void
 statusclick(const Arg *arg)
 {
 	spawncmd(&((Arg) { .v = statusclickcmd }), arg->i, 1);
+}
+
+Image *
+loadimage(char *path)
+{
+	int i;
+	int least = -1;
+	time_t leasttime = INT_MAX - 1;
+	Image *image;
+
+	/* First see if we can find the image path in our list of buffered images */
+	for (i = 0; i < LENGTH(imagebuffer); i++) {
+		if (imagebuffer[i].atime < leasttime) {
+			least = i;
+			leasttime = imagebuffer[i].atime;
+		}
+
+		if (imagebuffer[i].image.icon == None)
+			continue;
+
+		if (!strcmp(imagebuffer[i].image.iconpath, path)) {
+			imagebuffer[i].atime = time(NULL);
+			return &imagebuffer[i].image;
+		}
+	}
+
+	/* If we did not find our image in the buffer then we need to try to load it from file.
+	 * We may be overwriting the oldest image in the buffer, so free that first if present. */
+	image = &imagebuffer[least].image;
+
+	if (image->icon) {
+		XRenderFreePicture(dpy, image->icon);
+		image->icon = None;
+		image->icw = 0;
+		image->ich = 0;
+		image->iconpath[0] = '\0';
+		imagebuffer[least].atime = 0;
+	}
+
+	if (!loadimagefromfile(image, path))
+		return NULL;
+
+	imagebuffer[least].atime = time(NULL);
+	return image;
+}
+
+int
+loadimagefromfile(Image *image, char *path)
+{
+	unsigned int* data;
+	Imlib_Image im;
+	int w, h, s, ich, icw;
+
+	struct stat stbuf;
+	s = stat(path, &stbuf);
+	if (s == -1 || S_ISDIR(s) || strlen(path) <= 2)
+		return 0; /* no readable file */
+
+	strlcpy(image->iconpath, path, sizeof image->iconpath);
+	im = imlib_load_image(path);
+	if (!im)
+		return 0; /* corrupt or otherwise not loadable file */
+	imlib_context_set_image(im);
+	imlib_image_set_has_alpha(1);
+	icw = w = imlib_image_get_width();
+	ich = h = imlib_image_get_height();
+
+	if (h >= bh) {
+		icw = w * ((float)(bh) / (float)h);
+		ich = bh;
+	}
+
+	data = imlib_image_get_data_for_reading_only();
+	imlib_free_image();
+
+	image->icon = drw_picture_create_resized(drw, (char*)data, w, h, icw, ich);
+	image->icw = icw;
+	image->ich = ich;
+	return image->icon;
+}
+
+void
+cleanup2dimagebuffer(void)
+{
+	int i;
+
+	for (i = 0; i < LENGTH(imagebuffer); i++) {
+		if (imagebuffer[i].image.icon != None) {
+			XRenderFreePicture(dpy, imagebuffer[i].image.icon);
+		}
+	}
 }

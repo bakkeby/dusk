@@ -176,8 +176,21 @@ drw_picture_create_resized(Drw *drw, char *src, unsigned int srcw, unsigned int 
 			return None;
 		imlib_context_set_image(origin);
 		imlib_image_set_has_alpha(1);
+
+		/* For reasons unknown imlib tends to segfault when executing
+		 * imlib_create_cropped_scaled_image for pictures with a height of 1024
+		 * or more. The first picture may load fine but then segfault on another, same
+		 * if you change the order of the pictures suggesting that the problem is not
+		 * the picture itself. As a workaround we simply do not support scaling images
+		 * larger than 1023.
+		 */
+		if (srch > 1023) {
+			imlib_free_image_and_decache();
+			return None;
+		}
+
 		Imlib_Image scaled = imlib_create_cropped_scaled_image(0, 0, srcw, srch, dstw, dsth);
-		imlib_free_image_and_decache();
+		imlib_free_image_and_decache(); // frees the origin image, set as context
 		if (!scaled)
 			return None;
 		imlib_context_set_image(scaled);

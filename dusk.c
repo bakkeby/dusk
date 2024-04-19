@@ -528,6 +528,8 @@ static void zoom(const Arg *arg);
 /* variables */
 static const char broken[] = "fubar";
 static char rawstatustext[NUM_STATUSES][STATUS_BUFFER];
+static const char* env_home;
+static int env_homelen;
 
 static int screen;
 static int sw, sh;             /* X display screen geometry width, height */
@@ -1060,6 +1062,9 @@ cleanup(void)
 		drw_cur_free(drw, cursor[i]);
 	for (i = 0; i < LENGTH(colors) + 1; i++)
 		free(scheme[i]);
+
+	cleanup2dimagebuffer();
+
 	free(scheme);
 	XDestroyWindow(dpy, wmcheckwin);
 	drw_free(drw);
@@ -3217,6 +3222,11 @@ setup(void)
 	Atom utf8string;
 	struct sigaction chld, hup, term;
 
+	/* Record the HOME environment variable (for ~ substitution) */
+	env_home = getenv("HOME");
+	assert(env_home && strchr(env_home, '/'));
+	env_homelen = strlen(env_home);
+
 	/* Handle children when they terminate. */
 	sigemptyset(&chld.sa_mask);
 	chld.sa_flags = SA_NOCLDSTOP | SA_RESTART;
@@ -3409,10 +3419,6 @@ spawncmd(const Arg *arg, int buttonclick, int orphan)
 		if (dpy)
 			close(ConnectionNumber(dpy));
 
-		const char* const home = getenv("HOME");
-		assert(home && strchr(home, '/'));
-		const size_t homelen = strlen(home);
-
 		if (enabled(SpawnCwd) && selws->sel) {
 			char *cwd, *pathbuf = NULL;
 			struct stat statbuf;
@@ -3424,8 +3430,8 @@ spawncmd(const Arg *arg, int buttonclick, int orphan)
 			while (cwd) {
 				if (*cwd == '~') {
 					/* Replace ~ with HOME environment variable */
-					pathbuf = ecalloc(1, homelen + strlen(cwd));
-					sprintf(pathbuf, "%s%s", home, cwd + 1);
+					pathbuf = ecalloc(1, env_homelen + strlen(cwd));
+					sprintf(pathbuf, "%s%s", env_home, cwd + 1);
 					cwd = pathbuf;
 				}
 
@@ -3467,8 +3473,8 @@ spawncmd(const Arg *arg, int buttonclick, int orphan)
 		/* Replace occurrences of "~/" with the value of HOME environment variable */
 		for (i = 0; argv[i] != NULL; i++) {
 			if (strncmp(argv[i], "~/", 2) == 0) {
-				char *buffer = ecalloc(1, homelen + strlen(argv[i]));
-				sprintf(buffer, "%s%s", home, argv[i] + 1);
+				char *buffer = ecalloc(1, env_homelen + strlen(argv[i]));
+				sprintf(buffer, "%s%s", env_home, argv[i] + 1);
 				argv[i] = buffer;
 			}
 		}
