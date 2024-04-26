@@ -42,7 +42,7 @@ draw_status(Bar *bar, BarArg *a)
 }
 
 int
-drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lpad, const char *text2d, int invert, int drawbg, int defscheme)
+drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lpad, char *text2d, int invert, int drawbg, int defscheme)
 {
 	if (!w && drawbg)
 		return 0;
@@ -170,18 +170,25 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 						rh = 0;
 
 					drw_rect(drw, dx + rx, y + ry, rw, rh, 1, 0);
-				} else if (text[i] == 'i') {
+				} else if (text[i] == 'i' || text[i] == 'I') {
 					/* Linux has a maximum filename length of 255 characters for most filesystems
 					 * and a maxixmum path of 4096 characters. For status updates we do not expect
 					 * that long path names so we keep this at 255 characters. */
 					int maxlen = 256;
 					char buf[maxlen];
+					int use_cache = 1;
+
+					if (text[i] == 'I') {
+						use_cache = 0;
+						*(text2d + i) = 'i'; // ensure that the next time this status is used we do it from cache
+					}
+
 					for (j = 0, i++; j < maxlen - 1 && i < len && text[i] != '^'; i++, j++)
 						buf[j] = text[i];
 					buf[j] = '\0';
 					i--;
 
-					if ((image = loadimage(buf))) {
+					if ((image = loadimage(buf, use_cache))) {
 						drw_pic(drw, dx, y + (h - image->ich) / 2, MIN(image->icw, mw), image->ich, image->icon);
 						dx += image->icw;
 						mw -= image->icw;
@@ -273,15 +280,22 @@ status2dtextlength(char* text2d)
 				++i;
 				if (text[i] == 'f') {
 					w += atoi(text + ++i);
-				} else if (text[i] == 'i') {
+				} else if (text[i] == 'i' || text[i] == 'I') {
 					int maxlen = 256;
 					char buf[maxlen];
+					int use_cache = 1;
+
+					if (text[i] == 'I') {
+						use_cache = 0;
+						*(text2d + i) = 'i'; // ensure that the next time this status is used we do it from cache
+					}
+
 					for (j = 0, i++; j < maxlen - 1 && i < len && text[i] != '^'; i++, j++)
 						buf[j] = text[i];
 					buf[j] = '\0';
 					i--;
 
-					if ((image = loadimage(buf))) {
+					if ((image = loadimage(buf, use_cache))) {
 						w += image->icw;
 					}
 				}
@@ -305,7 +319,7 @@ statusclick(const Arg *arg)
 }
 
 Image *
-loadimage(char *path)
+loadimage(char *path, int use_cache)
 {
 	int i;
 	int least = -1;
@@ -323,8 +337,13 @@ loadimage(char *path)
 			continue;
 
 		if (!strcmp(imagebuffer[i].image.iconpath, path)) {
-			imagebuffer[i].atime = time(NULL);
-			return &imagebuffer[i].image;
+			if (use_cache) {
+				imagebuffer[i].atime = time(NULL);
+				return &imagebuffer[i].image;
+			}
+
+			least = i;
+			break;
 		}
 	}
 
@@ -351,7 +370,6 @@ loadimage(char *path)
 int
 loadimagefromfile(Image *image, char *path)
 {
-	unsigned int* data;
 	Imlib_Image im;
 	int w, h, s, ich, icw;
 
@@ -361,9 +379,11 @@ loadimagefromfile(Image *image, char *path)
 		return 0; /* no readable file */
 
 	strlcpy(image->iconpath, path, sizeof image->iconpath);
-	im = imlib_load_image(path);
-	if (!im)
+	im = imlib_load_image_immediately_without_cache(path);
+	if (!im) {
 		return 0; /* corrupt or otherwise not loadable file */
+	}
+
 	imlib_context_set_image(im);
 	imlib_image_set_has_alpha(1);
 	icw = w = imlib_image_get_width();
@@ -374,12 +394,14 @@ loadimagefromfile(Image *image, char *path)
 		ich = bh;
 	}
 
-	data = imlib_image_get_data_for_reading_only();
-	imlib_free_image();
+	image->icon = drw_picture_create_resized_image(drw, im, w, h, icw, ich);
 
-	image->icon = drw_picture_create_resized(drw, (char*)data, w, h, icw, ich);
+	imlib_context_set_image(im);
+	imlib_free_image_and_decache();
+
 	image->icw = icw;
 	image->ich = ich;
+
 	return image->icon;
 }
 

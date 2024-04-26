@@ -1,4 +1,5 @@
 /* See LICENSE file for copyright and license details. */
+#include <Imlib2.h>
 
 typedef struct {
 	Cursor cursor;
@@ -71,3 +72,12 @@ void drw_arrow(Drw *drw, int x, int y, unsigned int w, unsigned int h, int style
 
 /* Map functions */
 void drw_map(Drw *drw, Window win, int x, int y, unsigned int w, unsigned int h);
+
+/* Picture functions */
+void drw_pic(Drw *drw, int x, int y, unsigned int w, unsigned int h, Picture pic);
+Picture drw_picture_create_resized_data(Drw *drw, char *src, unsigned int srcw, unsigned int srch, unsigned int dstw, unsigned int dsth);
+Picture drw_picture_create_resized_image(Drw *drw, Imlib_Image origin, unsigned int srcw, unsigned int srch, unsigned int dstw, unsigned int dsth);
+Picture drw_picture_create_centered_data(Drw *drw, char *src, unsigned int srcw, unsigned int srch, unsigned int dstw, unsigned int dsth);
+Picture drw_picture_create_centered_image(Drw *drw, Imlib_Image origin, unsigned int srcw, unsigned int srch, unsigned int dstw, unsigned int dsth);
+Picture drw_picture_create_scaled_data(Drw *drw, char *src, unsigned int srcw, unsigned int srch, unsigned int dstw, unsigned int dsth);
+Picture drw_picture_create_scaled_image(Drw *drw, Imlib_Image origin, unsigned int srcw, unsigned int srch, unsigned int dstw, unsigned int dsth);

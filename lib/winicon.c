@@ -11,6 +11,7 @@ geticonprop(Window win, unsigned int *picw, unsigned int *pich)
 	int format;
 	unsigned long n, extra, *p = NULL;
 	Atom real;
+	Picture pic;
 
 	if (XGetWindowProperty(dpy, win, netatom[NetWMIcon], 0L, LONG_MAX, False, AnyPropertyType,
 						   &real, &format, &n, &extra, (unsigned char **)&p) != Success)
@@ -64,26 +65,23 @@ geticonprop(Window win, unsigned int *picw, unsigned int *pich)
 	}
 
 	uint32_t icw, ich;
-	if (w <= h) {
-		ich = iconsize; icw = w * iconsize / h;
-		if (icw == 0)
-			icw = 1;
-	}
-	else {
-		icw = iconsize; ich = h * iconsize / w;
-		if (ich == 0)
-			ich = 1;
+	if (h >= w) {
+		ich = iconsize;
+		icw = MAX(w * iconsize / h, 1);
+	} else {
+		icw = iconsize;
+		ich = MAX(h * iconsize / w, 1);
 	}
 	*picw = icw; *pich = ich;
 
 	uint32_t i, *bstp32 = (uint32_t *)bstp;
 	for (sz = w * h, i = 0; i < sz; ++i)
 		bstp32[i] = prealpha(bstp[i]);
+	pic = drw_picture_create_resized_data(drw, (char *)bstp, w, h, icw, ich);
 
-	Picture ret = drw_picture_create_resized(drw, (char *)bstp, w, h, icw, ich);
 	XFree(p);
 
-	return ret;
+	return pic;
 }
 
 void
@@ -108,7 +106,6 @@ updateicon(Client *c)
 int
 load_icon_from_png_image(Client *c, const char *iconpath)
 {
-	unsigned int* data;
 	Imlib_Image image;
 	int w, h, s, ich, icw;
 
@@ -127,99 +124,18 @@ load_icon_from_png_image(Client *c, const char *iconpath)
 	imlib_image_set_has_alpha(1);
 	icw = w = imlib_image_get_width();
 	ich = h = imlib_image_get_height();
+
 	if (h >= bh) {
 		icw = w * ((float)(bh - 2) / (float)h);
 		ich = bh - 2;
 	}
 
-	data = imlib_image_get_data_for_reading_only();
-	imlib_free_image();
-
-	c->icon = drw_picture_create_resized(drw, (char*)data, w, h, icw, ich);
+	c->icon = drw_picture_create_resized_image(drw, image, w, h, icw, ich);
 	c->icw = icw;
 	c->ich = ich;
+
+	imlib_context_set_image(image);
+	imlib_free_image();
+
 	return 1;
-}
-
-Picture
-drw_picture_create_resized(Drw *drw, char *src, unsigned int srcw, unsigned int srch, unsigned int dstw, unsigned int dsth)
-{
-	Pixmap pm;
-	Picture pic;
-	GC gc;
-
-	if (srcw <= (dstw << 1u) && srch <= (dsth << 1u)) {
-		XImage img = {
-			srcw, srch, 0, ZPixmap, src,
-			ImageByteOrder(drw->dpy), BitmapUnit(drw->dpy), BitmapBitOrder(drw->dpy), 32,
-			32, 0, 32,
-			0, 0, 0
-		};
-		XInitImage(&img);
-		pm = XCreatePixmap(drw->dpy, drw->root, srcw, srch, 32);
-		gc = XCreateGC(drw->dpy, pm, 0, NULL);
-		XPutImage(drw->dpy, pm, gc, &img, 0, 0, 0, 0, srcw, srch);
-		XFreeGC(drw->dpy, gc);
-
-		pic = XRenderCreatePicture(drw->dpy, pm, XRenderFindStandardFormat(drw->dpy, PictStandardARGB32), 0, NULL);
-		XFreePixmap(drw->dpy, pm);
-
-		XRenderSetPictureFilter(drw->dpy, pic, FilterBilinear, NULL, 0);
-		XTransform xf;
-		xf.matrix[0][0] = (srcw << 16u) / dstw; xf.matrix[0][1] = 0; xf.matrix[0][2] = 0;
-		xf.matrix[1][0] = 0; xf.matrix[1][1] = (srch << 16u) / dsth; xf.matrix[1][2] = 0;
-		xf.matrix[2][0] = 0; xf.matrix[2][1] = 0; xf.matrix[2][2] = 65536;
-		XRenderSetPictureTransform(drw->dpy, pic, &xf);
-	} else {
-		Imlib_Image origin = imlib_create_image_using_data(srcw, srch, (DATA32 *)src);
-		if (!origin)
-			return None;
-		imlib_context_set_image(origin);
-		imlib_image_set_has_alpha(1);
-
-		/* For reasons unknown imlib tends to segfault when executing
-		 * imlib_create_cropped_scaled_image for pictures with a height of 1024
-		 * or more. The first picture may load fine but then segfault on another, same
-		 * if you change the order of the pictures suggesting that the problem is not
-		 * the picture itself. As a workaround we simply do not support scaling images
-		 * larger than 1023.
-		 */
-		if (srch > 1023) {
-			imlib_free_image_and_decache();
-			return None;
-		}
-
-		Imlib_Image scaled = imlib_create_cropped_scaled_image(0, 0, srcw, srch, dstw, dsth);
-		imlib_free_image_and_decache(); // frees the origin image, set as context
-		if (!scaled)
-			return None;
-		imlib_context_set_image(scaled);
-		imlib_image_set_has_alpha(1);
-		XImage img = {
-		    dstw, dsth, 0, ZPixmap, (char *)imlib_image_get_data_for_reading_only(),
-		    ImageByteOrder(drw->dpy), BitmapUnit(drw->dpy), BitmapBitOrder(drw->dpy), 32,
-		    32, 0, 32,
-		    0, 0, 0
-		};
-		XInitImage(&img);
-
-		pm = XCreatePixmap(drw->dpy, drw->root, dstw, dsth, 32);
-		gc = XCreateGC(drw->dpy, pm, 0, NULL);
-		XPutImage(drw->dpy, pm, gc, &img, 0, 0, 0, 0, dstw, dsth);
-		XFreeGC(drw->dpy, gc);
-
-		pic = XRenderCreatePicture(drw->dpy, pm, XRenderFindStandardFormat(drw->dpy, PictStandardARGB32), 0, NULL);
-		imlib_free_image_and_decache();
-		XFreePixmap(drw->dpy, pm);
-	}
-
-	return pic;
-}
-
-void
-drw_pic(Drw *drw, int x, int y, unsigned int w, unsigned int h, Picture pic)
-{
-	if (!drw)
-		return;
-	XRenderComposite(drw->dpy, PictOpOver, pic, None, drw->picture, 0, 0, 0, 0, x, y, w, h);
 }
