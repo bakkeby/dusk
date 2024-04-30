@@ -57,6 +57,7 @@ stackpush(const Arg *arg)
 	attachabove(sel, c);
 
 	arrangews(ws);
+	drawbar(ws->mon);
 	skipfocusevents();
 	if (canwarp(c))
 		warp(sel);
@@ -87,6 +88,7 @@ stackswap(const Arg *arg)
 	}
 
 	arrangews(ws);
+	drawbar(ws->mon);
 	skipfocusevents();
 	if (canwarp(sel))
 		warp(sel);
