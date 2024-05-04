@@ -16,10 +16,12 @@ togglemoveorplace(const Arg *arg)
 	if (!selws || !selws->sel)
 		return;
 
-	if (!selws->layout->arrange || ISFLOATING(selws->sel))
+	if (!selws->layout->arrange || ISFLOATING(selws->sel)) {
 		placemouse(arg);
-	else
+		restack(selws);
+	} else {
 		movemouse(arg);
+	}
 }
 
 void
