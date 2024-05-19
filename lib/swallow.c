@@ -97,7 +97,7 @@ replaceclient(Client *old, Client *new)
 	old->next = NULL;
 	old->snext = NULL;
 
-	if (ISVISIBLE(new) && !ISFULLSCREEN(new)) {
+	if (ISVISIBLE(new)) {
 		if (ISFLOATING(new) && (SWALLOWRETAINSIZE(new) || SWALLOWRETAINSIZE(old)))
 			resize(new, old->x, old->y, new->w, new->h, 0);
 		else
@@ -123,6 +123,8 @@ unswallow(const Arg *arg)
 		if (!arg->v) {
 			focus(c);
 			arrange(c->ws);
+		} else {
+			restack(c->ws);
 		}
 	}
 }
