@@ -40,6 +40,8 @@ placemouse(const Arg *arg)
 	if (!getrootptr(&x, &y))
 		return;
 
+	LOCK(c);
+
 	do {
 		XMaskEvent(dpy, MOUSEMASK|ExposureMask|SubstructureRedirectMask, &ev);
 		switch (ev.type) {
@@ -103,6 +105,8 @@ placemouse(const Arg *arg)
 		}
 	} while (ev.type != ButtonRelease);
 	XUngrabPointer(dpy, CurrentTime);
+
+	UNLOCK(c);
 
 	if ((w = recttows(ev.xmotion.x, ev.xmotion.y, 1, 1)) && w != c->ws) {
 		detach(c);

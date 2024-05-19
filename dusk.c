@@ -2849,6 +2849,8 @@ void
 resize(Client *c, int tx, int ty, int tw, int th, int interact)
 {
 	int wh = tw, hh = th;
+	if (ISLOCKED(c))
+		return;
 	show(c);
 	if (applysizehints(c, &tx, &ty, &wh, &hh, interact))
 		resizeclientpad(c, tx, ty, wh, hh, tw, th);
