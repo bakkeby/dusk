@@ -1321,7 +1321,7 @@ clientmonresize(Client *c, Monitor *from, Monitor *to)
 	if (!restorewindowfloatposition(c, to))
 		clientrelposmon(c, from, to, &c->sfx, &c->sfy, &c->sfw, &c->sfh);
 
-	if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c))
+	if (ISTRUEFULLSCREEN(c))
 		clientrelposmon(c, from, to, &c->oldx, &c->oldy, &c->oldw, &c->oldh);
 }
 
@@ -1338,7 +1338,7 @@ clientsmonresize(Client *clients, Monitor *from, Monitor *to)
 void
 clientfsrestore(Client *c)
 {
-	if (c && ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c)) {
+	if (c && ISTRUEFULLSCREEN(c)) {
 		resizeclient(c, c->ws->mon->mx, c->ws->mon->my, c->ws->mon->mw, c->ws->mon->mh);
 		XRaiseWindow(dpy, c->win);
 	} else if (c && ISFLOATING(c))
@@ -1514,7 +1514,7 @@ configurenotify(XEvent *e)
 					c->sfy += c->ws->wy;
 					if (!ISVISIBLE(c))
 						continue;
-					if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c))
+					if (ISTRUEFULLSCREEN(c))
 						resizeclient(c, ws->mon->mx, ws->mon->my, ws->mon->mw, ws->mon->mh);
 					else if (ISFLOATING(c)) {
 						c->x = c->sfx;
@@ -2398,7 +2398,7 @@ manage(Window w, XWindowAttributes *wa)
 		}
 	}
 
-	if (ISCENTERED(c) || (c->x == m->mx && c->y == m->my)) {
+	if (!ISTRUEFULLSCREEN(c) && (ISCENTERED(c) || (c->x == m->mx && c->y == m->my))) {
 		/* Transient windows are centered within the geometry of the parent window */
 		if (t) {
 			c->sfx = c->x = t->x + WIDTH(t) / 2 - WIDTH(c) / 2;
@@ -2871,6 +2871,7 @@ resizeclientpad(Client *c, int x, int y, int w, int h, int tw, int th)
 		c->oldw = c->w;
 		c->oldh = c->h;
 	}
+
 	wc.border_width = c->bw;
 	c->x = wc.x = x;
 	c->y = wc.y = y;
@@ -3090,7 +3091,7 @@ setfullscreen(Client *c, int fullscreen, int restorefakefullscreen)
 	if ((!ISFAKEFULLSCREEN(c) && fullscreen && !ISFULLSCREEN(c)) // normal fullscreen
 			|| (RESTOREFAKEFULLSCREEN(c) && fullscreen)) // fake fullscreen --> actual fullscreen
 		savestate = 1; // go actual fullscreen
-	else if ((!ISFAKEFULLSCREEN(c) && !fullscreen && ISFULLSCREEN(c)) // normal fullscreen exit
+	else if ((ISTRUEFULLSCREEN(c) && !fullscreen) // normal fullscreen exit
 			|| ((RESTOREFAKEFULLSCREEN(c) || restorefakefullscreen) && !fullscreen)) // fullscreen exit --> fake fullscreen
 		restorestate = 1; // go back into tiled
 
@@ -3535,7 +3536,7 @@ togglefloating(const Arg *arg)
 	wc.stack_mode = Above;
 
 	for (c = nextmarked(NULL, c); c; c = nextmarked(c->next, NULL)) {
-		if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c)) /* no support for fullscreen windows */
+		if (ISTRUEFULLSCREEN(c)) /* no support for fullscreen windows */
 			continue;
 		if (ISFIXED(c))
 			continue;
@@ -3612,9 +3613,8 @@ unfocus(Client *c, int setfocus, Client *nextfocus)
 
 	if (!c)
 		return;
-	if (ISFULLSCREEN(c) && ISVISIBLE(c) && c->ws == selws && nextfocus && !ISFLOATING(nextfocus) && !STEAMGAME(c))
-		if (!ISFAKEFULLSCREEN(c))
-			setfullscreen(c, 0, 0);
+	if (ISTRUEFULLSCREEN(c) && ISVISIBLE(c) && c->ws == selws && nextfocus && !ISFLOATING(nextfocus) && !STEAMGAME(c))
+		setfullscreen(c, 0, 0);
 	grabbuttons(c, 0);
 	if (setfocus) {
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);

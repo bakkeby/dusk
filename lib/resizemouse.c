@@ -16,7 +16,7 @@ resizemouse(const Arg *arg)
 
 	if (!(c = selws->sel))
 		return;
-	if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c)) /* no support resizing fullscreen windows by mouse */
+	if (ISTRUEFULLSCREEN(c)) /* no support resizing fullscreen windows by mouse */
 		return;
 
 	/* Snap girders */

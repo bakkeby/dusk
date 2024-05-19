@@ -123,10 +123,15 @@ void
 drawbar(Monitor *m)
 {
 	Bar *bar;
+	Workspace *ws;
 
-	if (m->showbar)
+	if (m->showbar) {
+		for (ws = nextvismonws(m, workspaces); ws; ws = nextvismonws(m, ws->next))
+			if (hasfullscreen(ws))
+				return;
 		for (bar = m->bar; bar; bar = bar->next)
 			drawbarwin(bar);
+	}
 }
 
 void

@@ -142,7 +142,7 @@ togglescratch(const Arg *arg)
 		arrange_focus_on_monocle = 0;
 		if (ISVISIBLE(c)) {
 			showwsclient(c);
-			if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c))
+			if (ISTRUEFULLSCREEN(c))
 				clientfsrestore(c);
 			focus(c);
 		} else {

@@ -16,7 +16,7 @@ setborderpx(const Arg *arg)
 		c->bw = m->borderpx;
 		if (!ISVISIBLE(c))
 			continue;
-		if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c))
+		if (ISTRUEFULLSCREEN(c))
 			continue;
 		if (!ISFLOATING(c) && ws->layout->arrange)
 			continue;

@@ -94,6 +94,7 @@ static const uint64_t
 #define ISCENTERED(C) (C && C->flags & Centered)
 #define ISFULLSCREEN(C) (C && C->flags & FullScreen)
 #define ISFAKEFULLSCREEN(C) (C && C->flags & FakeFullScreen)
+#define ISTRUEFULLSCREEN(C) (C && C->flags & FullScreen && !(C->flags & FakeFullScreen))
 #define ISPERMANENT(C) (C && C->flags & Permanent)
 #define ISTERMINAL(C) (C && C->flags & Terminal)
 #define ISTRANSIENT(C) (C && C->flags & Transient)

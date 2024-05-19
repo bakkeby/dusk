@@ -13,7 +13,7 @@ placemouse(const Arg *arg)
 
 	if (!(c = ws->sel) || !ws->layout->arrange) /* no support for placemouse when floating layout is used */
 		return;
-	if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c)) /* no support placing fullscreen windows by mouse */
+	if (ISTRUEFULLSCREEN(c)) /* no support placing fullscreen windows by mouse */
 		return;
 	if (ISSTICKY(c))
 		return;

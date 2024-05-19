@@ -252,7 +252,8 @@ hasclients(Workspace *ws)
 	return c != NULL;
 }
 
-int hashidden(Workspace *ws)
+int
+hashidden(Workspace *ws)
 {
 	Client *c;
 
@@ -276,6 +277,18 @@ hasfloating(Workspace *ws)
 }
 
 int
+hasfullscreen(Workspace *ws)
+{
+	Client *c;
+
+	if (!ws)
+		return 0;
+
+	for (c = ws->clients; c && !(ISTRUEFULLSCREEN(c) && !HIDDEN(c) && !ISINVISIBLE(c)); c = c->next);
+	return c != NULL;
+}
+
+int
 noborder(Client *c)
 {
 	if (disabled(NoBorders))
@@ -287,7 +300,7 @@ noborder(Client *c)
 	if (ISFLOATING(c))
 		return 0;
 
-	if (ISFULLSCREEN(c) && !ISFAKEFULLSCREEN(c))
+	if (ISTRUEFULLSCREEN(c))
 		return 0;
 
 	if (!c->ws->layout->arrange)
@@ -372,7 +385,7 @@ showwsclient(Client *c)
 		if (NEEDRESIZE(c)) {
 			removeflag(c, NeedResize);
 			XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
-		} else if (!ISSTICKY(c) && c->sfx != -9999 && (!ISFULLSCREEN(c) || ISFAKEFULLSCREEN(c))) {
+		} else if (!ISSTICKY(c) && c->sfx != -9999 && !ISTRUEFULLSCREEN(c)) {
 			restorefloats(c);
 		} else {
 			show(c);
