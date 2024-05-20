@@ -94,7 +94,7 @@ static const uint64_t
 #define ISCENTERED(C) (C && C->flags & Centered)
 #define ISFULLSCREEN(C) (C && C->flags & FullScreen)
 #define ISFAKEFULLSCREEN(C) (C && C->flags & FakeFullScreen)
-#define ISTRUEFULLSCREEN(C) (C && C->flags & FullScreen && !(C->flags & FakeFullScreen))
+#define ISTRUEFULLSCREEN(C) (C && (C->flags & FullScreen) && !(C->flags & FakeFullScreen))
 #define ISPERMANENT(C) (C && C->flags & Permanent)
 #define ISTERMINAL(C) (C && C->flags & Terminal)
 #define ISTRANSIENT(C) (C && C->flags & Transient)
@@ -136,7 +136,7 @@ static const uint64_t
 #define MOVEPLACE(C) (C && C->flags & MovePlace)
 #define LOWER(C) (C && C->flags & Lower)
 #define RAISE(C) (C && C->flags & Raise)
-#define TILED(C) (C && C->win && !(C->flags & (Invisible|Hidden|Floating|Sticky)))
+#define TILED(C) (C && C->win && !(C->flags & (Invisible|Hidden|Floating|Sticky)) && !ISTRUEFULLSCREEN(c))
 
 #define WASFLOATING(C) (C && C->prevflags & Floating)
 #define WASFAKEFULLSCREEN(C) (C && C->prevflags & FakeFullScreen)

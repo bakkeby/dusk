@@ -1818,6 +1818,10 @@ focus(Client *c)
 	int revert_to_return;
 	Bar *bar;
 
+	if (!c && ISTRUEFULLSCREEN(selws->sel)) {
+		c = selws->sel;
+	}
+
 	if (enabled(FocusFollowMouse) && !monitorchanged && (!c || ISINVISIBLE(c))) {
 		c = getpointerclient();
 		if (c && c->ws->mon != selmon) {
@@ -2378,7 +2382,7 @@ manage(Window w, XWindowAttributes *wa)
 	if (!ISFLOATING(c) && (ISFIXED(c) || WASFLOATING(c) || getatomprop(c, duskatom[IsFloating], AnyPropertyType)))
 		SETFLOATING(c);
 
-	if (ISFLOATING(c))
+	if (ISFLOATING(c) || ISTRUEFULLSCREEN(c))
 		XRaiseWindow(dpy, c->win);
 
 	XChangeProperty(dpy, c->win, netatom[NetWMAllowedActions], XA_ATOM, 32,
@@ -2421,8 +2425,9 @@ manage(Window w, XWindowAttributes *wa)
 	setclientstate(c, NormalState);
 
 	if (focusclient) {
-		if (c->ws == selws)
+		if (c->ws == selws && c->ws->sel != c) {
 			unfocus(selws->sel, 0, c);
+		}
 
 		c->ws->sel = c; // needed for the XRaiseWindow that takes place in restack
 	}
@@ -2913,7 +2918,7 @@ restack(Workspace *ws)
 	if (!c)
 		return;
 
-	raised = (enabled(FocusedOnTopTiled) || ISFLOATING(c) ? c : NULL);
+	raised = (enabled(FocusedOnTopTiled) || ISFLOATING(c) || ISTRUEFULLSCREEN(c) ? c : NULL);
 
 	/* Place tiled clients below the bar window */
 	if (ws->layout->arrange) {
@@ -3128,14 +3133,12 @@ setfullscreen(Client *c, int fullscreen, int restorefakefullscreen)
 	if (savestate && !ISLOCKED(c)) {
 		c->oldbw = c->bw;
 		c->bw = 0;
-		SETFLOATING(c);
 		resizeclient(c, m->mx, m->my, m->mw, m->mh);
 		XRaiseWindow(dpy, c->win);
 		LOCK(c);
 	} else if (restorestate && ISLOCKED(c)) {
 		UNLOCK(c);
 		c->bw = c->oldbw;
-		setflag(c, Floating, WASFLOATING(c));
 		if (restorefakefullscreen) {
 			addflag(c, FakeFullScreen);
 			removeflag(c, RestoreFakeFullScreen);
@@ -3615,8 +3618,9 @@ unfocus(Client *c, int setfocus, Client *nextfocus)
 
 	if (!c)
 		return;
-	if (ISTRUEFULLSCREEN(c) && ISVISIBLE(c) && c->ws == selws && nextfocus && !ISFLOATING(nextfocus) && !STEAMGAME(c))
+	if (ISTRUEFULLSCREEN(c) && ISVISIBLE(c) && c->ws == selws && nextfocus && !ISFLOATING(nextfocus) && !STEAMGAME(c)) {
 		setfullscreen(c, 0, 0);
+	}
 	grabbuttons(c, 0);
 	if (setfocus) {
 		XSetInputFocus(dpy, root, RevertToPointerRoot, CurrentTime);

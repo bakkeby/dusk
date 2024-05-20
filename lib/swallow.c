@@ -61,6 +61,7 @@ replaceclient(Client *old, Client *new)
 
 	Client *c = NULL;
 	Workspace *ws = old->ws;
+	Monitor *m = ws->mon;
 	XWindowChanges wc;
 
 	new->ws = ws;
@@ -98,10 +99,13 @@ replaceclient(Client *old, Client *new)
 	old->snext = NULL;
 
 	if (ISVISIBLE(new)) {
-		if (ISFLOATING(new) && (SWALLOWRETAINSIZE(new) || SWALLOWRETAINSIZE(old)))
+		if (ISTRUEFULLSCREEN(new)) {
+			resizeclient(new, m->mx, m->my, m->mw, m->mh);
+		} else if (ISFLOATING(new) && (SWALLOWRETAINSIZE(new) || SWALLOWRETAINSIZE(old))) {
 			resize(new, old->x, old->y, new->w, new->h, 0);
-		else
+		} else {
 			resize(new, old->x, old->y, old->w, old->h, 0);
+		}
 	}
 
 	return 1;
@@ -115,7 +119,10 @@ unswallow(const Arg *arg)
 	if (!c || !c->swallowing)
 		return;
 	s = c->swallowing;
-	if (c && replaceclient(c, s)) {
+
+	if (ISFULLSCREEN(c))
+		setfullscreen(s, 1, ISFAKEFULLSCREEN(c));
+	if (replaceclient(c, s)) {
 		c->swallowing = s->swallowing;
 		s->swallowing = NULL;
 		attachabove(c, s);

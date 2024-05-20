@@ -34,7 +34,7 @@ static const uint64_t
 	NoBorders = 0x800, // as per the noborder patch, show no border when only one client in tiled mode
 	Warp = 0x1000, // warp patch
 	FocusedOnTop = 0x2000,
-	DecorationHints = 0x4000, // used by setfullscreen, prevents state change
+	DecorationHints = 0x4000,
 	FocusOnNetActive = 0x8000,
 	AllowNoModifierButtons = 0x10000,
 	CenterSizeHintsClients = 0x20000, // center tiled clients subject to size hints within their tiled area
