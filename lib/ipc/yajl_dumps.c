@@ -203,7 +203,7 @@ dump_client(yajl_gen gen, Client *c)
 			YSTR("AlwaysOnTop"); YBOOL(ALWAYSONTOP(c));
 			YSTR("CfgReqPosRelativeToMonitor"); YBOOL(CFGREQPOSRELATIVETOMONITOR(c));
 			YSTR("Debug"); YBOOL(DEBUGGING(c));
-			YSTR("Floating"); YBOOL(ISFLOATING(c));
+			YSTR("Floating"); YBOOL(FLOATING(c));
 			YSTR("Fixed"); YBOOL(ISFIXED(c));
 			YSTR("Hidden"); YBOOL(HIDDEN(c));
 			YSTR("Locked"); YBOOL(ISLOCKED(c));

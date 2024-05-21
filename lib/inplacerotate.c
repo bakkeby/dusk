@@ -26,7 +26,7 @@ void
 inplacerotate(const Arg *arg)
 {
 	Workspace *ws = selws;
-	if (!ws->sel || (ISFLOATING(ws->sel) && !arg->f))
+	if (!ws->sel || !ws->layout->arrange)
 		return;
 
 	unsigned int n, selidx = 0, i = 0, tidx, center, dualstack;
@@ -36,6 +36,9 @@ inplacerotate(const Arg *arg)
 		*mhead = NULL, *mtail = NULL;
 
 	for (n = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), ++n);
+	if (n < 2)
+		return;
+
 	tidx = ws->nmaster + (ws->nstack > 0 ? ws->nstack : (n - ws->nmaster) / 2 + ((n - ws->nmaster) % 2 > 0 ? 1 : 0));
 
 	/* Shift client */

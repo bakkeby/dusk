@@ -1181,6 +1181,7 @@ flextile(Workspace *ws)
 		setflexsymbols(ws, n);
 	else if (ws->layout->preset.symbolfunc != NULL)
 		ws->layout->preset.symbolfunc(ws, n);
+
 	if (n == 0) {
 		setwindowborders(ws, ws->sel);
 		return;
@@ -1254,7 +1255,7 @@ void
 decksymbols(Workspace *ws, unsigned int n)
 {
 	if (n > ws->nmaster)
-		snprintf(ws->ltsymbol, sizeof ws->ltsymbol, "[]%d", n);
+		snprintf(ws->ltsymbol, sizeof ws->ltsymbol, "[]%d", n - ws->nmaster);
 	else
 		snprintf(ws->ltsymbol, sizeof ws->ltsymbol, "[D]");
 }
@@ -1302,5 +1303,4 @@ rotatelayoutaxis(const Arg *arg)
 			ws->ltaxis[axis] = AXIS_LAST - 1;
 	}
 	arrange(ws);
-	setflexsymbols(ws, 0);
 }

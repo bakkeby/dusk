@@ -51,12 +51,3 @@ restorefloats(Client *c)
 
 	resize(c, x, y, w, h, 0);
 }
-
-void
-restorewsfloats(Workspace *ws)
-{
-	Client *c;
-	/* restore last known float dimensions for all visible clients */
-	for (c = ws->stack; c; c = c->snext)
-		restorefloats(c);
-}

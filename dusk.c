@@ -892,11 +892,9 @@ arrange(Workspace *ws)
 		return;
 	}
 
-	for (ws = workspaces; ws; ws = ws->next) {
-		if (ws == stickyws)
-			continue;
+	for (ws = workspaces; ws; ws = ws->next)
 		arrangews(ws);
-	}
+
 	drawbars();
 }
 
@@ -904,22 +902,17 @@ void
 arrangemon(Monitor *m)
 {
 	Workspace *ws;
-	for (ws = workspaces; ws; ws = ws->next) {
-		if (ws->mon == m && ws != stickyws)
+	for (ws = workspaces; ws; ws = ws->next)
+		if (ws->mon == m)
 			arrangews(ws);
-	}
 }
 void
 arrangews(Workspace *ws)
 {
-	if (!ws->visible)
+	if (!ws->visible || !ws->layout->arrange || ws == stickyws)
 		return;
 
-	strlcpy(ws->ltsymbol, ws->layout->symbol, sizeof ws->ltsymbol);
-	if (ws->layout->arrange)
-		ws->layout->arrange(ws);
-	else
-		restorewsfloats(ws);
+	ws->layout->arrange(ws);
 }
 
 void
@@ -3199,7 +3192,10 @@ setlayout(const Arg *arg)
 
 	strlcpy(ws->ltsymbol, ws->layout->symbol, sizeof ws->ltsymbol);
 
-	arrange(ws);
+	if (ws->layout->arrange)
+		arrange(ws);
+	else
+		showwsclients(ws->stack);
 	setfloatinghints(ws);
 }
 

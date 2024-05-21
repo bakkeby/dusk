@@ -294,16 +294,13 @@ noborder(Client *c)
 	if (disabled(NoBorders))
 		return 0;
 
-	if (nexttiled(c->ws->clients) != c || nexttiled(c->next))
-		return 0;
-
-	if (ISFLOATING(c))
+	if (FREEFLOW(c))
 		return 0;
 
 	if (ISTRUEFULLSCREEN(c))
 		return 0;
 
-	if (!c->ws->layout->arrange)
+	if (nexttiled(c->ws->clients) != c || nexttiled(c->next))
 		return 0;
 
 	return 1;
@@ -381,7 +378,7 @@ hidewsclients(Client *c)
 void
 showwsclient(Client *c)
 {
-	if (ISVISIBLE(c) && (ISFLOATING(c) || ISTRUEFULLSCREEN(c))) {
+	if (ISVISIBLE(c) && (FREEFLOW(c) || ISTRUEFULLSCREEN(c))) {
 		if (NEEDRESIZE(c)) {
 			removeflag(c, NeedResize);
 			XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
