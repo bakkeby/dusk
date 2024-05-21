@@ -5,7 +5,7 @@ unfloatvisible(const Arg *arg)
 	Client *c;
 
 	for (c = ws->clients; c; c = c->next)
-		if (ISVISIBLE(c) && ISFLOATING(c))
+		if (ISVISIBLE(c) && FLOATING(c))
 			setflag(c, Floating, ISFIXED(c));
 
 	arrange(ws);

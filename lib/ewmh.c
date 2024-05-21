@@ -227,7 +227,7 @@ setdesktopnames(void)
 void
 setfloatinghint(Client *c)
 {
-	unsigned int floating[1] = {ISFLOATING(c) || !c->ws->layout->arrange ? 1 : 0};
+	unsigned int floating[1] = {FREEFLOW(c) ? 1 : 0};
 	XChangeProperty(dpy, c->win, duskatom[IsFloating], XA_CARDINAL, 32, PropModeReplace, (unsigned char *)floating, 1);
 }
 

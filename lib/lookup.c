@@ -46,25 +46,25 @@ getclientindices(
 
 		nc++;
 
-		if (ISFLOATING(s)) {
-			nf++;
-		} else {
+		if (ISTILED(s)) {
 			nt++;
 			if (nt <= ws->nmaster) {
 				nm++;
 			} else {
 				ns++;
 			}
+		} else {
+			nf++;
 		}
 
 		if (c == s) {
 			nthc = nc;
-			if (ISFLOATING(c)) {
-				nthf = nf;
-			} else {
+			if (ISTILED(c)) {
 				ntht = nt;
 				nthm = ns ? 0 : nm;
 				nths = ns;
+			} else {
+				nthf = nf;
 			}
 		}
 	}

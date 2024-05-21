@@ -53,7 +53,7 @@ resizemouse(const Arg *arg)
 		}
 
 		for (s = ws->stack; s; s = s->snext) {
-			if ((!ISFLOATING(s) && ws->layout->arrange) || !ISVISIBLE(s) || s == c)
+			if ((ISTILED(s) && ws->layout->arrange) || !ISVISIBLE(s) || s == c)
 				continue;
 
 			h = HEIGHT(s);
@@ -110,7 +110,7 @@ resizemouse(const Arg *arg)
 			if (c->ws->mon->wx + nw >= selmon->wx && c->ws->mon->wx + nw <= selmon->wx + selmon->ww
 			&& c->ws->mon->wy + nh >= selmon->wy && c->ws->mon->wy + nh <= selmon->wy + selmon->wh)
 			{
-				if (!ISFLOATING(c) && selws->layout->arrange
+				if (ISTILED(c) && selws->layout->arrange
 				&& (abs(nw - c->w) > snap || abs(nh - c->h) > snap))
 					togglefloating(NULL);
 			}
@@ -143,7 +143,7 @@ resizemouse(const Arg *arg)
 			nw = sw;
 			nh = sh;
 
-			if (!selws->layout->arrange || ISFLOATING(c)) {
+			if (FREEFLOW(c)) {
 				resize(c, nx, ny, nw, nh, 1);
 				savefloats(c);
 			}
@@ -174,7 +174,7 @@ resizeorfacts(const Arg *arg)
 	if (!selws || !selws->sel)
 		return;
 
-	if (!selws->layout->arrange || ISFLOATING(selws->sel))
+	if (FREEFLOW(selws->sel))
 		resizemouse(arg);
 	else
 		dragfact(arg);

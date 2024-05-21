@@ -88,7 +88,10 @@ static const uint64_t
 #define DISALLOWED(C) (C && C->flags & Disallowed)
 #define HIDDEN(C) (C && ((C->flags & Hidden) || (getstate(C->win) == IconicState)))
 #define ISFIXED(C) (C && C->flags & Fixed)
+#define FLOATING(C) (C && C->flags & Floating)
 #define ISFLOATING(C) (C && C->flags & (Floating|Sticky|Fixed))
+#define ISTILED(C) (C && !(C->flags & (Floating|Sticky|Fixed)))
+#define FREEFLOW(C) (C && (ISFLOATING(C) || !C->ws->layout->arrange))
 #define ISLOCKED(C) (C && C->flags & Locked)
 #define ISSTICKY(C) (C && C->flags & Sticky)
 #define ISCENTERED(C) (C && C->flags & Centered)
@@ -144,7 +147,6 @@ static const uint64_t
 
 #define SETFLOATING(C) (addflag(C, Floating))
 #define SETFULLSCREEN(C) (addflag(C, FullScreen))
-#define SETTILED(C) (removeflag(C, Floating))
 
 #define LOCK(C) (addflag(C, Locked))
 #define UNLOCK(C) (removeflag(C, Locked))

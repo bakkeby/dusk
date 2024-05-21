@@ -27,7 +27,7 @@ canwarp(Client *c)
 		return 0;
 
 	/* Do warp if the client is floating or floating layout is used */
-	if (ISFLOATING(c) || !ws->layout->arrange)
+	if (FREEFLOW(c))
 		return 1;
 
 	/* Do not warp if monocle layout is used */

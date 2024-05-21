@@ -46,7 +46,7 @@ markall(const Arg *arg)
 		if ((arg->i == 2 && !HIDDEN(c)) || (arg->i != 2 && HIDDEN(c)))
 			continue;
 
-		if (arg->i == 1 && !ISFLOATING(c))
+		if (arg->i == 1 && ISTILED(c))
 			continue;
 
 		markclient(c);

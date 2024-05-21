@@ -272,7 +272,7 @@ hasfloating(Workspace *ws)
 	if (!ws)
 		return 0;
 
-	for (c = ws->clients; c && (ISINVISIBLE(c) || SKIPTASKBAR(c) || HIDDEN(c) || !ISFLOATING(c)); c = c->next);
+	for (c = ws->clients; c && (ISINVISIBLE(c) || SKIPTASKBAR(c) || HIDDEN(c) || ISTILED(c)); c = c->next);
 	return c != NULL;
 }
 

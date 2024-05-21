@@ -69,7 +69,7 @@ showhideclient(const Arg *arg)
 		focus(last_shown);
 		restack(last_shown->ws);
 	} else if (last_hidden) {
-		if (ISFLOATING(last_hidden) || !last_hidden->ws->layout->arrange) {
+		if (FREEFLOW(last_hidden)) {
 			for (n = last_hidden->snext; n && !ISVISIBLE(n); n = n->snext);
 			if (!n)
 				for (n = last_hidden->ws->stack; n && !ISVISIBLE(n); n = n->snext);

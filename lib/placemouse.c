@@ -11,11 +11,16 @@ placemouse(const Arg *arg)
 	unsigned long attachmode, prevattachmode;
 	attachmode = prevattachmode = AttachMaster;
 
-	if (!(c = ws->sel) || !ws->layout->arrange) /* no support for placemouse when floating layout is used */
+	c = ws->sel;
+	if (!c)
+		return;
+	if (!ws->layout->arrange) /* no support for placemouse when floating layout is used */
 		return;
 	if (ISTRUEFULLSCREEN(c)) /* no support placing fullscreen windows by mouse */
 		return;
 	if (ISSTICKY(c))
+		return;
+	if (ISFIXED(c))
 		return;
 	restack(ws);
 	prevr = c;

@@ -1,10 +1,12 @@
 void
 moveorplace(const Arg *arg)
 {
-	if (!selws || !selws->sel)
+	Workspace *ws = selws;
+
+	if (!ws || !ws->sel)
 		return;
 
-	if (!selws->layout->arrange || ISFLOATING(selws->sel))
+	if (FREEFLOW(ws->sel))
 		movemouse(arg);
 	else
 		placemouse(arg);
@@ -13,12 +15,13 @@ moveorplace(const Arg *arg)
 void
 togglemoveorplace(const Arg *arg)
 {
-	if (!selws || !selws->sel)
+	Workspace *ws = selws;
+	if (!ws || !ws->sel)
 		return;
 
-	if (!selws->layout->arrange || ISFLOATING(selws->sel)) {
+	if (ws->layout->arrange && FLOATING(ws->sel)) {
 		placemouse(arg);
-		restack(selws);
+		restack(ws);
 	} else {
 		movemouse(arg);
 	}
@@ -86,7 +89,7 @@ movemouse(const Arg *arg)
 		}
 
 		for (s = ws->stack; s; s = s->snext) {
-			if ((!ISFLOATING(s) && ws->layout->arrange) || !ISVISIBLE(s) || s == c)
+			if ((ISTILED(s) && ws->layout->arrange) || !ISVISIBLE(s) || s == c)
 				continue;
 			if (c->group && s->group == c->group) {
 				group[ngroup] = s;
@@ -146,7 +149,7 @@ movemouse(const Arg *arg)
 			sy = ny = ocy[0] + (ev.xmotion.y - y);
 			vsnap = hsnap = snap;
 
-			if (!ISFLOATING(c) && selws->layout->arrange) {
+			if (ISTILED(c) && selws->layout->arrange) {
 				if (abs(nx - c->x) <= snap && abs(ny - c->y) <= snap)
 					continue;
 				togglefloating(NULL);

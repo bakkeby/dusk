@@ -843,7 +843,7 @@ applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact)
 		*h = bh;
 	if (*w < bh)
 		*w = bh;
-	if (!IGNORESIZEHINTS(c) && (enabled(ResizeHints) || RESPECTSIZEHINTS(c) || ISFLOATING(c) || !c->ws->layout->arrange)) {
+	if (!IGNORESIZEHINTS(c) && (enabled(ResizeHints) || RESPECTSIZEHINTS(c) || FREEFLOW(c))) {
 		if (REFRESHSIZEHINTS(c))
 			updatesizehints(c);
 		/* see last two sentences in ICCCM 4.1.2.3 */
@@ -1247,7 +1247,7 @@ clientmessage(XEvent *e)
 				switch (cme->data.l[0]) {
 				default:
 				case 0: /* _NET_WM_STATE_REMOVE */
-					if (ISFLOATING(c) || !c->ws->layout->arrange) {
+					if (FREEFLOW(c)) {
 						restorefloats(c);
 					}
 					break;
@@ -1338,11 +1338,12 @@ clientsmonresize(Client *clients, Monitor *from, Monitor *to)
 void
 clientfsrestore(Client *c)
 {
-	if (c && ISTRUEFULLSCREEN(c)) {
+	if (ISTRUEFULLSCREEN(c)) {
 		resizeclient(c, c->ws->mon->mx, c->ws->mon->my, c->ws->mon->mw, c->ws->mon->mh);
 		XRaiseWindow(dpy, c->win);
-	} else if (c && ISFLOATING(c))
+	} else if (ISFLOATING(c)) {
 		resizeclient(c, c->sfx, c->sfy, c->sfw, c->sfh);
+	}
 }
 
 void
@@ -1374,7 +1375,7 @@ clientscheme(Client *c, Client *s)
 		return sel ? SchemeHidSel : SchemeHidNorm;
 	if (ISSCRATCHPAD(c))
 		return sel ? SchemeScratchSel : SchemeScratchNorm;
-	if (ISFLOATING(c) || !c->ws->layout->arrange)
+	if (FREEFLOW(c))
 		return sel ? SchemeFlexSelFloat : active ? SchemeFlexActFloat : SchemeFlexInaFloat;
 
 	if (fwb)
@@ -1552,7 +1553,7 @@ configurerequest(XEvent *e)
 			return;
 		if (ev->value_mask & CWBorderWidth)
 			c->bw = ev->border_width;
-		else if (ISFLOATING(c) || !c->ws->layout->arrange) {
+		else if (FREEFLOW(c)) {
 			if (IGNORECFGREQPOS(c) && IGNORECFGREQSIZE(c))
 				return;
 
@@ -2379,7 +2380,7 @@ manage(Window w, XWindowAttributes *wa)
 	/* If this is a transient window for a window that is managed by the window manager, then it should be floating. */
 	if (t)
 		c->prevflags |= Floating;
-	if (!ISFLOATING(c) && (ISFIXED(c) || WASFLOATING(c) || getatomprop(c, duskatom[IsFloating], AnyPropertyType)))
+	if (ISTILED(c) && (ISFIXED(c) || WASFLOATING(c) || getatomprop(c, duskatom[IsFloating], AnyPropertyType)))
 		SETFLOATING(c);
 
 	if (ISFLOATING(c) || ISTRUEFULLSCREEN(c))
@@ -2741,7 +2742,7 @@ raiseclient(Client *c)
 
 	/* Check if there are floating always on top clients that need to be on top. */
 	for (s = ws->stack; s; s = s->snext) {
-		if (s == c || !ISFLOATING(s) || !(ALWAYSONTOP(s) || ISTRANSIENT(s)))
+		if (s == c || ISTILED(s) || !(ALWAYSONTOP(s) || ISTRANSIENT(s)))
 			continue;
 
 		if (!top) {
@@ -2885,7 +2886,7 @@ resizeclientpad(Client *c, int x, int y, int w, int h, int tw, int th)
 	c->w = wc.width = w;
 	c->h = wc.height = h;
 
-	if (enabled(CenterSizeHintsClients) && !ISFLOATING(c) && c->ws->layout->arrange) {
+	if (enabled(CenterSizeHintsClients) && ISTILED(c) && c->ws->layout->arrange) {
 		if (w != tw)
 			c->x = wc.x += (tw - w) / 2;
 		if (h != th)
@@ -2918,7 +2919,7 @@ restack(Workspace *ws)
 	if (!c)
 		return;
 
-	raised = (enabled(FocusedOnTopTiled) || ISFLOATING(c) || ISTRUEFULLSCREEN(c) ? c : NULL);
+	raised = (enabled(FocusedOnTopTiled) || FREEFLOW(c) || ISTRUEFULLSCREEN(c) ? c : NULL);
 
 	/* Place tiled clients below the bar window */
 	if (ws->layout->arrange) {
@@ -3545,6 +3546,8 @@ togglefloating(const Arg *arg)
 			continue;
 		if (ISFIXED(c))
 			continue;
+		if (ISSTICKY(c))
+			continue;
 		if (ws && c->ws != ws) {
 			drawbar(ws->mon);
 			arrange(ws);
@@ -3618,7 +3621,7 @@ unfocus(Client *c, int setfocus, Client *nextfocus)
 
 	if (!c)
 		return;
-	if (ISTRUEFULLSCREEN(c) && ISVISIBLE(c) && c->ws == selws && nextfocus && !ISFLOATING(nextfocus) && !STEAMGAME(c)) {
+	if (ISTRUEFULLSCREEN(c) && ISVISIBLE(c) && c->ws == selws && nextfocus && ISTILED(nextfocus) && !STEAMGAME(c)) {
 		setfullscreen(c, 0, 0);
 	}
 	grabbuttons(c, 0);
@@ -3632,7 +3635,7 @@ unfocus(Client *c, int setfocus, Client *nextfocus)
 	else
 		XSetWindowBorder(dpy, c->win, scheme[clientscheme(c, nextfocus)][ColBorder].pixel);
 
-	if (enabled(FocusedOnTopTiled) && !ISFLOATING(c)) {
+	if (enabled(FocusedOnTopTiled) && ISTILED(c)) {
 		wc.stack_mode = Below;
 		wc.sibling = c->ws->mon->bar ? c->ws->mon->bar->win : wmcheckwin;
 		XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
@@ -4035,14 +4038,16 @@ zoom(const Arg *arg)
 	Client *c = CLIENT, *master = NULL;
 	Workspace *ws;
 
-	if (!c)
+	if (!c || !c->ws->layout->arrange)
 		return;
 
 	ws = c->ws;
-	if (c && ISFLOATING(c))
+	if (FLOATING(c))
 		togglefloating(&((Arg) { .v = c }));
 
-	if (!ws->layout->arrange || (c && ISFLOATING(c)) || !c)
+	/* The client could still be floating for other reasons like
+	 * being sticky or fixed in size, don't proceed if that is the case. */
+	if (ISFLOATING(c))
 		return;
 
 	if (ismasterclient(c)) {

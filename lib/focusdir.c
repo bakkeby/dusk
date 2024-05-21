@@ -10,7 +10,7 @@ focusdir(const Arg *arg)
 	unsigned int client_score;
 	int dist;
 	int dirweight = 20;
-	int isfloating = ISFLOATING(s);
+	int istiled = ISTILED(s);
 
 	next = s->next;
 	if (!next)
@@ -21,7 +21,7 @@ focusdir(const Arg *arg)
 		if (!next)
 			next = s->ws->clients;
 
-		if (!ISVISIBLE(c) || ISFLOATING(c) != isfloating)
+		if (!ISVISIBLE(c) || (!ISTILED(c) != !istiled))
 			continue;
 
 		switch (arg->i) {

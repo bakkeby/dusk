@@ -135,7 +135,7 @@ attachstackx(Client *c, uint64_t mode, Workspace *ws)
 		}
 	} else if (attachmode == AttachAside) {
 		for (at = ws->stack, n = 0; at; at = at->snext)
-			if (!ISFLOATING(at))
+			if (ISTILED(at))
 				if (++n >= ws->nmaster)
 					break;
 

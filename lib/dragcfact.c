@@ -10,7 +10,7 @@ dragcfact(const Arg *arg)
 
 	if (!(c = ws->sel))
 		return;
-	if (ISFLOATING(c)) {
+	if (FREEFLOW(c)) {
 		resizemouse(arg);
 		return;
 	}
