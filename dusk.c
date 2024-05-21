@@ -1710,35 +1710,26 @@ dirtomon(int dir)
 	return m;
 }
 
-/* Returns the workspace found in a given direction -1/+1 on the
+/* Returns the workspace found in a given direction (-1/+1) on the
  * current monitor. The direction is circular, i.e. it wraps around.
  * Passing -2/+2 results in only workspaces that contain clients to
  * be returned. */
 Workspace *
 dirtows(int dir)
 {
-	Workspace *ws = selws, *nws = NULL, *tws;
+	Workspace * (*next)(Monitor *, Workspace *) = (abs(dir) == 2 ? &nextoccmonws : &nextmonws);
+	Workspace *ws = selws, *target = NULL, *last;
+	Monitor *m = ws->mon;
 
 	if (dir > 0) { // right circular search
-		for (nws = ws->next; nws; nws = nws->next)
-			if (nws->mon == ws->mon && nws != stickyws && (dir != 2 || nws->clients))
-				break;
-		if (!nws && ws != workspaces)
-			for (tws = workspaces; tws && tws != ws; tws = tws->next) {
-				if (tws == stickyws)
-					continue;
-				if (tws->mon == ws->mon && (dir != 2 || tws->clients)) {
-					nws = tws;
-					break;
-				}
-			}
+		if (!(target = next(m, ws->next)))
+			target = next(m, workspaces);
 	} else { // left circular search
-		for (tws = workspaces; tws && !(nws && tws == ws); tws = tws->next)
-			if (tws->mon == ws->mon && tws != stickyws && (dir != -2 || tws->clients))
-				nws = tws;
+		for (last = next(m, workspaces); last && (!target || last != ws); last = next(m, last->next))
+			target = last;
 	}
 
-	return nws;
+	return target == ws ? NULL : target;
 }
 
 void
