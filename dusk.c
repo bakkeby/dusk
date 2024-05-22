@@ -1965,8 +1965,6 @@ getatomprop(Client *c, Atom prop, Atom req)
 	unsigned char *p = NULL;
 	Atom da, atom = None;
 
-	/* FIXME getatomprop should return the number of items and a pointer to
-	 * the stored data instead of this workaround */
 	if (XGetWindowProperty(dpy, c->win, prop, 0L, sizeof atom, False, req,
 		&da, &di, &dl, &dm, &p) == Success && p) {
 		atom = *(Atom *)p;
@@ -2056,62 +2054,71 @@ grabbuttons(Client *c, int focused)
 		unsigned int i, j;
 		unsigned int modifiers[] = { 0, LockMask, numlockmask, numlockmask|LockMask };
 		XUngrabButton(dpy, AnyButton, AnyModifier, c->win);
-		if (!focused)
+		if (!focused) {
 			XGrabButton(dpy, AnyButton, AnyModifier, c->win, False,
 				BUTTONMASK, GrabModeSync, GrabModeSync, None, None);
-		for (i = 0; i < LENGTH(buttons); i++)
-			if (buttons[i].click == ClkClientWin
-				&& ((enabled(AllowNoModifierButtons) && !ONLYMODBUTTONS(c)) || buttons[i].mask != 0)
-			)
-				for (j = 0; j < LENGTH(modifiers); j++)
-					XGrabButton(dpy, buttons[i].button,
-						buttons[i].mask | modifiers[j],
-						c->win, False, BUTTONMASK,
-						GrabModeAsync, GrabModeSync, None, None);
+		}
+		for (i = 0; i < LENGTH(buttons); i++) {
+			if (buttons[i].click != ClkClientWin)
+				continue;
+
+			if ((disabled(AllowNoModifierButtons) || ONLYMODBUTTONS(c)) && buttons[i].mask == 0)
+				continue;
+
+			for (j = 0; j < LENGTH(modifiers); j++) {
+				XGrabButton(dpy, buttons[i].button,
+					buttons[i].mask | modifiers[j],
+					c->win, False, BUTTONMASK,
+					GrabModeAsync, GrabModeSync, None, None);
+			}
+		}
 	}
 }
 
+#if USE_KEYCODES
 void
 grabkeys(void)
 {
+	unsigned int i, j;
+	unsigned int modifiers[] = { 0, LockMask, numlockmask, numlockmask|LockMask };
 	updatenumlockmask();
-	{
-		#if USE_KEYCODES
-		unsigned int i, j;
-		unsigned int modifiers[] = { 0, LockMask, numlockmask, numlockmask|LockMask };
+	XUngrabKey(dpy, AnyKey, AnyModifier, root);
 
-		XUngrabKey(dpy, AnyKey, AnyModifier, root);
+	for (i = 0; i < LENGTH(keys); i++)
+		for (j = 0; j < LENGTH(modifiers); j++)
+			XGrabKey(dpy, keys[i].keycode, keys[i].mod | modifiers[j], root,
+					True, GrabModeAsync, GrabModeAsync);
+}
+#else // keysyms
+void
+grabkeys(void)
+{
+	unsigned int i, j, k;
+	int start, end, skip;
+	unsigned int modifiers[] = { 0, LockMask, numlockmask, numlockmask|LockMask };
+	updatenumlockmask();
+	XUngrabKey(dpy, AnyKey, AnyModifier, root);
 
-		for (i = 0; i < LENGTH(keys); i++)
-			for (j = 0; j < LENGTH(modifiers); j++)
-				XGrabKey(dpy, keys[i].keycode, keys[i].mod | modifiers[j], root,
-						True, GrabModeAsync, GrabModeAsync);
-		#else // keysyms
-		unsigned int i, j, k;
-		unsigned int modifiers[] = { 0, LockMask, numlockmask, numlockmask|LockMask };
-		int start, end, skip;
-		KeySym *syms;
+	KeySym *syms;
 
-		XUngrabKey(dpy, AnyKey, AnyModifier, root);
-		XDisplayKeycodes(dpy, &start, &end);
-		syms = XGetKeyboardMapping(dpy, start, end - start + 1, &skip);
-		if (!syms)
-			return;
-		for (k = start; k <= end; k++) {
-			for (i = 0; i < LENGTH(keys); i++) {
-				/* skip modifier codes, we do that ourselves */
-				if (keys[i].keysym != syms[(k - start) * skip])
-					continue;
-				for (j = 0; j < LENGTH(modifiers); j++) {
-					XGrabKey(dpy, k, keys[i].mod | modifiers[j], root, True,
-						GrabModeAsync, GrabModeAsync);
-				}
+	XDisplayKeycodes(dpy, &start, &end);
+	syms = XGetKeyboardMapping(dpy, start, end - start + 1, &skip);
+	if (!syms)
+		return;
+	for (k = start; k <= end; k++) {
+		for (i = 0; i < LENGTH(keys); i++) {
+			/* skip modifier codes, we do that ourselves */
+			if (keys[i].keysym != syms[(k - start) * skip])
+				continue;
+			for (j = 0; j < LENGTH(modifiers); j++) {
+				XGrabKey(dpy, k, keys[i].mod | modifiers[j], root, True,
+					GrabModeAsync, GrabModeAsync);
 			}
 		}
-		XFree(syms);
-		#endif // USE_KEYCODES
 	}
+	XFree(syms);
 }
+#endif // USE_KEYCODES
 
 void
 hide(Client *c)
@@ -2140,10 +2147,16 @@ incnstack(const Arg *arg)
 static int
 isuniquegeom(XineramaScreenInfo *unique, size_t n, XineramaScreenInfo *info)
 {
-	while (n--)
-		if (unique[n].x_org == info->x_org && unique[n].y_org == info->y_org
-		&& unique[n].width == info->width && unique[n].height == info->height)
+	while (n--) {
+		if (
+			unique[n].x_org == info->x_org &&
+			unique[n].y_org == info->y_org &&
+			unique[n].width == info->width &&
+			unique[n].height == info->height
+		) {
 			return 0;
+		}
+	}
 	return 1;
 }
 #endif /* XINERAMA */
@@ -2340,11 +2353,6 @@ manage(Window w, XWindowAttributes *wa)
 	/* only fix client y-offset, if the client center might cover the bar */
 	c->y = MAX(c->y, ((m->bar && m->bar->by == m->my) && (c->x + (c->w / 2) >= m->wx)
 		&& (c->x + (c->w / 2) < m->wx + m->ww)) ? bh : m->my);
-	wc.border_width = c->bw;
-	XConfigureWindow(dpy, w, CWBorderWidth, &wc);
-	configure(c); /* propagates border_width, if size doesn't change */
-	updateclientdesktop(c);
-	addflag(c, RefreshSizeHints);
 
 	/* If the client indicates that it is in fullscreen, or if the FullScreen flag has been
 	 * explictly set via client rules, then enable fullscreen now. */
@@ -2352,7 +2360,14 @@ manage(Window w, XWindowAttributes *wa)
 		setflag(c, FullScreen, 0);
 		setfullscreen(c, 1, 0);
 		term = NULL; /* do not allow terminals to be swallowed by windows that start in fullscreen */
+	} else {
+		wc.border_width = c->bw;
+		XConfigureWindow(dpy, w, CWBorderWidth, &wc);
+		configure(c); /* propagates border_width, if size doesn't change */
 	}
+
+	updateclientdesktop(c);
+	addflag(c, RefreshSizeHints);
 
 	updatewmhints(c);
 	updatemotifhints(c);
@@ -2420,17 +2435,17 @@ manage(Window w, XWindowAttributes *wa)
 	if (!c->swallowing) {
 		if (riopid && (riopid == 1 || RIODRAWNOMATCHPID(c) || isdescprocess(riopid, c->pid))) {
 			riopid = 0;
-			if (riodimensions[3] != -1)
+			if (riodimensions[3] != -1) {
 				rioposition(c, riodimensions[0], riodimensions[1], riodimensions[2], riodimensions[3]);
-			else {
+			} else {
 				killclient(&((Arg) { .v = c }));
 				return;
 			}
-		}
-		else if (SWITCHWORKSPACE(c) && !c->ws->visible)
+		} else if (SWITCHWORKSPACE(c) && !c->ws->visible) {
 			viewwsonmon(c->ws, c->ws->mon, 0);
-		else if (ENABLEWORKSPACE(c) && !c->ws->visible)
+		} else if (ENABLEWORKSPACE(c) && !c->ws->visible) {
 			viewwsonmon(c->ws, c->ws->mon, 1);
+		}
 	}
 
 	arrange(c->ws);
@@ -2556,15 +2571,16 @@ motionnotify(XEvent *e)
 	if (!ISSTICKY(selws->sel) && (ws = recttows(ev->x_root, ev->y_root, 1, 1)) && ws != selws) {
 		if (selmon != ws->mon) {
 			entermon(ws->mon, NULL);
-		} else {
-			sel = selws->sel;
-			selws = ws;
-			selmon->selws = ws;
-			unfocus(sel, 1, NULL);
-			focus(NULL);
-			drawbar(selmon);
-			updatecurrentdesktop();
+			return;
 		}
+
+		sel = selws->sel;
+		selws = ws;
+		selmon->selws = ws;
+		unfocus(sel, 1, NULL);
+		focus(NULL);
+		drawbar(selmon);
+		updatecurrentdesktop();
 		return;
 	}
 
@@ -3875,40 +3891,52 @@ updatesizehints(Client *c)
 	long msize;
 	XSizeHints size;
 
-	if (!XGetWMNormalHints(dpy, c->win, &size, &msize))
+	if (!XGetWMNormalHints(dpy, c->win, &size, &msize)) {
 		/* size is uninitialized, ensure that size.flags aren't used */
 		size.flags = PSize;
+	}
+
 	if (size.flags & PBaseSize) {
 		c->basew = size.base_width;
 		c->baseh = size.base_height;
 	} else if (size.flags & PMinSize) {
 		c->basew = size.min_width;
 		c->baseh = size.min_height;
-	} else
+	} else {
 		c->basew = c->baseh = 0;
+	}
+
 	if (size.flags & PResizeInc) {
 		c->incw = size.width_inc;
 		c->inch = size.height_inc;
-	} else
+	} else {
 		c->incw = c->inch = 0;
+	}
+
 	if (size.flags & PMaxSize) {
 		c->maxw = size.max_width;
 		c->maxh = size.max_height;
-	} else
+	} else {
 		c->maxw = c->maxh = 0;
+	}
+
 	if (!IGNOREMINIMUMSIZEHINTS(c) && size.flags & PMinSize) {
 		c->minw = size.min_width;
 		c->minh = size.min_height;
 	} else if (!IGNOREMINIMUMSIZEHINTS(c) && size.flags & PBaseSize) {
 		c->minw = size.base_width;
 		c->minh = size.base_height;
-	} else
+	} else {
 		c->minw = c->minh = 0;
+	}
+
 	if (size.flags & PAspect) {
 		c->mina = (float)size.min_aspect.y / size.min_aspect.x;
 		c->maxa = (float)size.max_aspect.x / size.max_aspect.y;
-	} else
+	} else {
 		c->maxa = c->mina = 0.0;
+	}
+
 	setflag(c, Fixed, (c->maxw && c->maxh && c->maxw == c->minw && c->maxh == c->minh));
 	removeflag(c, RefreshSizeHints);
 }
@@ -3931,8 +3959,9 @@ updatewmhints(Client *c)
 		if (c == selws->sel && wmh->flags & XUrgencyHint) {
 			wmh->flags &= ~XUrgencyHint;
 			XSetWMHints(dpy, c->win, wmh);
-		} else
+		} else {
 			setflag(c, Urgent, wmh->flags & XUrgencyHint);
+		}
 
 		if (ISURGENT(c))
 			XSetWindowBorder(dpy, c->win, scheme[SchemeUrg][ColBorder].pixel);
