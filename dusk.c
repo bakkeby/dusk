@@ -489,7 +489,7 @@ static void restack(Workspace *ws);
 static void run(void);
 static void scan(void);
 static int sendevent(Window w, Atom proto, int m, long d0, long d1, long d2, long d3, long d4);
-static void setbackground();
+static void setbackground(void);
 static void setclientstate(Client *c, long state);
 static void setfocus(Client *c);
 static void setfullscreen(Client *c, int fullscreen, int setfakefullscreen);
@@ -3016,7 +3016,7 @@ scan(void)
 }
 
 void
-setbackground()
+setbackground(void)
 {
 	int di;
 	unsigned long dl;
@@ -3765,7 +3765,7 @@ unmapnotify(XEvent *e)
 }
 
 void
-updateclientlist()
+updateclientlist(void)
 {
 	Client *c;
 	Workspace *ws;
