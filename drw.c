@@ -100,6 +100,7 @@ drw_create(Display *dpy, int screen, Window root, unsigned int w, unsigned int h
 	drw->drawable = XCreatePixmap(dpy, root, w, h, depth);
 	drw->picture = XRenderCreatePicture(dpy, drw->drawable, XRenderFindVisualFormat(dpy, visual), 0, NULL);
 	drw->gc = XCreateGC(dpy, drw->drawable, 0, NULL);
+	XSetGraphicsExposures(dpy, drw->gc, 0);
 	XSetLineAttributes(dpy, drw->gc, 1, LineSolid, CapButt, JoinMiter);
 
 	return drw;
