@@ -1758,9 +1758,6 @@ enternotify(XEvent *e)
 	XCrossingEvent *ev = &e->xcrossing;
 	int x, y;
 
-	if (enabled(FocusOnClick))
-		return;
-
 	if (cursor_hidden)
 		return;
 
@@ -1778,8 +1775,14 @@ enternotify(XEvent *e)
 	m = c ? c->ws->mon : wintomon(ev->window);
 	if (selws == m->selws && (!c || (m->selws && c == m->selws->sel)))
 		return;
-	if (m != selmon)
+
+	if (m != selmon) {
 		entermon(m, c);
+		if (enabled(FocusOnClick))
+			c = NULL;
+	} else if (enabled(FocusOnClick))
+		return;
+
 	focus(c);
 }
 
