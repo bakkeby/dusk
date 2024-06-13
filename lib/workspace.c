@@ -103,6 +103,7 @@ createworkspace(int num, const WorkspaceRule *r)
 	strlcpy(ws->name, r->name, sizeof ws->name);
 
 	ws->layout = (r->layout == -1 ? &layouts[0] : &layouts[MIN(r->layout, LENGTH(layouts))]);
+	strlcpy(ws->ltsymbol, ws->layout->symbol, sizeof ws->ltsymbol);
 	ws->prevlayout = &layouts[1 % LENGTH(layouts)];
 	ws->mfact = (r->mfact == -1 ? mfact : r->mfact);
 	ws->nmaster = (r->nmaster == -1 ? nmaster : r->nmaster);
