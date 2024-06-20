@@ -2621,7 +2621,6 @@ propertynotify(XEvent *e)
 {
 	Client *c;
 	Window trans;
-	XEvent ignored;
 	XPropertyEvent *ev = &e->xproperty;
 
 	/* Some programs may end up spamming property notifications rendering the window
@@ -2639,8 +2638,13 @@ propertynotify(XEvent *e)
 			pn_prev_count++; /* Only print the below log line once. */
 			fprintf(stderr, "propertynotify: throttling repeating %s (%ld) property notificatons for window %ld\n", XGetAtomName(dpy, ev->atom), ev->atom, ev->window);
 		}
-		while (XCheckMaskEvent(dpy, PropertyChangeMask, &ignored));
-		return;
+		while (XCheckMaskEvent(dpy, PropertyChangeMask, e)) {
+			ev = &e->xproperty;
+			if (ev->state != pn_prev_state || ev->window != pn_prev_win || ev->atom != pn_prev_atom)
+				break;
+		}
+		if (!e)
+			return;
 	}
 
 	pn_prev_count++;
