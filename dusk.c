@@ -3022,12 +3022,16 @@ setbackground(void)
 	unsigned long dl;
 	unsigned char *p = NULL;
 	Atom da, atom = None;
-	/* Set a solid background, but only if a wallpaper has not been set. */
-	if (!(XGetWindowProperty(dpy, root, XInternAtom(dpy, "_XROOTPMAP_ID", False), 0L, sizeof atom,
-			False, AnyPropertyType, &da, &di, &dl, &dl, &p) == Success && p)) {
-		XSetWindowBackground(dpy, root, scheme[SchemeNorm][ColBg].pixel);
-		XClearWindow(dpy, root);
+
+	/* Do not set a background if a wallpaper has been set. */
+	if (XGetWindowProperty(dpy, root, XInternAtom(dpy, "_XROOTPMAP_ID", False), 0L, sizeof atom,
+			False, AnyPropertyType, &da, &di, &dl, &dl, &p) == Success && p) {
+		return;
 	}
+
+	/* Set a solid background */
+	XSetWindowBackground(dpy, root, scheme[SchemeNorm][ColBg].pixel);
+	XClearWindow(dpy, root);
 }
 
 void
