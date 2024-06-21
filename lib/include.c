@@ -1,4 +1,5 @@
 /* Utilities */
+#include "defaults.h"
 #include "lookup.c"
 
 /* Bar functionality */
