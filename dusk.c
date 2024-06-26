@@ -1643,31 +1643,47 @@ destroynotify(XEvent *e)
 {
 	Client *c;
 	Bar *bar;
-	Workspace *ws = NULL;
+	Window focus_return;
+	int revert_to_return;
 	XDestroyWindowEvent *ev = &e->xdestroywindow;
 
 	if ((c = wintoclient(ev->window))) {
-		ws = c->ws;
 		if (enabled(Debug) || DEBUGGING(c))
 			fprintf(stderr, "destroynotify: received event for client %s\n", c->name);
 		unmanage(c, 1);
-	} else if ((c = swallowingparent(ev->window))) {
-		ws = c->ws;
+		return c->ws;
+	}
+
+	if ((c = swallowingparent(ev->window))) {
 		if (enabled(Debug) || DEBUGGING(c))
 			fprintf(stderr, "destroynotify: received event for swallowing client %s\n", c->name);
 		unmanage(c->swallowing, 1);
-	} else if (systray && (c = wintosystrayicon(ev->window))) {
+		return c->ws;
+	}
+
+	if (systray && (c = wintosystrayicon(ev->window))) {
 		if (enabled(Debug) || DEBUGGING(c))
 			fprintf(stderr, "destroynotify: removing systray icon for client %s\n", c->name);
 		removesystrayicon(c);
 		drawbarwin(systray->bar);
-	} else if ((bar = wintobar(ev->window))) {
+		return NULL;
+	}
+
+	if ((bar = wintobar(ev->window))) {
 		if (enabled(Debug))
 			fprintf(stderr, "destroynotify: received event for bar %s\n", bar->name);
 		recreatebar(bar);
+		return NULL;
 	}
 
-	return ws;
+	/* Give input focus back to the selected client when a DestroyNotify event is received
+	 * for an unmanaged window and the selected client does not have input focus. */
+	XGetInputFocus(dpy, &focus_return, &revert_to_return);
+	if (selws->sel && selws->sel->win != focus_return) {
+		setfocus(selws->sel);
+	}
+
+	return NULL;
 }
 
 void
