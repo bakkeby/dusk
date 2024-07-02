@@ -175,6 +175,8 @@ xrdb(const Arg *arg)
 {
 	loadxrdb();
 	setbackground();
+	if (systray)
+		XMoveWindow(dpy, systray->win, -10000, -10000);
 	arrange(NULL);
 	focus(NULL);
 }
