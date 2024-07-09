@@ -49,7 +49,7 @@ toggle(const Arg *arg)
 }
 
 void
-reload()
+reload(void)
 {
 	arrange(NULL);
 	grabkeys();

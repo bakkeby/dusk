@@ -694,7 +694,7 @@ ipc_init(const char *socket_path, const int p_epoll_fd, IPCCommand commands[],
 }
 
 void
-ipc_cleanup()
+ipc_cleanup(void)
 {
 	IPCClient *c = ipc_clients;
 	// Free clients and their buffers
@@ -722,7 +722,7 @@ ipc_cleanup()
 }
 
 int
-ipc_get_sock_fd()
+ipc_get_sock_fd(void)
 {
 	return sock_fd;
 }
@@ -740,7 +740,7 @@ ipc_is_client_registered(int fd)
 }
 
 int
-ipc_accept_client()
+ipc_accept_client(void)
 {
 	int fd = -1;
 

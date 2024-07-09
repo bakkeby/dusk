@@ -5,7 +5,7 @@ static int depth;
 static Colormap cmap;
 
 void
-xinitvisual()
+xinitvisual(void)
 {
 	XVisualInfo *infos;
 	XRenderPictFormat *fmt;

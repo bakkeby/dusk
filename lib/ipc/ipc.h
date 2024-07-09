@@ -99,14 +99,14 @@ int ipc_init(const char *socket_path, const int p_epoll_fd,
  * Uninitialize the socket and module. Free allocated memory and restore static
  * variables to their state before ipc_init
  */
-void ipc_cleanup();
+void ipc_cleanup(void);
 
 /**
  * Get the file descriptor of the IPC socket
  *
  * @return int File descriptor of IPC socket, -1 if socket not created.
  */
-int ipc_get_sock_fd();
+int ipc_get_sock_fd(void);
 
 /**
  * Get address to IPCClient with specified file descriptor
@@ -143,7 +143,7 @@ int ipc_drop_client(IPCClient *c);
  *
  * @return File descriptor of new client, -1 on error
  */
-int ipc_accept_client();
+int ipc_accept_client(void);
 
 /**
  * Read an incoming message from an accepted IPC client

@@ -1,3 +1,3 @@
 #define OPAQUE                  0xffU
 
-static void xinitvisual();
+static void xinitvisual(void);

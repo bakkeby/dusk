@@ -72,7 +72,7 @@ loadxrdbconfig(XrmDatabase xrdb, char *name, enum resource_type rtype, void *dst
 }
 
 void
-loadxrdb()
+loadxrdb(void)
 {
 	Display *display;
 	char * resm;

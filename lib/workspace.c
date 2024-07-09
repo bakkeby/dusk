@@ -33,7 +33,7 @@ comboviewwsbyindex(const Arg *arg)
 }
 
 void
-createworkspaces()
+createworkspaces(void)
 {
 	Workspace *pws, *ws;
 	Monitor *m;
@@ -1112,7 +1112,7 @@ setwfact(const Arg *arg)
 }
 
 void
-setworkspaceareas()
+setworkspaceareas(void)
 {
 	Monitor *mon;
 	for (mon = mons; mon; mon = mon->next)

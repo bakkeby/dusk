@@ -3,7 +3,7 @@ transfer(const Arg *arg)
 {
 	Workspace *ws = selws;
 	Client *c, *mtail = ws->clients, *stail = NULL, *insertafter;
-	int transfertostack = 0, i, nmasterclients = 0;
+	int transfertostack = 0, i;
 
 	for (i = 0, c = ws->clients; c; c = c->next) {
 		if (!ISVISIBLE(c) || ISFLOATING(c))
@@ -12,7 +12,6 @@ transfer(const Arg *arg)
 			transfertostack = i < ws->nmaster && ws->nmaster != 0;
 		}
 		if (i < ws->nmaster) {
-			nmasterclients++;
 			mtail = c;
 		}
 		stail = c;
