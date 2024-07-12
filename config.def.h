@@ -106,6 +106,7 @@ static uint64_t functionality = 0
 //	|ViewOnWs // follow a window to the workspace it is being moved to
 	|Xresources // add support for changing colours via Xresources
 //	|Debug // enables additional debug output
+	|AltWindowTitles // show alternate window titles, if present
 //	|AltWorkspaceIcons // show the workspace name instead of the icons
 //	|GreedyMonitor // disables swap of workspaces between monitors
 	|SmartLayoutConvertion // automatically adjust layout based on monitor orientation when moving a workspace from one monitor to another
@@ -721,6 +722,8 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( setwfact, ARG_TYPE_FLOAT ),
 	IPCCOMMAND( setgapsex, ARG_TYPE_SINT ),
 	IPCCOMMANDS( setstatus, 2, ARG_TYPE_UINT, ARG_TYPE_STR ),
+	IPCCOMMAND( settitle, ARG_TYPE_STR ),
+	IPCCOMMANDS( setwintitle, 2, ARG_TYPE_UINT, ARG_TYPE_STR ),
 	IPCCOMMAND( showbar, ARG_TYPE_NONE ),
 	IPCCOMMAND( showhideclient, ARG_TYPE_NONE ),
 	IPCCOMMAND( stackfocus, ARG_TYPE_SINT ),

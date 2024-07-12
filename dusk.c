@@ -262,6 +262,7 @@ typedef struct Workspace Workspace;
 typedef struct Client Client;
 struct Client {
 	char name[256];
+	char altname[256];
 	char label[32];
 	char iconpath[256];  /* maximum file path length under linux is 4096 bytes */
 	float mina, maxa;
@@ -365,6 +366,7 @@ typedef struct {
 	const char swallowedby;
 	const char swallowkey;
 	const char *iconpath;
+	const char *alttitle;
 	int resume;
 } Rule;
 
@@ -661,6 +663,9 @@ applyrules(Client *c)
 
 			if (r->iconpath)
 				load_icon_from_png_image(c, r->iconpath);
+
+			if (r->alttitle)
+				strlcpy(c->altname, r->alttitle, sizeof c->altname);
 
 			if (enabled(Debug) || DEBUGGING(c))
 				fprintf(stderr, "applyrules: client rule %d matched:\n    class: %s\n    role: %s\n    instance: %s\n    title: %s\n    wintype: %s\n    flags: %lu\n    floatpos: %s\n    workspace: %s\n    label: %s\n",

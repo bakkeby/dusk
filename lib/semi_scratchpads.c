@@ -4,6 +4,7 @@ cloneclient(Client *c)
 	Client *clone = ecalloc(1, sizeof(Client));
 
 	strcpy(clone->name, c->name);
+	strcpy(clone->altname, c->altname);
 	clone->mina = c->mina;
 	clone->maxa = c->maxa;
 	clone->cfact = c->cfact;
@@ -100,6 +101,7 @@ swapsemiscratchpadclients(Client *o, Client *n)
 	o->win = o->icon = o->icw = o->ich = 0;
 
 	strcpy(n->name, o->name);
+	strcpy(n->altname, o->altname);
 
 	if (ISVISIBLE(n))
 		XMoveResizeWindow(dpy, n->win, n->x, n->y, n->w, n->h);

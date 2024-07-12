@@ -152,6 +152,7 @@ dump_client(yajl_gen gen, Client *c)
 	// clang-format off
 	YMAP(
 		YSTR("name"); YSTR(c->name);
+		YSTR("altname"); YSTR(c->altname);
 		YSTR("window_id"); YINT(c->win);
 		YSTR("workspace"); YSTR(c->ws->name);
 		YSTR("monitor_number"); YINT(c->ws->mon->num);

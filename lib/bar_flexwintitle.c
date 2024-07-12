@@ -168,11 +168,13 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 	int tx = x;
 	int tw = w;
 	int icon2dwidth = 0;
-	int titlewidth = TEXTW(c->name);
+	int titlewidth;
 	int max_items = 4;
 	int order[max_items];
 	int idx = 0;
 	int i;
+	char *name = (enabled(AltWindowTitles) && c->altname[0] ? c->altname : c->name);
+	titlewidth = TEXTW(name);
 
 	const StackerIcon *stackericon = NULL;
 	static int textw_single_char = 0;
@@ -260,7 +262,7 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 			tw -= iconspacing;
 			break;
 		case window_title:
-			drw_text(drw, tx, barg->y, tw, barg->h, 0, c->name, 0, 1);
+			drw_text(drw, tx, barg->y, tw, barg->h, 0, name, 0, 1);
 			tx += titlewidth;
 			tw -= titlewidth;
 			break;
