@@ -3129,6 +3129,7 @@ setfullscreen(Client *c, int fullscreen, int restorefakefullscreen)
 {
 	Monitor *m = c->ws->mon;
 	int savestate = 0, restorestate = 0;
+	int x, y, w, h;
 
 	if ((!ISFAKEFULLSCREEN(c) && fullscreen && !ISFULLSCREEN(c)) // normal fullscreen
 			|| (RESTOREFAKEFULLSCREEN(c) && fullscreen)) // fake fullscreen --> actual fullscreen
@@ -3183,11 +3184,11 @@ setfullscreen(Client *c, int fullscreen, int restorefakefullscreen)
 		 * height and width may be larger than the monitor's window area, so we cap that by
 		 * ensuring max / min values. */
 		if (ISFLOATING(c)) {
-			c->x = MAX(m->wx, c->oldx);
-			c->y = MAX(m->wy, c->oldy);
-			c->w = MIN(m->ww - c->x + m->wx - 2*c->bw, c->oldw);
-			c->h = MIN(m->wh - c->y + m->wy - 2*c->bw, c->oldh);
-			resizeclient(c, c->x, c->y, c->w, c->h);
+			x = MAX(m->wx, c->oldx);
+			y = MAX(m->wy, c->oldy);
+			w = MIN(m->ww - c->x + m->wx - 2*c->bw, c->oldw);
+			h = MIN(m->wh - c->y + m->wy - 2*c->bw, c->oldh);
+			resize(c, x, y, w, h, 0);
 			restack(c->ws);
 		} else
 			arrange(c->ws);
