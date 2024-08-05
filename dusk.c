@@ -3234,10 +3234,12 @@ setlayout(const Arg *arg)
 
 	strlcpy(ws->ltsymbol, ws->layout->symbol, sizeof ws->ltsymbol);
 
-	if (ws->layout->arrange)
+	if (ws->layout->arrange) {
 		arrange(ws);
-	else
+	} else {
 		showwsclients(ws->stack);
+		drawbar(ws->mon);
+	}
 	setfloatinghints(ws);
 }
 
