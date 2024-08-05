@@ -523,9 +523,10 @@ arrange_monocle(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n
 		c->area = grp;
 		c->arr = arr;
 		if (c == f) {
-			if (!ISLOCKED(c))
-				XMoveWindow(dpy, c->win, x, y);
-			resize(c, x, y, w - (2 * c->bw), h - (2 * c->bw), 0);
+			if (n == an)
+				addflag(c, NoBorder);
+			resizeclient(c, x, y, w - (2 * c->bw), h - (2 * c->bw));
+			removeflag(c, NoBorder);
 		} else {
 			hide(c);
 		}

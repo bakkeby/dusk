@@ -768,8 +768,11 @@ reapplyrules(Client *c)
 			drawbar(client_ws->mon);
 	}
 
-	if (NOBORDER(c))
+	if (NOBORDER(c)) {
 		c->bw = 0;
+		removeflag(c, NoBorder);
+	}
+
 	if (c->opacity)
 		opacity(c, c->opacity);
 
@@ -2359,6 +2362,7 @@ manage(Window w, XWindowAttributes *wa)
 	}
 
 	c->bw = (NOBORDER(c) ? 0 : c->ws->mon->borderpx);
+	removeflag(c, NoBorder);
 
 	if (c->opacity)
 		opacity(c, c->opacity);

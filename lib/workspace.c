@@ -301,6 +301,9 @@ noborder(Client *c)
 	if (ISTRUEFULLSCREEN(c))
 		return 0;
 
+	if (NOBORDER(c))
+		return 1;
+
 	if (nexttiled(c->ws->clients) != c || nexttiled(c->next))
 		return 0;
 
