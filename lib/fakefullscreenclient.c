@@ -17,4 +17,5 @@ togglefakefullscreen(const Arg *arg)
 		removeflag(c, RestoreFakeFullScreen);
 		setfullscreen(c, 1, 0);
 	}
+	drawbar(ws->mon);
 }
