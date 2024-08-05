@@ -41,9 +41,6 @@ swallowclient(Client *t, Client *c)
 	if (!RULED(c) && disabled(SwallowFloating) && ISFLOATING(c))
 		return 0;
 
-	if (ISFULLSCREEN(t))
-		setfullscreen(c, 1, ISFAKEFULLSCREEN(t));
-
 	replaceclient(t, c);
 	hide(t);
 	addflag(c, IgnoreCfgReqPos);
@@ -61,8 +58,8 @@ replaceclient(Client *old, Client *new)
 
 	Client *c = NULL;
 	Workspace *ws = old->ws;
-	Monitor *m = ws->mon;
 	XWindowChanges wc;
+	int x, y, w, h;
 
 	new->ws = ws;
 
@@ -98,13 +95,50 @@ replaceclient(Client *old, Client *new)
 	old->next = NULL;
 	old->snext = NULL;
 
+	/* Capture the normal state of the old client */
+	if (ISTRUEFULLSCREEN(old)) {
+		x = old->oldx;
+		y = old->oldy;
+		w = old->oldw;
+		h = old->oldh;
+	} else {
+		x = old->x;
+		y = old->y;
+		w = old->w;
+		h = old->h;
+	}
+
+	/* Work out whether the new client should gain fullscreen, lose fullscreen or remain as-is */
+	if (!SWALLOWNOINHERITFULLSCREEN(new) && !ISTRUEFULLSCREEN(new) && ISTRUEFULLSCREEN(old)) {
+		/* Gain fullscreen */
+		setfullscreen(new, 1, 0);
+	} else if (!SWALLOWNOINHERITFULLSCREEN(new) && ISTRUEFULLSCREEN(new) && !ISTRUEFULLSCREEN(old) && !ISTERMINAL(old)) {
+		/* Lose fullscreen */
+		setfullscreen(new, 0, ISFAKEFULLSCREEN(old));
+	}
+
+	/* Correct state of new client based on the normal state of the old client */
+	if (SWALLOWRETAINSIZE(new)) {
+		w = new->w;
+		h = new->h;
+	} else {
+		new->oldx = x;
+		new->oldy = y;
+		new->oldw = w;
+		new->oldh = h;
+		new->sfx = old->sfx;
+		new->sfy = old->sfy;
+		new->sfw = old->sfw;
+		new->sfh = old->sfh;
+	}
+
+	toggleflagop(new, Floating, FLOATING(old));
+
 	if (ISVISIBLE(new)) {
 		if (ISTRUEFULLSCREEN(new)) {
-			resizeclient(new, m->mx, m->my, m->mw, m->mh);
-		} else if (ISFLOATING(new) && (SWALLOWRETAINSIZE(new) || SWALLOWRETAINSIZE(old))) {
-			resize(new, old->x, old->y, new->w, new->h, 0);
-		} else {
-			resize(new, old->x, old->y, old->w, old->h, 0);
+			XMoveWindow(dpy, new->win, new->x, new->y);
+		} else if (ISFLOATING(new)) {
+			resize(new, x, y, w, h, 0);
 		}
 	}
 
@@ -120,8 +154,6 @@ unswallow(const Arg *arg)
 		return;
 	s = c->swallowing;
 
-	if (ISFULLSCREEN(c))
-		setfullscreen(s, 1, ISFAKEFULLSCREEN(c));
 	if (replaceclient(c, s)) {
 		c->swallowing = s->swallowing;
 		s->swallowing = NULL;

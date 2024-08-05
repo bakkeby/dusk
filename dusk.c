@@ -2383,7 +2383,6 @@ manage(Window w, XWindowAttributes *wa)
 	if (getatomprop(c, netatom[NetWMState], XA_ATOM) == netatom[NetWMFullscreen] || ISFULLSCREEN(c)) {
 		setflag(c, FullScreen, 0);
 		setfullscreen(c, 1, 0);
-		term = NULL; /* do not allow terminals to be swallowed by windows that start in fullscreen */
 	} else {
 		wc.border_width = c->bw;
 		XConfigureWindow(dpy, w, CWBorderWidth, &wc);

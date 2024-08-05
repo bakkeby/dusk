@@ -61,7 +61,7 @@ static const uint64_t
 	CfgReqPosRelativeToMonitor = 0x400000000000, // makes configure requests relative to the client's monitor
 	SwallowRetainSize = 0x800000000000, // allows for a client to retain its height and width when swallowed or unswallowed
 	NoWarp = 0x1000000000000, // disallow cursor to warp to this client
-	FlagPlaceholder0x2000000000000 = 0x2000000000000,
+	SwallowNoInheritFullScreen = 0x2000000000000, // prevents the client from inheriting the fullscreen property when swallowed / unswallowed
 	FlagPlaceholder0x4000000000000 = 0x4000000000000,
 	FlagPlaceholder0x8000000000000 = 0x8000000000000,
 	FlagPlaceholder0x10000000000000 = 0x10000000000000,
@@ -132,6 +132,7 @@ static const uint64_t
 #define SKIPTASKBAR(C) (C && C->flags & SkipTaskbar)
 #define STEAMGAME(C) (C && C->flags & SteamGame)
 #define SWALLOWRETAINSIZE(C) (C && C->flags & SwallowRetainSize)
+#define SWALLOWNOINHERITFULLSCREEN(C) (C && C->flags & SwallowNoInheritFullScreen)
 #define SWITCHWORKSPACE(C) (C && C->flags & SwitchWorkspace)
 #define ENABLEWORKSPACE(C) (C && C->flags & EnableWorkspace)
 #define REVERTWORKSPACE(C) (C && C->flags & RevertWorkspace)
