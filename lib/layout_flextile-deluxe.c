@@ -525,10 +525,9 @@ arrange_monocle(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n
 		if (c == f) {
 			/* If this is full monocle then draw the client without a border if relevant (it still
 			 * needs to be drawn with a border in a deck layout for example). */
-			if (n == an)
+			if (enabled(NoBorders) && n == an)
 				addflag(c, NoBorder);
 			resize(c, x, y, w - (2 * c->bw), h - (2 * c->bw), 0);
-			removeflag(c, NoBorder);
 		} else {
 			hide(c);
 		}

@@ -884,6 +884,8 @@ applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact)
 		if (c->maxh)
 			*h = MIN(*h, c->maxh);
 	}
+	if (noborder(c))
+		addflag(c, NoBorder);
 	return *x != c->x || *y != c->y || *w != c->w || *h != c->h || NOBORDER(c);
 }
 
@@ -1463,10 +1465,11 @@ configure(Client *c)
 	ce.height = c->h;
 	ce.border_width = c->bw;
 
-	if (noborder(c)) {
+	if (NOBORDER(c)) {
 		ce.width += c->bw * 2;
 		ce.height += c->bw * 2;
 		ce.border_width = 0;
+		removeflag(c, NoBorder);
 	}
 
 	ce.above = None;
@@ -2932,7 +2935,7 @@ resizeclientpad(Client *c, int x, int y, int w, int h, int tw, int th)
 		return;
 	}
 
-	if (noborder(c)) {
+	if (NOBORDER(c)) {
 		wc.width += c->bw * 2;
 		wc.height += c->bw * 2;
 		wc.border_width = 0;
