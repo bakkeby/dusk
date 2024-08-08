@@ -8,8 +8,8 @@ enable(const Arg *arg)
 	uint64_t f = getfuncbyname(name);
 
 	if (f) {
-		enablefunc(getfuncbyname(arg->v));
-		reload();
+		enablefunc(f);
+		reload(f);
 	}
 }
 
@@ -21,7 +21,7 @@ disable(const Arg *arg)
 
 	if (f) {
 		disablefunc(f);
-		reload();
+		reload(f);
 	}
 }
 
@@ -33,7 +33,7 @@ toggle(const Arg *arg)
 
 	if (f) {
 		togglefunc(f);
-		reload();
+		reload(f);
 	}
 	mapfunc("bar", togglebar)
 	mapfunc("barpadding", togglebarpadding)
@@ -49,8 +49,24 @@ toggle(const Arg *arg)
 }
 
 void
-reload(void)
+reload(const uint64_t functionality)
 {
+	Workspace *ws;
+	Client *c;
+	int func_enabled = enabled(functionality);
+
+	/* If the NoBorders functionality was disabled, then loop through and force resize all clients
+	 * that previously had the NoBorder flag set in order to restore borders. */
+	if (!func_enabled && functionality == NoBorders) {
+		for (ws = workspaces; ws; ws = ws->next) {
+			for (c = ws->clients; c; c = c->next) {
+				if (ISVISIBLE(c) && WASSNOBORDER(c)) {
+					resizeclient(c, c->x, c->y, c->w, c->h);
+				}
+			}
+		}
+	}
+
 	arrange(NULL);
 	grabkeys();
 }

@@ -143,6 +143,7 @@ static const uint64_t
 #define TILED(C) (C && C->win && !(C->flags & (Invisible|Hidden|Floating|Fixed|Sticky)) && !ISTRUEFULLSCREEN(c))
 
 #define WASFLOATING(C) (C && C->prevflags & Floating)
+#define WASSNOBORDER(C) (C && C->prevflags & NoBorder)
 #define WASFAKEFULLSCREEN(C) (C && C->prevflags & FakeFullScreen)
 #define WASFULLSCREEN(C) (C && C->prevflags & FullScreen)
 
