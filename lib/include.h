@@ -53,6 +53,7 @@
 #include "placemouse.h"
 #include "swallowmouse.h"
 #include "mark.h"
+#include "maximize.h"
 #include "nomodbuttons.h"
 #include "push.h"
 #include "semi_scratchpads.h"

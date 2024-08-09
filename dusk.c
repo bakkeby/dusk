@@ -473,7 +473,6 @@ static void killclient(const Arg *arg);
 static void manage(Window w, XWindowAttributes *wa);
 static void mappingnotify(XEvent *e);
 static void maprequest(XEvent *e);
-static void maximize(Client *c, int maximize_vert, int maximize_horz);
 static void motionnotify(XEvent *e);
 static unsigned long long now(void);
 static void propertynotify(XEvent *e);
@@ -506,7 +505,6 @@ static pid_t spawncmd(const Arg *arg, int buttonclick, int orphan);
 static void structurenotify(XEvent *e);
 static unsigned int textw_clamp(const char *str, unsigned int n);
 static void togglefloating(const Arg *arg);
-static void togglemaximize(Client *c, int maximize_vert, int maximize_horz);
 static void unfocus(Client *c, int setfocus, Client *nextfocus);
 static void unmanage(Client *c, int destroyed);
 static Workspace *unmapnotify(XEvent *e);
@@ -2540,27 +2538,6 @@ maprequest(XEvent *e)
 }
 
 void
-maximize(Client *c, int maximize_vert, int maximize_horz)
-{
-	if (!maximize_vert && !maximize_horz)
-		return;
-	Workspace *ws = c->ws;
-
-	SETFLOATING(c);
-	XRaiseWindow(dpy, c->win);
-
-	if (maximize_vert && maximize_horz)
-		setfloatpos(c, "0% 0% 100% 100%", 1, 0);
-	else if (maximize_vert)
-		setfloatpos(c, "-1x 0% -1w 100%", 1, 0);
-	else
-		setfloatpos(c, "0% -1y 100% -1h", 1, 0);
-
-	resizeclient(c, c->x, c->y, c->w, c->h);
-	drawbar(ws->mon);
-}
-
-void
 motionnotify(XEvent *e)
 {
 	Bar *bar;
@@ -3618,47 +3595,6 @@ togglefloating(const Arg *arg)
 		drawbar(ws->mon);
 		arrange(ws);
 	}
-}
-
-void
-togglemaximize(Client *c, int maximize_vert, int maximize_horz)
-{
-	if (!maximize_vert && !maximize_horz)
-		return;
-	Workspace *ws = c->ws;
-	Monitor *m = ws->mon;
-
-	if (ISFLOATING(c)) {
-		if (maximize_vert && maximize_horz) {
-			if (abs(c->x - m->wx) <= m->gappov && abs(c->y - m->wy) <= m->gappoh) {
-				if (!WASFLOATING(c))
-					togglefloating(&((Arg) { .v = c }));
-				else
-					restorefloats(c);
-				return;
-			}
-		} else if (maximize_vert && abs(c->y - m->wy) <= m->gappoh) {
-			resizeclient(c,
-				c->x,
-				ws->wy + (c->sfy - m->wy) * ws->wh / m->wh,
-				c->w,
-				c->sfh * ws->wh / m->wh
-			);
-			return;
-		} else if (maximize_horz && abs(c->x - m->wx) <= m->gappov) {
-			resizeclient(
-				c,
-				ws->wx + (c->sfx - m->wx) * ws->ww / m->ww,
-				c->y,
-				c->sfw * ws->ww / m->ww,
-				c->h
-			);
-			return;
-		}
-		savefloats(c);
-	}
-
-	maximize(c, maximize_vert, maximize_horz);
 }
 
 void

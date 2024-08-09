@@ -53,6 +53,7 @@
 #endif
 #include "killunsel.c"
 #include "mark.c"
+#include "maximize.c"
 #include "movemouse.c"
 #include "resizemouse.c"
 #include "placemouse.c"

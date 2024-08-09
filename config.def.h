@@ -695,6 +695,9 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( layoutconvert, ARG_TYPE_NONE ),
 	IPCCOMMAND( mark, ARG_TYPE_NONE ),
 	IPCCOMMAND( markall, ARG_TYPE_SINT ), // 0 = mark all, 1 = mark floating, 2 = mark hidden
+	IPCCOMMAND( maximize, ARG_TYPE_NONE ),
+	IPCCOMMAND( maximizevert, ARG_TYPE_NONE ),
+	IPCCOMMAND( maximizehorz, ARG_TYPE_NONE ),
 	IPCCOMMAND( mirrorlayout, ARG_TYPE_NONE ),
 	IPCCOMMAND( movetowsbyindex, ARG_TYPE_SINT ),
 	IPCCOMMAND( movetowsbyname, ARG_TYPE_STR ),
