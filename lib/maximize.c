@@ -57,34 +57,24 @@ togglemaximize(Client *c, int maximize_vert, int maximize_horz)
 {
 	if (!maximize_vert && !maximize_horz)
 		return;
+
 	Workspace *ws = c->ws;
 	Monitor *m = ws->mon;
+	int is_maximized_vert = 0, is_maximized_horz = 0;
 
 	if (ISFLOATING(c)) {
-		if (maximize_vert && maximize_horz) {
-			if (abs(c->x - m->wx) <= m->gappov && abs(c->y - m->wy) <= m->gappoh) {
-				if (!WASFLOATING(c))
-					togglefloating(&((Arg) { .v = c }));
-				else
-					restorefloats(c);
-				return;
-			}
-		} else if (maximize_vert && abs(c->y - m->wy) <= m->gappoh) {
-			resizeclient(c,
-				c->x,
-				ws->wy + (c->sfy - m->wy) * ws->wh / m->wh,
-				c->w,
-				c->sfh * ws->wh / m->wh
-			);
-			return;
-		} else if (maximize_horz && abs(c->x - m->wx) <= m->gappov) {
-			resizeclient(
-				c,
-				ws->wx + (c->sfx - m->wx) * ws->ww / m->ww,
-				c->y,
-				c->sfw * ws->ww / m->ww,
-				c->h
-			);
+		is_maximized_vert = abs(c->y - m->wy) <= m->gappoh;
+		is_maximized_horz = abs(c->x - m->wx) <= m->gappov;
+
+		if (
+			(maximize_vert && maximize_horz && is_maximized_vert && is_maximized_horz) ||
+			(!maximize_horz && is_maximized_vert) ||
+			(!maximize_vert && is_maximized_horz)
+		) {
+			if (!WASFLOATING(c))
+				togglefloating(&((Arg) { .v = c }));
+			else
+				restorefloats(c);
 			return;
 		}
 		savefloats(c);
