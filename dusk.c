@@ -1604,15 +1604,19 @@ configurerequest(XEvent *e)
 				attachstack(c);
 			}
 
-			if ((ev->value_mask & (CWX|CWY)) && !(ev->value_mask & (CWWidth|CWHeight)))
+			if ((ev->value_mask & (CWX|CWY)) && !(ev->value_mask & (CWWidth|CWHeight))) {
+				setflag(c, NoBorder, enabled(NoBorders) && WASNOBORDER(c));
 				configure(c);
+			}
 			if (ISVISIBLE(c))
 				XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
 			else
 				addflag(c, NeedResize);
 			savefloats(c);
-		} else
+		} else {
+			setflag(c, NoBorder, enabled(NoBorders) && WASNOBORDER(c));
 			configure(c);
+		}
 	} else {
 		wc.x = ev->x;
 		wc.y = ev->y;
@@ -2388,10 +2392,6 @@ manage(Window w, XWindowAttributes *wa)
 	if (getatomprop(c, netatom[NetWMState], XA_ATOM) == netatom[NetWMFullscreen] || ISFULLSCREEN(c)) {
 		setflag(c, FullScreen, 0);
 		setfullscreen(c, 1, 0);
-	} else {
-		wc.border_width = c->bw;
-		XConfigureWindow(dpy, w, CWBorderWidth, &wc);
-		configure(c); /* propagates border_width, if size doesn't change */
 	}
 
 	updateclientdesktop(c);
@@ -2478,8 +2478,14 @@ manage(Window w, XWindowAttributes *wa)
 
 	arrange(c->ws);
 
-	if (ISFLOATING(c))
+	if (ISFLOATING(c)) {
+		if (!ISTRUEFULLSCREEN(c) && !noborder(c)) {
+			wc.border_width = c->bw;
+			XConfigureWindow(dpy, w, CWBorderWidth, &wc);
+			configure(c); /* propagates border_width, if size doesn't change */
+		}
 		XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
+	}
 
 	if (ISVISIBLE(c))
 		show(c);

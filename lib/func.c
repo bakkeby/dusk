@@ -61,7 +61,7 @@ reload(const uint64_t functionality)
 	if (!func_enabled && functionality == NoBorders) {
 		for (ws = workspaces; ws; ws = ws->next) {
 			for (c = ws->clients; c; c = c->next) {
-				if (WASSNOBORDER(c)) {
+				if (WASNOBORDER(c)) {
 					wc.border_width = c->bw;
 					wc.width = c->w;
 					wc.height = c->h;
