@@ -120,8 +120,8 @@ draw_workspaces(Bar *bar, BarArg *a)
 			if (plw && nextws)
 				drw_arrow(drw, x + w, y, plw, h, a->value, scheme[wsscheme][ColBg], scheme[nextscheme][ColBg], scheme[SchemeNorm][ColBg]);
 
-			drawindicator(ws, NULL, hasclients(ws), x, y, w , h, -1, 0, wsindicatortype);
-			drawindicator(ws, NULL, ws->pinned, x, y, w, h, -1, 0, wspinnedindicatortype);
+			drawindicator(ws, NULL, hasclients(ws), x, y, w , h, -1, 0, indicators[IndicatorWs]);
+			drawindicator(ws, NULL, ws->pinned, x, y, w, h, -1, 0, indicators[IndicatorPinnedWs]);
 
 			if (bar->vert) {
 				y += bh;

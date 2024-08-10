@@ -3188,6 +3188,9 @@ setfullscreen(Client *c, int fullscreen, int restorefakefullscreen)
 	 */
 	if (!ISFULLSCREEN(c))
 		skipfocusevents();
+
+	if (ISFAKEFULLSCREEN(c))
+		drawbar(m);
 }
 
 void

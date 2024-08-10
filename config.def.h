@@ -39,12 +39,16 @@ static const double resizeopacity        = 0;   /* client opacity when being res
 static const double placeopacity         = 0;   /* client opacity when being placed, 0 means don't apply opacity */
 
 /* Indicators: see lib/bar_indicators.h for options */
-static int wsindicatortype               = INDICATOR_NONE;
-static int wspinnedindicatortype         = INDICATOR_NONE;
-static int fakefsindicatortype           = INDICATOR_PLUS;
-static int floatfakefsindicatortype      = INDICATOR_PLUS_AND_LARGER_SQUARE;
-static int floatindicatortype            = INDICATOR_TOP_LEFT_LARGER_SQUARE;
-static int tiledindicatortype            = INDICATOR_NONE;
+static int indicators[IndicatorLast] = {
+	[IndicatorWs] = INDICATOR_NONE,
+	[IndicatorPinnedWs] = INDICATOR_NONE,
+	[IndicatorFakeFullScreen] = INDICATOR_PLUS,
+	[IndicatorFakeFullScreenActive] = INDICATOR_PLUS_AND_LARGER_SQUARE,
+	[IndicatorFloatFakeFullScreen] = INDICATOR_PLUS,
+	[IndicatorFloatFakeFullScreenActive] = INDICATOR_PLUS_AND_LARGER_SQUARE,
+	[IndicatorTiled] = INDICATOR_NONE,
+	[IndicatorFloating] = INDICATOR_TOP_LEFT_LARGER_SQUARE,
+};
 
 /* Custom indicators using status2d markup, e.g. enabled via INDICATOR_CUSTOM_3 */
 static char *custom_2d_indicator_1 = "^c#00A523^^r0,h,w,2^"; // green underline

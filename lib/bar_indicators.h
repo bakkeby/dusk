@@ -1,3 +1,18 @@
+
+/* Indicator types */
+enum {
+	IndicatorWs,
+	IndicatorPinnedWs,
+	IndicatorFakeFullScreen,
+	IndicatorFakeFullScreenActive,
+	IndicatorFloatFakeFullScreen,
+	IndicatorFloatFakeFullScreenActive,
+	IndicatorTiled,
+	IndicatorFloating,
+	IndicatorLast,
+};
+
+/* Indicator options */
 enum {
 	INDICATOR_NONE,
 	INDICATOR_TOP_LEFT_SQUARE,
