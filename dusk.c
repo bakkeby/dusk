@@ -2283,7 +2283,6 @@ manage(Window w, XWindowAttributes *wa)
 	Client *c = NULL, *t = NULL, *term = NULL;
 	Monitor *m = NULL;
 	Window trans = None;
-	XWindowChanges wc = { 0 };
 	int focusclient = 1;
 
 	if (selws == stickyws)
@@ -2480,9 +2479,7 @@ manage(Window w, XWindowAttributes *wa)
 
 	if (FREEFLOW(c)) {
 		if (!ISTRUEFULLSCREEN(c) && !noborder(c)) {
-			wc.border_width = c->bw;
-			XConfigureWindow(dpy, w, CWBorderWidth, &wc);
-			configure(c); /* propagates border_width, if size doesn't change */
+			restoreborder(c);
 		}
 		XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
 	}

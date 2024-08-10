@@ -311,6 +311,17 @@ noborder(Client *c)
 }
 
 void
+restoreborder(Client *c)
+{
+	XWindowChanges wc;
+	wc.border_width = c->bw;
+	wc.width = c->w;
+	wc.height = c->h;
+	XConfigureWindow(dpy, c->win, CWWidth|CWHeight|CWBorderWidth, &wc);
+	configure(c);
+}
+
+void
 adjustwsformonitor(Workspace *ws, Monitor *m)
 {
 	if (!ws || !m)
@@ -383,6 +394,8 @@ void
 showwsclient(Client *c)
 {
 	if (ISVISIBLE(c) && (FREEFLOW(c) || ISTRUEFULLSCREEN(c))) {
+		if (WASNOBORDER(c))
+			restoreborder(c);
 		if (NEEDRESIZE(c)) {
 			removeflag(c, NeedResize);
 			XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);

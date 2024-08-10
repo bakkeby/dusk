@@ -54,7 +54,6 @@ reload(const uint64_t functionality)
 	Workspace *ws;
 	Client *c;
 	int func_enabled = enabled(functionality);
-	XWindowChanges wc;
 
 	/* If the NoBorders functionality was disabled, then loop through and force resize all clients
 	 * that previously had the NoBorder flag set in order to restore borders. */
@@ -62,11 +61,7 @@ reload(const uint64_t functionality)
 		for (ws = workspaces; ws; ws = ws->next) {
 			for (c = ws->clients; c; c = c->next) {
 				if (WASNOBORDER(c)) {
-					wc.border_width = c->bw;
-					wc.width = c->w;
-					wc.height = c->h;
-					XConfigureWindow(dpy, c->win, CWWidth|CWHeight|CWBorderWidth, &wc);
-					configure(c);
+					restoreborder(c);
 				}
 			}
 		}

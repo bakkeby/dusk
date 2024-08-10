@@ -20,6 +20,7 @@ static int hasfloating(Workspace *ws);
 static int hasfullscreen(Workspace *ws);
 static void handleabandoned(Workspace *ws);
 static int noborder(Client *c);
+static void restoreborder(Client *c);
 static void adjustwsformonitor(Workspace *ws, Monitor *m);
 static Workspace * getwsbyindex(const Arg *arg);
 static Workspace * getwsbyname(const Arg *arg);
