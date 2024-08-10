@@ -2478,7 +2478,7 @@ manage(Window w, XWindowAttributes *wa)
 
 	arrange(c->ws);
 
-	if (ISFLOATING(c)) {
+	if (FREEFLOW(c)) {
 		if (!ISTRUEFULLSCREEN(c) && !noborder(c)) {
 			wc.border_width = c->bw;
 			XConfigureWindow(dpy, w, CWBorderWidth, &wc);
