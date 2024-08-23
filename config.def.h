@@ -722,6 +722,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( rioresize, ARG_TYPE_NONE ),
 	IPCCOMMAND( setattachdefault, ARG_TYPE_STR),
 	IPCCOMMAND( setborderpx, ARG_TYPE_SINT ),
+	IPCCOMMAND( setclientborderpx, ARG_TYPE_SINT ),
 	IPCCOMMAND( setlayoutaxisex, ARG_TYPE_SINT ),
 	IPCCOMMAND( setlayout, ARG_TYPE_SINT ),
 	IPCCOMMAND( setcfact, ARG_TYPE_FLOAT ),
