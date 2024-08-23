@@ -292,6 +292,8 @@ hasfullscreen(Workspace *ws)
 int
 noborder(Client *c)
 {
+	Monitor *m = c->ws->mon;
+
 	if (disabled(NoBorders))
 		return 0;
 
@@ -302,6 +304,10 @@ noborder(Client *c)
 		return 0;
 
 	if (NOBORDER(c))
+		return 1;
+
+	/* Special case if client size takes up the entire window area */
+	if (abs(c->y - m->wy) <= m->gappoh && abs(c->x - m->wx) <= m->gappov)
 		return 1;
 
 	if (nexttiled(c->ws->clients) != c || nexttiled(c->next))

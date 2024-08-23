@@ -2475,14 +2475,13 @@ manage(Window w, XWindowAttributes *wa)
 		}
 	}
 
+	if (!ISTRUEFULLSCREEN(c) && !noborder(c))
+		restoreborder(c);
+
 	arrange(c->ws);
 
-	if (FREEFLOW(c)) {
-		if (!ISTRUEFULLSCREEN(c) && !noborder(c)) {
-			restoreborder(c);
-		}
+	if (FREEFLOW(c))
 		XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
-	}
 
 	if (ISVISIBLE(c))
 		show(c);
