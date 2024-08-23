@@ -2081,28 +2081,26 @@ gettextprop(Window w, Atom atom, char *text, unsigned int size)
 void
 grabbuttons(Client *c, int focused)
 {
+	unsigned int i, j;
 	updatenumlockmask();
-	{
-		unsigned int i, j;
-		unsigned int modifiers[] = { 0, LockMask, numlockmask, numlockmask|LockMask };
-		XUngrabButton(dpy, AnyButton, AnyModifier, c->win);
-		if (!focused) {
-			XGrabButton(dpy, AnyButton, AnyModifier, c->win, False,
-				BUTTONMASK, GrabModeSync, GrabModeSync, None, None);
-		}
-		for (i = 0; i < LENGTH(buttons); i++) {
-			if (buttons[i].click != ClkClientWin)
-				continue;
+	unsigned int modifiers[] = { 0, LockMask, numlockmask, numlockmask|LockMask };
+	XUngrabButton(dpy, AnyButton, AnyModifier, c->win);
+	if (!focused) {
+		XGrabButton(dpy, AnyButton, AnyModifier, c->win, False,
+			BUTTONMASK, GrabModeSync, GrabModeSync, None, None);
+	}
+	for (i = 0; i < LENGTH(buttons); i++) {
+		if (buttons[i].click != ClkClientWin)
+			continue;
 
-			if ((disabled(AllowNoModifierButtons) || ONLYMODBUTTONS(c)) && buttons[i].mask == 0)
-				continue;
+		if ((disabled(AllowNoModifierButtons) || ONLYMODBUTTONS(c)) && buttons[i].mask == 0)
+			continue;
 
-			for (j = 0; j < LENGTH(modifiers); j++) {
-				XGrabButton(dpy, buttons[i].button,
-					buttons[i].mask | modifiers[j],
-					c->win, False, BUTTONMASK,
-					GrabModeAsync, GrabModeSync, None, None);
-			}
+		for (j = 0; j < LENGTH(modifiers); j++) {
+			XGrabButton(dpy, buttons[i].button,
+				buttons[i].mask | modifiers[j],
+				c->win, False, BUTTONMASK,
+				GrabModeAsync, GrabModeSync, None, None);
 		}
 	}
 }
@@ -2112,8 +2110,8 @@ void
 grabkeys(void)
 {
 	unsigned int i, j;
-	unsigned int modifiers[] = { 0, LockMask, numlockmask, numlockmask|LockMask };
 	updatenumlockmask();
+	unsigned int modifiers[] = { 0, LockMask, numlockmask, numlockmask|LockMask };
 	XUngrabKey(dpy, AnyKey, AnyModifier, root);
 
 	for (i = 0; i < LENGTH(keys); i++)
@@ -2127,8 +2125,8 @@ grabkeys(void)
 {
 	unsigned int i, j, k;
 	int start, end, skip;
-	unsigned int modifiers[] = { 0, LockMask, numlockmask, numlockmask|LockMask };
 	updatenumlockmask();
+	unsigned int modifiers[] = { 0, LockMask, numlockmask, numlockmask|LockMask };
 	XUngrabKey(dpy, AnyKey, AnyModifier, root);
 
 	KeySym *syms;
