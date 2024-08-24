@@ -43,7 +43,7 @@ static const uint64_t
 	ViewOnWs = 0x100000, // follow a window to the workspace it is being moved to
 	Xresources = 0x200000, // xrdb patch
 	SnapToWindows = 0x400000, // snap to windows when moving floating clients
-	FuncPlaceholder0x800000 = 0x800000,
+	SnapToGaps = 0x800000, // snap to outer gaps when moving floating clients
 	AltWorkspaceIcons = 0x1000000, // show the workspace name instead of the icons
 	GreedyMonitor = 0x2000000, // when viewing a workspace the monitor is greedy and gives nothing in return (i.e. disables swap of workspaces)
 	SmartLayoutConvertion = 0x4000000, // when moving a workspace from one monitor to another, automatically adjust layout based on monitor orientation (i.e. vertical vs horizontal)

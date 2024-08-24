@@ -106,6 +106,7 @@ static uint64_t functionality = 0
 	|CenterSizeHintsClients // center tiled clients subject to size hints within their tiled area
 //	|ResizeHints // respect size hints also when windows are tiled
 	|SnapToWindows // snap to windows when moving floating clients
+	|SnapToGaps // snap to outer gaps when moving floating clients
 //	|SortScreens // monitors are numbered from left to right
 //	|ViewOnWs // follow a window to the workspace it is being moved to
 	|Xresources // add support for changing colours via Xresources

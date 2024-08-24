@@ -38,6 +38,7 @@ dump_settings(yajl_gen gen)
 			YSTR("CenterSizeHintsClients"); YBOOL(enabled(CenterSizeHintsClients));
 			YSTR("ResizeHints"); YBOOL(enabled(ResizeHints));
 			YSTR("SnapToWindows"); YBOOL(enabled(SnapToWindows));
+			YSTR("SnapToGaps"); YBOOL(enabled(SnapToGaps));
 			YSTR("SortScreens"); YBOOL(enabled(SortScreens));
 			YSTR("ViewOnWs"); YBOOL(enabled(ViewOnWs));
 			YSTR("Xresources"); YBOOL(enabled(Xresources));

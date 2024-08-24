@@ -37,6 +37,7 @@ movemouse(const Arg *arg)
 	XEvent ev;
 	Time lasttime = 0;
 	double prevopacity;
+	int ov = 0, oh = 0;
 
 	if (!(c = selws->sel))
 		return;
@@ -47,6 +48,11 @@ movemouse(const Arg *arg)
 	if (ISMARKED(c)) {
 		ignore_marked = 0; // movemouse supports marked clients
 		group(NULL);
+	}
+
+	if (enabled(SnapToGaps)) {
+		oh = gappoh;
+		ov = gappov;
 	}
 
 	/* Snap girders */
@@ -78,10 +84,10 @@ movemouse(const Arg *arg)
 		if (!ws->visible)
 			continue;
 
-		lgirder[ngirders] = ws->wx + gappov;
-		rgirder[ngirders] = ws->wx + ws->ww - gappov;
-		tgirder[ngirders] = ws->wy + gappoh;
-		bgirder[ngirders] = ws->wy + ws->wh - gappoh;
+		lgirder[ngirders] = ws->wx + ov;
+		rgirder[ngirders] = ws->wx + ws->ww - ov;
+		tgirder[ngirders] = ws->wy + oh;
+		bgirder[ngirders] = ws->wy + ws->wh - oh;
 		ngirders++;
 
 		if (disabled(SnapToWindows) || arg->i == 11) {

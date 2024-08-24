@@ -13,11 +13,17 @@ resizemouse(const Arg *arg)
 	Workspace *ws;
 	Time lasttime = 0;
 	double prevopacity;
+	int ov = 0, oh = 0;
 
 	if (!(c = selws->sel))
 		return;
 	if (ISTRUEFULLSCREEN(c)) /* no support resizing fullscreen windows by mouse */
 		return;
+
+	if (enabled(SnapToGaps)) {
+		oh = gappoh;
+		ov = gappov;
+	}
 
 	/* Snap girders */
 	int gap = gappfl;
@@ -40,10 +46,10 @@ resizemouse(const Arg *arg)
 		if (!ws->visible)
 			continue;
 
-		lgirder[ngirders] = ws->wx + gappov;
-		rgirder[ngirders] = ws->wx + ws->ww - gappov;
-		tgirder[ngirders] = ws->wy + gappoh;
-		bgirder[ngirders] = ws->wy + ws->wh - gappoh;
+		lgirder[ngirders] = ws->wx + ov;
+		rgirder[ngirders] = ws->wx + ws->ww - ov;
+		tgirder[ngirders] = ws->wy + oh;
+		bgirder[ngirders] = ws->wy + ws->wh - oh;
 		ngirders++;
 
 		if (disabled(SnapToWindows) || arg->i == 11) {
