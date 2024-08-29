@@ -451,9 +451,11 @@ static Monitor *dirtomon(int dir);
 static Workspace *dirtows(int dir);
 static void entermon(Monitor *m, Client *next);
 static void enternotify(XEvent *e);
+static void leavenotify(XEvent *e);
 static void expose(XEvent *e);
 static void focus(Client *c);
 static void focusin(XEvent *e);
+static void focusout(XEvent *e);
 static void focusmon(const Arg *arg);
 static void focusstack(const Arg *arg);
 static Atom getatomprop(Client *c, Atom prop, Atom req);
@@ -564,8 +566,10 @@ static void (*handler[LASTEvent]) (XEvent *) = {
 	[ConfigureRequest] = configurerequest,
 	[DestroyNotify] = structurenotify,
 	[EnterNotify] = enternotify,
+	[LeaveNotify] = leavenotify,
 	[Expose] = expose,
 	[FocusIn] = focusin,
+	[FocusOut] = focusout,
 	#ifdef HAVE_LIBXI
 	[GenericEvent] = genericevent,
 	#endif
@@ -1808,6 +1812,11 @@ enternotify(XEvent *e)
 	if (!c)
 		c = wintoclient(ev->window);
 
+	if (KILLONUNFOCUS(selws->sel) && (!c || c != selws->sel)) {
+		fprintf(stderr, "enternotify, killing focused %s\n", NAME(selws->sel));
+		killclient(&((Arg) { .v = selws->sel }));
+	}
+
 	m = c ? c->ws->mon : wintomon(ev->window);
 	if (selws == m->selws && (!c || (m->selws && c == m->selws->sel)))
 		return;
@@ -1820,6 +1829,21 @@ enternotify(XEvent *e)
 		return;
 
 	focus(c);
+}
+
+void
+leavenotify(XEvent *e)
+{
+	Client *c;
+	XCrossingEvent *ev = &e->xcrossing;
+
+	c = wintoclient(ev->window);
+	fprintf(stderr, "leave notify for client %s\n", ev->window == root ? "root" : NAME(c));
+	fprintf(stderr, "leave notify for client %s\n", ev->window == root ? "root" : NAME(c));
+	if (KILLONUNFOCUS(c)) {
+		fprintf(stderr, "leave notify, killing client %s\n", ev->window == root ? "root" : NAME(c));
+		killclient(&((Arg) { .v = c }));
+	}
 }
 
 void
@@ -1921,6 +1945,18 @@ focusin(XEvent *e)
 	Client *c = wintoclient(ev->window);
 	if (ws->sel && ev->window != ws->sel->win && c)
 		setfocus(ws->sel);
+}
+
+void
+focusout(XEvent *e)
+{
+	XFocusChangeEvent *ev = &e->xfocus;
+	Client *c = wintoclient(ev->window);
+fprintf(stderr, "focusout event received for client %s\n", NAME(c));
+	if (KILLONUNFOCUS(c)) {
+		fprintf(stderr, "focusout, killing focused %s\n", NAME(c));
+		killclient(&((Arg) { .v = c }));
+	}
 }
 
 void
@@ -3644,6 +3680,7 @@ unfocus(Client *c, int setfocus, Client *nextfocus)
 	c->ws->sel = NULL;
 
 	if (KILLONUNFOCUS(c)) {
+		fprintf(stderr, "unfocus; killing client %s\n", NAME(c));
 		killclient(&((Arg) { .v = c }));
 	}
 }
