@@ -3642,6 +3642,10 @@ unfocus(Client *c, int setfocus, Client *nextfocus)
 		restackwin(c->win, Below, wmcheckwin);
 
 	c->ws->sel = NULL;
+
+	if (KILLONUNFOCUS(c)) {
+		killclient(&((Arg) { .v = c }));
+	}
 }
 
 void

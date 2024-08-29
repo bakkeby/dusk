@@ -58,6 +58,7 @@ getflagbyname(const char *name)
 {
 	if (!name)
 		return 0;
+
 	compareNameToFlag(AlwaysOnTop)
 	compareNameToFlag(Fixed)
 	compareNameToFlag(Floating)
@@ -108,7 +109,7 @@ getflagbyname(const char *name)
 	compareNameToFlag(SwallowRetainSize)
 	compareNameToFlag(NoWarp)
 	compareNameToFlag(SwallowNoInheritFullScreen)
-	compareNameToFlag(FlagPlaceholder0x4000000000000)
+	compareNameToFlag(KillOnUnfocus)
 	compareNameToFlag(FlagPlaceholder0x8000000000000)
 	compareNameToFlag(FlagPlaceholder0x10000000000000)
 	compareNameToFlag(FlagPlaceholder0x20000000000000)

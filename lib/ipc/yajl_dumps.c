@@ -225,6 +225,7 @@ dump_client(yajl_gen gen, Client *c)
 			YSTR("IgnorePropTransientFor"); YBOOL(IGNOREPROPTRANSIENTFOR(c));
 			YSTR("IgnoreSizeHints"); YBOOL(IGNORESIZEHINTS(c));
 			YSTR("IgnoreMinimumSizeHints"); YBOOL(IGNOREMINIMUMSIZEHINTS(c));
+			YSTR("KillOnUnfocus"); YBOOL(KILLONUNFOCUS(c));
 			YSTR("Marked"); YBOOL(ISMARKED(c));
 			YSTR("NeedResize"); YBOOL(NEEDRESIZE(c));
 			YSTR("NeverFocus"); YBOOL(NEVERFOCUS(c));

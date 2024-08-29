@@ -62,7 +62,7 @@ static const uint64_t
 	SwallowRetainSize = 0x800000000000, // allows for a client to retain its height and width when swallowed or unswallowed
 	NoWarp = 0x1000000000000, // disallow cursor to warp to this client
 	SwallowNoInheritFullScreen = 0x2000000000000, // prevents the client from inheriting the fullscreen property when swallowed / unswallowed
-	FlagPlaceholder0x4000000000000 = 0x4000000000000,
+	KillOnUnfocus = 0x4000000000000, // if a client with this flag loses focus then it will be forcibly killed
 	FlagPlaceholder0x8000000000000 = 0x8000000000000,
 	FlagPlaceholder0x10000000000000 = 0x10000000000000,
 	FlagPlaceholder0x20000000000000 = 0x20000000000000,
@@ -114,6 +114,7 @@ static const uint64_t
 #define IGNOREPROPTRANSIENTFOR(C) (C && C->flags & IgnorePropTransientFor)
 #define IGNORESIZEHINTS(C) (C && C->flags & IgnoreSizeHints)
 #define IGNOREMINIMUMSIZEHINTS(C) (C && C->flags & IgnoreMinimumSizeHints)
+#define KILLONUNFOCUS(C) (C && C->flags & KillOnUnfocus)
 #define REFRESHSIZEHINTS(C) (C && C->flags & RefreshSizeHints)
 #define NEEDRESIZE(C) (C && C->flags & NeedResize)
 #define NEVERFOCUS(C) (C && C->flags & NeverFocus)
