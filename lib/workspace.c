@@ -290,15 +290,35 @@ hasfullscreen(Workspace *ws)
 }
 
 int
-noborder(Client *c)
+ismaximized(Client *c, int x, int y, int w, int h)
 {
 	Monitor *m = c->ws->mon;
+
+	if (w * h == 0) {
+		x = c->x;
+		y = c->y;
+		w = c->w;
+		h = c->h;
+	}
+
+	return abs(y - m->wy) <= m->gappoh &&
+	       abs(x - m->wx) <= m->gappov &&
+	       abs(w - m->ww) <= (m->gappov + c->bw) * 2 &&
+	       abs(h - m->wh) <= (m->gappoh + c->bw) * 2;
+}
+
+int
+noborder(Client *c, int x, int y, int w, int h)
+{
+	int maximized;
 
 	if (disabled(NoBorders))
 		return 0;
 
+	maximized = ismaximized(c, x, y, w, h);
+
 	if (FREEFLOW(c))
-		return 0;
+		return maximized;
 
 	if (ISTRUEFULLSCREEN(c))
 		return 0;
@@ -307,7 +327,7 @@ noborder(Client *c)
 		return 1;
 
 	/* Special case if client size takes up the entire window area */
-	if (abs(c->y - m->wy) <= m->gappoh && abs(c->x - m->wx) <= m->gappov)
+	if (maximized)
 		return 1;
 
 	if (nexttiled(c->ws->clients) != c || nexttiled(c->next))

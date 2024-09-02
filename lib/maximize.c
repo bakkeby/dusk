@@ -48,6 +48,10 @@ maximize_client(Client *c, int maximize_vert, int maximize_horz)
 	else
 		setfloatpos(c, "0% -1y 100% -1h", 1, 0);
 
+	if (noborder(c, 0, 0, 0, 0)) {
+		addflag(c, NoBorder);
+	}
+
 	resizeclient(c, c->x, c->y, c->w, c->h);
 	drawbar(ws->mon);
 }
