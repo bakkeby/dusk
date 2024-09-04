@@ -696,13 +696,12 @@ togglepinnedws(const Arg *arg)
 void
 togglews(const Arg *arg)
 {
-	Monitor *m;
+	Monitor *m = selmon;
 
-	if (!selws)
+	if (!m->prevwsmask)
 		return;
 
-	m = selws->mon;
-	viewwsmask(m, m->wsmask);
+	viewwsmask(m, m->prevwsmask);
 }
 
 void
@@ -788,7 +787,8 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 	Monitor *omon = NULL;
 	Workspace *ows = NULL, *w;
 
-	m->prevwsmask = getwsmask(m);
+	if (!combo)
+		m->prevwsmask = getwsmask(m);
 
 	if (enabled(WorkspacePreview)) {
 		storepreview(ws->mon->selws);
@@ -804,7 +804,8 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 		if (selws && selws->mon != ws->mon) {
 			do_warp = 1;
 			m = ws->mon;
-			m->prevwsmask = getwsmask(m);
+			if (!combo)
+				m->prevwsmask = getwsmask(m);
 			monitorchanged = 1;
 			selmon = m;
 		}
@@ -882,7 +883,8 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 				hidews(w);
 	}
 
-	storewsmask();
+	if (!combo)
+		storewsmask();
 
 	drawws(ws, m, m->prevwsmask, enablews, arrangeall, do_warp);
 }
