@@ -511,9 +511,9 @@ static Key keys[] = {
 	{ KeyPress,   MODKEY,                       XK_v,            group,                  {0} }, // groups floating clients together
 	{ KeyPress,   MODKEY|Shift,                 XK_v,            ungroup,                {0} }, // ungroups floating clients
 
-	{ KeyPress,   MODKEY,                       XK_a,            markall,                {0} }, // marks all clients on the selected workspace
-	{ KeyPress,   MODKEY|Ctrl,                  XK_a,            markall,                {1} }, // marks all floating clients on the selected workspace
-	{ KeyPress,   MODKEY|Alt,                   XK_a,            markall,                {2} }, // marks all hidden clients on the selected workspace
+	{ KeyPress,   MODKEY,                       XK_a,            markall,                {MARKALL_ALL} }, // marks all clients on the selected workspace
+	{ KeyPress,   MODKEY|Ctrl,                  XK_a,            markall,                {MARKALL_FLOATING} }, // marks all floating clients on the selected workspace
+	{ KeyPress,   MODKEY|Alt,                   XK_a,            markall,                {MARKALL_HIDDEN} }, // marks all hidden clients on the selected workspace
 	{ KeyPress,   MODKEY|Shift,                 XK_a,            unmarkall,              {0} }, // unmarks all clients
 	{ KeyPress,   MODKEY,                       XK_m,            togglemark,             {0} }, // marks or unmarks the selected client for group action
 	{ KeyPress,   MODKEY,                       XK_n,            zoom,                   {0} }, // moves the currently focused window to/from the master area (for tiled layouts)
@@ -680,6 +680,7 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( disable, ARG_TYPE_STR ),
 	IPCCOMMAND( floatpos, ARG_TYPE_STR ),
 	IPCCOMMAND( focusdir, ARG_TYPE_SINT ),
+	IPCCOMMAND( focushidden, ARG_TYPE_SINT ),
 	IPCCOMMAND( focusmaster, ARG_TYPE_NONE ),
 	IPCCOMMAND( focusmon, ARG_TYPE_SINT ),
 	IPCCOMMAND( focusstack, ARG_TYPE_SINT ),
@@ -760,6 +761,8 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( transfer, ARG_TYPE_NONE ),
 	IPCCOMMAND( transferall, ARG_TYPE_NONE ),
 	IPCCOMMAND( unfloatvisible, ARG_TYPE_NONE ),
+	IPCCOMMAND( unhideall, ARG_TYPE_NONE ),
+	IPCCOMMAND( unhidepop, ARG_TYPE_NONE ),
 	IPCCOMMAND( unmark, ARG_TYPE_NONE ),
 	IPCCOMMAND( unmarkall, ARG_TYPE_NONE ),
 	IPCCOMMAND( unswallow, ARG_TYPE_NONE ),

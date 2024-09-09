@@ -4,6 +4,8 @@ static int ismasterclient(Client *c);
 static Client *lastclient(Client *c);
 static Client *lasttiled(Client *c);
 static Client *nexttiled(Client *c);
+static Client *nexthidden(Client *c);
+static Client *snexthidden(Client *c);
 static Client *nthmaster(Client *c, int n, int reduce);
 static Client *nthstack(Client *c, int n, int reduce);
 static Client *nthtiled(Client *c, int n, int reduce);

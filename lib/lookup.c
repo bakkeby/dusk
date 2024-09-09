@@ -123,6 +123,20 @@ nexttiled(Client *c)
 }
 
 Client *
+nexthidden(Client *c)
+{
+	for (; c && !HIDDEN(c); c = c->next);
+	return c;
+}
+
+Client *
+snexthidden(Client *c)
+{
+	for (; c && !HIDDEN(c); c = c->snext);
+	return c;
+}
+
+Client *
 nthmaster(Client *c, int n, int reduce)
 {
 	if (!c)

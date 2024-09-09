@@ -47,7 +47,7 @@ showhideclient(const Arg *arg)
 {
 
 	Client *c = CLIENT, *n, *last_shown = NULL, *last_hidden = NULL;
-	if (!c)
+	if (!c && !num_marked)
 		return;
 
 	Workspace *ws = c->ws;
@@ -83,4 +83,60 @@ showhideclient(const Arg *arg)
 
 	arrange(ws);
 	force_warp = 0;
+}
+
+void
+unhideall(const Arg *arg)
+{
+	if (num_marked)
+		unmarkall(NULL);
+	markall(&((Arg) { .i = MARKALL_HIDDEN }));
+	if (num_marked)
+		showhideclient(NULL);
+}
+
+void
+unhidepop(const Arg *arg)
+{
+	Client *c;
+	int prev_ignore_marked = ignore_marked;
+
+	if (!selws)
+		return;
+
+	c = snexthidden(selws->stack);
+
+	if (c) {
+		ignore_marked = 1;
+		showhideclient(&((Arg) { .v = c }));
+		ignore_marked = prev_ignore_marked;
+	}
+}
+
+/* Variant of focusstack that only focuses on hidden clients (if any) on the current workspace. */
+void
+focushidden(const Arg *arg)
+{
+	Client *c = NULL, *i;
+	Workspace *ws = selws;
+
+	if (!ws)
+		return;
+
+	if (arg->i > 0) {
+		c = nexthidden(ws->sel->next);
+		if (!c)
+			c = nexthidden(ws->clients);
+	} else {
+		for (i = ws->clients; i && i != ws->sel; i = i->next)
+			if (HIDDEN(i))
+				c = i;
+		if (!c)
+			for (; i; i = i->next)
+				if (HIDDEN(i))
+					c = i;
+	}
+
+	if (c)
+		focus(c);
 }
