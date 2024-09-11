@@ -784,6 +784,19 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 	if (m == NULL)
 		m = selmon;
 
+	/* Workspaces that are assigned to dummymon are not intended to be viewed; they are temporary
+	 * assigned to the the dummy monitor in the context of the workspaces_per_mon functionality and
+	 * they are staying there until the surplus monitor is available.
+	 *
+	 * That said there may be obscure edge cases where a client can get assigned to a workspace on
+	 * the dummy monitor or such a workspace being brought into view. If so we allow that workspace
+	 * to be brought to the selected monitor.
+	 */
+	if (ws->mon == dummymon)
+		ws->mon = selmon;
+	if (m == dummymon)
+		m = selmon;
+
 	Monitor *omon = NULL;
 	Workspace *ows = NULL, *w;
 

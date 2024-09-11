@@ -647,7 +647,7 @@ applyrules(Client *c)
 
 			if (r->workspace)
 				for (ws = workspaces; ws && strcmp(ws->name, r->workspace) != 0; ws = ws->next);
-			c->ws = ws ? ws : selws;
+			c->ws = ws && ws->mon != dummymon ? ws : selws;
 
 			if (r->floatpos)
 				setfloatpos(c, r->floatpos, 0, 1);
