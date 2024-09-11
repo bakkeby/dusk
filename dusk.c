@@ -722,8 +722,6 @@ reapplyrules(Client *c)
 		return 0;
 	}
 
-	removeflag(c, ReapplyRules);
-
 	if (DISALLOWED(c)) {
 		killclient(&((Arg) { .v = c }));
 		return 1;
