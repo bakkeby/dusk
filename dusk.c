@@ -807,6 +807,9 @@ reapplyrules(Client *c)
 	if (SEMISCRATCHPAD(c) && c->scratchkey)
 		initsemiscratchpad(c);
 
+	if (SWITCHWORKSPACE(c) && !c->ws->visible)
+		viewwsonmon(c->ws, c->ws->mon, 0);
+
 	if (ISVISIBLE(c))
 		show(c);
 	else
