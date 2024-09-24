@@ -142,7 +142,7 @@ nthmaster(Client *c, int n, int reduce)
 	if (!c)
 		return NULL;
 
-	return nthtiled(c, MIN(n, c->ws->nmaster), 1);
+	return nthtiled(c, MIN(n, c->ws->nmaster), reduce);
 }
 
 Client *
@@ -151,7 +151,7 @@ nthstack(Client *c, int n, int reduce)
 	if (!c)
 		return NULL;
 
-	return nthtiled(c, n + c->ws->nmaster, 1);
+	return nthtiled(c, n + c->ws->nmaster, reduce);
 }
 
 Client *
