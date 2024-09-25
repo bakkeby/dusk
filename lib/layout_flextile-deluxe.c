@@ -502,35 +502,42 @@ arrange_top_to_bottom(Workspace *ws, int x, int y, int h, int w, int ih, int iv,
 void
 arrange_monocle(Workspace *ws, int x, int y, int h, int w, int ih, int iv, int n, int an, int ai, int arr, int grp)
 {
-	int i, stackno, minstackno = 0xFFFFFF;
-	Client *c, *s, *f = NULL;
+	int i;
+	Client *c, *s, *focused = NULL;
 
-	for (i = 0, c = nexttiled(ws->clients); c && i < (ai + an); c = nexttiled(c->next), i++) {
-		if (i < ai)
-			continue;
+	/* Find the most recently focused client among the clients tiled in monocle arrangement and
+	 * move it into view. */
+	for (s = ws->stack; s && !focused; s = s->snext) {
+		for (i = 0, c = nexttiled(ws->clients); c && i < (ai + an); c = nexttiled(c->next), i++) {
+			if (i < ai) {
+				if (c == s)
+					break;
+				continue;
+			}
 
-		for (stackno = 0, s = ws->stack; s && s != c; s = s->snext, ++stackno);
-		if (stackno < minstackno) {
-			f = s;
-			minstackno = stackno;
+			if (c != s)
+				continue;
+
+			/* If this is full monocle then draw the client without a border if relevant
+			 * (it still needs to be drawn with a border in a deck layout for example). */
+			if (enabled(NoBorders) && n == an)
+				addflag(c, NoBorder);
+			resize(c, x, y, w - (2 * c->bw), h - (2 * c->bw), 0);
+			focused = c;
+			break;
 		}
 	}
 
+	/* Hide other windows after focused have been moved into view, avoids background flickering */
 	for (i = 0, c = nexttiled(ws->clients); c && i < (ai + an); c = nexttiled(c->next), i++) {
 		if (i < ai)
 			continue;
 
 		c->area = grp;
 		c->arr = arr;
-		if (c == f) {
-			/* If this is full monocle then draw the client without a border if relevant (it still
-			 * needs to be drawn with a border in a deck layout for example). */
-			if (enabled(NoBorders) && n == an)
-				addflag(c, NoBorder);
-			resize(c, x, y, w - (2 * c->bw), h - (2 * c->bw), 0);
-		} else {
+
+		if (c != focused)
 			hide(c);
-		}
 	}
 
 	skipfocusevents();
