@@ -13,6 +13,9 @@ togglesticky(const Arg *arg)
 void
 setsticky(Client *c)
 {
+	if (ISSTICKY(c))
+		return;
+
 	int wastiled = TILED(c);
 	addflag(c, Sticky);
 
@@ -39,6 +42,9 @@ setsticky(Client *c)
 void
 unsetsticky(Client *c)
 {
+	if (!ISSTICKY(c))
+		return;
+
 	removeflag(c, Sticky);
 	detach(c);
 	detachstack(c);
