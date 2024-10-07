@@ -28,6 +28,7 @@ clean:
 
 install: all
 	mkdir -p ${DESTDIR}${PREFIX}/bin
+	rm -f ${DESTDIR}${PREFIX}/bin/dusk
 	cp -f dusk ${DESTDIR}${PREFIX}/bin
 	cp -f duskc ${DESTDIR}${PREFIX}/bin
 	chmod 755 ${DESTDIR}${PREFIX}/bin/dusk
