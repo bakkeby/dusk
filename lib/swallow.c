@@ -133,6 +133,7 @@ replaceclient(Client *old, Client *new)
 	}
 
 	toggleflagop(new, Floating, FLOATING(old));
+	toggleflagop(new, Sticky, ISSTICKY(old));
 
 	if (ISVISIBLE(new)) {
 		if (ISTRUEFULLSCREEN(new)) {
