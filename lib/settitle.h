@@ -1,3 +1,3 @@
 static void settitle(const Arg *arg);
-static void setwintitle(const Arg args[], int num_args);
+static void setwintitle(Window win, const char *title);
 static void setclienttitle(Client *c, const char *title);

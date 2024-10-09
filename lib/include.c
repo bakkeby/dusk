@@ -44,13 +44,6 @@
 #include "focusmaster.c"
 #include "focusurgent.c"
 #include "inplacerotate.c"
-#include "ipc.c"
-#ifdef VERSION
-#include "ipc/IPCClient.c"
-#include "ipc/yajl_dumps.c"
-#include "ipc/ipc.c"
-#include "ipc/util.c"
-#endif
 #include "killunsel.c"
 #include "mark.c"
 #include "maximize.c"
@@ -89,3 +82,6 @@
 
 /* Layouts */
 #include "layout_flextile-deluxe.c"
+
+/* dbus */
+#include "dbus_server.c"
