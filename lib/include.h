@@ -44,9 +44,6 @@
 #include "focusmaster.h"
 #include "focusurgent.h"
 #include "inplacerotate.h"
-#include "ipc.h"
-#include "ipc/ipc.h"
-#include "ipc/util.h"
 #include "killunsel.h"
 #include "movemouse.h"
 #include "resizemouse.h"
@@ -84,3 +81,6 @@
 
 /* Layouts */
 #include "layout_flextile-deluxe.h"
+
+/* dbus */
+#include "dbus_server.h"

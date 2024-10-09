@@ -1075,11 +1075,6 @@ cleanup(void)
 	XSync(dpy, False);
 	XSetInputFocus(dpy, PointerRoot, RevertToPointerRoot, CurrentTime);
 	XDeleteProperty(dpy, root, netatom[NetActiveWindow]);
-
-	ipc_cleanup();
-
-	if (close(epoll_fd) < 0)
-		fprintf(stderr, "Failed to close epoll file descriptor\n");
 }
 
 void
@@ -2981,36 +2976,75 @@ restackwin(Window win, int stack_mode, Window sibling)
 void
 run(void)
 {
-	int event_count = 0;
-	const int MAX_EVENTS = 10;
-	struct epoll_event events[MAX_EVENTS];
+	int activity;
+	int dbus_fd;
+	int dpy_fd;
+	int dbus_registered;
+	int max_fd;
+	char dbus_name[256];
+	prepare_dbus_name(dbus_name, dbus_base_name);
+
+	unsigned long long last_dbus_attempt;
+	DBusMessage *msg;
+	XEvent ev;
 
 	XSync(dpy, False);
+	dbus_registered = register_dbus(dbus_name, &dbus_fd);
+	last_dbus_attempt = now();
 
-	/* main event loop */
+	/* Get the file descriptor for X11 */
+	dpy_fd = ConnectionNumber(dpy);
+
+	/* Temporary event loop in case dbus is not available */
+	while (running && !dbus_registered && !XNextEvent(dpy, &ev)) {
+		if (handler[ev.type]) {
+			handler[ev.type](&ev); /* call handler */
+		}
+
+		/* Attempt to register with dbus at most every 5 seconds */
+		if (now() - last_dbus_attempt > 5000) {
+			dbus_registered = register_dbus(dbus_name, &dbus_fd);
+			last_dbus_attempt = now();
+		}
+	}
+
+	/* Main event loop */
 	while (running) {
-		event_count = epoll_wait(epoll_fd, events, MAX_EVENTS, -1);
 
-		for (int i = 0; i < event_count; i++) {
-			int event_fd = events[i].data.fd;
-			DEBUG("Got event from fd %d\n", event_fd);
+		fd_set read_fds;
+		FD_ZERO(&read_fds);
+		FD_SET(dbus_fd, &read_fds); // watch D-Bus socket
+		FD_SET(dpy_fd, &read_fds);  // watch X11 socket
 
-			if (event_fd == dpy_fd) {
-				// -1 means EPOLLHUP
-				if (handlexevent(events + i) == -1)
-					return;
-			} else if (event_fd == ipc_get_sock_fd()) {
-				ipc_handle_socket_epoll_event(events + i);
-			} else if (ipc_is_client_registered(event_fd)) {
-				if (ipc_handle_client_epoll_event(events + i, mons, &lastselmon, selmon,
-						num_workspaces, layouts, LENGTH(layouts)) < 0) {
-					fprintf(stderr, "Error handling IPC event on fd %d\n", event_fd);
+		max_fd = (dbus_fd > dpy_fd) ? dbus_fd : dpy_fd;
+
+		/* Wait for events on either D-Bus or X11 */
+		activity = select(max_fd + 1, &read_fds, NULL, NULL, NULL);
+
+		if (activity < 0) {
+			perror("select");
+			continue;
+		}
+
+		/* Handle X events */
+		if (FD_ISSET(dpy_fd, &read_fds)) {
+			while (XPending(dpy)) {
+				XNextEvent(dpy, &ev);
+				if (handler[ev.type]) {
+					handler[ev.type](&ev); /* call X event handler */
 				}
-			} else {
-				fprintf(stderr, "Got event from unknown fd %d, ptr %p, u32 %d, u64 %lu",
-				event_fd, events[i].data.ptr, events[i].data.u32,
-				events[i].data.u64);
-				fprintf(stderr, " with events %d\n", events[i].events);
+			}
+		}
+
+		/* Handle D-Bus messages */
+		if (FD_ISSET(dbus_fd, &read_fds)) {
+
+			/* Non-blocking read of the next available message */
+			dbus_connection_read_write(dbus_conn, 0);
+
+			while ((msg = dbus_connection_pop_message(dbus_conn)) != NULL) {
+				handle_dbus_message(msg); /* call dbus handler */
+				dbus_message_unref(msg);
 			}
 		}
 	}
@@ -3417,7 +3451,6 @@ setup(void)
 	#endif
 	grabkeys();
 	focus(NULL);
-	setupepoll();
 
 	for (m = mons; m; m = m->next)
 		showws(m->selws);
@@ -4088,7 +4121,6 @@ main(int argc, char *argv[])
 		fputs("warning: no locale support\n", stderr);
 	if (!(dpy = XOpenDisplay(NULL)))
 		die("dusk: cannot open display");
-
 	if (!(xcon = XGetXCBConnection(dpy)))
 		die("dusk: cannot get xcb connection\n");
 

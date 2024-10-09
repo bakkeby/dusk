@@ -8,11 +8,8 @@ settitle(const Arg *arg)
 }
 
 void
-setwintitle(const Arg args[], int num_args)
+setwintitle(Window win, const char *title)
 {
-	Window win = args[0].i;
-	const char *title = args[1].v;
-
 	setclienttitle(wintoclient(win), title);
 }
 
