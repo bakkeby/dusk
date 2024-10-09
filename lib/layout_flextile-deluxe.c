@@ -44,48 +44,44 @@ static const TileArranger flextiles[] = {
 
 /* workspace  symbol     nmaster, nstack, split, master axis, stack axis, secondary stack axis  */
 void
-customlayout(const Arg args[], int num_args)
-{
+customlayout(
+	int ws_num,
+	char *symbol,
+	int nmaster,
+	int nstack,
+	int split,
+	int master_axis,
+	int stack_axis,
+	int secondary_stack_axis
+) {
 	Workspace *ws;
 
-	if (num_args < 8) {
-		fprintf(stderr, "customlayout: num_args < 7 : %d\n", num_args);
-		return;
-	}
-
-	/* 0) Workspace */
-	for (ws = workspaces; ws && ws->num != args[0].i; ws = ws->next);
+	for (ws = workspaces; ws && ws->num != ws_num; ws = ws->next);
 	if (!ws)
 		ws = selws;
 	ws->prevlayout = ws->layout;
 
-	/* 1) Layout symbol */
-	if (args[1].v)
-		strlcpy(ws->ltsymbol, args[1].v, sizeof ws->ltsymbol);
+	if (symbol != NULL)
+		strlcpy(ws->ltsymbol, symbol, sizeof ws->ltsymbol);
 
-	/* 2) nmaster */
-	if (args[2].i > -1)
-		ws->nmaster = args[2].i;
+	if (nmaster > -1)
+		ws->nmaster = nmaster;
 
-	/* 3) nstack */
-	if (args[3].i > -1)
-		ws->nstack = args[3].i;
+	if (nstack > -1)
+		ws->nstack = nstack;
 
-	/* 4) split (layout), negative means mirror layout */
-	if (labs(args[4].i) < LAYOUT_LAST)
-		ws->ltaxis[LAYOUT] = args[4].i;
+	/* split (layout), negative means mirror layout */
+	if (labs(split) < LAYOUT_LAST)
+		ws->ltaxis[LAYOUT] = split;
 
-	/* 5) master axis */
-	if (args[5].i > -1 && args[5].i < AXIS_LAST)
-		ws->ltaxis[MASTER] = args[5].i;
+	if (master_axis > -1 && master_axis < AXIS_LAST)
+		ws->ltaxis[MASTER] = master_axis;
 
-	/* 6) stack 1 axis */
-	if (args[6].i > -1 && args[6].i < AXIS_LAST)
-		ws->ltaxis[STACK] = args[6].i;
+	if (stack_axis > -1 && stack_axis < AXIS_LAST)
+		ws->ltaxis[STACK] = stack_axis;
 
-	/* 7) stack 2 axis */
-	if (args[7].i > -1 && args[7].i < AXIS_LAST)
-		ws->ltaxis[STACK2] = args[7].i;
+	if (secondary_stack_axis > -1 && secondary_stack_axis < AXIS_LAST)
+		ws->ltaxis[STACK2] = secondary_stack_axis;
 
 	arrange(ws);
 }

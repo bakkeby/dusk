@@ -1,4 +1,4 @@
-static void customlayout(const Arg args[], int num_args);
+static void customlayout(int ws_num, char *symbol, int nmaster, int nstack, int split, int master_axis, int stack_axis, int secondary_stack_axis);
 static void flextile(Workspace *ws);
 static void getfactsforrange(Workspace *ws, int an, int ai, int size, int *rest, float *fact);
 static void mirrorlayout(const Arg *arg);
