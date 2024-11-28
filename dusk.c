@@ -789,7 +789,7 @@ reapplyrules(Client *c)
 		drawbar(rule_ws->mon);
 
 	/* If the client indicates that it is in fullscreen, or if the FullScreen flag has been
-	 * explictly set via client rules, then enable fullscreen now. */
+	 * explicitly set via client rules, then enable fullscreen now. */
 	if (getatomprop(c, netatom[NetWMState], XA_ATOM) == netatom[NetWMFullscreen] || ISFULLSCREEN(c)) {
 		setflag(c, FullScreen, 0);
 		setfullscreen(c, 1, 0);

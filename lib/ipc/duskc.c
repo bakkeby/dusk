@@ -471,7 +471,7 @@ print_usage(const char *name)
 	puts("");
 	puts("  get_layouts                     Get list of layouts");
 	puts("");
-	puts("  get_client <window_id>          Get client proprties");
+	puts("  get_client <window_id>          Get client properties");
 	puts("");
 	puts("  get_bar_height                  Get the bar height");
 	puts("");
