@@ -30,6 +30,9 @@ struct BarDef {
 	int vert;
 	const char *barpos;
 	const char *name;
+	const char *extclass;
+	const char *extinstance;
+	const char *extname;
 };
 
 struct Bar {
@@ -88,15 +91,20 @@ static void drawbar(Monitor *m);
 static void drawbars(void);
 static void drawbarwin(Bar *bar);
 static void drawbarmodule(const BarRule *br, int r);
+static const BarDef * getbardef(Bar *bar);
 static void updatebarpos(Monitor *m);
 static void updatebars(void);
 static void recreatebar(Bar *bar);
 static void reducewindowarea(Monitor *m);
 static void removebar(Bar *bar);
 static void setbarpos(Bar *bar);
+static void getbarsize(Bar *bar, int *w, int *h);
 static void showbar(const Arg *arg);
 static void hidebar(const Arg *arg);
+static void showhidebar(Bar *bar);
 static void togglebar(const Arg *arg);
 static void togglebarpadding(const Arg *arg);
 static void togglecompact(const Arg *arg);
 static Bar * wintobar(Window win);
+static Bar * mapexternalbar(Window win);
+static int matchextbar(Bar *bar, Window win);

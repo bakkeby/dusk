@@ -237,15 +237,18 @@ static const Rule clientrules[] = {
 
 /* Bar settings, this defines what bars exists, their position, and what attributes they have.
  *
- *    monitor - the exact monitor number the bar should be created on
- *              (0 - primary, 1 - secondary, 2 - tertiary)
- *    idx     - the bar index, used in relation to bar rules below
- *              (bar indexes can be reused across monitors)
- *    vert    - whether the bar is horizontal (0) or vertical (1), not
- *              all bar modules will have support for being displayed
- *              in a vertical bar
- *    name    - this is just a reference that can be used for logging
- *              purposes
+ *    monitor   - the exact monitor number the bar should be created on
+ *                (0 - primary, 1 - secondary, 2 - tertiary)
+ *    idx       - the bar index, used in relation to bar rules below
+ *                (bar indexes can be reused across monitors)
+ *    vert      - whether the bar is horizontal (0) or vertical (1), not
+ *                all bar modules will have support for being displayed
+ *                in a vertical bar
+ *    name      - this is just a reference that can be used for logging
+ *                purposes
+ *    ext class - WM class to match on for external bars
+ *    ext inst  - WM instance to match on for external bars
+ *    ext name  - WM name to match on for external bars
  *
  *    Bar positioning consists of four values, x, y, w and h which,
  *    similarly to floatpos, can have different meaning depending on
@@ -282,7 +285,7 @@ static const Rule clientrules[] = {
  *    vertpad and sidepad variables towards the top of this configuration file.
  */
 static const BarDef bars[] = {
-	/* monitor idx  vert   x     y      w     h     name  */
+	/* monitor idx  vert   x     y      w     h     name            ext class  ext inst  ext name */
 	{  0,      0,   0,    "0%    0%     100% -1h ", "Primary top" },
 	{  0,      1,   0,    "0%    100%   100% -1h ", "Primary bottom" },
 	{  1,      0,   0,    "0%    0%     100% -1h ", "Secondary top" },

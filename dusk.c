@@ -1512,7 +1512,7 @@ configurenotify(XEvent *e)
 			setviewport();
 			for (m = mons; m; m = m->next) {
 				for (bar = m->bar; bar; bar = bar->next)
-					XMoveResizeWindow(dpy, bar->win, bar->bx, bar->by, bar->bw, bar->bh);
+					showhidebar(bar);
 				freepreview(m);
 			}
 			for (ws = workspaces; ws; ws = ws->next) {
@@ -1544,6 +1544,7 @@ configurerequest(XEvent *e)
 {
 	Client *c;
 	Monitor *m;
+	Bar *bar;
 	XConfigureRequestEvent *ev = &e->xconfigurerequest;
 	XWindowChanges wc;
 	Workspace *ws;
@@ -1621,6 +1622,11 @@ configurerequest(XEvent *e)
 			setflag(c, NoBorder, enabled(NoBorders) && WASNOBORDER(c));
 			configure(c);
 		}
+	} else if ((bar = wintobar(ev->window))) {
+		if (enabled(Debug)) {
+			fprintf(stderr, "configurerequest: received event %ld for bar %s\n", ev->value_mask, bar->name);
+			fprintf(stderr, "    - x = %d, y = %d, w = %d, h = %d (ignored)\n", ev->x, ev->y, ev->width, ev->height);
+		}
 	} else {
 		wc.x = ev->x;
 		wc.y = ev->y;
@@ -1658,6 +1664,7 @@ createmon(int num)
 Workspace *
 destroynotify(XEvent *e)
 {
+	Monitor *m;
 	Client *c;
 	Bar *bar;
 	Window focus_return;
@@ -1689,7 +1696,11 @@ destroynotify(XEvent *e)
 	if ((bar = wintobar(ev->window))) {
 		if (enabled(Debug))
 			fprintf(stderr, "destroynotify: received event for bar %s\n", bar->name);
+		m = bar->mon;
 		recreatebar(bar);
+		updatebarpos(m);
+		setworkspaceareasformon(m);
+		arrangemon(m);
 		return NULL;
 	}
 
@@ -2529,14 +2540,20 @@ maprequest(XEvent *e)
 
 	if (!XGetWindowAttributes(dpy, ev->window, &wa))
 		return;
+
 	if (!wa.depth) {
 		fprintf(stderr, "maprequest: refusing to map window %ld with depth of 0\n", ev->window);
 		return;
 	}
+
+	if (mapexternalbar(ev->window))
+		return;
+
 	if (wa.override_redirect) {
 		XRaiseWindow(dpy, ev->window);
 		return;
 	}
+
 	if (!wintoclient(ev->window))
 		manage(ev->window, &wa);
 }
@@ -3012,6 +3029,8 @@ scan(void)
 		for (i = 0; i < num; i++) {
 			if (!XGetWindowAttributes(dpy, wins[i], &wa)
 			|| wa.override_redirect || XGetTransientForHint(dpy, wins[i], &d1))
+				continue;
+			if (mapexternalbar(wins[i]))
 				continue;
 			if (wa.map_state == IsViewable || getstate(wins[i]) == IconicState)
 				manage(wins[i], &wa);
