@@ -2761,7 +2761,7 @@ raiseclient(Client *c)
 	 * selected workspace when for searching other clients. */
 	ws = (!c ? selws : c->ws == stickyws ? stickyws->next : c->ws);
 	wc.stack_mode = Above;
-	wc.sibling = ws->mon->bar ? ws->mon->bar->win : wmcheckwin;
+	wc.sibling = wmcheckwin;
 
 	/* If the raised client is always on top, then it should be raised first. */
 	if (ALWAYSONTOP(c) || ISTRANSIENT(c) || ISSTICKY(c)) {
@@ -2956,10 +2956,10 @@ restack(Workspace *ws)
 
 	raised = (enabled(FocusedOnTopTiled) || FREEFLOW(c) || ISTRUEFULLSCREEN(c) ? c : NULL);
 
-	/* Place tiled clients below the bar window */
+	/* Place tiled clients below the wmcheckwin window */
 	if (ws->layout->arrange) {
 		wc.stack_mode = Below;
-		wc.sibling = ws->mon->bar ? ws->mon->bar->win : wmcheckwin;
+		wc.sibling = wmcheckwin;
 		for (s = ws->stack; s; s = s->snext) {
 			if (TILED(s) && s != raised) {
 				XConfigureWindow(dpy, s->win, CWSibling|CWStackMode, &wc);
@@ -3608,7 +3608,7 @@ togglefloating(const Arg *arg)
 				floatpos(&((Arg) { .v = toggle_float_pos }));
 			else
 				restorefloats(c);
-			wc.sibling = c->ws->mon->bar ? c->ws->mon->bar->win : wmcheckwin;
+			wc.sibling = wmcheckwin;
 			XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
 		}
 
@@ -3646,7 +3646,7 @@ unfocus(Client *c, int setfocus, Client *nextfocus)
 
 	if (enabled(FocusedOnTopTiled) && ISTILED(c)) {
 		wc.stack_mode = Below;
-		wc.sibling = c->ws->mon->bar ? c->ws->mon->bar->win : wmcheckwin;
+		wc.sibling = wmcheckwin;
 		XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
 	}
 

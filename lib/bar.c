@@ -603,6 +603,7 @@ updatebars(void)
 {
 	Bar *bar;
 	Monitor *m;
+	XWindowChanges wc;
 	XSetWindowAttributes wa = {
 		.override_redirect = True,
 		.background_pixel = 0,
@@ -619,9 +620,12 @@ updatebars(void)
 				bar->win = XCreateWindow(dpy, root, bar->bx, bar->by, bar->bw, bar->bh, 0, depth,
 					InputOutput, visual,
 					CWOverrideRedirect|CWBackPixel|CWBorderPixel|CWColormap|CWEventMask, &wa);
+				wc.stack_mode = Above;
+				wc.sibling = wmcheckwin;
+				XConfigureWindow(dpy, bar->win, CWSibling|CWStackMode, &wc);
 				XDefineCursor(dpy, bar->win, cursor[CurNormal]->cursor);
-				XMapRaised(dpy, bar->win);
 				XSetClassHint(dpy, bar->win, &ch);
+				XMapWindow(dpy, bar->win);
 			}
 		}
 	}
@@ -732,13 +736,20 @@ mapexternalbar(Window win)
 {
 	Monitor *m;
 	Bar *bar;
+	XWindowChanges wc;
+
 	for (m = mons; m; m = m->next) {
 		for (bar = m->bar; bar; bar = bar->next) {
 			if (matchextbar(bar, win)) {
+				wc.stack_mode = Above;
+				wc.sibling = wmcheckwin;
+				XConfigureWindow(dpy, win, CWSibling|CWStackMode, &wc);
+
 				if (bar->win && bar->win != win) {
 					XUnmapWindow(dpy, bar->win);
 					XDestroyWindow(dpy, bar->win);
 				}
+
 				bar->win = win;
 				bar->showbar = 1;
 				bar->external = 1;
@@ -746,7 +757,7 @@ mapexternalbar(Window win)
 				updatebarpos(m);
 				showhidebar(bar);
 				setworkspaceareasformon(m);
-				XMapRaised(dpy, win);
+				XMapWindow(dpy, win);
 				restack(m->selws);
 				arrangemon(m);
 				drawbars();
