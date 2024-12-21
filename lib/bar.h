@@ -39,6 +39,7 @@ struct Bar {
 	Window win;
 	Monitor *mon;
 	Bar *next;
+	const BarDef *def;
 	const char *barpos;
 	const char *name;
 	int vert;
@@ -91,7 +92,6 @@ static void drawbar(Monitor *m);
 static void drawbars(void);
 static void drawbarwin(Bar *bar);
 static void drawbarmodule(const BarRule *br, int r);
-static const BarDef * getbardef(Bar *bar);
 static void updatebarpos(Monitor *m);
 static void updatebars(void);
 static void recreatebar(Bar *bar);

@@ -107,6 +107,7 @@ createbar(const BarDef *def, Monitor *m)
 {
 	Bar *bar;
 	bar = ecalloc(1, sizeof(Bar));
+	bar->def = def;
 	bar->win = 0;
 	bar->mon = m;
 	bar->idx = def->idx;
@@ -114,9 +115,9 @@ createbar(const BarDef *def, Monitor *m)
 	bar->name = def->name;
 	bar->vert = def->vert;
 	bar->barpos = def->barpos;
-	bar->external = (def->extclass != NULL || def->extname != NULL);
-	bar->showbar = !bar->external;
-	bar->borderpx = enabled(BarBorder) && !bar->external ? borderpx : 0;
+	bar->external = 0;
+	bar->showbar = 1;
+	bar->borderpx = enabled(BarBorder) ? borderpx : 0;
 	m->bar = bar;
 }
 
@@ -399,7 +400,7 @@ drawbarmodule(const BarRule *br, int r)
 		if ((br->monitor > -1 && br->monitor != m->num) || !m->showbar)
 			continue;
 		for (bar = m->bar; bar; bar = bar->next) {
-			if (br->bar > -1 && br->bar != bar->idx)
+			if ((br->bar > -1 && br->bar != bar->idx) || bar->external)
 				continue;
 
 			if (bar->vert) {
@@ -427,23 +428,6 @@ drawbarmodule(const BarRule *br, int r)
 			}
 		}
 	}
-}
-
-const BarDef *
-getbardef(Bar *bar)
-{
-	Monitor *m = bar->mon;
-	int i, idx = bar->idx;
-	const BarDef *def;
-
-	for (i = 0; i < LENGTH(bars); i++) {
-		def = &bars[i];
-		if (def->idx == idx && def->monitor == m->num) {
-			return def;
-		}
-	}
-
-	return NULL;
 }
 
 void
@@ -536,8 +520,8 @@ getbarsize(Bar *bar, int *w, int *h)
 void
 recreatebar(Bar *bar)
 {
-	const BarDef *def = getbardef(bar);
 	Monitor *m = bar->mon;
+	const BarDef *def = bar->def;
 	int setsystraybar = (systray && bar == systray->bar);
 	removebar(bar);
 	createbar(def, m);
@@ -748,12 +732,17 @@ mapexternalbar(Window win)
 {
 	Monitor *m;
 	Bar *bar;
-
 	for (m = mons; m; m = m->next) {
 		for (bar = m->bar; bar; bar = bar->next) {
-			if (bar->external && matchextbar(bar, win)) {
+			if (matchextbar(bar, win)) {
+				if (bar->win && bar->win != win) {
+					XUnmapWindow(dpy, bar->win);
+					XDestroyWindow(dpy, bar->win);
+				}
 				bar->win = win;
 				bar->showbar = 1;
+				bar->external = 1;
+				bar->borderpx = 0;
 				updatebarpos(m);
 				showhidebar(bar);
 				setworkspaceareasformon(m);
@@ -774,9 +763,9 @@ matchextbar(Bar *bar, Window win)
 	if (bar->win == win)
 		return 1;
 
-	const BarDef *def = getbardef(bar);
+	const BarDef *def = bar->def;
 
-	if (bar->win != 0 || !def)
+	if (def->extclass == NULL && def->extinstance == NULL && def->extname == NULL)
 		return 0;
 
 	const char *class, *instance;
