@@ -449,8 +449,8 @@ setbarpos(Bar *bar)
 	float w, h;
 	float x, y;
 
-	int y_pad = (enabled(BarPadding) ? vertpad : 0);
-	int x_pad = (enabled(BarPadding) ? sidepad : 0);
+	int y_pad = (enabled(BarPadding) && !bar->external ? vertpad : 0);
+	int x_pad = (enabled(BarPadding) && !bar->external ? sidepad : 0);
 	Monitor *m = bar->mon;
 
 	switch (sscanf(bar->barpos, "%f%c %f%c %f%c %f%c", &x, &xCh, &y, &yCh, &w, &wCh, &h, &hCh)) {
