@@ -30,7 +30,6 @@ draw_systray(Bar *bar, BarArg *a)
 	}
 
 	XSetWindowAttributes wa;
-	XWindowChanges wc;
 	Client *i, *next;
 	unsigned int w;
 
@@ -41,9 +40,7 @@ draw_systray(Bar *bar, BarArg *a)
 	if (!systray && !initsystray())
 		return 0;
 
-	wc.stack_mode = Above;
-	wc.sibling = bar->win;
-	XConfigureWindow(dpy, systray->win, CWSibling|CWStackMode, &wc);
+	restackwin(systray->win, Above, bar->win);
 	if (enabled(SystrayNoAlpha)) {
 		XSetWindowBackground(dpy, systray->win, scheme[a->scheme][ColBg].pixel);
 		XClearWindow(dpy, systray->win);

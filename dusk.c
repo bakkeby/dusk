@@ -487,6 +487,7 @@ static void resize(Client *c, int x, int y, int w, int h, int interact);
 static void resizeclient(Client *c, int x, int y, int w, int h);
 static void resizeclientpad(Client *c, int x, int y, int w, int h, int xpad, int ypad);
 static void restack(Workspace *ws);
+static void restackwin(Window win, int stack_mode, Window sibling);
 static void run(void);
 static void scan(void);
 static int sendevent(Window w, Atom proto, int m, long d0, long d1, long d2, long d3, long d4);
@@ -2979,6 +2980,16 @@ restack(Workspace *ws)
 }
 
 void
+restackwin(Window win, int stack_mode, Window sibling)
+{
+	XWindowChanges wc;
+
+	wc.stack_mode = stack_mode;
+	wc.sibling = sibling;
+	XConfigureWindow(dpy, win, CWSibling|CWStackMode, &wc);
+}
+
+void
 run(void)
 {
 	int event_count = 0;
@@ -3588,8 +3599,6 @@ togglefloating(const Arg *arg)
 {
 	Client *c = CLIENT;
 	Workspace *ws = NULL;
-	XWindowChanges wc;
-	wc.stack_mode = Above;
 
 	for (c = nextmarked(NULL, c); c; c = nextmarked(c->next, NULL)) {
 		if (ISTRUEFULLSCREEN(c)) /* no support for fullscreen windows */
@@ -3608,8 +3617,7 @@ togglefloating(const Arg *arg)
 				floatpos(&((Arg) { .v = toggle_float_pos }));
 			else
 				restorefloats(c);
-			wc.sibling = wmcheckwin;
-			XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
+			restackwin(c->win, Above, wmcheckwin);
 		}
 
 		setfloatinghint(c);
@@ -3626,8 +3634,6 @@ togglefloating(const Arg *arg)
 void
 unfocus(Client *c, int setfocus, Client *nextfocus)
 {
-	XWindowChanges wc;
-
 	if (!c)
 		return;
 	if (ISTRUEFULLSCREEN(c) && ISVISIBLE(c) && c->ws == selws && nextfocus && ISTILED(nextfocus) && !STEAMGAME(c)) {
@@ -3644,11 +3650,8 @@ unfocus(Client *c, int setfocus, Client *nextfocus)
 	else
 		XSetWindowBorder(dpy, c->win, scheme[clientscheme(c, nextfocus)][ColBorder].pixel);
 
-	if (enabled(FocusedOnTopTiled) && ISTILED(c)) {
-		wc.stack_mode = Below;
-		wc.sibling = wmcheckwin;
-		XConfigureWindow(dpy, c->win, CWSibling|CWStackMode, &wc);
-	}
+	if (enabled(FocusedOnTopTiled) && ISTILED(c))
+		restackwin(c->win, Below, wmcheckwin);
 
 	c->ws->sel = NULL;
 }
