@@ -5,7 +5,6 @@
 #include <kvm.h>
 #endif /* __OpenBSD__ */
 
-static int scanner;
 static xcb_connection_t *xcon;
 
 void

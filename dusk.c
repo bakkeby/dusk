@@ -3030,7 +3030,6 @@ run(void)
 void
 scan(void)
 {
-	scanner = 1;
 	char swin[256] = {0};
 	unsigned int i, num;
 	Window d1, d2, *wins = NULL;
@@ -3057,7 +3056,6 @@ scan(void)
 		}
 		XFree(wins);
 	}
-	scanner = 0;
 }
 
 void
