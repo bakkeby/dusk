@@ -791,7 +791,7 @@ matchextbar(Bar *bar, Window win)
 			def->monitor,
 			NVL(def->extclass, "NULL"),
 			NVL(def->extinstance, "NULL"),
-			NVL(def->extclass, "NULL")
+			NVL(def->extname, "NULL")
 		);
 	}
 
