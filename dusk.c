@@ -2209,6 +2209,11 @@ keypress(XEvent *e)
 	#endif
 	XKeyEvent *ev = &e->xkey;
 
+	if (ev->window == wmcheckwin && !(ev->state & Super)) {
+		forward_key_press_event(ev);
+		return;
+	}
+
 	prev_ptr_x = ev->x_root;
 	prev_ptr_y = ev->y_root;
 
@@ -3119,6 +3124,7 @@ setfocus(Client *c)
 		XChangeProperty(dpy, root, netatom[NetActiveWindow],
 			XA_WINDOW, 32, PropModeReplace,
 			(unsigned char *) &(c->win), 1);
+		disable_cross_typing(NULL);
 	}
 	selws->sel = c;
 	if (selws != c->ws)
@@ -3370,7 +3376,7 @@ setup(void)
 	initsystray();
 
 	/* supporting window for NetWMCheck */
-	wmcheckwin = XCreateSimpleWindow(dpy, root, 0, 0, 1, 1, 0, 0, 0);
+	wmcheckwin = XCreateSimpleWindow(dpy, root, -1, -1, 1, 1, 0, 0, 0);
 	XChangeProperty(dpy, wmcheckwin, netatom[NetWMCheck], XA_WINDOW, 32,
 		PropModeReplace, (unsigned char *) &wmcheckwin, 1);
 	XChangeProperty(dpy, wmcheckwin, netatom[NetWMName], utf8string, 8,

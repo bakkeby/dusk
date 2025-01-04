@@ -107,6 +107,15 @@ markmouse(const Arg *arg)
 }
 
 void
+markmousextype(const Arg *arg)
+{
+	markmouse(arg);
+	if (num_marked > 1) {
+		enable_cross_typing(NULL);
+	}
+}
+
+void
 togglemark(const Arg *arg)
 {
 	Client *c = CLIENT;

@@ -29,6 +29,7 @@
 #include "autostart.c"
 #include "cfacts.c"
 #include "clientopacity.c"
+#include "cross_typing.c"
 #include "cyclelayouts.c"
 #include "decorationhints.c"
 #include "dragcfact.c"
