@@ -1679,13 +1679,6 @@ destroynotify(XEvent *e)
 		return c->ws;
 	}
 
-	if ((c = swallowingparent(ev->window))) {
-		if (enabled(Debug) || DEBUGGING(c))
-			fprintf(stderr, "destroynotify: received event for swallowing client %s\n", c->name);
-		unmanage(c->swallowing, 1);
-		return c->ws;
-	}
-
 	if (systray && (c = wintosystrayicon(ev->window))) {
 		if (enabled(Debug) || DEBUGGING(c))
 			fprintf(stderr, "destroynotify: removing systray icon for client %s\n", c->name);
@@ -3752,14 +3745,6 @@ unmapnotify(XEvent *e)
 			setclientstate(c, WithdrawnState);
 		else
 			unmanage(c, 0);
-	} else if ((c = swallowingparent(ev->window))) {
-		ws = c->ws;
-		if (enabled(Debug) || DEBUGGING(c))
-			fprintf(stderr, "unmapnotify: received event for swallowing client %s\n", c->name);
-		if (ev->send_event)
-			setclientstate(c, WithdrawnState);
-		else
-			unmanage(c->swallowing, 0);
 	} else if (systray && (c = wintosystrayicon(ev->window))) {
 		removesystrayicon(c);
 		drawbarwin(systray->bar);
@@ -3981,13 +3966,22 @@ updatewmhints(Client *c)
 Client *
 wintoclient(Window w)
 {
-	Client *c;
 	Workspace *ws;
+	Client *c, *next;
 
-	for (ws = workspaces; ws; ws = ws->next)
-		for (c = ws->clients; c; c = c->next)
+	for (ws = workspaces; ws; ws = ws->next) {
+		for (c = ws->clients; c; c = next) {
+			next = c->next;
 			if (c->win == w)
 				return c;
+			while (c->swallowing) {
+				if (c->swallowing->win == w)
+					return c;
+				c = c->swallowing;
+			}
+		}
+	}
+
 	return NULL;
 }
 
