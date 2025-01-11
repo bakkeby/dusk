@@ -1794,13 +1794,11 @@ enternotify(XEvent *e)
 	Client *c;
 	Monitor *m;
 	XCrossingEvent *ev = &e->xcrossing;
-	int x, y;
 
 	if (cursor_hidden)
 		return;
 
-	getrootptr(&x, &y);
-	if (x == prev_ptr_x && y == prev_ptr_y)
+	if (ev->x_root == prev_ptr_x && ev->y_root == prev_ptr_y)
 		return;
 
 	if ((ev->mode != NotifyNormal || ev->detail == NotifyInferior) && ev->window != root)
@@ -2209,11 +2207,11 @@ keypress(XEvent *e)
 	int keysyms_return;
 	KeySym* keysym;
 	#endif
-	XKeyEvent *ev;
+	XKeyEvent *ev = &e->xkey;
 
-	getrootptr(&prev_ptr_x, &prev_ptr_y);
+	prev_ptr_x = ev->x_root;
+	prev_ptr_y = ev->y_root;
 
-	ev = &e->xkey;
 	ignore_marked = 0;
 	#if !USE_KEYCODES
 	keysym = XGetKeyboardMapping(dpy, (KeyCode)ev->keycode, 1, &keysyms_return);
