@@ -24,8 +24,8 @@ stackfocus(const Arg *arg)
 		return;
 	}
 
-	focus(c);
 	arrangews(ws);
+	focus(c);
 	skipfocusevents();
 	if (canwarp(c))
 		warp(c);
@@ -81,13 +81,13 @@ stackswap(const Arg *arg)
 		return;
 
 	swap(sel, c);
+	arrangews(ws);
 
 	if (!ISINC(arg) && ismasterclient(c)) {
 		focus(c);
 		sel = c;
 	}
 
-	arrangews(ws);
 	drawbar(ws->mon);
 	skipfocusevents();
 	if (canwarp(sel))

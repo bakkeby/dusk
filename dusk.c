@@ -1873,6 +1873,17 @@ focus(Client *c)
 
 		detachstack(c);
 		attachstack(c);
+
+		if (arrange_focus_on_monocle &&
+			ws->layout->arrange == flextile && (
+			ws->ltaxis[MASTER] == MONOCLE ||
+			ws->ltaxis[STACK]  == MONOCLE ||
+			ws->ltaxis[STACK2] == MONOCLE
+		)) {
+			arrangews(ws);
+			skipfocusevents();
+		}
+
 		grabbuttons(c, 1);
 		setfocus(c);
 
@@ -1894,15 +1905,6 @@ focus(Client *c)
 		}
 	}
 
-	if (arrange_focus_on_monocle &&
-		ws->layout->arrange == flextile && (
-		ws->ltaxis[MASTER] == MONOCLE ||
-		ws->ltaxis[STACK]  == MONOCLE ||
-		ws->ltaxis[STACK2] == MONOCLE
-	)) {
-		arrangews(ws);
-		skipfocusevents();
-	}
 	drawbar(ws->mon);
 }
 

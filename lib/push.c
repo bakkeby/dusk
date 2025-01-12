@@ -26,8 +26,8 @@ pushup(const Arg *arg)
 			c->next = sel;
 		}
 	}
-	focus(sel);
 	arrangews(ws);
+	focus(sel);
 	skipfocusevents();
 	if (canwarp(sel))
 		warp(sel);
@@ -52,8 +52,8 @@ pushdown(const Arg *arg)
 		detach(sel);
 		attach(sel);
 	}
-	focus(sel);
 	arrangews(ws);
+	focus(sel);
 	skipfocusevents();
 	if (canwarp(sel))
 		warp(sel);
