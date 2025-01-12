@@ -14,7 +14,7 @@ static int size_status(Bar *bar, BarArg *a);
 static int click_status(Bar *bar, Arg *arg, BarArg *a);
 static int draw_status(Bar *bar, BarArg *a);
 static int drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lpad, char *text, int invert, int drawbg, int defscheme);
-static void setstatus(const Arg args[], int num_args);
+static void setstatus(int status_no, char const *statustext);
 static int status2dtextlength(char *stext);
 static void statusclick(const Arg *arg);
 static Image *loadimage(char *path, int use_cache);

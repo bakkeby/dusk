@@ -225,29 +225,27 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 }
 
 void
-setstatus(const Arg args[], int num_args)
+setstatus(int status_no, char const *statustext)
 {
 	const BarRule *br;
-	int i, j, sid = args[0].i;
+	int i, j;
 
-	if (sid < 0 || sid >= NUM_STATUSES)
+	if (status_no < 0 || status_no >= NUM_STATUSES)
 		return;
-
-	char const *statustext = args[1].v;
 
 	for (j = 0, i = 0; j < STATUS_BUFFER - 1 && statustext[i] != '\0'; j++, i++) {
 		if (statustext[i] == '~' && statustext[i + 1] == '/') {
-			strlcpy(rawstatustext[sid] + j, env_home, env_homelen + 1);
+			strlcpy(rawstatustext[status_no] + j, env_home, env_homelen + 1);
 			j += env_homelen - 1;
 		} else {
-			rawstatustext[sid][j] = statustext[i];
+			rawstatustext[status_no][j] = statustext[i];
 		}
 	}
-	rawstatustext[sid][j] = '\0';
+	rawstatustext[status_no][j] = '\0';
 
 	for (int r = 0; r < LENGTH(barrules); r++) {
 		br = &barrules[r];
-		if (br->value == sid && br->drawfunc == draw_status)
+		if (br->value == status_no && br->drawfunc == draw_status)
 			drawbarmodule(br, r);
 	}
 }

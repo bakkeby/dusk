@@ -20,7 +20,7 @@ dusk: ${OBJ}
 	${CC} -o $@ ${OBJ} ${LDFLAGS}
 
 duskc:
-	${CC} -o $@ lib/ipc/duskc.c ${LDFLAGS}
+	${CC} ${CFLAGS} -o $@ duskc.c ${LDFLAGS}
 
 clean:
 	rm -f dusk ${OBJ}

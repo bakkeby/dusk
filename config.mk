@@ -38,6 +38,10 @@ XRENDER = -lXrender
 YAJLLIBS = -lyajl
 YAJLINC = -I/usr/include/yajl
 
+# dbus (ipc replacement)
+DBUSLIBS = -ldbus-1
+DBUSINC = -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include/
+
 # Needed for the swallow patch
 XCBLIBS = -lX11-xcb -lxcb -lxcb-res
 
@@ -45,8 +49,8 @@ XCBLIBS = -lX11-xcb -lxcb -lxcb-res
 IMLIB2LIBS = -lImlib2
 
 # includes and libs
-INCS = -I${X11INC} -I${FREETYPEINC} ${YAJLINC} ${XINPUTINC} ${FRIBIDIINC}
-LIBS = -L${X11LIB} -lX11 ${XINERAMALIBS} ${FREETYPELIBS}  ${XRENDER} ${XCBLIBS} ${KVMLIB} ${YAJLLIBS} ${IMLIB2LIBS} ${XINPUTLIBS} ${XFIXESLIBS} ${FRIBIDILIBS}
+INCS = -I${X11INC} -I${FREETYPEINC} ${YAJLINC} ${DBUSINC} ${XINPUTINC} ${FRIBIDIINC}
+LIBS = -L${X11LIB} -lX11 ${XINERAMALIBS} ${FREETYPELIBS} ${XRENDER} ${XCBLIBS} ${KVMLIB} ${YAJLLIBS} ${DBUSLIBS} ${IMLIB2LIBS} ${XINPUTLIBS} ${XFIXESLIBS} ${FRIBIDILIBS}
 
 # Optional host flag for computer specific configuration
 #HOSTFLAGS = -DHOST=$(shell command -v cksum > /dev/null && hostname | cksum | tr -d ' ')

@@ -72,10 +72,8 @@ dump_commands(yajl_gen gen)
 			c = ipccommands[i];
 			YMAP(
 				YSTR("command"); YSTR(c.name);
-				if (c.argc != 1 || c.arg_types[0] != ARG_TYPE_NONE) {
-					for (a = 0; a < c.argc; a++) {
-						YSTR("argument"); YSTR(argtype_names[c.arg_types[a]]);
-					}
+				for (a = 0; a < c.argc; a++) {
+					YSTR("argument"); YSTR(dbus_type_to_string(c.args[a]));
 				}
 			)
 		}
