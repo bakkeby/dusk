@@ -84,4 +84,6 @@
 #include "layout_flextile-deluxe.c"
 
 /* dbus */
+#ifdef HAVE_DBUS
 #include "dbus_server.c"
+#endif

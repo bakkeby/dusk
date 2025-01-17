@@ -33,13 +33,14 @@ FREETYPEINC = `$(PKG_CONFIG) --cflags fontconfig`
 # Needed for alpha and window icons
 XRENDER = `$(PKG_CONFIG) --libs xrender`
 
-# Needed for ipc information dumps
-YAJLLIBS = `$(PKG_CONFIG) --libs yajl`
-YAJLINC = `$(PKG_CONFIG) --cflags yajl`
-
-# dbus (used for ipc)
+## Optional dependency on dbus (used for ipc / duskc)
+HAVE_DBUS = -DHAVE_DBUS=1
 DBUSLIBS = `$(PKG_CONFIG) --libs dbus-1`
 DBUSINC = `$(PKG_CONFIG) --cflags dbus-1`
+
+# Optional dependency on yajl, needed for ipc information dumps
+YAJLLIBS = `$(PKG_CONFIG) --libs yajl`
+YAJLINC = `$(PKG_CONFIG) --cflags yajl`
 
 # Needed for window swallowing functionality
 XCBLIBS = `$(PKG_CONFIG) --libs x11-xcb xcb-res`
@@ -60,7 +61,7 @@ LIBS = ${XINERAMALIBS} ${FREETYPELIBS} ${XRENDER} ${XCBLIBS} ${KVMLIB} ${YAJLLIB
 #OPTIMISATIONS = -march=native -flto=auto -O3
 
 # flags
-CPPFLAGS = -D_DEFAULT_SOURCE ${HAVE_LIBXI} ${HAVE_FRIBIDI} -D_BSD_SOURCE -D_POSIX_C_SOURCE=200809L -DUSE_KEYCODES=${USE_KEYCODES} -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS} ${HOSTFLAGS}
+CPPFLAGS = -D_DEFAULT_SOURCE ${HAVE_LIBXI} ${HAVE_FRIBIDI} ${HAVE_DBUS} -D_BSD_SOURCE -D_POSIX_C_SOURCE=200809L -DUSE_KEYCODES=${USE_KEYCODES} -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS} ${HOSTFLAGS}
 CFLAGS   = ${OPTIMISATIONS} -std=c99 -pedantic -Wall -Wno-unused-function -Wno-deprecated-declarations ${INCS} ${CPPFLAGS}
 LDFLAGS  = ${LIBS}
 

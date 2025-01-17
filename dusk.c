@@ -2970,6 +2970,7 @@ restackwin(Window win, int stack_mode, Window sibling)
 	XConfigureWindow(dpy, win, CWSibling|CWStackMode, &wc);
 }
 
+#ifdef HAVE_DBUS
 void
 run(void)
 {
@@ -3046,6 +3047,18 @@ run(void)
 		}
 	}
 }
+#else
+void
+run(void)
+{
+	XEvent ev;
+	/* main event loop */
+	XSync(dpy, False);
+	while (running && !XNextEvent(dpy, &ev))
+		if (handler[ev.type])
+			handler[ev.type](&ev); /* call handler */
+}
+#endif // HAVE_DBUS
 
 void
 scan(void)
