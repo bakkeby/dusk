@@ -515,6 +515,7 @@ static void unmanage(Client *c, int destroyed);
 static Workspace *unmapnotify(XEvent *e);
 static void updateclientlist(void);
 static int updategeom(int width, int height);
+static void updatelegacystatus(void);
 static void updatenumlockmask(void);
 static void updatesizehints(Client *c);
 static void updatetitle(Client *c);
@@ -2666,6 +2667,11 @@ propertynotify(XEvent *e)
 		drawbarwin(systray->bar);
 	}
 
+	if ((ev->window == root) && (ev->atom == XA_WM_NAME)) {
+		updatelegacystatus();
+		return;
+	}
+
 	if (ev->state == PropertyDelete) {
 		if (enabled(Debug)) {
 			if ((c = wintoclient(ev->window))) {
@@ -2675,7 +2681,9 @@ propertynotify(XEvent *e)
 			}
 		}
 		return; /* ignore */
-	} else if ((c = wintoclient(ev->window))) {
+	}
+
+	if ((c = wintoclient(ev->window))) {
 
 		if ((enabled(Debug) || DEBUGGING(c)) && ev->atom != netatom[NetWMUserTime])
 			fprintf(stderr, "propertynotify: received message type of %s (%ld) for client %s\n", XGetAtomName(dpy, ev->atom), ev->atom, c->name);
@@ -3893,6 +3901,29 @@ updategeom(int width, int height)
 		selmon = wintomon(root);
 	}
 	return dirty;
+}
+
+void
+updatelegacystatus(void)
+{
+	char buffer[STATUS_BUFFER * NUM_STATUSES];
+	int status_no = 0;
+	char *text, *s, ch;
+
+	if (!gettextprop(root, XA_WM_NAME, buffer, sizeof(buffer) - 1))
+		return;
+
+	for (text = s = buffer; *s; s++) {
+		if ((unsigned char)(*s) < NUM_STATUSES) {
+			ch = *s;
+			*s = '\0';
+			setstatus(status_no, text);
+			*s = ch;
+			status_no = ch;
+			text = s + 1;
+		}
+	}
+	setstatus(status_no, text);
 }
 
 void
