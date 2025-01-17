@@ -102,6 +102,7 @@ static void getbarsize(Bar *bar, int *w, int *h);
 static void showbar(const Arg *arg);
 static void hidebar(const Arg *arg);
 static void showhidebar(Bar *bar);
+static void teardownbars(Monitor *m);
 static void togglebar(const Arg *arg);
 static void togglebarpadding(const Arg *arg);
 static void togglecompact(const Arg *arg);

@@ -63,7 +63,7 @@ draw_workspaces(Bar *bar, BarArg *a)
 				}
 
 			nextscheme =
-				nextws == nextws->mon->selws
+				nextws == nextws->mon->selws && nextws->visible
 				? nextws->scheme[SELECTED]
 				: nextws->visible
 				? nextws->scheme[VISIBLE]

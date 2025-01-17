@@ -14,9 +14,16 @@ persistworkspacestate(Workspace *ws)
 	unsigned int i;
 
 	/* Fill flextile attributes if arrange method is NULL (floating layout) */
-	if (!ws->layout->arrange)
+	if (!ws->layout->arrange) {
 		for (i = 0; i < LTAXIS_LAST; i++)
 			ws->ltaxis[i] = 0xF;
+	} else if (enabled(SmartLayoutConversion) && ws->orientation != 0) {
+		/* If smart layout conversion functionality is enabled then convert vertically
+		 * oriented workspaces into horizontal before persisting. This because the orientation
+		 * is not persisted and the layouts will be subject conversion when the workspace
+		 * is assigned to a vertical monitor. */
+		layoutconvert(&((Arg) { .v = ws }));
+	}
 
 	/* Perists workspace information in 32 bits laid out like this:
 	 *
@@ -79,6 +86,82 @@ persistworkspacestate(Workspace *ws)
 	}
 
 	XSync(dpy, False);
+}
+
+void
+restoreworkspacestates(void)
+{
+	Workspace *ws;
+	for (ws = workspaces; ws; ws = ws->next)
+		restoreworkspacestate(ws);
+}
+
+void
+restoreworkspacestate(Workspace *ws)
+{
+	const Layout *layout;
+	int i, di, mon, num_ws = 0;
+	unsigned long dl, nitems;
+	unsigned char *p = NULL;
+	Atom da, settings = None;
+
+	if (XGetWindowProperty(dpy, root, netatom[NetNumberOfDesktops], 0L, sizeof da,
+			False, AnyPropertyType, &da, &di, &nitems, &dl, &p) == Success && p) {
+		num_ws = *(Atom *)p;
+		XFree(p);
+	}
+
+	if (ws->num > num_ws)
+		return;
+
+	if (!(XGetWindowProperty(dpy, root, duskatom[DuskWorkspace], ws->num, num_ws * sizeof dl,
+			False, AnyPropertyType, &da, &di, &nitems, &dl, &p) == Success && p)) {
+		return;
+	}
+
+	/* If the root window has the _DUSK_WORKSPACES property, which is confirmed by the above if
+	 * statement, then we do not want to trigger autostart of applications. This is only to happen
+	 * during the initial startup and not as part of restarts. The autostart_startup variable is
+	 * defined in lib/autostart.c */
+	autostart_startup = 0;
+
+	if (nitems) {
+		settings = *(Atom *)p;
+
+		/* See bit layout in the persistworkspacestate function */
+		mon = (settings >> 8) & 0x7;
+		ws->rule_monitor = mon;
+		ws->visible = settings & 0x1;
+		ws->rule_pinned = (settings >> 1) & 0x1;
+		ws->nmaster = (settings >> 2) & 0x7;
+		ws->nstack = (settings >> 5) & 0x7;
+		ws->ltaxis[LAYOUT] = (settings >> 11) & 0xF;
+		if (settings & (1 << 27)) // mirror layout
+			ws->ltaxis[LAYOUT] *= -1;
+		ws->ltaxis[MASTER] = (settings >> 15) & 0xF;
+		ws->ltaxis[STACK] = (settings >> 19) & 0xF;
+		ws->ltaxis[STACK2] = (settings >> 23) & 0xF;
+		ws->enablegaps = (settings >> 28) & 0x1;
+
+		/* Restore layout if we have an exact match, floating layout interpreted as 0x7fff800 */
+		for (i = 0; i < LENGTH(layouts); i++) {
+			layout = &layouts[i];
+			if ((layout->arrange == flextile
+				&& ws->ltaxis[LAYOUT] == layout->preset.layout
+				&& ws->ltaxis[MASTER] == layout->preset.masteraxis
+				&& ws->ltaxis[STACK]  == layout->preset.stack1axis
+				&& ws->ltaxis[STACK2] == layout->preset.stack2axis)
+				|| ((settings & 0x7fff800) == 0x7fff800
+				&& layout->arrange == NULL)
+			) {
+				ws->layout = layout;
+				strlcpy(ws->ltsymbol, ws->layout->symbol, sizeof ws->ltsymbol);
+				break;
+			}
+		}
+	}
+
+	XFree(p);
 }
 
 void
@@ -213,7 +296,7 @@ setdesktopnames(void)
 	XTextProperty text;
 
 	char *wslist[num_workspaces];
-	for (i = 0, ws = workspaces; ws; ws = ws->next) {
+	for (i = 0, ws = workspaces; ws && i < num_workspaces; ws = ws->next) {
 		if (ws == stickyws)
 			continue;
 		wslist[i] = wsicon(ws);
@@ -356,83 +439,6 @@ getclientlabel(Client *c)
 			XFree(data);
 		}
 	}
-}
-
-void
-getworkspacestate(Workspace *ws)
-{
-	Monitor *m;
-	const Layout *layout;
-	int i, di, mon, num_ws = 0;
-	unsigned long dl, nitems;
-	unsigned char *p = NULL;
-	Atom da, settings = None;
-
-	if (XGetWindowProperty(dpy, root, netatom[NetNumberOfDesktops], 0L, sizeof da,
-			False, AnyPropertyType, &da, &di, &nitems, &dl, &p) == Success && p) {
-		num_ws = *(Atom *)p;
-		XFree(p);
-	}
-
-	if (ws->num > num_ws)
-		return;
-
-	if (!(XGetWindowProperty(dpy, root, duskatom[DuskWorkspace], ws->num, num_ws * sizeof dl,
-			False, AnyPropertyType, &da, &di, &nitems, &dl, &p) == Success && p)) {
-		return;
-	}
-
-	/* If the root window has the _DUSK_WORKSPACES property, which is confirmed by the above if
-	 * statement, then we do not want to trigger autostart of applications. This is only to happen
-	 * during the initial startup and not as part of restarts. The autostart_startup variable is
-	 * defined in lib/autostart.c */
-	autostart_startup = 0;
-
-	if (nitems) {
-		settings = *(Atom *)p;
-
-		/* See bit layout in the persistworkspacestate function */
-		mon = (settings >> 8) & 0x7;
-		for (m = mons; m && m->num != mon; m = m->next);
-		if (!m && workspaces_per_mon && mon == dummymon->num)
-			m = dummymon;
-		if (m) {
-			ws->mon = m;
-			ws->visible = settings & 0x1;
-			ws->pinned = (settings >> 1) & 0x1;
-			ws->nmaster = (settings >> 2) & 0x7;
-			ws->nstack = (settings >> 5) & 0x7;
-			ws->ltaxis[LAYOUT] = (settings >> 11) & 0xF;
-			if (settings & (1 << 27)) // mirror layout
-				ws->ltaxis[LAYOUT] *= -1;
-			ws->ltaxis[MASTER] = (settings >> 15) & 0xF;
-			ws->ltaxis[STACK] = (settings >> 19) & 0xF;
-			ws->ltaxis[STACK2] = (settings >> 23) & 0xF;
-			ws->enablegaps = (settings >> 28) & 0x1;
-
-			/* Restore layout if we have an exact match, floating layout interpreted as 0x7fff800 */
-			for (i = 0; i < LENGTH(layouts); i++) {
-				layout = &layouts[i];
-				if ((layout->arrange == flextile
-					&& ws->ltaxis[LAYOUT] == layout->preset.layout
-					&& ws->ltaxis[MASTER] == layout->preset.masteraxis
-					&& ws->ltaxis[STACK]  == layout->preset.stack1axis
-					&& ws->ltaxis[STACK2] == layout->preset.stack2axis)
-					|| ((settings & 0x7fff800) == 0x7fff800
-					&& layout->arrange == NULL)
-				) {
-					ws->layout = layout;
-					strlcpy(ws->ltsymbol, ws->layout->symbol, sizeof ws->ltsymbol);
-					break;
-				}
-			}
-
-			if (ws->visible)
-				ws->mon->selws = ws;
-		}
-	}
-
-	XFree(p);
 }
 
 void

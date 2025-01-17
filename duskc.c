@@ -3,6 +3,7 @@
 #define arg(A) (!strcmp(argv[i], A))
 #define LENGTH(X) (sizeof X / sizeof X[0])
 
+#include "util.c"
 #include "lib/dbus_client.h"
 #include "lib/dbus_client.c"
 

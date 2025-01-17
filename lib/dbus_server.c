@@ -1,5 +1,5 @@
 #include "dbus.c"
-#include "ipc/yajl_dumps.c"
+#include "yajl_dumps.c"
 
 void
 handle_dbus_message(DBusMessage *msg)
@@ -11,6 +11,12 @@ handle_dbus_message(DBusMessage *msg)
 	int int_param;
 
 	const char *method = dbus_message_get_member(msg);
+
+	if (method == NULL) {
+		reply_with_formatted_message(msg, "Error: No method passed\n");
+		return;
+	}
+
 	command = lookup_command(method);
 
 	if (command == NULL) {

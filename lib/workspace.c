@@ -19,6 +19,24 @@ detachws(Workspace *ws)
 }
 
 void
+attachmon(Monitor *m, Monitor *target)
+{
+	Monitor **mp;
+	for (mp = &mons; *mp && *mp != target; mp = &(*mp)->next);
+	m->next = target;
+	*mp = m;
+}
+
+void
+detachmon(Monitor *m)
+{
+	Monitor **mp;
+	for (mp = &mons; *mp && *mp != m; mp = &(*mp)->next);
+	*mp = m->next;
+	m->next = NULL;
+}
+
+void
 comboviewwsbyname(const Arg *arg)
 {
 	viewwsonmon(getwsbyname(arg), NULL, combo);
@@ -32,79 +50,93 @@ comboviewwsbyindex(const Arg *arg)
 	combo = 1;
 }
 
+Workspace *
+getnullws(Monitor *m)
+{
+	if (!m->nullws) {
+		m->nullws = m->selws = createnullws(m);
+		assignworkspacetomonitor(m->nullws, m);
+		attachws(m->nullws, NULL);
+		num_workspaces++;
+	}
+
+	return m->nullws;
+}
+
+Workspace *
+createnullws(Monitor *m)
+{
+	Workspace *ws;
+
+	const WorkspaceRule nullwsrule = {
+		.name = "",
+		.monitor = m->num,
+		.pinned = 1,
+		.layout = -1,
+		.mfact = -1,
+		.nmaster = -1,
+		.enablegaps = -1
+	};
+
+	ws = createworkspace(stickyws->num + m->num + 1, &nullwsrule);
+
+	return ws;
+}
+
+void
+teardownnullws(Monitor *m)
+{
+	Workspace *nullws = m->nullws;
+
+	if (!nullws)
+		return;
+
+	/* Migrate clients, if any */
+	moveallclientstows(nullws, workspaces, 0);
+
+	if (m->selws == nullws)
+		m->selws = NULL;
+	m->nullws = NULL;
+
+	detachws(nullws);
+	removepreview(nullws);
+	free(nullws);
+
+	num_workspaces--;
+}
+
 void
 createworkspaces(void)
 {
-	Workspace *pws, *ws;
-	Monitor *m;
 	int i;
 
-	/* find the floating layout for the sticky rule */
-	for (i = 0; i < LENGTH(layouts); i++)
-		if ((&layouts[i])->arrange == NULL)
-			break;
-
-	const WorkspaceRule stickywsrule = { .name = "Sticky", .layout = i };
-	stickyws = createworkspace(LENGTH(wsrules), &stickywsrule);
-	stickyws->visible = 1;
-	stickyws->mon = mons; // not sure about how to handle mon
-	stickyws->wh = sh;
-	stickyws->ww = sw;
-
-	pws = selws = workspaces = createworkspace(0, &wsrules[0]);
-	for (i = 1; i < LENGTH(wsrules); i++)
-		pws = pws->next = createworkspace(i, &wsrules[i]);
+	for (i = 0; i < LENGTH(wsrules); i++)
+		attachws(createworkspace(i, &wsrules[i]), NULL);
 
 	num_workspaces = i;
 
-	for (m = mons, ws = workspaces; ws; ws = ws->next) {
-		if (ws->mon == NULL) {
-			ws->mon = m;
-			m = (m->next == NULL ? mons : m->next);
-		}
-
-		ws->wx = ws->mon->wx;
-		ws->wy = ws->mon->wy;
-		ws->wh = ws->mon->wh;
-		ws->ww = ws->mon->ww;
-		ws->orientation = ws->mon->orientation;
-
-		if (ws->mon->selws == NULL) {
-			ws->mon->selws = ws;
-			ws->visible = 1;
-		}
-	}
+	stickyws = createstickyworkspace();
 	attachws(stickyws, workspaces);
-	setworkspaceareas();
 }
 
 Workspace *
 createworkspace(int num, const WorkspaceRule *r)
 {
-	Monitor *m = NULL;
 	Workspace *ws;
+	int num_layouts = LENGTH(layouts) - 1;
 
 	ws = ecalloc(1, sizeof(Workspace));
 	ws->num = num;
 	ws->pinned = 0;
 	ws->wfact = 1.0;
-
-	if (r->monitor != -1) {
-		for (m = mons; m && m->num != r->monitor; m = m->next);
-		if (!m && workspaces_per_mon && r->pinned) {
-			m = dummymon;
-			ws->pinned = r->pinned;
-		}
-		ws->mon = m;
-		if (r->pinned > 0 && m && m->num == r->monitor)
-			ws->pinned = 1;
-	}
+	ws->rule_pinned = r->pinned;
+	ws->rule_monitor = r->monitor;
 
 	strlcpy(ws->name, r->name, sizeof ws->name);
 
-	ws->layout = (r->layout == -1 ? &layouts[0] : &layouts[MIN(r->layout, LENGTH(layouts))]);
+	ws->layout = (r->layout == -1 ? &layouts[0] : &layouts[MIN(r->layout, num_layouts)]);
 	strlcpy(ws->ltsymbol, ws->layout->symbol, sizeof ws->ltsymbol);
-	ws->prevlayout = &layouts[1 % LENGTH(layouts)];
+	ws->prevlayout = &layouts[1 % num_layouts];
 	ws->mfact = (r->mfact == -1 ? mfact : r->mfact);
 	ws->nmaster = (r->nmaster == -1 ? nmaster : r->nmaster);
 	ws->nstack = (r->nstack == -1 ? nstack : r->nstack);
@@ -122,31 +154,69 @@ createworkspace(int num, const WorkspaceRule *r)
 	ws->scheme[SELECTED] = r->sel_scheme;
 	ws->scheme[OCCUPIED] = r->occ_scheme;
 
-	getworkspacestate(ws);
+	return ws;
+}
+
+Workspace *
+createstickyworkspace(void)
+{
+	int i;
+	Workspace *ws;
+
+	/* Find the floating layout for the sticky rule */
+	for (i = 0; i < LENGTH(layouts); i++)
+		if ((&layouts[i])->arrange == NULL)
+			break;
+
+	const WorkspaceRule stickywsrule = { .name = "Sticky", .layout = i };
+	ws = createworkspace(num_workspaces, &stickywsrule);
+	ws->visible = 1;
+	ws->mon = mons;
+	ws->wh = sh;
+	ws->ww = sw;
 
 	return ws;
 }
 
 void
-handleabandoned(Workspace *ws)
+abandonworkspaces(Monitor *mon)
+{
+	Workspace *ws;
+
+	for (ws = workspaces; ws; ws = ws->next) {
+		if (ws->mon != mon)
+			continue;
+
+		if (ws == stickyws) {
+			ws->mon = mons;
+			continue;
+		}
+
+		if (workspaces_per_mon && ws->pinned) {
+			stash_workspace(ws);
+			continue;
+		}
+
+		hidews(ws);
+		hidewsclients(ws->stack);
+		assignworkspacetomonitor(ws, mons);
+		ws->pinned = 0;
+	}
+}
+
+/* Moves all clients to the selected workspace on the primary monitor and moves workspace
+ * itself to the dummy monitor for safekeeping. */
+void
+stash_workspace(Workspace *ws)
 {
 	Workspace *target;
 
-	if (workspaces_per_mon && ws->pinned) {
-		ws->visible = 0;
-		hidewsclients(ws->stack);
-		target = mons->selws;
-		if (!target || target == stickyws)
-			for (target = workspaces; target == stickyws; target = target->next);
-		moveallclientstows(ws, target, 0);
-		ws->mon = dummymon;
-		return;
-	}
-
-	assignworkspacetomonitor(ws, mons);
 	ws->visible = 0;
-	hidewsclients(ws->stack);
-	ws->pinned = 0;
+	target = mons->selws;
+	if (!target || target == stickyws)
+		for (target = workspaces; target == stickyws; target = target->next);
+	moveallclientstows(ws, target, 0);
+	ws->mon = dummymon;
 }
 
 char *
@@ -353,6 +423,11 @@ adjustwsformonitor(Workspace *ws, Monitor *m)
 	if (!ws || !m)
 		return;
 
+	ws->wx = m->wx;
+	ws->wy = m->wy;
+	ws->wh = m->wh;
+	ws->ww = m->ww;
+
 	clientsmonresize(ws->clients, ws->mon, m);
 	reorientworkspace(ws, m->orientation);
 }
@@ -360,36 +435,26 @@ adjustwsformonitor(Workspace *ws, Monitor *m)
 void
 hidews(Workspace *ws)
 {
-	Workspace *w;
-	if (enabled(Debug))
-		fprintf(stderr, "hidews called for ws %s\n", ws ? ws->name : "NULL");
-
-	if (!ws)
+	if (!ws || ws == stickyws || ws == ws->mon->nullws)
 		return;
 
 	ws->visible = 0;
+}
 
-	/* If the workspace being hidden was the selected workspace, then try to find another
-	 * visible workspace on the same monitor that can become the selected workspace. */
-	if (ws != selws)
-		return;
+void
+hidewsotherthan(Workspace *shownws)
+{
+	Monitor *m = shownws->mon;
+	Workspace *ws;
 
-	/* Find the first available workspace to the right, otherwise on the left */
-	w = nextvismonws(ws->mon, ws->next);
-	if (!w)
-		w = nextvismonws(ws->mon, workspaces);
-	if (w == ws)
-		ws->mon->selws = NULL;
-	else
-		selws = ws->mon->selws = w;
+	for (ws = nextvismonws(m, workspaces); ws; ws = nextvismonws(m, ws->next))
+		if (ws != shownws)
+			hidews(ws);
 }
 
 void
 showws(Workspace *ws)
 {
-	if (enabled(Debug))
-		fprintf(stderr, "showws called for ws %s\n", ws ? ws->name : "NULL");
-
 	if (!ws)
 		return;
 
@@ -510,15 +575,16 @@ swapwsclients(Workspace *ws1, Workspace *ws2)
 	if (ws1->visible) {
 		showwsclients(c2);
 		arrangews(ws1);
-	} else
+	} else {
 		hidewsclients(ws1->stack);
+	}
 
 	if (ws2->visible) {
 		showwsclients(c1);
 		arrangews(ws2);
-	}
-	else
+	} else {
 		hidewsclients(ws2->stack);
+	}
 
 	drawbars();
 }
@@ -601,20 +667,14 @@ moveallclientstows(Workspace *from, Workspace *to, int view_workspace)
 	if (view_workspace && !to->visible)
 		viewwsonmon(to, to->mon, 0);
 
-	if (from->visible)
-		arrangews(from);
-	else
-		hidewsclients(from->stack);
-
 	if (to->visible)
 		arrangews(to);
 	else
 		hidewsclients(to->stack);
 
-	if (from->mon == to->mon)
-		drawbar(to->mon);
-	else
-		drawbars();
+	drawbar(to->mon);
+	if (from->mon != to->mon)
+		drawbar(from->mon);
 }
 
 void
@@ -686,9 +746,11 @@ viewwsdir(const Arg *arg)
 void
 togglepinnedws(const Arg *arg)
 {
-	Workspace *ws = selws;
-	if (arg->v)
-		ws = (Workspace*)arg->v;
+	Workspace *ws = (arg->v ? (Workspace*)arg->v : selws);
+
+	if (ws == ws->mon->nullws)
+		return;
+
 	ws->pinned = !ws->pinned;
 	drawbar(ws->mon);
 }
@@ -798,7 +860,7 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 		m = selmon;
 
 	Monitor *omon = NULL;
-	Workspace *ows = NULL, *w;
+	Workspace *ows = NULL;
 
 	if (!combo)
 		m->prevwsmask = getwsmask(m);
@@ -837,44 +899,24 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 			 * monitor. In this case, move the other workspace to the current monitor and
 			 * change to the next available workspace on the other monitor. */
 			do_warp = 1;
-
-			adjustwsformonitor(ws, selmon);
-
 			omon = ws->mon;
 
-			/* First check if there are more than one visible workspace on the other monitor,
-			 * in which case we just leave the remaining workspaces selected. */
-			ows = nextvismonws(ws->mon, workspaces);
-			if (ows == ws)
-				ows = nextvismonws(ws->mon, ws->next);
+			assignworkspacetomonitor(ws, selmon);
 
-			/* Otherwise find the next available workspace on said monitor and enable that */
-			if (!ows)
-				ows = nextmonws(ws->mon, ws->next);
-			if (!ows)
-				ows = nextmonws(ws->mon, workspaces);
-			if (ows == ws)
-				ows = NULL;
-
-			omon->selws = ows;
-
-			ws->mon = m;
-			m->selws = ws;
-			selws = ws;
+			selws = m->selws = ws;
 			showws(ws);
 			clientsfsrestore(ws->clients);
 
-			if (ows)
-				ows->visible = 1;
+			ows = selectmonws(omon);
+			omon->selws = ows;
+			ows->visible = 1;
 			arrangeall = 1;
 		} else {
 			/* Swap the selected workspace on this monitor with the visible desired workspace
 			 * on the other monitor. */
 			ows = m->selws;
-			adjustwsformonitor(ows, ws->mon);
-			adjustwsformonitor(ws, ows->mon);
-			ows->mon = ws->mon;
-			ws->mon = m;
+			assignworkspacetomonitor(ows, ws->mon);
+			assignworkspacetomonitor(ws, m);
 
 			showws(ows);
 			showws(ws);
@@ -884,17 +926,13 @@ viewwsonmon(Workspace *ws, Monitor *m, int enablews)
 		}
 	} else {
 		/* Workspace is not visible, just grab it */
-		adjustwsformonitor(ws, m);
-		ws->mon = m;
+		assignworkspacetomonitor(ws, m);
 		showws(ws);
 		clientsfsrestore(ws->clients);
 	}
 
-	if (!enablews) {
-		for (w = nextvismonws(ws->mon, workspaces); w; w = nextvismonws(ws->mon, w->next))
-			if (w != ws)
-				hidews(w);
-	}
+	if (!enablews)
+		hidewsotherthan(ws);
 
 	if (!combo)
 		storewsmask();
@@ -907,18 +945,12 @@ drawws(Workspace *ws, Monitor *m, uint64_t prevwsmask, int enablews, int arrange
 {
 	int x, y;
 	Workspace *mousepointerws, *w;
-	Monitor *mon;
 	uint64_t hidewsmask = prevwsmask - (prevwsmask & getwsmask(m));
 
 	setworkspaceareas();
 
-	/* Clear the selected workspace for a monitor if there are no visible workspaces,
-	 * likewise set the selected workspace for the monitor if present and not already set. */
-	for (mon = mons; mon; mon = mon->next) {
-		w = nextvismonws(mon, workspaces);
-		if (!w)
-			mon->selws = NULL;
-	}
+	/* Ensure that there is a selected workspace for every monitor */
+	reviewworkspaces(0);
 
 	/* When enabling new workspaces into view let the focus remain with the one
 	 * that has the mouse cursor on it. */
@@ -951,7 +983,7 @@ drawws(Workspace *ws, Monitor *m, uint64_t prevwsmask, int enablews, int arrange
 	if (do_warp && ws && ws->sel)
 		warp(ws->sel);
 	if (!selws)
-		selws = workspaces;
+		selws = m->selws;
 }
 
 Workspace *
@@ -1013,20 +1045,24 @@ nextvismonws(Monitor *mon, Workspace *ws)
 }
 
 Workspace *
-selectmonws(Monitor *mon)
+selectmonws(Monitor *m)
 {
 	Workspace *ws;
 
 	/* Prioritise the first visible workspace on the given monitor */
-	ws = nextvismonws(mon, workspaces);
+	ws = nextvismonws(m, workspaces);
 
 	/* Fall back to the first occcupied workspace on the given monitor */
 	if (!ws)
-		ws = nextoccmonws(mon, workspaces);
+		ws = nextoccmonws(m, workspaces);
 
 	/* Fall back to the first workspace on the given monitor */
 	if (!ws)
-		ws = nextmonws(mon, workspaces);
+		ws = nextmonws(m, workspaces);
+
+	/* Fall back to creating a "null" workspace */
+	if (!ws)
+		ws = getnullws(m);
 
 	return ws;
 }
@@ -1034,63 +1070,51 @@ selectmonws(Monitor *mon)
 void
 assignworkspacetomonitor(Workspace *ws, Monitor *m)
 {
+	Monitor *wsmon;
+
 	if (!ws || !m || ws->mon == m)
 		return;
 
-	adjustwsformonitor(ws, m);
-	if (ws->mon && ws->mon->selws == ws)
-		ws->mon->selws = NULL;
-	ws->mon = m;
+	wsmon = ws->mon;
 
-	ws->wx = ws->mon->wx;
-	ws->wy = ws->mon->wy;
-	ws->wh = ws->mon->wh;
-	ws->ww = ws->mon->ww;
+	adjustwsformonitor(ws, m);
+	ws->mon = m;
+	if (wsmon && wsmon->selws == ws) {
+		wsmon->selws = selectmonws(wsmon);
+	}
+
+	if (m->nullws && ws != m->nullws) {
+		if (m->selws == m->nullws)
+			m->selws = ws;
+		moveallclientstows(m->nullws, ws, 0);
+		teardownnullws(m);
+	}
 }
 
-/* This is called when a new monitor is added and it handles redistribution of workspaces across
- * all available monitors. */
+/* Handles (re-)distribution of workspaces across all available monitors. */
 void
-redistributeworkspaces(void)
+distributeworkspaces(void)
 {
-	int i;
-	const WorkspaceRule *r;
 	Monitor *m = mons, *mr = NULL;
 	Workspace *ws;
 
-	for (i = 0, ws = workspaces; ws && i < LENGTH(wsrules); ws = ws->next) {
+	for (ws = workspaces; ws; ws = ws->next) {
 		if (ws == stickyws)
 			continue;
 
-		r = &wsrules[i];
-		i++;
-
-		/* If the workspace rule specifies a designated monitor, and that monitor exists, then
-		 * this will have precedence. */
-		for (mr = mons; mr && mr->num != r->monitor; mr = mr->next);
+		/* If the workspace rule specified a designated monitor, and that monitor exists, then
+		 * this will have precedence. A restart may override the specified rule values. */
+		for (mr = mons; mr && mr->num != ws->rule_monitor; mr = mr->next);
 		if (mr) {
 			assignworkspacetomonitor(ws, mr);
-			ws->pinned = r->pinned;
+			ws->pinned = ws->rule_pinned;
 			continue;
 		}
 
-		/* Otherwise redistribute workspaces evenly. */
+		/* Otherwise distribute workspaces evenly. */
 		ws->pinned = 0;
 		assignworkspacetomonitor(ws, m);
 		m = (m->next == NULL ? mons : m->next);
-	}
-
-	/* Set selected workspaces for monitors, if not already set */
-	for (m = mons; m; m = m->next) {
-		if (m->selws) {
-			m->selws->visible = 1;
-			continue;
-		}
-		ws = selectmonws(m);
-		if (ws) {
-			m->selws = ws;
-			m->selws->visible = 1;
-		}
 	}
 }
 
@@ -1110,35 +1134,26 @@ reorientworkspace(Workspace *ws, int orientation)
 	if (ws->orientation == orientation)
 		return;
 
-	if (enabled(SmartLayoutConvertion) && ws->layout->arrange == flextile)
+	if (enabled(SmartLayoutConversion) && ws->layout->arrange == flextile)
 		layoutconvert(&((Arg) { .v = ws }));
 	ws->orientation = orientation;
 }
 
 void
-reviewworkspaces(void)
+reviewworkspaces(int hide_others)
 {
-	Workspace *ws, *sel;
 	Monitor *m;
 
-	/* Make sure that at least one workspace is visible on each monitor.
-	 * For consistency; make sure that there is not more than one visible workspace per monitor. */
+	/* Make sure that at least one workspace is visible on each monitor. */
 	for (m = mons; m; m = m->next) {
-		if (m->selws && m->selws->mon != m)
-			m->selws = NULL;
+		if (!m->selws || m->selws->mon != m) {
+			m->selws = selectmonws(m);
+			m->selws->visible = 1;
+		}
 
-		sel = selectmonws(m);
-		if (sel) {
-			m->selws = sel;
-			sel->visible = 1;
-
-			/* Hide the rest, if any */
-			for (ws = nextvismonws(m, workspaces); ws; ws = nextvismonws(m, ws->next)) {
-				if (ws == sel)
-					continue;
-				ws->visible = 0;
-				hidewsclients(ws->stack);
-			}
+		/* Hide the rest, if any */
+		if (hide_others) {
+			hidewsotherthan(m->selws);
 		}
 	}
 }
@@ -1156,12 +1171,15 @@ setwfact(const Arg *arg)
 		f = 1.0;
 	else if (arg->f < 4.0)
 		f = arg->f + ws->wfact;
-	else // set fact absolutely
+	else // 4.0 or greater - set fact absolutely
 		f = arg->f - 4.0;
+
+	/* Restrict to minimum and maximum fact values */
 	if (f < 0.25)
 		f = 0.25;
 	else if (f > 4.0)
 		f = 4.0;
+
 	ws->wfact = f;
 
 	setworkspaceareasformon(ws->mon);

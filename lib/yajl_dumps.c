@@ -45,7 +45,7 @@ dump_settings(yajl_gen gen)
 			YSTR("Debug"); YBOOL(enabled(Debug));
 			YSTR("AltWorkspaceIcons"); YBOOL(enabled(AltWorkspaceIcons));
 			YSTR("GreedyMonitor"); YBOOL(enabled(GreedyMonitor));
-			YSTR("SmartLayoutConvertion"); YBOOL(enabled(SmartLayoutConvertion));
+			YSTR("SmartLayoutConversion"); YBOOL(enabled(SmartLayoutConversion));
 			YSTR("AutoHideScratchpads"); YBOOL(enabled(AutoHideScratchpads));
 			YSTR("RioDrawIncludeBorders"); YBOOL(enabled(RioDrawIncludeBorders));
 			YSTR("RioDrawSpawnAsync"); YBOOL(enabled(RioDrawSpawnAsync));

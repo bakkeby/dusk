@@ -666,6 +666,27 @@ showhidebar(Bar *bar)
 }
 
 void
+teardownbars(Monitor *m)
+{
+	Bar *bar, *next;
+
+	for (bar = m->bar; bar; bar = next) {
+		next = bar->next;
+
+		if (!bar->external) {
+			XUnmapWindow(dpy, bar->win);
+			XDestroyWindow(dpy, bar->win);
+		}
+
+		if (systray && bar == systray->bar)
+			systray->bar = NULL;
+		free(bar);
+	}
+
+	m->bar = NULL;
+}
+
+void
 togglebar(const Arg *arg)
 {
 	Bar *bar;

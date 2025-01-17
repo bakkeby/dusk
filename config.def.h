@@ -114,7 +114,7 @@ static uint64_t functionality = 0
 	|AltWindowTitles // show alternate window titles, if present
 //	|AltWorkspaceIcons // show the workspace name instead of the icons
 //	|GreedyMonitor // disables swap of workspaces between monitors
-	|SmartLayoutConvertion // automatically adjust layout based on monitor orientation when moving a workspace from one monitor to another
+	|SmartLayoutConversion // automatically adjust layout based on monitor orientation when moving a workspace from one monitor to another
 //	|AutoHideScratchpads // automatically hide open scratchpads when moving to another workspace
 //	|RioDrawIncludeBorders // indicates whether the area drawn using slop includes the window borders
 //	|RioDrawSpawnAsync // spawn the application alongside rather than after drawing area using slop

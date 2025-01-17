@@ -333,6 +333,7 @@ typedef struct {
 typedef struct Preview Preview;
 struct Monitor {
 	int num;              /* monitor index */
+	char name[16];        /* monitor name (text index) */
 	int mx, my, mw, mh;   /* screen size */
 	int wx, wy, ww, wh;   /* window area  */
 	int gappih;           /* horizontal gap between windows */
@@ -346,6 +347,7 @@ struct Monitor {
 	unsigned int borderpx;
 	Monitor *next;
 	Workspace *selws;
+	Workspace *nullws;
 	Bar *bar;
 	Preview *preview;
 };
@@ -384,7 +386,9 @@ struct Workspace {
 	int visible;
 	int orientation;
 	int num;
-	int pinned;  /* whether workspace is pinned to assigned monitor or not */
+	int pinned;  /* Whether workspace is pinned to assigned monitor or not */
+	int rule_pinned;   /* Was the workspace pinned to a monitor according to the original rule?    */
+	int rule_monitor;  /* Used when redistributing workspaces when monitors are added and removed. */
 	Client *clients;
 	Client *sel;
 	Client *stack;
@@ -395,8 +399,8 @@ struct Workspace {
 	const Layout *layout;
 	const Layout *prevlayout;
 	char *icondef;  /* default icon */
-	char *iconvac;  /* vacant icon (when workspace is selected, default is empty, and no clients) */
-	char *iconocc;  /* when workspace has clients */
+	char *iconvac;  /* vacant icon - when workspace is selected, default is empty, and no clients */
+	char *iconocc;  /* occupied icon - when workspace has clients */
 };
 
 typedef struct {
@@ -543,6 +547,7 @@ static int prev_ptr_x = 0;
 static int prev_ptr_y = 0;
 static int ignore_warp = 0;    /* force skip warp in some situations, e.g. dragmfact, dragcfact */
 static int num_workspaces = 0; /* the number of available workspaces */
+static int num_monitors = 0;   /* the number of available monitors */
 static int combo = 0;          /* used for combo keys */
 static int monitorchanged = 0; /* used for combo logic */
 static int grp_idx = 0;        /* used for grouping windows together */
@@ -893,8 +898,12 @@ applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact)
 void
 arrange(Workspace *ws)
 {
-	if (ws && !ws->visible)
-		return;
+	if (ws && !ws->visible) {
+		if (ws != ws->mon->selws)
+			return;
+		ws->visible = 1;
+		showwsclients(ws->stack);
+	}
 
 	if (ws) {
 		arrangews(ws);
@@ -1080,39 +1089,11 @@ cleanup(void)
 void
 cleanupmon(Monitor *mon)
 {
-	Workspace *ws;
-	Monitor *m;
-	Bar *bar;
-
-	if (mon == mons)
-		mons = mons->next;
-	else {
-		for (m = mons; m && m->next != mon; m = m->next);
-		m->next = mon->next;
-	}
-
-	for (ws = workspaces; ws; ws = ws->next) {
-		if (ws->mon != mon || !mons)
-			continue;
-
-		if (ws == stickyws) {
-			ws->mon = mons;
-			continue;
-		}
-
-		handleabandoned(ws);
-	}
-
-	for (bar = mon->bar; bar; bar = mon->bar) {
-		if (!bar->external) {
-			XUnmapWindow(dpy, bar->win);
-			XDestroyWindow(dpy, bar->win);
-		}
-		mon->bar = bar->next;
-		if (systray && bar == systray->bar)
-			systray->bar = NULL;
-		free(bar);
-	}
+	detachmon(mon);
+	teardownnullws(mon);
+	if (running)
+		abandonworkspaces(mon);
+	teardownbars(mon);
 	freepreview(mon);
 	free(mon);
 }
@@ -1483,54 +1464,63 @@ configurenotify(XEvent *e)
 	Workspace *ws;
 	Client *c;
 	XConfigureEvent *ev = &e->xconfigure;
+	int prev_num_monitors = num_monitors;
 
-	if (ev->window == root) {
+	if (ev->window != root)
+		return NULL;
 
-		if (enabled(Debug)) {
-			fprintf(stderr, "configurenotify: received event for root window\n");
-			fprintf(stderr, "    - x = %d, y = %d, w = %d, h = %d\n", ev->x, ev->y, ev->width, ev->height);
-		}
+	if (enabled(Debug)) {
+		fprintf(stderr, "configurenotify: received event for root window\n");
+		fprintf(stderr, "    - x = %d, y = %d, w = %d, h = %d\n", ev->x, ev->y, ev->width, ev->height);
+	}
 
-		if (updategeom(ev->width, ev->height)) {
+	if (!updategeom(ev->width, ev->height))
+		return NULL;
 
-			stickyws->ww = sw;
-			stickyws->wh = sh;
+	reorientworkspaces();
+	if (prev_num_monitors < num_monitors)
+		distributeworkspaces(); /* Re-distribute workspaces if we have new monitors */
+	reviewworkspaces(1);
 
-			for (ws = workspaces; ws; ws = ws->next) {
-				for (c = ws->clients; c; c = c->next) {
-					c->sfx = (c->sfx != -9999 ? c->sfx : c->x) - c->ws->wx;
-					c->sfy = (c->sfx != -9999 ? c->sfy : c->y) - c->ws->wy;
-				}
-			}
-			drw_resize(drw, sw, sh);
-			updatebars();
-			setworkspaceareas();
-			setviewport();
-			for (m = mons; m; m = m->next) {
-				for (bar = m->bar; bar; bar = bar->next)
-					showhidebar(bar);
-				freepreview(m);
-			}
-			for (ws = workspaces; ws; ws = ws->next) {
-				for (c = ws->clients; c; c = c->next) {
-					c->sfx += c->ws->wx;
-					c->sfy += c->ws->wy;
-					if (!ISVISIBLE(c))
-						continue;
-					if (ISTRUEFULLSCREEN(c))
-						resizeclient(c, ws->mon->mx, ws->mon->my, ws->mon->mw, ws->mon->mh);
-					else if (ISFLOATING(c)) {
-						c->x = c->sfx;
-						c->y = c->sfy;
-						show(c);
-					}
-				}
-				removepreview(ws);
-			}
-			arrange(NULL);
-			focus(NULL);
+	stickyws->ww = sw;
+	stickyws->wh = sh;
+
+	for (ws = workspaces; ws; ws = ws->next) {
+		for (c = ws->clients; c; c = c->next) {
+			c->sfx = (c->sfx != -9999 ? c->sfx : c->x) - c->ws->wx;
+			c->sfy = (c->sfx != -9999 ? c->sfy : c->y) - c->ws->wy;
 		}
 	}
+
+	drw_resize(drw, sw, sh);
+	updatebars();
+	setworkspaceareas();
+	setviewport();
+
+	for (m = mons; m; m = m->next) {
+		for (bar = m->bar; bar; bar = bar->next)
+			showhidebar(bar);
+		freepreview(m);
+	}
+
+	for (ws = workspaces; ws; ws = ws->next) {
+		for (c = ws->clients; c; c = c->next) {
+			c->sfx += c->ws->wx;
+			c->sfy += c->ws->wy;
+			if (!ISVISIBLE(c))
+				continue;
+			if (ISTRUEFULLSCREEN(c))
+				resizeclient(c, ws->mon->mx, ws->mon->my, ws->mon->mw, ws->mon->mh);
+			else if (ISFLOATING(c)) {
+				c->x = c->sfx;
+				c->y = c->sfy;
+				show(c);
+			}
+		}
+		removepreview(ws);
+	}
+	arrange(NULL);
+	focus(NULL);
 
 	return NULL;
 }
@@ -1648,9 +1638,11 @@ createmon(int num)
 	m->gappoh = gappoh;
 	m->gappov = gappov;
 	m->wsmask = 0;
+	m->nullws = 0;
 	m->prevwsmask = 0;
 	m->num = num;
 	m->bar = NULL;
+	sprintf(m->name, "%d", num);
 
 	createbars(m);
 
@@ -1661,6 +1653,7 @@ Workspace *
 destroynotify(XEvent *e)
 {
 	Monitor *m;
+	Workspace *ws;
 	Client *c;
 	Bar *bar;
 	Window focus_return;
@@ -1670,8 +1663,9 @@ destroynotify(XEvent *e)
 	if ((c = wintoclient(ev->window))) {
 		if (enabled(Debug) || DEBUGGING(c))
 			fprintf(stderr, "destroynotify: received event for client %s\n", c->name);
+		ws = c->ws;
 		unmanage(c, 1);
-		return c->ws;
+		return ws;
 	}
 
 	if (systray && (c = wintosystrayicon(ev->window))) {
@@ -2326,8 +2320,9 @@ manage(Window w, XWindowAttributes *wa)
 		if (XGetTransientForHint(dpy, w, &trans) && (t = wintoclient(trans))) {
 			addflag(c, Transient);
 			c->ws = t->ws;
-		} else
+		} else {
 			c->ws = selws;
+		}
 	}
 
 	restorewindowfloatposition(c, c->ws->mon);
@@ -2859,7 +2854,7 @@ recttomon(int x, int y, int w, int h)
 Workspace *
 recttows(int x, int y, int w, int h)
 {
-	Workspace *ws, *r = NULL;
+	Workspace *ws, *r = selws;
 	int a, area = 0;
 
 	for (ws = workspaces; ws; ws = ws->next)
@@ -3024,7 +3019,7 @@ run(void)
 		activity = select(max_fd + 1, &read_fds, NULL, NULL, NULL);
 
 		if (activity < 0) {
-			fprintf(stderr, "Warning: failed to read from D-Bus or X11 socket, continuing");
+			fprintf(stderr, "Warning: failed to read from D-Bus or X11 socket, continuing\n");
 			continue;
 		}
 
@@ -3378,6 +3373,7 @@ setup(void)
 	vacant_workspace_label_format_length = TEXT2DW(vacant_workspace_label_format) - TEXTW(workspace_label_placeholder);
 
 	updategeom(sw, sh);
+	dummymon = createmon(7);
 
 	/* init atoms */
 	utf8string = XInternAtom(dpy, "UTF8_STRING", False);
@@ -3402,6 +3398,10 @@ setup(void)
 	cursor[CurSwallow] = drw_cur_create(drw, XC_target);
 
 	createworkspaces();
+	restoreworkspacestates();
+	distributeworkspaces();
+	reorientworkspaces();
+	reviewworkspaces(1);
 	updatebars();
 	initsystray();
 
@@ -3594,9 +3594,12 @@ structurenotify(XEvent *e)
 			ws = configurenotify(e);
 			break;
 		}
-		if (prevws && prevws != ws)
-			multiws = 1;
-		prevws = ws;
+
+		if (ws) {
+			if (prevws && prevws != ws)
+				multiws = 1;
+			prevws = ws;
+		}
 	} while (XCheckMaskEvent(dpy, StructureNotifyMask|SubstructureNotifyMask, e));
 
 	if (multiws) {
@@ -3733,10 +3736,11 @@ unmanage(Client *c, int destroyed)
 	updateclientlist();
 
 	if (revertws) {
-		if (!revertws->visible)
+		if (!revertws->visible) {
 			viewwsonmon(revertws, revertws->mon, 0);
-		else if (ws->visible)
+		} else if (ws->visible) {
 			viewwsonmon(ws, ws->mon, 1);
+		}
 	}
 }
 
@@ -3829,14 +3833,8 @@ updategeom(int width, int height)
 		if (enabled(SortScreens))
 			sortscreens(unique, nn);
 
-		for (i = n; i < nn; i++) {
-			for (m = mons; m && m->next; m = m->next);
-			if (m)
-				m->next = createmon(i);
-			else
-				mons = createmon(i);
-		}
-		dummymon = createmon(7);
+		for (i = n; i < nn; i++)
+			attachmon(createmon(i), NULL);
 
 		for (m = mons; m && m->num < nn; m = m->next) {
 			if (m->num >= n
@@ -3853,11 +3851,6 @@ updategeom(int width, int height)
 			}
 		}
 
-		reorientworkspaces();
-
-		if (n < nn)
-			redistributeworkspaces();
-
 		for (i = nn; i < n; i++) {
 			for (m = mons; m && m->next; m = m->next);
 			if (m == selmon)
@@ -3865,9 +3858,8 @@ updategeom(int width, int height)
 			cleanupmon(m);
 		}
 
-		reviewworkspaces();
-
 		free(unique);
+		num_monitors = nn;
 	} else
 #endif /* XINERAMA */
 	{ /* default monitor setup */
@@ -3880,6 +3872,8 @@ updategeom(int width, int height)
 			mons->orientation = (mons->mw < mons->mh);
 			updatebarpos(mons);
 		}
+
+		num_monitors = 1;
 	}
 	if (dirty) {
 		selmon = mons;

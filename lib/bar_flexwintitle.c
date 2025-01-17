@@ -4,7 +4,7 @@ int prevscheme = 0;
 int
 size_flexwintitle(Bar *bar, BarArg *a)
 {
-	if (!bar->mon->selws)
+	if (!bar->mon->selws->visible)
 		return 0;
 	return a->w;
 }
@@ -12,7 +12,7 @@ size_flexwintitle(Bar *bar, BarArg *a)
 int
 draw_flexwintitle(Bar *bar, BarArg *a)
 {
-	if (!bar->mon->selws)
+	if (!bar->mon->selws->visible)
 		return 0;
 	return flextitlecalculate(bar, a->x + a->lpad, a->w - a->lpad - a->rpad, -1, flextitledraw, NULL, a);
 }
@@ -20,7 +20,7 @@ draw_flexwintitle(Bar *bar, BarArg *a)
 int
 click_flexwintitle(Bar *bar, Arg *arg, BarArg *a)
 {
-	if (!bar->mon->selws)
+	if (!bar->mon->selws->visible)
 		return 0;
 	if (flextitlecalculate(bar, 0, a->w, a->x, flextitleclick, arg, a))
 		return ClkWinTitle;

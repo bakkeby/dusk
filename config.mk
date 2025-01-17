@@ -3,54 +3,53 @@ VERSION = 1.0
 
 # Customize below to fit your system
 
-# paths
+# Paths
 PREFIX = /usr/local
 MANPREFIX = ${PREFIX}/share/man
 
-X11INC = /usr/X11R6/include
-X11LIB = /usr/X11R6/lib
+PKG_CONFIG = pkg-config
 
 # Optional dependency on libxi for mouse related features
 #HAVE_LIBXI = -DHAVE_LIBXI=1
-#XINPUTLIBS = -lXi
-#XFIXESLIBS = -lXfixes
+#XINPUTLIBS = `$(PKG_CONFIG) --libs xi xfixes`
 
 # Optional dependency on fribidi for RTL languages
 #HAVE_FRIBIDI = -DHAVE_FRIBIDI=1
-#FRIBIDIINC = -I/usr/include/fribidi
-#FRIBIDILIBS = -lfribidi
+#FRIBIDILIBS = `$(PKG_CONFIG) --libs fribidi`
+#FRIBIDIINC = `$(PKG_CONFIG) --cflags fribidi`
 
 # Optionally set to 1 to use key codes rather than keysyms for keybindings
 USE_KEYCODES = 0
 
-# Xinerama, comment if you don't want it
-XINERAMALIBS  = -lXinerama
+# Optional dependency on Xinerama for multi-monitor support
+XINERAMALIBS  = `$(PKG_CONFIG) --libs xinerama`
 XINERAMAFLAGS = -DXINERAMA
 
 # freetype
-FREETYPELIBS = -lfontconfig -lXft
-FREETYPEINC = /usr/include/freetype2
+# FREETYPELIBS = -lfontconfig -lXft
+FREETYPELIBS = `$(PKG_CONFIG) --libs fontconfig xft`
+FREETYPEINC = `$(PKG_CONFIG) --cflags fontconfig`
 
-# Needed for the alpha patch and the winicon patch
-XRENDER = -lXrender
+# Needed for alpha and window icons
+XRENDER = `$(PKG_CONFIG) --libs xrender`
 
-# Needed for the ipc patch
-YAJLLIBS = -lyajl
-YAJLINC = -I/usr/include/yajl
+# Needed for ipc information dumps
+YAJLLIBS = `$(PKG_CONFIG) --libs yajl`
+YAJLINC = `$(PKG_CONFIG) --cflags yajl`
 
-# dbus (ipc replacement)
-DBUSLIBS = -ldbus-1
-DBUSINC = -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include/
+# dbus (used for ipc)
+DBUSLIBS = `$(PKG_CONFIG) --libs dbus-1`
+DBUSINC = `$(PKG_CONFIG) --cflags dbus-1`
 
-# Needed for the swallow patch
-XCBLIBS = -lX11-xcb -lxcb -lxcb-res
+# Needed for window swallowing functionality
+XCBLIBS = `$(PKG_CONFIG) --libs x11-xcb xcb-res`
 
-# Needed for the winicon patch
-IMLIB2LIBS = -lImlib2
+# Needed for window icons
+IMLIB2LIBS = `$(PKG_CONFIG) --libs imlib2`
 
-# includes and libs
-INCS = -I${X11INC} -I${FREETYPEINC} ${YAJLINC} ${DBUSINC} ${XINPUTINC} ${FRIBIDIINC}
-LIBS = -L${X11LIB} -lX11 ${XINERAMALIBS} ${FREETYPELIBS} ${XRENDER} ${XCBLIBS} ${KVMLIB} ${YAJLLIBS} ${DBUSLIBS} ${IMLIB2LIBS} ${XINPUTLIBS} ${XFIXESLIBS} ${FRIBIDILIBS}
+# Includes and libs
+INCS = ${FREETYPEINC} ${YAJLINC} ${DBUSINC} ${XINPUTINC} ${FRIBIDIINC}
+LIBS = ${XINERAMALIBS} ${FREETYPELIBS} ${XRENDER} ${XCBLIBS} ${KVMLIB} ${YAJLLIBS} ${DBUSLIBS} ${IMLIB2LIBS} ${XINPUTLIBS} ${FRIBIDILIBS}
 
 # Optional host flag for computer specific configuration
 #HOSTFLAGS = -DHOST=$(shell command -v cksum > /dev/null && hostname | cksum | tr -d ' ')
@@ -65,5 +64,5 @@ CPPFLAGS = -D_DEFAULT_SOURCE ${HAVE_LIBXI} ${HAVE_FRIBIDI} -D_BSD_SOURCE -D_POSI
 CFLAGS   = ${OPTIMISATIONS} -std=c99 -pedantic -Wall -Wno-unused-function -Wno-deprecated-declarations ${INCS} ${CPPFLAGS}
 LDFLAGS  = ${LIBS}
 
-# compiler and linker
+# Compiler and linker
 CC = cc

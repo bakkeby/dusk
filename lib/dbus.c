@@ -243,6 +243,10 @@ IPCCommand *
 lookup_command(const char *command)
 {
 	int i;
+
+	if (!command)
+		return NULL;
+
 	for (i = 0; i < LENGTH(ipccommands); i++)
 		if (!strcasecmp(ipccommands[i].name, command))
 			return &ipccommands[i];

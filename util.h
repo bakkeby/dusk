@@ -47,7 +47,8 @@ static const uint64_t
 	SnapToGaps = 0x800000, // snap to outer gaps when moving floating clients
 	AltWorkspaceIcons = 0x1000000, // show the workspace name instead of the icons
 	GreedyMonitor = 0x2000000, // when viewing a workspace the monitor is greedy and gives nothing in return (i.e. disables swap of workspaces)
-	SmartLayoutConvertion = 0x4000000, // when moving a workspace from one monitor to another, automatically adjust layout based on monitor orientation (i.e. vertical vs horizontal)
+	SmartLayoutConversion = 0x4000000, // when moving a workspace from one monitor to another, automatically adjust layout based on monitor orientation (i.e. vertical vs horizontal)
+	SmartLayoutConvertion = 0x4000000, // typo correction alias for the above
 	AutoHideScratchpads = 0x8000000, // automatically hide open scratchpads when moving to another workspace
 	RioDrawIncludeBorders = 0x10000000, // indicates whether the area drawn using slop includes the window borders
 	RioDrawSpawnAsync = 0x20000000, // indicates whether to spawn the application alongside or after drawing area using slop
