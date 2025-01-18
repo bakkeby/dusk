@@ -230,20 +230,11 @@ void
 setstatus(int status_no, char const *statustext)
 {
 	const BarRule *br;
-	int i, j;
 
 	if (status_no < 0 || status_no >= NUM_STATUSES)
 		return;
 
-	for (j = 0, i = 0; j < STATUS_BUFFER - 1 && statustext[i] != '\0'; j++, i++) {
-		if (statustext[i] == '~' && statustext[i + 1] == '/') {
-			strlcpy(rawstatustext[status_no] + j, env_home, env_homelen + 1);
-			j += env_homelen - 1;
-		} else {
-			rawstatustext[status_no][j] = statustext[i];
-		}
-	}
-	rawstatustext[status_no][j] = '\0';
+	strlcpy(rawstatustext[status_no], statustext, sizeof rawstatustext[status_no]);
 
 	for (int r = 0; r < LENGTH(barrules); r++) {
 		br = &barrules[r];
@@ -324,6 +315,7 @@ loadimage(char *path, int use_cache)
 	int least = -1;
 	time_t leasttime = INT_MAX - 1;
 	Image *image;
+	char *fullpath = subst_home_directory(path);
 
 	/* First see if we can find the image path in our list of buffered images */
 	for (i = 0; i < LENGTH(imagebuffer); i++) {
@@ -335,10 +327,11 @@ loadimage(char *path, int use_cache)
 		if (imagebuffer[i].image.icon == None)
 			continue;
 
-		if (!strcmp(imagebuffer[i].image.iconpath, path)) {
+		if (!strcmp(imagebuffer[i].image.iconpath, fullpath)) {
 			if (use_cache) {
 				imagebuffer[i].atime = time(NULL);
-				return &imagebuffer[i].image;
+				image = &imagebuffer[i].image;
+				goto bail;
 			}
 
 			least = i;
@@ -359,10 +352,14 @@ loadimage(char *path, int use_cache)
 		imagebuffer[least].atime = 0;
 	}
 
-	if (!loadimagefromfile(image, path))
-		return NULL;
+	if (loadimagefromfile(image, fullpath)) {
+		imagebuffer[least].atime = time(NULL);
+	} else {
+		image = NULL;
+	}
 
-	imagebuffer[least].atime = time(NULL);
+bail:
+	free(fullpath);
 	return image;
 }
 
