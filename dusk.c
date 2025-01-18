@@ -508,6 +508,7 @@ static void skipfocusevents(void);
 static void spawn(const Arg *arg);
 static pid_t spawncmd(const Arg *arg, int buttonclick, int orphan);
 static void structurenotify(XEvent *e);
+static char *subst_home_directory(char *str);
 static unsigned int textw_clamp(const char *str, unsigned int n);
 static void togglefloating(const Arg *arg);
 static void unfocus(Client *c, int setfocus, Client *nextfocus);
@@ -1643,7 +1644,7 @@ createmon(int num)
 	m->prevwsmask = 0;
 	m->num = num;
 	m->bar = NULL;
-	sprintf(m->name, "%d", num);
+	snprintf(m->name, sizeof m->name, "%d", num);
 
 	createbars(m);
 
@@ -3536,17 +3537,17 @@ spawncmd(const Arg *arg, int buttonclick, int orphan)
 			struct stat statbuf;
 
 			cwd = strtok(selws->sel->name, SPAWN_CWD_DELIM);
+
+			if (strncmp(cwd, "~/", 2) == 0) {
+				/* Replace ~/ with HOME environment variable */
+				pathbuf = subst_home_directory(cwd);
+				cwd = pathbuf;
+			}
+
 			/* NOTE: strtok() alters selws->sel->name in-place,
 			 * but that does not matter because we are going to
 			 * exec() below anyway; nothing else will use it */
 			while (cwd) {
-				if (*cwd == '~') {
-					/* Replace ~ with HOME environment variable */
-					pathbuf = ecalloc(1, env_homelen + strlen(cwd));
-					sprintf(pathbuf, "%s%s", env_home, cwd + 1);
-					cwd = pathbuf;
-				}
-
 				if (strchr(cwd, '/') && !stat(cwd, &statbuf)) {
 					if (!S_ISDIR(statbuf.st_mode))
 						cwd = dirname(cwd);
@@ -3563,13 +3564,13 @@ spawncmd(const Arg *arg, int buttonclick, int orphan)
 
 		if (buttonclick) {
 			char button[11];
-			sprintf(button, "%d", buttonclick);
+			snprintf(button, sizeof button, "%d", buttonclick);
 			setenv("BLOCK_BUTTON", button, 1);
 		}
 
 		if (statusclicked > -1) {
 			char status[11];
-			sprintf(status, "%d", statusclicked);
+			snprintf(status, sizeof status, "%d", statusclicked);
 			setenv("BLOCK_STATUS", status, 1);
 			statusclicked = -1;
 		}
@@ -3585,9 +3586,7 @@ spawncmd(const Arg *arg, int buttonclick, int orphan)
 		/* Replace occurrences of "~/" with the value of HOME environment variable */
 		for (i = 0; argv[i] != NULL; i++) {
 			if (strncmp(argv[i], "~/", 2) == 0) {
-				char *buffer = ecalloc(1, env_homelen + strlen(argv[i]));
-				sprintf(buffer, "%s%s", env_home, argv[i] + 1);
-				argv[i] = buffer;
+				argv[i] = subst_home_directory(argv[i]);
 			}
 		}
 
@@ -3595,6 +3594,19 @@ spawncmd(const Arg *arg, int buttonclick, int orphan)
 		die("dusk: execvp %s failed:", argv[0]);
 	}
 	return pid;
+}
+
+/* Allocates memory for a char array that need to be freed by the caller */
+char *
+subst_home_directory(char *str)
+{
+	if (strncmp(str, "~/", 2) != 0)
+		return str;
+
+	int buffer_length = env_homelen + strlen(str);
+	char *buffer = ecalloc(1, buffer_length);
+	snprintf(buffer, buffer_length, "%s%s", env_home, str + 1);
+	return buffer;
 }
 
 void
@@ -4005,7 +4017,7 @@ updatetitle(Client *c)
 	if (!gettextprop(c->win, netatom[NetWMName], c->name, sizeof c->name))
 		gettextprop(c->win, XA_WM_NAME, c->name, sizeof c->name);
 	if (c->name[0] == '\0') /* hack to mark broken clients */
-		strcpy(c->name, broken);
+		strlcpy(c->name, broken, sizeof c->name);
 }
 
 void

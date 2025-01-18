@@ -1,3 +1,5 @@
+#define BUFFERSIZE 20
+
 int
 loadxrdbcolor(XrmDatabase xrdb, char **dest, unsigned int *alpha, char *resource)
 {
@@ -11,13 +13,13 @@ loadxrdbcolor(XrmDatabase xrdb, char **dest, unsigned int *alpha, char *resource
 	if (value.addr == NULL)
 		return 0;
 
-	strcpy(*dest, value.addr);
+	strlcpy(*dest, value.addr, BUFFERSIZE);
 	switch(sscanf(value.addr, "#%6x%2x", &rgb, &a)) {
 		case 1:
-			sprintf(*dest, "#%.6x", rgb);
+			snprintf(*dest, BUFFERSIZE, "#%.6x", rgb);
 			return 1;
 		case 2:
-			sprintf(*dest, "#%.6x", rgb);
+			snprintf(*dest, BUFFERSIZE, "#%.6x", rgb);
 			*alpha = a;
 			return 1;
 	}
@@ -59,7 +61,7 @@ loadxrdbconfig(XrmDatabase xrdb, char *name, enum resource_type rtype, void *dst
 	{
 		switch (rtype) {
 		case STRING:
-			strcpy(sdst, ret.addr);
+			strlcpy(sdst, ret.addr, BUFFERSIZE);
 			break;
 		case INTEGER:
 			*idst = strtoul(ret.addr, NULL, 10);
@@ -84,21 +86,21 @@ loadxrdb(void)
 	const char *resource_prefix;
 	char *pattern = "dusk.%s.%s.%s";
 
-	char fg[20] = {0};
-	char bg[20] = {0};
-	char bd[20] = {0};
+	char fg[BUFFERSIZE] = {0};
+	char bg[BUFFERSIZE] = {0};
+	char bd[BUFFERSIZE] = {0};
 	unsigned int alpha[] = { 0, 0, 0 };
 	char *clrnames[3] = { fg, bg, bd };
 	const char *columns[] = { "fg", "bg", "border" };
 
-	char tnfg[20] = {0};
-	char tnbg[20] = {0};
-	char tnbd[20] = {0};
+	char tnfg[BUFFERSIZE] = {0};
+	char tnbg[BUFFERSIZE] = {0};
+	char tnbd[BUFFERSIZE] = {0};
 	char *titlenorm[3] = { tnfg, tnbg, tnbd };
 
-	char tsfg[20] = {0};
-	char tsbg[20] = {0};
-	char tsbd[20] = {0};
+	char tsfg[BUFFERSIZE] = {0};
+	char tsbg[BUFFERSIZE] = {0};
+	char tsbd[BUFFERSIZE] = {0};
 	char *titlesel[3] = { tsfg, tsbg, tsbd };
 
 	if (disabled(Xresources))
@@ -120,10 +122,10 @@ loadxrdb(void)
 						continue;
 					}
 					for (c = 0; c < ColCount; c++) {
-						sprintf(resource, pattern, resource_prefix, columns[c], "alpha");
+						snprintf(resource, sizeof resource, pattern, resource_prefix, columns[c], "alpha");
 						if (!loadxrdbalpha(xrdb, &alpha[c], resource))
 							alpha[c] = default_alphas[c];
-						sprintf(resource, pattern, resource_prefix, columns[c], "color");
+						snprintf(resource, sizeof resource, pattern, resource_prefix, columns[c], "color");
 						if (!loadxrdbcolor(xrdb, &clrnames[c], &alpha[c], resource)) {
 							colorscheme = s;
 							/* Fall back to SchemeTitleNorm / Sel for SchemeFlex colors if not defined. */
@@ -131,22 +133,22 @@ loadxrdb(void)
 								colorscheme = (s >= SchemeFlexSelTTB ? SchemeTitleSel : SchemeTitleNorm);
 							}
 							if (colorscheme == SchemeTitleNorm && titlenorm[0][0]) {
-								strcpy(clrnames[c], titlenorm[c]);
+								strlcpy(clrnames[c], titlenorm[c], BUFFERSIZE);
 							} else if (colorscheme == SchemeTitleSel && titlesel[0][0]) {
-								strcpy(clrnames[c], titlesel[c]);
+								strlcpy(clrnames[c], titlesel[c], BUFFERSIZE);
 							} else {
-								strcpy(clrnames[c], colors[colorscheme][c]);
+								strlcpy(clrnames[c], colors[colorscheme][c], BUFFERSIZE);
 							}
 						}
 					}
 
 					if (s == SchemeTitleNorm) {
 						for (c = 0; c < ColCount; c++) {
-							strcpy(titlenorm[c], clrnames[c]);
+							strlcpy(titlenorm[c], clrnames[c], BUFFERSIZE);
 						}
 					} else if (s == SchemeTitleSel) {
 						for (c = 0; c < ColCount; c++) {
-							strcpy(titlesel[c], clrnames[c]);
+							strlcpy(titlesel[c], clrnames[c], BUFFERSIZE);
 						}
 					}
 
@@ -156,7 +158,7 @@ loadxrdb(void)
 
 				/* status2d terminal colours */
 				for (s = 0; s < 16; s++) {
-					sprintf(resource, "dusk.color%d", s);
+					snprintf(resource, sizeof resource, "dusk.color%d", s);
 					loadxrdbcolor(xrdb, &termcolor[s], &alpha[0], resource);
 				}
 

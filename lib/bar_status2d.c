@@ -56,11 +56,11 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 	Image *image;
 	Clr oldbg = scheme[defscheme][ColFg];
 	Clr oldfg = scheme[defscheme][ColBg];
-	len = strlen(text2d) + 1;
-	text = (char*) ecalloc(1, sizeof(char)*(len));
+	len = sizeof(char) * (strlen(text2d) + 1);
+	text = (char*) ecalloc(1, len);
 	p = text;
 
-	strcpy(text, text2d);
+	strlcpy(text, text2d, len);
 
 	if (drawbg) {
 		drw_setscheme(drw, scheme[defscheme]);
@@ -74,6 +74,7 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 
 	/* process status text */
 	i = -1;
+
 	while (text[++i]) {
 		if (text[i] == '^' && !isCode) {
 			isCode = 1;
@@ -219,6 +220,7 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 		if (tw > 0)
 			drw_text(drw, dx, y, tw, bh, 0, text, invert, fillbg);
 	}
+
 	free(p);
 
 	return 1;
@@ -259,11 +261,10 @@ status2dtextlength(char* text2d)
 	char *p = {0};
 	Image *image;
 
-	len = strlen(text2d) + 1;
-	text = (char*) ecalloc(1, sizeof(char)*len);
+	len = sizeof(char) * (strlen(text2d) + 1);
+	text = (char*) ecalloc(1, len);
 	p = text;
-
-	strcpy(text, text2d);
+	strlcpy(text, text2d, len);
 
 	/* compute width of the status text */
 	w = 0;

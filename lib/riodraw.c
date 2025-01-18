@@ -18,11 +18,11 @@ riodraw(Client *c, const char slopstyle[])
 	}
 	#endif
 
-	strcat(slopcmd, slopstyle);
+	strlcat(slopcmd, slopstyle, sizeof slopcmd);
 	FILE *fp = popen(slopcmd, "r");
 
 	while (fgets(str, 100, fp) != NULL)
-		strcat(strout, str);
+		strlcat(strout, str, sizeof strout);
 
 	pclose(fp);
 

@@ -231,11 +231,11 @@ savewindowfloatposition(Client *c, Monitor *m)
 	if (c->sfx == -9999)
 		return;
 
-	sprintf(atom, "_DUSK_FLOATPOS_%u", m->num);
+	snprintf(atom, sizeof atom, "_DUSK_FLOATPOS_%u", m->num);
 	uint32_t pos[] = { (MAX(c->sfx - m->mx, 0) & 0xffff) | ((MAX(c->sfy - m->my, 0) & 0xffff) << 16) };
 	XChangeProperty(dpy, c->win, XInternAtom(dpy, atom, False), XA_CARDINAL, 32, PropModeReplace, (unsigned char *)pos, 1);
 
-	sprintf(atom, "_DUSK_FLOATSIZE_%u", m->num);
+	snprintf(atom, sizeof atom, "_DUSK_FLOATSIZE_%u", m->num);
 	uint32_t size[] = { (c->sfw & 0xffff) | ((c->sfh & 0xffff) << 16) };
 	XChangeProperty(dpy, c->win, XInternAtom(dpy, atom, False), XA_CARDINAL, 32, PropModeReplace, (unsigned char *)size, 1);
 
@@ -249,7 +249,7 @@ restorewindowfloatposition(Client *c, Monitor *m)
 	Atom key, value;
 	int x, y, w, h;
 
-	sprintf(atom, "_DUSK_FLOATPOS_%u", m->num);
+	snprintf(atom, sizeof atom, "_DUSK_FLOATPOS_%u", m->num);
 
 	key = XInternAtom(dpy, atom, False);
 	if (!key)
@@ -262,7 +262,7 @@ restorewindowfloatposition(Client *c, Monitor *m)
 	x = value & 0xffff;
 	y = value >> 16;
 
-	sprintf(atom, "_DUSK_FLOATSIZE_%u", m->num);
+	snprintf(atom, sizeof atom, "_DUSK_FLOATSIZE_%u", m->num);
 
 	key = XInternAtom(dpy, atom, False);
 	if (!key)
