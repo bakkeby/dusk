@@ -80,6 +80,9 @@
 #include "xban.c"
 #endif
 
+/* Debug */
+#include "x11_debug.c"
+
 /* Layouts */
 #include "layout_flextile-deluxe.c"
 

@@ -82,6 +82,9 @@
 /* Layouts */
 #include "layout_flextile-deluxe.h"
 
+/* Debug */
+#include "x11_debug.h"
+
 /* dbus */
 #ifdef HAVE_DBUS
 #include "dbus_server.h"

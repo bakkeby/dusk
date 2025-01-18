@@ -3627,10 +3627,11 @@ structurenotify(XEvent *e)
 		arrange(NULL);
 		focus(NULL);
 		drawbars();
-	} else if (ws) {
-		arrange(ws);
+	/* We are using prevws here as ws can be overwritten with a NULL due to the event loop above */
+	} else if (prevws) {
+		arrange(prevws);
 		focus(NULL);
-		drawbar(ws->mon);
+		drawbar(prevws->mon);
 	}
 }
 
@@ -4091,11 +4092,22 @@ xerror(Display *dpy, XErrorEvent *ee)
 	|| (ee->request_code == X_GrabKey && ee->error_code == BadAccess)
 	|| (ee->request_code == X_CopyArea && ee->error_code == BadDrawable)) {
 		if (enabled(Debug))
-			fprintf(stderr, "xerror: got XErrorEvent type %d serial %ld, error code %d request code %d minor code %d resource ID %ld\n", ee->type, ee->serial, ee->error_code, ee->request_code, ee->minor_code, ee->resourceid);
+			fprintf(stderr, "xerror: got XErrorEvent serial %ld, error code %d (%s) request code %d (%s) minor code %d resource ID %ld\n",
+				ee->serial,
+				ee->error_code,
+				errordesc(ee->error_code),
+				ee->request_code,
+				requestdesc(ee->request_code),
+				ee->minor_code,
+				ee->resourceid
+			);
 		return 0;
 	}
-	fprintf(stderr, "dusk: fatal error: request code=%d, error code=%d\n",
-		ee->request_code, ee->error_code);
+	fprintf(stderr, "dusk: fatal error: request code=%d (%s), error code=%d (%s)\n",
+		ee->request_code,
+		requestdesc(ee->request_code),
+		ee->error_code,
+		errordesc(ee->error_code));
 	return xerrorxlib(dpy, ee); /* may call exit */
 }
 
