@@ -276,6 +276,8 @@ struct Client {
 	int area;  /* arrangement area (master, stack, secondary stack) */
 	int arr;   /* tile arrangement (left to right, top to bottom, etc.) */
 	int scheme;
+	int shown;
+	int expecting_unmap;
 	char scratchkey;
 	char swallowkey;
 	char swallowedby;
@@ -445,10 +447,10 @@ static void clientrelposmon(Client *c, Monitor *o, Monitor *n, int *cx, int *cy,
 static void clienttomon(const Arg *arg);
 static void clientstomon(const Arg *arg);
 static void configure(Client *c);
-static Workspace *configurenotify(XEvent *e);
+static Workspace *configurenotify(XConfigureEvent *ev);
 static void configurerequest(XEvent *e);
 static Monitor *createmon(int num);
-static Workspace *destroynotify(XEvent *e);
+static Workspace *destroynotify(XDestroyWindowEvent *ev);
 static void detach(Client *c);
 static void detachstack(Client *c);
 static Monitor *dirtomon(int dir);
@@ -513,7 +515,7 @@ static unsigned int textw_clamp(const char *str, unsigned int n);
 static void togglefloating(const Arg *arg);
 static void unfocus(Client *c, int setfocus, Client *nextfocus);
 static void unmanage(Client *c, int destroyed);
-static Workspace *unmapnotify(XEvent *e);
+static Workspace *unmapnotify(XUnmapEvent *ev);
 static void updateclientlist(void);
 static int updategeom(int width, int height);
 static void updatelegacystatus(void);
@@ -1459,13 +1461,12 @@ configure(Client *c)
 }
 
 Workspace *
-configurenotify(XEvent *e)
+configurenotify(XConfigureEvent *ev)
 {
 	Monitor *m;
 	Bar *bar;
 	Workspace *ws;
 	Client *c;
-	XConfigureEvent *ev = &e->xconfigure;
 	int prev_num_monitors = num_monitors;
 
 	if (ev->window != root)
@@ -1652,15 +1653,25 @@ createmon(int num)
 }
 
 Workspace *
-destroynotify(XEvent *e)
+destroynotify(XDestroyWindowEvent *ev)
 {
+	static Window last_window = 0;
+	static unsigned long last_serial = 0;
+
 	Monitor *m;
 	Workspace *ws;
 	Client *c;
 	Bar *bar;
 	Window focus_return;
 	int revert_to_return;
-	XDestroyWindowEvent *ev = &e->xdestroywindow;
+
+	/* Skip duplicate events */
+	if (ev->serial == last_serial && ev->window == last_window) {
+		return NULL;
+	}
+
+	last_serial = ev->serial;
+	last_window = ev->window;
 
 	if ((c = wintoclient(ev->window))) {
 		if (enabled(Debug) || DEBUGGING(c))
@@ -2151,8 +2162,24 @@ grabkeys(void)
 #endif // USE_KEYCODES
 
 void
+show(Client *c)
+{
+	if (c->shown)
+		return;
+
+	c->shown = 1;
+	setclientstate(c, NormalState);
+	XMapWindow(dpy, c->win);
+}
+
+void
 hide(Client *c)
 {
+	if (!c->shown)
+		return;
+
+	c->shown = 0;
+	c->expecting_unmap++;
 	setclientstate(c, IconicState);
 	XUnmapWindow(dpy, c->win);
 }
@@ -3495,13 +3522,6 @@ seturgent(Client *c, int urg)
 }
 
 void
-show(Client *c)
-{
-	setclientstate(c, NormalState);
-	XMapWindow(dpy, c->win);
-}
-
-void
 skipfocusevents(void)
 {
 	XEvent ev;
@@ -3618,13 +3638,13 @@ structurenotify(XEvent *e)
 	do {
 		switch (e->type) {
 		case UnmapNotify:
-			ws = unmapnotify(e);
+			ws = unmapnotify(&e->xunmap);
 			break;
 		case DestroyNotify:
-			ws = destroynotify(e);
+			ws = destroynotify(&e->xdestroywindow);
 			break;
 		case ConfigureNotify:
-			ws = configurenotify(e);
+			ws = configurenotify(&e->xconfigure);
 			break;
 		}
 
@@ -3795,20 +3815,30 @@ unmanage(Client *c, int destroyed)
  * https://tronche.com/gui/x/xlib/events/window-state-change/unmap.html
  */
 Workspace *
-unmapnotify(XEvent *e)
+unmapnotify(XUnmapEvent *ev)
 {
+	static Window last_window = 0;
+	static unsigned long last_serial = 0;
+
 	Client *c;
-	XUnmapEvent *ev;
 	Workspace *ws = NULL;
 
-	ev = &e->xunmap;
+	/* Skip duplicate events */
+	if (ev->serial == last_serial && ev->window == last_window) {
+		return NULL;
+	}
+
+	last_serial = ev->serial;
+	last_window = ev->window;
 
 	if ((c = wintoclient(ev->window))) {
-		if (getstate(c->win) == WithdrawnState) {
+		if (c->expecting_unmap == 0) {
 			ws = c->ws;
 			if (enabled(Debug) || DEBUGGING(c))
 				fprintf(stderr, "unmapnotify: window %ld --> client %s (%s)\n", ev->window, c->name, "unmanage");
 			unmanage(c, 0);
+		} else {
+			c->expecting_unmap--;
 		}
 	} else if (systray && (c = wintosystrayicon(ev->window))) {
 		removesystrayicon(c);
