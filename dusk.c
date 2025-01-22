@@ -4083,9 +4083,9 @@ wintoclient(Window w)
 			if (c->win == w)
 				return c;
 			while (c->swallowing) {
-				if (c->swallowing->win == w)
-					return c;
 				c = c->swallowing;
+				if (c->win == w)
+					return c;
 			}
 		}
 	}
