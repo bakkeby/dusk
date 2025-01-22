@@ -152,15 +152,18 @@ unswallow(const Arg *arg)
 	s = c->swallowing;
 
 	if (replaceclient(c, s)) {
-		c->swallowing = s->swallowing;
-		s->swallowing = NULL;
+		c->swallowing = NULL;
 		attachabove(c, s);
 		attachstack(c);
-		if (!arg->v) {
-			focus(c);
-			arrange(c->ws);
-		} else {
-			restack(c->ws);
+
+		if (s->ws->visible) {
+			show(s);
+			if (!arg->v) {
+				focus(s);
+				arrange(s->ws);
+			} else {
+				restack(s->ws);
+			}
 		}
 	}
 }
