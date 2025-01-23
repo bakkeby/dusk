@@ -555,6 +555,7 @@ static int num_monitors = 0;   /* the number of available monitors */
 static int combo = 0;          /* used for combo keys */
 static int monitorchanged = 0; /* used for combo logic */
 static int grp_idx = 0;        /* used for grouping windows together */
+static int scanning = 0;       /* used to indicate that we are scanning for windows following restart */
 static int arrange_focus_on_monocle = 1; /* used in focus to arrange monocle layouts on focus */
 
 /* Used by propertynotify to throttle repeating notifications */
@@ -896,7 +897,7 @@ applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact)
 
 	if (noborder(c, *x, *y, *w, *h))
 		addflag(c, NoBorder);
-	return *x != c->x || *y != c->y || *w != c->w || *h != c->h || NOBORDER(c);
+	return *x != c->x || *y != c->y || *w != c->w || *h != c->h || NOBORDER(c) || NEEDRESIZE(c);
 }
 
 void
@@ -2325,7 +2326,7 @@ manage(Window w, XWindowAttributes *wa)
 	c->sfy = -9999;
 	c->sfw = c->w = c->oldw = wa->width;
 	c->sfh = c->h = c->oldh = wa->height;
-	c->oldbw = wa->border_width;
+	c->bw = c->oldbw = wa->border_width;
 	c->cfact = 1.0;
 	c->ws = NULL;
 	c->icon = 0;
@@ -2400,18 +2401,28 @@ manage(Window w, XWindowAttributes *wa)
 
 	m = c->ws->mon;
 
-	if (WIDTH(c) > m->mw)
-		c->w = m->mw - 2 * c->bw;
-	if (HEIGHT(c) > m->mh)
-		c->h = m->mh - 2 * c->bw;
-	if (c->x + WIDTH(c) > m->mx + m->mw)
-		c->x = m->mx + m->mw - WIDTH(c);
-	if (c->y + HEIGHT(c) > m->my + m->mh)
-		c->y = m->my + m->mh - HEIGHT(c);
-	c->x = MAX(c->x, m->mx);
-	/* only fix client y-offset, if the client center might cover the bar */
-	c->y = MAX(c->y, ((m->bar && m->bar->by == m->my) && (c->x + (c->w / 2) >= m->wx)
-		&& (c->x + (c->w / 2) < m->wx + m->ww)) ? bh : m->my);
+	/* These checks apply constraints that intend to make sure a window spawns within the borders
+	 * of the monitor they are starting on. It uses WIDTH and HEIGHT in the calculations, which
+	 * takes into account the client's border width. If the client was drawn without a border
+	 * before the last restart then we should delay setting c->bw until after these checks, but
+	 * otherwise we should be setting c->bw before. Overall it is easier to just not apply the
+	 * constraints if the window is going through manage as part of a scan following a restart.
+	 * It is highly unlikely for the window to be out of bounds in this context.
+	 */
+	if (!scanning) {
+		if (WIDTH(c) > m->mw)
+			c->w = m->mw - 2 * c->bw;
+		if (HEIGHT(c) > m->mh)
+			c->h = m->mh - 2 * c->bw;
+		if (c->x + WIDTH(c) > m->mx + m->mw)
+			c->x = m->mx + m->mw - WIDTH(c);
+		if (c->y + HEIGHT(c) > m->my + m->mh)
+			c->y = m->my + m->mh - HEIGHT(c);
+		c->x = MAX(c->x, m->mx);
+		/* only fix client y-offset, if the client center might cover the bar */
+		c->y = MAX(c->y, ((m->bar && m->bar->by == m->my) && (c->x + (c->w / 2) >= m->wx)
+			&& (c->x + (c->w / 2) < m->wx + m->ww)) ? bh : m->my);
+	}
 
 	/* If the client indicates that it is in fullscreen, or if the FullScreen flag has been
 	 * explictly set via client rules, then enable fullscreen now. */
@@ -2500,6 +2511,12 @@ manage(Window w, XWindowAttributes *wa)
 		}
 	}
 
+	/* During a restart clients may remain in their desired position and not go through
+	 * a resize due to starting on a workspace that is not viewed, thus never having their
+	 * border set. We are adding the NeedResize flag here to force a resize the next time
+	 * the opportunity should arise. */
+	addflag(c, NeedResize);
+
 	if (!ISTRUEFULLSCREEN(c) && !noborder(c, 0, 0, 0, 0))
 		restoreborder(c);
 
@@ -2508,10 +2525,11 @@ manage(Window w, XWindowAttributes *wa)
 	if (FREEFLOW(c))
 		XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
 
-	if (ISVISIBLE(c))
+	if (ISVISIBLE(c)) {
 		show(c);
-	else
+	} else {
 		hide(c);
+	}
 
 	if (focusclient)
 		focus(c);
@@ -2957,6 +2975,7 @@ resizeclientpad(Client *c, int x, int y, int w, int h, int tw, int th)
 		wc.border_width = 0;
 	}
 
+	removeflag(c, NeedResize);
 	XConfigureWindow(dpy, c->win, CWX|CWY|CWWidth|CWHeight|CWBorderWidth, &wc);
 	configure(c);
 	XSync(dpy, False);
@@ -3104,6 +3123,8 @@ scan(void)
 	Window d1, d2, *wins = NULL;
 	XWindowAttributes wa;
 
+	scanning = 1;
+
 	if (XQueryTree(dpy, root, &d1, &d2, &wins, &num)) {
 		for (i = 0; i < num; i++) {
 			if (!XGetWindowAttributes(dpy, wins[i], &wa)
@@ -3125,6 +3146,8 @@ scan(void)
 		}
 		XFree(wins);
 	}
+
+	scanning = 0;
 }
 
 void
