@@ -99,9 +99,12 @@ storepreview(Workspace *ws)
 
 	Imlib_Image image;
 	Monitor *m = ws->mon;
+	int preview_shown;
 
 	if (!m->preview)
 		createpreview(m);
+
+	preview_shown = m->preview->show;
 
 	removepreview(ws);
 
@@ -110,6 +113,25 @@ storepreview(Workspace *ws)
 
 	hidepreview(m);
 	XFlush(dpy);
+
+	/* When hiding the preview window we unmap it and the unmapping is handled asynchronously by
+	 * the X server. This means that the preview window may still be visible on the screen when
+	 * we are grabbing the next screenshot.
+	 *
+	 * There is nothing that we can do to implicitly sync up to the X server in this situation.
+	 * Even if we were to subscribe to StructureNotifyMask events for the preview window the
+	 * unmap notification comes through before the window has been graphically removed.
+	 *
+	 * So we are left with simply waiting for this to happen. The below adds an artificial delay
+	 * of 50 ms to give the preview window time to disappear. We only need to wait if we did have
+	 * a preview window shown.
+	 *
+	 * Feel free to play with lower values. 50 ms seems like a reasonable trade-off to have clean
+	 * previews for someone who relies on this feature.
+	 */
+	if (preview_shown) {
+		usleep(50000);
+	}
 
 	image = imlib_create_image(sw, sh);
 	imlib_context_set_image(image);
