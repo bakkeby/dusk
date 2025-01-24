@@ -1511,14 +1511,12 @@ configurenotify(XConfigureEvent *ev)
 		for (c = ws->clients; c; c = c->next) {
 			c->sfx += c->ws->wx;
 			c->sfy += c->ws->wy;
-			if (!ISVISIBLE(c))
-				continue;
 			if (ISTRUEFULLSCREEN(c))
 				resizeclient(c, ws->mon->mx, ws->mon->my, ws->mon->mw, ws->mon->mh);
 			else if (ISFLOATING(c)) {
 				c->x = c->sfx;
 				c->y = c->sfy;
-				show(c);
+				XMoveWindow(dpy, c->win, c->x, c->y);
 			}
 		}
 		removepreview(ws);
@@ -1603,10 +1601,7 @@ configurerequest(XEvent *e)
 				setflag(c, NoBorder, enabled(NoBorders) && WASNOBORDER(c));
 				configure(c);
 			}
-			if (ISVISIBLE(c))
-				XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
-			else
-				addflag(c, NeedResize);
+			XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
 			savefloats(c);
 		} else {
 			setflag(c, NoBorder, enabled(NoBorders) && WASNOBORDER(c));
@@ -2964,7 +2959,7 @@ resizeclientpad(Client *c, int x, int y, int w, int h, int tw, int th)
 			c->y = wc.y += (th - h) / 2;
 	}
 
-	if (!c->ws->visible || MOVEPLACE(c)) {
+	if (MOVEPLACE(c)) {
 		addflag(c, NeedResize);
 		return;
 	}
