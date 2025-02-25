@@ -65,6 +65,7 @@
 #define INTERSECTC(X,Y,W,H,Z)   (MAX(0, MIN((X)+(W),(Z)->x+(Z)->w) - MAX((X),(Z)->x)) \
                                * MAX(0, MIN((Y)+(H),(Z)->y+(Z)->h) - MAX((Y),(Z)->y)))
 #define LENGTH(X)               (sizeof X / sizeof X[0])
+#define END(A)                  ((A) + LENGTH(A))
 #define MOUSEMASK               (BUTTONMASK|PointerMotionMask)
 #define WIDTH(X)                ((X)->w + 2 * (X)->bw)
 #define HEIGHT(X)               ((X)->h + 2 * (X)->bw)
@@ -614,7 +615,7 @@ applyrules(Client *c)
 	int di;
 	unsigned long dl, nitems;
 	unsigned char *p = NULL;
-	unsigned int i, transient;
+	unsigned int transient;
 	Workspace *ws = NULL;
 	XClassHint ch = { NULL, NULL };
 
@@ -639,8 +640,7 @@ applyrules(Client *c)
 	if (enabled(Debug))
 		fprintf(stderr, "applyrules: new client %s (%ld), class = '%s', instance = '%s', role = '%s', wintype = '%ld'\n", c->name, c->win, class, instance, role, nitems ? win_types[0] : 0);
 
-	for (i = 0; i < LENGTH(clientrules); i++) {
-		r = &clientrules[i];
+	for (r = clientrules; r < END(clientrules); r++) {
 		if ((!r->title || strstr(c->name, r->title))
 		&& (!r->class || strstr(class, r->class))
 		&& (!r->role || strstr(role, r->role))
@@ -676,18 +676,30 @@ applyrules(Client *c)
 			if (r->alttitle)
 				strlcpy(c->altname, r->alttitle, sizeof c->altname);
 
-			if (enabled(Debug) || DEBUGGING(c))
-				fprintf(stderr, "applyrules: client rule %d matched:\n    class: %s\n    role: %s\n    instance: %s\n    title: %s\n    wintype: %s\n    flags: %lu\n    floatpos: %s\n    workspace: %s\n    label: %s\n",
-					i,
-					r->class ? r->class : "NULL",
-					r->role ? r->role : "NULL",
-					r->instance ? r->instance : "NULL",
-					r->title ? r->title : "NULL",
-					r->wintype ? r->wintype : "NULL",
+			if (enabled(Debug) || DEBUGGING(c)) {
+				fprintf(stderr,
+					"applyrules: client rule matched:\n"
+					"    class:     %s\n"
+					"    role:      %s\n"
+					"    instance:  %s\n"
+					"    title:     %s\n"
+					"    wintype:   %s\n"
+					"    flags:     %lu\n"
+					"    floatpos:  %s\n"
+					"    workspace: %s\n"
+					"    label:     %s\n",
+					NVL(r->class, "NULL"),
+					NVL(r->role, "NULL"),
+					NVL(r->instance, "NULL"),
+					NVL(r->title, "NULL"),
+					NVL(r->wintype, "NULL"),
 					r->flags,
-					r->floatpos ? r->floatpos : "NULL",
-					r->workspace,
-					r->label ? r->label : "NULL");
+					NVL(r->floatpos, "NULL"),
+					NVL(r->workspace, "NULL"),
+					NVL(r->label, "NULL")
+				);
+			}
+
 			if (!r->resume)
 				break; /* only allow one rule match */
 		}
