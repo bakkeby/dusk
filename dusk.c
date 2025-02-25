@@ -1274,6 +1274,7 @@ clientmessage(XEvent *e)
 			}
 			if (c->ws->visible) {
 				focus(c);
+				arrangews(c->ws);
 			} else {
 				viewwsonmon(c->ws, c->ws->mon, 0);
 			}
