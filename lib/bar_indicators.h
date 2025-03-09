@@ -13,6 +13,7 @@ enum {
 	IndicatorFloatFakeFullScreenActive,
 	IndicatorTiled,
 	IndicatorFloating,
+	IndicatorSelected,
 	IndicatorLast,
 };
 
