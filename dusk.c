@@ -3083,7 +3083,6 @@ run(void)
 		activity = select(max_fd + 1, &read_fds, NULL, NULL, NULL);
 
 		if (activity < 0) {
-			fprintf(stderr, "Warning: failed to read from D-Bus or X11 socket, continuing\n");
 			continue;
 		}
 
