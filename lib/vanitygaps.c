@@ -153,9 +153,9 @@ incrivgaps(const Arg *arg)
 }
 
 static void
-getgaps(Workspace *ws, int *oh, int *ov, int *ih, int *iv, unsigned int *nc)
+getgaps(Workspace *ws, int *oh, int *ov, int *ih, int *iv, int *nc)
 {
-	unsigned int oe, ie, n = numtiled(ws);
+	int oe, ie, n = numtiled(ws);
 	oe = ie = ws->enablegaps;
 
 	if (enabled(SmartGaps) && n == 1) {

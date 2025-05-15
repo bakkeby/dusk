@@ -9,7 +9,7 @@ dragfact(const Arg *arg)
 	Workspace *ws = selws;
 	XEvent ev;
 	Time lasttime = 0;
-	unsigned int n = numtiled(ws);
+	int n = numtiled(ws);
 
 	if (!(c = ws->sel) || !n || !ws->layout->arrange)
 		return;

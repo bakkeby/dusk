@@ -73,6 +73,7 @@
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X)))
 #define TEXT2DW(X)              (status2dtextlength((X)))
 #define CLIENT                  (arg && arg->v ? (Client*)arg->v : selws->sel)
+#define WORKSPACE               (arg && arg->v ? (Workspace*)arg->v : selws);
 #define NAME(X)                 ((X) ? (X)->name : "NULL")
 
 /* enums */
@@ -275,7 +276,6 @@ struct Client {
 	int bw, oldbw;
 	int group;
 	int area;  /* arrangement area (master, stack, secondary stack) */
-	int arr;   /* tile arrangement (left to right, top to bottom, etc.) */
 	int scheme;
 	int shown;
 	int expecting_unmap;
@@ -323,7 +323,7 @@ typedef struct {
 	int masteraxis;  /* master stack area */
 	int stack1axis;  /* primary stack area */
 	int stack2axis;  /* secondary stack area, e.g. centered master */
-	void (*symbolfunc)(Workspace *, unsigned int);
+	void (*symbolfunc)(Workspace *, int);
 } LayoutPreset;
 
 typedef struct {
@@ -1379,7 +1379,7 @@ clientscheme(Client *c, Client *s)
 		return sel ? SchemeFlexSelFloat : active ? SchemeFlexActFloat : SchemeFlexInaFloat;
 
 	if (fwb)
-		return c->arr + (sel ? SchemeFlexSelTTB : active ? SchemeFlexActTTB : SchemeFlexInaTTB);
+		return c->ws->ltaxis[c->area] + (sel ? SchemeFlexSelTTB : active ? SchemeFlexActTTB : SchemeFlexInaTTB);
 	return sel ? SchemeTitleSel : SchemeTitleNorm;
 }
 

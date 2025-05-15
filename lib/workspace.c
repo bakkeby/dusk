@@ -514,11 +514,11 @@ movews(const Arg *arg)
 	movetows(c, ws, enabled(ViewOnWs));
 }
 
-unsigned int
+int
 numtiled(Workspace *ws)
 {
 	Client *c;
-	unsigned int n;
+	int n;
 	for (n = 0, c = nexttiled(ws->clients); c; c = nexttiled(c->next), n++);
 	return n;
 }

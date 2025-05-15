@@ -29,7 +29,7 @@ inplacerotate(const Arg *arg)
 	if (!ws->sel || !ws->layout->arrange)
 		return;
 
-	unsigned int n, selidx = 0, i = 0, tidx, center, dualstack;
+	int n, selidx = 0, i = 0, tidx, center, dualstack;
 	Client *c = NULL,
 		*shead = NULL, *stail = NULL,
 		*thead = NULL, *ttail = NULL,

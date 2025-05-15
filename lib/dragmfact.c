@@ -1,7 +1,7 @@
 void
 dragmfact(const Arg *arg)
 {
-	unsigned int n;
+	int n;
 	int py, px; // pointer coordinates
 	int ax, ay, aw, ah; // area position, width and height
 	int oh, ov, ih, iv;
