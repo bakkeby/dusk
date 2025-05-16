@@ -2754,6 +2754,8 @@ propertynotify(XEvent *e)
 			break;
 		case XA_WM_NORMAL_HINTS:
 			addflag(c, RefreshSizeHints);
+			if (ISVISIBLE(c))
+				arrangews(c->ws);
 			break;
 		case XA_WM_HINTS:
 			updatewmhints(c);
