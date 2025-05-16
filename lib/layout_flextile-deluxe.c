@@ -1436,30 +1436,20 @@ rotatelayoutaxis(const Arg *arg)
 {
 	int incr = (arg->i > 0 ? 1 : -1);
 	int axis = labs(arg->i) - 1;
+	int mirror, value;
 	Workspace *ws = selws;
 
-	if (!ws->layout->arrange || arg->i == 0)
+	if (!ws->layout->arrange || axis < 0 || axis >= LTAXIS_LAST)
 		return;
+
+	value = abs(ws->ltaxis[axis]) + incr;
+
 	if (axis == LAYOUT) {
-		if (ws->ltaxis[LAYOUT] >= 0) {
-			ws->ltaxis[LAYOUT] += incr;
-			if (ws->ltaxis[LAYOUT] >= LAYOUT_LAST)
-				ws->ltaxis[LAYOUT] = 0;
-			else if (ws->ltaxis[LAYOUT] < 0)
-				ws->ltaxis[LAYOUT] = LAYOUT_LAST - 1;
-		} else {
-			ws->ltaxis[LAYOUT] -= incr;
-			if (ws->ltaxis[LAYOUT] <= -LAYOUT_LAST)
-				ws->ltaxis[LAYOUT] = 0;
-			else if (ws->ltaxis[LAYOUT] > 0)
-				ws->ltaxis[LAYOUT] = -LAYOUT_LAST + 1;
-		}
+		mirror = MIRROR ? -1 : 1;
+		ws->ltaxis[axis] = WRAP(value, 0, LAYOUT_LAST - 1) * mirror;
 	} else {
-		ws->ltaxis[axis] += incr;
-		if (ws->ltaxis[axis] >= AXIS_LAST)
-			ws->ltaxis[axis] = 0;
-		else if (ws->ltaxis[axis] < 0)
-			ws->ltaxis[axis] = AXIS_LAST - 1;
+		ws->ltaxis[axis] = WRAP(value, 0, AXIS_LAST - 1);
 	}
+
 	arrange(ws);
 }

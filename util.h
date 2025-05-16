@@ -9,6 +9,8 @@
 #endif
 #define BETWEEN(X, A, B)        ((A) <= (X) && (X) <= (B))
 #define NVL(A, B)               ((A) == NULL ? (B) : (A))
+#define CLAMP(A, MIN, MAX)      ((A) < (MIN) ? (MIN) : ((A) > (MAX) ? (MAX) : (A)))
+#define WRAP(A, MIN, MAX)       ((A) < (MIN) ? (MAX) : ((A) > (MAX) ? (MIN) : (A)))
 
 #ifdef _DEBUG
 #define DEBUG(...) fprintf(stderr, __VA_ARGS__)
