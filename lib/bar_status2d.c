@@ -47,7 +47,7 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 	if (!w && drawbg)
 		return 0;
 
-	int i, j, tw, dx = x, len, mw = w - 2 * lpad;
+	int i, j, caret, tw, dx = x, len, mw = w - 2 * lpad;
 	int rx, ry, rw, rh;
 	int fillbg = drawbg;
 	short isCode = 0;
@@ -77,9 +77,11 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 
 	while (text[++i]) {
 		if (text[i] == '^' && !isCode) {
+
 			isCode = 1;
 
-			text[i] = '\0';
+			caret = i; // track where the last caret (^) character was, in case we need to abort
+			text[caret] = '\0';
 			tw = textw_clamp(text, mw);
 
 			if (tw) {
@@ -90,22 +92,20 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 
 			/* process code */
 			while (text[++i] != '^') {
-				if (text[i] == 'c') {
+				if (text[i] == '\0') {
+					goto abort;
+				} else if (text[i] == 'c') {
 					char buf[8];
-					if (i + 7 > len) {
-						i += 7;
-						break;
-					}
+					if (i + 7 > len)
+						goto abort;
 					memcpy(buf, (char*)text+i+1, 7);
 					buf[7] = '\0';
 					drw_clr_create(drw, &drw->scheme[ColFg], buf, enabled(Status2DNoAlpha) ? 0xff : default_alphas[ColFg]);
 					i += 7;
 				} else if (text[i] == 'b') {
 					char buf[8];
-					if (i + 7 > len) {
-						i += 7;
-						break;
-					}
+					if (i + 7 > len)
+						goto abort;
 					memcpy(buf, (char*)text+i+1, 7);
 					buf[7] = '\0';
 					drw_clr_create(drw, &drw->scheme[ColBg], buf, enabled(Status2DNoAlpha) ? 0xff : default_alphas[ColBg]);
@@ -138,37 +138,33 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 					drw->scheme[ColBg] = oldbg;
 				} else if (text[i] == 'r') {
 					if (++i >= len)
-						break;
+						goto abort;
 					rx = (strncmp(text + i, "w", 1) == 0 ? w - 1 : atoi(text + i));
 					if (rx < 0)
 						rx += mw;
 					while (i < len && text[++i] != ',');
 					if (++i >= len)
-						break;
+						goto abort;
 					ry = (strncmp(text + i, "h", 1) == 0 ? h - 1 : atoi(text + i));
 					if (ry < 0)
 						ry += h;
 					while (i < len && text[++i] != ',');
 					if (++i >= len)
-						break;
+						goto abort;
 					rw = (strncmp(text + i, "w", 1) == 0 ? w : atoi(text + i));
 					if (rw < 0)
 						rw += mw;
 					while (i < len && text[++i] != ',');
 					if (++i >= len)
-						break;
+						goto abort;
 					rh = (strncmp(text + i, "h", 1) == 0 ? h : atoi(text + i));
 					if (rh < 0)
 						rh += h;
 
-					if (ry < 0)
-						ry = 0;
-					if (rx < 0)
-						rx = 0;
-					if (rw < 0)
-						rw = 0;
-					if (rh < 0)
-						rh = 0;
+					if (ry < 0) ry = 0;
+					if (rx < 0) rx = 0;
+					if (rw < 0) rw = 0;
+					if (rh < 0) rh = 0;
 
 					drw_rect(drw, dx + rx, y + ry, rw, rh, 1, 0);
 				} else if (text[i] == 'i' || text[i] == 'I') {
@@ -178,16 +174,22 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 					int maxlen = 256;
 					char buf[maxlen];
 					int use_cache = 1;
+					int icharpos = i;
 
-					if (text[i] == 'I') {
-						use_cache = 0;
-						*(text2d + i) = 'i'; // ensure that the next time this status is used we do it from cache
+					for (j = 0, i++; j < maxlen - 1 && i < len && text[i] != '^' && text[i] != '\0'; i++, j++)
+						buf[j] = text[i];
+
+					if (i >= len || text[i] == '\0') {
+						goto abort;
 					}
 
-					for (j = 0, i++; j < maxlen - 1 && i < len && text[i] != '^'; i++, j++)
-						buf[j] = text[i];
 					buf[j] = '\0';
 					i--;
+
+					if (text[icharpos] == 'I') {
+						use_cache = 0;
+						*(text2d + icharpos) = 'i'; // ensure that the next time this status is used we load from cache
+					}
 
 					if ((image = loadimage(buf, use_cache))) {
 						drw_pic(drw, dx, y + (h - image->ich) / 2, MIN(image->icw, mw), image->ich, image->icon);
@@ -196,12 +198,19 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 					}
 				} else if (text[i] == 'f') {
 					if (++i >= len)
-						break;
+						goto abort;
 					rx = (strncmp(text + i, "p", 1) == 0 ? 0 : atoi(text + i));
 					if (rx < 0)
 						rx += mw;
 					dx += rx;
 					mw -= rx;
+				}
+
+				/* If the text ends before the code has finished parsing, then bail
+				 * and print the remaining text as-is. It may not be intended as status2d
+				 * markup. */
+				if (len <= i + 1) {
+					goto abort;
 				}
 			}
 
@@ -215,10 +224,17 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 			i = -1;
 		}
 	}
-	if (!isCode && len > 0) {
+
+	if (len > 0) {
+abort:
+		if (isCode) {
+			text[caret] = '^';
+			text += caret;
+		}
 		tw = textw_clamp(text, mw);
-		if (tw > 0)
+		if (tw > 0) {
 			drw_text(drw, dx, y, tw, bh, 0, text, invert, fillbg);
+		}
 	}
 
 	free(p);
@@ -246,7 +262,7 @@ setstatus(int status_no, char const *statustext)
 int
 status2dtextlength(char* text2d)
 {
-	int i, j, w, len;
+	int i, j, w, len, caret;
 	short isCode = 0;
 	char *text = {0};
 	char *p = {0};
@@ -264,26 +280,36 @@ status2dtextlength(char* text2d)
 		if (text[i] == '^') {
 			if (!isCode) {
 				isCode = 1;
-				text[i] = '\0';
+				caret = i;
+				text[caret] = '\0'; // track where the last caret (^) character was
 				w += TEXTW(text);
 				text[i] = '^';
 				++i;
-				if (text[i] == 'f') {
+				if (text[i] == '\0') {
+					goto abort;
+				} else if (text[i] == 'f') {
 					w += atoi(text + ++i);
 				} else if (text[i] == 'i' || text[i] == 'I') {
 					int maxlen = 256;
 					char buf[maxlen];
 					int use_cache = 1;
+					int icharpos = i;
 
-					if (text[i] == 'I') {
-						use_cache = 0;
-						*(text2d + i) = 'i'; // ensure that the next time this status is used we do it from cache
+					for (j = 0, i++; j < maxlen - 1 && i < len && text[i] != '^' && text[i] != '\0'; i++, j++) {
+						buf[j] = text[i];
 					}
 
-					for (j = 0, i++; j < maxlen - 1 && i < len && text[i] != '^'; i++, j++)
-						buf[j] = text[i];
+					if (i >= len || text[i] == '\0') {
+						goto abort;
+					}
+
 					buf[j] = '\0';
 					i--;
+
+					if (text[icharpos] == 'I') {
+						use_cache = 0;
+						*(text2d + icharpos) = 'i'; // ensure that the next time this status is used we load from cache
+					}
 
 					if ((image = loadimage(buf, use_cache))) {
 						w += image->icw;
@@ -296,8 +322,13 @@ status2dtextlength(char* text2d)
 			}
 		}
 	}
-	if (!isCode)
-		w += TEXTW(text);
+
+abort:
+	if (isCode) {
+		text[caret] = '^';
+		text += caret;
+	}
+	w += TEXTW(text);
 	free(p);
 	return w;
 }
@@ -315,6 +346,7 @@ loadimage(char *path, int use_cache)
 	int least = -1;
 	time_t leasttime = INT_MAX - 1;
 	Image *image;
+
 	char *fullpath = subst_home_directory(path);
 
 	/* First see if we can find the image path in our list of buffered images */
@@ -371,8 +403,9 @@ loadimagefromfile(Image *image, char *path)
 
 	struct stat stbuf;
 	s = stat(path, &stbuf);
-	if (s == -1 || S_ISDIR(s) || strlen(path) <= 2)
+	if (s == -1 || S_ISDIR(s) || strlen(path) <= 2) {
 		return 0; /* no readable file */
+	}
 
 	strlcpy(image->iconpath, path, sizeof image->iconpath);
 	im = imlib_load_image_immediately_without_cache(path);

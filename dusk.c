@@ -3650,12 +3650,15 @@ spawncmd(const Arg *arg, int buttonclick, int orphan)
 char *
 subst_home_directory(char *str)
 {
-	if (strncmp(str, "~/", 2) != 0)
-		return str;
-
 	int buffer_length = env_homelen + strlen(str);
 	char *buffer = ecalloc(1, buffer_length);
-	snprintf(buffer, buffer_length, "%s%s", env_home, str + 1);
+
+	if (strncmp(str, "~/", 2) != 0) {
+		strlcat(buffer, str, buffer_length);
+	} else {
+		snprintf(buffer, buffer_length, "%s%s", env_home, str + 1);
+	}
+
 	return buffer;
 }
 
