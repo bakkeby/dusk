@@ -6,10 +6,10 @@ setgaps(int oh, int ov, int ih, int iv)
 	if (ih < 0) ih = 0;
 	if (iv < 0) iv = 0;
 
-	selmon->gappoh = oh;
-	selmon->gappov = ov;
-	selmon->gappih = ih;
-	selmon->gappiv = iv;
+	selmon->oh = oh;
+	selmon->ov = ov;
+	selmon->ih = ih;
+	selmon->iv = iv;
 	arrangemon(selmon);
 }
 
@@ -40,10 +40,10 @@ static void
 setgapsex(const Arg *arg)
 {
 	Workspace *ws = selws;
-	int oh = selmon->gappoh;
-	int ov = selmon->gappov;
-	int ih = selmon->gappih;
-	int iv = selmon->gappiv;
+	int oh = selmon->oh;
+	int ov = selmon->ov;
+	int ih = selmon->ih;
+	int iv = selmon->iv;
 
 	if (!(arg->i & (1 << 31)))
 		oh = (arg->i & 0x7f000000) >> 24;
@@ -79,10 +79,10 @@ static void
 incrgaps(const Arg *arg)
 {
 	setgaps(
-		selmon->gappoh + arg->i,
-		selmon->gappov + arg->i,
-		selmon->gappih + arg->i,
-		selmon->gappiv + arg->i
+		selmon->oh + arg->i,
+		selmon->ov + arg->i,
+		selmon->ih + arg->i,
+		selmon->iv + arg->i
 	);
 }
 
@@ -90,10 +90,10 @@ static void
 incrigaps(const Arg *arg)
 {
 	setgaps(
-		selmon->gappoh,
-		selmon->gappov,
-		selmon->gappih + arg->i,
-		selmon->gappiv + arg->i
+		selmon->oh,
+		selmon->ov,
+		selmon->ih + arg->i,
+		selmon->iv + arg->i
 	);
 }
 
@@ -101,10 +101,10 @@ static void
 incrogaps(const Arg *arg)
 {
 	setgaps(
-		selmon->gappoh + arg->i,
-		selmon->gappov + arg->i,
-		selmon->gappih,
-		selmon->gappiv
+		selmon->oh + arg->i,
+		selmon->ov + arg->i,
+		selmon->ih,
+		selmon->iv
 	);
 }
 
@@ -112,10 +112,10 @@ static void
 incrohgaps(const Arg *arg)
 {
 	setgaps(
-		selmon->gappoh + arg->i,
-		selmon->gappov,
-		selmon->gappih,
-		selmon->gappiv
+		selmon->oh + arg->i,
+		selmon->ov,
+		selmon->ih,
+		selmon->iv
 	);
 }
 
@@ -123,10 +123,10 @@ static void
 incrovgaps(const Arg *arg)
 {
 	setgaps(
-		selmon->gappoh,
-		selmon->gappov + arg->i,
-		selmon->gappih,
-		selmon->gappiv
+		selmon->oh,
+		selmon->ov + arg->i,
+		selmon->ih,
+		selmon->iv
 	);
 }
 
@@ -134,10 +134,10 @@ static void
 incrihgaps(const Arg *arg)
 {
 	setgaps(
-		selmon->gappoh,
-		selmon->gappov,
-		selmon->gappih + arg->i,
-		selmon->gappiv
+		selmon->oh,
+		selmon->ov,
+		selmon->ih + arg->i,
+		selmon->iv
 	);
 }
 
@@ -145,10 +145,10 @@ static void
 incrivgaps(const Arg *arg)
 {
 	setgaps(
-		selmon->gappoh,
-		selmon->gappov,
-		selmon->gappih,
-		selmon->gappiv + arg->i
+		selmon->oh,
+		selmon->ov,
+		selmon->ih,
+		selmon->iv + arg->i
 	);
 }
 
@@ -162,9 +162,9 @@ getgaps(Workspace *ws, int *oh, int *ov, int *ih, int *iv, int *nc)
 		oe = smartgaps_fact; // outer gaps disabled or multiplied when only one client
 	}
 
-	*oh = ws->mon->gappoh*oe; // outer horizontal gap
-	*ov = ws->mon->gappov*oe; // outer vertical gap
-	*ih = ws->mon->gappih*ie; // inner horizontal gap
-	*iv = ws->mon->gappiv*ie; // inner vertical gap
+	*oh = ws->mon->oh*oe; // outer horizontal gap
+	*ov = ws->mon->ov*oe; // outer vertical gap
+	*ih = ws->mon->ih*ie; // inner horizontal gap
+	*iv = ws->mon->iv*ie; // inner vertical gap
 	*nc = n; // number of clients
 }

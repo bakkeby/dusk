@@ -339,10 +339,10 @@ struct Monitor {
 	char name[16];        /* monitor name (text index) */
 	int mx, my, mw, mh;   /* screen size */
 	int wx, wy, ww, wh;   /* window area  */
-	int gappih;           /* horizontal gap between windows */
-	int gappiv;           /* vertical gap between windows */
-	int gappoh;           /* horizontal outer gaps */
-	int gappov;           /* vertical outer gaps */
+	int ih;               /* horizontal gap between windows */
+	int iv;               /* vertical gap between windows */
+	int oh;               /* horizontal outer gaps */
+	int ov;               /* vertical outer gaps */
 	int showbar;
 	int orientation;      /* screen orientation: 0 = Horizontal, 1 = Vertical */
 	uint64_t wsmask;
@@ -1119,13 +1119,13 @@ void
 clientfittomon(Client *c, Monitor *m, int *cx, int *cy, int *cw, int *ch)
 {
 	if (*cx < m->wx)
-		*cx = m->wx + m->gappov;
+		*cx = m->wx + m->ov;
 	if (*cy < m->wy)
-		*cy = m->wy + m->gappoh;
+		*cy = m->wy + m->oh;
 	if (*cx + *cw > m->wx + m->ww)
-		*cx = m->wx + m->ww - *cw - m->gappov;
+		*cx = m->wx + m->ww - *cw - m->ov;
 	if (*cy + *ch > m->wy + m->wh)
-		*cy = m->my + m->wh - *ch - m->gappoh;
+		*cy = m->my + m->wh - *ch - m->oh;
 }
 
 void
@@ -1394,20 +1394,20 @@ clientscheme(Client *c, Client *s)
 void
 clientrelposmon(Client *c, Monitor *o, Monitor *n, int *cx, int *cy, int *cw, int *ch)
 {
-	int ncw = MIN(*cw, MIN(o->ww, n->ww) - 2 * c->bw - 2 * n->gappov);
-	int nch = MIN(*ch, MIN(o->wh, n->wh) - 2 * c->bw - 2 * n->gappoh);
+	int ncw = MIN(*cw, MIN(o->ww, n->ww) - 2 * c->bw - 2 * n->ov);
+	int nch = MIN(*ch, MIN(o->wh, n->wh) - 2 * c->bw - 2 * n->oh);
 
 	clientfittomon(c, o, cx, cy, cw, ch);
 
 	if (*cw != ncw || (o->ww - *cw <= 0)) {
 		*cw = ncw;
-		*cx = n->wx + n->gappov;
+		*cx = n->wx + n->ov;
 	} else
 		*cx = n->wx + (n->ww - *cw) * (*cx - o->wx) / (o->ww - *cw);
 
 	if (*ch != nch || (o->wh - *ch <= 0)) {
 		*ch = nch;
-		*cy = n->wy + n->gappoh;
+		*cy = n->wy + n->oh;
 	} else
 		*cy = n->wy + (n->wh - *ch) * (*cy - o->wy) / (o->wh - *ch);
 
@@ -1645,10 +1645,10 @@ createmon(int num)
 	m = ecalloc(1, sizeof(Monitor));
 	m->showbar = initshowbar;
 	m->borderpx = borderpx;
-	m->gappih = gappih;
-	m->gappiv = gappiv;
-	m->gappoh = gappoh;
-	m->gappov = gappov;
+	m->ih = gappih;
+	m->iv = gappiv;
+	m->oh = gappoh;
+	m->ov = gappov;
 	m->wsmask = 0;
 	m->nullws = 0;
 	m->prevwsmask = 0;

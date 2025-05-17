@@ -67,8 +67,8 @@ togglemaximize(Client *c, int maximize_vert, int maximize_horz)
 	int is_maximized_vert = 0, is_maximized_horz = 0;
 
 	if (ISFLOATING(c)) {
-		is_maximized_vert = abs(c->y - m->wy) <= m->gappoh;
-		is_maximized_horz = abs(c->x - m->wx) <= m->gappov;
+		is_maximized_vert = abs(c->y - m->wy) <= m->oh;
+		is_maximized_horz = abs(c->x - m->wx) <= m->ov;
 
 		if (
 			(maximize_vert && maximize_horz && is_maximized_vert && is_maximized_horz) ||

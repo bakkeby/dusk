@@ -1328,8 +1328,8 @@ flextile(Workspace *ws)
 	if (enabled(SmartGapsMonocle)) {
 		/* Apply outer gap factor if full screen monocle */
 		if (abs(ws->ltaxis[MASTER]) == MONOCLE && (abs(ws->ltaxis[LAYOUT]) == NO_SPLIT || d.n <= ws->nmaster)) {
-			oh = ws->mon->gappoh * smartgaps_fact;
-			ov = ws->mon->gappov * smartgaps_fact;
+			oh = ws->mon->oh * smartgaps_fact;
+			ov = ws->mon->ov * smartgaps_fact;
 		}
 	}
 
