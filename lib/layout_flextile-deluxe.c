@@ -697,7 +697,7 @@ void
 arrange_horizgrid(Workspace *ws, FlexDim d)
 {
 	int rh, rest;
-	int an = d.an, h = d.h, ih = d.ih, y = d.y;
+	int an = d.an, h = d.h, ih = d.ih;
 
 	/* Exception when there is only one client; do not split into two rows */
 	if (an == 1) {
@@ -710,14 +710,14 @@ arrange_horizgrid(Workspace *ws, FlexDim d)
 	rh = (h - ih) / 2;
 	rest = h - ih - rh * 2;
 
-	top_row.n = an / 2;
+	top_row.an = an / 2;
 	top_row.h = rh + rest;
-	arrange_left_to_right(ws, top_row);
-
-	bottom_row.n = an - top_row.n;
-	bottom_row.y = y + top_row.h + ih;
+	bottom_row.an = an - top_row.an;
+	bottom_row.y = top_row.y + top_row.h + ih;
 	bottom_row.h = rh;
-	bottom_row.ai = top_row.n;
+	bottom_row.ai = top_row.ai + top_row.an;
+
+	arrange_left_to_right(ws, top_row);
 	arrange_left_to_right(ws, bottom_row);
 }
 
@@ -1346,21 +1346,23 @@ flextile(Workspace *ws)
 void
 updatelayoutsymbols(Workspace *ws, int n)
 {
+	LayoutPreset preset = ws->layout->preset;
+
 	/* If the layout has changed from the preset then call setflexsymbols to
 	 * generate the layout symbol. */
 	if (
-		ws->layout->preset.layout != ws->ltaxis[LAYOUT] ||
-		ws->layout->preset.masteraxis != ws->ltaxis[MASTER] ||
-		ws->layout->preset.stack1axis != ws->ltaxis[STACK] ||
-		ws->layout->preset.stack2axis != ws->ltaxis[STACK2]
+		preset.layout != ws->ltaxis[LAYOUT] ||
+		preset.masteraxis != ws->ltaxis[MASTER] ||
+		preset.stack1axis != ws->ltaxis[STACK] ||
+		preset.stack2axis != ws->ltaxis[STACK2]
 	) {
 		setflexsymbols(ws, n);
 		return;
 	}
 
 	/* Fall back to calling the symbol function for the layout, if one is set. */
-	if (ws->layout->preset.symbolfunc != NULL) {
-		ws->layout->preset.symbolfunc(ws, n);
+	if (preset.symbolfunc != NULL) {
+		preset.symbolfunc(ws, n);
 	}
 }
 
@@ -1388,14 +1390,9 @@ setflexsymbols(Workspace *ws, int n)
 	if (l == NO_SPLIT || !ws->nmaster) {
 		sym1 = sym2 = sym3 = (int)tilesymb[ws->ltaxis[MASTER]];
 	} else {
+		sym1 = tilesymb[ws->ltaxis[(MIRROR ? STACK : MASTER)]];
 		sym2 = layoutsymb[l];
-		if (ws->ltaxis[LAYOUT] < 0) {
-			sym1 = tilesymb[ws->ltaxis[STACK]];
-			sym3 = tilesymb[ws->ltaxis[MASTER]];
-		} else {
-			sym1 = tilesymb[ws->ltaxis[MASTER]];
-			sym3 = tilesymb[ws->ltaxis[STACK]];
-		}
+		sym3 = tilesymb[ws->ltaxis[(MIRROR ? MASTER : STACK)]];
 	}
 
 	snprintf(ws->ltsymbol, sizeof ws->ltsymbol, "%c%c%c", sym1, sym2, sym3);
