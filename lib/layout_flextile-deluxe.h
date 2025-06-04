@@ -14,7 +14,7 @@ struct FlexDim {
 
 static void customlayout(int ws_num, char *symbol, int nmaster, int nstack, int split, int master_axis, int stack_axis, int secondary_stack_axis);
 static void flextile(Workspace *ws);
-static void getfactsforrange(Workspace *ws, int an, int ai, int size, int *rest, float *fact);
+static void getfactsforrange(Client *f, int n, int size, int *rest, float *fact, int include_mina);
 static void mirrorlayout(const Arg *arg);
 static void rotatelayoutaxis(const Arg *arg);
 static void setlayoutaxisex(const Arg *arg);
@@ -62,6 +62,10 @@ static void arrange_spiral(Workspace *ws, FlexDim d);
 static void arrange_spiral_cfacts(Workspace *ws, FlexDim d);
 static void arrange_tatami(Workspace *ws, FlexDim d);
 static void arrange_tatami_cfacts(Workspace *ws, FlexDim d);
+static void arrange_aspectgrid(Workspace *ws, FlexDim d);
+static void arrange_left_to_right_aspect(Workspace *ws, FlexDim d);
+static void arrange_top_to_bottom_aspect(Workspace *ws, FlexDim d);
+static void arrange_aspect_tiles(Workspace *ws, FlexDim d, int arrange);
 
 /* Layout arrangements */
 enum {
@@ -122,6 +126,9 @@ enum {
 	SPIRAL_CFACTS = 12,      // clients are arranged in fibonacci spiral mode and takes cfacts into account
 	TATAMI = 13,             // clients are arranged as tatami mats
 	TATAMI_CFACTS = 14,      // clients are arranged as tatami mats that takes cfacts into account
+	ASPECTGRID = 15,         // clients are arranged in a grid based on their aspect ratio
+	TOP_TO_BOTTOM_AR = 16,   // clients are arranged vertically based on their aspect ratio
+	LEFT_TO_RIGHT_AR = 17,   // clients are arranged horizontally based on their aspect ratio
 	AXIS_LAST,
 };
 
@@ -141,4 +148,7 @@ static char tilesymb[] = {
 	64,  // "@",
 	84,  // "T",
 	84,  // "T",
+	65,  // "A",
+	61,  // "=",
+	124, // "|",
 };

@@ -43,6 +43,9 @@ static const TileArranger flextiles[] = {
 	{ arrange_spiral_cfacts },
 	{ arrange_tatami },
 	{ arrange_tatami_cfacts },
+	{ arrange_aspectgrid },
+	{ arrange_top_to_bottom_aspect },
+	{ arrange_left_to_right_aspect },
 };
 
 /* workspace  symbol     nmaster, nstack, split, master axis, stack axis, secondary stack axis  */
@@ -90,19 +93,19 @@ customlayout(
 }
 
 void
-getfactsforrange(Workspace *ws, int an, int ai, int size, int *rest, float *fact)
+getfactsforrange(Client *f, int n, int size, int *rest, float *fact, int include_mina)
 {
 	int i;
 	float facts = 0;
 	int total = 0;
 	Client *c;
 
-	for (i = 0, c = nexttiled(ws->clients); c && i < (ai + an); c = nexttiled(c->next), i++)
-		if (i >= ai)
+	for (i = 0, c = f; c && i < n; c = nexttiled(c->next), i++)
+		if (include_mina || !c->mina)
 			facts += c->cfact;
 
-	for (i = 0, c = nexttiled(ws->clients); c && i < (ai + an); c = nexttiled(c->next), i++)
-		if (i >= ai)
+	for (i = 0, c = f; c && i < n; c = nexttiled(c->next), i++)
+		if (include_mina || !c->mina)
 			total += size * (c->cfact / facts);
 
 	*rest = size - total;
@@ -187,6 +190,9 @@ convert_arrange(int arrange)
 
 	if (arrange == LEFT_TO_RIGHT)
 		return TOP_TO_BOTTOM;
+
+	/* Intentionally not converting TOP_TO_BOTTOM_AR and LEFT_TO_RIGHT_AR here because
+	 * aspect ratios of windows do not change */
 
 	return arrange;
 }
@@ -577,22 +583,22 @@ arrange_left_to_right(Workspace *ws, FlexDim d)
 {
 	int i, rest, cw;
 	int n = d.n, an = d.an, ai = d.ai, x = d.x, y = d.y, w = d.w, h = d.h, iv = d.iv;
-	float facts, fact = 1;
+	float facts;
 	Client *c;
 
 	if (ai + an > n)
 		an = n - ai;
 
+	/* Skip ahead to the first client. */
+	for (i = 0, c = nexttiled(ws->clients); c && i < ai; c = nexttiled(c->next), i++);
+
 	w -= iv * (an - 1);
-	getfactsforrange(ws, an, ai, w, &rest, &facts);
-	for (i = 0, c = nexttiled(ws->clients); c && i < (ai + an); c = nexttiled(c->next), i++) {
-		if (i >= ai) {
-			c->area = d.grp;
-			fact = c->cfact;
-			cw = w * (fact / facts) + ((i - ai) < rest ? 1 : 0);
-			resize(c, x, y, cw - (2 * c->bw), h - (2 * c->bw), 0);
-			x += cw + iv;
-		}
+	getfactsforrange(c, an, w, &rest, &facts, 1);
+	for (i = 0; c && i < an; c = nexttiled(c->next), i++) {
+		c->area = d.grp;
+		cw = w * (c->cfact / facts) + (i < rest ? 1 : 0);
+		resize(c, x, y, cw - (2 * c->bw), h - (2 * c->bw), 0);
+		x += cw + iv;
 	}
 }
 
@@ -601,21 +607,22 @@ arrange_top_to_bottom(Workspace *ws, FlexDim d)
 {
 	int i, rest, ch;
 	int n = d.n, an = d.an, ai = d.ai, x = d.x, y = d.y, w = d.w, h = d.h, ih = d.ih;
-	float facts, fact = 1;
+	float facts;
 	Client *c;
+
 	if (ai + an > n)
 		an = n - ai;
 
+	/* Skip ahead to the first client. */
+	for (i = 0, c = nexttiled(ws->clients); c && i < ai; c = nexttiled(c->next), i++);
+
 	h -= ih * (an - 1);
-	getfactsforrange(ws, an, ai, h, &rest, &facts);
-	for (i = 0, c = nexttiled(ws->clients); c && i < (ai + an); c = nexttiled(c->next), i++) {
-		if (i >= ai) {
-			c->area = d.grp;
-			fact = c->cfact;
-			ch = h * (fact / facts) + ((i - ai) < rest ? 1 : 0);
-			resize(c, x, y, w - (2 * c->bw), ch - (2 * c->bw), 0);
-			y += ch + ih;
-		}
+	getfactsforrange(c, an, h, &rest, &facts, 1);
+	for (i = 0, c = nexttiled(ws->clients); c && i < an; c = nexttiled(c->next), i++) {
+		c->area = d.grp;
+		ch = h * (c->cfact / facts) + (i < rest ? 1 : 0);
+		resize(c, x, y, w - (2 * c->bw), ch - (2 * c->bw), 0);
+		y += ch + ih;
 	}
 }
 
@@ -1308,6 +1315,229 @@ arrange_tatami_cfacts(Workspace *ws, FlexDim f)
 
 		ny += nh + ih + (nhrest > 0 ? 1 : 0);
 		--nhrest;
+	}
+}
+
+void
+arrange_aspectgrid(Workspace *ws, FlexDim d)
+{
+	int i, target_an, layout = 0;
+	int an = d.an, ai = d.ai;
+	FlexDim next = d;  /* Copy of FlexDim, to be passed on recursively */
+	Client *c, *f;
+	float height_aspect = 0.0;  /* H/W, portrait, used to work out the width based on the height */
+	float width_aspect = 0.0;   /* W/H, landscape, used to work out the height based on the width */
+	float width_pct, height_pct, target_pct;  /* Percentages */
+	float ar;
+	int height, width, height_row_width, width_col_height;
+	int iv, ih, rh, rw;
+
+	/* Skip ahead to the first client. */
+	for (i = 0, f = nexttiled(ws->clients); f && i < ai; f = nexttiled(f->next), i++);
+
+	for (c = f, target_an = 1; target_an <= an; target_an++) {
+
+		/* Calculate gap sizes depending on the number of target clients */
+		iv = (target_an - 1) * d.iv;
+		ih = (target_an - 1) * d.ih;
+
+		/* The remaining height and width after deducting gaps */
+		rh = d.h - ih;
+		rw = d.w - iv;
+
+		/* Sum up the aspect ratio for each target client. c->mina is portrait aspect, H/W. */
+		if (c->mina) {
+			height_aspect += c->mina;
+			width_aspect += 1.0/c->mina;
+		} else {
+			/* Use workspace aspect ratio for non-aspect ratio restricted windows */
+			ar = (float)ws->wh/ws->ww;
+			height_aspect += ar;
+			width_aspect += 1.0/ar;
+		}
+
+		/* Calculate the width for a top to bottom layout and the height for a left to right
+		 * layout on the basis of the combined aspect ratio for all target clients. */
+		width = (float)rh / height_aspect;
+		height = (float)rw / width_aspect;
+
+		/* Cap the width and height to the available size */
+		width = MIN(width, rw);
+		height = MIN(height, rh);
+
+		/* Calculate the complementary height and width based on the capped size */
+		width_col_height = (float)width * height_aspect;
+		height_row_width = (float)height * width_aspect;
+
+		/* in order to work out how much space would be used compared to the available space */
+		width_pct = 100.0 * (float)(width * width_col_height) / (rh * rw);
+		height_pct = 100.0 * (float)(height * height_row_width) / (rh * rw);
+		target_pct = 100.0 * (float)target_an / an;
+
+		/* If the amount of space taken up is less than the proportional amount of target clients,
+		 * e.g. 3 out of 6 clients taking up ~50% of the tiling area, then we allow the best fit
+		 * to determine whether we arrange the clients top to bottom or left to right. */
+		if (width_pct <= target_pct && (width >= height_row_width || width_pct >= height_pct || height_pct > target_pct)) {
+			layout = TOP_TO_BOTTOM;
+			break;
+		}
+
+		if (height_pct <= target_pct && (height >= width_col_height || height_pct >= width_pct || width_pct > target_pct)) {
+			layout = LEFT_TO_RIGHT;
+			break;
+		}
+
+		c = nexttiled(c->next);
+	}
+
+	target_an = MIN(target_an, an);  /* Safeguard in case the for-loop above overflows */
+
+	/* Prepare the next recursive call and trigger the arrangement of clients */
+	next.an -= target_an;
+	next.ai += target_an;
+
+	/* Use up the remaining space if this is the last batch of clients */
+	if (abs(d.w - width) < 5 || d.w < width || next.an == 0) {
+		width = d.w;
+	}
+
+	if (abs(d.h - height) < 5 || d.h < height || next.an == 0) {
+		height = d.h;
+	}
+
+	if (layout == LEFT_TO_RIGHT) {
+		next.h -= height + d.ih;
+		next.y += height + d.ih;
+		d.h = height;
+		d.an = target_an;
+		arrange_left_to_right_aspect(ws, d);
+	} else {
+		next.w -= width + d.iv;
+		next.x += width + d.iv;
+		d.w = width;
+		d.an = target_an;
+		arrange_top_to_bottom_aspect(ws, d);
+	}
+
+	/* Only do the recursive call if we have more clients to process */
+	if (target_an && next.an > 0)
+		arrange_aspectgrid(ws, next);
+}
+
+void
+arrange_top_to_bottom_aspect(Workspace *ws, FlexDim d)
+{
+	arrange_aspect_tiles(ws, d, TOP_TO_BOTTOM);
+}
+
+void
+arrange_left_to_right_aspect(Workspace *ws, FlexDim d)
+{
+	arrange_aspect_tiles(ws, d, LEFT_TO_RIGHT);
+}
+
+void
+arrange_aspect_tiles(Workspace *ws, FlexDim d, int arrange)
+{
+	int ai = d.ai, an = d.an;
+	int i, j, s, rest, length, pos, gap;
+	Client *c, *f;
+	float facts;
+
+	if (arrange == TOP_TO_BOTTOM) {
+		gap = d.ih;
+		length = d.h;
+		pos = d.y;
+	} else {
+		gap = d.iv;
+		length = d.w;
+		pos = d.x;
+	}
+
+	int remaining_size = length - (gap * (an - 1));
+	int remaining_clients = an;
+	int target_size;
+	float leeway = 1.20;
+	int size[an];
+	int num_normal_windows = 0, num_aspect_restricted_windows = 0;
+
+	/* Skip ahead to the first client. */
+	for (i = 0, f = nexttiled(ws->clients); f && i < ai; f = nexttiled(f->next), i++);
+
+
+	/* Get a count of aspect restricted clients vs not. */
+	for (i = 0, c = f; c && i < an; c = nexttiled(c->next), i++) {
+		if (c->mina) {
+			num_aspect_restricted_windows++;
+		} else {
+			num_normal_windows++;
+		}
+	}
+
+	/* Adjust leeway depending on the number of clients */
+	leeway += (0.4 * num_normal_windows / MAX(num_aspect_restricted_windows, 1));
+
+	/* Size aspect restricted windows first. Client.mina = H/W. */
+	for (i = 0, c = f; c && i < an; c = nexttiled(c->next), i++) {
+		if (c->mina) {
+			target_size = remaining_size / remaining_clients;
+			s = (arrange == TOP_TO_BOTTOM ? d.w * c->mina : d.h / c->mina) + 2 * c->bw;
+			if (c->cfact < 1.0) {
+				s *= c->cfact;
+			}
+			if (s > target_size * leeway) {
+				s = target_size * leeway;
+			}
+			size[i] = s;
+			remaining_size -= s;
+			remaining_clients--;
+		}
+	}
+
+	/* Calculate size of remaining windows. */
+	if (remaining_clients) {
+		getfactsforrange(f, an, remaining_size, &rest, &facts, 0);
+
+		for (i = 0, j = 0, c = f; c && j < remaining_clients; c = nexttiled(c->next), i++) {
+			if (!c->mina) {
+				target_size = remaining_size * (c->cfact / facts) + (j < rest ? 1 : 0);
+				s = target_size;
+				size[i] = s;
+				j++;
+
+			}
+		}
+	}
+
+	/* Recalculate the remaining size in case we need to distribute a remainder */
+	remaining_size = length - (gap * (an - 1));
+	for (i = 0; i < an; i++) {
+		remaining_size -= size[i];
+	}
+
+	/* Distribute the remainder, if any. */
+	for (i = 0; i < remaining_size && i < an; i++) {
+		size[i]++;
+	}
+
+	/* Adjust if the remainder is negative. */
+	if (remaining_size < 0) {
+		for (i = 0; i < an; i++) {
+			target_size = abs(remaining_size / (an - i));
+			size[i] -= target_size;
+			remaining_size += target_size;
+		}
+	}
+
+	/* Now resize and place clients */
+	for (i = 0, c = f; c && i < an; c = nexttiled(c->next), i++) {
+		if (arrange == TOP_TO_BOTTOM) {
+			resize(c, d.x, pos, d.w - (2 * c->bw), size[i] - (2 * c->bw), 0);
+		} else {
+			resize(c, pos, d.y, size[i] - (2 * c->bw), d.h - (2 * c->bw), 0);
+		}
+
+		pos += size[i] + gap;
 	}
 }
 

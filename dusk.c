@@ -2753,9 +2753,21 @@ propertynotify(XEvent *e)
 				arrange(c->ws);
 			break;
 		case XA_WM_NORMAL_HINTS:
-			addflag(c, RefreshSizeHints);
-			if (ISVISIBLE(c))
-				arrangews(c->ws);
+			if (ISVISIBLE(c)) {
+				float mina = c->mina;
+				float maxa = c->maxa;
+				updatesizehints(c);
+				if (mina != c->mina || maxa != c->maxa) {
+					addflag(c, NeedResize);
+					if (ISTILED(c)) {
+						arrangews(c->ws);
+					} else {
+						resize(c, c->x, c->y, c->w, c->h, 0);
+					}
+				}
+			} else {
+				addflag(c, RefreshSizeHints);
+			}
 			break;
 		case XA_WM_HINTS:
 			updatewmhints(c);

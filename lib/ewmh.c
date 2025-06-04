@@ -27,18 +27,18 @@ persistworkspacestate(Workspace *ws)
 
 	/* Perists workspace information in 32 bits laid out like this:
 	 *
-	 * 000|1|0|0000|0000|0001|0001|000|000|001|0|1
-	 *    | | |    |    |    |    |   |   |   | |-- ws->visible
-	 *    | | |    |    |    |    |   |   |   |-- ws->pinned
-	 *    | | |    |    |    |    |   |   |-- ws->nmaster
-	 *    | | |    |    |    |    |   |-- ws->nstack
-	 *    | | |    |    |    |    |-- ws->mon
-	 *    | | |    |    |    |-- ws->ltaxis[LAYOUT] (i.e. split)
-	 *    | | |    |    |-- ws->ltaxis[MASTER]
-	 *    | | |    |-- ws->ltaxis[STACK]
-	 *    | | |-- ws->ltaxis[STACK2]
-	 *    | |-- mirror layout (indicated by negative ws->ltaxis[LAYOUT])
-	 *    |-- ws->enablegaps
+	 * |1|0|00000|00000|00001|0001|000|000|001|0|1
+	 * | | |     |     |     |    |   |   |   | |-- ws->visible
+	 * | | |     |     |     |    |   |   |   |-- ws->pinned
+	 * | | |     |     |     |    |   |   |-- ws->nmaster
+	 * | | |     |     |     |    |   |-- ws->nstack
+	 * | | |     |     |     |    |-- ws->mon
+	 * | | |     |     |     |-- ws->ltaxis[LAYOUT] (i.e. split)
+	 * | | |     |     |-- ws->ltaxis[MASTER]
+	 * | | |     |-- ws->ltaxis[STACK]
+	 * | | |-- ws->ltaxis[STACK2]
+	 * | |-- mirror layout (indicated by negative ws->ltaxis[LAYOUT])
+	 * |-- ws->enablegaps
 	 */
 	uint32_t data[] = {
 		(ws->visible & 0x1) |
@@ -47,11 +47,11 @@ persistworkspacestate(Workspace *ws)
 		(ws->nstack & 0x7 ) << 5 |
 		(ws->mon->num & 0x7) << 8 |
 		(abs(ws->ltaxis[LAYOUT]) & 0xF) << 11 |
-		(ws->ltaxis[MASTER] & 0xF) << 15 |
-		(ws->ltaxis[STACK] & 0xF) << 19 |
-		(ws->ltaxis[STACK2] & 0xF) << 23 |
-		(ws->ltaxis[LAYOUT] < 0 ? 1 : 0) << 27 |
-		(ws->enablegaps & 0x1) << 28
+		(ws->ltaxis[MASTER] & 0x1F) << 15 |
+		(ws->ltaxis[STACK] & 0x1F) << 20 |
+		(ws->ltaxis[STACK2] & 0x1F) << 25 |
+		(ws->ltaxis[LAYOUT] < 0 ? 1 : 0) << 30 |
+		(ws->enablegaps & 0x1) << 31
 	};
 
 	XChangeProperty(dpy, root, duskatom[DuskWorkspace], XA_CARDINAL, 32,
@@ -136,12 +136,12 @@ restoreworkspacestate(Workspace *ws)
 		ws->nmaster = (settings >> 2) & 0x7;
 		ws->nstack = (settings >> 5) & 0x7;
 		ws->ltaxis[LAYOUT] = (settings >> 11) & 0xF;
-		if (settings & (1 << 27)) // mirror layout
+		if (settings & (1 << 30)) // mirror layout
 			ws->ltaxis[LAYOUT] *= -1;
-		ws->ltaxis[MASTER] = (settings >> 15) & 0xF;
-		ws->ltaxis[STACK] = (settings >> 19) & 0xF;
-		ws->ltaxis[STACK2] = (settings >> 23) & 0xF;
-		ws->enablegaps = (settings >> 28) & 0x1;
+		ws->ltaxis[MASTER] = WRAP((settings >> 15) & 0x1F, 0, AXIS_LAST - 1);
+		ws->ltaxis[STACK]  = WRAP((settings >> 20) & 0x1F, 0, AXIS_LAST - 1);
+		ws->ltaxis[STACK2] = WRAP((settings >> 25) & 0x1F, 0, AXIS_LAST - 1);
+		ws->enablegaps = (settings >> 31) & 0x1;
 
 		/* Restore layout if we have an exact match, floating layout interpreted as 0x7fff800 */
 		for (i = 0; i < LENGTH(layouts); i++) {
