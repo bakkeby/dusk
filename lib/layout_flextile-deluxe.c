@@ -1318,6 +1318,29 @@ arrange_tatami_cfacts(Workspace *ws, FlexDim f)
 	}
 }
 
+/* This arrangement aims to create a grid layout that is optimised for aspect ratio restricted
+ * windows.
+ *
+ * The general approach is to loop through the available client windows and estimate the space
+ * used when they are tiled vertically vs horizontally. For example with a total of 9 clients
+ * it might find that tiling three windows vertically (top to bottom) is the best fit because
+ * the space used is less than a third of the available space, compared to two windows taking
+ * up 41% of the space accounting only for 22% of the clients.
+ *
+ * The actual placement of the windows is delegated to arrange_aspect_tiles which prioritises
+ * sizing of aspect restricted windows over non-aspect restricted windows.
+ *
+ * Then it makes a recursive call to arrange_aspectgrid with the remaining space as long as
+ * there are more clients to process.
+ *
+ * It is worth noting are that the border width is not actually part of the window and should
+ * therefore not be taken into account when calculating the size using the aspect ratio.
+ *
+ * The approach here also has a special case where if a suitable arrangement like top to bottom
+ * has been found including up to the next to last client, then it is going to run through the
+ * calculations including the last client as well to see if an opposite arrangement (left to
+ * right) is a better fit.
+ */
 void
 arrange_aspectgrid(Workspace *ws, FlexDim d)
 {
@@ -1328,14 +1351,29 @@ arrange_aspectgrid(Workspace *ws, FlexDim d)
 	float height_aspect = 0.0;  /* H/W, portrait, used to work out the width based on the height */
 	float width_aspect = 0.0;   /* W/H, landscape, used to work out the height based on the width */
 	float width_pct, height_pct, target_pct;  /* Percentages */
-	float ar;
+	float prev_width_pct = 0.0, prev_height_pct = 0.0;
 	int height, width, height_row_width, width_col_height;
+	int prev_height = 0, prev_width = 0, prev_width_target_an = 0, prev_height_target_an = 0;
 	int iv, ih, rh, rw;
+	int bw = 0;
 
 	/* Skip ahead to the first client. */
 	for (i = 0, f = nexttiled(ws->clients); f && i < ai; f = nexttiled(f->next), i++);
 
-	for (c = f, target_an = 1; target_an <= an; target_an++) {
+	for (c = f, target_an = 1; target_an <= an; c = nexttiled(c->next), target_an++) {
+
+		/* Sum up the aspect ratio for each target client. */
+		if (c->mina) {
+			height_aspect += c->mina;  /* c->mina is portrait aspect, H/W. */
+			width_aspect += c->maxa;   /* c->maxa is landscape aspect, W/H. */
+		} else {
+			/* Use workspace aspect ratio for non-aspect ratio restricted windows */
+			height_aspect += (float)ws->wh/ws->ww;
+			width_aspect += (float)ws->ww/ws->wh;
+		}
+
+		/* Total border width across all clients */
+		bw += 2 * c->bw;
 
 		/* Calculate gap sizes depending on the number of target clients */
 		iv = (target_an - 1) * d.iv;
@@ -1345,52 +1383,98 @@ arrange_aspectgrid(Workspace *ws, FlexDim d)
 		rh = d.h - ih;
 		rw = d.w - iv;
 
-		/* Sum up the aspect ratio for each target client. c->mina is portrait aspect, H/W. */
-		if (c->mina) {
-			height_aspect += c->mina;
-			width_aspect += 1.0/c->mina;
-		} else {
-			/* Use workspace aspect ratio for non-aspect ratio restricted windows */
-			ar = (float)ws->wh/ws->ww;
-			height_aspect += ar;
-			width_aspect += 1.0/ar;
-		}
-
 		/* Calculate the width for a top to bottom layout and the height for a left to right
 		 * layout on the basis of the combined aspect ratio for all target clients. */
-		width = (float)rh / height_aspect;
-		height = (float)rw / width_aspect;
+		width = (float)(rh - bw) / height_aspect + bw/target_an + 0.5;
+		height = (float)(rw - bw) / width_aspect + bw/target_an + 0.5;
 
 		/* Cap the width and height to the available size */
 		width = MIN(width, rw);
 		height = MIN(height, rh);
 
 		/* Calculate the complementary height and width based on the capped size */
-		width_col_height = (float)width * height_aspect;
-		height_row_width = (float)height * width_aspect;
+		width_col_height = (float)(width) * height_aspect;
+		height_row_width = (float)(height) * width_aspect;
 
 		/* in order to work out how much space would be used compared to the available space */
 		width_pct = 100.0 * (float)(width * width_col_height) / (rh * rw);
 		height_pct = 100.0 * (float)(height * height_row_width) / (rh * rw);
 		target_pct = 100.0 * (float)target_an / an;
 
+		/* Cap the percentages */
+		width_pct = MIN(width_pct, 100.0);
+		height_pct = MIN(height_pct, 100.0);
+		target_pct = MIN(target_pct, 100.0);
+
+		/* Once a suitable layout has been found, e.g. top to bottom for two windows, then
+		 * the algorithm is going to do one more round of calculations such that if the
+		 * next client in line is the last client and the opposite arrangement, e.g. left
+		 * to right, is more suitable than the first option - then we are going switch and
+		 * include the last client as well.
+		 *
+		 * This is to avoid situations where the last client ends up with a very large area
+		 * that could have been be better used by the next to last clients.
+		 */
+		if (prev_width_target_an) {
+
+			if (target_an == an && height_pct > prev_width_pct && height_pct <= target_pct) {
+				layout = LEFT_TO_RIGHT;
+				break;
+			}
+
+			layout = TOP_TO_BOTTOM;
+			width = prev_width;
+			target_an = prev_width_target_an;
+			break;
+		}
+
+		if (prev_height_target_an) {
+
+			if (target_an == an && width_pct > prev_height_pct && width_pct <= target_pct) {
+				layout = TOP_TO_BOTTOM;
+				break;
+			}
+
+			layout = LEFT_TO_RIGHT;
+			height = prev_height;
+			target_an = prev_height_target_an;
+			break;
+		}
+
 		/* If the amount of space taken up is less than the proportional amount of target clients,
 		 * e.g. 3 out of 6 clients taking up ~50% of the tiling area, then we allow the best fit
 		 * to determine whether we arrange the clients top to bottom or left to right. */
 		if (width_pct <= target_pct && (width >= height_row_width || width_pct >= height_pct || height_pct > target_pct)) {
+
 			layout = TOP_TO_BOTTOM;
-			break;
+
+			/* If in practice this is going to use up the remaining space then include the
+			 * remaining clients. This calculates the effective space used compared to the height
+			 * and width percentages which are relative to the aspect ratio of the clients. */
+			if (((float)(width * d.h) / (rh * rw)) > 0.95) {
+				target_an = an;
+			}
+
+			prev_width = width;
+			prev_width_pct = width_pct;
+			prev_width_target_an = target_an;
 		}
 
 		if (height_pct <= target_pct && (height >= width_col_height || height_pct >= width_pct || width_pct > target_pct)) {
-			layout = LEFT_TO_RIGHT;
-			break;
-		}
 
-		c = nexttiled(c->next);
+			layout = LEFT_TO_RIGHT;
+
+			if (((float)(height * d.w) / (rh * rw)) > 0.95) {
+				target_an = an;
+			}
+
+			prev_height = height;
+			prev_height_pct = height_pct;
+			prev_height_target_an = target_an;
+		}
 	}
 
-	target_an = MIN(target_an, an);  /* Safeguard in case the for-loop above overflows */
+	target_an = MIN(target_an, an);  /* In case the for-loop above overflows */
 
 	/* Prepare the next recursive call and trigger the arrangement of clients */
 	next.an -= target_an;
@@ -1409,15 +1493,13 @@ arrange_aspectgrid(Workspace *ws, FlexDim d)
 		next.h -= height + d.ih;
 		next.y += height + d.ih;
 		d.h = height;
-		d.an = target_an;
-		arrange_left_to_right_aspect(ws, d);
 	} else {
 		next.w -= width + d.iv;
 		next.x += width + d.iv;
 		d.w = width;
-		d.an = target_an;
-		arrange_top_to_bottom_aspect(ws, d);
 	}
+	d.an = target_an;
+	arrange_aspect_tiles(ws, d, layout);
 
 	/* Only do the recursive call if we have more clients to process */
 	if (target_an && next.an > 0)
@@ -1436,29 +1518,39 @@ arrange_left_to_right_aspect(Workspace *ws, FlexDim d)
 	arrange_aspect_tiles(ws, d, LEFT_TO_RIGHT);
 }
 
+/* This arrangement aims to lay out client windows optimally based on their aspect ratio.
+ *
+ * This will arrange windows top to bottom or left to right. This arrangement is used by the
+ * aspectgrid arrangement, but can also be used as a replacement for the default arrangements
+ * (which divides the space evenly) by using the TOP_TO_BOTTOM_AR and LEFT_TO_RIGHT_AR when
+ * setting up the layouts.
+ *
+ * The approach here is to attempt to fully size aspect restricted clients first, and later
+ * reduce the sizes if there is not enough space to tile the non-aspect restricted windows.
+ */
 void
 arrange_aspect_tiles(Workspace *ws, FlexDim d, int arrange)
 {
 	int ai = d.ai, an = d.an;
-	int i, j, s, rest, length, pos, gap;
+	int i, j, s, rest, size, pos, gap, amount, bw;
 	Client *c, *f;
-	float facts;
+	float facts, ar;
 
 	if (arrange == TOP_TO_BOTTOM) {
 		gap = d.ih;
-		length = d.h;
+		size = d.h;
 		pos = d.y;
 	} else {
 		gap = d.iv;
-		length = d.w;
+		size = d.w;
 		pos = d.x;
 	}
 
-	int remaining_size = length - (gap * (an - 1));
+	int remaining_size = size - (gap * (an - 1));
 	int remaining_clients = an;
 	int target_size;
 	float leeway = 1.20;
-	int size[an];
+	int sizes[an];
 	int num_normal_windows = 0, num_aspect_restricted_windows = 0;
 
 	/* Skip ahead to the first client. */
@@ -1477,18 +1569,28 @@ arrange_aspect_tiles(Workspace *ws, FlexDim d, int arrange)
 	/* Adjust leeway depending on the number of clients */
 	leeway += (0.4 * num_normal_windows / MAX(num_aspect_restricted_windows, 1));
 
-	/* Size aspect restricted windows first. Client.mina = H/W. */
+	/* Size aspect restricted windows first. Client mina = H/W, maxa = W/H. */
 	for (i = 0, c = f; c && i < an; c = nexttiled(c->next), i++) {
 		if (c->mina) {
-			target_size = remaining_size / remaining_clients;
-			s = (arrange == TOP_TO_BOTTOM ? d.w * c->mina : d.h / c->mina) + 2 * c->bw;
+			target_size = remaining_size / remaining_clients + remaining_size % remaining_clients;
+
+			ar = (arrange == TOP_TO_BOTTOM ? c->mina : c->maxa);
+			bw = 2 * c->bw;
+			if (arrange == TOP_TO_BOTTOM) {
+				s = (d.w - bw) * ar + bw + 0.5;
+			} else {
+				s = (d.h - bw) * ar + bw + 0.5;
+			}
+
 			if (c->cfact < 1.0) {
 				s *= c->cfact;
 			}
+
 			if (s > target_size * leeway) {
 				s = target_size * leeway;
 			}
-			size[i] = s;
+
+			sizes[i] = s;
 			remaining_size -= s;
 			remaining_clients--;
 		}
@@ -1502,42 +1604,35 @@ arrange_aspect_tiles(Workspace *ws, FlexDim d, int arrange)
 			if (!c->mina) {
 				target_size = remaining_size * (c->cfact / facts) + (j < rest ? 1 : 0);
 				s = target_size;
-				size[i] = s;
+				sizes[i] = s;
 				j++;
-
 			}
 		}
 	}
 
 	/* Recalculate the remaining size in case we need to distribute a remainder */
-	remaining_size = length - (gap * (an - 1));
+	remaining_size = size - (gap * (an - 1));
 	for (i = 0; i < an; i++) {
-		remaining_size -= size[i];
+		remaining_size -= sizes[i];
 	}
 
-	/* Distribute the remainder, if any. */
-	for (i = 0; i < remaining_size && i < an; i++) {
-		size[i]++;
-	}
-
-	/* Adjust if the remainder is negative. */
-	if (remaining_size < 0) {
-		for (i = 0; i < an; i++) {
-			target_size = abs(remaining_size / (an - i));
-			size[i] -= target_size;
-			remaining_size += target_size;
-		}
+	/* Distribute the remainder, if any (can be negative). */
+	for (i = 0; remaining_size && i < an; i++) {
+		amount = (float)remaining_size / (an - i);
+		sizes[i] += amount;
+		remaining_size -= amount;
 	}
 
 	/* Now resize and place clients */
 	for (i = 0, c = f; c && i < an; c = nexttiled(c->next), i++) {
+		bw = 2 * c->bw;
 		if (arrange == TOP_TO_BOTTOM) {
-			resize(c, d.x, pos, d.w - (2 * c->bw), size[i] - (2 * c->bw), 0);
+			resize(c, d.x, pos, d.w - bw, sizes[i] - bw, 0);
 		} else {
-			resize(c, pos, d.y, size[i] - (2 * c->bw), d.h - (2 * c->bw), 0);
+			resize(c, pos, d.y, sizes[i] - bw, d.h - bw, 0);
 		}
 
-		pos += size[i] + gap;
+		pos += sizes[i] + gap;
 	}
 }
 
