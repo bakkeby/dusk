@@ -618,7 +618,7 @@ arrange_top_to_bottom(Workspace *ws, FlexDim d)
 
 	h -= ih * (an - 1);
 	getfactsforrange(c, an, h, &rest, &facts, 1);
-	for (i = 0, c = nexttiled(ws->clients); c && i < an; c = nexttiled(c->next), i++) {
+	for (i = 0; c && i < an; c = nexttiled(c->next), i++) {
 		c->area = d.grp;
 		ch = h * (c->cfact / facts) + (i < rest ? 1 : 0);
 		resize(c, x, y, w - (2 * c->bw), ch - (2 * c->bw), 0);
