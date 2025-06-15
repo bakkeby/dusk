@@ -67,6 +67,7 @@ togglefunc(const uint64_t functionality)
 	settings ^= functionality;
 }
 
+#ifdef __linux__
 /*
  * Copy string src to buffer dst of size dsize.  At most dsize-1
  * chars will be copied.  Always NUL terminates (unless dsize == 0).
@@ -134,3 +135,4 @@ strlcat(char *dst, const char *src, size_t siz)
 
 	return(dlen + (s - src));   /* count does not include NUL */
 }
+#endif /* __linux__ */

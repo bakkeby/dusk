@@ -112,7 +112,7 @@ reply_with_formatted_message(DBusMessage *msg, const char *text, ...)
 	char response_buffer[256] = {0};
 
 	va_list args;
-	va_start(args, 0);
+	va_start(args, text);
 	vsnprintf(response_buffer, sizeof(response_buffer) - 1, text, args);
 	va_end(args);
 

@@ -66,7 +66,7 @@ markmouse(const Arg *arg)
 	Workspace *w;
 	XEvent ev;
 	Time lasttime = 0;
-	unsigned long mark = (arg->i == 1 ? Marked : arg->i);
+	uint64_t mark = (arg->i == 1 ? Marked : arg->i);
 
 	if (r && mark != ISMARKED(r))
 		togglemark(&((Arg) { .v = r }));

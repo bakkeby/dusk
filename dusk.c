@@ -41,6 +41,7 @@
 #include <X11/extensions/Xinerama.h>
 #endif /* XINERAMA */
 #include <X11/Xft/Xft.h>
+#include <inttypes.h>
 
 #include "drw.h"
 #include "util.h"
@@ -684,7 +685,7 @@ applyrules(Client *c)
 					"    instance:  %s\n"
 					"    title:     %s\n"
 					"    wintype:   %s\n"
-					"    flags:     %lu\n"
+					"    flags:     %" PRIu64 "\n"
 					"    floatpos:  %s\n"
 					"    workspace: %s\n"
 					"    label:     %s\n",
@@ -4272,7 +4273,7 @@ main(int argc, char *argv[])
 	setup();
 	autostart_exec();
 #ifdef __OpenBSD__
-	if (pledge("stdio rpath proc exec ps", NULL) == -1)
+	if (pledge("stdio rpath proc exec ps unix inet", NULL) == -1)
 		die("pledge");
 #endif /* __OpenBSD__ */
 	scan();

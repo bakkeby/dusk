@@ -66,4 +66,4 @@ CFLAGS   = ${OPTIMISATIONS} -std=c99 -pedantic -Wall -Wno-unused-function -Wno-d
 LDFLAGS  = ${LIBS}
 
 # Compiler and linker
-CC = cc
+# CC = cc
