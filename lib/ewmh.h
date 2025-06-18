@@ -17,6 +17,8 @@ static void setclientflags(Client *c);
 static void setclientfields(Client *c);
 static void setclienticonpath(Client *c);
 static void setclientlabel(Client *c);
+static void setclientstate(Client *c, long state);
+static void setclientnetstate(Client *c, int state);
 static void setnumdesktops(void);
 static void setviewport(void);
 static void updatecurrentdesktop(void);

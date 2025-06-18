@@ -500,7 +500,6 @@ static void run(void);
 static void scan(void);
 static int sendevent(Window w, Atom proto, int m, long d0, long d1, long d2, long d3, long d4);
 static void setbackground(void);
-static void setclientstate(Client *c, long state);
 static void setfocus(Client *c);
 static void setfullscreen(Client *c, int fullscreen, int setfakefullscreen);
 static void setlayout(const Arg *arg);
@@ -3193,15 +3192,6 @@ setbackground(void)
 	XClearWindow(dpy, root);
 }
 
-void
-setclientstate(Client *c, long state)
-{
-	long data[] = { state, None };
-
-	XChangeProperty(dpy, c->win, wmatom[WMState], wmatom[WMState], 32,
-		PropModeReplace, (unsigned char *)data, 2);
-}
-
 int
 sendevent(Window w, Atom proto, int mask, long d0, long d1, long d2, long d3, long d4)
 {
@@ -3281,12 +3271,7 @@ setfullscreen(Client *c, int fullscreen, int restorefakefullscreen)
 	}
 
 	if (fullscreen != ISFULLSCREEN(c)) { // only send property change if necessary
-		if (fullscreen)
-			XChangeProperty(dpy, c->win, netatom[NetWMState], XA_ATOM, 32,
-				PropModeReplace, (unsigned char*)&netatom[NetWMFullscreen], 1);
-		else
-			XChangeProperty(dpy, c->win, netatom[NetWMState], XA_ATOM, 32,
-				PropModeReplace, (unsigned char*)0, 0);
+		setclientnetstate(c, fullscreen ? NetWMFullscreen : 0);
 	}
 
 	setflag(c, FullScreen, fullscreen);
