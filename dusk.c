@@ -3776,7 +3776,6 @@ unmanage(Client *c, int destroyed)
 {
 	Client *s;
 	Workspace *ws, *revertws;
-	XWindowChanges wc;
 
 	if (SEMISCRATCHPAD(c))
 		c = unmanagesemiscratchpad(c);
@@ -3809,11 +3808,9 @@ unmanage(Client *c, int destroyed)
 	freeicon(c);
 
 	if (!destroyed) {
-		wc.border_width = c->oldbw;
 		XGrabServer(dpy); /* avoid race conditions */
 		XSetErrorHandler(xerrordummy);
 		XSelectInput(dpy, c->win, NoEventMask);
-		XConfigureWindow(dpy, c->win, CWBorderWidth, &wc); /* restore border */
 		XUngrabButton(dpy, AnyButton, AnyModifier, c->win);
 		XSync(dpy, False);
 		XSetErrorHandler(xerror);
