@@ -296,8 +296,6 @@ setclientstate(Client *c, long state)
 
 	XChangeProperty(dpy, c->win, wmatom[WMState], wmatom[WMState], 32,
 		PropModeReplace, (unsigned char *)data, 2);
-
-	setclientnetstate(c, state == NormalState ? 0 : NetWMHidden);
 }
 
 /* Sets _NET_WM_STATE, which is an extended window manager hint part of the EWMH specification */

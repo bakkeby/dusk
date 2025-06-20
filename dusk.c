@@ -2179,6 +2179,7 @@ show(Client *c)
 		return;
 
 	c->shown = 1;
+	XMoveWindow(dpy, c->win, c->x, c->y);
 	setclientstate(c, NormalState);
 	XMapWindow(dpy, c->win);
 }
@@ -2193,6 +2194,7 @@ hide(Client *c)
 	c->expecting_unmap++;
 	setclientstate(c, IconicState);
 	XUnmapWindow(dpy, c->win);
+	XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
 }
 
 void

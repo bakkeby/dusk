@@ -8,18 +8,12 @@ conceal(Client *c)
 void
 reveal(Client *c)
 {
-	if (getstate(c->win) == IconicState)
-		setclientstate(c, NormalState);
-
+	setclientstate(c, NormalState);
 	removeflag(c, Hidden);
 
-	if (!ISVISIBLE(c))
-		return;
-
-	if (ISFULLSCREEN(c))
-		setfullscreen(c, 1, 0);
-	else
+	if (ISVISIBLE(c)) {
 		show(c);
+	}
 }
 
 void
