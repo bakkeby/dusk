@@ -88,9 +88,9 @@ warp(const Client *c)
 	/* Do not warp if cursor rests on one of the bars */
 	for (m = mons; m; m = m->next)
 		for (bar = m->bar; bar; bar = bar->next)
-			if (x > bar->bx &&
+			if (x >= bar->bx &&
 				x < bar->bx + bar->bw &&
-				y > bar->by &&
+				y >= bar->by &&
 				y < bar->by + bar->bh)
 				return;
 
