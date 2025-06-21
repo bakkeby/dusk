@@ -150,7 +150,7 @@ drawbarwin(Bar *bar)
 	if (!bar || !bar->win || bar->external)
 		return;
 
-	int r, w, mw, total_drawn = 0;
+	int r, w, mw, total_drawn = 0, idx;
 	int rx, lx, rw, lw; // bar size, split between left and right if a center module is added
 	const BarRule *br;
 	Monitor *lastmon;
@@ -163,7 +163,8 @@ drawbarwin(Bar *bar)
 		bar->scheme = SchemeNorm;
 
 	if (bar->borderpx) {
-		XSetForeground(drw->dpy, drw->gc, scheme[bar->scheme][ColBorder].pixel);
+		idx = (enabled(BarBorderColBg) ? ColBg : ColBorder);
+		XSetForeground(drw->dpy, drw->gc, scheme[bar->scheme][idx].pixel);
 		XFillRectangle(drw->dpy, drw->drawable, drw->gc, 0, 0, bar->bw, bar->bh);
 	}
 

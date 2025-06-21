@@ -28,8 +28,8 @@ static const uint64_t
 	Swallow = 0x4, // enables swallowing of clients
 	SwallowFloating = 0x8, // allow floating windows to swallow the terminal by default
 	CenteredWindowName = 0x10,
-	BarActiveGroupBorderColor = 0x20, // use border color of active group, otherwise title scheme is used
-	BarMasterGroupBorderColor = 0x40, // use border color of master group, otherwise title scheme is used
+	BarActiveGroupBorderColor = 0x20, // use border color of active group, otherwise normal scheme is used
+	BarMasterGroupBorderColor = 0x40, // use border color of master group, otherwise normal scheme is used
 	ColorEmoji = 0x80,
 	Status2DNoAlpha = 0x100, // option to not use alpha when drawing status2d status
 	Systray = 0x200, // enables systray
@@ -70,7 +70,7 @@ static const uint64_t
 	BanishMouseCursorToCorner = 0x80000000000, // makes BanishMouseCursor also move the cursor to top right corner of the screen
 	StackerIcons = 0x100000000000, // adds a stacker icon hints in window titles
 	AltWindowTitles = 0x200000000000, // show alternate window titles, if present
-	FuncPlaceholder70368744177664 = 0x400000000000,
+	BarBorderColBg = 0x400000000000, // optionally use the background colour of the bar for the border as well, rather than border colur
 	FuncPlaceholder140737488355328 = 0x800000000000,
 	FuncPlaceholder281474976710656 = 0x1000000000000,
 	FuncPlaceholder562949953421312 = 0x2000000000000,
