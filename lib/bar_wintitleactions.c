@@ -2,6 +2,7 @@ void
 conceal(Client *c)
 {
 	addflag(c, Hidden);
+	setclientnetstate(c, NetWMHidden);
 	hide(c);
 }
 
@@ -9,6 +10,7 @@ void
 reveal(Client *c)
 {
 	setclientstate(c, NormalState);
+	setclientnetstate(c, 0);
 	removeflag(c, Hidden);
 
 	if (ISVISIBLE(c)) {
