@@ -2175,26 +2175,15 @@ grabkeys(void)
 void
 show(Client *c)
 {
-	if (c->shown)
-		return;
-
-	c->shown = 1;
 	XMoveWindow(dpy, c->win, c->x, c->y);
 	setclientstate(c, NormalState);
-	XMapWindow(dpy, c->win);
 }
 
 void
 hide(Client *c)
 {
-	if (!c->shown)
-		return;
-
-	c->shown = 0;
-	c->expecting_unmap++;
 	setclientstate(c, IconicState);
-	XUnmapWindow(dpy, c->win);
-	XMoveWindow(dpy, c->win, WIDTH(c) * -2, c->y);
+	XMoveWindow(dpy, c->win, c->x, HEIGHT(c) * -2);
 }
 
 void
@@ -2542,6 +2531,7 @@ manage(Window w, XWindowAttributes *wa)
 	} else {
 		hide(c);
 	}
+	XMapWindow(dpy, c->win);
 
 	if (focusclient)
 		focus(c);
@@ -3866,13 +3856,11 @@ unmapnotify(XUnmapEvent *ev)
 	last_window = ev->window;
 
 	if ((c = wintoclient(ev->window))) {
-		if (c->expecting_unmap == 0) {
+		if (getstate(c->win) == WithdrawnState) {
 			ws = c->ws;
 			if (enabled(Debug) || DEBUGGING(c))
 				fprintf(stderr, "unmapnotify: window %ld --> client %s (%s)\n", ev->window, c->name, "unmanage");
 			unmanage(c, 0);
-		} else {
-			c->expecting_unmap--;
 		}
 	} else if (systray && (c = wintosystrayicon(ev->window))) {
 		removesystrayicon(c);
