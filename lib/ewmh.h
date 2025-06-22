@@ -3,6 +3,7 @@ static void getclientflags(Client *c);
 static void getclientfields(Client *c);
 static void getclienticonpath(Client *c);
 static void getclientlabel(Client *c);
+static void getclientalttitle(Client *c);
 static void persistworkspacestate(Workspace *ws);
 static void restoreworkspacestate(Workspace *ws);
 static void restoreworkspacestates(void);
@@ -17,6 +18,7 @@ static void setclientflags(Client *c);
 static void setclientfields(Client *c);
 static void setclienticonpath(Client *c);
 static void setclientlabel(Client *c);
+static void setclientalttitle(Client *c);
 static void setclientstate(Client *c, long state);
 static void setclientnetstate(Client *c, int state);
 static void setnumdesktops(void);
@@ -158,6 +160,7 @@ enum {
 	DuskClientFlags,
 	DuskClientFields,
 	DuskClientLabel,
+	DuskClientAltName,
 	DuskClientIconPath,
 	DuskWorkspace,
 	SteamGameID,
@@ -171,6 +174,7 @@ static char *dusk_names[DuskLast] = {
 	[DuskClientFlags] = "_DUSK_CLIENT_FLAGS",
 	[DuskClientFields] = "_DUSK_CLIENT_FIELDS",
 	[DuskClientLabel] = "_DUSK_CLIENT_LABEL",
+	[DuskClientAltName] = "_DUSK_CLIENT_ALT_TITLE",
 	[DuskClientIconPath] = "_DUSK_CLIENT_ICON_PATH",
 	[DuskWorkspace] = "_DUSK_WORKSPACE",
 	[SteamGameID] = "STEAM_GAME",

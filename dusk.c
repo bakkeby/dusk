@@ -2340,6 +2340,7 @@ manage(Window w, XWindowAttributes *wa)
 	getclientfields(c);
 	getclientopacity(c);
 	getclientlabel(c);
+	getclientalttitle(c);
 	getclienticonpath(c);
 
 	updateicon(c);
@@ -3378,7 +3379,6 @@ setup(void)
 	Monitor *m;
 	int i, colorscheme;
 	XSetWindowAttributes wa;
-	Atom utf8string;
 	struct sigaction chld, hup, term;
 
 	/* Record the HOME environment variable (for ~ substitution) */

@@ -1,3 +1,5 @@
+Atom utf8string;
+
 int
 atomin(Atom input, Atom *list, int nitems)
 {
@@ -70,6 +72,7 @@ persistworkspacestate(Workspace *ws)
 		setclientflags(c);
 		setclientfields(c);
 		setclientlabel(c);
+		setclientalttitle(c);
 		setclienticonpath(c);
 		savewindowfloatposition(c, c->ws->mon);
 
@@ -79,6 +82,7 @@ persistworkspacestate(Workspace *ws)
 			setclientflags(s);
 			setclientfields(s);
 			setclientlabel(s);
+			setclientalttitle(s);
 			setclienticonpath(s);
 			savewindowfloatposition(s, s->ws->mon);
 			s = s->swallowing;
@@ -379,6 +383,12 @@ setclientlabel(Client *c)
 }
 
 void
+setclientalttitle(Client *c)
+{
+	XChangeProperty(dpy, c->win, duskatom[DuskClientAltName], utf8string, 8, PropModeReplace, (unsigned char *)c->altname, strlen(c->altname));
+}
+
+void
 getclientflags(Client *c)
 {
 	int di;
@@ -460,6 +470,28 @@ getclientlabel(Client *c)
 			if (type == XA_STRING) {
 				for (i = 0; i < size; ++i)
 					c->label[i] = data[i];
+			}
+			XFree(data);
+		}
+	}
+}
+
+void
+getclientalttitle(Client *c)
+{
+	Atom type;
+	int format;
+	unsigned int i;
+	unsigned long after;
+	unsigned char *data = 0;
+	long unsigned int size = LENGTH(c->altname);
+
+	if (XGetWindowProperty(dpy, c->win, duskatom[DuskClientAltName], 0, 1024, 0, utf8string,
+				&type, &format, &size, &after, &data) == Success) {
+		if (data) {
+			if (type == utf8string) {
+				for (i = 0; i < size; ++i)
+					c->altname[i] = data[i];
 			}
 			XFree(data);
 		}
