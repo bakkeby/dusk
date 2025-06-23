@@ -43,26 +43,26 @@ getclientcounts(Workspace *ws, int *n, int *clientsnmaster, int *clientsnstack, 
 				ch++;
 			continue;
 		}
-		if (ISTILED(c)) {
-			switch (c->area) {
-			case MASTER:
-				++cm;
-				break;
-			case STACK:
-				++cs1;
-				break;
-			case STACK2:
-				++cs2;
-				break;
-			default:
-				++cm;
-				break;
-			}
+		if (!ISTILED(c)) {
+			if (flexwintitle_floatweight)
+				cf++;
 			continue;
 		}
 
-		if (flexwintitle_floatweight)
-			cf++;
+		switch (c->area) {
+		case MASTER:
+			if (flexwintitle_masterweight)
+				++cm;
+			break;
+		case STACK:
+			if (flexwintitle_stackweight)
+				++cs1;
+			break;
+		case STACK2:
+			if (flexwintitle_stackweight)
+				++cs2;
+			break;
+		}
 	}
 	*n = cm + cs1 + cs2 + cf + ch;
 
@@ -130,6 +130,13 @@ flextitledrawarea(Workspace *ws, Client *c, int x, int w, int num_clients, int t
 	cw = (w - sepw * num_separators) / num_clients;
 	rw = (w - sepw * num_separators) % num_clients;
 
+	/* If we have run out of space to draw something, then just fill the remaining background */
+	if (cw <= sepw) {
+		XSetForeground(drw->dpy, drw->gc, drw->scheme[ColBg].pixel);
+		XFillRectangle(drw->dpy, drw->drawable, drw->gc, x, barg->y, w, barg->h);
+		return;
+	}
+
 	for (i = 0; c && i < num_clients; c = c->next) {
 		if (
 			!SKIPTASKBAR(c) &&
@@ -143,8 +150,9 @@ flextitledrawarea(Workspace *ws, Client *c, int x, int w, int num_clients, int t
 			padw = (!drawpowerline || firstpwlwintitle ? 0 : sepw);
 			tabfn(ws, c, passx, x + padw, cw + (i < rw ? 1 : 0), titlescheme, arg, barg);
 
-			if (drawpowerline && tabfn == flextitledraw && !firstpwlwintitle && prevscheme > -1 && barg->lastscheme > -1)
+			if (drawpowerline && tabfn == flextitledraw && !firstpwlwintitle && prevscheme > -1 && barg->lastscheme > -1) {
 				drw_arrow(drw, x, barg->y, sepw, barg->h, barg->value, scheme[prevscheme][ColBg], scheme[barg->lastscheme][ColBg], scheme[SchemeNorm][ColBg]);
+			}
 
 			firstpwlwintitle = 0;
 			if (drawpowerline)
@@ -160,6 +168,9 @@ void
 flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme, Arg *arg, BarArg *barg)
 {
 	if (!c)
+		return;
+
+	if (w <= 0)
 		return;
 
 	/* icon padding, left padding */
@@ -339,7 +350,7 @@ flextitlecalculate(
 	XSetForeground(drw->dpy, drw->gc, scheme[bar->scheme][ColBorder].pixel);
 	XFillRectangle(drw->dpy, drw->drawable, drw->gc, a->x + a->lpad, a->y, a->w - a->lpad - a->rpad, a->h);
 
-	/* floating mode */
+	/* floating mode - all window titles are allocated equal width */
 	if (!ws->layout->arrange) {
 		flextitledrawarea(
 			ws,
@@ -348,7 +359,7 @@ flextitlecalculate(
 			tabw,
 			n,
 			0,
-			flexwintitle_masterweight,
+			flexwintitle_masterweight + flexwintitle_stackweight,
 			flexwintitle_hiddenweight,
 			flexwintitle_floatweight,
 			passx,
@@ -364,6 +375,12 @@ flextitlecalculate(
 	    + (clientsnstack + clientsnstack2) * flexwintitle_stackweight
 	    + clientsnhidden * flexwintitle_hiddenweight
 	    + clientsnfloating * flexwintitle_floatweight;
+
+	/* Return if there is nothing to draw */
+	if (!den) {
+		return 1;
+	}
+
 	w = (tabw - (n - 1) * sepw) / den;
 	r = (tabw - (n - 1) * sepw) % den;
 
@@ -385,19 +402,19 @@ flextitlecalculate(
 		order[2] = 2;
 	}
 
-	if (clientsnmaster && flexwintitle_masterweight)
+	if (clientsnmaster)
 		mas_w = clientsnmaster * rw + w * clientsnmaster * flexwintitle_masterweight + (rr > 0 ? MIN(rr, clientsnmaster) : 0) + (clientsnmaster - 1) * sepw;
 	rr -= clientsnmaster;
-	if (clientsnstack && flexwintitle_stackweight)
+	if (clientsnstack)
 		st1_w = clientsnstack * (rw + w * flexwintitle_stackweight) + (rr > 0 ? MIN(rr, clientsnstack) : 0) + (clientsnstack - 1) * sepw;
 	rr -= clientsnstack;
-	if (clientsnstack2 && flexwintitle_stackweight)
+	if (clientsnstack2)
 		st2_w = clientsnstack2 * (rw + w * flexwintitle_stackweight) + (rr > 0 ? MIN(rr, clientsnstack2) : 0) + (clientsnstack2 - 1) * sepw;
 	rr -= clientsnstack2;
-	if (clientsnhidden && flexwintitle_hiddenweight)
+	if (clientsnhidden)
 		hid_w = clientsnhidden * (rw + w * flexwintitle_hiddenweight) + (rr > 0 ? MIN(rr, clientsnhidden) : 0) + (clientsnhidden - 1) * sepw;
 	rr -= clientsnhidden;
-	if (clientsnfloating && flexwintitle_floatweight)
+	if (clientsnfloating)
 		flt_w = clientsnfloating * (rw + w * flexwintitle_floatweight) + (rr > 0 ? MIN(rr, clientsnfloating) : 0) + (clientsnfloating - 1) * sepw;
 	if (rr > 0)
 		mas_w += rr;
@@ -436,9 +453,11 @@ flextitlecalculate(
 			}
 			break;
 		}
+
 		x += w;
-		if (!drawpowerline && w)
+		if (!drawpowerline && w) {
 			x += flexwintitle_separator;
+		}
 	}
 	return 1;
 }
