@@ -1616,8 +1616,13 @@ configurerequest(XEvent *e)
 				setflag(c, NoBorder, enabled(NoBorders) && WASNOBORDER(c));
 				configure(c);
 			}
-			XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
+
 			savefloats(c);
+			if (ISVISIBLE(c)) {
+				XMoveResizeWindow(dpy, c->win, c->x, c->y, c->w, c->h);
+			} else {
+				addflag(c, NeedResize);
+			}
 		} else {
 			setflag(c, NoBorder, enabled(NoBorders) && WASNOBORDER(c));
 			configure(c);
