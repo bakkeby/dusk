@@ -288,6 +288,10 @@ saveclientclass(Client *c)
 	strlcpy(c->label, ch.res_class ? ch.res_class : broken, sizeof c->label);
 	if (lowercase_workspace_labels)
 		for (char *p = c->label; *p; ++p) *p = tolower(*p);
+    if (ch.res_class)
+        XFree(ch.res_class);
+    if (ch.res_name)
+        XFree(ch.res_name);
 }
 
 void

@@ -187,6 +187,9 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 	char *name = (enabled(AltWindowTitles) && c->altname[0] ? c->altname : c->name);
 	titlewidth = TEXTW(name);
 
+	for (i = 0; i < max_items; i++)
+		order[i] = 0;
+
 	const StackerIcon *stackericon = NULL;
 	static int textw_single_char = 0;
 	if (!textw_single_char)

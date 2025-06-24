@@ -334,6 +334,7 @@ setdesktopnames(void)
 
 	Xutf8TextListToTextProperty(dpy, wslist, num_workspaces, XUTF8StringStyle, &text);
 	XSetTextProperty(dpy, root, &text, netatom[NetDesktopNames]);
+	XFree(text.value);
 }
 
 void

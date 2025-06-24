@@ -817,18 +817,17 @@ matchextbar(Bar *bar, Window win)
 		);
 	}
 
-	if (def->extclass != NULL && strcmp(def->extclass, class))
-		goto bail;
-
-	if (def->extinstance != NULL && strcmp(def->extinstance, instance))
-		goto bail;
-
-	if (def->extname != NULL && strcmp(def->extname, name))
-		goto bail;
-
 	matched = 1;
 
-bail:
+	if (def->extclass != NULL && strcmp(def->extclass, class))
+		matched = 0;
+
+	if (def->extinstance != NULL && strcmp(def->extinstance, instance))
+		matched = 0;
+
+	if (def->extname != NULL && strcmp(def->extname, name))
+		matched = 0;
+
 	if (ch.res_class)
 		XFree(ch.res_class);
 	if (ch.res_name)

@@ -1147,10 +1147,20 @@ clientmessage(XEvent *e)
 
 	if (cme->window == root) {
 		if (enabled(Debug)) {
-			fprintf(stderr, "clientmessage: received message type of %s (%ld) for root window\n", XGetAtomName(dpy, cme->message_type), cme->message_type);
-			fprintf(stderr, "    - data 0 = %s (%ld)\n", XGetAtomName(dpy, cme->data.l[0]), cme->data.l[0]);
-			fprintf(stderr, "    - data 1 = %s (%ld)\n", XGetAtomName(dpy, cme->data.l[1]), cme->data.l[1]);
-			fprintf(stderr, "    - data 2 = %s (%ld)\n", XGetAtomName(dpy, cme->data.l[2]), cme->data.l[2]);
+			char *type_name = XGetAtomName(dpy, cme->message_type);
+			char *data_0 = XGetAtomName(dpy, cme->data.l[0]);
+			char *data_1 = XGetAtomName(dpy, cme->data.l[1]);
+			char *data_2 = XGetAtomName(dpy, cme->data.l[2]);
+
+			fprintf(stderr, "clientmessage: received message type of %s (%ld) for root window\n", type_name, cme->message_type);
+			fprintf(stderr, "    - data 0 = %s (%ld)\n", data_0, cme->data.l[0]);
+			fprintf(stderr, "    - data 1 = %s (%ld)\n", data_1, cme->data.l[1]);
+			fprintf(stderr, "    - data 2 = %s (%ld)\n", data_2, cme->data.l[2]);
+
+			XFree(type_name);
+			XFree(data_0);
+			XFree(data_1);
+			XFree(data_2);
 		}
 
 		if (cme->message_type == netatom[NetCurrentDesktop]) {
@@ -1167,10 +1177,16 @@ clientmessage(XEvent *e)
 		return;
 
 	if (enabled(Debug) || DEBUGGING(c)) {
-		fprintf(stderr, "clientmessage: received message type of %s (%ld) for client %s\n", XGetAtomName(dpy, cme->message_type), cme->message_type, c->name);
+		char *type_name = XGetAtomName(dpy, cme->message_type);
+		char *data_1 = XGetAtomName(dpy, cme->data.l[1]);
+		char *data_2 = XGetAtomName(dpy, cme->data.l[2]);
+		fprintf(stderr, "clientmessage: received message type of %s (%ld) for client %s\n", type_name, cme->message_type, c->name);
 		fprintf(stderr, "    - data 0 = %s (%ld)\n", (cme->data.l[0] == 0 ? "_NET_WM_STATE_REMOVE" : cme->data.l[0] == 1 ? "_NET_WM_STATE_ADD" : cme->data.l[0] == 2 ? "_NET_WM_STATE_TOGGLE" : "?"), cme->data.l[0]);
-		fprintf(stderr, "    - data 1 = %s (%ld)\n", XGetAtomName(dpy, cme->data.l[1]), cme->data.l[1]);
-		fprintf(stderr, "    - data 2 = %s (%ld)\n", XGetAtomName(dpy, cme->data.l[2]), cme->data.l[2]);
+		fprintf(stderr, "    - data 1 = %s (%ld)\n", data_1, cme->data.l[1]);
+		fprintf(stderr, "    - data 2 = %s (%ld)\n", data_2, cme->data.l[2]);
+		XFree(type_name);
+		XFree(data_1);
+		XFree(data_2);
 	}
 
 	/* To change the state of a mapped window, a client MUST send a _NET_WM_STATE client message
@@ -2698,7 +2714,9 @@ propertynotify(XEvent *e)
 	} else if (pn_prev_count > 3) {
 		if (pn_prev_count == 4 && enabled(Debug)) {
 			pn_prev_count++; /* Only print the below log line once. */
-			fprintf(stderr, "propertynotify: throttling repeating %s (%ld) property notificatons for window %ld\n", XGetAtomName(dpy, ev->atom), ev->atom, ev->window);
+			char *atom_name = XGetAtomName(dpy, ev->atom);
+			fprintf(stderr, "propertynotify: throttling repeating %s (%ld) property notificatons for window %ld\n", atom_name, ev->atom, ev->window);
+			XFree(atom_name);
 		}
 		while (XCheckMaskEvent(dpy, PropertyChangeMask, e)) {
 			ev = &e->xproperty;
@@ -2728,19 +2746,24 @@ propertynotify(XEvent *e)
 
 	if (ev->state == PropertyDelete) {
 		if (enabled(Debug)) {
+			char *atom_name = XGetAtomName(dpy, ev->atom);
 			if ((c = wintoclient(ev->window))) {
-				fprintf(stderr, "propertynotify: ignored property delete event %s (%ld) for client %s\n", XGetAtomName(dpy, ev->atom), ev->atom, c->name);
+				fprintf(stderr, "propertynotify: ignored property delete event %s (%ld) for client %s\n", atom_name, ev->atom, c->name);
 			} else {
-				fprintf(stderr, "propertynotify: ignored property delete event %s (%ld) for unknown client\n", XGetAtomName(dpy, ev->atom), ev->atom);
+				fprintf(stderr, "propertynotify: ignored property delete event %s (%ld) for unknown client\n", atom_name, ev->atom);
 			}
+			XFree(atom_name);
 		}
 		return; /* ignore */
 	}
 
 	if ((c = wintoclient(ev->window))) {
 
-		if ((enabled(Debug) || DEBUGGING(c)) && ev->atom != netatom[NetWMUserTime])
-			fprintf(stderr, "propertynotify: received message type of %s (%ld) for client %s\n", XGetAtomName(dpy, ev->atom), ev->atom, c->name);
+		if ((enabled(Debug) || DEBUGGING(c)) && ev->atom != netatom[NetWMUserTime]) {
+			char *atom_name = XGetAtomName(dpy, ev->atom);
+			fprintf(stderr, "propertynotify: received message type of %s (%ld) for client %s\n", atom_name, ev->atom, c->name);
+			XFree(atom_name);
+		}
 
 		switch (ev->atom) {
 		default: break;

@@ -264,7 +264,7 @@ void
 readswallowkey(Client *c)
 {
 	struct stat st;
-	char buffer[1024];
+	char buffer[1024] = {0};
 	ssize_t bytes_read;
 	char path[30];
 	FILE* envfile;
