@@ -1,4 +1,4 @@
-#define BUFFERSIZE 20
+#define BUFFERSIZE 60
 
 int
 loadxrdbcolor(XrmDatabase xrdb, char **dest, unsigned int *alpha, char *resource)
@@ -43,7 +43,7 @@ loadxrdbalpha(XrmDatabase xrdb, unsigned int *alpha, char *resource)
 }
 
 void
-loadxrdbconfig(XrmDatabase xrdb, char *name, enum resource_type rtype, void *dst)
+loadxrdbconfig(XrmDatabase xrdb, char *name, enum resource_type rtype, void *dst, int dst_size)
 {
 	char *sdst = NULL;
 	int *idst = NULL;
@@ -56,12 +56,16 @@ loadxrdbconfig(XrmDatabase xrdb, char *name, enum resource_type rtype, void *dst
 	char *type;
 	XrmValue ret;
 
+	if (!dst_size) {
+		dst_size = BUFFERSIZE;
+	}
+
 	XrmGetResource(xrdb, name, "*", &type, &ret);
 	if (!(ret.addr == NULL || strncmp("String", type, 64)))
 	{
 		switch (rtype) {
 		case STRING:
-			strlcpy(sdst, ret.addr, BUFFERSIZE);
+			strlcpy(sdst, ret.addr, dst_size);
 			break;
 		case INTEGER:
 			*idst = strtoul(ret.addr, NULL, 10);
@@ -164,7 +168,7 @@ loadxrdb(void)
 
 				/* other preferences */
 				for (p = resources; p < resources + LENGTH(resources); p++)
-					loadxrdbconfig(xrdb, p->name, p->type, p->dst);
+					loadxrdbconfig(xrdb, p->name, p->type, p->dst, p->dst_size);
 			}
 		}
 	}
