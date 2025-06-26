@@ -50,6 +50,7 @@ getclientcounts(Workspace *ws, int *n, int *clientsnmaster, int *clientsnstack, 
 		}
 
 		switch (c->area) {
+		default:
 		case MASTER:
 			if (flexwintitle_masterweight)
 				++cm;
