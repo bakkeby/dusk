@@ -33,20 +33,35 @@ swallow(const Arg *arg)
 }
 
 int
-swallowclient(Client *t, Client *c)
+swallowclient(Client *term, Client *c)
 {
 	if (disabled(Swallow) || NOSWALLOW(c))
 		return 0;
 	if (!RULED(c) && disabled(SwallowFloating) && ISFLOATING(c))
 		return 0;
 
-	replaceclient(t, c);
-	hide(t);
+	replaceclient(term, c);
+	hide(term);
 	addflag(c, IgnoreCfgReqPos);
-	c->swallowing = t;
+	c->swallowing = term;
 	c->revertws = NULL;
 
 	return 1;
+}
+
+int
+swallowterm(Client *term)
+{
+	Client *c;
+
+	if (!ISTERMINAL(term))
+		return 0;
+
+	if (!(c = winforterm(term)))
+		return 0;
+
+	replaceclient(c, term);
+	return swallowclient(term, c);
 }
 
 int
@@ -130,6 +145,10 @@ replaceclient(Client *old, Client *new)
 
 	toggleflagop(new, Floating, FLOATING(old));
 	toggleflagop(new, Sticky, ISSTICKY(old));
+	addflag(old, Swallowed);
+	removeflag(new, Swallowed);
+	setclientnetstate(old, NetWMHidden);
+	setclientnetstate(new, 0);
 
 	if (ISVISIBLE(new)) {
 		if (ISTRUEFULLSCREEN(new)) {
@@ -328,6 +347,36 @@ termforwin(const Client *w)
 
 	return NULL;
 }
+
+Client *
+winforterm(const Client *term)
+{
+	Workspace *ws;
+	Client *c;
+	char key = term->swallowkey;
+
+	if (disabled(Swallow))
+		return NULL;
+
+	if (!term->pid)
+		return NULL;
+
+	c = selws->sel;
+	if (c && ((key && c->swallowedby == key) || (c->pid && isdescprocess(term->pid, c->pid))))
+		return c;
+
+	for (ws = workspaces; ws; ws = ws->next) {
+		for (c = ws->stack; c; c = c->snext) {
+			if (!RULED(c) && disabled(SwallowFloating) && ISFLOATING(c))
+				continue;
+			if (!NOSWALLOW(c) && ((key && c->swallowedby == key) || (c->pid && isdescprocess(term->pid, c->pid))))
+				return c;
+		}
+	}
+
+	return NULL;
+}
+
 
 Client *
 swallowingparent(Window w)

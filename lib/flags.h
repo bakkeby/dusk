@@ -66,8 +66,8 @@ static const uint64_t
 	FlagPlaceholder0x8000000000000 = 0x8000000000000,
 	FlagPlaceholder0x10000000000000 = 0x10000000000000,
 	FlagPlaceholder0x20000000000000 = 0x20000000000000,
-	FlagPlaceholder0x40000000000000 = 0x40000000000000,
 	/* Below are flags that are intended to only be used internally */
+	Swallowed = 0x40000000000000,
 	RefreshSizeHints = 0x80000000000000, // used internally to indicate that size hints for the window should be (re-)loaded
 	/* Debug = 0x100000000000000,  // same name and value as debug functionality, see util.h */
 	Invisible = 0x200000000000000, // by default all clients are visible, used by scratchpads to hide clients
@@ -120,6 +120,7 @@ static const uint64_t
 #define NOBORDER(C) (C && C->flags & NoBorder)
 #define NOFOCUSONNETACTIVE(C) (C && C->flags & NoFocusOnNetActive)
 #define NOSWALLOW(C) (C && C->flags & NoSwallow)
+#define SWALLOWED(C) (C && C->flags & Swallowed)
 #define NOWARP(C) (C && C->flags & NoWarp)
 #define ONLYMODBUTTONS(C) (C && C->flags & OnlyModButtons)
 #define REAPPLYRULES(C) (C && C->flags & ReapplyRules)

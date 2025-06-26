@@ -1842,6 +1842,9 @@ enternotify(XEvent *e)
 	if (!c)
 		c = wintoclient(ev->window);
 
+	if (SWALLOWED(c))
+		return;
+
 	m = c ? c->ws->mon : wintomon(ev->window);
 	if (selws == m->selws && (!c || (m->selws && c == m->selws->sel)))
 		return;
@@ -1882,7 +1885,7 @@ focus(Client *c)
 
 	if (enabled(FocusFollowMouse) && !monitorchanged && (!c || ISINVISIBLE(c))) {
 		c = getpointerclient();
-		if (c && c->ws->mon != selmon) {
+		if ((c && c->ws->mon != selmon) || SWALLOWED(c)) {
 			c = NULL;
 		}
 	}
@@ -2479,6 +2482,9 @@ manage(Window w, XWindowAttributes *wa)
 	/* Do not attach client if it swallows a terminal */
 	if (term && swallowclient(term, c)) {
 		focusclient = (c == selws->sel);
+	} else if (ISTERMINAL(c) && swallowterm(c)) {
+		XMapWindow(dpy, c->win);
+		return;
 	} else {
 		attachx(c, AttachDefault, NULL);
 
@@ -2764,6 +2770,9 @@ propertynotify(XEvent *e)
 			fprintf(stderr, "propertynotify: received message type of %s (%ld) for client %s\n", atom_name, ev->atom, c->name);
 			XFree(atom_name);
 		}
+
+		if (SWALLOWED(c))
+			return; /* ignore property notification for swallowed windows */
 
 		switch (ev->atom) {
 		default: break;
