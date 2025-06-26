@@ -123,6 +123,13 @@ nexttiled(Client *c)
 }
 
 Client *
+nextvisible(Client *c)
+{
+	for (; c && !ISVISIBLE(c); c = c->next);
+	return c;
+}
+
+Client *
 nexthidden(Client *c)
 {
 	for (; c && !HIDDEN(c); c = c->next);
@@ -160,6 +167,20 @@ nthtiled(Client *c, int n, int reduce)
 	Client *prev = NULL;
 	int i;
 	for (i = 1, c = nexttiled(c); c && (i++ < n); prev = c, c = nexttiled(c->next));
+
+	if (!c && reduce) {
+		c = prev;
+	}
+
+	return c;
+}
+
+Client *
+nthvisible(Client *c, int n, int reduce)
+{
+	Client *prev = NULL;
+	int i;
+	for (i = 1, c = nextvisible(c); c && (i++ < n); prev = c, c = nextvisible(c->next));
 
 	if (!c && reduce) {
 		c = prev;

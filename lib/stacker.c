@@ -117,7 +117,7 @@ stackposclient(const Arg *arg)
 	if (ISPREVSEL(arg))
 		return prevsel();
 
-	return nthtiled(ws->clients, arg->i, 1);
+	return nthvisible(ws->clients, arg->i, 1);
 }
 
 const StackerIcon *
