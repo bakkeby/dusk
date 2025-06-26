@@ -3884,10 +3884,12 @@ unmapnotify(XUnmapEvent *ev)
 	last_window = ev->window;
 
 	if ((c = wintoclient(ev->window))) {
-		if (getstate(c->win) == WithdrawnState) {
-			ws = c->ws;
-			if (enabled(Debug) || DEBUGGING(c))
-				fprintf(stderr, "unmapnotify: window %ld --> client %s (%s)\n", ev->window, c->name, "unmanage");
+		ws = c->ws;
+		if (enabled(Debug) || DEBUGGING(c))
+			fprintf(stderr, "unmapnotify: window %ld --> client %s (%s)\n", ev->window, c->name, ev->send_event ? "WithdrawnState" : "unmanage");
+		if (ev->send_event) {
+			setclientstate(c, WithdrawnState);
+		} else {
 			unmanage(c, 0);
 		}
 	} else if (systray && (c = wintosystrayicon(ev->window))) {
