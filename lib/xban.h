@@ -4,6 +4,7 @@
 static void hide_cursor(const Arg *arg);
 static void show_cursor(const Arg *arg);
 static void toggle_cursor(const Arg *arg);
+static void ban_to_corner(Client *c);
 static void genericevent(XEvent *e);
 
 static int xi_opcode;

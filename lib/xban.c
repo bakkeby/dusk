@@ -37,11 +37,46 @@ hide_cursor(const Arg *arg)
 		XFixesHideCursor(dpy, root);
 		if (getrootptr(&mouse_x, &mouse_y)) {
 			if (enabled(BanishMouseCursorToCorner)) {
-				XWarpPointer(dpy, None, root, 0, 0, 0, 0, selmon->mx + selmon->mw, selmon->my);
+				ban_to_corner(selws->sel);
 			}
 		}
 	}
 	cursor_hidden = 1;
+}
+
+void
+ban_to_corner(Client *c)
+{
+	int i, x, y;
+
+	if (!c) {
+		XWarpPointer(dpy, None, root, 0, 0, 0, 0, selmon->mx + selmon->mw, selmon->my);
+		return;
+	}
+
+	/* This will attempt to move the mouse cursor to one of the corners of the client window.
+	 * The order of preference is: SW, NW, SE, NE
+	 * If the corner is overlapped by a floating window, then another corner will be selected.
+	 * If all four corners are overlapped by other windows then the mouse cursor is not moved.
+	 */
+
+	int corners[4][2] = {
+		{ c->x, c->y + c->h - 1 },
+		{ c->x, c->y },
+		{ c->x + c->w - 1, c->y + c->h - 1 },
+		{ c->x + c->w - 1, c->y },
+	};
+
+	readclientstackingorder();
+
+	for (i = 0; i < 4; i++) {
+		x = corners[i][0];
+		y = corners[i][1];
+		if (c == recttoclient(x, y, 1, 1, 1)) {
+			XWarpPointer(dpy, None, root, 0, 0, 0, 0, x, y);
+			break;
+		}
+	}
 }
 
 void

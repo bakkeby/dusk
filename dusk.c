@@ -2937,7 +2937,9 @@ recttoclient(int x, int y, int w, int h, int include_floating)
 	for (c = selws->stack; c; c = c->snext) {
 		if (!ISVISIBLE(c) || (ISFLOATING(c) && !include_floating))
 			continue;
-		if ((a = INTERSECTC(x, y, w, h, c)) >= area && (!r || r->idx < c->idx)) {
+		if (getstate(c->win) != NormalState)
+			continue;
+		if ((!r || r->idx < c->idx) && (a = INTERSECTC(x, y, w, h, c)) >= area) {
 			area = a;
 			r = c;
 		}
