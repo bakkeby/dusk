@@ -55,16 +55,16 @@ ban_to_corner(Client *c)
 	}
 
 	/* This will attempt to move the mouse cursor to one of the corners of the client window.
-	 * The order of preference is: SW, NW, SE, NE
+	 * The order of preference is: NE, NW, SE, SW
 	 * If the corner is overlapped by a floating window, then another corner will be selected.
 	 * If all four corners are overlapped by other windows then the mouse cursor is not moved.
 	 */
 
 	int corners[4][2] = {
-		{ c->x, c->y + c->h - 1 },
+		{ c->x + c->w - 1, c->y },
 		{ c->x, c->y },
 		{ c->x + c->w - 1, c->y + c->h - 1 },
-		{ c->x + c->w - 1, c->y },
+		{ c->x, c->y + c->h - 1 },
 	};
 
 	readclientstackingorder();
