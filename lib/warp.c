@@ -80,11 +80,13 @@ warp(Client *c)
 		 x < c->x + c->w + c->bw*2 &&
 		 y < c->y + c->h + c->bw*2)
 	) {
+		#ifdef HAVE_LIBXI
 		if (enabled(BanishMouseCursorToCorner) && cursor_hidden) {
 			mouse_x = x;
 			mouse_y = y;
 			ban_to_corner(c);
 		}
+		#endif
 		return;
 	}
 
@@ -93,10 +95,12 @@ warp(Client *c)
 	if (enabled(BanishMouseCursor) && cursor_hidden) {
 		mouse_x = c->x + c->w / 2;
 		mouse_y = c->y + c->h / 2;
+		#ifdef HAVE_LIBXI
 		if (enabled(BanishMouseCursorToCorner)) {
 			ban_to_corner(c);
 			return;
 		}
+		#endif
 	}
 
 	if (disabled(FocusedOnTop) && !ALWAYSONTOP(c)) {
