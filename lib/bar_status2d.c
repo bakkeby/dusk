@@ -25,7 +25,7 @@ static ImageBuffer imagebuffer[30] = {0};
 int
 size_status(Bar *bar, BarArg *a)
 {
-	return (bar->vert ? bh : status2dtextlength(rawstatustext[a->value]) + 2 * a->lpad);
+	return (bar->vert ? bh : status2dtextlength(rawstatustext[a->value]));
 }
 
 int
@@ -47,7 +47,7 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 	if (!w && drawbg)
 		return 0;
 
-	int i, j, caret, tw, dx = x, stored_dx = 0, stored_mw = 0, len, mw = w - 2 * lpad;
+	int i, j, caret, tw, dx = x, stored_dx = 0, stored_mw = 0, len, mw = w - lpad;
 	int rx, ry, rw, rh;
 	int fillbg = drawbg;
 	short isCode = 0;
@@ -139,7 +139,7 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 				} else if (text[i] == 'r') {
 					if (++i >= len)
 						goto abort;
-					rx = (strncmp(text + i, "w", 1) == 0 ? w - 1 : atoi(text + i));
+					rx = (strncmp(text + i, "w", 1) == 0 ? mw - 1 : atoi(text + i));
 					if (rx < 0)
 						rx += mw;
 					while (i < len && text[++i] != ',');
