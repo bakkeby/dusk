@@ -47,7 +47,7 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 	if (!w && drawbg)
 		return 0;
 
-	int i, j, caret, tw, dx = x, stored_dx = 0, len, mw = w - 2 * lpad;
+	int i, j, caret, tw, dx = x, stored_dx = 0, stored_mw = 0, len, mw = w - 2 * lpad;
 	int rx, ry, rw, rh;
 	int fillbg = drawbg;
 	short isCode = 0;
@@ -152,7 +152,7 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 					if (++i >= len)
 						goto abort;
 					if (!strncmp(text + i, "w", 1)) {
-						rw = w - 2 * lpad;
+						rw = mw;
 					} else if (!strncmp(text + i, "d", 1)) {
 						rw = abs(stored_dx - dx);
 					} else {
@@ -211,15 +211,21 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 					} else if (!strncmp(text + i, "s", 1)) {
 						rx = 0;
 						stored_dx = dx;
+						stored_mw = mw;
 					} else if (!strncmp(text + i, "r", 1)) {
 						int tmp = dx;
 						rx = 0;
 						dx = stored_dx;
 						stored_dx = tmp;
+						tmp = mw;
+						mw = stored_mw;
+						stored_mw = mw;
 					} else if (!strncmp(text + i, "x", 1)) {
 						rx = 0;
 						stored_dx = dx;
+						stored_mw = mw;
 						dx = x + lpad;
+						mw = w - 2 * lpad;
 					} else {
 						rx = atoi(text + i);
 					}
