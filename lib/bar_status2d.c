@@ -25,7 +25,7 @@ static ImageBuffer imagebuffer[30] = {0};
 int
 size_status(Bar *bar, BarArg *a)
 {
-	return (bar->vert ? bh : status2dtextlength(rawstatustext[a->value]));
+	return (bar->vert ? bh : status2dtextlength(rawstatustext[a->value]) + 2 * a->lpad);
 }
 
 int
@@ -47,7 +47,7 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 	if (!w && drawbg)
 		return 0;
 
-	int i, j, caret, tw, dx = x, len, mw = w - 2 * lpad;
+	int i, j, caret, tw, dx = x, stored_dx = 0, len, mw = w - 2 * lpad;
 	int rx, ry, rw, rh;
 	int fillbg = drawbg;
 	short isCode = 0;
@@ -151,7 +151,13 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 					while (i < len && text[++i] != ',');
 					if (++i >= len)
 						goto abort;
-					rw = (strncmp(text + i, "w", 1) == 0 ? w : atoi(text + i));
+					if (!strncmp(text + i, "w", 1)) {
+						rw = w - 2 * lpad;
+					} else if (!strncmp(text + i, "d", 1)) {
+						rw = abs(stored_dx - dx);
+					} else {
+						rw = atoi(text + i);
+					}
 					if (rw < 0)
 						rw += mw;
 					while (i < len && text[++i] != ',');
@@ -199,9 +205,25 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 				} else if (text[i] == 'f') {
 					if (++i >= len)
 						goto abort;
-					rx = (strncmp(text + i, "p", 1) == 0 ? 0 : atoi(text + i));
-					if (rx < 0)
-						rx += mw;
+
+					if (!strncmp(text + i, "p", 1)) {
+						rx = lpad;
+					} else if (!strncmp(text + i, "s", 1)) {
+						rx = 0;
+						stored_dx = dx;
+					} else if (!strncmp(text + i, "r", 1)) {
+						int tmp = dx;
+						rx = 0;
+						dx = stored_dx;
+						stored_dx = tmp;
+					} else if (!strncmp(text + i, "x", 1)) {
+						rx = 0;
+						stored_dx = dx;
+						dx = x + lpad;
+					} else {
+						rx = atoi(text + i);
+					}
+
 					dx += rx;
 					mw -= rx;
 				}
