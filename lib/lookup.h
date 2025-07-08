@@ -1,4 +1,5 @@
 static Client **clientptr(Client *c);
+static Client **stackptr(Client *c);
 static void getclientindices(Client *c, int *nth_client, int *nth_tiled, int *nth_floating, int *nth_master, int *nth_stack, int *num_clients, int *num_tiled, int *num_floating, int *num_master, int *num_stack);
 static int ismasterclient(Client *c);
 static Client *lastclient(Client *c);
@@ -7,6 +8,7 @@ static Client *nexttiled(Client *c);
 static Client *nextvisible(Client *c);
 static Client *nexthidden(Client *c);
 static Client *snexthidden(Client *c);
+static Client *nextwsclient(Client *c);
 static Client *nthmaster(Client *c, int n, int reduce);
 static Client *nthstack(Client *c, int n, int reduce);
 static Client *nthtiled(Client *c, int n, int reduce);

@@ -485,14 +485,14 @@ static Key keys[] = {
 	{ KeyPress,   MODKEY,                       XK_k,            focusstack,             {.i = -1 } }, // focus on the previous client in the stack
 	{ KeyPress,   MODKEY|Alt|Shift,             XK_j,            focusstack,             {.i = +2 } }, // allows focusing on hidden clients
 	{ KeyPress,   MODKEY|Alt|Shift,             XK_k,            focusstack,             {.i = -2 } }, // allows focusing on hidden clients
-	{ KeyPress,   MODKEY,                       XK_Left,         focusdir,               {.i = 0 } }, // focus on the client left of the currently focused client
-	{ KeyPress,   MODKEY,                       XK_Right,        focusdir,               {.i = 1 } }, // focus on the client right of the currently focused client
-	{ KeyPress,   MODKEY,                       XK_Up,           focusdir,               {.i = 2 } }, // focus on the client above the currently focused client
-	{ KeyPress,   MODKEY,                       XK_Down,         focusdir,               {.i = 3 } }, // focus on the client below the currently focused client
-	{ KeyPress,   MODKEY|Ctrl,                  XK_Left,         placedir,               {.i = 0 } }, // swap places with the client window on the immediate left of the current client
-	{ KeyPress,   MODKEY|Ctrl,                  XK_Right,        placedir,               {.i = 1 } }, // swap places with the client window on the immediate right of the current client
-	{ KeyPress,   MODKEY|Ctrl,                  XK_Up,           placedir,               {.i = 2 } }, // swap places with the client window on the immediate up of the current client
-	{ KeyPress,   MODKEY|Ctrl,                  XK_Down,         placedir,               {.i = 3 } }, // swap places with the client window on the immediate down of the current client
+	{ KeyPress,   MODKEY,                       XK_Left,         focusdir,               {.i = LEFT } }, // focus on the client left of the currently focused client
+	{ KeyPress,   MODKEY,                       XK_Right,        focusdir,               {.i = RIGHT } }, // focus on the client right of the currently focused client
+	{ KeyPress,   MODKEY,                       XK_Up,           focusdir,               {.i = UP } }, // focus on the client above the currently focused client
+	{ KeyPress,   MODKEY,                       XK_Down,         focusdir,               {.i = DOWN } }, // focus on the client below the currently focused client
+	{ KeyPress,   MODKEY|Ctrl,                  XK_Left,         placedir,               {.i = LEFT } }, // swap places with the client window on the immediate left of the current client
+	{ KeyPress,   MODKEY|Ctrl,                  XK_Right,        placedir,               {.i = RIGHT } }, // swap places with the client window on the immediate right of the current client
+	{ KeyPress,   MODKEY|Ctrl,                  XK_Up,           placedir,               {.i = UP } }, // swap places with the client window above the current client
+	{ KeyPress,   MODKEY|Ctrl,                  XK_Down,         placedir,               {.i = DOWN } }, // swap places with the client window below the current client
 
 	{ KeyPress,   MODKEY|Ctrl,                  XK_j,            pushdown,               {0} }, // move the selected client down the stack
 	{ KeyPress,   MODKEY|Ctrl,                  XK_k,            pushup,                 {0} }, // move the selected client up the stack

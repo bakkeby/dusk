@@ -6,6 +6,14 @@ clientptr(Client *c)
 	return tc;
 }
 
+Client **
+stackptr(Client *c)
+{
+	Client **tc;
+	for (tc = &c->ws->stack; *tc && *tc != c; tc = &(*tc)->snext);
+	return tc;
+}
+
 /* Calculates the position of a client in a workspace.
  *
  *   nth_client   - the position of the given client in the client list
@@ -120,6 +128,21 @@ nexttiled(Client *c)
 {
 	for (; c && !TILED(c); c = c->next);
 	return c;
+}
+
+Client *
+nextwsclient(Client *c)
+{
+	Workspace *ws = c->ws;
+	Client *next = c->next;
+
+	if (!next) {
+		for (ws = NVL(ws->next, workspaces); !next; ws = NVL(ws->next, workspaces)) {
+			next = ws->clients;
+		}
+	}
+
+	return next;
 }
 
 Client *
@@ -239,6 +262,30 @@ swap(Client *a, Client *b)
 	Client **bp = clientptr(b);
 	Client *an = a->next;
 	Client *bn = b->next;
+
+	if (a->ws != b->ws) {
+		Client **asp = stackptr(a);
+		Client **bsp = stackptr(b);
+		Client *asn = a->snext;
+		Client *bsn = b->snext;
+		Workspace *aws = a->ws;
+		Workspace *bws = b->ws;
+
+		b->snext = asn;
+		a->snext = bsn;
+		*asp = b;
+		*bsp = a;
+		a->ws = bws;
+		b->ws = aws;
+
+		if (aws->sel == a) {
+			aws->sel = b;
+		}
+
+		if (bws->sel == b) {
+			bws->sel = a;
+		}
+	}
 
 	if (bn == a) {
 		b->next = an;

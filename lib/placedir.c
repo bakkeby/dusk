@@ -1,96 +1,56 @@
 void
 placedir(const Arg *arg)
 {
-	Client *s = selws->sel, *f = NULL, *c, *next, *fprior, *sprior;
+	Client *s = selws->sel, *f = NULL, *c;
+	Workspace *dirws = NULL;
 
 	if (!s || ISFLOATING(s))
 		return;
 
-	unsigned int score = -1;
-	unsigned int client_score;
-	int dist;
-	int dirweight = 20;
+	unsigned int best = -1;
+	unsigned int score;
+	int direction = arg->i;
 
-	next = s->next;
-	if (!next)
-		next = s->ws->clients;
-	for (c = next; c != s; c = next) {
+	for (c = nextwsclient(s); c != s; c = nextwsclient(c)) {
 
-		next = c->next;
-		if (!next)
-			next = s->ws->clients;
-
-		if (!ISVISIBLE(c))
+		/* Skip clients that are e.g. behind others in a deck or monocle layout */
+		if (!c->shown)
 			continue;
 
-		switch (arg->i) {
-		case 0: // left
-			dist = s->x - c->x - c->w;
-			client_score =
-				dirweight * MIN(abs(dist), abs(dist + s->ws->mon->ww)) +
-				abs(s->y - c->y);
-			break;
-		case 1: // right
-			dist = c->x - s->x - s->w;
-			client_score =
-				dirweight * MIN(abs(dist), abs(dist + s->ws->mon->ww)) +
-				abs(c->y - s->y);
-			break;
-		case 2: // up
-			dist = s->y - c->y - c->h;
-			client_score =
-				dirweight * MIN(abs(dist), abs(dist + s->ws->mon->wh)) +
-				abs(s->x - c->x);
-			break;
-		default:
-		case 3: // down
-			dist = c->y - s->y - s->h;
-			client_score =
-				dirweight * MIN(abs(dist), abs(dist + s->ws->mon->wh)) +
-				abs(c->x - s->x);
-			break;
-		}
+		if (!ISVISIBLE(c) || !ISTILED(c))
+			continue;
 
-		if (((arg->i == 0 || arg->i == 2) && client_score <= score) || client_score < score) {
-			score = client_score;
+		score = get_direction_score(s, c, direction);
+
+		if (((direction == LEFT || direction == UP) && score <= best) || score < best) {
+			best = score;
 			f = c;
 		}
 	}
 
-	if (f && f != s) {
-		for (fprior = f->ws->clients; fprior && fprior->next != f; fprior = fprior->next);
-		for (sprior = s->ws->clients; sprior && sprior->next != s; sprior = sprior->next);
-
-		if (s == fprior) {
-			next = f->next;
-			if (sprior)
-				sprior->next = f;
-			else
-				f->ws->clients = f;
-			f->next = s;
-			s->next = next;
-		} else if (f == sprior) {
-			next = s->next;
-			if (fprior)
-				fprior->next = s;
-			else
-				s->ws->clients = s;
-			s->next = f;
-			f->next = next;
-		} else { // clients are not adjacent to each other
-			next = f->next;
-			f->next = s->next;
-			s->next = next;
-			if (fprior)
-				fprior->next = s;
-			else
-				s->ws->clients = s;
-			if (sprior)
-				sprior->next = f;
-			else
-				f->ws->clients = f;
+	/* If we do not have a candidate client, or that client was found because we wrapped around,
+	 * then first check if there is an empty workspace in the given direction. If so then it will
+	 * be more intuitive to move the client to that workspace instead. */
+	if (
+		(!f || f == s || f->ws != s->ws) ||
+		(direction == LEFT && f->x >= s->x) ||
+		(direction == RIGHT && f->x <= s->x) ||
+		(direction == UP && f->y >= s->y) ||
+		(direction == DOWN && f->y <= s->y)
+	) {
+		dirws = get_next_workspace_in_direction(s->ws, direction);
+		if (dirws && dirws->clients == NULL) {
+			movetows(s, dirws, 1);
+			return;
 		}
+	}
 
+	if (f && f != s) {
+		swap(f, s);
 		arrange(f->ws);
+		if (f->ws != s->ws) {
+			arrange(s->ws);
+		}
+		focus(s);
 	}
 }

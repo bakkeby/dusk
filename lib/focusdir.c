@@ -1,59 +1,29 @@
 void
 focusdir(const Arg *arg)
 {
-	Client *s = selws->sel, *f = NULL, *c, *next;
+	Client *s = selws->sel, *f = NULL, *c;
 
 	if (!s)
 		return;
 
-	unsigned int score = -1;
-	unsigned int client_score;
-	int dist;
-	int dirweight = 20;
+	unsigned int best = -1;
+	unsigned int score;
+	int direction = arg->i;
 	int istiled = ISTILED(s);
 
-	next = s->next;
-	if (!next)
-		next = s->ws->clients;
-	for (c = next; c != s; c = next) {
+	for (c = nextwsclient(s); c != s; c = nextwsclient(c)) {
 
-		next = c->next;
-		if (!next)
-			next = s->ws->clients;
+		/* Skip clients that are e.g. behind others in a deck or monocle layout */
+		if (!c->shown)
+			continue;
 
 		if (!ISVISIBLE(c) || (!ISTILED(c) != !istiled))
 			continue;
 
-		switch (arg->i) {
-		case 0: // left
-			dist = s->x - c->x - c->w;
-			client_score =
-				dirweight * MIN(abs(dist), abs(dist + s->ws->mon->ww)) +
-				abs(s->y - c->y);
-			break;
-		case 1: // right
-			dist = c->x - s->x - s->w;
-			client_score =
-				dirweight * MIN(abs(dist), abs(dist + s->ws->mon->ww)) +
-				abs(c->y - s->y);
-			break;
-		case 2: // up
-			dist = s->y - c->y - c->h;
-			client_score =
-				dirweight * MIN(abs(dist), abs(dist + s->ws->mon->wh)) +
-				abs(s->x - c->x);
-			break;
-		default:
-		case 3: // down
-			dist = c->y - s->y - s->h;
-			client_score =
-				dirweight * MIN(abs(dist), abs(dist + s->ws->mon->wh)) +
-				abs(c->x - s->x);
-			break;
-		}
+		score = get_direction_score(s, c, direction);
 
-		if (((arg->i == 0 || arg->i == 2) && client_score <= score) || client_score < score) {
-			score = client_score;
+		if (((direction == LEFT || direction == UP) && score <= best) || score < best) {
+			best = score;
 			f = c;
 		}
 	}
@@ -62,4 +32,73 @@ focusdir(const Arg *arg)
 		focus(f);
 		restack(f->ws);
 	}
+}
+
+unsigned int
+get_direction_score(Client *s, Client *c, int direction)
+{
+	unsigned int score = 0;
+	int dist = 0;
+	int wrap = 0;
+	int dirweight = 20;
+
+	switch (direction) {
+	case LEFT:
+		dist = s->x - c->x - c->w;
+		wrap = sw;
+		score = abs(s->y - c->y);
+		break;
+	case RIGHT:
+		dist = c->x - s->x - s->w;
+		wrap = sw;
+		score = abs(c->y - s->y);
+		break;
+	case UP:
+		dist = s->y - c->y - c->h;
+		wrap = s->ws->mon->wh;
+		score = abs(s->x - c->x);
+		break;
+	case DOWN:
+		dist = c->y - s->y - s->h;
+		wrap = s->ws->mon->wh;
+		score = abs(c->x - s->x);
+		break;
+	}
+
+	score += dirweight * MIN(abs(dist), abs(dist + wrap));
+	return score;
+}
+
+Workspace *
+get_next_workspace_in_direction(Workspace *ws, int direction)
+{
+	Workspace *ret = NULL, *w;
+	unsigned int best = -1;
+	unsigned int dist = 0;
+	int xdelta, ydelta;
+
+	for (w = workspaces; w; w = w->next) {
+		if (w == ws || !w->visible || w == stickyws)
+			continue;
+
+		if (
+			(direction == LEFT && w->wx >= ws->wx) ||
+			(direction == RIGHT && w->wx <= ws->wx) ||
+			(direction == UP && w->wy >= ws->wy) ||
+			(direction == DOWN && w->wy <= ws->wy)
+		) {
+			continue;
+		}
+
+		xdelta = (w->wx + w->ww / 2) - (ws->wx + ws->ww / 2);
+		ydelta = (w->wy + w->wh / 2) - (ws->wy + ws->wh / 2);
+		dist = xdelta * xdelta + ydelta * ydelta;
+
+		if (dist < best) {
+			best = dist;
+			ret = w;
+		}
+	}
+
+	return ret;
 }

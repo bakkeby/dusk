@@ -243,6 +243,13 @@ enum {
 	LTAXIS_LAST,
 }; /* named flextile constants */
 
+enum {
+	LEFT,
+	RIGHT,
+	UP,
+	DOWN
+}; /* focusdir and placedir directions */
+
 typedef union {
 	long i;
 	unsigned long ui;
@@ -2199,6 +2206,7 @@ grabkeys(void)
 void
 show(Client *c)
 {
+	c->shown = 1;
 	XMoveWindow(dpy, c->win, c->x, c->y);
 	setclientstate(c, NormalState);
 }
@@ -2206,6 +2214,7 @@ show(Client *c)
 void
 hide(Client *c)
 {
+	c->shown = 0;
 	setclientstate(c, IconicState);
 	XMoveWindow(dpy, c->win, c->x, HEIGHT(c) * -2);
 }
