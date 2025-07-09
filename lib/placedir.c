@@ -10,6 +10,7 @@ placedir(const Arg *arg)
 	unsigned int best = -1;
 	unsigned int score;
 	int direction = arg->i;
+	int istiled = ISTILED(s);
 
 	for (c = nextwsclient(s); c != s; c = nextwsclient(c)) {
 
@@ -17,7 +18,7 @@ placedir(const Arg *arg)
 		if (!c->shown)
 			continue;
 
-		if (!ISVISIBLE(c) || !ISTILED(c))
+		if (!ISVISIBLE(c) || (!ISTILED(c) != !istiled))
 			continue;
 
 		score = get_direction_score(s, c, direction);
