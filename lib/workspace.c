@@ -966,6 +966,7 @@ drawws(Workspace *ws, Monitor *m, uint64_t prevwsmask, int enablews, int arrange
 		if (w->visible)
 			showwsclients(w->stack);
 
+	drawbars();
 	if (arrangeall)
 		arrange(NULL);
 	else
@@ -977,7 +978,6 @@ drawws(Workspace *ws, Monitor *m, uint64_t prevwsmask, int enablews, int arrange
 		if (w->mon == m && (hidewsmask & (1L << w->num)))
 			hidewsclients(w->stack);
 
-	drawbars();
 	updatecurrentdesktop();
 	focus(NULL);
 
