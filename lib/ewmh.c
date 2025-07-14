@@ -147,7 +147,7 @@ restoreworkspacestate(Workspace *ws)
 		ws->ltaxis[STACK2] = WRAP((settings >> 25) & 0x1F, 0, AXIS_LAST - 1);
 		ws->enablegaps = (settings >> 31) & 0x1;
 
-		/* Restore layout if we have an exact match, floating layout interpreted as 0x7fff800 */
+		/* Restore layout if we have an exact match, floating layout interpreted as 0x1ef7f800 */
 		for (i = 0; i < LENGTH(layouts); i++) {
 			layout = &layouts[i];
 			if ((layout->arrange == flextile
@@ -155,7 +155,7 @@ restoreworkspacestate(Workspace *ws)
 				&& ws->ltaxis[MASTER] == layout->preset.masteraxis
 				&& ws->ltaxis[STACK]  == layout->preset.stack1axis
 				&& ws->ltaxis[STACK2] == layout->preset.stack2axis)
-				|| ((settings & 0x7fff800) == 0x7fff800
+				|| ((settings & 0x1ef7f800) == 0x1ef7f800
 				&& layout->arrange == NULL)
 			) {
 				ws->layout = layout;
