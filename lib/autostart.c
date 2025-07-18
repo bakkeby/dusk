@@ -1,34 +1,35 @@
 /* execute command from autostart array */
-static int autostart_startup = 1;
-static pid_t autostart_pids[LENGTH(autostart) + LENGTH(autorestart) + 10] = {0};
+int autostart_startup = 1;
+pid_t *autostart_pids = NULL;
 
 void
 autostart_exec(void)
 {
-	const char *const *p;
-	struct sigaction sa;
-	pid_t pid;
+	int i;
 
-	for (p = autostart_startup ? autostart : autorestart; *p; p++) {
-		if ((pid = fork()) == 0) {
-			setsid();
+	if (autostart_pids == NULL) {
+		autostart_init_pids();
+	}
 
-			/* Restore SIGCHLD sighandler to default before spawning a program */
-			sigemptyset(&sa.sa_mask);
-			sa.sa_flags = 0;
-			sa.sa_handler = SIG_DFL;
-			sigaction(SIGCHLD, &sa, NULL);
-
-			execvp(*p, (char *const *)p);
-			fprintf(stderr, "dusk: execvp %s\n", *p);
-			perror(" failed");
-			_exit(EXIT_FAILURE);
+	if (autostart_startup) {
+		for (i = 0; i < num_autostart; i++) {
+			autostart_addpid(spawncmd(&((Arg) { .v = autostart[i] }), 0, 1));
 		}
+	} else {
+		for (i = 0; i < num_autorestart; i++) {
+			autostart_addpid(spawncmd(&((Arg) { .v = autorestart[i] }), 0, 1));
+		}
+	}
+}
 
-		autostart_addpid(pid);
-
-		/* skip arguments */
-		while (*++p);
+void
+autostart_init_pids(void)
+{
+	int i, num_autostart_pids;
+	num_autostart_pids = num_autostart + num_autorestart + 10;
+	autostart_pids = ecalloc(num_autostart_pids, sizeof(pid_t));
+	for (i = 0; i < num_autostart_pids; i++) {
+		autostart_pids[i] = 0;
 	}
 }
 
@@ -36,7 +37,7 @@ void
 autostart_addpid(pid_t pid)
 {
 	unsigned int i;
-	for (i = 0; i < LENGTH(autostart_pids); i++) {
+	for (i = 0; i < num_autostart_pids; i++) {
 		if (autostart_pids[i] <= 0) {
 			autostart_pids[i] = pid;
 			break;
@@ -48,7 +49,7 @@ void
 autostart_removepid(pid_t pid)
 {
 	unsigned int i;
-	for (i = 0; i < LENGTH(autostart_pids); i++) {
+	for (i = 0; i < num_autostart_pids; i++) {
 		if (autostart_pids[i] == 0)
 			break;
 
@@ -63,7 +64,7 @@ void
 autostart_killpids(void)
 {
 	unsigned int i;
-	for (i = 0; i < LENGTH(autostart_pids); i++) {
+	for (i = 0; i < num_autostart_pids; i++) {
 		if (autostart_pids[i] == 0)
 			break;
 
@@ -73,4 +74,10 @@ autostart_killpids(void)
 		kill(autostart_pids[i], SIGTERM);
 		waitpid(autostart_pids[i], NULL, 0);
 	}
+}
+
+void
+autostart_cleanup(void)
+{
+	free(autostart_pids);
 }

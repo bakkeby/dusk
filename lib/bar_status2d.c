@@ -68,7 +68,7 @@ drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int 
 	}
 
 	dx += lpad;
-	drw_setscheme(drw, scheme[LENGTH(colors)]);
+	drw_setscheme(drw, scheme[SchemeLast]);
 	drw->scheme[ColFg] = scheme[defscheme][ColFg];
 	drw->scheme[ColBg] = scheme[defscheme][ColBg];
 
@@ -280,7 +280,7 @@ setstatus(int status_no, char const *statustext)
 
 	strlcpy(rawstatustext[status_no], statustext, sizeof rawstatustext[status_no]);
 
-	for (int r = 0; r < LENGTH(barrules); r++) {
+	for (int r = 0; r < num_barrules; r++) {
 		br = &barrules[r];
 		if (br->value == status_no && br->drawfunc == draw_status)
 			drawbarmodule(br, r);

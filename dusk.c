@@ -42,6 +42,7 @@
 #endif /* XINERAMA */
 #include <X11/Xft/Xft.h>
 #include <inttypes.h>
+#include <libconfig.h>
 
 #include "drw.h"
 #include "util.h"
@@ -56,7 +57,7 @@
 #define Button7                 7
 #define Button8                 8
 #define Button9                 9
-#define BARRULES                50
+#define BARRULES                100
 #define NUM_STATUSES            10
 #define STATUS_BUFFER           512
 #define BUTTONMASK              (ButtonPressMask|ButtonReleaseMask)
@@ -259,14 +260,20 @@ typedef union {
 
 typedef struct Monitor Monitor;
 typedef struct Bar Bar;
+typedef void (*ArgFunc)(const Arg *);
 
 typedef struct {
 	unsigned int click;
 	unsigned int mask;
 	unsigned int button;
 	void (*func)(const Arg *arg);
-	const Arg arg;
+	Arg arg;
 } Button;
+
+typedef struct {
+    char *name;  /* string key */
+    char **argv;       /* pointer to execv argument list */
+} Command;
 
 typedef struct Workspace Workspace;
 typedef struct Client Client;
@@ -315,7 +322,7 @@ typedef struct {
 	KeySym keysym;
 	#endif // USE_KEYCODES
 	void (*func)(const Arg *);
-	const Arg arg;
+	Arg arg;
 } Key;
 
 typedef struct {
@@ -335,10 +342,10 @@ typedef struct {
 } LayoutPreset;
 
 typedef struct {
-	const char *symbol;
+	char *symbol;
 	void (*arrange)(Workspace *);
 	LayoutPreset preset;
-	const char *name;
+	char *name;
 } Layout;
 
 typedef struct Preview Preview;
@@ -364,22 +371,22 @@ struct Monitor {
 };
 
 typedef struct {
-	const char *class;
-	const char *role;
-	const char *instance;
-	const char *title;
-	const char *wintype;
-	const int transient;
-	const double opacity;
-	const uint64_t flags;
-	const char *floatpos;
-	const char scratchkey;
-	const char *workspace;
-	const char *label;
-	const char swallowedby;
-	const char swallowkey;
-	const char *iconpath;
-	const char *alttitle;
+	char *class;
+	char *role;
+	char *instance;
+	char *title;
+	char *wintype;
+	int transient;
+	double opacity;
+	uint64_t flags;
+	char *floatpos;
+	char scratchkey;
+	char *workspace;
+	char *label;
+	char swallowedby;
+	char swallowkey;
+	char *iconpath;
+	char *alttitle;
 	int resume;
 } Rule;
 
@@ -419,7 +426,7 @@ typedef struct {
 	int monitor;
 	int pinned;
 	int layout;
-	float mfact;
+	double mfact;
 	int nmaster;
 	int nstack;
 	int enablegaps;
@@ -548,6 +555,18 @@ static char rawstatustext[NUM_STATUSES][STATUS_BUFFER];
 static const char* env_home;
 static int env_homelen;
 
+char *cached_strings_array[50] = {0};
+char ***colors = NULL;
+char ***autostart = NULL;
+char ***autorestart = NULL;
+
+Layout *layouts = NULL;
+Button *buttons = NULL;
+Command *commands = NULL;
+Key *keys = NULL;
+Rule *clientrules = NULL;
+StackerIcon *stackericons = NULL;
+
 static int screen;
 static int sw, sh;             /* X display screen geometry width, height */
 static int lrpad;              /* sum of left and right padding for text */
@@ -558,7 +577,17 @@ static int mouse_y = 0;
 static int prev_ptr_x = 0;
 static int prev_ptr_y = 0;
 static int ignore_warp = 0;    /* force skip warp in some situations, e.g. dragmfact, dragcfact */
+static int num_autostart = 0;
+static int num_autorestart = 0;
+static int num_autostart_pids = 0;
+static int num_cached_strings = 0;
+static int num_client_rules = 0;
 static int num_workspaces = 0; /* the number of available workspaces */
+static int num_stackericons = 0;
+static int num_layouts = 0;
+static int num_button_bindings = 0;
+static int num_key_bindings = 0;
+static int num_commands = 0;
 static int num_monitors = 0;   /* the number of available monitors */
 static int combo = 0;          /* used for combo keys */
 static int monitorchanged = 0; /* used for combo logic */
@@ -611,6 +640,8 @@ static Window root, wmcheckwin;
 
 #include "lib/include.c"
 
+#include "conf.c"
+
 /* function implementations */
 void
 applyrules(Client *c)
@@ -619,7 +650,7 @@ applyrules(Client *c)
 	const char *class, *instance;
 	Atom game_id = None, da = None, *win_types = NULL;
 	char *role = NULL;
-	int di;
+	int i, di;
 	unsigned long dl, nitems;
 	unsigned char *p = NULL;
 	unsigned int transient;
@@ -648,7 +679,8 @@ applyrules(Client *c)
 	if (enabled(Debug))
 		fprintf(stderr, "applyrules: new client %s (%ld), class = '%s', instance = '%s', role = '%s', wintype = '%ld'\n", c->name, c->win, class, instance, role, nitems ? win_types[0] : 0);
 
-	for (r = clientrules; r < END(clientrules); r++) {
+	for (i = 0; i < num_client_rules; i++) {
+		r = &clientrules[i];
 		if ((!r->title || strstr(c->name, r->title))
 		&& (!r->class || strstr(class, r->class))
 		&& (!r->role || strstr(role, r->role))
@@ -1028,7 +1060,7 @@ buttonpress(XEvent *e)
 		barpress(ev, m, &arg, &click);
 	}
 
-	for (i = 0; i < LENGTH(buttons); i++) {
+	for (i = 0; i < num_button_bindings; i++) {
 		if (click == buttons[i].click && buttons[i].func && buttons[i].button == ev->button
 				&& CLEANMASK(buttons[i].mask) == CLEANMASK(ev->state)) {
 			buttons[i].func((click == ClkWorkspaceBar || click == ClkWinTitle) && buttons[i].arg.i == 0 ? &arg : &buttons[i].arg);
@@ -1058,7 +1090,7 @@ cleanup(void)
 {
 	Layout foo = { "", NULL };
 	Workspace *ws, *next;
-	size_t i;
+	size_t i, j;
 
 	/* Persist data for restart purposes. */
 	for (ws = workspaces; ws; ws = ws->next) {
@@ -1073,6 +1105,7 @@ cleanup(void)
 	} else {
 		autostart_killpids();
 	}
+	autostart_cleanup();
 
 	for (ws = workspaces; ws; ws = ws->next) {
 		ws->layout = &foo;
@@ -1101,9 +1134,93 @@ cleanup(void)
 		free(ws);
 	}
 
+	/* Cleanup colors */
+	for (i = 0; i < SchemeLast; i++) {
+		for (j = 0; j < ColCount; j++) {
+			free(colors[i][j]);
+		}
+	}
+	free(colors);
+
+	/* Cleanup barrules */
+	if (barrules != default_barrules) {
+		for (i = 0; i < num_barrules; i++) {
+			free(barrules[i].name);
+		}
+		free(barrules);
+	}
+
+	/* Cleanup bars */
+	if (bars != default_bars) {
+		for (i = 0; i < num_bars; i++) {
+			free(bars[i].barpos);
+			free(bars[i].name);
+			free(bars[i].extclass);
+			free(bars[i].extinstance);
+			free(bars[i].extname);
+		}
+		free(bars);
+	}
+
+	/* Cleanup client rules */
+	if (clientrules != default_clientrules) {
+		for (i = 0; i < num_client_rules; i++) {
+			free(clientrules[i].class);
+			free(clientrules[i].role);
+			free(clientrules[i].instance);
+			free(clientrules[i].title);
+			free(clientrules[i].wintype);
+			free(clientrules[i].floatpos);
+			free(clientrules[i].workspace);
+			free(clientrules[i].label);
+			free(clientrules[i].iconpath);
+			free(clientrules[i].alttitle);
+		}
+		free(clientrules);
+	}
+
+	/* Cleanup workspace rules */
+	if (wsrules != default_wsrules) {
+		for (i = 0; i < num_wsrules; i++) {
+			free(wsrules[i].icondef);
+			free(wsrules[i].iconvac);
+			free(wsrules[i].iconocc);
+		}
+		free(wsrules);
+	}
+
+	/* Cleanup buttons */
+	if (buttons != default_buttons) {
+		free(buttons);
+	}
+
+	/* Cleanup stacker icons */
+	if (stackericons != default_stackericons) {
+		for (i = 0; i < num_stackericons; i++) {
+			free(stackericons[i].icon);
+		}
+		free(stackericons);
+	}
+
+	/* Cleanup commands */
+	if (commands != NULL) {
+		for (i = 0; i < num_commands; i++) {
+			free(commands[i].name);
+			for (j = 0; commands[i].argv[j] != NULL; j++) {
+				free(commands[i].argv[j]);
+			}
+		}
+		free(commands);
+	}
+
+	/* Cleanup stray strings from config */
+	for (i = 0; i < num_cached_strings; i++) {
+		free(cached_strings_array[i]);
+	}
+
 	for (i = 0; i < CurLast; i++)
 		drw_cur_free(drw, cursor[i]);
-	for (i = 0; i < LENGTH(colors) + 1; i++)
+	for (i = 0; i < SchemeLast + 1; i++)
 		free(scheme[i]);
 
 	cleanup2dimagebuffer();
@@ -2011,7 +2128,7 @@ focusstack(const Arg *arg)
 				continue;
 			for (c = (firstws ? selws->sel : ws->clients); c && (c == selws->sel || ISINVISIBLE(c) || (arg->i == 1 && HIDDEN(c))); c = c->next);
 			firstws = 0;
-			if (n++ > LENGTH(wsrules))
+			if (n++ > num_wsrules)
 				break;
 		}
 	} else {
@@ -2028,7 +2145,7 @@ focusstack(const Arg *arg)
 					if (ws && w->next == prevws)
 						break;
 				}
-				if (n++ > LENGTH(wsrules))
+				if (n++ > num_wsrules)
 					break;
 			}
 		} while (!c && ws);
@@ -2146,7 +2263,8 @@ grabbuttons(Client *c, int focused)
 		XGrabButton(dpy, AnyButton, AnyModifier, c->win, False,
 			BUTTONMASK, GrabModeSync, GrabModeSync, None, None);
 	}
-	for (i = 0; i < LENGTH(buttons); i++) {
+
+	for (i = 0; i < num_button_bindings; i++) {
 		if (buttons[i].click != ClkClientWin)
 			continue;
 
@@ -2171,7 +2289,7 @@ grabkeys(void)
 	unsigned int modifiers[] = { 0, LockMask, numlockmask, numlockmask|LockMask };
 	XUngrabKey(dpy, AnyKey, AnyModifier, root);
 
-	for (i = 0; i < LENGTH(keys); i++)
+	for (i = 0; i < num_key_bindings; i++)
 		for (j = 0; j < LENGTH(modifiers); j++)
 			XGrabKey(dpy, keys[i].keycode, keys[i].mod | modifiers[j], root,
 					True, GrabModeAsync, GrabModeAsync);
@@ -2193,7 +2311,7 @@ grabkeys(void)
 	if (!syms)
 		return;
 	for (k = start; k <= end; k++) {
-		for (i = 0; i < LENGTH(keys); i++) {
+		for (i = 0; i < num_key_bindings; i++) {
 			/* skip modifier codes, we do that ourselves */
 			if (keys[i].keysym != syms[(k - start) * skip])
 				continue;
@@ -2275,7 +2393,7 @@ keypress(XEvent *e)
 	#if !USE_KEYCODES
 	keysym = XGetKeyboardMapping(dpy, (KeyCode)ev->keycode, 1, &keysyms_return);
 	#endif
-	for (i = 0; i < LENGTH(keys); i++) {
+	for (i = 0; i < num_key_bindings; i++) {
 		if (
 			#if USE_KEYCODES
 			ev->keycode == keys[i].keycode
@@ -3195,15 +3313,15 @@ scan(void)
 	XWindowAttributes wa;
 
 	scanning = 1;
-
 	if (XQueryTree(dpy, root, &d1, &d2, &wins, &num)) {
 		for (i = 0; i < num; i++) {
 			if (!XGetWindowAttributes(dpy, wins[i], &wa)
 			|| wa.override_redirect || XGetTransientForHint(dpy, wins[i], &d1))
 				continue;
-			if (mapexternalbar(wins[i]))
+			if (mapexternalbar(wins[i])) {
 				continue;
-			if (wa.map_state == IsViewable || getstate(wins[i]) == IconicState)
+			}
+			if (wa.map_state == IsViewable || getstate(wins[i]) == IconicState) {
 				manage(wins[i], &wa);
 		}
 		for (i = 0; i < num; i++) { /* now the transients */
@@ -3375,7 +3493,7 @@ setlayout(const Arg *arg)
 	Workspace *ws = selws;
 	const Layout *tmplayout;
 
-	if (!ws || !arg || (arg->i > 0 && arg->i > LENGTH(layouts))) {
+	if (!ws || !arg || (arg->i > 0 && arg->i > num_layouts)) {
 		return;
 	}
 
@@ -3430,7 +3548,7 @@ void
 setup(void)
 {
 	Monitor *m;
-	int i, colorscheme;
+	int i, j, colorscheme;
 	XSetWindowAttributes wa;
 	struct sigaction chld, hup, term;
 
@@ -3462,8 +3580,6 @@ setup(void)
 
 	putenv("_JAVA_AWT_WM_NONREPARENTING=1");
 
-	enablefunc(functionality);
-
 	/* init screen */
 	screen = DefaultScreen(dpy);
 	sw = DisplayWidth(dpy, screen);
@@ -3472,11 +3588,61 @@ setup(void)
 	xinitvisual();
 	drw = drw_create(dpy, screen, root, sw, sh, visual, depth, cmap);
 
-	/* init appearance */
-	scheme = ecalloc(LENGTH(colors) + 1, sizeof(Clr *));
-	scheme[LENGTH(colors)] = drw_scm_create(drw, colors[0], default_alphas, 3); // ad-hoc color scheme used by status2d
+	/* Initialise the colors array */
+	colors = ecalloc(SchemeLast, sizeof(char **));
+	for (i = 0; i < SchemeLast; i++) {
+		colors[i] = ecalloc((ColCount+1), sizeof(char *));
+		for (j = 0; j <= ColCount; j++) {
+			colors[i][j] = NULL;
+		}
+	}
 
-	for (i = 0; i < LENGTH(colors); i++) {
+	enablefunc(functionality);
+	read_config();
+
+	/* Fall back to default values if not set via config */
+	for (i = 0; i < SchemeLast; i++) {
+		for (j = 0; j <= ColCount; j++) {
+			if (colors[i][j] == NULL && default_colors[i][j] != NULL) {
+				colors[i][j] = strdup(default_colors[i][j]);
+			}
+		}
+	}
+
+	if (barrules == NULL) {
+		barrules = default_barrules;
+		num_barrules = LENGTH(default_barrules);
+	}
+	if (bars == NULL) {
+		bars = default_bars;
+		num_bars = LENGTH(default_bars);
+	}
+	if (buttons == NULL) {
+		buttons = default_buttons;
+		num_button_bindings = LENGTH(default_buttons);
+	}
+	if (clientrules == NULL) {
+		clientrules = default_clientrules;
+		num_client_rules = LENGTH(default_clientrules);
+	}
+	if (keys == NULL) {
+		keys = default_keys;
+		num_key_bindings = LENGTH(default_keys);
+	}
+	if (layouts == NULL) {
+		layouts = default_layouts;
+		num_layouts = LENGTH(default_layouts);
+	}
+	if (stackericons == NULL) {
+		stackericons = default_stackericons;
+		num_stackericons = LENGTH(default_stackericons);
+	}
+
+	/* init appearance */
+	scheme = ecalloc(SchemeLast + 1, sizeof(Clr *));
+	scheme[SchemeLast] = drw_scm_create(drw, colors[0], default_alphas, 3); // ad-hoc color scheme used by status2d
+
+	for (i = 0; i < SchemeLast; i++) {
 		colorscheme = i;
 		/* Fall back to SchemeTitleNorm / Sel for SchemeFlex colors if not defined. */
 		if (!colors[i][0]) {
@@ -3488,8 +3654,10 @@ setup(void)
 	if (enabled(Xresources))
 		loadxrdb();
 
-	if (!drw_fontset_create(drw, fonts, LENGTH(fonts)))
-		die("no fonts could be loaded.");
+	if (!drw->fonts) {
+		if (!drw_fontset_create(drw, default_fonts, LENGTH(default_fonts)))
+			die("no fonts could be loaded.");
+	}
 
 	lrpad = drw->fonts->h + horizpadbar;
 	bh = bar_height ? bar_height : drw->fonts->h + vertpadbar;

@@ -148,7 +148,7 @@ restoreworkspacestate(Workspace *ws)
 		ws->enablegaps = (settings >> 31) & 0x1;
 
 		/* Restore layout if we have an exact match, floating layout interpreted as 0x1ef7f800 */
-		for (i = 0; i < LENGTH(layouts); i++) {
+		for (i = 0; i < num_layouts; i++) {
 			layout = &layouts[i];
 			if ((layout->arrange == flextile
 				&& ws->ltaxis[LAYOUT] == layout->preset.layout
@@ -173,7 +173,7 @@ persistpids(void)
 {
 	unsigned int i, count = 0;
 
-	for (i = 0; i < LENGTH(autostart_pids); i++) {
+	for (i = 0; i < num_autostart_pids; i++) {
 		if (autostart_pids[i] == 0)
 			break;
 

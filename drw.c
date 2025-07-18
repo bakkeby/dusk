@@ -219,6 +219,26 @@ drw_fontset_create(Drw* drw, const char *fonts[], size_t fontcount)
 	return (drw->fonts = ret);
 }
 
+Fnt*
+drw_font_add(Drw* drw, const char *font)
+{
+	Fnt *cur, *ret;
+
+	if (!drw || !font)
+		return NULL;
+
+	ret = xfont_create(drw, font, NULL);
+
+	if (!drw->fonts) {
+		drw->fonts = ret;
+	} else {
+		for (cur = drw->fonts; cur->next; cur = cur->next);
+		cur->next = ret;
+	}
+
+	return ret;
+}
+
 void
 drw_fontset_free(Fnt *font)
 {

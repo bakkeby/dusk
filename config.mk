@@ -48,9 +48,11 @@ XCBLIBS = `$(PKG_CONFIG) --libs x11-xcb xcb-res`
 # Needed for window icons
 IMLIB2LIBS = `$(PKG_CONFIG) --libs imlib2`
 
+CONFIG = `pkg-config --libs libconfig`
+
 # Includes and libs
 INCS = ${FREETYPEINC} ${YAJLINC} ${DBUSINC} ${XINPUTINC} ${FRIBIDIINC}
-LIBS = ${XINERAMALIBS} ${FREETYPELIBS} ${XRENDER} ${XCBLIBS} ${KVMLIB} ${YAJLLIBS} ${DBUSLIBS} ${IMLIB2LIBS} ${XINPUTLIBS} ${FRIBIDILIBS}
+LIBS = ${XINERAMALIBS} ${FREETYPELIBS} ${XRENDER} ${CONFIG} ${XCBLIBS} ${KVMLIB} ${YAJLLIBS} ${DBUSLIBS} ${IMLIB2LIBS} ${XINPUTLIBS} ${FRIBIDILIBS}
 
 # Optional host flag for computer specific configuration
 #HOSTFLAGS = -DHOST=$(shell command -v cksum > /dev/null && hostname | cksum | tr -d ' ')

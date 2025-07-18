@@ -5,6 +5,10 @@ enum {
 	OCCUPIED,
 };
 
+Workspace *stickyws = NULL;
+WorkspaceRule *wsrules = NULL;
+int num_wsrules;
+
 static void attachws(Workspace *ws, Workspace *target);
 static void detachws(Workspace *ws);
 static void attachmon(Monitor *m, Monitor *target);
