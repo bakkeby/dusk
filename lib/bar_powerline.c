@@ -52,7 +52,7 @@ int
 schemeleftof(Bar *bar, int r_idx)
 {
 	const BarRule *br;
-	for (int r = 0; r < LENGTH(barrules); r++) {
+	for (int r = 0; r < num_barrules; r++) {
 		br = &barrules[r];
 		if (!bar->s[r] || br->drawfunc == draw_powerline)
 			continue;
@@ -70,7 +70,7 @@ int
 schemerightof(Bar *bar, int r_idx)
 {
 	const BarRule *br;
-	for (int r = 0; r < LENGTH(barrules); r++) {
+	for (int r = 0; r < num_barrules; r++) {
 		br = &barrules[r];
 		if (!bar->s[r] || br->drawfunc == draw_powerline)
 			continue;

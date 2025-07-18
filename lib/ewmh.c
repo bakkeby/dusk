@@ -147,15 +147,15 @@ restoreworkspacestate(Workspace *ws)
 		ws->ltaxis[STACK2] = WRAP((settings >> 25) & 0x1F, 0, AXIS_LAST - 1);
 		ws->enablegaps = (settings >> 31) & 0x1;
 
-		/* Restore layout if we have an exact match, floating layout interpreted as 0x7fff800 */
-		for (i = 0; i < LENGTH(layouts); i++) {
+		/* Restore layout if we have an exact match, floating layout interpreted as 0x1ef7f800 */
+		for (i = 0; i < num_layouts; i++) {
 			layout = &layouts[i];
 			if ((layout->arrange == flextile
 				&& ws->ltaxis[LAYOUT] == layout->preset.layout
 				&& ws->ltaxis[MASTER] == layout->preset.masteraxis
 				&& ws->ltaxis[STACK]  == layout->preset.stack1axis
 				&& ws->ltaxis[STACK2] == layout->preset.stack2axis)
-				|| ((settings & 0x7fff800) == 0x7fff800
+				|| ((settings & 0x1ef7f800) == 0x1ef7f800
 				&& layout->arrange == NULL)
 			) {
 				ws->layout = layout;
@@ -173,7 +173,7 @@ persistpids(void)
 {
 	unsigned int i, count = 0;
 
-	for (i = 0; i < LENGTH(autostart_pids); i++) {
+	for (i = 0; i < num_autostart_pids; i++) {
 		if (autostart_pids[i] == 0)
 			break;
 

@@ -1,6 +1,3 @@
-
-static int bh; /* bar geometry */
-
 enum {
 	BAR_ALIGN_TOP,
 	BAR_ALIGN_LEFT,
@@ -28,11 +25,11 @@ struct BarDef {
 	int monitor;
 	int idx;
 	int vert;
-	const char *barpos;
-	const char *name;
-	const char *extclass;
-	const char *extinstance;
-	const char *extname;
+	char *barpos;
+	char *name;
+	char *extclass;
+	char *extinstance;
+	char *extname;
 };
 
 struct Bar {
@@ -83,6 +80,12 @@ typedef struct {
 	int (*hoverfunc)(Bar *bar, BarArg *a, XMotionEvent *ev);
 	char *name; // for debugging
 } BarRule;
+
+static int bh; /* bar geometry */
+int num_bars, num_barrules;
+
+BarDef *bars = NULL;
+BarRule *barrules = NULL;
 
 static void barhover(XEvent *e, Bar *bar);
 static void barpress(XButtonPressedEvent *ev, Monitor *m, Arg *arg, int *click);

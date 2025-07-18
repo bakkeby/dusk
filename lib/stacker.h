@@ -15,7 +15,6 @@
 #define ISSTACK(X)              ((X)->i >= 5000 && (X)->i < 6000)
 #define ISTILE(X)               ((X)->i >= 6000 && (X)->i < 7000)
 #define MOD(N,M)                ((N)%(M) < 0 ? (N)%(M) + (M) : (N)%(M))
-#define TRUNC(X,A,B)            (MAX((A), MIN((X), (B))))
 
 enum {
 	StackerRightOfWindowIcon,

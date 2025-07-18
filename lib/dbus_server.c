@@ -203,7 +203,7 @@ handle_null_function_command(DBusMessage *msg, IPCCommand *command)
 	if (!strcasecmp("get_monitors", method)) {
 		dump_monitors(gen, mons, selmon);
 	} else if (!strcasecmp("get_layouts", method)) {
-		dump_layouts(gen, layouts, LENGTH(layouts));
+		dump_layouts(gen, layouts, num_layouts);
 	} else if (!strcasecmp("get_client", method)) {
 		if (!dbus_message_get_args(msg, NULL, DBUS_TYPE_INT32, &int_param, DBUS_TYPE_INVALID)) {
 			reply_with_formatted_message(msg, "Error: Command get_client failed to read int argument\n");

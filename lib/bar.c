@@ -1,5 +1,5 @@
 /* Compile-time check to make sure that the number of bar rules do not exceed the limit */
-struct NumBarRules { char TooManyBarRules__Increase_BARRULES_macro_to_fix_this[LENGTH(barrules) > BARRULES ? -1 : 1]; };
+struct NumBarRules { char TooManyBarRules__Increase_BARRULES_macro_to_fix_this[LENGTH(default_barrules) > BARRULES ? -1 : 1]; };
 
 void
 barhover(XEvent *e, Bar *bar)
@@ -13,7 +13,7 @@ barhover(XEvent *e, Bar *bar)
 	BarArg barg = { 0, 0, 0, 0 };
 	int r;
 
-	for (r = 0; r < LENGTH(barrules); r++) {
+	for (r = 0; r < num_barrules; r++) {
 		br = &barrules[r];
 		if (br->bar != bar->idx || (br->monitor == 'A' && m != selmon) || br->hoverfunc == NULL)
 			continue;
@@ -54,7 +54,7 @@ barpress(XButtonPressedEvent *ev, Monitor *m, Arg *arg, int *click)
 
 	for (bar = selmon->bar; bar; bar = bar->next) {
 		if (ev->window == bar->win) {
-			for (r = 0; r < LENGTH(barrules); r++) {
+			for (r = 0; r < num_barrules; r++) {
 				br = &barrules[r];
 				if (br->bar != bar->idx || (br->monitor == 'A' && m != selmon) || br->clickfunc == NULL || !bar->s[r])
 					continue;
@@ -95,7 +95,7 @@ createbars(Monitor *m)
 {
 	const BarDef *def;
 
-	for (int i = 0; i < LENGTH(bars); i++) {
+	for (int i = 0; i < num_bars; i++) {
 		def = &bars[i];
 		if (def->monitor == m->num)
 			createbar(def, m);
@@ -179,7 +179,7 @@ drawbarwin(Bar *bar)
 	drw_setscheme(drw, scheme[SchemeNorm]);
 	drw_rect(drw, lx, bar->borderpx, lw, bar->bh - 2 * bar->borderpx, 1, 1);
 
-	for (r = 0; r < LENGTH(barrules); r++) {
+	for (r = 0; r < num_barrules; r++) {
 		br = &barrules[r];
 		bar->s[r] = 0;
 		if (br->bar != bar->idx || !br->sizefunc || (br->monitor == 'A' && bar->mon != selmon))
@@ -349,7 +349,7 @@ drawbarwin(Bar *bar)
 	}
 
 	/* Draw powerline separators */
-	for (r = 0; r < LENGTH(barrules); r++) {
+	for (r = 0; r < num_barrules; r++) {
 		br = &barrules[r];
 		if (!bar->s[r] || br->drawfunc != draw_powerline)
 			continue;

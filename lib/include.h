@@ -13,6 +13,7 @@
 #include "bar_ltsymbol.h"
 #include "bar_status2d.h"
 #include "winicon.h"
+#include "bar_config_error.h"
 #include "bar_flexwintitle.h"
 #include "bar_wintitle_floating.h"
 #include "bar_wintitle_hidden.h"
