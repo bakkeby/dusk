@@ -1,6 +1,6 @@
 #include <libconfig.h>
 
-char* get_config_path(const char* filename);
+void set_config_path(const char* filename, char *config_path, char *config_file);
 void read_config(void);
 void read_autostart(config_t *cfg);
 void read_bar(config_t *cfg);
@@ -21,6 +21,7 @@ ArgFunc parse_functionailty(const char *string);
 int parse_indicator(const char *indicator);
 int parse_function_int_constant(const char *string, ArgFunc func, int *ptr);
 int parse_key_type(const char *string);
+int parse_layout(const char *string);
 int parse_layout_split(const char *string);
 int parse_layout_arrangement(const char *string);
 unsigned int parse_modifier(const char *string);
@@ -39,40 +40,44 @@ void add_key_binding(int type, unsigned int mod, KeySym keysym, ArgFunc function
 #endif // USE_KEYCODES
 void add_stacker_icon(config_t *cfg, const char *string, int value);
 
-char* get_config_path(const char* filename) {
+void
+set_config_path(const char* filename, char *config_path, char *config_file)
+{
 	const char* xdg_config_home = getenv("XDG_CONFIG_HOME");
 	const char* home = getenv("HOME");
-	static char path[PATH_MAX];
 
 	if (xdg_config_home && xdg_config_home[0] != '\0') {
-		snprintf(path, sizeof(path), "%s/dusk/%s", xdg_config_home, filename);
+		snprintf(config_path, PATH_MAX, "%s/dusk/", xdg_config_home);
 	} else if (home) {
-		snprintf(path, sizeof(path), "%s/.config/dusk/%s", home, filename);
+		snprintf(config_path, PATH_MAX, "%s/.config/dusk/", home);
 	} else {
-		return NULL;
+		return;
 	}
 
-	return path;
+	snprintf(config_file, PATH_MAX, "%s/%s", config_path, filename);
 }
 
 void
 read_config(void)
 {
 	config_t cfg;
+	char config_path[PATH_MAX] = {0};
+	char config_file[PATH_MAX] = {0};
 
-	char* config_path = get_config_path("dusk.cfg");
+	set_config_path("dusk.cfg", config_path, config_file);
 	config_init(&cfg);
-	if (!config_read_file(&cfg, config_path)) {
+	config_set_include_dir(&cfg, config_path);
+	if (!config_read_file(&cfg, config_file)) {
 		if (strcmp(config_error_text(&cfg), "file I/O error")) {
-			config_error = ecalloc(255, sizeof(char));
-			snprintf(config_error, 255,
+			config_error = ecalloc(PATH_MAX + 255, sizeof(char));
+			snprintf(config_error, PATH_MAX + 255,
 				"Config %s: %s:%d",
 				config_error_text(&cfg),
-				config_path,
+				config_file,
 				config_error_line(&cfg));
 		}
 
-		fprintf(stderr, "Error reading config at %s\n", config_path);
+		fprintf(stderr, "Error reading config at %s\n", config_file);
 		fprintf(stderr, "%s:%d - %s\n",
 				config_error_file(&cfg),
 				config_error_line(&cfg),
@@ -980,7 +985,7 @@ void
 read_workspace(config_t *cfg)
 {
 	const char *string;
-	config_setting_t *rules, *rule, *icons;
+	config_setting_t *rules, *rule, *icons, *layout;
 	int i;
 
 	config_lookup_float(cfg, "workspace.pfact", &pfact);
@@ -1031,7 +1036,19 @@ read_workspace(config_t *cfg)
 			strlcpy(wsrules[i].name, string, sizeof(wsrules[i].name));
 
 		config_setting_lookup_bool(rule, "pinned", &wsrules[i].pinned);
-		config_setting_lookup_int(rule, "layout", &wsrules[i].layout);
+
+		/* Allow layout to be referred to by name as well as index */
+		if ((layout = config_setting_lookup(rule, "layout"))) {
+			switch (config_setting_type(layout)) {
+			case CONFIG_TYPE_INT:
+				wsrules[i].layout = config_setting_get_int(layout);
+				break;
+			case CONFIG_TYPE_STRING:
+				wsrules[i].layout = parse_layout(config_setting_get_string(layout));
+				break;
+			}
+		}
+
 		config_setting_lookup_int(rule, "monitor", &wsrules[i].monitor);
 		config_setting_lookup_float(rule, "mfact", &wsrules[i].mfact);
 		config_setting_lookup_int(rule, "nmaster", &wsrules[i].nmaster);
@@ -1449,6 +1466,20 @@ parse_key_type(const char *string)
 
 	fprintf(stderr, "Warning: config could not find key type with name %s\n", string);
 	return KeyPress;
+}
+
+/* Look up the layout index based on the layout name */
+int
+parse_layout(const char *string)
+{
+	int i;
+	for (i = 0; i < num_layouts; i++) {
+		if (!strcasecmp(string, layouts[i].name)) {
+			return i;
+		}
+	}
+
+	return 0;
 }
 
 int
