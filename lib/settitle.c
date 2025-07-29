@@ -19,6 +19,6 @@ setclienttitle(Client *c, const char *title)
 	if (!c)
 		return;
 
-	strlcpy(c->altname, title, sizeof c->altname);
+	freestrdup(&c->alttitle, title);
 	drawbar(c->ws->mon);
 }

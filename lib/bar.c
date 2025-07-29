@@ -799,12 +799,14 @@ matchextbar(Bar *bar, Window win)
 	if (!XGetClassHint(dpy, win, &ch))
 		return 0;
 
+	char *name = NULL;
 	int matched = 0;
 	class    = ch.res_class ? ch.res_class : broken;
 	instance = ch.res_name  ? ch.res_name  : broken;
-	char name[256] = {0};
-	if (!gettextprop(win, netatom[NetWMName], name, sizeof name))
-		gettextprop(win, XA_WM_NAME, name, sizeof name);
+
+	if (!gettextprop(win, netatom[NetWMName], &name))
+		if (!gettextprop(win, XA_WM_NAME, &name))
+			name = strdup(broken);
 
 	if (enabled(Debug)) {
 		fprintf(stderr, "matchextbar: checking new window %s (%ld), class = '%s', instance = '%s'\n", name, win, class, instance);
@@ -832,6 +834,8 @@ matchextbar(Bar *bar, Window win)
 		XFree(ch.res_class);
 	if (ch.res_name)
 		XFree(ch.res_name);
+
+	free(name);
 
 	if (enabled(Debug)) {
 		fprintf(stderr, "matchextbar: window %ld %s a match for external bar %d monitor %d\n", win, matched ? "is" : "is not", def->idx, def->monitor);

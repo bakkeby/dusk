@@ -68,7 +68,7 @@ customlayout(
 	ws->prevlayout = ws->layout;
 
 	if (symbol != NULL)
-		strlcpy(ws->ltsymbol, symbol, sizeof ws->ltsymbol);
+		freestrdup(&ws->ltsymbol, symbol);
 
 	if (nmaster > -1)
 		ws->nmaster = nmaster;
@@ -1720,25 +1720,27 @@ setflexsymbols(Workspace *ws, int n)
 		sym3 = tilesymb[ws->ltaxis[(MIRROR ? MASTER : STACK)]];
 	}
 
-	snprintf(ws->ltsymbol, sizeof ws->ltsymbol, "%c%c%c", sym1, sym2, sym3);
+	freesprintf(&ws->ltsymbol, "%c%c%c", sym1, sym2, sym3);
 }
 
 void
 monoclesymbols(Workspace *ws, int n)
 {
-	if (n > 0)
-		snprintf(ws->ltsymbol, sizeof ws->ltsymbol, "[%d]", n);
-	else
-		snprintf(ws->ltsymbol, sizeof ws->ltsymbol, "[M]");
+	if (n > 0) {
+		freesprintf(&ws->ltsymbol, "[%d]", n);
+	} else {
+		freestrdup(&ws->ltsymbol, "[M]");
+	}
 }
 
 void
 decksymbols(Workspace *ws, int n)
 {
-	if (n > ws->nmaster)
-		snprintf(ws->ltsymbol, sizeof ws->ltsymbol, "[]%d", n - ws->nmaster);
-	else
-		snprintf(ws->ltsymbol, sizeof ws->ltsymbol, "[D]");
+	if (n > ws->nmaster) {
+		freesprintf(&ws->ltsymbol, "[]%d", n - ws->nmaster);
+	} else {
+		freestrdup(&ws->ltsymbol, "[D]");
+	}
 }
 
 /* Mirror layout axis for flextile */

@@ -185,8 +185,8 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 	int order[max_items];
 	int idx = 0;
 	int i;
-	char *name = (enabled(AltWindowTitles) && c->altname[0] ? c->altname : c->name);
-	titlewidth = TEXTW(name);
+	char *title = (enabled(AltWindowTitles) && c->alttitle ? c->alttitle : c->name);
+	titlewidth = TEXTW(title);
 
 	for (i = 0; i < max_items; i++)
 		order[i] = 0;
@@ -277,7 +277,7 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 			tw -= iconspacing;
 			break;
 		case window_title:
-			drw_text(drw, tx, barg->y, tw, barg->h, 0, name, 0, 1);
+			drw_text(drw, tx, barg->y, tw, barg->h, 0, title, 0, 1);
 			tx += titlewidth;
 			tw -= titlewidth;
 			break;

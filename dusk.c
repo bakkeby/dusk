@@ -271,10 +271,10 @@ typedef struct {
 typedef struct Workspace Workspace;
 typedef struct Client Client;
 struct Client {
-	char name[256];
-	char altname[256];
-	char label[32];
-	char iconpath[256];  /* maximum file path length under linux is 4096 bytes */
+	char *name;
+	char *alttitle;
+	char *label;
+	char *iconpath;  /* maximum file path length under linux is 4096 bytes */
 	float mina, maxa;
 	float cfact;
 	int x, y, w, h;
@@ -385,8 +385,8 @@ typedef struct {
 
 struct Workspace {
 	int wx, wy, ww, wh;  /* workspace area */
-	char ltsymbol[64];
-	char name[16];
+	char *ltsymbol;
+	char *name;
 	float mfact;
 	float wfact;
 	int scheme[4];
@@ -415,7 +415,7 @@ struct Workspace {
 };
 
 typedef struct {
-	char name[16];
+	char *name;
 	int monitor;
 	int pinned;
 	int layout;
@@ -475,7 +475,7 @@ static Atom getatomprop(Client *c, Atom prop, Atom req);
 static Client *getpointerclient(void);
 static int getrootptr(int *x, int *y);
 static long getstate(Window w);
-static int gettextprop(Window w, Atom atom, char *text, unsigned int size);
+static int gettextprop(Window w, Atom atom, char **text);
 static void grabbuttons(Client *c, int focused);
 static void grabkeys(void);
 static void hide(Client *c);
@@ -618,7 +618,7 @@ applyrules(Client *c)
 	const Rule *r;
 	const char *class, *instance;
 	Atom game_id = None, da = None, *win_types = NULL;
-	char role[64] = {0};
+	char *role = NULL;
 	int di;
 	unsigned long dl, nitems;
 	unsigned char *p = NULL;
@@ -635,7 +635,8 @@ applyrules(Client *c)
 	XGetClassHint(dpy, c->win, &ch);
 	class    = ch.res_class ? ch.res_class : broken;
 	instance = ch.res_name  ? ch.res_name  : broken;
-	gettextprop(c->win, wmatom[WMWindowRole], role, sizeof(role));
+	if (!gettextprop(c->win, wmatom[WMWindowRole], &role))
+		role = strdup(broken);
 	game_id = getatomprop(c, duskatom[SteamGameID], AnyPropertyType);
 	transient = ISTRANSIENT(c) ? 1 : 0;
 
@@ -672,8 +673,9 @@ applyrules(Client *c)
 
 			if (REVERTWORKSPACE(c) && !c->ws->visible)
 				c->revertws = c->ws->mon->selws;
+
 			if (r->label)
-				strlcpy(c->label, r->label, sizeof c->label);
+				freestrdup(&c->label, r->label);
 			else
 				saveclientclass(c);
 
@@ -681,7 +683,7 @@ applyrules(Client *c)
 				load_icon_from_png_image(c, r->iconpath);
 
 			if (r->alttitle)
-				strlcpy(c->altname, r->alttitle, sizeof c->altname);
+				freestrdup(&c->alttitle, r->alttitle);
 
 			if (enabled(Debug) || DEBUGGING(c)) {
 				fprintf(stderr,
@@ -724,6 +726,7 @@ applyrules(Client *c)
 		XFree(ch.res_name);
 	if (p)
 		XFree(p);
+	free(role);
 }
 
 /* This mimics most of what the manage function does when initially managing the window. It returns
@@ -1094,6 +1097,7 @@ cleanup(void)
 	for (ws = workspaces; ws; ws = next) {
 		next = ws->next;
 		removepreview(ws);
+		free(ws->ltsymbol);
 		free(ws);
 	}
 
@@ -2109,24 +2113,24 @@ getstate(Window w)
 }
 
 int
-gettextprop(Window w, Atom atom, char *text, unsigned int size)
+gettextprop(Window w, Atom atom, char **text)
 {
 	char **list = NULL;
 	int n;
 	XTextProperty name;
 
-	if (!text || size == 0)
-		return 0;
-	text[0] = '\0';
 	if (!XGetTextProperty(dpy, w, &name, atom) || !name.nitems)
 		return 0;
 	if (name.encoding == XA_STRING) {
-		strlcpy(text, (char *)name.value, size);
+		if (text != NULL) {
+			*text = strdup((char *)name.value);
+		}
 	} else if (XmbTextPropertyToTextList(dpy, &name, &list, &n) >= Success && n > 0 && *list) {
-		strlcpy(text, *list, size);
+		if (text != NULL) {
+			*text = strdup(*list);
+		}
 		XFreeStringList(list);
 	}
-	text[size - 1] = '\0';
 	XFree(name.value);
 	return 1;
 }
@@ -2350,6 +2354,10 @@ manage(Window w, XWindowAttributes *wa)
 		selws = stickyws->next;
 
 	c = ecalloc(1, sizeof(Client));
+	c->name = NULL;
+	c->alttitle = NULL;
+	c->label = NULL;
+	c->iconpath = NULL;
 	c->win = w;
 	c->pid = winpid(w);
 
@@ -2368,7 +2376,7 @@ manage(Window w, XWindowAttributes *wa)
 	updatetitle(c);
 	updatesizehints(c);
 	if (enabled(Debug))
-		fprintf(stderr, "manage --> client %s\n", c->name);
+		fprintf(stderr, "manage --> client %s\n", NAME(c));
 	getclientflags(c);
 	getclientfields(c);
 	getclientopacity(c);
@@ -2411,7 +2419,7 @@ manage(Window w, XWindowAttributes *wa)
 		else if (RAISE(c))
 			XRaiseWindow(dpy, c->win);
 		if (enabled(Debug))
-			fprintf(stderr, "manage <-- unmanaged (%s)\n", c->name);
+			fprintf(stderr, "manage <-- unmanaged (%s)\n", NAME(c));
 		free(c);
 		return;
 	}
@@ -2581,7 +2589,7 @@ manage(Window w, XWindowAttributes *wa)
 		drawbar(c->ws->mon);
 
 	if (enabled(Debug))
-		fprintf(stderr, "manage <-- (%s) on workspace %s\n", c->name, c->ws->name);
+		fprintf(stderr, "manage <-- (%s) on workspace %s\n", NAME(c), NAME(c->ws));
 }
 
 void
@@ -3182,7 +3190,6 @@ run(void)
 void
 scan(void)
 {
-	char swin[256] = {0};
 	unsigned int i, num;
 	Window d1, d2, *wins = NULL;
 	XWindowAttributes wa;
@@ -3197,8 +3204,6 @@ scan(void)
 			if (mapexternalbar(wins[i]))
 				continue;
 			if (wa.map_state == IsViewable || getstate(wins[i]) == IconicState)
-				manage(wins[i], &wa);
-			else if (gettextprop(wins[i], netatom[NetClientList], swin, sizeof swin))
 				manage(wins[i], &wa);
 		}
 		for (i = 0; i < num; i++) { /* now the transients */
@@ -3393,7 +3398,7 @@ setlayout(const Arg *arg)
 	ws->ltaxis[STACK]  = ws->layout->preset.stack1axis;
 	ws->ltaxis[STACK2] = ws->layout->preset.stack2axis;
 
-	strlcpy(ws->ltsymbol, ws->layout->symbol, sizeof ws->ltsymbol);
+	freestrdup(&ws->ltsymbol, ws->layout->symbol);
 
 	if (ws->layout->arrange) {
 		arrange(ws);
@@ -3846,6 +3851,10 @@ unmanage(Client *c, int destroyed)
 	detach(c);
 	detachstack(c);
 	freeicon(c);
+	free(c->name);
+	free(c->alttitle);
+	free(c->label);
+	free(c->iconpath);
 
 	if (!destroyed) {
 		XGrabServer(dpy); /* avoid race conditions */
@@ -4021,11 +4030,11 @@ updategeom(int width, int height)
 void
 updatelegacystatus(void)
 {
-	char buffer[STATUS_BUFFER * NUM_STATUSES];
+	char *buffer = NULL;
 	int status_no = 0;
 	char *text, *s, ch;
 
-	if (!gettextprop(root, XA_WM_NAME, buffer, sizeof(buffer) - 1))
+	if (!gettextprop(root, XA_WM_NAME, &buffer))
 		return;
 
 	for (text = s = buffer; *s; s++) {
@@ -4039,6 +4048,7 @@ updatelegacystatus(void)
 		}
 	}
 	setstatus(status_no, text);
+	free(buffer);
 }
 
 void
@@ -4116,10 +4126,15 @@ updatesizehints(Client *c)
 void
 updatetitle(Client *c)
 {
-	if (!gettextprop(c->win, netatom[NetWMName], c->name, sizeof c->name))
-		gettextprop(c->win, XA_WM_NAME, c->name, sizeof c->name);
-	if (c->name[0] == '\0') /* hack to mark broken clients */
-		strlcpy(c->name, broken, sizeof c->name);
+	free(c->name);
+
+	if (gettextprop(c->win, netatom[NetWMName], &c->name))
+		return;
+
+	if (gettextprop(c->win, XA_WM_NAME, &c->name))
+		return;
+
+	c->name = strdup(broken); /* hack to mark broken clients */
 }
 
 void

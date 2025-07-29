@@ -97,7 +97,7 @@ void
 updateicon(Client *c)
 {
 	freeicon(c);
-	if (strlen(c->iconpath) && load_icon_from_png_image(c, c->iconpath))
+	if (c->iconpath && strlen(c->iconpath) && load_icon_from_png_image(c, c->iconpath))
 		return;
 
 	c->icon = geticonprop(c->win, &c->icw, &c->ich);
@@ -116,7 +116,7 @@ load_icon_from_png_image(Client *c, const char *iconpath)
 		return 0; /* no readable file */
 
 	freeicon(c);
-	strlcpy(c->iconpath, iconpath, sizeof c->iconpath);
+	freestrdup(&c->iconpath, iconpath);
 	image = imlib_load_image(iconpath);
 	if (!image)
 		return 0; /* corrupt or otherwise not loadable file */

@@ -2,7 +2,7 @@ typedef struct {
 	Picture icon;
 	unsigned int icw;
 	unsigned int ich;
-	char iconpath[256];
+	char *iconpath;
 } Image;
 
 typedef struct {

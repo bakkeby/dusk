@@ -159,7 +159,7 @@ restoreworkspacestate(Workspace *ws)
 				&& layout->arrange == NULL)
 			) {
 				ws->layout = layout;
-				strlcpy(ws->ltsymbol, ws->layout->symbol, sizeof ws->ltsymbol);
+				freestrdup(&ws->ltsymbol, ws->layout->symbol);
 				break;
 			}
 		}
@@ -371,8 +371,10 @@ setclientfields(Client *c)
 void
 setclienticonpath(Client *c)
 {
-	if (!strlen(c->iconpath))
+	if (!c->iconpath) {
+		XDeleteProperty(dpy, c->win, duskatom[DuskClientIconPath]);
 		return;
+	}
 
 	XChangeProperty(dpy, c->win, duskatom[DuskClientIconPath], XA_STRING, 8, PropModeReplace, (unsigned char *)c->iconpath, strlen(c->iconpath));
 }
@@ -380,13 +382,23 @@ setclienticonpath(Client *c)
 void
 setclientlabel(Client *c)
 {
+	if (!c->label) {
+		XDeleteProperty(dpy, c->win, duskatom[DuskClientLabel]);
+		return;
+	}
+
 	XChangeProperty(dpy, c->win, duskatom[DuskClientLabel], XA_STRING, 8, PropModeReplace, (unsigned char *)c->label, strlen(c->label));
 }
 
 void
 setclientalttitle(Client *c)
 {
-	XChangeProperty(dpy, c->win, duskatom[DuskClientAltName], utf8string, 8, PropModeReplace, (unsigned char *)c->altname, strlen(c->altname));
+	if (!c->alttitle) {
+		XDeleteProperty(dpy, c->win, duskatom[DuskClientAltName]);
+		return;
+	}
+
+	XChangeProperty(dpy, c->win, duskatom[DuskClientAltName], utf8string, 8, PropModeReplace, (unsigned char *)c->alttitle, strlen(c->alttitle));
 }
 
 void
@@ -438,17 +450,17 @@ getclienticonpath(Client *c)
 {
 	Atom type;
 	int format;
-	unsigned int i;
 	unsigned long after;
 	unsigned char *data = 0;
-	long unsigned int size = LENGTH(c->iconpath);
+	char *iconpath;
+	long unsigned int size;
 
 	if (XGetWindowProperty(dpy, c->win, duskatom[DuskClientIconPath], 0, 1024, 0, XA_STRING,
 				&type, &format, &size, &after, &data) == Success) {
 		if (data) {
-			if (type == XA_STRING) {
-				for (i = 0; i < size; ++i)
-					c->iconpath[i] = data[i];
+			iconpath = (char *)data;
+			if (type == XA_STRING && strlen(iconpath)) {
+				freestrdup(&c->iconpath, iconpath);
 			}
 			XFree(data);
 		}
@@ -460,17 +472,17 @@ getclientlabel(Client *c)
 {
 	Atom type;
 	int format;
-	unsigned int i;
 	unsigned long after;
 	unsigned char *data = 0;
-	long unsigned int size = LENGTH(c->label);
+	char *label;
+	long unsigned int size;
 
 	if (XGetWindowProperty(dpy, c->win, duskatom[DuskClientLabel], 0, 1024, 0, XA_STRING,
 				&type, &format, &size, &after, &data) == Success) {
 		if (data) {
-			if (type == XA_STRING) {
-				for (i = 0; i < size; ++i)
-					c->label[i] = data[i];
+			label = (char *)data;
+			if (type == XA_STRING && strlen(label)) {
+				freestrdup(&c->label, label);
 			}
 			XFree(data);
 		}
@@ -482,17 +494,17 @@ getclientalttitle(Client *c)
 {
 	Atom type;
 	int format;
-	unsigned int i;
 	unsigned long after;
 	unsigned char *data = 0;
-	long unsigned int size = LENGTH(c->altname);
+	char *alttitle;
+	long unsigned int size;
 
 	if (XGetWindowProperty(dpy, c->win, duskatom[DuskClientAltName], 0, 1024, 0, utf8string,
 				&type, &format, &size, &after, &data) == Success) {
 		if (data) {
-			if (type == utf8string) {
-				for (i = 0; i < size; ++i)
-					c->altname[i] = data[i];
+			alttitle = (char *)data;
+			if (type == utf8string && strlen(alttitle)) {
+				freestrdup(&c->alttitle, alttitle);
 			}
 			XFree(data);
 		}

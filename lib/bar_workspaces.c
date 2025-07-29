@@ -285,7 +285,7 @@ saveclientclass(Client *c)
 {
 	XClassHint ch = { NULL, NULL };
 	XGetClassHint(dpy, c->win, &ch);
-	strlcpy(c->label, ch.res_class ? ch.res_class : broken, sizeof c->label);
+	freestrdup(&c->label, ch.res_class ? ch.res_class : broken);
 	if (lowercase_workspace_labels)
 		for (char *p = c->label; *p; ++p) *p = tolower(*p);
     if (ch.res_class)

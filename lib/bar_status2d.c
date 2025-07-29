@@ -44,7 +44,7 @@ draw_status(Bar *bar, BarArg *a)
 int
 drw_2dtext(Drw *drw, int x, int y, unsigned int w, unsigned int h, unsigned int lpad, char *text2d, int invert, int drawbg, int defscheme)
 {
-	if (!w && drawbg)
+	if ((!w && drawbg) || text2d == NULL)
 		return 0;
 
 	int i, j, caret, tw, dx = x, stored_dx = 0, stored_mw = 0, len, mw = w - lpad;
@@ -408,7 +408,8 @@ loadimage(char *path, int use_cache)
 		image->icon = None;
 		image->icw = 0;
 		image->ich = 0;
-		image->iconpath[0] = '\0';
+		free(image->iconpath);
+		image->iconpath = NULL;
 		imagebuffer[least].atime = 0;
 	}
 
@@ -435,7 +436,7 @@ loadimagefromfile(Image *image, char *path)
 		return 0; /* no readable file */
 	}
 
-	strlcpy(image->iconpath, path, sizeof image->iconpath);
+	freestrdup(&image->iconpath, path);
 	im = imlib_load_image_immediately_without_cache(path);
 	if (!im) {
 		return 0; /* corrupt or otherwise not loadable file */
@@ -469,6 +470,8 @@ cleanup2dimagebuffer(void)
 
 	for (i = 0; i < LENGTH(imagebuffer); i++) {
 		if (imagebuffer[i].image.icon != None) {
+			free(imagebuffer[i].image.iconpath);
+			imagebuffer[i].image.iconpath = NULL;
 			XRenderFreePicture(dpy, imagebuffer[i].image.icon);
 		}
 	}
