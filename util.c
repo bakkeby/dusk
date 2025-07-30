@@ -32,6 +32,7 @@ ecalloc(size_t nmemb, size_t size)
 {
 	void *p;
 
+	/* calloc allocates memory for an array of n elements and initializes all bits to zero */
 	if (!(p = calloc(nmemb, size)))
 		die("calloc:");
 	return p;

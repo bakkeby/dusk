@@ -1023,7 +1023,7 @@ read_workspace(config_t *cfg)
 		wsrules[i].nmaster = -1;
 		wsrules[i].nstack = -1;
 		wsrules[i].enablegaps = -1;
-		wsrules[i].name[0] = '\0';
+		wsrules[i].name = NULL;
 		wsrules[i].icondef = NULL;
 		wsrules[i].iconvac = NULL;
 		wsrules[i].iconocc = NULL;
@@ -1033,7 +1033,7 @@ read_workspace(config_t *cfg)
 			continue;
 
 		if (config_setting_lookup_string(rule, "name", &string))
-			strlcpy(wsrules[i].name, string, sizeof(wsrules[i].name));
+			freestrdup(&wsrules[i].name, string);
 
 		config_setting_lookup_bool(rule, "pinned", &wsrules[i].pinned);
 
