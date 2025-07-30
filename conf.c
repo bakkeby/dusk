@@ -2,6 +2,9 @@
 
 /* libconfig helper functions */
 int config_setting_lookup_strdup(const config_setting_t *cfg, const char *name, char **strptr);
+int config_lookup_sloppy_bool(const config_t *cfg, const char *name, int *ptr);
+int config_setting_lookup_sloppy_bool(const config_setting_t *cfg, const char *name, int *ptr);
+int config_setting_get_sloppy_bool(const config_setting_t *cfg, int *ptr);
 
 
 void set_config_path(const char* filename, char *config_path, char *config_file);
@@ -58,8 +61,44 @@ config_setting_lookup_strdup(const config_setting_t *cfg, const char *name, char
 }
 
 int
-config_setting_lookup_sloppy_bool(const config_setting_t *cfg, const char *name, char **ptr)
+config_lookup_sloppy_bool(const config_t *cfg, const char *name, int *ptr)
 {
+	return config_setting_get_sloppy_bool(config_lookup(cfg, name), ptr);
+}
+
+int
+config_setting_lookup_sloppy_bool(const config_setting_t *cfg, const char *name, int *ptr)
+{
+	return config_setting_get_sloppy_bool(config_setting_lookup(cfg, name), ptr);
+}
+
+int
+config_setting_get_sloppy_bool(const config_setting_t *cfg_item, int *ptr)
+{
+	const char *string;
+
+	if (!cfg_item)
+		return 0;
+
+	switch (config_setting_type(cfg_item)) {
+	case CONFIG_TYPE_INT:
+		*ptr = config_setting_get_int(cfg_item);
+		return 1;
+	case CONFIG_TYPE_STRING:
+		string = config_setting_get_string(cfg_item);
+
+		if (string && strlen(string)) {
+			char a = tolower(string[0]);
+			/* Match for positives like "true", "yes" and "on" */
+			*ptr = (a == 't' || a == 'y' || !strcasecmp(string, "on"));
+			return 1;
+		}
+		break;
+	case CONFIG_TYPE_BOOL:
+		*ptr = config_setting_get_bool(cfg_item);
+		return 1;
+	}
+
 	return 0;
 }
 
@@ -162,7 +201,7 @@ read_bar(config_t *cfg)
 	const char *string;
 	config_setting_t *barconfig, *bar, *rules, *rule, *monitor, *scheme, *value, *align;
 
-	config_lookup_bool(cfg, "bar.showbar", &initshowbar);
+	config_lookup_sloppy_bool(cfg, "bar.showbar", &initshowbar);
 
 	config_lookup_int(cfg, "bar.height", &bar_height);
 	if (!config_lookup_int(cfg, "bar.vertpad", &vertpad))
@@ -943,7 +982,7 @@ read_singles(config_t *cfg)
 	config_lookup_int(cfg, "gaps.oh", &gappoh);
 	config_lookup_int(cfg, "gaps.ov", &gappov);
 	config_lookup_int(cfg, "gaps.fl", &gappfl);
-	config_lookup_bool(cfg, "gaps.enabled", &enablegaps);
+	config_lookup_sloppy_bool(cfg, "gaps.enabled", &enablegaps);
 	config_lookup_int(cfg, "gaps.smartgaps_fact", &smartgaps_fact);
 
 	config_lookup_int(cfg, "nmaster", &nmaster);
@@ -999,10 +1038,10 @@ read_workspace(config_t *cfg)
 	if (config_lookup_string(cfg, "workspace.labels.vacant_format", &string))
 		strlcpy(vacant_workspace_label_format, string, LENGTH(vacant_workspace_label_format));
 
-	config_lookup_bool(cfg, "workspace.labels.lowercase", &lowercase_workspace_labels);
-	config_lookup_bool(cfg, "workspace.labels.prefer_window_icons", &prefer_window_icons_over_workspace_labels);
-	config_lookup_bool(cfg, "workspace.labels.swap_occupied_format", &swap_occupied_workspace_label_format_strings);
-	config_lookup_bool(cfg, "workspace.per_mon", &workspaces_per_mon);
+	config_lookup_sloppy_bool(cfg, "workspace.labels.lowercase", &lowercase_workspace_labels);
+	config_lookup_sloppy_bool(cfg, "workspace.labels.prefer_window_icons", &prefer_window_icons_over_workspace_labels);
+	config_lookup_sloppy_bool(cfg, "workspace.labels.swap_occupied_format", &swap_occupied_workspace_label_format_strings);
+	config_lookup_sloppy_bool(cfg, "workspace.per_mon", &workspaces_per_mon);
 
 	/* Workspace rules */
 	rules = config_lookup(cfg, "workspace.rules");
@@ -1037,7 +1076,7 @@ read_workspace(config_t *cfg)
 			continue;
 
 		config_setting_lookup_strdup(rule, "name", &wsrules[i].name);
-		config_setting_lookup_bool(rule, "pinned", &wsrules[i].pinned);
+		config_setting_lookup_sloppy_bool(rule, "pinned", &wsrules[i].pinned);
 
 		/* Allow layout to be referred to by name as well as index */
 		if ((layout = config_setting_lookup(rule, "layout"))) {
@@ -1055,7 +1094,7 @@ read_workspace(config_t *cfg)
 		config_setting_lookup_float(rule, "mfact", &wsrules[i].mfact);
 		config_setting_lookup_int(rule, "nmaster", &wsrules[i].nmaster);
 		config_setting_lookup_int(rule, "nstack", &wsrules[i].nstack);
-		config_setting_lookup_bool(rule, "gaps", &wsrules[i].enablegaps);
+		config_setting_lookup_sloppy_bool(rule, "gaps", &wsrules[i].enablegaps);
 
 		icons = config_setting_lookup(rule, "icons");
 		if (icons) {
@@ -1078,7 +1117,7 @@ read_workspace(config_t *cfg)
 
 }
 
-#define readfunc(F) if (config_lookup_bool(cfg, "functionality." #F, &enabled)) { if (enabled) { enablefunc(F); } else { disablefunc(F); } }
+#define readfunc(F) if (config_lookup_sloppy_bool(cfg, "functionality." #F, &enabled)) { if (enabled) { enablefunc(F); } else { disablefunc(F); } }
 
 void
 read_functionality(config_t *cfg)
@@ -1377,6 +1416,7 @@ parse_functionailty(const char *string)
 	map("swapws", swapws);
 	map("swapwsbyindex", swapwsbyindex);
 	map("swapwsbyname", swapwsbyname);
+	map("swallowmouse", swallowmouse);
 	map("toggle", toggle);
 	map("togglebar", togglebar);
 	map("togglebarpadding", togglebarpadding);
