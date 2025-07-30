@@ -3318,10 +3318,9 @@ scan(void)
 			if (!XGetWindowAttributes(dpy, wins[i], &wa)
 			|| wa.override_redirect || XGetTransientForHint(dpy, wins[i], &d1))
 				continue;
-			if (mapexternalbar(wins[i])) {
+			if (mapexternalbar(wins[i]))
 				continue;
-			}
-			if (wa.map_state == IsViewable || getstate(wins[i]) == IconicState) {
+			if (wa.map_state == IsViewable || getstate(wins[i]) == IconicState)
 				manage(wins[i], &wa);
 		}
 		for (i = 0; i < num; i++) { /* now the transients */

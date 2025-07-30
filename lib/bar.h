@@ -51,6 +51,7 @@ struct Bar {
 	int p[BARRULES]; // x/y position, array length == ^
 	int sscheme[BARRULES]; // start scheme
 	int escheme[BARRULES]; // end scheme
+	// TODO need to allocate space here rather than relying on BARRULES given that we now add rules dynamically via config
 };
 
 typedef struct {
