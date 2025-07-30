@@ -1,5 +1,9 @@
 #include <libconfig.h>
 
+/* libconfig helper functions */
+int config_setting_lookup_strdup(const config_setting_t *cfg, const char *name, char **strptr);
+
+
 void set_config_path(const char* filename, char *config_path, char *config_file);
 void read_config(void);
 void read_autostart(config_t *cfg);
@@ -39,6 +43,25 @@ void add_key_binding(int type, unsigned int mod, KeyCode keycode, ArgFunc functi
 void add_key_binding(int type, unsigned int mod, KeySym keysym, ArgFunc function, int argument, void *void_argument, float float_argument);
 #endif // USE_KEYCODES
 void add_stacker_icon(config_t *cfg, const char *string, int value);
+
+int
+config_setting_lookup_strdup(const config_setting_t *cfg, const char *name, char **strptr)
+{
+	const char *string;
+	if (config_setting_lookup_string(cfg, name, &string)) {
+		free(*strptr);
+		*strptr = strdup(string);
+		return 1;
+	}
+
+	return 0;
+}
+
+int
+config_setting_lookup_sloppy_bool(const config_setting_t *cfg, const char *name, char **ptr)
+{
+	return 0;
+}
 
 void
 set_config_path(const char* filename, char *config_path, char *config_file)
@@ -173,16 +196,11 @@ read_bar(config_t *cfg)
 				config_setting_lookup_int(bar, "monitor", &bars[i].monitor);
 				config_setting_lookup_int(bar, "bar", &bars[i].idx);
 				config_setting_lookup_int(bar, "vert", &bars[i].vert);
-				if (config_setting_lookup_string(bar, "pos", &string))
-					bars[i].barpos = strdup(string);
-				if (config_setting_lookup_string(bar, "extclass", &string))
-					bars[i].extclass = strdup(string);
-				if (config_setting_lookup_string(bar, "extinst", &string))
-					bars[i].extinstance = strdup(string);
-				if (config_setting_lookup_string(bar, "extname", &string))
-					bars[i].extname = strdup(string);
-				if (config_setting_lookup_string(bar, "name", &string))
-					bars[i].name = strdup(string);
+				config_setting_lookup_strdup(bar, "pos", &bars[i].barpos);
+				config_setting_lookup_strdup(bar, "extclass", &bars[i].extclass);
+				config_setting_lookup_strdup(bar, "extinst", &bars[i].extinstance);
+				config_setting_lookup_strdup(bar, "extname", &bars[i].extname);
+				config_setting_lookup_strdup(bar, "name", &bars[i].name);
 			}
 		}
 	}
@@ -241,6 +259,8 @@ read_bar(config_t *cfg)
 			}
 		}
 
+		config_setting_lookup_int(rule, "padding", &barrules[i].lpad);
+		config_setting_lookup_int(rule, "padding", &barrules[i].rpad);
 		config_setting_lookup_int(rule, "lpad", &barrules[i].lpad);
 		config_setting_lookup_int(rule, "rpad", &barrules[i].rpad);
 
@@ -269,8 +289,7 @@ read_bar(config_t *cfg)
 		config_setting_lookup_string(rule, "module", &string);
 		parse_module(string, &barrules[i]);
 
-		if (config_setting_lookup_string(rule, "name", &string))
-			barrules[i].name = strdup(string);
+		config_setting_lookup_strdup(rule, "name", &barrules[i].name);
 	}
 }
 
@@ -492,26 +511,19 @@ read_clientrules(config_t *cfg)
 		r.resume = 0;
 
 		rule = config_setting_get_elem(rules, i);
-		if (config_setting_lookup_string(rule, "class", &string))
-			r.class = strdup(string);
-		if (config_setting_lookup_string(rule, "role", &string))
-			r.role = strdup(string);
-		if (config_setting_lookup_string(rule, "instance", &string))
-			r.instance = strdup(string);
-		if (config_setting_lookup_string(rule, "title", &string))
-			r.title = strdup(string);
+
+		config_setting_lookup_strdup(rule, "class", &r.class);
+		config_setting_lookup_strdup(rule, "role", &r.role);
+		config_setting_lookup_strdup(rule, "instance", &r.instance);
+		config_setting_lookup_strdup(rule, "title", &r.title);
+
 		if (config_setting_lookup_string(rule, "wintype", &string))
 			r.wintype = strdup(parse_window_type(string));
-		if (config_setting_lookup_string(rule, "floatpos", &string))
-			r.floatpos = strdup(string);
-		if (config_setting_lookup_string(rule, "workspace", &string))
-			r.workspace = strdup(string);
-		if (config_setting_lookup_string(rule, "label", &string))
-			r.label = strdup(string);
-		if (config_setting_lookup_string(rule, "iconpath", &string))
-			r.iconpath = strdup(string);
-		if (config_setting_lookup_string(rule, "alttitle", &string))
-			r.alttitle = strdup(string);
+
+		config_setting_lookup_strdup(rule, "floatpos", &r.floatpos);
+		config_setting_lookup_strdup(rule, "label", &r.label);
+		config_setting_lookup_strdup(rule, "iconpath", &r.iconpath);
+		config_setting_lookup_strdup(rule, "alttitle", &r.alttitle);
 
 		if (config_setting_lookup_string(rule, "scratchkey", &string))
 			r.scratchkey = string[0];
@@ -522,7 +534,7 @@ read_clientrules(config_t *cfg)
 
 		config_setting_lookup_int(rule, "transient", &r.transient);
 		config_setting_lookup_int(rule, "resume", &r.resume);
-		config_setting_lookup_float(rule, "transient", &r.opacity);
+		config_setting_lookup_float(rule, "opacity", &r.opacity);
 
 		flags = config_setting_lookup(rule, "flags");
 		if (flags) {
@@ -568,7 +580,6 @@ void
 read_colors(config_t *cfg)
 {
 	int i, num_cols;
-	const char *string;
 	config_setting_t *cols, *col;
 
 	cols = config_lookup(cfg, "colors");
@@ -583,12 +594,10 @@ read_colors(config_t *cfg)
 	for (i = 0; i < num_cols; i++) {
 		col = config_setting_get_elem(cols, i);
 		int scheme = parse_scheme(config_setting_name(col));
-		if (config_setting_lookup_string(col, "fg", &string))
-			colors[scheme][ColFg] = strdup(string);
-		if (config_setting_lookup_string(col, "bg", &string))
-			colors[scheme][ColBg] = strdup(string);
-		if (config_setting_lookup_string(col, "border", &string))
-			colors[scheme][ColBorder] = strdup(string);
+
+		config_setting_lookup_strdup(col, "fg", &colors[scheme][ColFg]);
+		config_setting_lookup_strdup(col, "bg", &colors[scheme][ColBg]);
+		config_setting_lookup_strdup(col, "border", &colors[scheme][ColBorder]);
 	}
 }
 
@@ -597,7 +606,6 @@ read_commands(config_t *cfg)
 {
 	int i, j, num_cmd_elements;
 	config_setting_t *commands_list, *command_entry, *command;
-	const char *string;
 
 	commands_list = config_lookup(cfg, "commands");
 	if (!commands_list || !config_setting_is_list(commands_list))
@@ -613,16 +621,13 @@ read_commands(config_t *cfg)
 		commands[i].name = NULL;
 		commands[i].argv = NULL;
 
-		if (config_setting_lookup_string(command_entry, "name", &string))
-			commands[i].name = strdup(string);
+		config_setting_lookup_strdup(command_entry, "name", &commands[i].name);
 
 		command = config_setting_lookup(command_entry, "command");
 		num_cmd_elements = config_setting_length(command);
 		commands[i].argv = ecalloc(num_cmd_elements + 2, sizeof(char*));
 
-		if (config_setting_lookup_string(command_entry, "scratchkey", &string)) {
-			commands[i].argv[0] = strdup(string);
-		} else {
+		if (!config_setting_lookup_strdup(command_entry, "scratchkey", &commands[i].argv[0])) {
 			commands[i].argv[0] = NULL;
 		}
 
@@ -854,7 +859,7 @@ void
 add_stacker_icon(config_t *cfg, const char *string, int value)
 {
 	const char *prefix, *suffix, *pos_string, *icon_char, *replace_str;
-	int i, icon_length, num_overrides, overridden = 0;
+	int i, num_overrides, overridden = 0;
 	int position = StackerTitlePrefix;
 	config_setting_t *stacker_cfg, *overrides, *override;
 
@@ -900,9 +905,8 @@ add_stacker_icon(config_t *cfg, const char *string, int value)
 		icon_char = string;
 	}
 
-	icon_length = strlen(prefix) + strlen(icon_char) + strlen(suffix) + 1;
-	char *icon = ecalloc(icon_length, sizeof(char));
-	snprintf(icon, icon_length, "%s%s%s", prefix, icon_char, suffix);
+	char *icon = NULL;
+	freesprintf(&icon, "%s%s%s", prefix, icon_char, suffix);
 
 	stackericons[num_stackericons].icon = icon;
 	stackericons[num_stackericons].arg.i = value;
@@ -988,7 +992,7 @@ read_workspace(config_t *cfg)
 	config_setting_t *rules, *rule, *icons, *layout;
 	int i;
 
-	config_lookup_float(cfg, "workspace.pfact", &pfact);
+	config_lookup_float(cfg, "workspace.preview_factor", &pfact);
 
 	if (config_lookup_string(cfg, "workspace.labels.occupied_format", &string))
 		strlcpy(occupied_workspace_label_format, string, LENGTH(occupied_workspace_label_format));
@@ -1032,9 +1036,7 @@ read_workspace(config_t *cfg)
 		if (!rule)
 			continue;
 
-		if (config_setting_lookup_string(rule, "name", &string))
-			freestrdup(&wsrules[i].name, string);
-
+		config_setting_lookup_strdup(rule, "name", &wsrules[i].name);
 		config_setting_lookup_bool(rule, "pinned", &wsrules[i].pinned);
 
 		/* Allow layout to be referred to by name as well as index */
@@ -1057,21 +1059,15 @@ read_workspace(config_t *cfg)
 
 		icons = config_setting_lookup(rule, "icons");
 		if (icons) {
-			if (config_setting_lookup_string(icons, "def", &string)) {
-				wsrules[i].icondef = strdup(string);
-			} else {
+			if (!config_setting_lookup_strdup(icons, "def", &wsrules[i].icondef)) {
 				wsrules[i].icondef = strdup("◉");
 			}
 
-			if (config_setting_lookup_string(icons, "vac", &string)) {
-				wsrules[i].iconvac = strdup(string);
-			} else {
+			if (!config_setting_lookup_strdup(icons, "vac", &wsrules[i].iconvac)) {
 				wsrules[i].iconvac = wsrules[i].icondef;
 			}
 
-			if (config_setting_lookup_string(icons, "occ", &string)) {
-				wsrules[i].iconocc = strdup(string);
-			} else {
+			if (!config_setting_lookup_strdup(icons, "occ", &wsrules[i].iconocc)) {
 				wsrules[i].iconocc = wsrules[i].icondef;
 			}
 		} else {
@@ -1170,11 +1166,9 @@ read_layouts(config_t *cfg)
 		lt = config_setting_get_elem(lts, i);
 		config_setting_lookup_int(lt, "nmaster", &layouts[i].preset.nmaster);
 		config_setting_lookup_int(lt, "nstack", &layouts[i].preset.nstack);
+		config_setting_lookup_strdup(lt, "symbol", &layouts[i].symbol);
+		config_setting_lookup_strdup(lt, "name", &layouts[i].name);
 
-		if (config_setting_lookup_string(lt, "symbol", &string))
-			layouts[i].symbol = strdup(string);
-		if (config_setting_lookup_string(lt, "name", &string))
-			layouts[i].name = strdup(string);
 		if (config_setting_lookup_string(lt, "split", &string))
 			layouts[i].preset.layout = parse_layout_split(string);
 		if (config_setting_lookup_string(lt, "master", &string)) {
