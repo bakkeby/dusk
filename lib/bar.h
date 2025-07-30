@@ -47,11 +47,10 @@ struct Bar {
 	int scheme;
 	int groupactive;
 	int bx, by, bw, bh; /* bar geometry */
-	int s[BARRULES]; // width/height, array length == barrules, then use r index for lookup purposes
-	int p[BARRULES]; // x/y position, array length == ^
-	int sscheme[BARRULES]; // start scheme
-	int escheme[BARRULES]; // end scheme
-	// TODO need to allocate space here rather than relying on BARRULES given that we now add rules dynamically via config
+	int *s; // width/height, array length == barrules, then use r index for lookup purposes
+	int *p; // x/y position, array length == ^
+	int *sscheme; // start scheme
+	int *escheme; // end scheme
 };
 
 typedef struct {

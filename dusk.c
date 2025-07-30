@@ -57,7 +57,6 @@
 #define Button7                 7
 #define Button8                 8
 #define Button9                 9
-#define BARRULES                100
 #define NUM_STATUSES            10
 #define STATUS_BUFFER           512
 #define BUTTONMASK              (ButtonPressMask|ButtonReleaseMask)
@@ -1113,9 +1112,11 @@ cleanup(void)
 			unmanage(ws->stack, 0);
 	}
 	XUngrabKey(dpy, AnyKey, AnyModifier, root);
+
 	while (mons)
 		cleanupmon(mons);
 	free(dummymon);
+
 	if (systray) {
 		while (systray->icons)
 			removesystrayicon(systray->icons);
@@ -1150,7 +1151,7 @@ cleanup(void)
 		free(barrules);
 	}
 
-	/* Cleanup bars */
+	/* Cleanup bar definitions */
 	if (bars != default_bars) {
 		for (i = 0; i < num_bars; i++) {
 			free(bars[i].barpos);

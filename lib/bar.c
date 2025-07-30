@@ -1,6 +1,3 @@
-/* Compile-time check to make sure that the number of bar rules do not exceed the limit */
-struct NumBarRules { char TooManyBarRules__Increase_BARRULES_macro_to_fix_this[LENGTH(default_barrules) > BARRULES ? -1 : 1]; };
-
 void
 barhover(XEvent *e, Bar *bar)
 {
@@ -118,6 +115,11 @@ createbar(const BarDef *def, Monitor *m)
 	bar->showbar = 1;
 	bar->external = 0;
 	bar->borderpx = enabled(BarBorder) ? borderpx : 0;
+	bar->s = ecalloc(num_barrules, sizeof(int));
+	bar->p = ecalloc(num_barrules, sizeof(int));
+	bar->sscheme = ecalloc(num_barrules, sizeof(int));
+	bar->escheme = ecalloc(num_barrules, sizeof(int));
+
 	m->bar = bar;
 }
 
@@ -681,6 +683,11 @@ teardownbars(Monitor *m)
 
 		if (systray && bar == systray->bar)
 			systray->bar = NULL;
+
+		free(bar->s);
+		free(bar->p);
+		free(bar->sscheme);
+		free(bar->escheme);
 		free(bar);
 	}
 
