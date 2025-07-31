@@ -5,7 +5,10 @@ int config_setting_lookup_strdup(const config_setting_t *cfg, const char *name, 
 int config_lookup_sloppy_bool(const config_t *cfg, const char *name, int *ptr);
 int config_setting_lookup_sloppy_bool(const config_setting_t *cfg, const char *name, int *ptr);
 int config_setting_get_sloppy_bool(const config_setting_t *cfg, int *ptr);
-
+int setting_length(const config_setting_t *cfg);
+const char *setting_get_string_elem(const config_setting_t *cfg, int i);
+int setting_get_int_elem(const config_setting_t *cfg, int i);
+const config_setting_t *setting_get_elem(const config_setting_t *cfg, int i);
 
 void set_config_path(const char* filename, char *config_path, char *config_file);
 void read_config(void);
@@ -100,6 +103,70 @@ config_setting_get_sloppy_bool(const config_setting_t *cfg_item, int *ptr)
 	}
 
 	return 0;
+}
+
+int
+setting_length(const config_setting_t *cfg)
+{
+	if (!cfg)
+		return 0;
+
+	switch (config_setting_type(cfg)) {
+	case CONFIG_TYPE_GROUP:
+	case CONFIG_TYPE_LIST:
+	case CONFIG_TYPE_ARRAY:
+		return config_setting_length(cfg);
+	}
+
+	return 1;
+}
+
+const char *
+setting_get_string_elem(const config_setting_t *cfg, int i)
+{
+	if (!cfg)
+		return NULL;
+
+	switch (config_setting_type(cfg)) {
+	case CONFIG_TYPE_GROUP:
+	case CONFIG_TYPE_LIST:
+	case CONFIG_TYPE_ARRAY:
+		return config_setting_get_string_elem(cfg, i);
+	}
+
+	return config_setting_get_string(cfg);
+}
+
+int
+setting_get_int_elem(const config_setting_t *cfg, int i)
+{
+	if (!cfg)
+		return 0;
+
+	switch (config_setting_type(cfg)) {
+	case CONFIG_TYPE_GROUP:
+	case CONFIG_TYPE_LIST:
+	case CONFIG_TYPE_ARRAY:
+		return config_setting_get_int_elem(cfg, i);
+	}
+
+	return config_setting_get_int(cfg);
+}
+
+const config_setting_t *
+setting_get_elem(const config_setting_t *cfg, int i)
+{
+	if (!cfg)
+		return NULL;
+
+	switch (config_setting_type(cfg)) {
+	case CONFIG_TYPE_GROUP:
+	case CONFIG_TYPE_LIST:
+	case CONFIG_TYPE_ARRAY:
+		return config_setting_get_elem(cfg, i);
+	}
+
+	return cfg;
 }
 
 void
@@ -335,7 +402,7 @@ read_bar(config_t *cfg)
 void
 read_button_bindings(config_t *cfg)
 {
-	int i, j, k, num_clicks, num_modifiers, num_buttons, num_functions, num_arguments;
+	int i, j, k, length, num_clicks, num_modifiers, num_buttons, num_functions, num_arguments;
 	int num_bindings, num_expanded_bindings, value;
 	int click_arr[20] = {0};
 	unsigned int modifier_arr[20] = {0};
@@ -346,7 +413,7 @@ read_button_bindings(config_t *cfg)
 	void *void_argument_arr[20] = {0};
 	float float_argument_arr[20] = {0};
 
-	config_setting_t *bindings, *binding, *click, *modifier, *button, *function, *argument, *arg;
+	const config_setting_t *bindings, *binding, *click, *modifier, *button, *function, *argument, *arg;
 
 	bindings = config_lookup(cfg, "button_bindings");
 	if (!bindings || !config_setting_is_list(bindings))
@@ -367,98 +434,59 @@ read_button_bindings(config_t *cfg)
 		function = config_setting_lookup(binding, "function");
 		argument = config_setting_lookup(binding, "argument");
 
-		num_clicks = num_modifiers = num_buttons = num_functions = num_arguments = 1;
+		click_arr[0] = 0;
+		modifier_arr[0] = 0;
+		button_arr[0] = 1;
+		function_arr[0] = NULL;
+		argument_arr[0] = 0;
+		float_argument_arr[0] = 0;
+		void_argument_arr[0] = NULL;
 
-		if (!click) {
-			click_arr[0] = 0;
-		} else if (config_setting_is_list(click) || config_setting_is_array(click)) {
-			num_clicks = config_setting_length(click);
-			for (j = 0; j < num_clicks; j++) {
-				click_arr[j] = parse_click(config_setting_get_string_elem(click, j));
-			}
-		} else {
-			click_arr[0] = parse_click(config_setting_get_string(click));
+		length = setting_length(click);
+		num_clicks = MAX(length, 1);
+		for (j = 0; j < length; j++) {
+			click_arr[j] = parse_click(setting_get_string_elem(click, j));
 		}
 
-		if (!modifier) {
-			modifier_arr[0] = 0;
-		} else if (config_setting_is_list(modifier) || config_setting_is_array(modifier)) {
-			num_modifiers = config_setting_length(modifier);
-			for (j = 0; j < num_modifiers; j++) {
-				modifier_arr[j] = parse_modifier(config_setting_get_string_elem(modifier, j));
-			}
-		} else {
-			modifier_arr[0] = parse_modifier(config_setting_get_string(modifier));
+		length = setting_length(modifier);
+		num_modifiers = MAX(length, 1);
+		for (j = 0; j < length; j++) {
+			modifier_arr[j] = parse_modifier(setting_get_string_elem(modifier, j));
 		}
 
-		if (!button) {
-			button_arr[0] = 1;
-		} else if (config_setting_is_list(button) || config_setting_is_array(button)) {
-			num_buttons = config_setting_length(button);
-			for (j = 0; j < num_buttons; j++) {
-				button_arr[j] = config_setting_get_int_elem(button, j);
-			}
-		} else {
-			button_arr[0] = config_setting_get_int(button);
+		length = setting_length(button);
+		num_buttons = MAX(length, 1);
+		for (j = 0; j < length; j++) {
+			button_arr[j] = setting_get_int_elem(button, j);
 		}
 
-		if (!function) {
-			function_arr[0] = NULL;
-		} else if (config_setting_is_list(function) || config_setting_is_array(function)) {
-			num_functions = config_setting_length(function);
-			for (j = 0; j < num_functions; j++) {
-				function_arr[j] = parse_functionailty(config_setting_get_string_elem(function, j));
-			}
-		} else {
-			function_arr[0] = parse_functionailty(config_setting_get_string(function));
+		length = setting_length(function);
+		num_functions = MAX(length, 1);
+		for (j = 0; j < length; j++) {
+			function_arr[j] = parse_functionailty(setting_get_string_elem(function, j));
 		}
 
-		if (!argument) {
-			argument_arr[0] = 0;
-			float_argument_arr[0] = 0;
-			void_argument_arr[0] = NULL;
-		} else if (config_setting_is_list(argument) || config_setting_is_array(argument)) {
-			num_arguments = config_setting_length(argument);
-			for (j = 0; j < num_arguments; j++) {
-				arg = config_setting_get_elem(argument, j);
-				argument_arr[j] = 0;
-				float_argument_arr[j] = 0;
-				void_argument_arr[j] = NULL;
-				switch (config_setting_type(arg)) {
-				case CONFIG_TYPE_INT:
-					argument_arr[j] = config_setting_get_int(arg);
-					break;
-				case CONFIG_TYPE_STRING:
-					string = config_setting_get_string(arg);
-					if (parse_function_int_constant(string, function_arr[j % num_functions], &value)) {
-						argument_arr[j] = value;
-					} else {
-						void_argument_arr[j] = parse_void_reference(string);
-					}
-					break;
-				case CONFIG_TYPE_FLOAT:
-					float_argument_arr[j] = config_setting_get_float(arg);
-					break;
-				}
-			}
-		} else {
-			argument_arr[0] = 0;
-			float_argument_arr[0] = 0;
-			void_argument_arr[0] = NULL;
-			switch (config_setting_type(argument)) {
+		length = setting_length(argument);
+		num_arguments = MAX(length, 1);
+		for (j = 0; j < length; j++) {
+			arg = setting_get_elem(argument, j);
+			argument_arr[j] = 0;
+			float_argument_arr[j] = 0;
+			void_argument_arr[j] = NULL;
+			switch (config_setting_type(arg)) {
 			case CONFIG_TYPE_INT:
-				argument_arr[0] = config_setting_get_int(argument);
+				argument_arr[j] = config_setting_get_int(arg);
 				break;
 			case CONFIG_TYPE_STRING:
-				string = config_setting_get_string(argument);
-				if (parse_function_int_constant(string, function_arr[0], &value)) {
-					argument_arr[0] = value;
+				string = config_setting_get_string(arg);
+				if (parse_function_int_constant(string, function_arr[j % num_functions], &value)) {
+					argument_arr[j] = value;
 				} else {
-					void_argument_arr[0] = parse_void_reference(string);
+					void_argument_arr[j] = parse_void_reference(string);
 				}
 				break;
 			case CONFIG_TYPE_FLOAT:
-				float_argument_arr[0] = config_setting_get_float(arg);
+				float_argument_arr[j] = config_setting_get_float(arg);
 				break;
 			}
 		}
@@ -684,7 +712,7 @@ read_commands(config_t *cfg)
 void
 read_keybindings(config_t *cfg)
 {
-	int i, j, k, keytype, num_modifiers, num_keys, num_functions, num_arguments;
+	int i, j, k, length, keytype, num_modifiers, num_keys, num_functions, num_arguments;
 	int num_bindings, num_expanded_bindings, value;
 	unsigned int modifier_arr[20] = {0};
 	#if USE_KEYCODES
@@ -698,7 +726,7 @@ read_keybindings(config_t *cfg)
 	void *void_argument_arr[20] = {0};
 	float float_argument_arr[20] = {0};
 
-	config_setting_t *bindings, *binding, *type, *modifier, *key, *function, *argument, *arg;
+	const config_setting_t *bindings, *binding, *type, *modifier, *key, *function, *argument, *arg;
 
 	bindings = config_lookup(cfg, "keybindings");
 	if (!bindings || !config_setting_is_list(bindings))
@@ -719,129 +747,75 @@ read_keybindings(config_t *cfg)
 		function = config_setting_lookup(binding, "function");
 		argument = config_setting_lookup(binding, "argument");
 
-		num_modifiers = num_keys = num_functions = num_arguments = 1;
+		keytype = (type ? parse_key_type(config_setting_get_string(type)) : KeyPress);
 
-		if (!type) {
-			keytype = KeyPress;
-		} else {
-			keytype = parse_key_type(config_setting_get_string(type));
+		modifier_arr[0] = 0;
+		function_arr[0] = NULL;
+		argument_arr[0] = 0;
+		float_argument_arr[0] = 0;
+		void_argument_arr[0] = NULL;
+		key_arr[0] = 0;
+
+		length = setting_length(modifier);
+		num_modifiers = MAX(length, 1);
+		for (j = 0; j < length; j++) {
+			modifier_arr[j] = parse_modifier(setting_get_string_elem(modifier, j));
 		}
 
-		if (!modifier) {
-			modifier_arr[0] = 0;
-		} else if (config_setting_is_list(modifier) || config_setting_is_array(modifier)) {
-			num_modifiers = config_setting_length(modifier);
-			for (j = 0; j < num_modifiers; j++) {
-				modifier_arr[j] = parse_modifier(config_setting_get_string_elem(modifier, j));
-			}
-		} else {
-			modifier_arr[0] = parse_modifier(config_setting_get_string(modifier));
+		length = setting_length(function);
+		num_functions = MAX(length, 1);
+		for (j = 0; j < length; j++) {
+			function_arr[j] = parse_functionailty(setting_get_string_elem(function, j));
 		}
 
-		if (!function) {
-			function_arr[0] = NULL;
-		} else if (config_setting_is_list(function) || config_setting_is_array(function)) {
-			num_functions = config_setting_length(function);
-			for (j = 0; j < num_functions; j++) {
-				function_arr[j] = parse_functionailty(config_setting_get_string_elem(function, j));
-			}
-		} else {
-			function_arr[0] = parse_functionailty(config_setting_get_string(function));
-		}
-
-		if (!argument) {
-			argument_arr[0] = 0;
-			float_argument_arr[0] = 0;
-			void_argument_arr[0] = NULL;
-		} else if (config_setting_is_list(argument) || config_setting_is_array(argument)) {
-			num_arguments = config_setting_length(argument);
-			for (j = 0; j < num_arguments; j++) {
-				arg = config_setting_get_elem(argument, j);
-				argument_arr[j] = 0;
-				float_argument_arr[j] = 0;
-				void_argument_arr[j] = NULL;
-				switch (config_setting_type(arg)) {
-				case CONFIG_TYPE_INT:
-					argument_arr[j] = config_setting_get_int(arg);
-					break;
-				case CONFIG_TYPE_STRING:
-					string = config_setting_get_string(arg);
-					if (parse_function_int_constant(string, function_arr[j % num_functions], &value)) {
-						argument_arr[j] = value;
-					} else {
-						void_argument_arr[j] = parse_void_reference(string);
-					}
-					break;
-				case CONFIG_TYPE_FLOAT:
-					float_argument_arr[j] = config_setting_get_float(arg);
-					break;
-				}
-			}
-		} else {
-			argument_arr[0] = 0;
-			float_argument_arr[0] = 0;
-			void_argument_arr[0] = NULL;
-			switch (config_setting_type(argument)) {
+		length = setting_length(argument);
+		num_arguments = MAX(length, 1);
+		for (j = 0; j < length; j++) {
+			arg = setting_get_elem(argument, j);
+			argument_arr[j] = 0;
+			float_argument_arr[j] = 0;
+			void_argument_arr[j] = NULL;
+			switch (config_setting_type(arg)) {
 			case CONFIG_TYPE_INT:
-				argument_arr[0] = config_setting_get_int(argument);
+				argument_arr[j] = config_setting_get_int(arg);
 				break;
 			case CONFIG_TYPE_STRING:
-				string = config_setting_get_string(argument);
-				if (parse_function_int_constant(string, function_arr[0], &value)) {
-					argument_arr[0] = value;
+				string = config_setting_get_string(arg);
+				if (parse_function_int_constant(string, function_arr[j % num_functions], &value)) {
+					argument_arr[j] = value;
 				} else {
-					void_argument_arr[0] = parse_void_reference(string);
+					void_argument_arr[j] = parse_void_reference(string);
 				}
 				break;
 			case CONFIG_TYPE_FLOAT:
-				float_argument_arr[0] = config_setting_get_float(arg);
+				float_argument_arr[j] = config_setting_get_float(arg);
 				break;
 			}
 		}
 
-		if (!key) {
-			key_arr[0] = 0;
-		} else if (config_setting_is_list(key) || config_setting_is_array(key)) {
-			num_keys = config_setting_length(key);
-			for (j = 0; j < num_keys; j++) {
-				string = config_setting_get_string_elem(key, j);
+		length = config_setting_length(key);
+		num_keys = MAX(length, 1);
+		for (j = 0; j < length; j++) {
+			string = config_setting_get_string_elem(key, j);
 
-				if (function_arr[j % num_functions] == stackfocus) {
-					add_stacker_icon(cfg, string, argument_arr[j % num_arguments]);
-				}
-
-				#if USE_KEYCODES
-				KeySym ks = XStringToKeysym(string);
-				if (key_arr[j] == NoSymbol)
-					fprintf(stderr, "Warning: config could not look up keycode for key %s\n", string);
-				key_arr[j] = XKeysymToKeycode(dpy, ks);
-				#else
-				key_arr[j] = XStringToKeysym(string);
-				if (key_arr[j] == NoSymbol)
-					fprintf(stderr, "Warning: config could not look up keysym for key %s\n", string);
-				#endif // USE_KEYCODES
-			}
-		} else {
-			string = config_setting_get_string(key);
-
-			if (function_arr[0] == focusstack) {
-				add_stacker_icon(cfg, string, argument_arr[0]);
+			if (function_arr[j % num_functions] == stackfocus) {
+				add_stacker_icon(cfg, string, argument_arr[j % num_arguments]);
 			}
 
 			#if USE_KEYCODES
 			KeySym ks = XStringToKeysym(string);
-			if (key_arr[0] == NoSymbol)
+			if (key_arr[j] == NoSymbol)
 				fprintf(stderr, "Warning: config could not look up keycode for key %s\n", string);
-			key_arr[0] = XKeysymToKeycode(dpy, ks);
+			key_arr[j] = XKeysymToKeycode(dpy, ks);
 			#else
-			key_arr[0] = XStringToKeysym(string);
-			if (key_arr[0] == NoSymbol)
+			key_arr[j] = XStringToKeysym(string);
+			if (key_arr[j] == NoSymbol)
 				fprintf(stderr, "Warning: config could not look up keysym for key %s\n", string);
 			#endif // USE_KEYCODES
 		}
 
 		/* Figure out the maximum number of expanded keybindings */
-		int counts[4] = {num_modifiers, num_keys, num_functions, num_arguments};
+		int counts[4] = {num_modifiers, num_functions, num_arguments, num_keys};
 		num_expanded_bindings = counts[0];
 		for (k = 1; k < 4; k++)
 			if (counts[k] > num_expanded_bindings)
