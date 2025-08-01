@@ -793,10 +793,10 @@ read_keybindings(config_t *cfg)
 			}
 		}
 
-		length = config_setting_length(key);
+		length = setting_length(key);
 		num_keys = MAX(length, 1);
 		for (j = 0; j < length; j++) {
-			string = config_setting_get_string_elem(key, j);
+			string = setting_get_string_elem(key, j);
 
 			if (function_arr[j % num_functions] == stackfocus) {
 				add_stacker_icon(cfg, string, argument_arr[j % num_arguments]);
