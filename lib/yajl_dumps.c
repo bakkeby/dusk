@@ -152,8 +152,8 @@ dump_client(yajl_gen gen, Client *c)
 {
 	// clang-format off
 	YMAP(
-		YSTR("name"); YSTR(c->name);
-		YSTR("alttitle"); YSTR(c->alttitle);
+		YSTR("name"); YSTR(NVL(c->name, "NULL"));
+		YSTR("alttitle"); YSTR(NVL(c->alttitle, "NULL"));
 		YSTR("window_id"); YINT(c->win);
 		YSTR("workspace"); YSTR(c->ws->name);
 		YSTR("monitor_number"); YINT(c->ws->mon->num);
@@ -342,8 +342,8 @@ dump_monitor(yajl_gen gen, Monitor *mon, int is_selected)
 
 		YSTR("layout"); YMAP(
 			YSTR("symbol"); YMAP(
-				YSTR("current"); YSTR(ws->ltsymbol);
-				YSTR("old"); YSTR(ws->prevlayout->symbol);
+				YSTR("current"); YSTR(NVL(ws->ltsymbol, "NULL"));
+				YSTR("old"); YSTR(NVL(ws->prevlayout->symbol, "NULL"));
 			)
 			YSTR("address"); YMAP(
 				YSTR("current"); YINT((uintptr_t)ws->layout);
