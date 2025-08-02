@@ -42,7 +42,6 @@ void *parse_void_reference(const char *string);
 const char *parse_window_type(const char *string);
 void parse_module(const char *string, BarRule *rule);
 void add_button_binding(unsigned int click, unsigned int mask, unsigned int button, ArgFunc function, int argument, void *void_argument, float float_argument);
-void add_client_rule(Rule *rule);
 #if USE_KEYCODES
 void add_key_binding(int type, unsigned int mod, KeyCode keycode, ArgFunc function, int argument, void *void_argument, float float_argument);
 #else
@@ -542,8 +541,8 @@ add_button_binding(
 void
 read_clientrules(config_t *cfg)
 {
-	int i, f, num_rules, num_flags;
-	Rule r;
+	int i, f, num_flags;
+	Rule *r;
 	const char *string;
 
 	config_setting_t *rules, *rule, *flags;
@@ -552,95 +551,49 @@ read_clientrules(config_t *cfg)
 	if (!rules || !config_setting_is_list(rules))
 		return;
 
-	num_rules = config_setting_length(rules);
-	if (!num_rules)
+	num_client_rules = config_setting_length(rules);
+	if (!num_client_rules)
 		return;
 
-	clientrules = ecalloc(num_rules, sizeof(Rule));
+	clientrules = ecalloc(num_client_rules, sizeof(Rule));
 
-	for (i = 0; i < num_rules; i++) {
-		r.class = NULL;
-		r.role = NULL;
-		r.instance = NULL;
-		r.title = NULL;
-		r.wintype = NULL;
-		r.transient = 0;
-		r.opacity = 0;
-		r.flags = 0;
-		r.floatpos = NULL;
-		r.scratchkey = '\0';
-		r.workspace = NULL;
-		r.label = NULL;
-		r.swallowedby = '\0';
-		r.swallowkey = '\0';
-		r.iconpath = NULL;
-		r.alttitle = NULL;
-		r.resume = 0;
+	for (i = 0; i < num_client_rules; i++) {
+
+		r = &clientrules[i];
 
 		rule = config_setting_get_elem(rules, i);
 
-		config_setting_lookup_strdup(rule, "class", &r.class);
-		config_setting_lookup_strdup(rule, "role", &r.role);
-		config_setting_lookup_strdup(rule, "instance", &r.instance);
-		config_setting_lookup_strdup(rule, "title", &r.title);
+		config_setting_lookup_strdup(rule, "class", &r->class);
+		config_setting_lookup_strdup(rule, "role", &r->role);
+		config_setting_lookup_strdup(rule, "instance", &r->instance);
+		config_setting_lookup_strdup(rule, "title", &r->title);
 
 		if (config_setting_lookup_string(rule, "wintype", &string))
-			r.wintype = strdup(parse_window_type(string));
+			r->wintype = strdup(parse_window_type(string));
 
-		config_setting_lookup_strdup(rule, "floatpos", &r.floatpos);
-		config_setting_lookup_strdup(rule, "label", &r.label);
-		config_setting_lookup_strdup(rule, "iconpath", &r.iconpath);
-		config_setting_lookup_strdup(rule, "alttitle", &r.alttitle);
+		config_setting_lookup_strdup(rule, "floatpos", &r->floatpos);
+		config_setting_lookup_strdup(rule, "label", &r->label);
+		config_setting_lookup_strdup(rule, "iconpath", &r->iconpath);
+		config_setting_lookup_strdup(rule, "alttitle", &r->alttitle);
+		config_setting_lookup_strdup(rule, "workspace", &r->workspace);
 
 		if (config_setting_lookup_string(rule, "scratchkey", &string))
-			r.scratchkey = string[0];
+			r->scratchkey = string[0];
 		if (config_setting_lookup_string(rule, "swallowedby", &string))
-			r.swallowedby = string[0];
+			r->swallowedby = string[0];
 		if (config_setting_lookup_string(rule, "swallowkey", &string))
-			r.swallowkey = string[0];
+			r->swallowkey = string[0];
 
-		config_setting_lookup_int(rule, "transient", &r.transient);
-		config_setting_lookup_int(rule, "resume", &r.resume);
-		config_setting_lookup_float(rule, "opacity", &r.opacity);
+		config_setting_lookup_int(rule, "transient", &r->transient);
+		config_setting_lookup_int(rule, "resume", &r->resume);
+		config_setting_lookup_float(rule, "opacity", &r->opacity);
 
 		flags = config_setting_lookup(rule, "flags");
-		if (flags) {
-			if (config_setting_is_list(flags) || config_setting_is_array(flags)) {
-				num_flags = config_setting_length(flags);
-				for (f = 0; f < num_flags; f++) {
-					r.flags |= getflagbyname(config_setting_get_string_elem(flags, f));
-				}
-			} else {
-				r.flags = getflagbyname(config_setting_get_string(flags));
-			}
+		num_flags = setting_length(flags)
+		for (f = 0; f < num_flags; f++) {
+			r->flags |= getflagbyname(setting_get_string_elem(flags, f));
 		}
-
-		add_client_rule(&r);
 	}
-}
-
-void
-add_client_rule(Rule *rule)
-{
-	clientrules[num_client_rules].class = rule->class;
-	clientrules[num_client_rules].role = rule->role;
-	clientrules[num_client_rules].instance = rule->instance;
-	clientrules[num_client_rules].title = rule->title;
-	clientrules[num_client_rules].wintype = rule->wintype;
-	clientrules[num_client_rules].transient = rule->transient;
-	clientrules[num_client_rules].opacity = rule->opacity;
-	clientrules[num_client_rules].flags = rule->flags;
-	clientrules[num_client_rules].floatpos = rule->floatpos;
-	clientrules[num_client_rules].scratchkey = rule->scratchkey;
-	clientrules[num_client_rules].workspace = rule->workspace;
-	clientrules[num_client_rules].label = rule->label;
-	clientrules[num_client_rules].swallowedby = rule->swallowedby;
-	clientrules[num_client_rules].swallowkey = rule->swallowkey;
-	clientrules[num_client_rules].iconpath = rule->iconpath;
-	clientrules[num_client_rules].alttitle = rule->alttitle;
-	clientrules[num_client_rules].resume = rule->resume;
-
-	num_client_rules++;
 }
 
 void
