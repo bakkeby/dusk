@@ -48,7 +48,7 @@ XCBLIBS = `$(PKG_CONFIG) --libs x11-xcb xcb-res`
 # Needed for window icons
 IMLIB2LIBS = `$(PKG_CONFIG) --libs imlib2`
 
-CONFIG = `pkg-config --libs libconfig`
+CONFIG = `$(PKG_CONFIG) --libs libconfig`
 
 # Includes and libs
 INCS = ${FREETYPEINC} ${YAJLINC} ${DBUSINC} ${XINPUTINC} ${FRIBIDIINC}

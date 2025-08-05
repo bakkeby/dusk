@@ -132,7 +132,7 @@ int flexwintitle_hiddenweight = 1;  // hidden window title weight
 int flexwintitle_floatweight  = 1;  // floating window title weight, set to 0 to not show floating windows
 int flexwintitle_separator    = 0;  // width of client separator
 
-const char *default_fonts[] = { "monospace:size=10" };
+const char *fonts[] = { "monospace:size=10" };
 char dmenufont[60] = "monospace:size=10";
 
 char dmenunormfgcolor[16] = "#D9CFC5";

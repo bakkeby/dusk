@@ -3655,7 +3655,7 @@ setup(void)
 		loadxrdb();
 
 	if (!drw->fonts) {
-		if (!drw_fontset_create(drw, default_fonts, LENGTH(default_fonts)))
+		if (!drw_fontset_create(drw, fonts, LENGTH(fonts)))
 			die("no fonts could be loaded.");
 	}
 

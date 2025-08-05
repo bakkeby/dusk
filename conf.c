@@ -589,7 +589,7 @@ read_clientrules(config_t *cfg)
 		config_setting_lookup_float(rule, "opacity", &r->opacity);
 
 		flags = config_setting_lookup(rule, "flags");
-		num_flags = setting_length(flags)
+		num_flags = setting_length(flags);
 		for (f = 0; f < num_flags; f++) {
 			r->flags |= getflagbyname(setting_get_string_elem(flags, f));
 		}
