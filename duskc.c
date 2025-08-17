@@ -55,12 +55,6 @@ usage_run_commands(FILE *stream)
 	fprintf(stream, "\n");
 }
 
-int
-strstartswith(const char *str, const char *prefix)
-{
-	return strncmp(str, prefix, strlen(prefix)) == 0;
-}
-
 void
 parseargs(int argc, char *argv[])
 {
@@ -126,7 +120,7 @@ parseargs(int argc, char *argv[])
 					break;
 				case DBUS_TYPE_INT32:
 					/* If the argument starts with 0x then try to parse it as hex instead of integer. */
-					if (strstartswith(argv[i], "0x")) {
+					if (startswith("0x", argv[i])) {
 						scanned = sscanf(argv[i], "%x", &arg_uint);
 						arg_int = arg_uint;
 					} else {

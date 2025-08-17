@@ -98,6 +98,8 @@ void disablefunc(const uint64_t functionality);
 void togglefunc(const uint64_t functionality);
 void freestrdup(char **dest, const char *src);
 int freesprintf(char **dest, const char *format, ...);
+int startswith(const char *needle, const char *haystack);
+
 #ifdef __linux__
 size_t strlcpy(char * __restrict dst, const char * __restrict src, size_t dsize);
 size_t strlcat(char *dst, const char *src, size_t siz);

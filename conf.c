@@ -27,7 +27,7 @@ void read_workspace(config_t *cfg);
 void read_singles(config_t *cfg);
 int parse_align(const char *string);
 int parse_click(const char *string);
-ArgFunc parse_functionailty(const char *string);
+ArgFunc parse_function(const char *string);
 int parse_indicator(const char *indicator);
 int parse_function_int_constant(const char *string, ArgFunc func, int *ptr);
 int parse_key_type(const char *string);
@@ -37,7 +37,7 @@ int parse_layout_arrangement(const char *string);
 unsigned int parse_modifier(const char *string);
 int parse_scheme(const char *string);
 int parse_stacker_placement(const char *string);
-int parse_value(const char *string);
+int parse_bar_rule_value(const char *string);
 void *parse_void_reference(const char *string);
 const char *parse_window_type(const char *string);
 void parse_module(const char *string, BarRule *rule);
@@ -375,7 +375,7 @@ read_bar(config_t *cfg)
 				barrules[i].value = config_setting_get_int(value);
 				break;
 			case CONFIG_TYPE_STRING:
-				barrules[i].value = parse_value(config_setting_get_string(value));
+				barrules[i].value = parse_bar_rule_value(config_setting_get_string(value));
 				break;
 			}
 		}
@@ -462,7 +462,7 @@ read_button_bindings(config_t *cfg)
 		length = setting_length(function);
 		num_functions = MAX(length, 1);
 		for (j = 0; j < length; j++) {
-			function_arr[j] = parse_functionailty(setting_get_string_elem(function, j));
+			function_arr[j] = parse_function(setting_get_string_elem(function, j));
 		}
 
 		length = setting_length(argument);
@@ -718,7 +718,7 @@ read_keybindings(config_t *cfg)
 		length = setting_length(function);
 		num_functions = MAX(length, 1);
 		for (j = 0; j < length; j++) {
-			function_arr[j] = parse_functionailty(setting_get_string_elem(function, j));
+			function_arr[j] = parse_function(setting_get_string_elem(function, j));
 		}
 
 		length = setting_length(argument);
@@ -924,6 +924,7 @@ read_singles(config_t *cfg)
 		}
 	}
 
+	// TODO use strdup here and free perhaps?
 	if (config_lookup_string(cfg, "slop.spawnstyle", &string))
 		strlcpy(slopspawnstyle, string, LENGTH(slopspawnstyle));
 	if (config_lookup_string(cfg, "slop.resizestyle", &string))
@@ -1251,7 +1252,7 @@ parse_click(const char *string)
 }
 
 ArgFunc
-parse_functionailty(const char *string)
+parse_function(const char *string)
 {
 	map("changeopacity", changeopacity);
 	map("clienttomon", clienttomon);
@@ -1555,33 +1556,22 @@ parse_modifier(const char *string)
 int
 parse_scheme(const char *string)
 {
-	map("SchemeNorm", SchemeNorm);
+	if (startswith("Scheme", string))
+		string += 6;
+
 	map("Norm", SchemeNorm);
-	map("SchemeSel", SchemeSel);
 	map("Sel", SchemeSel);
-	map("SchemeTitleNorm", SchemeTitleNorm);
 	map("TitleNorm", SchemeTitleNorm);
-	map("SchemeTitleSel", SchemeTitleSel);
 	map("TitleSel", SchemeTitleSel);
-	map("SchemeWsNorm", SchemeWsNorm);
 	map("WsNorm", SchemeWsNorm);
-	map("SchemeWsVisible", SchemeWsVisible);
 	map("WsVisible", SchemeWsVisible);
-	map("SchemeWsSel", SchemeWsSel);
 	map("WsSel", SchemeWsSel);
-	map("SchemeWsOcc", SchemeWsOcc);
 	map("WsOcc", SchemeWsOcc);
-	map("SchemeScratchSel", SchemeScratchSel);
 	map("ScratchSel", SchemeScratchSel);
-	map("SchemeScratchNorm", SchemeScratchNorm);
 	map("ScratchNorm", SchemeScratchNorm);
-	map("SchemeHidSel", SchemeHidSel);
 	map("HidSel", SchemeHidSel);
-	map("SchemeHidNorm", SchemeHidNorm);
 	map("HidNorm", SchemeHidNorm);
-	map("SchemeUrg", SchemeUrg);
 	map("Urg", SchemeUrg);
-	map("SchemeMarked", SchemeMarked);
 	map("Marked", SchemeMarked);
 
 	fprintf(stderr, "Warning: config could not find color scheme with name %s\n", string);
@@ -1591,24 +1581,25 @@ parse_scheme(const char *string)
 int
 parse_stacker_placement(const char *string)
 {
+	if (startswith("Stacker", string))
+		string += 7;
+
 	map("RightOfWindowIcon", StackerRightOfWindowIcon);
 	map("LeftOfWindowIcon", StackerLeftOfWindowIcon);
 	map("TitlePrefix", StackerTitlePrefix);
 	map("TitleSuffix", StackerTitleSuffix);
 	map("TitleEllipsis", StackerTitleEllipsis);
-	map("StackerRightOfWindowIcon", StackerRightOfWindowIcon);
-	map("StackerLeftOfWindowIcon", StackerLeftOfWindowIcon);
-	map("StackerTitlePrefix", StackerTitlePrefix);
-	map("StackerTitleSuffix", StackerTitleSuffix);
-	map("StackerTitleEllipsis", StackerTitleEllipsis);
 
 	fprintf(stderr, "Warning: config could not find stacker placement with name %s\n", string);
 	return StackerTitlePrefix;
 }
 
 int
-parse_value(const char *string)
+parse_bar_rule_value(const char *string)
 {
+	if (startswith("Pwrl", string))
+		string += 4;
+
 	map("None", PwrlNone);
 	map("RightArrow", PwrlRightArrow);
 	map("LeftArrow", PwrlLeftArrow);
@@ -1616,13 +1607,6 @@ parse_value(const char *string)
 	map("Backslash", PwrlBackslash);
 	map("Solid", PwrlSolid);
 	map("SolidRev", PwrlSolidRev);
-	map("PwrlNone", PwrlNone);
-	map("PwrlRightArrow", PwrlRightArrow);
-	map("PwrlLeftArrow", PwrlLeftArrow);
-	map("PwrlForwardSlash", PwrlForwardSlash);
-	map("PwrlBackslash", PwrlBackslash);
-	map("PwrlSolid", PwrlSolid);
-	map("PwrlSolidRev", PwrlSolidRev);
 
 	fprintf(stderr, "Warning: config could not find powerline option with name %s\n", string);
 	return atoi(string);

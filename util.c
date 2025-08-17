@@ -101,6 +101,10 @@ freesprintf(char **dest, const char *format, ...)
 	return result;
 }
 
+int startswith(const char *needle, const char *haystack)
+{
+	return !strncmp(haystack, needle, strlen(needle));
+}
 
 #ifdef __linux__
 /*

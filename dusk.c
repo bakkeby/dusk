@@ -545,7 +545,7 @@ static int xerrordummy(Display *dpy, XErrorEvent *ee);
 static int xerrorstart(Display *dpy, XErrorEvent *ee);
 static void zoom(const Arg *arg);
 
-/* bar functions */
+/* misc functions */
 #include "lib/include.h"
 
 /* variables */
@@ -1193,6 +1193,11 @@ cleanup(void)
 	/* Cleanup buttons */
 	if (buttons != default_buttons) {
 		free(buttons);
+	}
+
+	/* Cleanup keybindings */
+	if (keys != default_keys) {
+		free(keys);
 	}
 
 	/* Cleanup stacker icons */
