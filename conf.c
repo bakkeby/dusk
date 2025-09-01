@@ -1,81 +1,176 @@
 #include <libconfig.h>
 
+static char *_cfg_slopspawnstyle = NULL;
+static char *_cfg_slopresizestyle = NULL;
+static char *_cfg_toggle_float_pos = NULL;
+static char *_cfg_custom_2d_indicator_1 = NULL;
+static char *_cfg_custom_2d_indicator_2 = NULL;
+static char *_cfg_custom_2d_indicator_3 = NULL;
+static char *_cfg_custom_2d_indicator_4 = NULL;
+static char *_cfg_custom_2d_indicator_5 = NULL;
+static char *_cfg_custom_2d_indicator_6 = NULL;
+static char *_cfg_occupied_workspace_label_format = NULL;
+static char *_cfg_vacant_workspace_label_format = NULL;
+static char *_cfg_cached_strings_array[50] = {0};
+static char ***_cfg_colors = NULL;
+static char ***_cfg_autostart = NULL;
+static char ***_cfg_autorestart = NULL;
+static Rule *_cfg_clientrules = NULL;
+static BarDef *_cfg_bars = NULL;
+static BarRule *_cfg_barrules = NULL;
+static WorkspaceRule *_cfg_wsrules = NULL;
+static Layout *_cfg_layouts = NULL;
+static Button *_cfg_buttons = NULL;
+static Command *_cfg_commands = NULL;
+static Key *_cfg_keys = NULL;
+static StackerIcon *_cfg_stackericons = NULL;
+
+static int num_wsrules;
+static int num_autostart = 0;
+static int num_autorestart = 0;
+static int num_autostart_pids = 0;
+static int num_cached_strings = 0;
+static int num_client_rules = 0;
+static int num_workspaces = 0; /* the number of available workspaces */
+static int num_stackericons = 0;
+static int num_layouts = 0;
+static int num_button_bindings = 0;
+static int num_key_bindings = 0;
+static int num_commands = 0;
+
 /* libconfig helper functions */
-int config_setting_lookup_strdup(const config_setting_t *cfg, const char *name, char **strptr);
-int config_lookup_sloppy_bool(const config_t *cfg, const char *name, int *ptr);
-int config_setting_lookup_sloppy_bool(const config_setting_t *cfg, const char *name, int *ptr);
-int config_setting_get_sloppy_bool(const config_setting_t *cfg, int *ptr);
-int setting_length(const config_setting_t *cfg);
+static int setting_length(const config_setting_t *cfg);
 const char *setting_get_string_elem(const config_setting_t *cfg, int i);
-int setting_get_int_elem(const config_setting_t *cfg, int i);
+static int setting_get_int_elem(const config_setting_t *cfg, int i);
 const config_setting_t *setting_get_elem(const config_setting_t *cfg, int i);
 
-void set_config_path(const char* filename, char *config_path, char *config_file);
-void read_config(void);
-void read_autostart(config_t *cfg);
-void read_bar(config_t *cfg);
-void read_button_bindings(config_t *cfg);
-void read_clientrules(config_t *cfg);
-void read_colors(config_t *cfg);
-void read_commands(config_t *cfg);
-void read_fonts(config_t *cfg);
-void read_functionality(config_t *cfg);
-void read_indicators(config_t *cfg);
-void read_keybindings(config_t *cfg);
-void read_layouts(config_t *cfg);
-void read_workspace(config_t *cfg);
-void read_singles(config_t *cfg);
-int parse_align(const char *string);
-int parse_click(const char *string);
-ArgFunc parse_function(const char *string);
-int parse_indicator(const char *indicator);
-int parse_function_int_constant(const char *string, ArgFunc func, int *ptr);
-int parse_key_type(const char *string);
-int parse_layout(const char *string);
-int parse_layout_split(const char *string);
-int parse_layout_arrangement(const char *string);
-unsigned int parse_modifier(const char *string);
-int parse_scheme(const char *string);
-int parse_stacker_placement(const char *string);
-int parse_bar_rule_value(const char *string);
-void *parse_void_reference(const char *string);
+static int config_lookup_sloppy_bool(const config_t *cfg, const char *name, int *ptr);
+static int config_setting_lookup_sloppy_bool(const config_setting_t *cfg, const char *name, int *ptr);
+static int _config_setting_get_sloppy_bool(const config_setting_t *cfg, int *ptr);
+
+static int config_lookup_simple_float(const config_t *cfg, const char *name, float *floatptr);
+static int config_setting_lookup_simple_float(const config_setting_t *cfg, const char *name, float *floatptr);
+static int _config_setting_get_simple_float(const config_setting_t *cfg_item, float *floatptr);
+
+static int config_lookup_strdup(const config_t *cfg, const char *name, char **strptr);
+static int config_setting_lookup_strdup(const config_setting_t *cfg, const char *name, char **strptr);
+static int _config_setting_strdup_string(const config_setting_t *cfg_item, char **strptr);
+
+static int config_lookup_unsigned_int(const config_t *cfg, const char *name, unsigned int *ptr);
+static int config_setting_lookup_unsigned_int(const config_setting_t *cfg, const char *name, unsigned int *ptr);
+static int _config_setting_get_unsigned_int(const config_setting_t *cfg_item, unsigned int *ptr);
+
+static void set_config_path(const char* filename, char *config_path, char *config_file);
+static void load_config(void);
+static void load_fallback_config(void);
+static void load_autostart(config_t *cfg);
+static void load_bar(config_t *cfg);
+static void load_button_bindings(config_t *cfg);
+static void load_clientrules(config_t *cfg);
+static void load_colors(config_t *cfg);
+static void load_commands(config_t *cfg);
+static void load_fonts(config_t *cfg);
+static void load_functionality(config_t *cfg);
+static void load_indicators(config_t *cfg);
+static void load_keybindings(config_t *cfg);
+static void load_layouts(config_t *cfg);
+static void load_workspace(config_t *cfg);
+static void load_singles(config_t *cfg);
+static void cleanup_config(void);
+static int parse_align(const char *string);
+static int parse_click(const char *string);
+static ArgFunc parse_function(const char *string);
+static int parse_indicator(const char *indicator);
+static int parse_function_int_constant(const char *string, ArgFunc func, int *ptr);
+static int parse_key_type(const char *string);
+static int parse_layout(const char *string);
+static int parse_layout_split(const char *string);
+static int parse_layout_arrangement(const char *string);
+static unsigned int parse_modifier(const char *string);
+static int parse_scheme(const char *string);
+static int parse_stacker_placement(const char *string);
+static int parse_bar_rule_value(const char *string);
+static void *parse_void_reference(const char *string);
+static char ***execv_dup(const char *const *flat, int *count);
+static void execv_free(char ***argvv);
 const char *parse_window_type(const char *string);
-void parse_module(const char *string, BarRule *rule);
-void add_button_binding(unsigned int click, unsigned int mask, unsigned int button, ArgFunc function, int argument, void *void_argument, float float_argument);
+static void parse_module(const char *string, BarRule *rule);
+static void *cfg_get_command(const char *string);
+
+static void add_button_binding(unsigned int click, unsigned int mask, unsigned int button, ArgFunc function, int argument, void *void_argument, float float_argument);
 #if USE_KEYCODES
-void add_key_binding(int type, unsigned int mod, KeyCode keycode, ArgFunc function, int argument, void *void_argument, float float_argument);
+static void add_key_binding(int type, unsigned int mod, KeyCode keycode, ArgFunc function, int argument, void *void_argument, float float_argument);
 #else
-void add_key_binding(int type, unsigned int mod, KeySym keysym, ArgFunc function, int argument, void *void_argument, float float_argument);
+static void add_key_binding(int type, unsigned int mod, KeySym keysym, ArgFunc function, int argument, void *void_argument, float float_argument);
 #endif // USE_KEYCODES
-void add_stacker_icon(config_t *cfg, const char *string, int value);
+static void add_stacker_icon(config_t *cfg, const char *string, int value);
+
+int
+config_lookup_strdup(const config_t *cfg, const char *name, char **strptr)
+{
+	return _config_setting_strdup_string(config_lookup(cfg, name), strptr);
+}
 
 int
 config_setting_lookup_strdup(const config_setting_t *cfg, const char *name, char **strptr)
 {
-	const char *string;
-	if (config_setting_lookup_string(cfg, name, &string)) {
-		free(*strptr);
-		*strptr = strdup(string);
-		return 1;
-	}
+	return _config_setting_strdup_string(config_setting_lookup(cfg, name), strptr);
+}
 
-	return 0;
+int
+_config_setting_strdup_string(const config_setting_t *cfg_item, char **strptr)
+{
+	if (!cfg_item)
+		return 0;
+
+	const char *string = config_setting_get_string(cfg_item);
+
+	if (!string)
+		return 0;
+
+	free(*strptr);
+	*strptr = strdup(string);
+	return 1;
+}
+
+int
+config_lookup_simple_float(const config_t *cfg, const char *name, float *floatptr)
+{
+	return _config_setting_get_simple_float(config_lookup(cfg, name), floatptr);
+}
+
+int
+config_setting_lookup_simple_float(const config_setting_t *cfg, const char *name, float *floatptr)
+{
+	return _config_setting_get_simple_float(config_setting_lookup(cfg, name), floatptr);
+}
+
+int
+_config_setting_get_simple_float(const config_setting_t *cfg_item, float *floatptr)
+{
+	if (!cfg_item)
+		return 0;
+
+	double value = config_setting_get_float(cfg_item);
+
+	*floatptr = (float)value;
+	return 1;
 }
 
 int
 config_lookup_sloppy_bool(const config_t *cfg, const char *name, int *ptr)
 {
-	return config_setting_get_sloppy_bool(config_lookup(cfg, name), ptr);
+	return _config_setting_get_sloppy_bool(config_lookup(cfg, name), ptr);
 }
 
 int
 config_setting_lookup_sloppy_bool(const config_setting_t *cfg, const char *name, int *ptr)
 {
-	return config_setting_get_sloppy_bool(config_setting_lookup(cfg, name), ptr);
+	return _config_setting_get_sloppy_bool(config_setting_lookup(cfg, name), ptr);
 }
 
 int
-config_setting_get_sloppy_bool(const config_setting_t *cfg_item, int *ptr)
+_config_setting_get_sloppy_bool(const config_setting_t *cfg_item, int *ptr)
 {
 	const char *string;
 
@@ -102,6 +197,33 @@ config_setting_get_sloppy_bool(const config_setting_t *cfg_item, int *ptr)
 	}
 
 	return 0;
+}
+
+int
+config_lookup_unsigned_int(const config_t *cfg, const char *name, unsigned int *ptr)
+{
+	return _config_setting_get_unsigned_int(config_lookup(cfg, name), ptr);
+}
+
+int
+config_setting_lookup_unsigned_int(const config_setting_t *cfg, const char *name, unsigned int *ptr)
+{
+	return _config_setting_get_unsigned_int(config_setting_lookup(cfg, name), ptr);
+}
+
+int
+_config_setting_get_unsigned_int(const config_setting_t *cfg_item, unsigned int *ptr)
+{
+	if (!cfg_item)
+		return 0;
+
+	int integer = config_setting_get_int(cfg_item);
+
+	if (integer < 0)
+		return 0;
+
+	*ptr = (unsigned int)integer;
+	return 1;
 }
 
 int
@@ -185,8 +307,71 @@ set_config_path(const char* filename, char *config_path, char *config_file)
 	snprintf(config_file, PATH_MAX, "%s/%s", config_path, filename);
 }
 
+char ***
+execv_dup(const char *const *flat, int *count)
+{
+	size_t progcount = 0;
+
+	/* Count number of programs */
+	for (size_t i = 0; flat[i]; ) {
+		progcount++;
+		while (flat[i]) i++;  /* skip program args */
+		i++;                  /* skip NULL separator */
+	}
+
+	char ***all = malloc((progcount + 1) * sizeof *all);
+	if (!all)
+		return NULL;
+
+	size_t p = 0;
+	for (size_t i = 0; flat[i]; p++) {
+		/* count args for this program */
+		size_t argc = 0;
+		while (flat[i + argc]) argc++;
+
+		all[p] = malloc((argc + 1) * sizeof *all[p]);
+		if (!all[p]) {
+			execv_free(all);
+			return NULL;
+		}
+
+		for (size_t j = 0; j < argc; j++) {
+			all[p][j] = strdup(flat[i + j]);
+			if (!all[p][j]) {
+				execv_free(all);
+				return NULL;
+			}
+		}
+		all[p][argc] = NULL;
+
+		i += argc + 1; /* skip argv + NULL */
+	}
+	all[p] = NULL;
+
+	if (count)
+		*count = progcount;
+
+	return all;
+}
+
 void
-read_config(void)
+execv_free(char ***argvv)
+{
+	if (!argvv)
+		return;
+
+	for (size_t i = 0; argvv[i]; i++) {
+		char **argv = argvv[i];
+		for (size_t j = 0; argv[j]; j++) {
+			free(argv[j]);
+		}
+		free(argv);
+	}
+	free(argvv);
+}
+
+void
+load_config(void)
 {
 	config_t cfg;
 	char config_path[PATH_MAX] = {0};
@@ -211,28 +396,243 @@ read_config(void)
 				config_error_line(&cfg),
 				config_error_text(&cfg));
 
+		load_fallback_config();
 		config_destroy(&cfg);
 		return;
 	}
 
-	read_singles(&cfg);
-	read_commands(&cfg);
-	read_autostart(&cfg);
-	read_bar(&cfg);
-	read_button_bindings(&cfg);
-	read_clientrules(&cfg);
-	read_colors(&cfg);
-	read_fonts(&cfg);
-	read_functionality(&cfg);
-	read_indicators(&cfg);
-	read_keybindings(&cfg);
-	read_layouts(&cfg);
-	read_workspace(&cfg);
+	load_singles(&cfg);
+	load_commands(&cfg);
+	load_autostart(&cfg);
+	load_bar(&cfg);
+	load_button_bindings(&cfg);
+	load_clientrules(&cfg);
+	load_colors(&cfg);
+	load_fonts(&cfg);
+	load_functionality(&cfg);
+	load_indicators(&cfg);
+	load_keybindings(&cfg);
+	load_layouts(&cfg);
+	load_workspace(&cfg);
+	load_fallback_config();
 	config_destroy(&cfg);
 }
 
+#define STRDUPIFNULL(X) if (!CFG(X)) CFG(X) = strdup(X)
+
 void
-read_autostart(config_t *cfg)
+load_fallback_config(void)
+{
+	int i, j;
+
+	STRDUPIFNULL(slopspawnstyle);
+	STRDUPIFNULL(slopresizestyle);
+	STRDUPIFNULL(toggle_float_pos);
+	STRDUPIFNULL(custom_2d_indicator_1);
+	STRDUPIFNULL(custom_2d_indicator_2);
+	STRDUPIFNULL(custom_2d_indicator_3);
+	STRDUPIFNULL(custom_2d_indicator_4);
+	STRDUPIFNULL(custom_2d_indicator_5);
+	STRDUPIFNULL(custom_2d_indicator_6);
+	STRDUPIFNULL(occupied_workspace_label_format);
+	STRDUPIFNULL(vacant_workspace_label_format);
+
+	if (!_cfg_colors) {
+		/* Initialise the colors array */
+		_cfg_colors = ecalloc(SchemeLast, sizeof(char **));
+		for (i = 0; i < SchemeLast; i++) {
+			_cfg_colors[i] = ecalloc((ColCount+1), sizeof(char *));
+			for (j = 0; j <= ColCount; j++) {
+				_cfg_colors[i][j] = NULL;
+			}
+		}
+	}
+
+	/* Fall back to default values if not set via config */
+	for (i = 0; i < SchemeLast; i++) {
+		for (j = 0; j <= ColCount; j++) {
+			if (_cfg_colors[i][j] == NULL && colors[i][j] != NULL) {
+				_cfg_colors[i][j] = strdup(colors[i][j]);
+			}
+		}
+	}
+
+	if (!_cfg_autostart) {
+		_cfg_autostart = execv_dup(autostart, &num_autostart);
+	}
+
+	if (!_cfg_autorestart) {
+		_cfg_autorestart = execv_dup(autorestart, &num_autorestart);
+	}
+
+	if (!_cfg_clientrules) {
+		_cfg_clientrules = clientrules;
+		num_client_rules = LENGTH(clientrules);
+	}
+
+	if (!_cfg_bars) {
+		_cfg_bars = bars;
+		num_bars = LENGTH(bars);
+	}
+
+	if (!_cfg_barrules) {
+		_cfg_barrules = barrules;
+		num_barrules = LENGTH(barrules);
+	}
+
+	if (!_cfg_wsrules) {
+		_cfg_wsrules = wsrules;
+		num_wsrules = LENGTH(wsrules);
+	}
+
+	if (!_cfg_layouts) {
+		_cfg_layouts = layouts;
+		num_layouts = LENGTH(layouts);
+	}
+
+	if (!_cfg_keys) {
+		_cfg_keys = keys;
+		num_key_bindings = LENGTH(keys);
+	}
+
+	if (!_cfg_buttons) {
+		_cfg_buttons = buttons;
+		num_button_bindings = LENGTH(buttons);
+	}
+
+	if (!_cfg_stackericons) {
+		_cfg_stackericons = stackericons;
+		num_stackericons = LENGTH(stackericons);
+	}
+}
+
+#undef STRDUPIFNULL
+
+void
+cleanup_config(void)
+{
+	int i, j;
+	Rule *rule;
+	BarDef *bar;
+
+	free(_cfg_slopspawnstyle);
+	free(_cfg_slopresizestyle);
+	free(_cfg_toggle_float_pos);
+	free(_cfg_custom_2d_indicator_1);
+	free(_cfg_custom_2d_indicator_2);
+	free(_cfg_custom_2d_indicator_3);
+	free(_cfg_custom_2d_indicator_4);
+	free(_cfg_custom_2d_indicator_5);
+	free(_cfg_custom_2d_indicator_6);
+	free(_cfg_occupied_workspace_label_format);
+	free(_cfg_vacant_workspace_label_format);
+
+	/* Cleanup colors */
+	for (i = 0; i < SchemeLast; i++) {
+		for (j = 0; j < ColCount; j++) {
+			free(_cfg_colors[i][j]);
+		}
+	}
+	free(_cfg_colors);
+
+	execv_free(_cfg_autostart);
+	execv_free(_cfg_autorestart);
+
+	/* Cleanup client rules */
+	if (_cfg_clientrules != clientrules) {
+		for (i = 0; i < num_client_rules; i++) {
+			rule = &_cfg_clientrules[i];
+			free(rule->class);
+			free(rule->role);
+			free(rule->instance);
+			free(rule->title);
+			free(rule->wintype);
+			free(rule->floatpos);
+			free(rule->workspace);
+			free(rule->label);
+			free(rule->iconpath);
+			free(rule->alttitle);
+		}
+		free(_cfg_clientrules);
+	}
+
+	/* Cleanup bar definitions */
+	if (_cfg_bars != bars) {
+		for (i = 0; i < num_bars; i++) {
+			bar = &_cfg_bars[i];
+			free(bar->barpos);
+			free(bar->name);
+			free(bar->extclass);
+			free(bar->extinstance);
+			free(bar->extname);
+		}
+		free(_cfg_bars);
+	}
+
+	/* Cleanup barrules */
+	if (_cfg_barrules != barrules) {
+		for (i = 0; i < num_barrules; i++) {
+			free(_cfg_barrules[i].name);
+		}
+		free(_cfg_barrules);
+	}
+
+	/* Cleanup workspace rules */
+	if (_cfg_wsrules != wsrules) {
+		for (i = 0; i < num_wsrules; i++) {
+			free(_cfg_wsrules[i].icondef);
+			free(_cfg_wsrules[i].iconvac);
+			free(_cfg_wsrules[i].iconocc);
+		}
+		free(_cfg_wsrules);
+	}
+
+	/* Cleanup layouts */
+	if (_cfg_layouts != layouts) {
+		for (i = 0; i < num_layouts; i++) {
+			free(_cfg_layouts[i].name);
+			free(_cfg_layouts[i].symbol);
+		}
+		free(_cfg_layouts);
+	}
+
+	/* Cleanup keybindings */
+	if (_cfg_keys != keys) {
+		free(_cfg_keys);
+	}
+
+	/* Cleanup buttons */
+	if (_cfg_buttons != buttons) {
+		free(_cfg_buttons);
+	}
+
+	/* Cleanup stacker icons */
+	if (_cfg_stackericons != stackericons) {
+		for (i = 0; i < num_stackericons; i++) {
+			free(_cfg_stackericons[i].icon);
+		}
+		free(_cfg_stackericons);
+	}
+
+	/* Cleanup commands */
+	if (_cfg_commands != NULL) {
+		for (i = 0; i < num_commands; i++) {
+			free(_cfg_commands[i].name);
+			for (j = 0; _cfg_commands[i].argv[j] != NULL; j++) {
+				free(_cfg_commands[i].argv[j]);
+			}
+		}
+		free(_cfg_commands);
+	}
+
+	/* Cleanup stray strings from config */
+	for (i = 0; i < num_cached_strings; i++) {
+		free(_cfg_cached_strings_array[i]);
+	}
+}
+
+void
+load_autostart(config_t *cfg)
 {
 	int i;
 	config_setting_t *auto_cfg;
@@ -241,9 +641,9 @@ read_autostart(config_t *cfg)
 	if (auto_cfg && config_setting_is_array(auto_cfg)) {
 		num_autostart = config_setting_length(auto_cfg);
 		if (num_autostart) {
-			autostart = ecalloc(num_autostart + 1, sizeof(char **));
+			_cfg_autostart = ecalloc(num_autostart + 1, sizeof(char **));
 			for (i = 0; i < num_autostart; i++) {
-				autostart[i] = parse_void_reference(config_setting_get_string_elem(auto_cfg, i));
+				_cfg_autostart[i] = parse_void_reference(config_setting_get_string_elem(auto_cfg, i));
 			}
 		}
 	}
@@ -252,20 +652,23 @@ read_autostart(config_t *cfg)
 	if (auto_cfg && config_setting_is_array(auto_cfg)) {
 		num_autorestart = config_setting_length(auto_cfg);
 		if (num_autorestart) {
-			autorestart = ecalloc(num_autorestart + 1, sizeof(char **));
+			_cfg_autorestart = ecalloc(num_autorestart + 1, sizeof(char **));
 			for (i = 0; i < num_autorestart; i++) {
-				autorestart[i] = parse_void_reference(config_setting_get_string_elem(auto_cfg, i));
+				_cfg_autorestart[i] = parse_void_reference(config_setting_get_string_elem(auto_cfg, i));
 			}
 		}
 	}
 }
 
 void
-read_bar(config_t *cfg)
+load_bar(config_t *cfg)
 {
-	int i, alpha;
+	int i;
+	unsigned int alpha;
 	const char *string;
-	config_setting_t *barconfig, *bar, *rules, *rule, *monitor, *scheme, *value, *align;
+	BarDef *bar;
+	BarRule *rule;
+	config_setting_t *barconfig, *bar_t, *rules, *rule_t, *monitor, *scheme, *value, *align;
 
 	config_lookup_sloppy_bool(cfg, "bar.showbar", &initshowbar);
 
@@ -276,36 +679,37 @@ read_bar(config_t *cfg)
 		sidepad = borderpx;
 	config_lookup_int(cfg, "bar.text_padding", &horizpadbar);
 	config_lookup_int(cfg, "bar.height_padding", &vertpadbar);
-	config_lookup_int(cfg, "bar.systrayspacing", &systrayspacing);
+	config_lookup_unsigned_int(cfg, "bar.systrayspacing", &systrayspacing);
 
-	if (config_lookup_int(cfg, "bar.alpha_fg", &alpha))
+	if (config_lookup_unsigned_int(cfg, "bar.alpha_fg", &alpha))
 		default_alphas[ColFg] = alpha;
-	if (config_lookup_int(cfg, "bar.alpha_bg", &alpha))
+	if (config_lookup_unsigned_int(cfg, "bar.alpha_bg", &alpha))
 		default_alphas[ColBg] = alpha;
-	if (config_lookup_int(cfg, "bar.alpha_border", &alpha))
+	if (config_lookup_unsigned_int(cfg, "bar.alpha_border", &alpha))
 		default_alphas[ColBorder] = alpha;
 
 	/* Bars */
 	barconfig = config_lookup(cfg, "bar.bars");
 	if (barconfig && config_setting_is_list(barconfig)) {
 		if ((num_bars = config_setting_length(barconfig))) {
-			bars = ecalloc(num_bars, sizeof(BarDef));
+			_cfg_bars = ecalloc(num_bars, sizeof(BarDef));
 			for (i = 0; i < num_bars; i++) {
-				bars[i].barpos = NULL;
-				bars[i].extclass = NULL;
-				bars[i].extinstance = NULL;
-				bars[i].extname = NULL;
-				bars[i].name = NULL;
+				bar = &_cfg_bars[i];
+				bar->barpos = NULL;
+				bar->extclass = NULL;
+				bar->extinstance = NULL;
+				bar->extname = NULL;
+				bar->name = NULL;
 
-				bar = config_setting_get_elem(barconfig, i);
-				config_setting_lookup_int(bar, "monitor", &bars[i].monitor);
-				config_setting_lookup_int(bar, "bar", &bars[i].idx);
-				config_setting_lookup_int(bar, "vert", &bars[i].vert);
-				config_setting_lookup_strdup(bar, "pos", &bars[i].barpos);
-				config_setting_lookup_strdup(bar, "extclass", &bars[i].extclass);
-				config_setting_lookup_strdup(bar, "extinst", &bars[i].extinstance);
-				config_setting_lookup_strdup(bar, "extname", &bars[i].extname);
-				config_setting_lookup_strdup(bar, "name", &bars[i].name);
+				bar_t = config_setting_get_elem(barconfig, i);
+				config_setting_lookup_int(bar_t, "monitor", &bar->monitor);
+				config_setting_lookup_int(bar_t, "bar", &bar->idx);
+				config_setting_lookup_int(bar_t, "vert", &bar->vert);
+				config_setting_lookup_strdup(bar_t, "pos", &bar->barpos);
+				config_setting_lookup_strdup(bar_t, "extclass", &bar->extclass);
+				config_setting_lookup_strdup(bar_t, "extinst", &bar->extinstance);
+				config_setting_lookup_strdup(bar_t, "extname", &bar->extname);
+				config_setting_lookup_strdup(bar_t, "name", &bar->name);
 			}
 		}
 	}
@@ -319,87 +723,88 @@ read_bar(config_t *cfg)
 	if (!num_barrules)
 		return;
 
-	barrules = ecalloc(num_barrules, sizeof(BarRule));
+	_cfg_barrules = ecalloc(num_barrules, sizeof(BarRule));
 	for (i = 0; i < num_barrules; i++) {
+		rule = &_cfg_barrules[i];
 		/* Default values */
-		barrules[i].monitor = -1;
-		barrules[i].bar = 0;
-		barrules[i].scheme = SchemeNorm;
-		barrules[i].lpad = 0;
-		barrules[i].rpad = 0;
-		barrules[i].value = 0;
-		barrules[i].alignment = 0;
-		barrules[i].name = NULL;
+		rule->monitor = -1;
+		rule->bar = 0;
+		rule->scheme = SchemeNorm;
+		rule->lpad = 0;
+		rule->rpad = 0;
+		rule->value = 0;
+		rule->alignment = 0;
+		rule->name = NULL;
 
-		rule = config_setting_get_elem(rules, i);
-		if (!rule)
+		rule_t = config_setting_get_elem(rules, i);
+		if (!rule_t)
 			continue;
 
-		if ((monitor = config_setting_lookup(rule, "monitor"))) {
+		if ((monitor = config_setting_lookup(rule_t, "monitor"))) {
 			switch (config_setting_type(monitor)) {
 			case CONFIG_TYPE_INT:
-				barrules[i].monitor = config_setting_get_int(monitor);
+				rule->monitor = config_setting_get_int(monitor);
 				break;
 			case CONFIG_TYPE_STRING:
 				string = config_setting_get_string(monitor);
 				if (!strcasecmp("A", string)) {
-					barrules[i].scheme = 'A';
+					rule->scheme = 'A';
 				} else {
-					barrules[i].scheme = atoi(string);
+					rule->scheme = atoi(string);
 				}
 				break;
 			}
 		}
 
-		config_setting_lookup_int(rule, "bar", &barrules[i].bar);
+		config_setting_lookup_int(rule_t, "bar", &rule->bar);
 
-		if ((scheme = config_setting_lookup(rule, "scheme"))) {
+		if ((scheme = config_setting_lookup(rule_t, "scheme"))) {
 			switch (config_setting_type(scheme)) {
 			case CONFIG_TYPE_INT:
-				barrules[i].scheme = config_setting_get_int(scheme);
+				rule->scheme = config_setting_get_int(scheme);
 				break;
 			case CONFIG_TYPE_STRING:
-				barrules[i].scheme = parse_scheme(config_setting_get_string(scheme));
+				rule->scheme = parse_scheme(config_setting_get_string(scheme));
 				break;
 			}
 		}
 
-		config_setting_lookup_int(rule, "padding", &barrules[i].lpad);
-		config_setting_lookup_int(rule, "padding", &barrules[i].rpad);
-		config_setting_lookup_int(rule, "lpad", &barrules[i].lpad);
-		config_setting_lookup_int(rule, "rpad", &barrules[i].rpad);
+		config_setting_lookup_int(rule_t, "padding", &rule->lpad);
+		config_setting_lookup_int(rule_t, "padding", &rule->rpad);
+		config_setting_lookup_int(rule_t, "lpad", &rule->lpad);
+		config_setting_lookup_int(rule_t, "rpad", &rule->rpad);
 
-		if ((value = config_setting_lookup(rule, "value"))) {
+		if ((value = config_setting_lookup(rule_t, "value"))) {
 			switch (config_setting_type(value)) {
 			case CONFIG_TYPE_INT:
-				barrules[i].value = config_setting_get_int(value);
+				rule->value = config_setting_get_int(value);
 				break;
 			case CONFIG_TYPE_STRING:
-				barrules[i].value = parse_bar_rule_value(config_setting_get_string(value));
+				rule->value = parse_bar_rule_value(config_setting_get_string(value));
 				break;
 			}
 		}
 
-		if ((align = config_setting_lookup(rule, "align"))) {
+		if ((align = config_setting_lookup(rule_t, "align"))) {
 			switch (config_setting_type(align)) {
 			case CONFIG_TYPE_INT:
-				barrules[i].alignment = config_setting_get_int(align);
+				rule->alignment = config_setting_get_int(align);
 				break;
 			case CONFIG_TYPE_STRING:
-				barrules[i].alignment = parse_align(config_setting_get_string(align));
+				rule->alignment = parse_align(config_setting_get_string(align));
 				break;
 			}
 		}
 
-		config_setting_lookup_string(rule, "module", &string);
-		parse_module(string, &barrules[i]);
+		config_setting_lookup_string(rule_t, "module", &string);
+		parse_module(string, rule);
 
-		config_setting_lookup_strdup(rule, "name", &barrules[i].name);
+		config_setting_lookup_strdup(rule_t, "name", &rule->name);
 	}
 }
 
 void
-read_button_bindings(config_t *cfg)
+load_button_bindings(config_t *cfg)
 {
 	int i, j, k, length, num_clicks, num_modifiers, num_buttons, num_functions, num_arguments;
 	int num_bindings, num_expanded_bindings, value;
@@ -422,7 +827,7 @@ read_button_bindings(config_t *cfg)
 	if (!num_bindings)
 		return;
 
-	buttons = ecalloc(MAX(num_bindings * 2, 60), sizeof(Button));
+	_cfg_buttons = ecalloc(MAX(num_bindings * 2, 60), sizeof(Button));
 
 	/* Parse and set the button bindings based on config */
 	for (i = 0; i < num_bindings; i++) {
@@ -521,25 +926,24 @@ add_button_binding(
 	int argument,
 	void *void_argument,
 	float float_argument
-
 ) {
-	buttons[num_button_bindings].click = click;
-	buttons[num_button_bindings].mask = mask;
-	buttons[num_button_bindings].button = button;
-	buttons[num_button_bindings].func = function;
+	_cfg_buttons[num_button_bindings].click = click;
+	_cfg_buttons[num_button_bindings].mask = mask;
+	_cfg_buttons[num_button_bindings].button = button;
+	_cfg_buttons[num_button_bindings].func = function;
 	if (void_argument != NULL) {
-		buttons[num_button_bindings].arg.v = void_argument;
+		_cfg_buttons[num_button_bindings].arg.v = void_argument;
 	} else if (float_argument != 0) {
-		buttons[num_button_bindings].arg.f = float_argument;
+		_cfg_buttons[num_button_bindings].arg.f = float_argument;
 	} else {
-		buttons[num_button_bindings].arg.i = argument;
+		_cfg_buttons[num_button_bindings].arg.i = argument;
 	}
 
 	num_button_bindings++;
 }
 
 void
-read_clientrules(config_t *cfg)
+load_clientrules(config_t *cfg)
 {
 	int i, f, num_flags;
 	Rule *r;
@@ -555,11 +959,11 @@ read_clientrules(config_t *cfg)
 	if (!num_client_rules)
 		return;
 
-	clientrules = ecalloc(num_client_rules, sizeof(Rule));
+	_cfg_clientrules = ecalloc(num_client_rules, sizeof(Rule));
 
 	for (i = 0; i < num_client_rules; i++) {
 
-		r = &clientrules[i];
+		r = &_cfg_clientrules[i];
 
 		rule = config_setting_get_elem(rules, i);
 
@@ -597,9 +1001,9 @@ read_clientrules(config_t *cfg)
 }
 
 void
-read_colors(config_t *cfg)
+load_colors(config_t *cfg)
 {
-	int i, num_cols;
+	int i, j, num_cols, scheme;
 	config_setting_t *cols, *col;
 
 	cols = config_lookup(cfg, "colors");
@@ -610,22 +1014,32 @@ read_colors(config_t *cfg)
 	if (!num_cols)
 		return;
 
+	/* Initialise the colors array */
+	_cfg_colors = ecalloc(SchemeLast, sizeof(char **));
+	for (i = 0; i < SchemeLast; i++) {
+		_cfg_colors[i] = ecalloc((ColCount+1), sizeof(char *));
+		for (j = 0; j <= ColCount; j++) {
+			_cfg_colors[i][j] = NULL;
+		}
+	}
+
 	/* Parse and set the colors based on config */
 	for (i = 0; i < num_cols; i++) {
 		col = config_setting_get_elem(cols, i);
-		int scheme = parse_scheme(config_setting_name(col));
+		scheme = parse_scheme(config_setting_name(col));
 
-		config_setting_lookup_strdup(col, "fg", &colors[scheme][ColFg]);
-		config_setting_lookup_strdup(col, "bg", &colors[scheme][ColBg]);
-		config_setting_lookup_strdup(col, "border", &colors[scheme][ColBorder]);
+		config_setting_lookup_strdup(col, "fg", &_cfg_colors[scheme][ColFg]);
+		config_setting_lookup_strdup(col, "bg", &_cfg_colors[scheme][ColBg]);
+		config_setting_lookup_strdup(col, "border", &_cfg_colors[scheme][ColBorder]);
 	}
 }
 
 void
-read_commands(config_t *cfg)
+load_commands(config_t *cfg)
 {
 	int i, j, num_cmd_elements;
-	config_setting_t *commands_list, *command_entry, *command;
+	config_setting_t *commands_list, *command_entry, *command_t;
+	Command *command;
 
 	commands_list = config_lookup(cfg, "commands");
 	if (!commands_list || !config_setting_is_list(commands_list))
@@ -635,35 +1049,36 @@ read_commands(config_t *cfg)
 	if (!num_commands)
 		return;
 
-	commands = ecalloc(num_commands, sizeof(Command));
+	_cfg_commands = ecalloc(num_commands, sizeof(Command));
 	for (i = 0; i < num_commands; i++) {
+		command = &_cfg_commands[i];
+		command->name = NULL;
+		command->argv = NULL;
+
 		command_entry = config_setting_get_elem(commands_list, i);
-		commands[i].name = NULL;
-		commands[i].argv = NULL;
+		config_setting_lookup_strdup(command_entry, "name", &command->name);
 
-		config_setting_lookup_strdup(command_entry, "name", &commands[i].name);
+		command_t = config_setting_lookup(command_entry, "command");
+		num_cmd_elements = config_setting_length(command_t);
+		command->argv = ecalloc(num_cmd_elements + 2, sizeof(char*));
 
-		command = config_setting_lookup(command_entry, "command");
-		num_cmd_elements = config_setting_length(command);
-		commands[i].argv = ecalloc(num_cmd_elements + 2, sizeof(char*));
-
-		if (!config_setting_lookup_strdup(command_entry, "scratchkey", &commands[i].argv[0])) {
-			commands[i].argv[0] = NULL;
+		if (!config_setting_lookup_strdup(command_entry, "scratchkey", &command->argv[0])) {
+			command->argv[0] = NULL;
 		}
 
 		for (j = 0; j < num_cmd_elements; j++) {
-			commands[i].argv[j + 1] = strdup(config_setting_get_string_elem(command, j));
+			command->argv[j + 1] = strdup(config_setting_get_string_elem(command_t, j));
 		}
-		commands[i].argv[j + 1] = NULL;
+		command->argv[j + 1] = NULL;
 
-		if (commands[i].name == NULL || commands[i].argv == NULL) {
+		if (command->name == NULL || command->argv == NULL) {
 			fprintf(stderr, "Warning: config found incomplete command at line %d\n", config_setting_source_line(command_entry));
 		}
 	}
 }
 
 void
-read_keybindings(config_t *cfg)
+load_keybindings(config_t *cfg)
 {
 	int i, j, k, length, keytype, num_modifiers, num_keys, num_functions, num_arguments;
 	int num_bindings, num_expanded_bindings, value;
@@ -689,7 +1104,7 @@ read_keybindings(config_t *cfg)
 	if (!num_bindings)
 		return;
 
-	keys = ecalloc(MAX(num_bindings * 2, 200), sizeof(Key));
+	_cfg_keys = ecalloc(MAX(num_bindings * 2, 200), sizeof(Key));
 
 	/* Parse and set the key bindings based on config */
 	for (i = 0; i < num_bindings; i++) {
@@ -802,20 +1217,20 @@ void add_key_binding(
 	void *void_argument,
 	float float_argument
 ) {
-	keys[num_key_bindings].type = type;
-	keys[num_key_bindings].mod = mod;
+	_cfg_keys[num_key_bindings].type = type;
+	_cfg_keys[num_key_bindings].mod = mod;
 	#if USE_KEYCODES
-	keys[num_key_bindings].keycode = keycode;
+	_cfg_keys[num_key_bindings].keycode = keycode;
 	#else
-	keys[num_key_bindings].keysym = keysym;
+	_cfg_keys[num_key_bindings].keysym = keysym;
 	#endif // USE_KEYCODES
-	keys[num_key_bindings].func = function;
+	_cfg_keys[num_key_bindings].func = function;
 	if (void_argument != NULL) {
-		keys[num_key_bindings].arg.v = void_argument;
+		_cfg_keys[num_key_bindings].arg.v = void_argument;
 	} else if (float_argument != 0) {
-		keys[num_key_bindings].arg.f = float_argument;
+		_cfg_keys[num_key_bindings].arg.f = float_argument;
 	} else {
-		keys[num_key_bindings].arg.i = argument;
+		_cfg_keys[num_key_bindings].arg.i = argument;
 	}
 
 	num_key_bindings++;
@@ -829,8 +1244,8 @@ add_stacker_icon(config_t *cfg, const char *string, int value)
 	int position = StackerTitlePrefix;
 	config_setting_t *stacker_cfg, *overrides, *override;
 
-	if (stackericons == NULL) {
-		stackericons = ecalloc(30, sizeof(StackerIcon));
+	if (_cfg_stackericons == NULL) {
+		_cfg_stackericons = ecalloc(30, sizeof(StackerIcon));
 	}
 
 	stacker_cfg = config_lookup(cfg, "stacker_icons");
@@ -874,15 +1289,15 @@ add_stacker_icon(config_t *cfg, const char *string, int value)
 	char *icon = NULL;
 	freesprintf(&icon, "%s%s%s", prefix, icon_char, suffix);
 
-	stackericons[num_stackericons].icon = icon;
-	stackericons[num_stackericons].arg.i = value;
-	stackericons[num_stackericons].pos = position;
+	_cfg_stackericons[num_stackericons].icon = icon;
+	_cfg_stackericons[num_stackericons].arg.i = value;
+	_cfg_stackericons[num_stackericons].pos = position;
 
 	num_stackericons++;
 }
 
 void
-read_fonts(config_t *cfg)
+load_fonts(config_t *cfg)
 {
 	int i, num_fonts;
 	config_setting_t *fonts;
@@ -899,22 +1314,22 @@ read_fonts(config_t *cfg)
 }
 
 void
-read_singles(config_t *cfg)
+load_singles(config_t *cfg)
 {
 	const char *string;
 
-	config_lookup_int(cfg, "borderpx", &borderpx);
-	config_lookup_int(cfg, "gaps.ih", &gappih);
-	config_lookup_int(cfg, "gaps.iv", &gappiv);
-	config_lookup_int(cfg, "gaps.oh", &gappoh);
-	config_lookup_int(cfg, "gaps.ov", &gappov);
-	config_lookup_int(cfg, "gaps.fl", &gappfl);
+	config_lookup_unsigned_int(cfg, "borderpx", &borderpx);
+	config_lookup_unsigned_int(cfg, "gaps.ih", &gappih);
+	config_lookup_unsigned_int(cfg, "gaps.iv", &gappiv);
+	config_lookup_unsigned_int(cfg, "gaps.oh", &gappoh);
+	config_lookup_unsigned_int(cfg, "gaps.ov", &gappov);
+	config_lookup_unsigned_int(cfg, "gaps.fl", &gappfl);
 	config_lookup_sloppy_bool(cfg, "gaps.enabled", &enablegaps);
-	config_lookup_int(cfg, "gaps.smartgaps_fact", &smartgaps_fact);
+	config_lookup_unsigned_int(cfg, "gaps.smartgaps_fact", &smartgaps_fact);
 
 	config_lookup_int(cfg, "nmaster", &nmaster);
 	config_lookup_int(cfg, "nstack", &nstack);
-	config_lookup_float(cfg, "mfact", &mfact);
+	config_lookup_simple_float(cfg, "mfact", &mfact);
 
 	if (config_lookup_string(cfg, "attachdefault", &string)) {
 		uint64_t flag = getflagbyname(string) & AttachFlag;
@@ -924,18 +1339,13 @@ read_singles(config_t *cfg)
 		}
 	}
 
-	// TODO use strdup here and free perhaps?
-	if (config_lookup_string(cfg, "slop.spawnstyle", &string))
-		strlcpy(slopspawnstyle, string, LENGTH(slopspawnstyle));
-	if (config_lookup_string(cfg, "slop.resizestyle", &string))
-		strlcpy(slopresizestyle, string, LENGTH(slopresizestyle));
+	config_lookup_strdup(cfg, "slop.spawnstyle", &_cfg_slopspawnstyle);
+	config_lookup_strdup(cfg, "slop.resizestyle", &_cfg_slopresizestyle);
 
 	/* floatpos settings */
 	config_lookup_int(cfg, "floatpos.grid_x", &floatposgrid_x);
 	config_lookup_int(cfg, "floatpos.grid_y", &floatposgrid_y);
-
-	if (config_lookup_string(cfg, "floatpos.toggle_pos", &string))
-		strlcpy(toggle_float_pos, string, LENGTH(toggle_float_pos));
+	config_lookup_strdup(cfg, "floatpos.toggle_pos", &_cfg_toggle_float_pos);
 
 	config_lookup_float(cfg, "opacity.default", &defaultopacity);
 	config_lookup_float(cfg, "opacity.move", &moveopacity);
@@ -953,19 +1363,15 @@ read_singles(config_t *cfg)
 }
 
 void
-read_workspace(config_t *cfg)
+load_workspace(config_t *cfg)
 {
-	const char *string;
-	config_setting_t *rules, *rule, *icons, *layout;
+	config_setting_t *rules, *rule_t, *icons, *layout;
+	WorkspaceRule *rule;
 	int i;
 
-	config_lookup_float(cfg, "workspace.preview_factor", &pfact);
-
-	if (config_lookup_string(cfg, "workspace.labels.occupied_format", &string))
-		strlcpy(occupied_workspace_label_format, string, LENGTH(occupied_workspace_label_format));
-	if (config_lookup_string(cfg, "workspace.labels.vacant_format", &string))
-		strlcpy(vacant_workspace_label_format, string, LENGTH(vacant_workspace_label_format));
-
+	config_lookup_simple_float(cfg, "workspace.preview_factor", &pfact);
+	config_lookup_strdup(cfg, "workspace.labels.occupied_format", &_cfg_occupied_workspace_label_format);
+	config_lookup_strdup(cfg, "workspace.labels.vacant_format", &_cfg_vacant_workspace_label_format);
 	config_lookup_sloppy_bool(cfg, "workspace.labels.lowercase", &lowercase_workspace_labels);
 	config_lookup_sloppy_bool(cfg, "workspace.labels.prefer_window_icons", &prefer_window_icons_over_workspace_labels);
 	config_lookup_sloppy_bool(cfg, "workspace.labels.swap_occupied_format", &swap_occupied_workspace_label_format_strings);
@@ -980,75 +1386,76 @@ read_workspace(config_t *cfg)
 	if (!num_wsrules)
 		return;
 
-	wsrules = ecalloc(num_wsrules, sizeof(WorkspaceRule));
+	_cfg_wsrules = ecalloc(num_wsrules, sizeof(WorkspaceRule));
 	for (i = 0; i < num_wsrules; i++) {
-		/* Default values */
-		wsrules[i].norm_scheme = SchemeWsNorm;
-		wsrules[i].vis_scheme = SchemeWsVisible;
-		wsrules[i].sel_scheme = SchemeWsSel;
-		wsrules[i].occ_scheme = SchemeWsOcc;
-		wsrules[i].monitor = -1;
-		wsrules[i].pinned = 0;
-		wsrules[i].layout = 0;
-		wsrules[i].mfact = -1;
-		wsrules[i].nmaster = -1;
-		wsrules[i].nstack = -1;
-		wsrules[i].enablegaps = -1;
-		wsrules[i].name = NULL;
-		wsrules[i].icondef = NULL;
-		wsrules[i].iconvac = NULL;
-		wsrules[i].iconocc = NULL;
+		rule = &_cfg_wsrules[i];
 
-		rule = config_setting_get_elem(rules, i);
-		if (!rule)
+		/* Default values */
+		rule->norm_scheme = SchemeWsNorm;
+		rule->vis_scheme = SchemeWsVisible;
+		rule->sel_scheme = SchemeWsSel;
+		rule->occ_scheme = SchemeWsOcc;
+		rule->monitor = -1;
+		rule->pinned = 0;
+		rule->layout = 0;
+		rule->mfact = -1;
+		rule->nmaster = -1;
+		rule->nstack = -1;
+		rule->enablegaps = -1;
+		rule->name = NULL;
+		rule->icondef = NULL;
+		rule->iconvac = NULL;
+		rule->iconocc = NULL;
+
+		rule_t = config_setting_get_elem(rules, i);
+		if (!rule_t)
 			continue;
 
-		config_setting_lookup_strdup(rule, "name", &wsrules[i].name);
-		config_setting_lookup_sloppy_bool(rule, "pinned", &wsrules[i].pinned);
+		config_setting_lookup_strdup(rule_t, "name", &rule->name);
+		config_setting_lookup_sloppy_bool(rule_t, "pinned", &rule->pinned);
 
 		/* Allow layout to be referred to by name as well as index */
-		if ((layout = config_setting_lookup(rule, "layout"))) {
+		if ((layout = config_setting_lookup(rule_t, "layout"))) {
 			switch (config_setting_type(layout)) {
 			case CONFIG_TYPE_INT:
-				wsrules[i].layout = config_setting_get_int(layout);
+				rule->layout = config_setting_get_int(layout);
 				break;
 			case CONFIG_TYPE_STRING:
-				wsrules[i].layout = parse_layout(config_setting_get_string(layout));
+				rule->layout = parse_layout(config_setting_get_string(layout));
 				break;
 			}
 		}
 
-		config_setting_lookup_int(rule, "monitor", &wsrules[i].monitor);
-		config_setting_lookup_float(rule, "mfact", &wsrules[i].mfact);
-		config_setting_lookup_int(rule, "nmaster", &wsrules[i].nmaster);
-		config_setting_lookup_int(rule, "nstack", &wsrules[i].nstack);
-		config_setting_lookup_sloppy_bool(rule, "gaps", &wsrules[i].enablegaps);
+		config_setting_lookup_int(rule_t, "monitor", &rule->monitor);
+		config_setting_lookup_float(rule_t, "mfact", &rule->mfact);
+		config_setting_lookup_int(rule_t, "nmaster", &rule->nmaster);
+		config_setting_lookup_int(rule_t, "nstack", &rule->nstack);
+		config_setting_lookup_sloppy_bool(rule_t, "gaps", &rule->enablegaps);
 
-		icons = config_setting_lookup(rule, "icons");
+		icons = config_setting_lookup(rule_t, "icons");
 		if (icons) {
-			if (!config_setting_lookup_strdup(icons, "def", &wsrules[i].icondef)) {
-				wsrules[i].icondef = strdup("◉");
+			if (!config_setting_lookup_strdup(icons, "def", &rule->icondef)) {
+				rule->icondef = strdup("◉");
 			}
 
-			if (!config_setting_lookup_strdup(icons, "vac", &wsrules[i].iconvac)) {
-				wsrules[i].iconvac = wsrules[i].icondef;
+			if (!config_setting_lookup_strdup(icons, "vac", &rule->iconvac)) {
+				rule->iconvac = rule->icondef;
 			}
 
-			if (!config_setting_lookup_strdup(icons, "occ", &wsrules[i].iconocc)) {
-				wsrules[i].iconocc = wsrules[i].icondef;
+			if (!config_setting_lookup_strdup(icons, "occ", &rule->iconocc)) {
+				rule->iconocc = rule->icondef;
 			}
 		} else {
-			wsrules[i].icondef = strdup("◉");
-			wsrules[i].iconocc = strdup("●");
+			rule->icondef = strdup("◉");
+			rule->iconocc = strdup("●");
 		}
 	}
-
 }
 
 #define readfunc(F) if (config_lookup_sloppy_bool(cfg, "functionality." #F, &enabled)) { if (enabled) { enablefunc(F); } else { disablefunc(F); } }
 
 void
-read_functionality(config_t *cfg)
+load_functionality(config_t *cfg)
 {
 	int enabled;
 	readfunc(AutoReduceNmaster);
@@ -1104,11 +1511,12 @@ read_functionality(config_t *cfg)
 #undef readfunc
 
 void
-read_layouts(config_t *cfg)
+load_layouts(config_t *cfg)
 {
 	int i;
 	const char *string;
 	config_setting_t *lts, *lt;
+	Layout *layout;
 
 	/* Layouts */
 	lts = config_lookup(cfg, "layouts");
@@ -1119,38 +1527,39 @@ read_layouts(config_t *cfg)
 	if (!num_layouts)
 		return;
 
-	layouts = ecalloc(num_layouts, sizeof(Layout));
+	_cfg_layouts = ecalloc(num_layouts, sizeof(Layout));
 	for (i = 0; i < num_layouts; i++) {
-		layouts[i].preset.nmaster = -1;
-		layouts[i].preset.nstack = -1;
-		layouts[i].preset.layout = NO_SPLIT;
-		layouts[i].preset.masteraxis = 0;
-		layouts[i].preset.stack1axis = 0;
-		layouts[i].preset.stack2axis = 0;
-		layouts[i].preset.symbolfunc = NULL;
-		layouts[i].arrange = NULL;
+		layout = &_cfg_layouts[i];
+		layout->preset.nmaster = -1;
+		layout->preset.nstack = -1;
+		layout->preset.layout = NO_SPLIT;
+		layout->preset.masteraxis = 0;
+		layout->preset.stack1axis = 0;
+		layout->preset.stack2axis = 0;
+		layout->preset.symbolfunc = NULL;
+		layout->arrange = NULL;
 
 		lt = config_setting_get_elem(lts, i);
-		config_setting_lookup_int(lt, "nmaster", &layouts[i].preset.nmaster);
-		config_setting_lookup_int(lt, "nstack", &layouts[i].preset.nstack);
-		config_setting_lookup_strdup(lt, "symbol", &layouts[i].symbol);
-		config_setting_lookup_strdup(lt, "name", &layouts[i].name);
+		config_setting_lookup_int(lt, "nmaster", &layout->preset.nmaster);
+		config_setting_lookup_int(lt, "nstack", &layout->preset.nstack);
+		config_setting_lookup_strdup(lt, "symbol", &layout->symbol);
+		config_setting_lookup_strdup(lt, "name", &layout->name);
 
 		if (config_setting_lookup_string(lt, "split", &string))
-			layouts[i].preset.layout = parse_layout_split(string);
+			layout->preset.layout = parse_layout_split(string);
 		if (config_setting_lookup_string(lt, "master", &string)) {
-			layouts[i].arrange = flextile;
-			layouts[i].preset.masteraxis = parse_layout_arrangement(string);
+			layout->arrange = flextile;
+			layout->preset.masteraxis = parse_layout_arrangement(string);
 		}
 		if (config_setting_lookup_string(lt, "stack", &string))
-			layouts[i].preset.stack1axis = parse_layout_arrangement(string);
+			layout->preset.stack1axis = parse_layout_arrangement(string);
 		if (config_setting_lookup_string(lt, "stack2", &string))
-			layouts[i].preset.stack2axis = parse_layout_arrangement(string);
+			layout->preset.stack2axis = parse_layout_arrangement(string);
 	}
 }
 
 void
-read_indicators(config_t *cfg)
+load_indicators(config_t *cfg)
 {
 	const char *indicator;
 	if (config_lookup_string(cfg, "indicator.WsOcc", &indicator))
@@ -1178,18 +1587,26 @@ read_indicators(config_t *cfg)
 	if (config_lookup_string(cfg, "indicator.Selected", &indicator))
 		indicators[IndicatorSelected] = parse_indicator(indicator);
 
-	if (config_lookup_string(cfg, "indicator.custom.custom_1", &indicator))
-		strlcpy(custom_2d_indicator_1, indicator, LENGTH(custom_2d_indicator_1));
-	if (config_lookup_string(cfg, "indicator.custom.custom_2", &indicator))
-		strlcpy(custom_2d_indicator_2, indicator, LENGTH(custom_2d_indicator_2));
-	if (config_lookup_string(cfg, "indicator.custom.custom_3", &indicator))
-		strlcpy(custom_2d_indicator_3, indicator, LENGTH(custom_2d_indicator_3));
-	if (config_lookup_string(cfg, "indicator.custom.custom_4", &indicator))
-		strlcpy(custom_2d_indicator_4, indicator, LENGTH(custom_2d_indicator_4));
-	if (config_lookup_string(cfg, "indicator.custom.custom_5", &indicator))
-		strlcpy(custom_2d_indicator_5, indicator, LENGTH(custom_2d_indicator_5));
-	if (config_lookup_string(cfg, "indicator.custom.custom_6", &indicator))
-		strlcpy(custom_2d_indicator_6, indicator, LENGTH(custom_2d_indicator_6));
+	config_lookup_strdup(cfg, "indicator.custom.custom_1", &_cfg_custom_2d_indicator_1);
+	config_lookup_strdup(cfg, "indicator.custom.custom_2", &_cfg_custom_2d_indicator_2);
+	config_lookup_strdup(cfg, "indicator.custom.custom_3", &_cfg_custom_2d_indicator_3);
+	config_lookup_strdup(cfg, "indicator.custom.custom_4", &_cfg_custom_2d_indicator_4);
+	config_lookup_strdup(cfg, "indicator.custom.custom_5", &_cfg_custom_2d_indicator_5);
+	config_lookup_strdup(cfg, "indicator.custom.custom_6", &_cfg_custom_2d_indicator_6);
+}
+
+void *
+cfg_get_command(const char *string)
+{
+	int i;
+
+	for (i = 0; i < num_commands; i++) {
+		if (!strcasecmp(string, _cfg_commands[i].name)) {
+			return _cfg_commands[i].argv;
+		}
+	}
+
+	return NULL;
 }
 
 #define map(S, I) if (!strcasecmp(string, S)) return I;
@@ -1639,8 +2056,8 @@ parse_void_reference(const char *string)
 {
 	int i;
 	for (i = 0; i < num_commands; i++) {
-		if (!strcasecmp(string, commands[i].name)) {
-			return commands[i].argv;
+		if (!strcasecmp(string, _cfg_commands[i].name)) {
+			return _cfg_commands[i].argv;
 		}
 	}
 
@@ -1648,19 +2065,19 @@ parse_void_reference(const char *string)
 	map("termcmd", termcmd);
 
 	for (i = 0; i < num_cached_strings; i++) {
-		if (!strcmp(string, cached_strings_array[i])) {
-			return cached_strings_array[i];
+		if (!strcmp(string, _cfg_cached_strings_array[i])) {
+			return _cfg_cached_strings_array[i];
 		}
 	}
 
-	if (num_cached_strings + 1 > LENGTH(cached_strings_array)) {
+	if (num_cached_strings + 1 > LENGTH(_cfg_cached_strings_array)) {
 		fprintf(stderr, "Warning: config could not cache new void reference with name %s\n", string);
 		return strdup(string);
 	}
 
-	cached_strings_array[num_cached_strings] = strdup(string);
+	_cfg_cached_strings_array[num_cached_strings] = strdup(string);
 
-	return cached_strings_array[num_cached_strings++];
+	return _cfg_cached_strings_array[num_cached_strings++];
 }
 
 #undef map

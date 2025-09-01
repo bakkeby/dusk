@@ -108,13 +108,8 @@ createworkspaces(void)
 {
 	int i;
 
-	if (!num_wsrules) {
-		wsrules = default_wsrules;
-		num_wsrules = LENGTH(default_wsrules);
-	}
-
 	for (i = 0; i < num_wsrules; i++)
-		attachws(createworkspace(i, &wsrules[i]), NULL);
+		attachws(createworkspace(i, &_cfg_wsrules[i]), NULL);
 
 	num_workspaces = i;
 
@@ -136,9 +131,9 @@ createworkspace(int num, const WorkspaceRule *r)
 	ws->rule_monitor = r->monitor;
 	ws->name = r->name;
 
-	ws->layout = (r->layout == -1 ? &layouts[0] : &layouts[MIN(r->layout, n)]);
+	ws->layout = (r->layout == -1 ? &_cfg_layouts[0] : &_cfg_layouts[MIN(r->layout, n)]);
 	freestrdup(&ws->ltsymbol, ws->layout->symbol);
-	ws->prevlayout = &layouts[1 % n];
+	ws->prevlayout = &_cfg_layouts[1 % n];
 
 	ws->mfact = (r->mfact == -1 ? mfact : r->mfact);
 	ws->nmaster = (r->nmaster == -1 ? nmaster : r->nmaster);
@@ -168,7 +163,7 @@ createstickyworkspace(void)
 
 	/* Find the floating layout for the sticky rule */
 	for (i = 0; i < num_layouts; i++)
-		if ((&layouts[i])->arrange == NULL)
+		if ((&_cfg_layouts[i])->arrange == NULL)
 			break;
 
 	const WorkspaceRule stickywsrule = { .name = "Sticky", .layout = i };

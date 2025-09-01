@@ -120,7 +120,7 @@ loadxrdb(void)
 
 			if (xrdb != NULL) {
 				for (s = 0; s < SchemeLast; s++) {
-					resource_prefix = colors[s][ColCount] ? colors[s][ColCount] : default_resource_prefixes[s];
+					resource_prefix = _cfg_colors[s][ColCount] ? _cfg_colors[s][ColCount] : default_resource_prefixes[s];
 					/* Skip schemes that do not specify a resource string */
 					if (!resource_prefix || resource_prefix[0] == '\0') {
 						continue;
@@ -133,7 +133,7 @@ loadxrdb(void)
 						if (!loadxrdbcolor(xrdb, &clrnames[c], &alpha[c], resource)) {
 							colorscheme = s;
 							/* Fall back to SchemeTitleNorm / Sel for SchemeFlex colors if not defined. */
-							if (!colors[s][0]) {
+							if (!_cfg_colors[s][0]) {
 								colorscheme = (s >= SchemeFlexSelTTB ? SchemeTitleSel : SchemeTitleNorm);
 							}
 							if (colorscheme == SchemeTitleNorm && titlenorm[0][0]) {
@@ -141,7 +141,7 @@ loadxrdb(void)
 							} else if (colorscheme == SchemeTitleSel && titlesel[0][0]) {
 								strlcpy(clrnames[c], titlesel[c], BUFFERSIZE);
 							} else {
-								strlcpy(clrnames[c], colors[colorscheme][c], BUFFERSIZE);
+								strlcpy(clrnames[c], _cfg_colors[colorscheme][c], BUFFERSIZE);
 							}
 						}
 					}

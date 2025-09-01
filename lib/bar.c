@@ -11,7 +11,7 @@ barhover(XEvent *e, Bar *bar)
 	int r;
 
 	for (r = 0; r < num_barrules; r++) {
-		br = &barrules[r];
+		br = &_cfg_barrules[r];
 		if (br->bar != bar->idx || (br->monitor == 'A' && m != selmon) || br->hoverfunc == NULL)
 			continue;
 		if (br->monitor != 'A' && br->monitor != -1 && br->monitor != bar->mon->num)
@@ -52,7 +52,7 @@ barpress(XButtonPressedEvent *ev, Monitor *m, Arg *arg, int *click)
 	for (bar = selmon->bar; bar; bar = bar->next) {
 		if (ev->window == bar->win) {
 			for (r = 0; r < num_barrules; r++) {
-				br = &barrules[r];
+				br = &_cfg_barrules[r];
 				if (br->bar != bar->idx || (br->monitor == 'A' && m != selmon) || br->clickfunc == NULL || !bar->s[r])
 					continue;
 				if (br->monitor != 'A' && br->monitor != -1 && br->monitor != bar->mon->num)
@@ -93,7 +93,7 @@ createbars(Monitor *m)
 	const BarDef *def;
 
 	for (int i = 0; i < num_bars; i++) {
-		def = &bars[i];
+		def = &_cfg_bars[i];
 		if (def->monitor == m->num)
 			createbar(def, m);
 	}
@@ -182,7 +182,7 @@ drawbarwin(Bar *bar)
 	drw_rect(drw, lx, bar->borderpx, lw, bar->bh - 2 * bar->borderpx, 1, 1);
 
 	for (r = 0; r < num_barrules; r++) {
-		br = &barrules[r];
+		br = &_cfg_barrules[r];
 		bar->s[r] = 0;
 		if (br->bar != bar->idx || !br->sizefunc || (br->monitor == 'A' && bar->mon != selmon))
 			continue;
@@ -352,7 +352,7 @@ drawbarwin(Bar *bar)
 
 	/* Draw powerline separators */
 	for (r = 0; r < num_barrules; r++) {
-		br = &barrules[r];
+		br = &_cfg_barrules[r];
 		if (!bar->s[r] || br->drawfunc != draw_powerline)
 			continue;
 

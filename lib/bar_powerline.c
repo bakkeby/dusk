@@ -36,7 +36,7 @@ reducepowerline(Bar *bar, int r_idx)
 
 	/* If the powerline overlaps with another powerline, then get rid of it. */
 	for (r = 0; r < r_idx; r++) {
-		br = &barrules[r];
+		br = &_cfg_barrules[r];
 		if (!bar->s[r] || br->drawfunc != draw_powerline)
 			continue;
 		if (br->bar != bar->idx || !br->sizefunc || (br->monitor == 'A' && bar->mon != selmon))
@@ -53,7 +53,7 @@ schemeleftof(Bar *bar, int r_idx)
 {
 	const BarRule *br;
 	for (int r = 0; r < num_barrules; r++) {
-		br = &barrules[r];
+		br = &_cfg_barrules[r];
 		if (!bar->s[r] || br->drawfunc == draw_powerline)
 			continue;
 		if (br->bar != bar->idx || !br->sizefunc || (br->monitor == 'A' && bar->mon != selmon))
@@ -71,7 +71,7 @@ schemerightof(Bar *bar, int r_idx)
 {
 	const BarRule *br;
 	for (int r = 0; r < num_barrules; r++) {
-		br = &barrules[r];
+		br = &_cfg_barrules[r];
 		if (!bar->s[r] || br->drawfunc == draw_powerline)
 			continue;
 		if (br->bar != bar->idx || !br->sizefunc || (br->monitor == 'A' && bar->mon != selmon))

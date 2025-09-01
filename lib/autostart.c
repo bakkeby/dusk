@@ -13,11 +13,11 @@ autostart_exec(void)
 
 	if (autostart_startup) {
 		for (i = 0; i < num_autostart; i++) {
-			autostart_addpid(spawncmd(&((Arg) { .v = autostart[i] }), 0, 1));
+			autostart_addpid(spawncmd(&((Arg) { .v = _cfg_autostart[i] }), 0, 1));
 		}
 	} else {
 		for (i = 0; i < num_autorestart; i++) {
-			autostart_addpid(spawncmd(&((Arg) { .v = autorestart[i] }), 0, 1));
+			autostart_addpid(spawncmd(&((Arg) { .v = _cfg_autorestart[i] }), 0, 1));
 		}
 	}
 }

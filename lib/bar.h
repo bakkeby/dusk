@@ -84,9 +84,6 @@ typedef struct {
 static int bh; /* bar geometry */
 int num_bars, num_barrules;
 
-BarDef *bars = NULL;
-BarRule *barrules = NULL;
-
 static void barhover(XEvent *e, Bar *bar);
 static void barpress(XButtonPressedEvent *ev, Monitor *m, Arg *arg, int *click);
 static void createbars(Monitor *m);

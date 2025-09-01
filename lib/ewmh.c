@@ -149,7 +149,7 @@ restoreworkspacestate(Workspace *ws)
 
 		/* Restore layout if we have an exact match, floating layout interpreted as 0x1ef7f800 */
 		for (i = 0; i < num_layouts; i++) {
-			layout = &layouts[i];
+			layout = &_cfg_layouts[i];
 			if ((layout->arrange == flextile
 				&& ws->ltaxis[LAYOUT] == layout->preset.layout
 				&& ws->ltaxis[MASTER] == layout->preset.masteraxis

@@ -87,19 +87,19 @@ draw_workspaces(Bar *bar, BarArg *a)
 						draw_window_icon = 1;
 						w += occupied_workspace_label_format_length;
 						if (swap_occupied_workspace_label_format_strings)
-							snprintf(label, 127, occupied_workspace_label_format, "", icon);
+							snprintf(label, 127, _cfg_occupied_workspace_label_format, "", icon);
 						else
-							snprintf(label, 127, occupied_workspace_label_format, icon, "");
+							snprintf(label, 127, _cfg_occupied_workspace_label_format, icon, "");
 					} else {
 						w += occupied_workspace_label_format_length + TEXTW(c->label);
 						if (swap_occupied_workspace_label_format_strings)
-							snprintf(label, 127, occupied_workspace_label_format, c->label, icon);
+							snprintf(label, 127, _cfg_occupied_workspace_label_format, c->label, icon);
 						else
-							snprintf(label, 127, occupied_workspace_label_format, icon, c->label);
+							snprintf(label, 127, _cfg_occupied_workspace_label_format, icon, c->label);
 					}
 				} else {
 					w += vacant_workspace_label_format_length;
-					snprintf(label, 127, vacant_workspace_label_format, icon);
+					snprintf(label, 127, _cfg_vacant_workspace_label_format, icon);
 				}
 				icon = label;
 			}

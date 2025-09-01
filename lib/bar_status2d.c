@@ -281,7 +281,7 @@ setstatus(int status_no, char const *statustext)
 	strlcpy(rawstatustext[status_no], statustext, sizeof rawstatustext[status_no]);
 
 	for (int r = 0; r < num_barrules; r++) {
-		br = &barrules[r];
+		br = &_cfg_barrules[r];
 		if (br->value == status_no && br->drawfunc == draw_status)
 			drawbarmodule(br, r);
 	}
@@ -364,7 +364,8 @@ abort:
 void
 statusclick(const Arg *arg)
 {
-	spawncmd(&((Arg) { .v = statusclickcmd }), arg->i, 1);
+	void *command = cfg_get_command("statusclickcmd");
+	spawncmd(&((Arg) { .v = (command ? command : statusclickcmd) }), arg->i, 1);
 }
 
 Image *
