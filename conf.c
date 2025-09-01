@@ -1516,10 +1516,11 @@ parse_layout_arrangement(const char *string)
 unsigned int
 parse_modifier(const char *string)
 {
-	int i;
+	int i, len;
 	unsigned int mask = 0;
-	char buffer[256];
-	strlcpy(buffer, string, LENGTH(buffer));
+	len = strlen(string);
+	char buffer[len];
+	strlcpy(buffer, string, len);
 	const char *delims = "+-|:;, ";
 	const char *modifier_strings[] = {
 		"Super",
