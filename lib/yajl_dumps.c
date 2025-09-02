@@ -5,57 +5,13 @@
 int
 dump_settings(yajl_gen gen)
 {
+	int i;
 	// clang-format off
 	YMAP(
 		YSTR("Functionality"); YMAP(
-			YSTR("AllowNoModifierButtons"); YBOOL(enabled(AllowNoModifierButtons));
-			YSTR("AltWindowTitles"); YBOOL(enabled(AltWindowTitles));
-			YSTR("AltWorkspaceIcons"); YBOOL(enabled(AltWorkspaceIcons));
-			YSTR("AutoHideScratchpads"); YBOOL(enabled(AutoHideScratchpads));
-			YSTR("AutoReduceNmaster"); YBOOL(enabled(AutoReduceNmaster));
-			YSTR("BanishMouseCursor"); YBOOL(enabled(BanishMouseCursor));
-			YSTR("BanishMouseCursorToCorner"); YBOOL(enabled(BanishMouseCursorToCorner));
-			YSTR("BarBorder"); YBOOL(enabled(BarBorder));
-			YSTR("BarBorderColBg"); YBOOL(enabled(BarBorderColBg));
-			YSTR("BarActiveGroupBorderColor"); YBOOL(enabled(BarActiveGroupBorderColor));
-			YSTR("BarMasterGroupBorderColor"); YBOOL(enabled(BarMasterGroupBorderColor));
-			YSTR("BarPadding"); YBOOL(enabled(BarPadding));
-			YSTR("CenteredWindowName"); YBOOL(enabled(CenteredWindowName));
-			YSTR("CenterSizeHintsClients"); YBOOL(enabled(CenterSizeHintsClients));
-			YSTR("ColorEmoji"); YBOOL(enabled(ColorEmoji));
-			YSTR("Debug"); YBOOL(enabled(Debug));
-			YSTR("DecorationHints"); YBOOL(enabled(DecorationHints));
-			YSTR("FlexWinBorders"); YBOOL(enabled(FlexWinBorders));
-			YSTR("FocusedOnTop"); YBOOL(enabled(FocusedOnTop));
-			YSTR("FocusedOnTopTiled"); YBOOL(enabled(FocusedOnTopTiled));
-			YSTR("FocusFollowMouse"); YBOOL(enabled(FocusFollowMouse));
-			YSTR("FocusOnClick"); YBOOL(enabled(FocusOnClick));
-			YSTR("FocusOnNetActive"); YBOOL(enabled(FocusOnNetActive));
-			YSTR("GreedyMonitor"); YBOOL(enabled(GreedyMonitor));
-			YSTR("NoBorders"); YBOOL(enabled(NoBorders));
-			YSTR("ResizeHints"); YBOOL(enabled(ResizeHints));
-			YSTR("RestrictFocusstackToMonitor"); YBOOL(enabled(RestrictFocusstackToMonitor));
-			YSTR("RioDrawIncludeBorders"); YBOOL(enabled(RioDrawIncludeBorders));
-			YSTR("RioDrawSpawnAsync"); YBOOL(enabled(RioDrawSpawnAsync));
-			YSTR("SmartGaps"); YBOOL(enabled(SmartGaps));
-			YSTR("SmartGapsMonocle"); YBOOL(enabled(SmartGapsMonocle));
-			YSTR("SmartLayoutConversion"); YBOOL(enabled(SmartLayoutConversion));
-			YSTR("SnapToGaps"); YBOOL(enabled(SnapToGaps));
-			YSTR("SnapToWindows"); YBOOL(enabled(SnapToWindows));
-			YSTR("SortScreens"); YBOOL(enabled(SortScreens));
-			YSTR("SpawnCwd"); YBOOL(enabled(SpawnCwd));
-			YSTR("StackerIcons"); YBOOL(enabled(StackerIcons));
-			YSTR("Status2DNoAlpha"); YBOOL(enabled(Status2DNoAlpha));
-			YSTR("Swallow"); YBOOL(enabled(Swallow));
-			YSTR("SwallowFloating"); YBOOL(enabled(SwallowFloating));
-			YSTR("Systray"); YBOOL(enabled(Systray));
-			YSTR("SystrayNoAlpha"); YBOOL(enabled(SystrayNoAlpha));
-			YSTR("ViewOnWs"); YBOOL(enabled(ViewOnWs));
-			YSTR("Warp"); YBOOL(enabled(Warp));
-			YSTR("WinTitleIcons"); YBOOL(enabled(WinTitleIcons));
-			YSTR("WorkspaceLabels"); YBOOL(enabled(WorkspaceLabels));
-			YSTR("WorkspacePreview"); YBOOL(enabled(WorkspacePreview));
-			YSTR("Xresources"); YBOOL(enabled(Xresources));
+			for (i = 0; functionality_names[i].name != NULL; i++) {
+				YSTR(functionality_names[i].name); YBOOL(enabled(functionality_names[i].value));
+			}
 		)
 	)
 	// clang-format on
@@ -150,6 +106,8 @@ dump_workspaces(yajl_gen gen)
 int
 dump_client(yajl_gen gen, Client *c)
 {
+	int i;
+
 	// clang-format off
 	YMAP(
 		YSTR("name"); YSTR(NVL(c->name, "NULL"));
@@ -202,57 +160,9 @@ dump_client(yajl_gen gen, Client *c)
 		)
 
 		YSTR("flags"); YMAP(
-			YSTR("AlwaysOnTop"); YBOOL(ALWAYSONTOP(c));
-			YSTR("CfgReqPosRelativeToMonitor"); YBOOL(CFGREQPOSRELATIVETOMONITOR(c));
-			YSTR("Debug"); YBOOL(DEBUGGING(c));
-			YSTR("Floating"); YBOOL(FLOATING(c));
-			YSTR("Fixed"); YBOOL(ISFIXED(c));
-			YSTR("Hidden"); YBOOL(HIDDEN(c));
-			YSTR("Locked"); YBOOL(ISLOCKED(c));
-			YSTR("Sticky"); YBOOL(ISSTICKY(c));
-			YSTR("Centered"); YBOOL(ISCENTERED(c));
-			YSTR("FullScreen"); YBOOL(ISFULLSCREEN(c));
-			YSTR("FakeFullScreen"); YBOOL(ISFAKEFULLSCREEN(c));
-			YSTR("Permanent"); YBOOL(ISPERMANENT(c));
-			YSTR("Terminal"); YBOOL(ISTERMINAL(c));
-			YSTR("Transient"); YBOOL(ISTRANSIENT(c));
-			YSTR("Urgent"); YBOOL(ISURGENT(c));
-			YSTR("Visible"); YBOOL(ISVISIBLE(c));
-			YSTR("IgnoreCfgReq"); YBOOL(IGNORECFGREQ(c));
-			YSTR("IgnoreCfgReqPos"); YBOOL(IGNORECFGREQPOS(c));
-			YSTR("IgnoreCfgReqSize"); YBOOL(IGNORECFGREQSIZE(c));
-			YSTR("IgnoreDecorationHints"); YBOOL(IGNOREDECORATIONHINTS(c));
-			YSTR("IgnorePropTransientFor"); YBOOL(IGNOREPROPTRANSIENTFOR(c));
-			YSTR("IgnoreSizeHints"); YBOOL(IGNORESIZEHINTS(c));
-			YSTR("IgnoreMinimumSizeHints"); YBOOL(IGNOREMINIMUMSIZEHINTS(c));
-			YSTR("Marked"); YBOOL(ISMARKED(c));
-			YSTR("NeedResize"); YBOOL(NEEDRESIZE(c));
-			YSTR("Swallowed"); YBOOL(SWALLOWED(c));
-			YSTR("NeverFocus"); YBOOL(NEVERFOCUS(c));
-			YSTR("NoBorder"); YBOOL(NOBORDER(c));
-			YSTR("NoFocusOnNetActive"); YBOOL(NOFOCUSONNETACTIVE(c));
-			YSTR("NoSwallow"); YBOOL(NOSWALLOW(c));
-			YSTR("NoWarp"); YBOOL(NOWARP(c));
-			YSTR("OnlyModButtons"); YBOOL(ONLYMODBUTTONS(c));
-			YSTR("RespectSizeHints"); YBOOL(RESPECTSIZEHINTS(c));
-			YSTR("RestoreFakeFullScreen"); YBOOL(RESTOREFAKEFULLSCREEN(c));
-			YSTR("RioDrawNoMatchPID"); YBOOL(RIODRAWNOMATCHPID(c));
-			YSTR("Ruled"); YBOOL(RULED(c));
-			YSTR("SemiScratchpad"); YBOOL(SEMISCRATCHPAD(c));
-			YSTR("ScratchpadStayOnMon"); YBOOL(SCRATCHPADSTAYONMON(c));
-			YSTR("SkipTaskbar"); YBOOL(SKIPTASKBAR(c));
-			YSTR("SwallowRetainSize"); YBOOL(SWALLOWRETAINSIZE(c));
-			YSTR("SwallowNoInheritFullScreen"); YBOOL(SWALLOWNOINHERITFULLSCREEN(c));
-			YSTR("SwitchWorkspace"); YBOOL(SWITCHWORKSPACE(c));
-			YSTR("EnableWorkspace"); YBOOL(ENABLEWORKSPACE(c));
-			YSTR("RevertWorkspace"); YBOOL(REVERTWORKSPACE(c));
-			YSTR("MoveResize"); YBOOL(MOVERESIZE(c));
-			YSTR("MovePlace"); YBOOL(MOVEPLACE(c));
-			YSTR("WasFloating"); YBOOL(WASFLOATING(c));
-			YSTR("WasFakeFullscreen"); YBOOL(WASFAKEFULLSCREEN(c));
-			YSTR("WasFullscreen"); YBOOL(WASFULLSCREEN(c));
-			YSTR("Lower"); YBOOL(LOWER(c));
-			YSTR("Raise"); YBOOL(RAISE(c));
+			for (i = 0; flag_names[i].name != NULL; i++) {
+				YSTR(flag_names[i].name); YBOOL(c->flags & flag_names[i].value);
+			}
 		)
 	)
 	// clang-format on

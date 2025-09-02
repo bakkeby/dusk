@@ -175,6 +175,8 @@ static char *colors[SchemeLast][4] = {
  * executed again when doing a restart. */
 static const char *const autostart[] = {
 //	"st", NULL,
+	"st", "-c", "uggahbuggahhuggah", NULL,
+	"st", "-c", "sjokoladekake", NULL,
 	NULL /* terminate */
 };
 

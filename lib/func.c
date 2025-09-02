@@ -74,77 +74,30 @@ reload(const uint64_t functionality)
 const uint64_t
 getfuncbyname(const char *name)
 {
+	int i;
 
 	if (!name)
 		return 0;
-	compareNameToFunc(SmartGaps)
-	compareNameToFunc(SmartGapsMonocle)
-	compareNameToFunc(Swallow)
-	compareNameToFunc(SwallowFloating)
-	compareNameToFunc(CenteredWindowName)
-	compareNameToFunc(BarActiveGroupBorderColor)
-	compareNameToFunc(BarMasterGroupBorderColor)
-	compareNameToFunc(SpawnCwd)
-	compareNameToFunc(ColorEmoji)
-	compareNameToFunc(Status2DNoAlpha)
-	compareNameToFunc(Systray)
-	compareNameToFunc(BarBorder)
-	compareNameToFunc(NoBorders)
-	compareNameToFunc(Warp)
-	compareNameToFunc(FocusedOnTop)
-	compareNameToFunc(DecorationHints)
-	compareNameToFunc(FocusOnNetActive)
-	compareNameToFunc(AllowNoModifierButtons)
-	compareNameToFunc(CenterSizeHintsClients)
-	compareNameToFunc(ResizeHints)
-	compareNameToFunc(SortScreens)
-	compareNameToFunc(ViewOnWs)
-	compareNameToFunc(Xresources)
-	compareNameToFunc(AltWorkspaceIcons)
-	compareNameToFunc(GreedyMonitor)
-	compareNameToFunc(SmartLayoutConversion)
-	compareNameToFunc(SmartLayoutConvertion)
-	compareNameToFunc(AutoHideScratchpads)
-	compareNameToFunc(RioDrawIncludeBorders)
-	compareNameToFunc(RioDrawSpawnAsync)
-	compareNameToFunc(BarPadding)
-	compareNameToFunc(RestrictFocusstackToMonitor)
-	compareNameToFunc(AutoReduceNmaster)
-	compareNameToFunc(WinTitleIcons)
-	compareNameToFunc(WorkspacePreview)
-	compareNameToFunc(SystrayNoAlpha)
-	compareNameToFunc(WorkspaceLabels)
-	compareNameToFunc(SnapToWindows)
-	compareNameToFunc(SnapToGaps)
-	compareNameToFunc(FlexWinBorders)
-	compareNameToFunc(FocusOnClick)
-	compareNameToFunc(FocusedOnTopTiled)
-	compareNameToFunc(BanishMouseCursor)
-	compareNameToFunc(FocusFollowMouse)
-	compareNameToFunc(BanishMouseCursorToCorner)
-	compareNameToFunc(StackerIcons)
-	compareNameToFunc(AltWindowTitles)
-	compareNameToFunc(BarBorderColBg)
-	compareNameToFunc(FuncPlaceholder140737488355328)
-	compareNameToFunc(FuncPlaceholder281474976710656)
-	compareNameToFunc(FuncPlaceholder562949953421312)
-	compareNameToFunc(FuncPlaceholder1125899906842624)
-	compareNameToFunc(FuncPlaceholder2251799813685248)
-	compareNameToFunc(FuncPlaceholder4503599627370496)
-	compareNameToFunc(FuncPlaceholder9007199254740992)
-	compareNameToFunc(FuncPlaceholder18014398509481984)
-	compareNameToFunc(FuncPlaceholder36028797018963968)
-	compareNameToFunc(Debug)
-	compareNameToFunc(FuncPlaceholder144115188075855872)
-	compareNameToFunc(FuncPlaceholder288230376151711744)
-	compareNameToFunc(FuncPlaceholder576460752303423488)
-	compareNameToFunc(FuncPlaceholder1152921504606846976)
-	compareNameToFunc(FuncPlaceholder2305843009213693952)
-	compareNameToFunc(FuncPlaceholder4611686018427387904)
-	compareNameToFunc(FuncPlaceholder9223372036854775808)
+
+	for (i = 0; functionality_names[i].name != NULL; i++) {
+		if (strcmp(functionality_names[i].name, name) == 0)
+			return functionality_names[i].value;
+	}
 
 	return 0;
 }
 
-#undef compareNameToFunc
+const char *
+getnamebyfunc(const uint64_t functionality)
+{
+	int i;
+
+	for (i = 0; functionality_names[i].name != NULL; i++) {
+		if (functionality_names[i].value == functionality)
+			return functionality_names[i].name;
+	}
+
+	return 0;
+}
+
 #undef mapfunc

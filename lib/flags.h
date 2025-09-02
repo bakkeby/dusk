@@ -5,6 +5,7 @@ static void toggleflag(Client *c, const uint64_t flag);
 static void toggleclientflag(const Arg *arg);
 static void toggleflagop(Client *c, const uint64_t flag, int op);
 static const uint64_t getflagbyname(const char *name);
+static const char *getnamebyflag(const uint64_t flag);
 
 static const uint64_t
 	AlwaysOnTop = 0x1, // client window is intended to always display on top (even above floating windows)
@@ -81,6 +82,73 @@ static const uint64_t
 	Ruled = 0x2000000000000000, // indicates whether client was subject to client rules (used internally to determine default behaviour)
 	Marked = 0x4000000000000000, // indicates that the client has been marked for group action
 	Unmanaged = 0x8000000000000000; // indicates that the client is not to be managed by the window manager
+
+#define map(F) { #F, F }
+
+static const struct nv flag_names[] = {
+	map(AlwaysOnTop),
+	map(Fixed),
+	map(Floating),
+	map(Urgent),
+	map(NeverFocus),
+	map(FullScreen),
+	map(FakeFullScreen),
+	map(RestoreFakeFullScreen),
+	map(Centered),
+	map(Permanent),
+	map(Hidden),
+	map(Sticky),
+	map(Terminal),
+	map(NoSwallow),
+	map(Locked),
+	map(Transient),
+	map(OnlyModButtons),
+	map(Disallowed),
+	map(AttachDefault),
+	map(AttachMaster),
+	map(AttachAbove),
+	map(AttachBelow),
+	map(AttachAside),
+	map(AttachBottom),
+	map(AttachFlag),
+	map(SwitchWorkspace),
+	map(EnableWorkspace),
+	map(RevertWorkspace),
+	map(IgnoreCfgReq),
+	map(IgnoreCfgReqPos),
+	map(IgnoreCfgReqSize),
+	map(IgnorePropTransientFor),
+	map(IgnoreSizeHints),
+	map(IgnoreMinimumSizeHints),
+	map(IgnoreDecorationHints),
+	map(SemiScratchpad),
+	map(RespectSizeHints),
+	map(RioDrawNoMatchPID),
+	map(NoBorder),
+	map(SteamGame),
+	map(NoFocusOnNetActive),
+	map(ScratchpadStayOnMon),
+	map(Lower),
+	map(Raise),
+	map(SkipTaskbar),
+	map(ReapplyRules),
+	map(CfgReqPosRelativeToMonitor),
+	map(SwallowRetainSize),
+	map(NoWarp),
+	map(SwallowNoInheritFullScreen),
+	map(Swallowed),
+	map(RefreshSizeHints),
+	map(Invisible),
+	map(MoveResize),
+	map(MovePlace),
+	map(NeedResize),
+	map(Ruled),
+	map(Marked),
+	map(Unmanaged),
+	{ NULL, 0 }
+};
+
+#undef map
 
 #define ALWAYSONTOP(C) (C && C->flags & AlwaysOnTop)
 #define CFGREQPOSRELATIVETOMONITOR(C) (C && C->flags & CfgReqPosRelativeToMonitor)

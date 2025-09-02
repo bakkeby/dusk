@@ -1455,55 +1455,17 @@ load_workspace(config_t *cfg)
 void
 load_functionality(config_t *cfg)
 {
-	int enabled;
-	readfunc(AutoReduceNmaster);
-	readfunc(BanishMouseCursor);
-	readfunc(BanishMouseCursorToCorner);
-	readfunc(SmartGaps);
-	readfunc(SmartGapsMonocle);
-	readfunc(Systray);
-	readfunc(SystrayNoAlpha);
-	readfunc(Swallow);
-	readfunc(SwallowFloating);
-	readfunc(CenteredWindowName);
-	readfunc(BarActiveGroupBorderColor);
-	readfunc(BarMasterGroupBorderColor);
-	readfunc(FlexWinBorders);
-	readfunc(SpawnCwd);
-	readfunc(ColorEmoji);
-	readfunc(Status2DNoAlpha);
-	readfunc(BarBorder);
-	readfunc(BarBorderColBg);
-	readfunc(BarPadding);
-	readfunc(NoBorders);
-	readfunc(Warp);
-	readfunc(DecorationHints);
-	readfunc(FocusedOnTop);
-	readfunc(FocusedOnTopTiled);
-	readfunc(FocusFollowMouse);
-	readfunc(FocusOnClick);
-	readfunc(FocusOnNetActive);
-	readfunc(AllowNoModifierButtons);
-	readfunc(CenterSizeHintsClients);
-	readfunc(ResizeHints);
-	readfunc(SnapToWindows);
-	readfunc(SnapToGaps);
-	readfunc(SortScreens);
-	readfunc(ViewOnWs);
-	readfunc(Xresources);
-	readfunc(Debug);
-	readfunc(AltWindowTitles);
-	readfunc(AltWorkspaceIcons);
-	readfunc(GreedyMonitor);
-	readfunc(SmartLayoutConversion);
-	readfunc(AutoHideScratchpads);
-	readfunc(RioDrawIncludeBorders);
-	readfunc(RioDrawSpawnAsync);
-	readfunc(RestrictFocusstackToMonitor);
-	readfunc(WinTitleIcons);
-	readfunc(StackerIcons);
-	readfunc(WorkspaceLabels);
-	readfunc(WorkspacePreview);
+	int i, enabled;
+
+	config_setting_t *func_t = config_lookup(cfg, "functionality");
+	if (!func_t)
+		return;
+
+	for (i = 0; functionality_names[i].name != NULL; i++) {
+		if (config_setting_lookup_sloppy_bool(func_t, functionality_names[i].name, &enabled)) {
+			setenabled(functionality_names[i].value, enabled);
+		}
+	}
 }
 
 #undef readfunc

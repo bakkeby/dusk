@@ -89,6 +89,67 @@ static const uint64_t
 	FuncPlaceholder4611686018427387904 = 0x4000000000000000,
 	FuncPlaceholder9223372036854775808 = 0x8000000000000000;
 
+struct nv {
+    const char *name;
+    uint64_t value;
+};
+
+#define map(F) { #F, F }
+
+static const struct nv functionality_names[] = {
+	map(AllowNoModifierButtons),
+	map(AltWindowTitles),
+	map(AltWorkspaceIcons),
+	map(AutoHideScratchpads),
+	map(AutoReduceNmaster),
+	map(BanishMouseCursor),
+	map(BanishMouseCursorToCorner),
+	map(BarActiveGroupBorderColor),
+	map(BarBorder),
+	map(BarBorderColBg),
+	map(BarMasterGroupBorderColor),
+	map(BarPadding),
+	map(CenteredWindowName),
+	map(CenterSizeHintsClients),
+	map(ColorEmoji),
+	map(Debug),
+	map(DecorationHints),
+	map(FlexWinBorders),
+	map(FocusedOnTop),
+	map(FocusedOnTopTiled),
+	map(FocusFollowMouse),
+	map(FocusOnClick),
+	map(FocusOnNetActive),
+	map(GreedyMonitor),
+	map(NoBorders),
+	map(ResizeHints),
+	map(RestrictFocusstackToMonitor),
+	map(RioDrawIncludeBorders),
+	map(RioDrawSpawnAsync),
+	map(SmartGaps),
+	map(SmartGapsMonocle),
+	map(SmartLayoutConversion),
+	map(SnapToGaps),
+	map(SnapToWindows),
+	map(SortScreens),
+	map(SpawnCwd),
+	map(StackerIcons),
+	map(Status2DNoAlpha),
+	map(Swallow),
+	map(SwallowFloating),
+	map(Systray),
+	map(SystrayNoAlpha),
+	map(ViewOnWs),
+	map(Warp),
+	map(WinTitleIcons),
+	map(WorkspaceLabels),
+	map(WorkspacePreview),
+	map(Xresources),
+	{ NULL, 0 }
+};
+
+#undef map
+
 void die(const char *fmt, ...);
 void *ecalloc(size_t nmemb, size_t size);
 int enabled(const uint64_t functionality);
@@ -96,6 +157,7 @@ int disabled(const uint64_t functionality);
 void enablefunc(const uint64_t functionality);
 void disablefunc(const uint64_t functionality);
 void togglefunc(const uint64_t functionality);
+void setenabled(const uint64_t functionality, int enabled);
 void freestrdup(char **dest, const char *src);
 int freesprintf(char **dest, const char *format, ...);
 int startswith(const char *needle, const char *haystack);
