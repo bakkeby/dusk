@@ -30,7 +30,6 @@ static int num_autostart = 0;
 static int num_autorestart = 0;
 static int num_cached_strings = 0;
 static int num_client_rules = 0;
-static int num_workspaces = 0; /* the number of available workspaces */
 static int num_stackericons = 0;
 static int num_layouts = 0;
 static int num_button_bindings = 0;
@@ -1426,7 +1425,7 @@ load_workspace(config_t *cfg)
 		}
 
 		config_setting_lookup_int(rule_t, "monitor", &rule->monitor);
-		config_setting_lookup_float(rule_t, "mfact", &rule->mfact);
+		config_setting_lookup_simple_float(rule_t, "mfact", &rule->mfact);
 		config_setting_lookup_int(rule_t, "nmaster", &rule->nmaster);
 		config_setting_lookup_int(rule_t, "nstack", &rule->nstack);
 		config_setting_lookup_sloppy_bool(rule_t, "gaps", &rule->enablegaps);

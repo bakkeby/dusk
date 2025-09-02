@@ -426,7 +426,7 @@ typedef struct {
 	int monitor;
 	int pinned;
 	int layout;
-	double mfact;
+	float mfact;
 	int nmaster;
 	int nstack;
 	int enablegaps;
@@ -565,6 +565,7 @@ static int mouse_y = 0;
 static int prev_ptr_x = 0;
 static int prev_ptr_y = 0;
 static int ignore_warp = 0;    /* force skip warp in some situations, e.g. dragmfact, dragcfact */
+static int num_workspaces = 0; /* the number of available workspaces */
 static int num_monitors = 0;   /* the number of available monitors */
 static int combo = 0;          /* used for combo keys */
 static int monitorchanged = 0; /* used for combo logic */
@@ -613,7 +614,7 @@ static Workspace *workspaces, *selws;
 static Window root, wmcheckwin;
 
 /* configuration, allows nested code to access above variables */
-#include "config.def.h"
+#include "config.h"
 #include "conf.c"
 
 #include "lib/include.c"
