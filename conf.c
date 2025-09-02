@@ -1912,7 +1912,7 @@ parse_modifier(const char *string)
 {
 	int i, len;
 	unsigned int mask = 0;
-	len = strlen(string);
+	len = strlen(string) + 1;
 	char buffer[len];
 	strlcpy(buffer, string, len);
 	const char *delims = "+-|:;, ";
