@@ -1,6 +1,7 @@
 /* execute command from autostart array */
-int autostart_startup = 1;
-pid_t *autostart_pids = NULL;
+static int autostart_startup = 1;
+static pid_t *autostart_pids = NULL;
+static int num_autostart_pids = 0;
 
 void
 autostart_exec(void)

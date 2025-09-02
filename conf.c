@@ -25,10 +25,9 @@ static Command *_cfg_commands = NULL;
 static Key *_cfg_keys = NULL;
 static StackerIcon *_cfg_stackericons = NULL;
 
-static int num_wsrules;
+static int num_wsrules = 0;
 static int num_autostart = 0;
 static int num_autorestart = 0;
-static int num_autostart_pids = 0;
 static int num_cached_strings = 0;
 static int num_client_rules = 0;
 static int num_workspaces = 0; /* the number of available workspaces */
@@ -1614,6 +1613,9 @@ cfg_get_command(const char *string)
 int
 parse_align(const char *string)
 {
+	if (!strncasecmp(string, "BAR_ALIGN_", 10))
+		string += 10;
+
 	map("NONE", BAR_ALIGN_NONE);
 	map("TOP", BAR_ALIGN_TOP);
 	map("LEFT", BAR_ALIGN_LEFT);
@@ -1633,37 +1635,21 @@ parse_align(const char *string)
 	map("BOTTOM_CENTER", BAR_ALIGN_BOTTOM_CENTER);
 	map("BOTTOM_TOP", BAR_ALIGN_BOTTOM_TOP);
 
-	map("BAR_ALIGN_NONE", BAR_ALIGN_NONE);
-	map("BAR_ALIGN_TOP", BAR_ALIGN_TOP);
-	map("BAR_ALIGN_LEFT", BAR_ALIGN_LEFT);
-	map("BAR_ALIGN_CENTER", BAR_ALIGN_CENTER);
-	map("BAR_ALIGN_BOTTOM", BAR_ALIGN_BOTTOM);
-	map("BAR_ALIGN_RIGHT", BAR_ALIGN_RIGHT);
-	map("BAR_ALIGN_TOP_TOP", BAR_ALIGN_TOP_TOP);
-	map("BAR_ALIGN_TOP_CENTER", BAR_ALIGN_TOP_CENTER);
-	map("BAR_ALIGN_TOP_BOTTOM", BAR_ALIGN_TOP_BOTTOM);
-	map("BAR_ALIGN_LEFT_LEFT", BAR_ALIGN_LEFT_LEFT);
-	map("BAR_ALIGN_LEFT_RIGHT", BAR_ALIGN_LEFT_RIGHT);
-	map("BAR_ALIGN_LEFT_CENTER", BAR_ALIGN_LEFT_CENTER);
-	map("BAR_ALIGN_RIGHT_LEFT", BAR_ALIGN_RIGHT_LEFT);
-	map("BAR_ALIGN_RIGHT_RIGHT", BAR_ALIGN_RIGHT_RIGHT);
-	map("BAR_ALIGN_RIGHT_CENTER", BAR_ALIGN_RIGHT_CENTER);
-	map("BAR_ALIGN_BOTTOM_BOTTOM", BAR_ALIGN_BOTTOM_BOTTOM);
-	map("BAR_ALIGN_BOTTOM_CENTER", BAR_ALIGN_BOTTOM_CENTER);
-	map("BAR_ALIGN_BOTTOM_TOP", BAR_ALIGN_BOTTOM_TOP);
-
 	return BAR_ALIGN_NONE;
 }
 
 int
 parse_click(const char *string)
 {
-	map("ClkLtSymbol", ClkLtSymbol);
-	map("ClkWinTitle", ClkWinTitle);
-	map("ClkStatusText", ClkStatusText);
-	map("ClkClientWin", ClkClientWin);
-	map("ClkRootWin", ClkRootWin);
-	map("ClkWorkspaceBar", ClkWorkspaceBar);
+	if (!strncasecmp(string, "Clk", 3))
+		string += 3;
+
+	map("LtSymbol", ClkLtSymbol);
+	map("WinTitle", ClkWinTitle);
+	map("StatusText", ClkStatusText);
+	map("ClientWin", ClkClientWin);
+	map("RootWin", ClkRootWin);
+	map("WorkspaceBar", ClkWorkspaceBar);
 
 	return 0;
 }
@@ -1838,8 +1824,9 @@ parse_indicator(const char *string)
 int
 parse_key_type(const char *string)
 {
-	map("KeyPress", KeyPress);
-	map("KeyRelease", KeyRelease);
+	if (!strncasecmp(string, "Key", 3))
+		string += 3;
+
 	map("Press", KeyPress);
 	map("Release", KeyRelease);
 
@@ -1864,6 +1851,9 @@ parse_layout(const char *string)
 int
 parse_layout_split(const char *string)
 {
+	if (!strncasecmp(string, "SPLIT_", 6))
+		string += 6;
+
 	map("VERTICAL", SPLIT_VERTICAL);
 	map("HORIZONTAL", SPLIT_HORIZONTAL);
 	map("NO_SPLIT", NO_SPLIT);
@@ -1877,19 +1867,7 @@ parse_layout_split(const char *string)
 	map("CENTERED_HORIZONTAL_FIXED", SPLIT_CENTERED_HORIZONTAL_FIXED);
 	map("VERTICAL_DUAL_STACK_FIXED", SPLIT_VERTICAL_DUAL_STACK_FIXED);
 	map("HORIZONTAL_DUAL_STACK_FIXED", SPLIT_HORIZONTAL_DUAL_STACK_FIXED);
-	map("SPLIT_VERTICAL", SPLIT_VERTICAL);
-	map("SPLIT_HORIZONTAL", SPLIT_HORIZONTAL);
-	map("SPLIT_CENTERED_VERTICAL", SPLIT_CENTERED_VERTICAL);
-	map("SPLIT_CENTERED_HORIZONTAL", SPLIT_CENTERED_HORIZONTAL);
-	map("SPLIT_VERTICAL_DUAL_STACK", SPLIT_VERTICAL_DUAL_STACK);
-	map("SPLIT_HORIZONTAL_DUAL_STACK", SPLIT_HORIZONTAL_DUAL_STACK);
 	map("FLOATING_MASTER", FLOATING_MASTER);
-	map("SPLIT_VERTICAL_FIXED", SPLIT_VERTICAL_FIXED);
-	map("SPLIT_HORIZONTAL_FIXED", SPLIT_HORIZONTAL_FIXED);
-	map("SPLIT_CENTERED_VERTICAL_FIXED", SPLIT_CENTERED_VERTICAL_FIXED);
-	map("SPLIT_CENTERED_HORIZONTAL_FIXED", SPLIT_CENTERED_HORIZONTAL_FIXED);
-	map("SPLIT_VERTICAL_DUAL_STACK_FIXED", SPLIT_VERTICAL_DUAL_STACK_FIXED);
-	map("SPLIT_HORIZONTAL_DUAL_STACK_FIXED", SPLIT_HORIZONTAL_DUAL_STACK_FIXED);
 	map("FLOATING_MASTER_FIXED", FLOATING_MASTER_FIXED);
 
 	fprintf(stderr, "Warning: config could not find layout split with name %s\n", string);
@@ -2033,6 +2011,9 @@ parse_bar_rule_value(const char *string)
 const char *
 parse_window_type(const char *string)
 {
+	if (startswith("_NET_WM_WINDOW_TYPE_", string))
+		string += 20;
+
 	map("NORMAL", "_NET_WM_WINDOW_TYPE_NORMAL");
 	map("DESKTOP", "_NET_WM_WINDOW_TYPE_DESKTOP");
 	map("DOCK", "_NET_WM_WINDOW_TYPE_DOCK");
@@ -2152,14 +2133,13 @@ parse_function_int_constant(const char *string, ArgFunc func, int *ptr)
 	}
 
 	if (func == markall) {
+		if (startswith("MARKALL_", string))
+			string += 8;
+
 		map("ALL", MARKALL_ALL);
 		map("FLOATING", MARKALL_FLOATING);
 		map("HIDDEN", MARKALL_HIDDEN);
 		map("TILED", MARKALL_TILED);
-		map("MARKALL_ALL", MARKALL_ALL);
-		map("MARKALL_FLOATING", MARKALL_FLOATING);
-		map("MARKALL_HIDDEN", MARKALL_HIDDEN);
-		map("MARKALL_TILED", MARKALL_TILED);
 		return 0;
 	}
 
