@@ -1,5 +1,7 @@
 #include <libconfig.h>
 
+const char *progname = "dusk";
+
 static char *_cfg_slopspawnstyle = NULL;
 static char *_cfg_slopresizestyle = NULL;
 static char *_cfg_toggle_float_pos = NULL;
@@ -291,18 +293,18 @@ setting_get_elem(const config_setting_t *cfg, int i)
 void
 set_config_path(const char* filename, char *config_path, char *config_file)
 {
-	const char* xdg_config_home = getenv("XDG_CONFIG_HOME");
-	const char* home = getenv("HOME");
+	const char *xdg_config_home = getenv("XDG_CONFIG_HOME");
+	const char *home = getenv("HOME");
 
 	if (xdg_config_home && xdg_config_home[0] != '\0') {
-		snprintf(config_path, PATH_MAX, "%s/dusk/", xdg_config_home);
+		snprintf(config_path, PATH_MAX, "%s/%s/", xdg_config_home, progname);
 	} else if (home) {
-		snprintf(config_path, PATH_MAX, "%s/.config/dusk/", home);
+		snprintf(config_path, PATH_MAX, "%s/.config/%s/", home, progname);
 	} else {
 		return;
 	}
 
-	snprintf(config_file, PATH_MAX, "%s/%s", config_path, filename);
+	snprintf(config_file, PATH_MAX, "%s/%s.cfg", config_path, filename);
 }
 
 char ***
@@ -375,7 +377,7 @@ load_config(void)
 	char config_path[PATH_MAX] = {0};
 	char config_file[PATH_MAX] = {0};
 
-	set_config_path("dusk.cfg", config_path, config_file);
+	set_config_path(progname, config_path, config_file);
 	config_init(&cfg);
 	config_set_include_dir(&cfg, config_path);
 	if (!config_read_file(&cfg, config_file)) {
