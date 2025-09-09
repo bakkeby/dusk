@@ -535,9 +535,6 @@ cleanup_config(void)
 	}
 	free(_cfg_colors);
 
-	execv_free(_cfg_autostart);
-	execv_free(_cfg_autorestart);
-
 	/* Cleanup client rules */
 	if (_cfg_clientrules != clientrules) {
 		for (i = 0; i < num_client_rules; i++) {
@@ -624,6 +621,9 @@ cleanup_config(void)
 		}
 		free(_cfg_commands);
 	}
+
+	execv_free(_cfg_autostart);
+	execv_free(_cfg_autorestart);
 
 	/* Cleanup stray strings from config */
 	for (i = 0; i < num_cached_strings; i++) {
