@@ -1803,7 +1803,7 @@ parse_layout(const char *string)
 {
 	int i;
 	for (i = 0; i < num_layouts; i++) {
-		if (!strcasecmp(string, layouts[i].name)) {
+		if (!strcasecmp(string, _cfg_layouts[i].name)) {
 			return i;
 		}
 	}
