@@ -380,40 +380,35 @@ load_config(void)
 	set_config_path(progname, config_path, config_file);
 	config_init(&cfg);
 	config_set_include_dir(&cfg, config_path);
-	if (!config_read_file(&cfg, config_file)) {
-		if (strcmp(config_error_text(&cfg), "file I/O error")) {
-			config_error = ecalloc(PATH_MAX + 255, sizeof(char));
-			snprintf(config_error, PATH_MAX + 255,
-				"Config %s: %s:%d",
-				config_error_text(&cfg),
-				config_file,
-				config_error_line(&cfg));
-		}
+	if (config_read_file(&cfg, config_file)) {
+		load_singles(&cfg);
+		load_commands(&cfg);
+		load_autostart(&cfg);
+		load_bar(&cfg);
+		load_button_bindings(&cfg);
+		load_clientrules(&cfg);
+		load_colors(&cfg);
+		load_fonts(&cfg);
+		load_functionality(&cfg);
+		load_indicators(&cfg);
+		load_keybindings(&cfg);
+		load_layouts(&cfg);
+		load_workspace(&cfg);
+	} else if (strcmp(config_error_text(&cfg), "file I/O error")) {
+		config_error = ecalloc(PATH_MAX + 255, sizeof(char));
+		snprintf(config_error, PATH_MAX + 255,
+			"Config %s: %s:%d",
+			config_error_text(&cfg),
+			config_file,
+			config_error_line(&cfg));
 
 		fprintf(stderr, "Error reading config at %s\n", config_file);
 		fprintf(stderr, "%s:%d - %s\n",
 				config_error_file(&cfg),
 				config_error_line(&cfg),
 				config_error_text(&cfg));
-
-		load_fallback_config();
-		config_destroy(&cfg);
-		return;
 	}
 
-	load_singles(&cfg);
-	load_commands(&cfg);
-	load_autostart(&cfg);
-	load_bar(&cfg);
-	load_button_bindings(&cfg);
-	load_clientrules(&cfg);
-	load_colors(&cfg);
-	load_fonts(&cfg);
-	load_functionality(&cfg);
-	load_indicators(&cfg);
-	load_keybindings(&cfg);
-	load_layouts(&cfg);
-	load_workspace(&cfg);
 	load_fallback_config();
 	config_destroy(&cfg);
 }

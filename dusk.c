@@ -615,8 +615,6 @@ static Window root, wmcheckwin;
 
 /* configuration, allows nested code to access above variables */
 #include "config.h"
-#include "conf.c"
-
 #include "lib/include.c"
 
 /* function implementations */
