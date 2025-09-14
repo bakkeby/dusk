@@ -1348,8 +1348,8 @@ load_singles(config_t *cfg)
 		}
 	}
 
-	config_lookup_strdup(cfg, "slop.spawnstyle", &_cfg_slopspawnstyle);
-	config_lookup_strdup(cfg, "slop.resizestyle", &_cfg_slopresizestyle);
+	config_lookup_strdup(cfg, "slop.spawn_style", &_cfg_slopspawnstyle);
+	config_lookup_strdup(cfg, "slop.resize_style", &_cfg_slopresizestyle);
 
 	/* floatpos settings */
 	config_lookup_int(cfg, "floatpos.grid_x", &floatposgrid_x);
