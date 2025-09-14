@@ -27,6 +27,17 @@ static Command *_cfg_commands = NULL;
 static Key *_cfg_keys = NULL;
 static StackerIcon *_cfg_stackericons = NULL;
 
+static int global_hz = 60;
+static int dragcfact_hz = 60;
+static int dragfact_hz = 60;
+static int dragmfact_hz = 60;
+static int dragwfact_hz = 60;
+static int movemouse_hz = 60;
+static int placemouse_hz = 60;
+static int resizemouse_hz = 60;
+static int swallowmouse_hz = 60;
+static int markmouse_hz = 60;
+
 static int num_wsrules = 0;
 static int num_autostart = 0;
 static int num_autorestart = 0;
@@ -75,6 +86,7 @@ static void load_indicators(config_t *cfg);
 static void load_keybindings(config_t *cfg);
 static void load_layouts(config_t *cfg);
 static void load_workspace(config_t *cfg);
+static void load_refresh_rates(config_t *cfg);
 static void load_singles(config_t *cfg);
 static void cleanup_config(void);
 static int parse_align(const char *string);
@@ -394,6 +406,7 @@ load_config(void)
 		load_keybindings(&cfg);
 		load_layouts(&cfg);
 		load_workspace(&cfg);
+		load_refresh_rates(&cfg);
 	} else if (strcmp(config_error_text(&cfg), "file I/O error")) {
 		config_error = ecalloc(PATH_MAX + 255, sizeof(char));
 		snprintf(config_error, PATH_MAX + 255,
@@ -674,7 +687,7 @@ load_bar(config_t *cfg)
 		sidepad = borderpx;
 	config_lookup_int(cfg, "bar.text_padding", &horizpadbar);
 	config_lookup_int(cfg, "bar.height_padding", &vertpadbar);
-	config_lookup_unsigned_int(cfg, "bar.systrayspacing", &systrayspacing);
+	config_lookup_unsigned_int(cfg, "bar.systray_spacing", &systrayspacing);
 
 	if (config_lookup_unsigned_int(cfg, "bar.alpha_fg", &alpha))
 		default_alphas[ColFg] = alpha;
@@ -1026,6 +1039,7 @@ load_colors(config_t *cfg)
 		config_setting_lookup_strdup(col, "fg", &_cfg_colors[scheme][ColFg]);
 		config_setting_lookup_strdup(col, "bg", &_cfg_colors[scheme][ColBg]);
 		config_setting_lookup_strdup(col, "border", &_cfg_colors[scheme][ColBorder]);
+		config_setting_lookup_strdup(col, "resource", &_cfg_colors[scheme][ColCount]);
 	}
 }
 
@@ -1340,7 +1354,7 @@ load_singles(config_t *cfg)
 	/* floatpos settings */
 	config_lookup_int(cfg, "floatpos.grid_x", &floatposgrid_x);
 	config_lookup_int(cfg, "floatpos.grid_y", &floatposgrid_y);
-	config_lookup_strdup(cfg, "floatpos.toggle_pos", &_cfg_toggle_float_pos);
+	config_lookup_strdup(cfg, "floatpos.toggle_position", &_cfg_toggle_float_pos);
 
 	config_lookup_float(cfg, "opacity.default", &defaultopacity);
 	config_lookup_float(cfg, "opacity.move", &moveopacity);
@@ -1355,6 +1369,30 @@ load_singles(config_t *cfg)
 	config_lookup_int(cfg, "flexwintitle.separator", &flexwintitle_separator);
 	config_lookup_int(cfg, "flexwintitle.icon.size", &iconsize);
 	config_lookup_int(cfg, "flexwintitle.icon.spacing", &iconspacing);
+}
+
+void
+load_refresh_rates(config_t *cfg)
+{
+	config_lookup_int(cfg, "refresh_rates.global_hz", &global_hz);
+	if (!config_lookup_int(cfg, "refresh_rates.dragcfact_hz", &dragcfact_hz))
+		dragcfact_hz = global_hz;
+	if (!config_lookup_int(cfg, "refresh_rates.dragfact_hz", &dragfact_hz))
+		dragfact_hz = global_hz;
+	if (!config_lookup_int(cfg, "refresh_rates.dragmfact_hz", &dragmfact_hz))
+		dragmfact_hz = global_hz;
+	if (!config_lookup_int(cfg, "refresh_rates.dragwfact_hz", &dragwfact_hz))
+		dragwfact_hz = global_hz;
+	if (!config_lookup_int(cfg, "refresh_rates.movemouse_hz", &movemouse_hz))
+		movemouse_hz = global_hz;
+	if (!config_lookup_int(cfg, "refresh_rates.placemouse_hz", &placemouse_hz))
+		placemouse_hz = global_hz;
+	if (!config_lookup_int(cfg, "refresh_rates.resizemouse_hz", &resizemouse_hz))
+		resizemouse_hz = global_hz;
+	if (!config_lookup_int(cfg, "refresh_rates.swallowmouse_hz", &swallowmouse_hz))
+		swallowmouse_hz = global_hz;
+	if (!config_lookup_int(cfg, "refresh_rates.markmouse_hz", &markmouse_hz))
+		markmouse_hz = global_hz;
 }
 
 void

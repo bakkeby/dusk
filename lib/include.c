@@ -1,5 +1,4 @@
 /* Utilities */
-#include "defaults.h"
 #include "conf.c"
 #include "lookup.c"
 
