@@ -1340,7 +1340,7 @@ load_singles(config_t *cfg)
 	config_lookup_int(cfg, "nstack", &nstack);
 	config_lookup_simple_float(cfg, "mfact", &mfact);
 
-	if (config_lookup_string(cfg, "attachdefault", &string)) {
+	if (config_lookup_string(cfg, "attach_method", &string)) {
 		uint64_t flag = getflagbyname(string) & AttachFlag;
 
 		if (flag) {
