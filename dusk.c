@@ -4321,8 +4321,10 @@ main(int argc, char *argv[])
 {
 	if (argc == 2 && !strcmp("-v", argv[1]))
 		die("dusk-"VERSION);
+	else if (argc == 3 && (!strcmp("-c", argv[1]) || !strcmp("--cfg", argv[1])))
+		cfg_filename = argv[2];
 	else if (argc != 1)
-		die("usage: dusk [-v]");
+		die("usage: dusk [-v] [-c dusk.cfg]");
 	if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
 		fputs("warning: no locale support\n", stderr);
 	if (!(dpy = XOpenDisplay(NULL)))
