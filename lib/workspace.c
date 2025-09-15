@@ -1110,6 +1110,11 @@ distributeworkspaces(void)
 			continue;
 		}
 
+		if (workspaces_per_mon && ws->rule_pinned) {
+			stash_workspace(ws);
+			continue;
+		}
+
 		/* Otherwise distribute workspaces evenly. */
 		ws->pinned = 0;
 		assignworkspacetomonitor(ws, m);
