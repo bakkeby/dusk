@@ -8,7 +8,7 @@ drawindicator(Workspace *ws, Client *c, unsigned int occ, int x, int y, int w, i
 	boxs = drw->fonts->h / 9;
 	boxw = drw->fonts->h / 6 + 2;
 	if (filled == -1)
-		filled = ws->mon == selmon;
+		filled = (ws == ws->mon->selws);
 
 	switch (type) {
 	default:
