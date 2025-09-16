@@ -27,6 +27,7 @@ static Button *_cfg_buttons = NULL;
 static Command *_cfg_commands = NULL;
 static Key *_cfg_keys = NULL;
 static StackerIcon *_cfg_stackericons = NULL;
+static int persist_workstate_states_across_restarts = 1;
 
 static int global_hz = 60;
 static int dragcfact_hz = 60;
@@ -1416,6 +1417,7 @@ load_workspace(config_t *cfg)
 	config_lookup_sloppy_bool(cfg, "workspace.labels.prefer_window_icons", &prefer_window_icons_over_workspace_labels);
 	config_lookup_sloppy_bool(cfg, "workspace.labels.swap_occupied_format", &swap_occupied_workspace_label_format_strings);
 	config_lookup_sloppy_bool(cfg, "workspace.per_monitor", &workspaces_per_mon);
+	config_lookup_sloppy_bool(cfg, "workspace.persist_workstate_states_across_restarts", &persist_workstate_states_across_restarts);
 
 	/* Workspace rules */
 	rules = config_lookup(cfg, "workspace.rules");

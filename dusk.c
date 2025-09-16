@@ -3549,7 +3549,8 @@ setup(void)
 	cursor[CurSwallow] = drw_cur_create(drw, XC_target);
 
 	createworkspaces();
-	restoreworkspacestates();
+	if (persist_workstate_states_across_restarts)
+		restoreworkspacestates();
 	distributeworkspaces();
 	reorientworkspaces();
 	reviewworkspaces(1);
