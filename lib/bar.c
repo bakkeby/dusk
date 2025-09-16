@@ -259,20 +259,11 @@ drawbarwin(Bar *bar)
 		}
 
 		if (br->drawfunc == draw_powerline) {
-
+			/* Check if the bar overlaps with another powerline or is at
+			 * the start or end of the bar, in which case we skip it. */
 			if (reducepowerline(bar, r)) {
 				bar->s[r] = 0;
 				continue;
-			}
-
-			/* If the powerline is at the start or end of the bar, then keep the powerline but
-			 * reduce the size by half. When drawn this will be made a solid block rather than
-			 * slashes or arrows. */
-			if (bar->p[r] == bar->borderpx)
-				barg.w = w = bar->s[r] = bar->s[r] / 2;
-			else if (bar->p[r] + bar->s[r] + bar->borderpx == bar->bw) {
-				bar->p[r] += bar->s[r] / 2 + bar->s[r] % 2;
-				barg.w = w = bar->s[r] = bar->s[r] / 2;
 			}
 		}
 

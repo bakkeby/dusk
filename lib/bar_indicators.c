@@ -107,7 +107,7 @@ drawstateindicator(Workspace *ws, Client *c, unsigned int occ, int x, int y, int
 {
 	int indicator = 0;
 
-	if (c == selws->sel)
+	if (c == selws->sel && indicators[IndicatorSelected] != INDICATOR_NONE)
 		indicator = IndicatorSelected;
 	else if (ISFULLSCREEN(c) && ISFAKEFULLSCREEN(c))
 		indicator = ISTILED(c) ? IndicatorFakeFullScreenActive : IndicatorFloatFakeFullScreenActive;
