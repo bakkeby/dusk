@@ -44,10 +44,10 @@ persistworkspacestate(Workspace *ws)
 	 */
 	uint32_t data[] = {
 		(ws->visible & 0x1) |
-		(ws->pinned & 0x1) << 1 |
+		((ws->mon == dummymon ? ws->rule_pinned : ws->pinned) & 0x1) << 1 |
 		(ws->nmaster & 0x7) << 2 |
 		(ws->nstack & 0x7 ) << 5 |
-		(ws->mon->num & 0x7) << 8 |
+		((ws->mon == dummymon ? ws->rule_monitor : ws->mon->num) & 0x7) << 8 |
 		(abs(ws->ltaxis[LAYOUT]) & 0xF) << 11 |
 		(ws->ltaxis[MASTER] & 0x1F) << 15 |
 		(ws->ltaxis[STACK] & 0x1F) << 20 |
@@ -105,53 +105,51 @@ persistworkspacestate(Workspace *ws)
  */
 unsigned char *
 readworkspacestate(Display *dpy, Window w, Atom property,
-                   Atom *actual_type_return, int *actual_format_return,
-                   unsigned long *nitems_return)
+					Atom *actual_type_return, int *actual_format_return,
+					unsigned long *nitems_return)
 {
-    Atom actual_type;
-    int actual_format;
-    unsigned long nitems, bytes_after;
-    unsigned char *prop = NULL, *data = NULL;
-    unsigned long offset = 0;
+	Atom actual_type;
+	int actual_format;
+	unsigned long nitems, bytes_after;
+	unsigned char *prop = NULL, *data = NULL;
+	unsigned long offset = 0;
 
-    *nitems_return = 0;
+	*nitems_return = 0;
 
-    do {
-        if (XGetWindowProperty(dpy, w, property,
-                               offset / 4,          // offset in 32-bit multiples
-                               LONG_MAX,            // maximum length (in 32-bit multiples)
-                               False, AnyPropertyType,
-                               &actual_type, &actual_format,
-                               &nitems, &bytes_after, &prop) != Success)
-        {
-            if (data) XFree(data);
-            return NULL;
-        }
+	do {
+		if (XGetWindowProperty(dpy, w, property, offset / 4, LONG_MAX, False, AnyPropertyType,
+				&actual_type, &actual_format, &nitems, &bytes_after, &prop) != Success
+		) {
+			if (data) XFree(data);
+			return NULL;
+		}
 
-        if (prop) {
-            if (!data) {
-                data = prop;  // first chunk
-            } else {
-                // append chunk to existing buffer
-                data = realloc(data, (*nitems_return + nitems) * (actual_format / 8));
-                if (!data) {
-                    XFree(prop);
-                    return NULL;
-                }
-                memcpy(data + (*nitems_return * (actual_format / 8)),
-                       prop, nitems * (actual_format / 8));
-                XFree(prop);
-            }
-            *nitems_return += nitems;
-        }
+		if (prop) {
+			if (!data) {
+				data = prop;  // first chunk
+			} else {
+				/* Append chunk to existing buffer */
+				data = realloc(data, (*nitems_return + nitems) * (actual_format / 8));
+				if (!data) {
+					XFree(prop);
+					return NULL;
+				}
+				memcpy(data + (*nitems_return * (actual_format / 8)),
+					   prop, nitems * (actual_format / 8));
+				XFree(prop);
+			}
+			*nitems_return += nitems;
+		}
 
-        offset += nitems * (actual_format / 8); // advance offset
-    } while (bytes_after > 0);
+		offset += nitems * (actual_format / 8); // advance offset
+	} while (bytes_after > 0);
 
-    if (actual_type_return)   *actual_type_return = actual_type;
-    if (actual_format_return) *actual_format_return = actual_format;
+	if (actual_type_return)
+		*actual_type_return = actual_type;
+	if (actual_format_return)
+		*actual_format_return = actual_format;
 
-    return data;
+	return data;
 }
 
 void
@@ -165,8 +163,7 @@ restoreworkspacestates(void)
 	unsigned char *data;
 	unsigned long *vals;
 
-	data = readworkspacestate(dpy, root, duskatom[DuskWorkspace],
-		                      &actual_type, &actual_format, &nitems);
+	data = readworkspacestate(dpy, root, duskatom[DuskWorkspace], &actual_type, &actual_format, &nitems);
 	if (!data)
 		return;
 
@@ -195,9 +192,15 @@ restoreworkspacestate(Workspace *ws, unsigned long settings)
 	int i;
 
 	/* See bit layout in the persistworkspacestate function */
-	ws->rule_monitor = (settings >> 8) & 0x7;
+
+	/* If we are dedicating workspaces to specific monitors then keep monitor
+	 * and pinned status from the workspace rules rather than overwriting with
+	 * the state from the previous session. */
+	if (!workspaces_per_mon || !ws->rule_pinned) {
+		ws->rule_monitor = (settings >> 8) & 0x7;
+		ws->rule_pinned = (settings >> 1) & 0x1;
+	}
 	ws->visible = settings & 0x1;
-	ws->rule_pinned = (settings >> 1) & 0x1;
 	ws->nmaster = (settings >> 2) & 0x7;
 	ws->nstack = (settings >> 5) & 0x7;
 	ws->ltaxis[LAYOUT] = (settings >> 11) & 0xF;
