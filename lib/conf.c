@@ -403,18 +403,18 @@ load_config(void)
 	if (config_read_file(&cfg, config_file)) {
 		load_singles(&cfg);
 		load_commands(&cfg);
+		load_layouts(&cfg);
 		load_autostart(&cfg);
 		load_bar(&cfg);
-		load_button_bindings(&cfg);
 		load_clientrules(&cfg);
 		load_colors(&cfg);
 		load_fonts(&cfg);
 		load_functionality(&cfg);
 		load_indicators(&cfg);
-		load_keybindings(&cfg);
-		load_layouts(&cfg);
 		load_workspace(&cfg);
 		load_refresh_rates(&cfg);
+		load_button_bindings(&cfg);
+		load_keybindings(&cfg);
 	} else if (strcmp(config_error_text(&cfg), "file I/O error")) {
 		config_error = ecalloc(PATH_MAX + 255, sizeof(char));
 		snprintf(config_error, PATH_MAX + 255,
@@ -2135,6 +2135,11 @@ parse_function_int_constant(const char *string, ArgFunc func, int *ptr)
 		map("PREVSEL", PREVSEL);
 		map("LASTTILED", LASTTILED);
 		return 0;
+	}
+
+	if (func == setlayout) {
+		*ptr = parse_layout(string);
+		return 1;
 	}
 
 	if (func == markall) {
