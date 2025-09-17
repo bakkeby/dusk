@@ -1,7 +1,8 @@
 int
 size_config_error(Bar *bar, BarArg *a)
 {
-	return (config_error ? a->w : 0);
+	int textw = (config_error ? TEXT2DW(config_error) + lrpad : 0);
+	return MIN(textw, a->w);
 }
 
 int
