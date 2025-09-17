@@ -2142,6 +2142,24 @@ parse_function_int_constant(const char *string, ArgFunc func, int *ptr)
 		return 1;
 	}
 
+	if (func == rotatelayoutaxis) {
+		map("LAYOUT", LAYOUT);
+		map("MASTER", MASTER);
+		map("STACK", STACK);
+		map("STACK1", STACK);
+		map("STACK2", STACK2);
+		map("-LAYOUT", LAYOUT);
+		map("-MASTER", -MASTER);
+		map("-STACK", -STACK);
+		map("-STACK1", -STACK);
+		map("-STACK2", -STACK2);
+		map("MIRRORMASTER", -MASTER);
+		map("MIRRORSTACK", -STACK);
+		map("MIRRORSTACK1", -STACK);
+		map("MIRRORSTACK2", -STACK2);
+		return 0;
+	}
+
 	if (func == markall) {
 		if (startswith("MARKALL_", string))
 			string += 8;
@@ -2160,6 +2178,13 @@ parse_function_int_constant(const char *string, ArgFunc func, int *ptr)
 		map("DOWN", DOWN);
 		return 0;
 	}
+
+	map("INCR", +1);
+	map("DECR", -1);
+	map("INC", +1);
+	map("DEC", -1)
+	map("INC2", +2);
+	map("DEC2", -2);
 
 	return 0;
 }
