@@ -5,7 +5,10 @@ static void getclienticonpath(Client *c);
 static void getclientlabel(Client *c);
 static void getclientalttitle(Client *c);
 static void persistworkspacestate(Workspace *ws);
-static void restoreworkspacestate(Workspace *ws);
+static unsigned char *readworkspacestate(Display *dpy, Window w, Atom property,
+                   Atom *actual_type_return, int *actual_format_return,
+                   unsigned long *nitems_return);
+static void restoreworkspacestate(Workspace *ws, unsigned long settings);
 static void restoreworkspacestates(void);
 static void persistpids(void);
 static void restorepids(void);

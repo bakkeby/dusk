@@ -34,14 +34,19 @@ reducepowerline(Bar *bar, int r_idx)
 	int r;
 	const BarRule *br;
 
-	/* If the powerline overlaps with another powerline, then get rid of it. */
 	for (r = 0; r < r_idx; r++) {
-		br = &barrules[r];
+		br = &_cfg_barrules[r];
 		if (!bar->s[r] || br->drawfunc != draw_powerline)
 			continue;
 		if (br->bar != bar->idx || !br->sizefunc || (br->monitor == 'A' && bar->mon != selmon))
 			continue;
+		/* If the powerline overlaps with another powerline, then get rid of it. */
 		if (bar->p[r] + bar->s[r] == bar->p[r_idx] || bar->p[r_idx] + bar->s[r_idx] == bar->p[r])
+			return 1;
+		/* If the powerline is at the start or end of the bar, then get rid of it. */
+		if (bar->p[r] == bar->borderpx)
+			return 1;
+		if (bar->p[r] + bar->s[r] + bar->borderpx == bar->bw)
 			return 1;
 	}
 
@@ -52,15 +57,20 @@ int
 schemeleftof(Bar *bar, int r_idx)
 {
 	const BarRule *br;
-	for (int r = 0; r < LENGTH(barrules); r++) {
-		br = &barrules[r];
+	for (int r = 0; r < num_barrules; r++) {
+		br = &_cfg_barrules[r];
 		if (!bar->s[r] || br->drawfunc == draw_powerline)
 			continue;
 		if (br->bar != bar->idx || !br->sizefunc || (br->monitor == 'A' && bar->mon != selmon))
 			continue;
 
-		if (bar->p[r] + bar->s[r] + br->lpad + br->rpad == bar->p[r_idx])
+		if (bar->p[r] + bar->s[r] + br->lpad + br->rpad == bar->p[r_idx]) {
+			/* If the left module applies right padding then the module will not be
+			 * directly connected to the powerline, so fall back to using SchemeNorm. */
+			if (br->rpad)
+				return SchemeNorm;
 			return bar->escheme[r];
+		}
 	}
 
 	return SchemeNorm;
@@ -70,15 +80,20 @@ int
 schemerightof(Bar *bar, int r_idx)
 {
 	const BarRule *br;
-	for (int r = 0; r < LENGTH(barrules); r++) {
-		br = &barrules[r];
+	for (int r = 0; r < num_barrules; r++) {
+		br = &_cfg_barrules[r];
 		if (!bar->s[r] || br->drawfunc == draw_powerline)
 			continue;
 		if (br->bar != bar->idx || !br->sizefunc || (br->monitor == 'A' && bar->mon != selmon))
 			continue;
 
-		if (bar->p[r_idx] + bar->s[r_idx] == bar->p[r])
+		if (bar->p[r_idx] + bar->s[r_idx] == bar->p[r]) {
+			/* If the right module applies left padding then the module will not be
+			 * directly connected to the powerline, so fall back to using SchemeNorm. */
+			if (br->lpad)
+				return SchemeNorm;
 			return bar->sscheme[r];
+		}
 	}
 
 	return SchemeNorm;

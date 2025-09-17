@@ -132,8 +132,8 @@ getstackericonforclient(Client *c)
 	int nc, nt, nf, nm, ns;           // num clients, tiled, floating, master, stack
 	getclientindices(c, &nthc, &ntht, &nthf, &nthm, &nths, &nc, &nt, &nf, &nm, &ns);
 
-	for (i = 0; i < LENGTH(stackericons); i++) {
-		stacklevel = stackericons[i].arg.i;
+	for (i = 0; i < num_stackericons; i++) {
+		stacklevel = _cfg_stackericons[i].arg.i;
 
 		/* MASTER, STACK, TILE and implicit client positions take precedence for icons */
 		if (nthm && stacklevel == MASTER(nthm)) {
@@ -171,5 +171,5 @@ getstackericonforclient(Client *c)
 	if (i == -1)
 		return NULL;
 
-	return &stackericons[i];
+	return &_cfg_stackericons[i];
 }

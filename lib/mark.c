@@ -86,7 +86,7 @@ markmouse(const Arg *arg)
 			handler[ev.type](&ev);
 			break;
 		case MotionNotify:
-			if ((ev.xmotion.time - lasttime) <= (1000 / MARKMOUSE_HZ))
+			if ((ev.xmotion.time - lasttime) <= (1000 / markmouse_hz))
 				continue;
 			lasttime = ev.xmotion.time;
 

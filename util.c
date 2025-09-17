@@ -32,6 +32,7 @@ ecalloc(size_t nmemb, size_t size)
 {
 	void *p;
 
+	/* calloc allocates memory for an array of n elements and initializes all bits to zero */
 	if (!(p = calloc(nmemb, size)))
 		die("calloc:");
 	return p;
@@ -68,6 +69,16 @@ togglefunc(const uint64_t functionality)
 }
 
 void
+setenabled(const uint64_t functionality, int enabled)
+{
+	if (enabled) {
+		enablefunc(functionality);
+	} else {
+		disablefunc(functionality);
+	}
+}
+
+void
 freestrdup(char **dest, const char *src)
 {
 	if (dest == NULL)
@@ -100,6 +111,10 @@ freesprintf(char **dest, const char *format, ...)
 	return result;
 }
 
+int startswith(const char *needle, const char *haystack)
+{
+	return !strncmp(haystack, needle, strlen(needle));
+}
 
 #ifdef __linux__
 /*

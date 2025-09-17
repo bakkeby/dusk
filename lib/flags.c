@@ -51,81 +51,31 @@ toggleclientflag(const Arg *arg)
 	arrangews(selws);
 }
 
-#define compareNameToFlag(F) else if (!strcasecmp(name, #F)) return F;
-
 const uint64_t
 getflagbyname(const char *name)
 {
+	int i;
+
 	if (!name)
 		return 0;
-	compareNameToFlag(AlwaysOnTop)
-	compareNameToFlag(Fixed)
-	compareNameToFlag(Floating)
-	compareNameToFlag(Urgent)
-	compareNameToFlag(NeverFocus)
-	compareNameToFlag(FullScreen)
-	compareNameToFlag(FakeFullScreen)
-	compareNameToFlag(RestoreFakeFullScreen)
-	compareNameToFlag(Centered)
-	compareNameToFlag(Permanent)
-	compareNameToFlag(Hidden)
-	compareNameToFlag(Sticky)
-	compareNameToFlag(Terminal)
-	compareNameToFlag(NoSwallow)
-	compareNameToFlag(Locked)
-	compareNameToFlag(Transient)
-	compareNameToFlag(OnlyModButtons)
-	compareNameToFlag(Disallowed)
-	compareNameToFlag(AttachMaster)
-	compareNameToFlag(AttachAbove)
-	compareNameToFlag(AttachBelow)
-	compareNameToFlag(AttachAside)
-	compareNameToFlag(AttachBottom)
-	compareNameToFlag(SwitchWorkspace)
-	compareNameToFlag(EnableWorkspace)
-	compareNameToFlag(RevertWorkspace)
-	compareNameToFlag(IgnoreCfgReq)
-	compareNameToFlag(IgnoreCfgReqPos)
-	compareNameToFlag(IgnoreCfgReqSize)
-	compareNameToFlag(IgnorePropTransientFor)
-	compareNameToFlag(IgnoreSizeHints)
-	compareNameToFlag(IgnoreMinimumSizeHints)
-	compareNameToFlag(IgnoreDecorationHints)
-	compareNameToFlag(NoBorder)
-	compareNameToFlag(FlagPlaceholder0x400000000)
-	compareNameToFlag(SemiScratchpad)
-	compareNameToFlag(RespectSizeHints)
-	compareNameToFlag(RioDrawNoMatchPID)
-	compareNameToFlag(FlagPlaceholder0x200000000)
-	compareNameToFlag(SteamGame)
-	compareNameToFlag(NoFocusOnNetActive)
-	compareNameToFlag(ScratchpadStayOnMon)
-	compareNameToFlag(Lower)
-	compareNameToFlag(Raise)
-	compareNameToFlag(SkipTaskbar)
-	compareNameToFlag(ReapplyRules)
-	compareNameToFlag(CfgReqPosRelativeToMonitor)
-	compareNameToFlag(SwallowRetainSize)
-	compareNameToFlag(NoWarp)
-	compareNameToFlag(SwallowNoInheritFullScreen)
-	compareNameToFlag(FlagPlaceholder0x4000000000000)
-	compareNameToFlag(FlagPlaceholder0x8000000000000)
-	compareNameToFlag(FlagPlaceholder0x10000000000000)
-	compareNameToFlag(FlagPlaceholder0x20000000000000)
-	compareNameToFlag(Swallowed)
-	compareNameToFlag(RefreshSizeHints)
-	compareNameToFlag(Debug)
-	compareNameToFlag(Invisible)
-	compareNameToFlag(MoveResize)
-	compareNameToFlag(MovePlace)
-	compareNameToFlag(NeedResize)
-	compareNameToFlag(Ruled)
-	compareNameToFlag(Marked)
-	compareNameToFlag(Unmanaged)
 
-	if (enabled(Debug))
-		fprintf(stderr, "getflagbyname for name '%s' not found\n", name);
+	for (i = 0; flag_names[i].name != NULL; i++) {
+		if (strcmp(flag_names[i].name, name) == 0)
+			return flag_names[i].value;
+	}
+
 	return 0;
 }
 
-#undef compareNameToFlag
+const char *
+getnamebyflag(const uint64_t flag)
+{
+	int i;
+
+	for (i = 0; flag_names[i].name != NULL; i++) {
+		if (flag_names[i].value == flag)
+			return flag_names[i].name;
+	}
+
+	return 0;
+}

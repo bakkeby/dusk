@@ -1,5 +1,5 @@
 /* Utilities */
-#include "defaults.h"
+#include "conf.c"
 #include "lookup.c"
 
 /* Bar functionality */
@@ -12,6 +12,7 @@
 #include "bar_alpha.c"
 #include "bar.c"
 #include "bar_ltsymbol.c"
+#include "bar_config_error.c"
 #include "bar_flexwintitle.c"
 #include "bar_status2d.c"
 #include "bar_wintitle_floating.c"

@@ -44,10 +44,10 @@ persistworkspacestate(Workspace *ws)
 	 */
 	uint32_t data[] = {
 		(ws->visible & 0x1) |
-		(ws->pinned & 0x1) << 1 |
+		((ws->mon == dummymon ? ws->rule_pinned : ws->pinned) & 0x1) << 1 |
 		(ws->nmaster & 0x7) << 2 |
 		(ws->nstack & 0x7 ) << 5 |
-		(ws->mon->num & 0x7) << 8 |
+		((ws->mon == dummymon ? ws->rule_monitor : ws->mon->num) & 0x7) << 8 |
 		(abs(ws->ltaxis[LAYOUT]) & 0xF) << 11 |
 		(ws->ltaxis[MASTER] & 0x1F) << 15 |
 		(ws->ltaxis[STACK] & 0x1F) << 20 |
@@ -92,36 +92,80 @@ persistworkspacestate(Workspace *ws)
 	XSync(dpy, False);
 }
 
+/*
+ * Reads a property from a window and returns its data.
+ * - display: X11 display
+ * - w: window (often root)
+ * - property: atom of the property (e.g. _DUSK_WORKSPACE)
+ * - actual_type_return: receives the actual type of the property
+ * - actual_format_return: receives format (8, 16, 32)
+ * - nitems_return: receives number of items (elements, not bytes)
+ *
+ * Returns: pointer to data (must be freed with XFree), or NULL on failure.
+ */
+unsigned char *
+readworkspacestate(Display *dpy, Window w, Atom property,
+					Atom *actual_type_return, int *actual_format_return,
+					unsigned long *nitems_return)
+{
+	Atom actual_type;
+	int actual_format;
+	unsigned long nitems, bytes_after;
+	unsigned char *prop = NULL, *data = NULL;
+	unsigned long offset = 0;
+
+	*nitems_return = 0;
+
+	do {
+		if (XGetWindowProperty(dpy, w, property, offset / 4, LONG_MAX, False, AnyPropertyType,
+				&actual_type, &actual_format, &nitems, &bytes_after, &prop) != Success
+		) {
+			if (data) XFree(data);
+			return NULL;
+		}
+
+		if (prop) {
+			if (!data) {
+				data = prop;  // first chunk
+			} else {
+				/* Append chunk to existing buffer */
+				data = realloc(data, (*nitems_return + nitems) * (actual_format / 8));
+				if (!data) {
+					XFree(prop);
+					return NULL;
+				}
+				memcpy(data + (*nitems_return * (actual_format / 8)),
+					   prop, nitems * (actual_format / 8));
+				XFree(prop);
+			}
+			*nitems_return += nitems;
+		}
+
+		offset += nitems * (actual_format / 8); // advance offset
+	} while (bytes_after > 0);
+
+	if (actual_type_return)
+		*actual_type_return = actual_type;
+	if (actual_format_return)
+		*actual_format_return = actual_format;
+
+	return data;
+}
+
 void
 restoreworkspacestates(void)
 {
 	Workspace *ws;
-	for (ws = workspaces; ws; ws = ws->next)
-		restoreworkspacestate(ws);
-}
 
-void
-restoreworkspacestate(Workspace *ws)
-{
-	const Layout *layout;
-	int i, di, mon, num_ws = 0;
-	unsigned long dl, nitems;
-	unsigned char *p = NULL;
-	Atom da, settings = None;
+	Atom actual_type;
+	int actual_format;
+	unsigned long nitems;
+	unsigned char *data;
+	unsigned long *vals;
 
-	if (XGetWindowProperty(dpy, root, netatom[NetNumberOfDesktops], 0L, sizeof da,
-			False, AnyPropertyType, &da, &di, &nitems, &dl, &p) == Success && p) {
-		num_ws = *(Atom *)p;
-		XFree(p);
-	}
-
-	if (ws->num > num_ws)
+	data = readworkspacestate(dpy, root, duskatom[DuskWorkspace], &actual_type, &actual_format, &nitems);
+	if (!data)
 		return;
-
-	if (!(XGetWindowProperty(dpy, root, duskatom[DuskWorkspace], ws->num, num_ws * sizeof dl,
-			False, AnyPropertyType, &da, &di, &nitems, &dl, &p) == Success && p)) {
-		return;
-	}
 
 	/* If the root window has the _DUSK_WORKSPACES property, which is confirmed by the above if
 	 * statement, then we do not want to trigger autostart of applications. This is only to happen
@@ -129,43 +173,60 @@ restoreworkspacestate(Workspace *ws)
 	 * defined in lib/autostart.c */
 	autostart_startup = 0;
 
-	if (nitems) {
-		settings = *(Atom *)p;
-
-		/* See bit layout in the persistworkspacestate function */
-		mon = (settings >> 8) & 0x7;
-		ws->rule_monitor = mon;
-		ws->visible = settings & 0x1;
-		ws->rule_pinned = (settings >> 1) & 0x1;
-		ws->nmaster = (settings >> 2) & 0x7;
-		ws->nstack = (settings >> 5) & 0x7;
-		ws->ltaxis[LAYOUT] = (settings >> 11) & 0xF;
-		if (settings & (1 << 30)) // mirror layout
-			ws->ltaxis[LAYOUT] *= -1;
-		ws->ltaxis[MASTER] = WRAP((settings >> 15) & 0x1F, 0, AXIS_LAST - 1);
-		ws->ltaxis[STACK]  = WRAP((settings >> 20) & 0x1F, 0, AXIS_LAST - 1);
-		ws->ltaxis[STACK2] = WRAP((settings >> 25) & 0x1F, 0, AXIS_LAST - 1);
-		ws->enablegaps = (settings >> 31) & 0x1;
-
-		/* Restore layout if we have an exact match, floating layout interpreted as 0x1ef7f800 */
-		for (i = 0; i < LENGTH(layouts); i++) {
-			layout = &layouts[i];
-			if ((layout->arrange == flextile
-				&& ws->ltaxis[LAYOUT] == layout->preset.layout
-				&& ws->ltaxis[MASTER] == layout->preset.masteraxis
-				&& ws->ltaxis[STACK]  == layout->preset.stack1axis
-				&& ws->ltaxis[STACK2] == layout->preset.stack2axis)
-				|| ((settings & 0x1ef7f800) == 0x1ef7f800
-				&& layout->arrange == NULL)
-			) {
-				ws->layout = layout;
-				freestrdup(&ws->ltsymbol, ws->layout->symbol);
-				break;
-			}
+	if (actual_format == 32) {
+		vals = (unsigned long *)data;
+		for (ws = workspaces; ws; ws = ws->next) {
+			if (ws->num >= nitems)
+				continue;
+			restoreworkspacestate(ws, vals[ws->num]);
 		}
 	}
 
-	XFree(p);
+	XFree(data);
+}
+
+void
+restoreworkspacestate(Workspace *ws, unsigned long settings)
+{
+	const Layout *layout;
+	int i;
+
+	/* See bit layout in the persistworkspacestate function */
+
+	/* If we are dedicating workspaces to specific monitors then keep monitor
+	 * and pinned status from the workspace rules rather than overwriting with
+	 * the state from the previous session. */
+	if (!workspaces_per_mon || !ws->rule_pinned) {
+		ws->rule_monitor = (settings >> 8) & 0x7;
+		ws->rule_pinned = (settings >> 1) & 0x1;
+	}
+	ws->visible = settings & 0x1;
+	ws->nmaster = (settings >> 2) & 0x7;
+	ws->nstack = (settings >> 5) & 0x7;
+	ws->ltaxis[LAYOUT] = (settings >> 11) & 0xF;
+	if (settings & (1 << 30)) // mirror layout
+		ws->ltaxis[LAYOUT] *= -1;
+	ws->ltaxis[MASTER] = WRAP((settings >> 15) & 0x1F, 0, AXIS_LAST - 1);
+	ws->ltaxis[STACK]  = WRAP((settings >> 20) & 0x1F, 0, AXIS_LAST - 1);
+	ws->ltaxis[STACK2] = WRAP((settings >> 25) & 0x1F, 0, AXIS_LAST - 1);
+	ws->enablegaps = (settings >> 31) & 0x1;
+
+	/* Restore layout if we have an exact match, floating layout interpreted as 0x1ef7f800 */
+	for (i = 0; i < num_layouts; i++) {
+		layout = &_cfg_layouts[i];
+		if ((layout->arrange == flextile
+			&& ws->ltaxis[LAYOUT] == layout->preset.layout
+			&& ws->ltaxis[MASTER] == layout->preset.masteraxis
+			&& ws->ltaxis[STACK]  == layout->preset.stack1axis
+			&& ws->ltaxis[STACK2] == layout->preset.stack2axis)
+			|| ((settings & 0x1ef7f800) == 0x1ef7f800
+			&& layout->arrange == NULL)
+		) {
+			ws->layout = layout;
+			freestrdup(&ws->ltsymbol, ws->layout->symbol);
+			break;
+		}
+	}
 }
 
 void
@@ -173,7 +234,7 @@ persistpids(void)
 {
 	unsigned int i, count = 0;
 
-	for (i = 0; i < LENGTH(autostart_pids); i++) {
+	for (i = 0; i < num_autostart_pids; i++) {
 		if (autostart_pids[i] == 0)
 			break;
 

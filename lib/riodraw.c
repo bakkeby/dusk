@@ -93,7 +93,7 @@ rioresize(const Arg *arg)
 {
 	Client *c = CLIENT;
 	if (c)
-		riodraw(c, slopresizestyle);
+		riodraw(c, CFG(slopresizestyle));
 }
 
 /* spawn a new window and drag out an area using slop to position it */
@@ -102,8 +102,8 @@ riospawn(const Arg *arg)
 {
 	if (enabled(RioDrawSpawnAsync) && arg->v != dmenucmd) {
 		riopid = spawncmd(arg, 0, 0);
-		riodraw(NULL, slopspawnstyle);
-	} else if (riodraw(NULL, slopspawnstyle))
+		riodraw(NULL, CFG(slopspawnstyle));
+	} else if (riodraw(NULL, CFG(slopspawnstyle)))
 		riopid = spawncmd(arg, 0, 0);
 
 	if (riopid && arg->v == dmenucmd)
