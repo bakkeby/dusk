@@ -94,9 +94,11 @@ static void load_singles(config_t *cfg);
 static void cleanup_config(void);
 static int parse_align(const char *string);
 static int parse_click(const char *string);
-static ArgFunc parse_function(const char *string);
+static ArgFunc parse_arg_function(const char *string);
+static WsFunc parse_layout_function(const char *string);
+static SymbolFunc parse_symbol_function(const char *string);
 static int parse_indicator(const char *indicator);
-static int parse_function_int_constant(const char *string, ArgFunc func, int *ptr);
+static int parse_arg_function_int_constant(const char *string, ArgFunc func, int *ptr);
 static int parse_key_type(const char *string);
 static int parse_layout(const char *string);
 static int parse_layout_split(const char *string);
@@ -884,7 +886,7 @@ load_button_bindings(config_t *cfg)
 		length = setting_length(function);
 		num_functions = MAX(length, 1);
 		for (j = 0; j < length; j++) {
-			function_arr[j] = parse_function(setting_get_string_elem(function, j));
+			function_arr[j] = parse_arg_function(setting_get_string_elem(function, j));
 		}
 
 		length = setting_length(argument);
@@ -900,7 +902,7 @@ load_button_bindings(config_t *cfg)
 				break;
 			case CONFIG_TYPE_STRING:
 				string = config_setting_get_string(arg);
-				if (parse_function_int_constant(string, function_arr[j % num_functions], &value)) {
+				if (parse_arg_function_int_constant(string, function_arr[j % num_functions], &value)) {
 					argument_arr[j] = value;
 				} else {
 					void_argument_arr[j] = parse_void_reference(string);
@@ -1151,7 +1153,7 @@ load_keybindings(config_t *cfg)
 		length = setting_length(function);
 		num_functions = MAX(length, 1);
 		for (j = 0; j < length; j++) {
-			function_arr[j] = parse_function(setting_get_string_elem(function, j));
+			function_arr[j] = parse_arg_function(setting_get_string_elem(function, j));
 		}
 
 		length = setting_length(argument);
@@ -1167,7 +1169,7 @@ load_keybindings(config_t *cfg)
 				break;
 			case CONFIG_TYPE_STRING:
 				string = config_setting_get_string(arg);
-				if (parse_function_int_constant(string, function_arr[j % num_functions], &value)) {
+				if (parse_arg_function_int_constant(string, function_arr[j % num_functions], &value)) {
 					argument_arr[j] = value;
 				} else {
 					void_argument_arr[j] = parse_void_reference(string);
@@ -1528,12 +1530,15 @@ load_layouts(config_t *cfg)
 
 	/* Layouts */
 	lts = config_lookup(cfg, "layouts");
-	if (!lts || !config_setting_is_list(lts))
-		return;
+	if (lts && config_setting_is_list(lts)) {
+		num_layouts = config_setting_length(lts);
+	}
 
-	num_layouts = config_setting_length(lts);
-	if (!num_layouts)
+	if (!num_layouts) {
+		_cfg_layouts = layouts;
+		num_layouts = LENGTH(layouts);
 		return;
+	}
 
 	_cfg_layouts = ecalloc(num_layouts, sizeof(Layout));
 	for (i = 0; i < num_layouts; i++) {
@@ -1563,6 +1568,10 @@ load_layouts(config_t *cfg)
 			layout->preset.stack1axis = parse_layout_arrangement(string);
 		if (config_setting_lookup_string(lt, "stack2", &string))
 			layout->preset.stack2axis = parse_layout_arrangement(string);
+		if (config_setting_lookup_string(lt, "function", &string))
+			layout->arrange = parse_layout_function(string);
+		if (config_setting_lookup_string(lt, "symbolfunc", &string))
+			layout->preset.symbolfunc = parse_symbol_function(string);
 	}
 }
 
@@ -1664,8 +1673,9 @@ parse_click(const char *string)
 }
 
 ArgFunc
-parse_function(const char *string)
+parse_arg_function(const char *string)
 {
+	/* Add custom arg function mappings below */
 	map("changeopacity", changeopacity);
 	map("clienttomon", clienttomon);
 	map("clientstomon", clientstomon);
@@ -1793,8 +1803,30 @@ parse_function(const char *string)
 	map("xrdb", xrdb);
 	map("zoom", zoom);
 
-	fprintf(stderr, "Warning: config could not find function with name %s\n", string);
-	return 0;
+	fprintf(stderr, "Warning: config could not find arg function with name %s\n", string);
+	return NULL;
+}
+
+WsFunc
+parse_layout_function(const char *string)
+{
+	/* Add custom layout function mappings below */
+	map("flextile", flextile);
+	map("NULL", NULL);
+
+	fprintf(stderr, "Warning: config could not find layout function with name %s\n", string);
+	return NULL;
+}
+
+SymbolFunc
+parse_symbol_function(const char *string)
+{
+	/* Add custom symbol function mappings below */
+	map("monoclesymbols", monoclesymbols);
+	map("decksymbols", decksymbols);
+
+	fprintf(stderr, "Warning: config could not find symbol function with name %s\n", string);
+	return NULL;
 }
 
 int
@@ -2110,7 +2142,7 @@ parse_module(const char *string, BarRule *rule)
  * so it is not possible to tell from the return value alone whether a
  * constant was mapped or not. */
 int
-parse_function_int_constant(const char *string, ArgFunc func, int *ptr)
+parse_arg_function_int_constant(const char *string, ArgFunc func, int *ptr)
 {
 	int value;
 

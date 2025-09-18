@@ -259,8 +259,12 @@ typedef union {
 } Arg;
 
 typedef struct Monitor Monitor;
+typedef struct Workspace Workspace;
+typedef struct Client Client;
 typedef struct Bar Bar;
+typedef void (*WsFunc)(Workspace *);
 typedef void (*ArgFunc)(const Arg *);
+typedef void (*SymbolFunc)(Workspace *, int);
 
 typedef struct {
 	unsigned int click;
@@ -275,8 +279,6 @@ typedef struct {
     char **argv;       /* pointer to execv argument list */
 } Command;
 
-typedef struct Workspace Workspace;
-typedef struct Client Client;
 struct Client {
 	char *name;
 	char *alttitle;
