@@ -275,8 +275,8 @@ typedef struct {
 } Button;
 
 typedef struct {
-    char *name;  /* string key */
-    char **argv;       /* pointer to execv argument list */
+	char *name;  /* string key */
+	char **argv; /* pointer to execv argument list */
 } Command;
 
 struct Client {

@@ -654,7 +654,7 @@ void
 load_autostart(config_t *cfg)
 {
 	int i;
-	config_setting_t *auto_cfg;
+	const config_setting_t *auto_cfg;
 
 	auto_cfg = config_lookup(cfg, "autostart");
 	if (auto_cfg && config_setting_is_array(auto_cfg)) {
@@ -687,7 +687,7 @@ load_bar(config_t *cfg)
 	const char *string;
 	BarDef *bar;
 	BarRule *rule;
-	config_setting_t *barconfig, *bar_t, *rules, *rule_t, *monitor, *scheme, *value, *align;
+	const config_setting_t *barconfig, *bar_t, *rules, *rule_t, *monitor, *scheme, *value, *align;
 
 	config_lookup_sloppy_bool(cfg, "bar.showbar", &initshowbar);
 
@@ -967,8 +967,7 @@ load_clientrules(config_t *cfg)
 	int i, f, num_flags;
 	Rule *r;
 	const char *string;
-
-	config_setting_t *rules, *rule, *flags;
+	const config_setting_t *rules, *rule, *flags;
 
 	rules = config_lookup(cfg, "client_rules");
 	if (!rules || !config_setting_is_list(rules))
@@ -1023,7 +1022,7 @@ void
 load_colors(config_t *cfg)
 {
 	int i, j, num_cols, scheme;
-	config_setting_t *cols, *col;
+	const config_setting_t *cols, *col;
 
 	cols = config_lookup(cfg, "colors");
 	if (!cols || !config_setting_is_group(cols))
@@ -1058,7 +1057,7 @@ void
 load_commands(config_t *cfg)
 {
 	int i, j, num_cmd_elements;
-	config_setting_t *commands_list, *command_entry, *command_t;
+	const config_setting_t *commands_list, *command_entry, *command_t;
 	Command *command;
 
 	commands_list = config_lookup(cfg, "commands");
@@ -1224,7 +1223,8 @@ load_keybindings(config_t *cfg)
 	}
 }
 
-void add_key_binding(
+void
+add_key_binding(
 	int type,
 	unsigned int mod,
 	#if USE_KEYCODES
@@ -1262,7 +1262,7 @@ add_stacker_icon(config_t *cfg, const char *string, int value)
 	const char *prefix, *suffix, *pos_string, *icon_char, *replace_str;
 	int i, num_overrides, overridden = 0;
 	int position = StackerTitlePrefix;
-	config_setting_t *stacker_cfg, *overrides, *override;
+	const config_setting_t *stacker_cfg, *overrides, *override;
 
 	if (_cfg_stackericons == NULL) {
 		_cfg_stackericons = ecalloc(30, sizeof(StackerIcon));
@@ -1320,7 +1320,7 @@ void
 load_fonts(config_t *cfg)
 {
 	int i, num_fonts;
-	config_setting_t *fonts;
+	const config_setting_t *fonts;
 
 	fonts = config_lookup(cfg, "fonts");
 	if (!fonts)
@@ -1413,7 +1413,7 @@ load_refresh_rates(config_t *cfg)
 void
 load_workspace(config_t *cfg)
 {
-	config_setting_t *rules, *rule_t, *icons, *layout;
+	const config_setting_t *rules, *rule_t, *icons, *layout;
 	WorkspaceRule *rule;
 	int i;
 
@@ -1507,7 +1507,7 @@ load_functionality(config_t *cfg)
 {
 	int i, enabled;
 
-	config_setting_t *func_t = config_lookup(cfg, "functionality");
+	const config_setting_t *func_t = config_lookup(cfg, "functionality");
 	if (!func_t)
 		return;
 
@@ -1525,7 +1525,7 @@ load_layouts(config_t *cfg)
 {
 	int i;
 	const char *string;
-	config_setting_t *lts, *lt;
+	const config_setting_t *lts, *lt;
 	Layout *layout;
 
 	/* Layouts */
@@ -2009,6 +2009,7 @@ parse_scheme(const char *string)
 	map("HidSel", SchemeHidSel);
 	map("HidNorm", SchemeHidNorm);
 	map("Urg", SchemeUrg);
+	map("Urgent", SchemeUrg);
 	map("Marked", SchemeMarked);
 
 	fprintf(stderr, "Warning: config could not find color scheme with name %s\n", string);
