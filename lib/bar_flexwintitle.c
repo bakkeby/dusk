@@ -268,15 +268,24 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 
 		switch (order[i]) {
 		case window_icon:
+			if (tw < c->icw)
+				break;
+
 			drw_pic(drw, tx, barg->y + (barg->h - c->ich) / 2, c->icw, c->ich, c->icon);
 			tx += c->icw;
 			tw -= c->icw;
 			break;
 		case icon_spacing:
+			if (tw < iconspacing)
+				break;
+
 			tx += iconspacing;
 			tw -= iconspacing;
 			break;
 		case window_title:
+			if (tw <= 0)
+				break;
+
 			drw_text(drw, tx, barg->y, tw, barg->h, 0, title, 0, 1);
 			tx += titlewidth;
 			tw -= titlewidth;
@@ -288,6 +297,9 @@ flextitledraw(Workspace *ws, Client *c, int unused, int x, int w, int tabscheme,
 				tx = x + w - icon2dwidth;
 				tw = icon2dwidth;
 			}
+
+			if (tw < icon2dwidth)
+				break;
 
 			drw_2dtext(drw, tx, barg->y, tw, barg->h, 0, stackericon->icon, 0, 1, barg->lastscheme);
 			tx += icon2dwidth;
