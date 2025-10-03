@@ -3791,8 +3791,11 @@ togglefloating(const Arg *arg)
 	Workspace *ws = NULL;
 
 	for (c = nextmarked(NULL, c); c; c = nextmarked(c->next, NULL)) {
-		if (ISTRUEFULLSCREEN(c)) /* no support for fullscreen windows */
+		if (ISTRUEFULLSCREEN(c)) {
+			/* Exit true fullscreen, but do not toggle floating state */
+			setfullscreen(c, 0, 0);
 			continue;
+		}
 		if (ISFIXED(c))
 			continue;
 		if (ISSTICKY(c))
