@@ -2702,6 +2702,7 @@ motionnotify(XEvent *e)
 	if (!ISSTICKY(selws->sel) && (ws = recttows(ev->x_root, ev->y_root, 1, 1)) && ws != selws) {
 		if (selmon != ws->mon) {
 			entermon(ws->mon, NULL);
+			focus(NULL);
 			return;
 		}
 
