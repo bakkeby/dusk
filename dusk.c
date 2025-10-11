@@ -261,6 +261,7 @@ typedef union {
 typedef struct Monitor Monitor;
 typedef struct Workspace Workspace;
 typedef struct Client Client;
+typedef struct Image Image;
 typedef struct Bar Bar;
 typedef void (*WsFunc)(Workspace *);
 typedef void (*ArgFunc)(const Arg *);
@@ -313,6 +314,13 @@ struct Client {
 	Picture icon;
 	uint64_t flags;
 	uint64_t prevflags;
+};
+
+struct Image {
+	Picture icon;
+	unsigned int icw;
+	unsigned int ich;
+	char *iconpath;
 };
 
 typedef struct {
@@ -527,7 +535,7 @@ static void skipfocusevents(void);
 static void spawn(const Arg *arg);
 static pid_t spawncmd(const Arg *arg, int buttonclick, int orphan);
 static void structurenotify(XEvent *e);
-static char *subst_home_directory(char *str);
+static char *subst_home_directory(const char *str);
 static unsigned int textw_clamp(const char *str, unsigned int n);
 static void togglefloating(const Arg *arg);
 static void unfocus(Client *c, int setfocus, Client *nextfocus);
@@ -689,7 +697,7 @@ applyrules(Client *c)
 				saveclientclass(c);
 
 			if (r->iconpath)
-				load_icon_from_png_image(c, r->iconpath);
+				load_icon_from_file(c, r->iconpath);
 
 			if (r->alttitle)
 				freestrdup(&c->alttitle, r->alttitle);
@@ -705,6 +713,7 @@ applyrules(Client *c)
 					"    flags:     %" PRIu64 "\n"
 					"    floatpos:  %s\n"
 					"    workspace: %s\n"
+					"    iconpath:  %s\n"
 					"    label:     %s\n",
 					NVL(r->class, "NULL"),
 					NVL(r->role, "NULL"),
@@ -714,6 +723,7 @@ applyrules(Client *c)
 					r->flags,
 					NVL(r->floatpos, "NULL"),
 					NVL(r->workspace, "NULL"),
+					NVL(r->iconpath, "NULL"),
 					NVL(r->label, "NULL")
 				);
 			}
@@ -3726,7 +3736,7 @@ spawncmd(const Arg *arg, int buttonclick, int orphan)
 
 /* Allocates memory for a char array that need to be freed by the caller */
 char *
-subst_home_directory(char *str)
+subst_home_directory(const char *str)
 {
 	int buffer_length = env_homelen + strlen(str);
 	char *buffer = ecalloc(1, buffer_length);

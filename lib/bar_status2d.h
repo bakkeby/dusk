@@ -1,11 +1,4 @@
 typedef struct {
-	Picture icon;
-	unsigned int icw;
-	unsigned int ich;
-	char *iconpath;
-} Image;
-
-typedef struct {
 	Image image;
 	time_t atime;
 } ImageBuffer;
@@ -18,5 +11,4 @@ static void setstatus(int status_no, char const *statustext);
 static int status2dtextlength(char *stext);
 static void statusclick(const Arg *arg);
 static Image *loadimage(char *path, int use_cache);
-static int loadimagefromfile(Image *image, char *path);
 static void cleanup2dimagebuffer(void);

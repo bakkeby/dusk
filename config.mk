@@ -45,14 +45,16 @@ YAJLINC = `$(PKG_CONFIG) --cflags yajl`
 # Needed for window swallowing functionality
 XCBLIBS = `$(PKG_CONFIG) --libs x11-xcb xcb-res`
 
-# Needed for window icons
-IMLIB2LIBS = `$(PKG_CONFIG) --libs imlib2`
+# Optional, only needed when non-farbfeld image files are used in the context
+# of custom window icons or in status updates
+#IMLIB=-lImlib2
+#HAVE_IMLIB=-DHAVE_IMLIB=1
 
 CONFIG = `$(PKG_CONFIG) --libs libconfig`
 
 # Includes and libs
 INCS = ${FREETYPEINC} ${YAJLINC} ${DBUSINC} ${XINPUTINC} ${FRIBIDIINC}
-LIBS = ${XINERAMALIBS} ${FREETYPELIBS} ${XRENDER} ${CONFIG} ${XCBLIBS} ${KVMLIB} ${YAJLLIBS} ${DBUSLIBS} ${IMLIB2LIBS} ${XINPUTLIBS} ${FRIBIDILIBS}
+LIBS = ${XINERAMALIBS} ${FREETYPELIBS} ${XRENDER} ${CONFIG} ${XCBLIBS} ${KVMLIB} ${YAJLLIBS} ${DBUSLIBS} ${IMLIB} ${XINPUTLIBS} ${FRIBIDILIBS}
 
 # Optional host flag for computer specific configuration
 #HOSTFLAGS = -DHOST=$(shell command -v cksum > /dev/null && hostname | cksum | tr -d ' ')
@@ -63,7 +65,7 @@ LIBS = ${XINERAMALIBS} ${FREETYPELIBS} ${XRENDER} ${CONFIG} ${XCBLIBS} ${KVMLIB}
 #OPTIMISATIONS = -march=native -flto=auto -O3
 
 # flags
-CPPFLAGS = -D_DEFAULT_SOURCE ${HAVE_LIBXI} ${HAVE_FRIBIDI} ${HAVE_DBUS} -D_BSD_SOURCE -D_POSIX_C_SOURCE=200809L -DUSE_KEYCODES=${USE_KEYCODES} -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS} ${HOSTFLAGS}
+CPPFLAGS = -D_DEFAULT_SOURCE ${HAVE_LIBXI} ${HAVE_FRIBIDI} ${HAVE_DBUS} ${HAVE_IMLIB} -D_BSD_SOURCE -D_POSIX_C_SOURCE=200809L -DUSE_KEYCODES=${USE_KEYCODES} -DVERSION=\"${VERSION}\" ${XINERAMAFLAGS} ${HOSTFLAGS}
 CFLAGS   = ${OPTIMISATIONS} -std=c99 -pedantic -Wall -Wno-unused-function -Wno-deprecated-declarations ${INCS} ${CPPFLAGS}
 LDFLAGS  = ${LIBS}
 

@@ -414,7 +414,7 @@ loadimage(char *path, int use_cache)
 		imagebuffer[least].atime = 0;
 	}
 
-	if (loadimagefromfile(image, fullpath)) {
+	if (load_image_from_file(image, fullpath)) {
 		imagebuffer[least].atime = time(NULL);
 	} else {
 		image = NULL;
@@ -423,45 +423,6 @@ loadimage(char *path, int use_cache)
 bail:
 	free(fullpath);
 	return image;
-}
-
-int
-loadimagefromfile(Image *image, char *path)
-{
-	Imlib_Image im;
-	int w, h, s, ich, icw;
-
-	struct stat stbuf;
-	s = stat(path, &stbuf);
-	if (s == -1 || S_ISDIR(s) || strlen(path) <= 2) {
-		return 0; /* no readable file */
-	}
-
-	freestrdup(&image->iconpath, path);
-	im = imlib_load_image_immediately_without_cache(path);
-	if (!im) {
-		return 0; /* corrupt or otherwise not loadable file */
-	}
-
-	imlib_context_set_image(im);
-	imlib_image_set_has_alpha(1);
-	icw = w = imlib_image_get_width();
-	ich = h = imlib_image_get_height();
-
-	if (h >= bh) {
-		icw = w * ((float)(bh) / (float)h);
-		ich = bh;
-	}
-
-	image->icon = drw_picture_create_resized_image(drw, im, w, h, icw, ich);
-
-	imlib_context_set_image(im);
-	imlib_free_image_and_decache();
-
-	image->icw = icw;
-	image->ich = ich;
-
-	return image->icon;
 }
 
 void

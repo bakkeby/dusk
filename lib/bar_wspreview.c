@@ -38,6 +38,57 @@ createpreview(Monitor *m)
 	XSetClassHint(dpy, m->preview->win, &ch);
 }
 
+
+Pixmap
+create_scaled_preview(
+	Display *dpy,
+	Window root,
+	Visual *visual,
+	int depth,
+	int mx, int my, int mw, int mh,
+	float pfact
+) {
+	/* Capture screen area */
+	uint32_t *screenshot = capture_screen_area_as_argb32(dpy, root, mx, my, mw, mh);
+	if (!screenshot)
+		return 0;
+
+	/* Scale the preview down */
+	unsigned int dw = (unsigned int)(mw * pfact);
+	unsigned int dh = (unsigned int)(mh * pfact);
+	uint32_t *scaled = bilinear_scale(screenshot, mw, mh, dw, dh);
+	free(screenshot);
+	if (!scaled)
+		return 0;
+
+	/* Create Pixmap */
+	Pixmap pixmap = XCreatePixmap(dpy, root, dw, dh, depth);
+	if (!pixmap) {
+		free(scaled);
+		return 0;
+	}
+
+	/* Create XImage for scaled buffer */
+	XImage *out = XCreateImage(dpy, visual, depth, ZPixmap, 0, (char *)scaled, dw, dh, 32, 0);
+	if (!out) {
+		XFreePixmap(dpy, pixmap);
+		free(scaled);
+		return 0;
+	}
+
+	/* Push pixels to the pixmap */
+	GC gc = XCreateGC(dpy, pixmap, 0, NULL);
+	XPutImage(dpy, pixmap, gc, out, 0, 0, 0, 0, dw, dh);
+	XFreeGC(dpy, gc);
+
+	/* XDestroyImage() frees image->data automatically, so set to NULL to prevent double free */
+	out->data = NULL;
+	XDestroyImage(out);
+	free(scaled);
+
+	return pixmap;
+}
+
 void
 freepreview(Monitor *m)
 {
@@ -97,7 +148,6 @@ storepreview(Workspace *ws)
 	if (!ws)
 		return;
 
-	Imlib_Image image;
 	Monitor *m = ws->mon;
 	int preview_shown;
 
@@ -130,23 +180,8 @@ storepreview(Workspace *ws)
 	 * previews for someone who relies on this feature.
 	 */
 	if (preview_shown) {
-		usleep(50000);
+		usleep(20000);
 	}
 
-	image = imlib_create_image(sw, sh);
-	imlib_context_set_image(image);
-	imlib_image_set_has_alpha(1);
-	imlib_context_set_blend(0);
-	imlib_context_set_display(dpy);
-	imlib_context_set_visual(visual);
-	imlib_context_set_drawable(root);
-	imlib_copy_drawable_to_image(0, m->mx, m->my, m->mw, m->mh, 0, 0, 1);
-	ws->preview = XCreatePixmap(dpy, m->preview->win,
-			m->mw * pfact, m->mh * pfact, depth);
-	imlib_context_set_drawable(ws->preview);
-	imlib_render_image_part_on_drawable_at_size(
-		0, 0, m->mw, m->mh,
-		0, 0, m->mw * pfact, m->mh * pfact
-	);
-	imlib_free_image();
+	ws->preview = create_scaled_preview(dpy, root, visual, depth, m->mx, m->my, m->mw, m->mh, pfact);
 }
