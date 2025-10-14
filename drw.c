@@ -584,163 +584,6 @@ drw_cur_free(Drw *drw, Cur *cursor)
 	free(cursor);
 }
 
-static uint32_t
-prealpha(uint32_t p)
-{
-	uint8_t a = p >> 24u;
-	uint32_t rb = (a * (p & 0xFF00FFu)) >> 8u;
-	uint32_t g = (a * (p & 0x00FF00u)) >> 8u;
-	return (rb & 0xFF00FFu) | (g & 0x00FF00u) | (a << 24u);
-}
-
-uint32_t *
-bilinear_scale(const uint32_t *src, int sw, int sh, unsigned int dw, unsigned int dh)
-{
-	uint32_t *dst = calloc(dw * dh, sizeof(uint32_t));
-	if (!dst)
-		return NULL;
-
-	for (int y = 0; y < dh; y++) {
-		/* Source position (in fixed-point) */
-		float sy = (y + 0.5f) * sh / (float)dh - 0.5f;
-		int y0 = (sy < 0) ? (int)(sy - 1) : (int)(sy);;
-		int y1 = y0 + 1;
-		float fy = sy - y0;
-		if (y0 < 0) { y0 = 0; y1 = 0; fy = 0; }
-		if (y1 >= sh) { y1 = sh-1; y0 = y1; fy = 0; }
-
-		for (int x = 0; x < dw; x++) {
-			float sx = (x + 0.5f) * sw / (float)dw - 0.5f;
-			int x0 = (sx < 0) ? (int)(sx - 1) : (int)(sx);
-			int x1 = x0 + 1;
-			float fx = sx - x0;
-			if (x0 < 0) { x0 = 0; x1 = 0; fx = 0; }
-			if (x1 >= sw) { x1 = sw-1; x0 = x1; fx = 0; }
-
-			uint32_t p00 = prealpha(src[y0*sw + x0]);
-			uint32_t p10 = prealpha(src[y0*sw + x1]);
-			uint32_t p01 = prealpha(src[y1*sw + x0]);
-			uint32_t p11 = prealpha(src[y1*sw + x1]);
-
-			/* Extract premultiplied channels */
-			int a00 = p00 >> 24, r00 = (p00 >> 16) & 0xFF, g00 = (p00 >> 8) & 0xFF, b00 = p00 & 0xFF;
-			int a10 = p10 >> 24, r10 = (p10 >> 16) & 0xFF, g10 = (p10 >> 8) & 0xFF, b10 = p10 & 0xFF;
-			int a01 = p01 >> 24, r01 = (p01 >> 16) & 0xFF, g01 = (p01 >> 8) & 0xFF, b01 = p01 & 0xFF;
-			int a11 = p11 >> 24, r11 = (p11 >> 16) & 0xFF, g11 = (p11 >> 8) & 0xFF, b11 = p11 & 0xFF;
-
-			/* Bilinear weights */
-			float w00 = (1.0f - fx) * (1.0f - fy);
-			float w10 = fx * (1.0f - fy);
-			float w01 = (1.0f - fx) * fy;
-			float w11 = fx * fy;
-
-			int a = (int)(a00*w00 + a10*w10 + a01*w01 + a11*w11 + 0.5f);
-			int r = (int)(r00*w00 + r10*w10 + r01*w01 + r11*w11 + 0.5f);
-			int g = (int)(g00*w00 + g10*w10 + g01*w01 + g11*w11 + 0.5f);
-			int b = (int)(b00*w00 + b10*w10 + b01*w01 + b11*w11 + 0.5f);
-
-			dst[y*dw + x] = (a << 24) | (r << 16) | (g << 8) | b;
-		}
-	}
-	return dst;
-}
-
-/* Helper: count trailing zeros for shift calculation */
-static int
-bit_shift(unsigned long mask)
-{
-	int shift = 0;
-	if (!mask)
-		return 0;
-	while (!(mask & 1)) {
-		mask >>= 1;
-		shift++;
-	}
-	return shift;
-}
-
-/* Helper: compute channel bit width */
-static int
-bit_width(unsigned long mask)
-{
-	int width = 0;
-	while (mask) {
-		width += (mask & 1);
-		mask >>= 1;
-	}
-	return width;
-}
-
-uint32_t *
-ximage_to_argb32(XImage *img)
-{
-	if (!img)
-		return NULL;
-
-	const int byte_order = img->byte_order;
-	const int bytes_per_pixel = (img->bits_per_pixel + 7) / 8;
-	const unsigned long rmask = img->red_mask;
-	const unsigned long gmask = img->green_mask;
-	const unsigned long bmask = img->blue_mask;
-
-	const int rshift = bit_shift(rmask);
-	const int gshift = bit_shift(gmask);
-	const int bshift = bit_shift(bmask);
-	const int rbits = bit_width(rmask);
-	const int gbits = bit_width(gmask);
-	const int bbits = bit_width(bmask);
-
-	uint32_t *dst = malloc(img->width * img->height * sizeof(uint32_t));
-	if (!dst)
-		return NULL;
-
-	for (int y = 0; y < img->height; y++) {
-		uint8_t *row = (uint8_t *)img->data + y * img->bytes_per_line;
-		for (int x = 0; x < img->width; x++) {
-			unsigned long pixel = 0;
-
-			if (byte_order == LSBFirst) {
-				for (int b = 0; b < bytes_per_pixel; b++)
-					pixel |= ((unsigned long)row[x * bytes_per_pixel + b]) << (b * 8);
-			} else {
-				for (int b = 0; b < bytes_per_pixel; b++)
-					pixel = (pixel << 8) | row[x * bytes_per_pixel + b];
-			}
-
-			unsigned int r = (pixel & rmask) >> rshift;
-			unsigned int g = (pixel & gmask) >> gshift;
-			unsigned int b = (pixel & bmask) >> bshift;
-
-			if (rbits < 8) r = (r << (8 - rbits)) | (r >> (2 * rbits - 8));
-			if (gbits < 8) g = (g << (8 - gbits)) | (g >> (2 * gbits - 8));
-			if (bbits < 8) b = (b << (8 - bbits)) | (b >> (2 * bbits - 8));
-
-			dst[y * img->width + x] = 0xFF000000u | (r << 16) | (g << 8) | b;
-		}
-	}
-
-	return dst;
-}
-
-
-uint32_t *
-capture_screen_area_as_argb32(
-	Display *dpy,
-	Window root,
-	int x, int y,
-	unsigned int w, unsigned int h
-) {
-	XImage *img = XGetImage(dpy, root, x, y, w, h, AllPlanes, ZPixmap);
-	if (!img)
-		return NULL;
-
-	uint32_t *data = ximage_to_argb32(img);
-	XDestroyImage(img);
-
-	return data;
-}
-
-
 Picture
 drw_picture_create_from_argb32(
 	Drw *drw,
@@ -774,38 +617,28 @@ drw_picture_create_from_argb32(
 }
 
 Picture
-drw_picture_create_resized_data(
+drw_picture_scale_from_argb32(
 	Drw *drw,
 	const uint32_t *src,
 	unsigned int srcw, unsigned int srch,
 	unsigned int dstw, unsigned int dsth
 ) {
-	/* Centered meaning if scale factor < ~2x then let XRender handle it */
-	if (srcw <= (dstw << 1u) && srch <= (dsth << 1u)) {
-		/* Create Picture from the original data */
-		Picture pic = drw_picture_create_from_argb32(drw, src, srcw, srch);
-		if (!pic)
-			return None;
-
-		XRenderSetPictureFilter(drw->dpy, pic, FilterBilinear, NULL, 0);
-
-		/* Apply XRender transform to fit dst size */
-		XTransform xf = {{
-			{ (srcw << 16) / dstw, 0, 0 },
-			{ 0, (srch << 16) / dsth, 0 },
-			{ 0, 0, 65536 }
-		}};
-		XRenderSetPictureTransform(drw->dpy, pic, &xf);
-		return pic;
-	}
-
-	/* Otherwise, do software bilinear scaling */
-	uint32_t *scaled = bilinear_scale(src, srcw, srch, dstw, dsth);
-	if (!scaled)
+	/* Create Picture from the original data */
+	Picture pic = drw_picture_create_from_argb32(drw, src, srcw, srch);
+	if (!pic)
 		return None;
 
-	Picture pic = drw_picture_create_from_argb32(drw, scaled, dstw, dsth);
-	free(scaled);
+	/* Choose quality/performance tradeoff: FilterFast, FilterGood, FilterBest */
+	XRenderSetPictureFilter(drw->dpy, pic, FilterGood, NULL, 0);
+
+	/* Apply XRender transform to fit dst size */
+	XTransform xf = {{
+		{ (srcw << 16) / dstw, 0, 0 },
+		{ 0, (srch << 16) / dsth, 0 },
+		{ 0, 0, 65536 }
+	}};
+	XRenderSetPictureTransform(drw->dpy, pic, &xf);
+
 	return pic;
 }
 

@@ -15,6 +15,8 @@ static char *_cfg_custom_2d_indicator_6 = NULL;
 static char *_cfg_occupied_workspace_label_format = NULL;
 static char *_cfg_vacant_workspace_label_format = NULL;
 static char *_cfg_cached_strings_array[50] = {0};
+static int _cfg_autostart_fallback = 0;
+static int _cfg_autorestart_fallback = 0;
 static char ***_cfg_colors = NULL;
 static char ***_cfg_autostart = NULL;
 static char ***_cfg_autorestart = NULL;
@@ -478,10 +480,12 @@ load_fallback_config(void)
 
 	if (!_cfg_autostart) {
 		_cfg_autostart = execv_dup(autostart, &num_autostart);
+		_cfg_autostart_fallback = 1;
 	}
 
 	if (!_cfg_autorestart) {
 		_cfg_autorestart = execv_dup(autorestart, &num_autorestart);
+		_cfg_autorestart_fallback = 1;
 	}
 
 	if (!_cfg_clientrules) {
@@ -548,9 +552,10 @@ cleanup_config(void)
 
 	/* Cleanup colors */
 	for (i = 0; i < SchemeLast; i++) {
-		for (j = 0; j < ColCount; j++) {
+		for (j = 0; j <= ColCount; j++) {
 			free(_cfg_colors[i][j]);
 		}
+		free(_cfg_colors[i]);
 	}
 	free(_cfg_colors);
 
@@ -596,6 +601,7 @@ cleanup_config(void)
 	/* Cleanup workspace rules */
 	if (_cfg_wsrules != wsrules) {
 		for (i = 0; i < num_wsrules; i++) {
+			free(_cfg_wsrules[i].name);
 			free(_cfg_wsrules[i].icondef);
 			free(_cfg_wsrules[i].iconvac);
 			free(_cfg_wsrules[i].iconocc);
@@ -634,15 +640,26 @@ cleanup_config(void)
 	if (_cfg_commands != NULL) {
 		for (i = 0; i < num_commands; i++) {
 			free(_cfg_commands[i].name);
-			for (j = 0; _cfg_commands[i].argv[j] != NULL; j++) {
+			for (j = 0; j < _cfg_commands[i].argc; j++) {
 				free(_cfg_commands[i].argv[j]);
 			}
+			free(_cfg_commands[i].argv);
 		}
 		free(_cfg_commands);
 	}
 
-	execv_free(_cfg_autostart);
-	execv_free(_cfg_autorestart);
+	/* Cleanup autostart */
+	if (_cfg_autostart_fallback) {
+		execv_free(_cfg_autostart);
+	} else {
+		free(_cfg_autostart);
+	}
+
+	if (_cfg_autorestart_fallback) {
+		execv_free(_cfg_autorestart);
+	} else {
+		free(_cfg_autorestart);
+	}
 
 	/* Cleanup stray strings from config */
 	for (i = 0; i < num_cached_strings; i++) {
@@ -1080,6 +1097,7 @@ load_commands(config_t *cfg)
 		command_t = config_setting_lookup(command_entry, "command");
 		num_cmd_elements = config_setting_length(command_t);
 		command->argv = ecalloc(num_cmd_elements + 2, sizeof(char*));
+		command->argc = num_cmd_elements + 1;
 
 		if (!config_setting_lookup_strdup(command_entry, "scratchkey", &command->argv[0])) {
 			command->argv[0] = NULL;

@@ -277,6 +277,7 @@ typedef struct {
 
 typedef struct {
 	char *name;  /* string key */
+	int argc;
 	char **argv; /* pointer to execv argument list */
 } Command;
 
@@ -3267,6 +3268,7 @@ setbackground(void)
 	/* Do not set a background if a wallpaper has been set. */
 	if (XGetWindowProperty(dpy, root, XInternAtom(dpy, "_XROOTPMAP_ID", False), 0L, sizeof atom,
 			False, AnyPropertyType, &da, &di, &dl, &dl, &p) == Success && p) {
+		XFree(p);
 		return;
 	}
 

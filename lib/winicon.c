@@ -48,52 +48,23 @@ geticonprop(Window win, int iconsize, unsigned int *icw, unsigned int *ich)
 	uint32_t *src = malloc(best_w * best_h * sizeof(uint32_t));
 	for (size_t i = 0; i < best_w * best_h; i++)
 		src[i] = (uint32_t)best[i];
+	XFree(data);
 
-	/* Scale */
-	int dst_w, dst_h;
+	/* Calculate scaled size */
+	unsigned int dstw, dsth;
 	if (best_w > best_h) {
-		dst_w = iconsize;
-		dst_h = best_h * iconsize / best_w;
+		dstw = iconsize;
+		dsth = best_h * iconsize / best_w;
 	} else {
-		dst_h = iconsize;
-		dst_w = best_w * iconsize / best_h;
+		dsth = iconsize;
+		dstw = best_w * iconsize / best_h;
 	}
 
-	uint32_t *scaled = bilinear_scale(src, best_w, best_h, dst_w, dst_h);
+	pict = drw_picture_scale_from_argb32(drw, src, best_w, best_h, dstw, dsth);
 	free(src);
-	XFree(data);
-	if (!scaled) return None;
 
-	/* Create pixmap and upload pixels */
-	Pixmap pm = XCreatePixmap(dpy, root, dst_w, dst_h, 32);
-
-	XImage img;
-	memset(&img, 0, sizeof img);
-	img.width = dst_w;
-	img.height = dst_h;
-	img.format = ZPixmap;
-	img.data = (char*)scaled;
-	img.byte_order = LSBFirst;
-	img.bitmap_unit = 32;
-	img.bitmap_bit_order = LSBFirst;
-	img.bitmap_pad = 32;
-	img.depth = 32;
-	img.bits_per_pixel = 32;
-	img.bytes_per_line = dst_w * 4;
-
-	XInitImage(&img);
-	GC gc = XCreateGC(dpy, pm, 0, NULL);
-	XPutImage(dpy, pm, gc, &img, 0, 0, 0, 0, dst_w, dst_h);
-	XFreeGC(dpy, gc);
-
-	XRenderPictFormat *fmt = XRenderFindStandardFormat(dpy, PictStandardARGB32);
-	pict = XRenderCreatePicture(dpy, pm, fmt, 0, NULL);
-	XFreePixmap(dpy, pm);
-
-	free(scaled);
-
-	*icw = dst_w;
-	*ich = dst_h;
+	*icw = dstw;
+	*ich = dsth;
 	return pict;
 }
 
@@ -119,7 +90,14 @@ updateicon(Client *c)
 int
 load_icon_from_file(Client *c, const char *path)
 {
-	Image image;
+	/* Empty image struct passed to load_image_from_file to hold the returned payload. */
+	Image image = {
+		.icon = None,
+		.icw = 0,
+		.ich = 0,
+		.iconpath = NULL
+	};
+
 	if (load_image_from_file(&image, path)) {
 		freeicon(c);
 		free(c->iconpath);
@@ -137,6 +115,7 @@ load_image_from_file(Image *img, const char *path)
 {
 	char *iconpath = subst_home_directory(path);
 	Picture icon;
+	unsigned int icw, ich, w, h;
 
 	struct stat stbuf;
 	if (stat(iconpath, &stbuf) == -1 || S_ISDIR(stbuf.st_mode) || strlen(iconpath) <= 2) {
@@ -146,7 +125,6 @@ load_image_from_file(Image *img, const char *path)
 	}
 
 #if HAVE_IMLIB
-	int icw, ich, w, h;
 
 	Imlib_Image image = imlib_load_image(iconpath);
 	if (!image) {
@@ -167,12 +145,9 @@ load_image_from_file(Image *img, const char *path)
 
 	uint32_t *img_data = (uint32_t *)imlib_image_get_data_for_reading_only();
 
-
 	/* Apply scaling if necessary */
 	if (w != icw || h != ich) {
-		uint32_t *scaled = bilinear_scale(img_data, w, h, icw, ich);
-		icon = drw_picture_create_from_argb32(drw, scaled, icw, ich);
-		free(scaled);
+		icon = drw_picture_scale_from_argb32(drw, img_data, w, h, icw, ich);
 	} else {
 		icon = drw_picture_create_from_argb32(drw, img_data, w, h);
 	}
@@ -195,9 +170,13 @@ load_image_from_file(Image *img, const char *path)
 		return 0;
 	}
 
-	uint32_t w = (header[8] << 24) | (header[9] << 16) | (header[10] << 8) | header[11];
-	uint32_t h = (header[12] << 24) | (header[13] << 16) | (header[14] << 8) | header[15];
-	unsigned int icw = w, ich = h;
+	icw = w = (header[8] << 24) | (header[9] << 16) | (header[10] << 8) | header[11];
+	ich = h = (header[12] << 24) | (header[13] << 16) | (header[14] << 8) | header[15];
+
+	if (h >= bh) {
+		icw = w * ((float)(bh - 2) / (float)h);
+		ich = bh - 2;
+	}
 
 	size_t npixels = (size_t)w * h;
 	uint32_t *pixels = malloc(npixels * sizeof(uint32_t));
@@ -230,18 +209,13 @@ load_image_from_file(Image *img, const char *path)
 
 	fclose(fp);
 
-	/* Scale if taller than bar height (bh) */
-	if (h >= bh) {
-		icw = w * ((float)(bh - 2) / (float)h);
-		ich = bh - 2;
-		uint32_t *scaled = bilinear_scale(pixels, w, h, icw, ich);
-		free(pixels);
-		pixels = scaled;
-		w = icw;
-		h = ich;
+	/* Apply scaling if necessary */
+	if (w != icw || h != ich) {
+		icon = drw_picture_scale_from_argb32(drw, pixels, w, h, icw, ich);
+	} else {
+		icon = drw_picture_create_from_argb32(drw, pixels, w, h);
 	}
 
-	icon = drw_picture_create_from_argb32(drw, pixels, w, h);
 	free(pixels);
 
 #endif // HAVE_IMLIB
@@ -250,7 +224,6 @@ load_image_from_file(Image *img, const char *path)
 	img->icw = icw;
 	img->ich = ich;
 	freestrdup(&img->iconpath, iconpath);
-
 	free(iconpath);
 	return 1;
 }

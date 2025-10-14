@@ -38,53 +38,46 @@ createpreview(Monitor *m)
 	XSetClassHint(dpy, m->preview->win, &ch);
 }
 
-
 Pixmap
-create_scaled_preview(
-	Display *dpy,
-	Window root,
-	Visual *visual,
-	int depth,
-	int mx, int my, int mw, int mh,
-	float pfact
-) {
-	/* Capture screen area */
-	uint32_t *screenshot = capture_screen_area_as_argb32(dpy, root, mx, my, mw, mh);
-	if (!screenshot)
+create_scaled_preview_xrender(Display *dpy, Window root, Visual *visual, int depth,
+                              int mx, int my, int mw, int mh, float pfact)
+{
+	int dw = (int)(mw * pfact);
+	int dh = (int)(mh * pfact);
+
+	XWindowAttributes attrs;
+	XGetWindowAttributes(dpy, root, &attrs);
+
+	XRenderPictFormat *srcfmt = XRenderFindVisualFormat(dpy, attrs.visual);
+	XRenderPictFormat *dstfmt = XRenderFindVisualFormat(dpy, visual);
+	if (!srcfmt || !dstfmt)
 		return 0;
 
-	/* Scale the preview down */
-	unsigned int dw = (unsigned int)(mw * pfact);
-	unsigned int dh = (unsigned int)(mh * pfact);
-	uint32_t *scaled = bilinear_scale(screenshot, mw, mh, dw, dh);
-	free(screenshot);
-	if (!scaled)
-		return 0;
-
-	/* Create Pixmap */
 	Pixmap pixmap = XCreatePixmap(dpy, root, dw, dh, depth);
-	if (!pixmap) {
-		free(scaled);
-		return 0;
-	}
+	Picture src = XRenderCreatePicture(dpy, root, srcfmt, 0, NULL);
+	Picture dst = XRenderCreatePicture(dpy, pixmap, dstfmt, 0, NULL);
 
-	/* Create XImage for scaled buffer */
-	XImage *out = XCreateImage(dpy, visual, depth, ZPixmap, 0, (char *)scaled, dw, dh, 32, 0);
-	if (!out) {
-		XFreePixmap(dpy, pixmap);
-		free(scaled);
-		return 0;
-	}
+	/* Options: FilterFast, FilterGood, FilterBest */
+	XRenderSetPictureFilter(dpy, src, FilterFast, NULL, 0);
 
-	/* Push pixels to the pixmap */
-	GC gc = XCreateGC(dpy, pixmap, 0, NULL);
-	XPutImage(dpy, pixmap, gc, out, 0, 0, 0, 0, dw, dh);
-	XFreeGC(dpy, gc);
+	/* Apply inverse scaling transform (destination → source) */
+	XTransform transform = {{
+		{ XDoubleToFixed((double)1.0 / pfact), XDoubleToFixed(0), XDoubleToFixed(0) },
+		{ XDoubleToFixed(0), XDoubleToFixed((double)1.0 / pfact), XDoubleToFixed(0) },
+		{ XDoubleToFixed(0), XDoubleToFixed(0), XDoubleToFixed(1) }
+	}};
+	XRenderSetPictureTransform(dpy, src, &transform);
 
-	/* XDestroyImage() frees image->data automatically, so set to NULL to prevent double free */
-	out->data = NULL;
-	XDestroyImage(out);
-	free(scaled);
+	/* Directly composite the source region into the destination, scaling it. */
+	XRenderComposite(dpy, PictOpSrc,
+	                 src, None, dst,
+	                 mx * pfact, my * pfact,  // source x, y (after transformation)
+	                 0, 0,                    // mask x, y
+	                 0, 0,                    // dest x, y
+	                 dw, dh);                 // dest width, height (after transformation)
+
+	XRenderFreePicture(dpy, src);
+	XRenderFreePicture(dpy, dst);
 
 	return pixmap;
 }
@@ -135,10 +128,8 @@ showpreview(Workspace *ws, int x, int y)
 	}
 
 	XSetWindowBackgroundPixmap(dpy, m->preview->win, ws->preview);
-	XCopyArea(dpy, ws->preview, m->preview->win, drw->gc,
-			0, 0, m->mw * pfact, m->mh * pfact, 0, 0);
+	XClearWindow(dpy, m->preview->win);
 	XMoveWindow(dpy, m->preview->win, x, y);
-	XSync(dpy, False);
 	XMapRaised(dpy, m->preview->win);
 }
 
@@ -163,6 +154,7 @@ storepreview(Workspace *ws)
 
 	hidepreview(m);
 	XFlush(dpy);
+	XSync(dpy, False);
 
 	/* When hiding the preview window we unmap it and the unmapping is handled asynchronously by
 	 * the X server. This means that the preview window may still be visible on the screen when
@@ -173,15 +165,20 @@ storepreview(Workspace *ws)
 	 * unmap notification comes through before the window has been graphically removed.
 	 *
 	 * So we are left with simply waiting for this to happen. The below adds an artificial delay
-	 * of 50 ms to give the preview window time to disappear. We only need to wait if we did have
-	 * a preview window shown.
+	 * to give the preview window time to disappear. We only need to wait if we did have a preview
+	 * window shown.
 	 *
-	 * Feel free to play with lower values. 50 ms seems like a reasonable trade-off to have clean
-	 * previews for someone who relies on this feature.
+	 * Feel free to play with higher or lower values. ~20 ms seems like a reasonable trade-off to
+	 * have clean previews for someone who relies on this feature.
 	 */
 	if (preview_shown) {
-		usleep(20000);
+		/* Force server roundtrip — In principle this ensures all pending drawing and unmap events
+		 * are processed, but this does not necessarily mean that the compositor has dealt with the
+		 * rendering yet, hence we still have an arbitray sleep. */
+		XWindowAttributes wa;
+		XGetWindowAttributes(dpy, m->preview->win, &wa);
+		usleep(15000);
 	}
 
-	ws->preview = create_scaled_preview(dpy, root, visual, depth, m->mx, m->my, m->mw, m->mh, pfact);
+	ws->preview = create_scaled_preview_xrender(dpy, root, visual, depth, m->mx, m->my, m->mw, m->mh, pfact);
 }
