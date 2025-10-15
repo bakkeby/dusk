@@ -58,7 +58,7 @@ create_scaled_preview_xrender(Display *dpy, Window root, Visual *visual, int dep
 	Picture dst = XRenderCreatePicture(dpy, pixmap, dstfmt, 0, NULL);
 
 	/* Options: FilterFast, FilterGood, FilterBest */
-	XRenderSetPictureFilter(dpy, src, FilterFast, NULL, 0);
+	XRenderSetPictureFilter(dpy, src, FilterGood, NULL, 0);
 
 	/* Apply inverse scaling transform (destination → source) */
 	XTransform transform = {{
