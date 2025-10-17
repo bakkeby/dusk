@@ -1203,6 +1203,12 @@ load_keybindings(config_t *cfg)
 		for (j = 0; j < length; j++) {
 			string = setting_get_string_elem(key, j);
 
+			if (string == NULL) {
+				key_arr[j] = NoSymbol;
+				fprintf(stderr, "Warning: config keycode / keysym %d is not string\n", j);
+				continue;
+			}
+
 			if (function_arr[j % num_functions] == stackfocus) {
 				add_stacker_icon(cfg, string, argument_arr[j % num_arguments]);
 			}
@@ -1697,6 +1703,7 @@ parse_arg_function(const char *string)
 	map("changeopacity", changeopacity);
 	map("clienttomon", clienttomon);
 	map("clientstomon", clientstomon);
+	map("comboviewwsbyindex", comboviewwsbyindex);
 	map("comboviewwsbyname", comboviewwsbyname);
 	map("cyclelayout", cyclelayout);
 	map("dragmfact", dragmfact);
