@@ -1,3 +1,7 @@
+#if HAVE_IMLIB
+#include <Imlib2.h>
+#endif
+
 /* geticonprop: read, scale, and return an XRender Picture */
 Picture
 geticonprop(Window win, int iconsize, unsigned int *icw, unsigned int *ich)

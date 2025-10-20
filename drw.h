@@ -1,5 +1,5 @@
 /* See LICENSE file for copyright and license details. */
-#include <Imlib2.h>
+#include <stdint.h>
 
 typedef struct {
 	Cursor cursor;
