@@ -1,5 +1,7 @@
 static pid_t getparentprocess(pid_t p);
 static int isdescprocess(pid_t p, pid_t c);
+static int istmuxserver(pid_t p);
+static long gettmuxclientpid(long shellpid);
 static int replaceclient(Client *old, Client *new);
 static int swallowclient(Client *p, Client *c);
 static int swallowterm(Client *t);

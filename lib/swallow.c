@@ -251,7 +251,7 @@ getparentprocess(pid_t p)
 	if (!(f = fopen(buf, "r")))
 		return (pid_t)0;
 
-	if (fscanf(f, "%*u %*s %*c %u", (unsigned *)&v) != 1)
+	if (fscanf(f, "%*u (%*[^)]) %*c %u", (unsigned *)&v) != 1)
 		v = (pid_t)0;
 	fclose(f);
 #endif /* __linux__ */
@@ -273,10 +273,41 @@ getparentprocess(pid_t p)
 int
 isdescprocess(pid_t p, pid_t c)
 {
-	while (p != c && c != 0)
+	while (p != c && c != 0) {
 		c = getparentprocess(c);
+		if (istmuxserver(c))
+			c = gettmuxclientpid(c);
+	}
 
 	return (int)c;
+}
+
+int
+istmuxserver(pid_t p)
+{
+	char path[256];
+	char name[15];
+	FILE* stat;
+
+	snprintf(path, sizeof(path) - 1, "/proc/%u/stat", (unsigned)p);
+	if (!(stat = fopen(path, "r")))
+		return 0;
+	fscanf(stat, "%*u (%12[^)])", name);
+	fclose(stat);
+	return (strcmp(name, "tmux: server") == 0);
+}
+
+long
+gettmuxclientpid(long shellpid)
+{
+	long volatile panepid, clientpid;
+	FILE* list = popen("tmux list-clients -F '#{pane_pid} #{client_pid}'", "r");
+	if (!list)
+		return 0;
+	while (!feof(list) && panepid != shellpid)
+		fscanf(list, "%ld %ld\n", &panepid, &clientpid);
+	pclose(list);
+	return clientpid;
 }
 
 void
