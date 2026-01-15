@@ -273,10 +273,13 @@ getparentprocess(pid_t p)
 int
 isdescprocess(pid_t p, pid_t c)
 {
+	pid_t p_tmp;
 	while (p != c && c != 0) {
-		c = getparentprocess(c);
-		if (istmuxserver(c))
+		p_tmp = getparentprocess(c);
+		if (istmuxserver(p_tmp))
 			c = gettmuxclientpid(c);
+		else
+			c = p_tmp;
 	}
 
 	return (int)c;
