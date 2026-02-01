@@ -124,7 +124,7 @@ readworkspacestate(Display *dpy, Window w, Atom property,
 			return NULL;
 		}
 
-		if (prop) {
+		if (nitems > 0 && prop) {
 			if (!data) {
 				data = prop;  // first chunk
 			} else {
@@ -269,7 +269,8 @@ restorepids(void)
 	/* Get the count of PIDs (if any). */
 	if (XGetWindowProperty(dpy, root, duskatom[DuskAutostartCount], 0L, sizeof da,
 			False, AnyPropertyType, &da, &di, &nitems, &dl, &p) == Success && p) {
-		count = *(Atom *)p;
+		if (nitems > 0)
+			count = *(Atom *)p;
 		XFree(p);
 	}
 
@@ -278,9 +279,11 @@ restorepids(void)
 
 	if (XGetWindowProperty(dpy, root, duskatom[DuskAutostartPIDs], 0L, count * sizeof da,
 			False, AnyPropertyType, &da, &di, &nitems, &dl, &p) == Success && p) {
-		pids = (Atom *)p;
-		for (i = 0; i < nitems; i++) {
-			autostart_addpid(pids[i]);
+		if (nitems) {
+			pids = (Atom *)p;
+			for (i = 0; i < nitems; i++) {
+				autostart_addpid(pids[i]);
+			}
 		}
 		XFree(p);
 	}
@@ -474,8 +477,8 @@ getclientflags(Client *c)
 
 	if (XGetWindowProperty(dpy, c->win, duskatom[DuskClientFlags], 0L, 2 * sizeof flags1, False,
 			AnyPropertyType, &da, &di, &nitems, &dl, &p) == Success && p) {
-		cflags = (Atom *)p;
 		if (nitems == 2) {
+			cflags = (Atom *)p;
 			flags1 = cflags[0] & 0xFFFFFFFF;
 			flags2 = cflags[1] & 0xFFFFFFFF;
 		}
@@ -511,14 +514,13 @@ getclienticonpath(Client *c)
 {
 	Atom type;
 	int format;
-	unsigned long after;
+	unsigned long nitems, after;
 	unsigned char *data = 0;
 	char *iconpath;
-	long unsigned int size;
 
 	if (XGetWindowProperty(dpy, c->win, duskatom[DuskClientIconPath], 0, 1024, 0, XA_STRING,
-				&type, &format, &size, &after, &data) == Success) {
-		if (data) {
+				&type, &format, &nitems, &after, &data) == Success) {
+		if (nitems > 0 && data) {
 			iconpath = (char *)data;
 			if (type == XA_STRING && strlen(iconpath)) {
 				freestrdup(&c->iconpath, iconpath);
@@ -533,14 +535,13 @@ getclientlabel(Client *c)
 {
 	Atom type;
 	int format;
-	unsigned long after;
+	unsigned long nitems, after;
 	unsigned char *data = 0;
 	char *label;
-	long unsigned int size;
 
 	if (XGetWindowProperty(dpy, c->win, duskatom[DuskClientLabel], 0, 1024, 0, XA_STRING,
-				&type, &format, &size, &after, &data) == Success) {
-		if (data) {
+				&type, &format, &nitems, &after, &data) == Success) {
+		if (nitems > 0 && data) {
 			label = (char *)data;
 			if (type == XA_STRING && strlen(label)) {
 				freestrdup(&c->label, label);
@@ -555,14 +556,13 @@ getclientalttitle(Client *c)
 {
 	Atom type;
 	int format;
-	unsigned long after;
+	unsigned long nitems, after;
 	unsigned char *data = 0;
 	char *alttitle;
-	long unsigned int size;
 
 	if (XGetWindowProperty(dpy, c->win, duskatom[DuskClientAltName], 0, 1024, 0, utf8string,
-				&type, &format, &size, &after, &data) == Success) {
-		if (data) {
+				&type, &format, &nitems, &after, &data) == Success) {
+		if (nitems > 0 && data) {
 			alttitle = (char *)data;
 			if (type == utf8string && strlen(alttitle)) {
 				freestrdup(&c->alttitle, alttitle);

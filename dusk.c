@@ -645,7 +645,8 @@ applyrules(Client *c)
 
 	if (XGetWindowProperty(dpy, c->win, netatom[NetWMWindowType], 0L, sizeof(Atom), False, XA_ATOM,
 			&da, &di, &nitems, &dl, &p) == Success && p) {
-		win_types = (Atom *) p;
+		if (nitems > 0)
+			win_types = (Atom *) p;
 	}
 
 	/* rule matching */
@@ -2076,15 +2077,17 @@ Atom
 getatomprop(Client *c, Atom prop, Atom req)
 {
 	int di;
-	unsigned long dl, dm;
+	unsigned long nitems, after;
 	unsigned char *p = NULL;
 	Atom da, atom = None;
 
 	if (XGetWindowProperty(dpy, c->win, prop, 0L, sizeof atom, False, req,
-		&da, &di, &dl, &dm, &p) == Success && p) {
-		atom = *(Atom *)p;
-		if (da == xatom[XembedInfo] && dl == 2)
-			atom = ((Atom *)p)[1];
+		&da, &di, &nitems, &after, &p) == Success && p) {
+		if (nitems > 0) {
+			atom = *(Atom *)p;
+			if (da == xatom[XembedInfo] && nitems == 2)
+				atom = ((Atom *)p)[1];
+		}
 		XFree(p);
 	}
 	return atom;
@@ -2126,15 +2129,16 @@ getstate(Window w)
 	int format;
 	long result = -1;
 	unsigned char *p = NULL;
-	unsigned long n, extra;
+	unsigned long nitems, after;
 	Atom real;
 
 	if (XGetWindowProperty(dpy, w, wmatom[WMState], 0L, 2L, False, wmatom[WMState],
-		&real, &format, &n, &extra, (unsigned char **)&p) != Success)
-		return -1;
-	if (n != 0)
-		result = *p;
-	XFree(p);
+			&real, &format, &nitems, &after, (unsigned char **)&p) == Success && p) {
+		if (nitems > 0)
+			result = *p;
+		XFree(p);
+	}
+
 	return result;
 }
 

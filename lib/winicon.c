@@ -14,7 +14,9 @@ geticonprop(Window win, int iconsize, unsigned int *icw, unsigned int *ich)
 	Picture pict = None;
 
 	if (XGetWindowProperty(dpy, win, net_wm_icon, 0, LONG_MAX, False, AnyPropertyType,
-			&actual_type, &actual_format, &nitems, &bytes_after, &data) != Success || !data) {
+			&actual_type, &actual_format, &nitems, &bytes_after, &data) != Success || nitems == 0) {
+		if (data)
+			XFree(data);
 		return None;
 	}
 

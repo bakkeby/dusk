@@ -6,7 +6,7 @@ updatemotifhints(Client *c)
 	Atom real;
 	int format;
 	unsigned char *p = NULL;
-	unsigned long n, extra;
+	unsigned long nitems, extra;
 	unsigned long *motif;
 	int width, height;
 
@@ -14,7 +14,12 @@ updatemotifhints(Client *c)
 		return;
 
 	if (XGetWindowProperty(dpy, c->win, motifatom, 0L, 5L, False, motifatom,
-		                   &real, &format, &n, &extra, &p) == Success && p != NULL) {
+		                   &real, &format, &nitems, &extra, &p) == Success && p != NULL) {
+		if (nitems == 0) {
+			XFree(p);
+			return;
+		}
+
 		motif = (unsigned long*)p;
 		if (motif[MWM_HINTS_FLAGS_FIELD] & MWM_HINTS_DECORATIONS) {
 			width = WIDTH(c);
