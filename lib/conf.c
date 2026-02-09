@@ -1511,11 +1511,11 @@ load_workspace(config_t *cfg)
 			}
 
 			if (!config_setting_lookup_strdup(icons, "vac", &rule->iconvac)) {
-				rule->iconvac = rule->icondef;
+				rule->iconvac = strdup(rule->icondef);
 			}
 
 			if (!config_setting_lookup_strdup(icons, "occ", &rule->iconocc)) {
-				rule->iconocc = rule->icondef;
+				rule->iconocc = strdup(rule->icondef);
 			}
 		} else {
 			rule->icondef = strdup("◉");
