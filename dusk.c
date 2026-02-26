@@ -2133,9 +2133,9 @@ getstate(Window w)
 	Atom real;
 
 	if (XGetWindowProperty(dpy, w, wmatom[WMState], 0L, 2L, False, wmatom[WMState],
-			&real, &format, &nitems, &after, (unsigned char **)&p) == Success && p) {
-		if (nitems > 0)
-			result = *p;
+			&real, &format, &nitems, &after, &p) == Success && p) {
+		if (nitems > 0 && format == 32)
+			result = *(long *)p;
 		XFree(p);
 	}
 
