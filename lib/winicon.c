@@ -8,13 +8,15 @@ geticonprop(Window win, int iconsize, unsigned int *icw, unsigned int *ich)
 {
 	Atom net_wm_icon = XInternAtom(dpy, "_NET_WM_ICON", False);
 	Atom actual_type;
-	int actual_format;
+	int format;
 	unsigned long nitems, bytes_after;
 	unsigned char *data = NULL;
 	Picture pict = None;
 
-	if (XGetWindowProperty(dpy, win, net_wm_icon, 0, LONG_MAX, False, AnyPropertyType,
-			&actual_type, &actual_format, &nitems, &bytes_after, &data) != Success || nitems == 0) {
+	int ret = XGetWindowProperty(dpy, win, net_wm_icon, 0, LONG_MAX, False, AnyPropertyType,
+	                             &actual_type, &format, &nitems, &bytes_after, &data);
+
+	if (ret != Success || nitems == 0 || format != 32) {
 		if (data)
 			XFree(data);
 		return None;

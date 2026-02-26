@@ -230,7 +230,7 @@ winpid(Window w)
 
 	if (XGetWindowProperty(dpy, w, wmpidatom, 0, 1, False, AnyPropertyType,
 			&actual_type, &format, &nitems, &after, &prop) == Success) {
-		if (nitems > 0 && prop) {
+		if (nitems > 0 && prop && format == 32) {
 			ret = *(pid_t*)prop;
 			result = ret;
 		}

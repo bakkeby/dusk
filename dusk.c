@@ -636,7 +636,7 @@ applyrules(Client *c)
 	const char *class, *instance;
 	Atom game_id = None, da = None, *win_types = NULL;
 	char *role = NULL;
-	int i, di;
+	int i, format;
 	unsigned long dl, nitems;
 	unsigned char *p = NULL;
 	unsigned int transient;
@@ -644,9 +644,9 @@ applyrules(Client *c)
 	XClassHint ch = { NULL, NULL };
 
 	if (XGetWindowProperty(dpy, c->win, netatom[NetWMWindowType], 0L, sizeof(Atom), False, XA_ATOM,
-			&da, &di, &nitems, &dl, &p) == Success && p) {
-		if (nitems > 0)
-			win_types = (Atom *) p;
+			&da, &format, &nitems, &dl, &p) == Success && p) {
+		if (nitems > 0 && format == 32)
+			win_types = (Atom *)p;
 	}
 
 	/* rule matching */
@@ -2076,17 +2076,17 @@ focusstack(const Arg *arg)
 Atom
 getatomprop(Client *c, Atom prop, Atom req)
 {
-	int di;
+	int format;
 	unsigned long nitems, after;
 	unsigned char *p = NULL;
 	Atom da, atom = None;
 
 	if (XGetWindowProperty(dpy, c->win, prop, 0L, sizeof atom, False, req,
-		&da, &di, &nitems, &after, &p) == Success && p) {
-		if (nitems > 0) {
-			atom = *(Atom *)p;
+		&da, &format, &nitems, &after, &p) == Success && p) {
+		if (nitems > 0 && format == 32) {
+			atom = *(long *)p;
 			if (da == xatom[XembedInfo] && nitems == 2)
-				atom = ((Atom *)p)[1];
+				atom = ((long *)p)[1];
 		}
 		XFree(p);
 	}
