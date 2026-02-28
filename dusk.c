@@ -48,7 +48,6 @@
 #include "util.h"
 
 #include <assert.h>
-#include <libgen.h>
 #include <sys/stat.h>
 #define SPAWN_CWD_DELIM " []{}()<>\"':"
 
@@ -3680,7 +3679,7 @@ spawncmd(const Arg *arg, int buttonclick, int orphan)
 
 			cwd = strtok(selws->sel->name, SPAWN_CWD_DELIM);
 
-			if (strncmp(cwd, "~/", 2) == 0) {
+			if (cwd && strncmp(cwd, "~/", 2) == 0) {
 				/* Replace ~/ with HOME environment variable */
 				pathbuf = subst_home_directory(cwd);
 				cwd = pathbuf;
@@ -3690,12 +3689,25 @@ spawncmd(const Arg *arg, int buttonclick, int orphan)
 			 * but that does not matter because we are going to
 			 * exec() below anyway; nothing else will use it */
 			while (cwd) {
-				if (strchr(cwd, '/') && !stat(cwd, &statbuf)) {
-					if (!S_ISDIR(statbuf.st_mode))
-						cwd = dirname(cwd);
+				if (strchr(cwd, '/') && stat(cwd, &statbuf) == 0) {
 
-					if (strlen(cwd) > 1 && !chdir(cwd))
+					char *dir = NULL;
+
+					if (!S_ISDIR(statbuf.st_mode)) {
+						dir = path_dirname(cwd);
+					} else {
+						dir = strdup(cwd);
+					}
+
+					if (!dir)
+						break; /* OOM */
+
+					if (strlen(dir) > 1 && chdir(dir) == 0) {
+						free(dir);
 						break;
+					}
+
+					free(dir);
 				}
 
 				cwd = strtok(NULL, SPAWN_CWD_DELIM);

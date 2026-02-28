@@ -139,6 +139,33 @@ xasprintf(const char *fmt, ...)
 	return buf;
 }
 
+char *
+path_dirname(const char *path)
+{
+	if (!path || !*path)
+		return strdup(".");
+
+	const char *slash = strrchr(path, '/');
+
+	if (!slash)
+		return strdup(".");
+
+	/* handle root */
+	if (slash == path)
+		return strdup("/");
+
+	size_t len = slash - path;
+
+	char *out = malloc(len + 1);
+	if (!out)
+		return NULL;
+
+	memcpy(out, path, len);
+	out[len] = '\0';
+
+	return out;
+}
+
 #ifdef __linux__
 /*
  * Copy string src to buffer dst of size dsize.  At most dsize-1
