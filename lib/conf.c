@@ -76,7 +76,7 @@ static int config_lookup_unsigned_int(const config_t *cfg, const char *name, uns
 static int config_setting_lookup_unsigned_int(const config_setting_t *cfg, const char *name, unsigned int *ptr);
 static int _config_setting_get_unsigned_int(const config_setting_t *cfg_item, unsigned int *ptr);
 
-static void set_config_path(const char* filename, char *config_path, char *config_file);
+static char *get_config_path(const char* filename);
 static void load_config(void);
 static void load_fallback_config(void);
 static void load_autostart(config_t *cfg);
@@ -309,27 +309,27 @@ setting_get_elem(const config_setting_t *cfg, int i)
 	return cfg;
 }
 
-void
-set_config_path(const char* filename, char *config_path, char *config_file)
+char *
+get_config_path(const char *filename)
 {
-	const char *xdg_config_home = getenv("XDG_CONFIG_HOME");
-	const char *home = getenv("HOME");
+	if (!filename)
+		return NULL;
 
 	if (startswith("/", filename)) {
-		char *dname = strdup(filename);
-		snprintf(config_path, PATH_MAX, "%s", dirname(dname));
-		snprintf(config_file, PATH_MAX, "%s", filename);
-		free(dname);
-		return;
+		return strdup(filename);
 	}
 
+	const char *xdg_config_home = getenv("XDG_CONFIG_HOME");
 	if (xdg_config_home && xdg_config_home[0] != '\0') {
-		snprintf(config_path, PATH_MAX, "%s/%s", xdg_config_home, progname);
-		snprintf(config_file, PATH_MAX, "%s/%s", config_path, filename);
-	} else if (home) {
-		snprintf(config_path, PATH_MAX, "%s/.config/%s", home, progname);
-		snprintf(config_file, PATH_MAX, "%s/%s", config_path, filename);
+		return xasprintf("%s/%s/%s", xdg_config_home, progname, filename);
 	}
+
+	const char *home = getenv("HOME");
+	if (home && home[0] != '\0') {
+		return xasprintf("%s/.config/%s/%s", home, progname, filename);
+	}
+
+	return NULL;
 }
 
 char ***
@@ -399,12 +399,14 @@ void
 load_config(void)
 {
 	config_t cfg;
-	char config_path[PATH_MAX] = {0};
-	char config_file[PATH_MAX] = {0};
-
-	set_config_path(cfg_filename, config_path, config_file);
 	config_init(&cfg);
-	config_set_include_dir(&cfg, config_path);
+
+	char *config_file = get_config_path(cfg_filename);
+	if (!config_file)
+		goto bail;
+
+	char *config_path = strdup(config_file);
+	config_set_include_dir(&cfg, dirname(config_path));
 	if (config_read_file(&cfg, config_file)) {
 		load_singles(&cfg);
 		load_commands(&cfg);
@@ -421,12 +423,12 @@ load_config(void)
 		load_button_bindings(&cfg);
 		load_keybindings(&cfg);
 	} else if (strcmp(config_error_text(&cfg), "file I/O error")) {
-		config_error = ecalloc(PATH_MAX + 255, sizeof(char));
-		snprintf(config_error, PATH_MAX + 255,
+		config_error = xasprintf(
 			"Config %s: %s:%d",
 			config_error_text(&cfg),
 			config_file,
-			config_error_line(&cfg));
+			config_error_line(&cfg)
+		);
 
 		fprintf(stderr, "Error reading config at %s\n", config_file);
 		fprintf(stderr, "%s:%d - %s\n",
@@ -435,6 +437,10 @@ load_config(void)
 				config_error_text(&cfg));
 	}
 
+	free(config_file);
+	free(config_path);
+
+bail:
 	load_fallback_config();
 	config_destroy(&cfg);
 }
