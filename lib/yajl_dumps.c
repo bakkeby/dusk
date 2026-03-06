@@ -112,6 +112,7 @@ dump_client(yajl_gen gen, Client *c)
 	YMAP(
 		YSTR("name"); YSTR(NVL(c->name, "NULL"));
 		YSTR("alttitle"); YSTR(NVL(c->alttitle, "NULL"));
+		YSTR("label"); YSTR(NVL(c->label, "NULL"));
 		YSTR("window_id"); YINT(c->win);
 		YSTR("workspace"); YSTR(c->ws->name);
 		YSTR("monitor_number"); YINT(c->ws->mon->num);

@@ -520,7 +520,7 @@ getclienticonpath(Client *c)
 
 	if (XGetWindowProperty(dpy, c->win, duskatom[DuskClientIconPath], 0, 1024, 0, XA_STRING,
 				&type, &format, &nitems, &after, &data) == Success) {
-		if (nitems > 0 && data && format == 32) {
+		if (nitems > 0 && data && format == 8) {
 			iconpath = (char *)data;
 			if (type == XA_STRING && strlen(iconpath)) {
 				freestrdup(&c->iconpath, iconpath);
@@ -541,7 +541,7 @@ getclientlabel(Client *c)
 
 	if (XGetWindowProperty(dpy, c->win, duskatom[DuskClientLabel], 0, 1024, 0, XA_STRING,
 				&type, &format, &nitems, &after, &data) == Success) {
-		if (nitems > 0 && data && format == 32) {
+		if (nitems > 0 && data && format == 8) {
 			label = (char *)data;
 			if (type == XA_STRING && strlen(label)) {
 				freestrdup(&c->label, label);
@@ -562,7 +562,7 @@ getclientalttitle(Client *c)
 
 	if (XGetWindowProperty(dpy, c->win, duskatom[DuskClientAltName], 0, 1024, 0, utf8string,
 				&type, &format, &nitems, &after, &data) == Success) {
-		if (nitems > 0 && data && format == 32) {
+		if (nitems > 0 && data && format == 8) {
 			alttitle = (char *)data;
 			if (type == utf8string && strlen(alttitle)) {
 				freestrdup(&c->alttitle, alttitle);
