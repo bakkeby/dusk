@@ -94,6 +94,8 @@ teardownnullws(Monitor *m)
 
 	if (m->selws == nullws)
 		m->selws = NULL;
+	if (selws == nullws)
+		selws = workspaces;
 	m->nullws = NULL;
 
 	detachws(nullws);
