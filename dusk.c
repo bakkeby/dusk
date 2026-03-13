@@ -1319,6 +1319,13 @@ clientmessage(XEvent *e)
 		}
 	} else if (cme->message_type == netatom[NetActiveWindow]) {
 		if (enabled(FocusOnNetActive) && !NOFOCUSONNETACTIVE(c)) {
+			/* If a swallowed window get a _NET_ACTIVE_WINDOW then allow
+			 * the client to be unswallowed and the window to receive focus */
+			if (SWALLOWED(c)) {
+				s = swallowingparent(c->win);
+				unswallow(&((Arg) { .v = s }));
+				setclientnetstate(s, 0);
+			}
 			if (ISINVISIBLE(c) && c->scratchkey) {
 				togglescratch(&((Arg) {.v = (const char*[]){ &c->scratchkey, NULL } }));
 			}
