@@ -1172,7 +1172,7 @@ clientmessage(XEvent *e)
 {
 	XClientMessageEvent *cme = &e->xclient;
 	Workspace *ws;
-	Client *c;
+	Client *c, *s;
 	unsigned int maximize_vert, maximize_horz;
 	int setfakefullscreen = 0;
 
