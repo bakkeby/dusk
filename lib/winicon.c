@@ -171,7 +171,7 @@ load_image_from_file(Image *img, const char *path)
 		return 0;
 	}
 
-	char header[16];
+	uint8_t header[16];
 	if (fread(header, 1, sizeof(header), fp) != sizeof(header) || memcmp(header, "farbfeld", 8) != 0) {
 		fprintf(stderr, "load_image_from_file: not a farbfeld image: %s\n", iconpath);
 		fclose(fp);
