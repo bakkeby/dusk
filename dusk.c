@@ -3507,7 +3507,8 @@ setup(void)
 	/* Clean up any zombies (inherited from .xinitrc etc) immediately. */
 	while (waitpid(-1, NULL, WNOHANG) > 0);
 
-	putenv("_JAVA_AWT_WM_NONREPARENTING=1");
+	setenv("_JAVA_AWT_WM_NONREPARENTING", "1", 1);
+	setenv("XDG_SESSION_TYPE", "x11", 1);
 
 	/* init screen */
 	screen = DefaultScreen(dpy);
